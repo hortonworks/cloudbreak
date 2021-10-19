@@ -79,7 +79,8 @@ public class ClouderaManagerTemplateInstallationChecker extends AbstractCloudera
                 // In a good case it returns "Failed to create HDFS directory",
                 // but sometimes it just returns "Aborted command" or "Command timed-out after 186 seconds", so matching on such generic error messages
                 // has no added value, therefore we are just checking whether AuditDir related commands are failing or not.
-                if (CLOUD_STORAGE_RELATED_COMMANDS.contains(failedCommand.getName())) {
+                if (CLOUD_STORAGE_RELATED_COMMANDS.contains(failedCommand.getName())
+                        && CommandDetails.CommandStatus.FAILED == failedCommand.getCommandStatus()) {
                     throw new CloudStorageConfigurationFailedException(msg);
                 }
             }

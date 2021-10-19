@@ -43,6 +43,7 @@ import com.cloudera.api.swagger.model.ApiRemoteDataContext;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
@@ -62,6 +63,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CentralCmTemplateUpdater;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommand;
@@ -123,6 +125,9 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
 
     @Inject
     private ClouderaManagerStorageErrorMapper clouderaManagerStorageErrorMapper;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     private final Stack stack;
 
@@ -262,20 +267,20 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             Optional<ClusterCommand> importCommand = clusterCommandRepository.findTopByClusterIdAndClusterCommandType(cluster.getId(),
                     ClusterCommandType.IMPORT_CLUSTER);
             if (cmCluster.isEmpty() || importCommand.isEmpty()) {
-                    ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
-                    cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
-                    ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
-                    LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(template));
-                    // addRepositories - if true the parcels repositories in the cluster template
-                    // will be added.
-                    ApiCommand apiCommand = clouderaManagerResourceApi
-                            .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
-                    ClusterCommand clusterCommand = new ClusterCommand();
-                    clusterCommand.setClusterId(cluster.getId());
-                    clusterCommand.setCommandId(apiCommand.getId());
-                    clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
-                    importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
-                    LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
+                ApiClusterTemplate apiClusterTemplate = JsonUtil.readValue(template, ApiClusterTemplate.class);
+                cluster.setExtendedBlueprintText(getExtendedBlueprintText(apiClusterTemplate));
+                ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
+                LOGGER.info("Generated Cloudera cluster template: {}", AnonymizerUtil.anonymize(template));
+                // addRepositories - if true the parcels repositories in the cluster template
+                // will be added.
+                ApiCommand apiCommand = clouderaManagerResourceApi
+                        .importClusterTemplate(calculateAddRepositories(apiClusterTemplate, prewarmed), apiClusterTemplate);
+                ClusterCommand clusterCommand = new ClusterCommand();
+                clusterCommand.setClusterId(cluster.getId());
+                clusterCommand.setCommandId(apiCommand.getId());
+                clusterCommand.setClusterCommandType(ClusterCommandType.IMPORT_CLUSTER);
+                importCommand = Optional.of(clusterCommandRepository.save(clusterCommand));
+                LOGGER.debug("Cloudera cluster template has been submitted, cluster install is in progress");
             }
             importCommand.ifPresent(cmd -> clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(stack, apiClient, cmd.getCommandId()));
         } catch (ApiException e) {
@@ -283,10 +288,21 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw new ClouderaManagerOperationFailedException(msg, e);
         } catch (CloudStorageConfigurationFailedException e) {
             LOGGER.info("Error while configuring cloud storage. Message: {}", e.getMessage(), e);
-            throw new ClouderaManagerOperationFailedException(clouderaManagerStorageErrorMapper.map(e, stack.cloudPlatform(), cluster), e);
+            throw new ClouderaManagerOperationFailedException(mapStorageError(e, stack.getResourceCrn(), stack.cloudPlatform(), cluster), e);
         } catch (Exception e) {
             throw mapException(e);
         }
+    }
+
+    private String mapStorageError(CloudStorageConfigurationFailedException exception, String stackCrn, String cloudPlatform, Cluster cluster) {
+        String accountId = Crn.safeFromString(stackCrn).getAccountId();
+        String result = exception.getMessage();
+        if ((CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform) && !entitlementService.awsCloudStorageValidationEnabled(accountId)) ||
+                (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform) && !entitlementService.azureCloudStorageValidationEnabled(accountId)) ||
+                (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform) && !entitlementService.gcpCloudStorageValidationEnabled(accountId))) {
+            result = clouderaManagerStorageErrorMapper.map(exception, cloudPlatform, cluster);
+        }
+        return result;
     }
 
     @Override
@@ -450,7 +466,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     private ApiClusterTemplate getCmTemplate(TemplatePreparationObject templatePreparationObject, String sdxContextName,
-        Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, ClouderaManagerRepo clouderaManagerRepoDetails, Long clusterId) {
+            Map<HostGroup, List<InstanceMetaData>> instanceMetaDataByHostGroup, ClouderaManagerRepo clouderaManagerRepoDetails, Long clusterId) {
         List<ClouderaManagerProduct> clouderaManagerProductDetails = clusterComponentProvider.getClouderaManagerProductDetails(clusterId);
         Map<String, List<Map<String, String>>> hostGroupMappings = hostGroupAssociationBuilder.buildHostGroupAssociations(instanceMetaDataByHostGroup);
         return cmTemplateUpdater.getCmTemplate(templatePreparationObject, hostGroupMappings, clouderaManagerRepoDetails,
@@ -458,7 +474,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     private void configureCmMgmtServices(TemplatePreparationObject templatePreparationObject, String sdxCrn, Telemetry telemetry,
-        String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
+            String sdxContextName, ProxyConfig proxyConfig) throws ApiException {
         Optional<ApiHost> optionalCmHost = getCmHost(templatePreparationObject, apiClient);
         if (optionalCmHost.isPresent()) {
             ApiHost cmHost = optionalCmHost.get();
