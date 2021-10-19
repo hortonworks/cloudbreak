@@ -15,7 +15,7 @@ public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverter {
 
     public CustomImage convert(CustomImageCatalogV4UpdateImageRequest source) {
         CustomImage result = new CustomImage();
-        result.setImageType(source.getImageType() != null ? ImageType.valueOf(source.getImageType()) : null);
+        result.setImageType(source.getImageType() != null ? convertImageType(source.getImageType()) : null);
         result.setBaseParcelUrl(source.getBaseParcelUrl());
         result.setCustomizedImageId(source.getSourceImageId());
         result.setVmImage(source.getVmImages() != null ? getVmImages(source.getVmImages()) : null);
@@ -31,5 +31,10 @@ public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverter {
 
             return vmImage;
         }).collect(Collectors.toSet());
+    }
+
+    private ImageType convertImageType(String imageType) {
+        ImageType type = ImageType.valueOf(imageType);
+        return type == ImageType.DATAHUB || type == ImageType.DATALAKE ? ImageType.RUNTIME : type;
     }
 }
