@@ -15,6 +15,8 @@ public class DiagnosticsModelDescription {
             "hosts that are included the specific host groups";
     public static final String ADDITIONAL_LOGS = "Additional log path and label pairs that will be sent in the diagnostics collection";
     public static final String INCLUDE_SALT_LOGS = "Include salt logs in the diagnostic collections";
+    public static final String INCLUDE_SAR_OUTPUT = "Include sar outputs in the diagnostics collections";
+    public static final String INCLUDE_NGINX_REPORT = "Include nginx html reports in the diagnostics collections";
     public static final String UPDATE_PACKAGE = "Upgrade or install required telemetry cli tool on the nodes (works only with network)";
     public static final String SKIP_VALIDATION = "Skip cloud storage write operation testing or databus connection " +
             "check (depends on the destination) during init stage.";

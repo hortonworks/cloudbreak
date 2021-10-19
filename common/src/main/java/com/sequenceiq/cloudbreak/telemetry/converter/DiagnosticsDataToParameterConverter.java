@@ -45,6 +45,8 @@ public class DiagnosticsDataToParameterConverter {
                 .withHosts(Optional.ofNullable(request.getHosts()).orElse(new HashSet<>()))
                 .withExcludeHosts(Optional.ofNullable(request.getExcludeHosts()).orElse(new HashSet<>()))
                 .withIncludeSaltLogs(request.getIncludeSaltLogs())
+                .withIncludeSarOutput(request.getIncludeSarOutput())
+                .withIncludeNginxReport(request.getIncludeNginxReport())
                 .withUpdatePackage(request.getUpdatePackage())
                 .withSkipValidation(request.getSkipValidation())
                 .withSkipWorkspaceCleanupOnStartup(request.getSkipWorkspaceCleanupOnStartup())
