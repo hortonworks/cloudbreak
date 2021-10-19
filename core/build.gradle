@@ -78,6 +78,7 @@ publishing {
     publications {
         bootJava(MavenPublication) {
             artifact bootJar
+            artifactId "cloudbreak"
         }
     }
     repositories {
