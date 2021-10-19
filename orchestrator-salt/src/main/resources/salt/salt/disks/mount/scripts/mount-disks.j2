@@ -147,12 +147,12 @@ mount_tempstorage_azure() {
       fi
       log $LOG_FILE result of mounting $path: $?
       chmod 777 $path >> $LOG_FILE 2>&1
-      sed -i 's/mnt\/resource/hadoopfs\/ephfs1/' $waagent_conf >> $LOG_FILE 2>&1
+      sed -i 's/ResourceDisk\.Format=y/ResourceDisk\.Format=n/' $waagent_conf >> $LOG_FILE 2>&1
       if [ ! $? -eq 0 ]; then
-        log $LOG_FILE error changing temporary disk mount point in $waagent_conf
+        log $LOG_FILE error changing temporary disk mounting in $waagent_conf
         return_value=1
       fi
-      log $LOG_FILE result of changing temporary disk mount point in $waagent_conf: $?
+      log $LOG_FILE result of changing temporary disk mounting in $waagent_conf: $?
       return $((return_value))
 }
 

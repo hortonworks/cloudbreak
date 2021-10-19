@@ -3,6 +3,8 @@
 source /opt/salt/scripts/format-and-mount-common.sh
 
 MOUNT_PATH="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['mount_path'] }}"
+TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
+CLOUD_PLATFORM="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
 LOG_FILE="/var/log/mount-instance-storage.log"
 FS_TYPE=ext4
 
@@ -86,8 +88,47 @@ clean_up_fstab() {
     sed -i -E $sed_expr /etc/fstab
 }
 
-main () {
-    log $LOG_FILE "script 'instance-storage-format-and-mount' starts"
+find_format_and_mount_tempstorage_azure() {
+      local return_value=0
+      local path="/hadoopfs/ephfs1"
+
+      local device=""
+      all_devices=$(blkid | awk '{print $1}' | sed 's/.$//')
+      mounted_devices=$(df | tail -n +2 | awk '{print $1}')
+      for dev in $all_devices; do
+          if [[ ! ${mounted_devices[*]} =~ ${dev} ]]; then
+              device=$dev
+          fi
+      done
+      if [[ $device == "" ]]; then
+        log $LOG_FILE No unmounted temporary device found
+        return_value=0
+        return $((return_value))
+      fi
+
+      log $LOG_FILE "formatting: $device"
+      $(mkfs -E lazy_itable_init=1 -O uninit_bg -F -t $FS_TYPE $device >> $LOG_FILE 2>&1)
+      if [ ! $? -eq 0 ]; then
+        log $LOG_FILE "formatting of device $device failed"
+        return_value=1
+        return $((return_value))
+      fi
+
+      log $LOG_FILE mounting $device temporary storage device on path $path
+      mkdir $path >> $LOG_FILE 2>&1
+      log $LOG_FILE result of creating mount directory $path: $?
+      mount -t $FS_TYPE -o defaults,noatime,nofail $device $path >> $LOG_FILE 2>&1
+      if [ ! $? -eq 0 ]; then
+        log $LOG_FILE error mounting temporary storage device on $path
+        return_value=1
+        return $((return_value))
+      fi
+      log $LOG_FILE result of mounting $path: $?
+      chmod 777 $path >> $LOG_FILE 2>&1
+      return $((return_value))
+}
+
+find_format_and_mount_ephemeral_storage_aws() {
     declare -a devices_arr
     declare -a inst_storage_devices_arr
     declare -a devices_log_arr
@@ -121,7 +162,11 @@ main () {
     fi
 
     format_disks_if_unformatted "${inst_storage_devices_arr[@]}"
-    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not format all devices"
+    return_code=$?
+    if [ ! $return_code -eq 0 ]; then
+        log $LOG_FILE "could not format all devices"
+        return $((return_code))
+    fi
 
     for device in "${inst_storage_devices_arr[@]}"; do
       local dev_uuid=$(blkid $device -s UUID -o value)
@@ -131,9 +176,33 @@ main () {
 
     mount_all_sequential ${device_uuids_arr[@]}
     return_code=$?
-    [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Not all devices were mounted"
+    if [ ! $return_code -eq 0 ]; then
+        log $LOG_FILE "Not all devices were mounted"
+        return $((return_code))
+    fi
 
-    exit_with_code $LOG_FILE 0 "script 'instance-storage-format-and-mount' ended"
+    return $((return_code))
+}
+
+main () {
+    log $LOG_FILE "script 'instance-storage-format-and-mount' starts"
+    sleep 1
+
+    if [[ "$CLOUD_PLATFORM" == "AZURE" && "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
+        log $LOG_FILE "Starting to remount Azure temporary storage device"
+        find_format_and_mount_tempstorage_azure
+        return_code=$?
+        log $LOG_FILE result of remounting Azure temporary storage device: $return_code
+        [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error remounting Azure temporary storage device"
+    elif [[ "$CLOUD_PLATFORM" == "AWS" ]]; then
+        log $LOG_FILE "Starting to remount AWS ephemeral devices"
+        find_format_and_mount_ephemeral_storage_aws
+        return_code=$?
+        log $LOG_FILE result of remounting AWS ephemeral devices: $return_code
+        [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error remounting AWS ephemeral devices"
+    fi
+
+    exit_with_code $LOG_FILE 0 "script 'mount-instance-storage' ended"
 }
 
 [[ "$0" == "$BASH_SOURCE" ]] && main "$@"
