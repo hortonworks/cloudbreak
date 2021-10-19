@@ -50,6 +50,24 @@ mount_all_sequential() {
     local return_value=0
     log $LOG_FILE "mounting storage devices ${device_uuids_arr[@]}"
     local hadoop_fs_dir_counter=1
+    if [[ $MOUNT_PATH = *"ephfs"* ]]; then
+      hadoop_fs_dir_counter=1
+    else
+      declare -a mountpoints_arr
+      declare -a dirnum_arr
+      mountpoints_arr=($(lsblk -n -oMOUNTPOINT))
+      for mp in ${mountpoints_arr[@]}; do
+        if [[ $mp == *"hadoopfs"* ]]; then
+          num="${mp#/hadoopfs/fs*}"
+          dirnum_arr+=($num)
+        fi
+      done
+      max=${dirnum_arr[0]}
+      for n in "${dirnum_arr[@]}" ; do
+          ((n > max)) && max=$n
+      done
+      hadoop_fs_dir_counter=$((max+1))
+    fi
     for uuid in ${device_uuids_arr[@]}; do
         mount_one "UUID=$uuid /hadoopfs/$MOUNT_PATH${hadoop_fs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
         ((hadoop_fs_dir_counter++))

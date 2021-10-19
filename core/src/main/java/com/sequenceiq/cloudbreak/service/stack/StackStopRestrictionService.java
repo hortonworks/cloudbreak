@@ -30,22 +30,28 @@ public class StackStopRestrictionService {
 
     public StopRestrictionReason isInfrastructureStoppable(Stack stack) {
         StopRestrictionReason reason = StopRestrictionReason.NONE;
-        if (RESTRICTED_CLOUD_PLATFORM.equals(stack.getCloudPlatform()) && isCbVersionBeforeStopSupport(stack)) {
+        if (RESTRICTED_CLOUD_PLATFORM.equals(stack.getCloudPlatform())) {
             for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-                TemporaryStorage temporaryStorage = instanceGroup.getTemplate().getTemporaryStorage();
-                if (TemporaryStorage.EPHEMERAL_VOLUMES.equals(temporaryStorage)) {
-                    reason = StopRestrictionReason.EPHEMERAL_VOLUME_CACHING;
-                    LOGGER.info("Infrastructure cannot be stopped. Group [{}] has ephemeral volume caching enabled. " +
-                            "Stopping clusters with ephemeral volume caching enabled are only available in clusters " +
-                            "created at least with Cloudbreak version [{}]", instanceGroup.getGroupName(), MIN_VERSION);
-                    return reason;
-                }
-                if (hasInstanceGroupAwsEphemeralStorage(instanceGroup)) {
+                if (onlyEphemeralStorageInInstanceGroup(instanceGroup)) {
                     reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
-                    LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only." +
-                            "Stopping clusters with ephemeral storage only instances are only available in clusters " +
-                            "created at least with Cloudbreak version [{}]", instanceGroup.getGroupName(), MIN_VERSION);
+                    LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only.", instanceGroup.getGroupName());
                     return reason;
+                } else if (isCbVersionBeforeStopSupport(stack)) {
+                    TemporaryStorage temporaryStorage = instanceGroup.getTemplate().getTemporaryStorage();
+                    if (TemporaryStorage.EPHEMERAL_VOLUMES.equals(temporaryStorage)) {
+                        reason = StopRestrictionReason.EPHEMERAL_VOLUME_CACHING;
+                        LOGGER.info("Infrastructure cannot be stopped. Group [{}] has ephemeral volume caching enabled. " +
+                                "Stopping clusters with ephemeral volume caching enabled are only available in clusters " +
+                                "created at least with Cloudbreak version [{}]", instanceGroup.getGroupName(), MIN_VERSION);
+                        return reason;
+                    }
+                    if (hasInstanceGroupAwsEphemeralStorage(instanceGroup)) {
+                        reason = StopRestrictionReason.EPHEMERAL_VOLUMES;
+                        LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage." +
+                                "Stopping clusters with ephemeral storage instances are only available in clusters " +
+                                "created at least with Cloudbreak version [{}]", instanceGroup.getGroupName(), MIN_VERSION);
+                        return reason;
+                    }
                 }
             }
         }
@@ -54,6 +60,10 @@ public class StackStopRestrictionService {
 
     private boolean hasInstanceGroupAwsEphemeralStorage(InstanceGroup instanceGroup) {
         return instanceGroup.getTemplate().getVolumeTemplates().stream().anyMatch(volume -> AwsDiskType.Ephemeral.value().equals(volume.getVolumeType()));
+    }
+
+    private boolean onlyEphemeralStorageInInstanceGroup(InstanceGroup instanceGroup) {
+        return instanceGroup.getTemplate().getVolumeTemplates().stream().allMatch(volume -> AwsDiskType.Ephemeral.value().equals(volume.getVolumeType()));
     }
 
     private boolean isCbVersionBeforeStopSupport(Stack stack) {
