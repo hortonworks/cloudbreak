@@ -361,14 +361,14 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATALAKE)
     public SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByName(@ResourceName String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxService.syncComponentVersionsFromCm(userCrn, NameOrCrn.ofName(name));
+        return new SdxSyncComponentVersionsFromCmResponse(sdxService.syncComponentVersionsFromCm(userCrn, NameOrCrn.ofName(name)));
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SYNC_COMPONENT_VERSIONS_FROM_CM_DATALAKE)
     public SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByCrn(@ResourceCrn String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxService.syncComponentVersionsFromCm(userCrn, NameOrCrn.ofCrn(crn));
+        return new SdxSyncComponentVersionsFromCmResponse(sdxService.syncComponentVersionsFromCm(userCrn, NameOrCrn.ofCrn(crn)));
     }
 
     private SdxCluster getSdxClusterByName(String name) {
