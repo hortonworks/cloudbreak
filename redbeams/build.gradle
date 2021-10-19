@@ -165,6 +165,7 @@ publishing {
     repositories {
         maven {
             url = "$System.env.NEXUS_URL"
+            allowInsecureProtocol = true
             credentials {
                 username = "$System.env.NEXUS_USER"
                 password = "$System.env.NEXUS_PASSWORD"

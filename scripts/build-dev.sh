@@ -1,7 +1,7 @@
 #!/bin/bash -e
 set -x
 
-./gradlew -Penv=jenkins -b build.gradle buildInfo build uploadBootArchives :freeipa-client:uploadArchives -Pversion=$VERSION --parallel --stacktrace -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
+./gradlew -Penv=jenkins -b build.gradle buildInfo build publishBootJavaPublicationToMavenRepository :freeipa-client:publishMavenJavaPublicationToMavenRepository -Pversion=$VERSION --parallel --stacktrace -x checkstyleMain -x checkstyleTest -x spotbugsMain -x spotbugsTest
 
 if [[ "${RUN_SONARQUBE}" == "true" ]]; then
     # removing core modul because that is instable
