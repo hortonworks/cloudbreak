@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
@@ -255,7 +255,7 @@ public class StackRuntimeVersionValidatorTest {
 
     private Image createImage(String dataHubVersion) {
         return new Image(null, null, null, null, null, null, null, null,
-                new StackDetails(dataHubVersion, null, null), null, null, null, null, null, true, null, null);
+                new ImageStackDetails(dataHubVersion, null, null), null, null, null, null, null, true, null, null);
     }
 
     private StackV4Request createStackRequestWithoutCm() {

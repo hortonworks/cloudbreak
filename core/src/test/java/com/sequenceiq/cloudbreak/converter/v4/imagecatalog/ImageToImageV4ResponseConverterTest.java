@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.converter.v4.imagecatalog;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.converter.AbstractEntityConverterTest;
 
@@ -80,7 +80,7 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
 
         Map<String, String> stackDetailsMap = Collections.singletonMap("repoid", "CDH-7.2.1");
         StackRepoDetails repoDetails = new StackRepoDetails(stackDetailsMap, Collections.emptyMap());
-        StackDetails stackDetails = new StackDetails("7.2.1", repoDetails, "7.2.1-1.cdh7.2.1.p0.4217674");
+        ImageStackDetails stackDetails = new ImageStackDetails("7.2.1", repoDetails, "7.2.1-1.cdh7.2.1.p0.4217674");
 
         List<List<String>> preWarmParcels = List.of(List.of("PROFILER-2.0.3.2.0.3.0", "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/"));
         List<String> preWarmCsd = List.of("http://s3.amazonaws.com/dev.hortonworks.com/DSS/PROFILER-2.0.3.jar");

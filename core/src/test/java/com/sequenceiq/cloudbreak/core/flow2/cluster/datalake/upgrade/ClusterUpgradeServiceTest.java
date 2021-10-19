@@ -33,7 +33,7 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -187,7 +187,7 @@ public class ClusterUpgradeServiceTest {
         underTest.clusterUpgradeFinished(STACK_ID, currentImage, targetImage);
         // THEN
         verify(flowMessageService).fireEventAndLog(STACK_ID, Status.AVAILABLE.name(), CLUSTER_UPGRADE_FINISHED,
-                NullUtil.getIfNotNull(targetIm.getStackDetails(), StackDetails::getVersion));
+                NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getVersion));
     }
 
     @Test
@@ -221,7 +221,7 @@ public class ClusterUpgradeServiceTest {
 
     private static Image createImage(String cmBuildNumber, String stackBuildNumber) {
         return new Image(null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
-                Map.of(CLOUD_PLATFORM, Collections.emptyMap()), new StackDetails(V_7_0_2, null, stackBuildNumber), OS_TYPE,
+                Map.of(CLOUD_PLATFORM, Collections.emptyMap()), new ImageStackDetails(V_7_0_2, null, stackBuildNumber), OS_TYPE,
                 createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, cmBuildNumber, true, null, null);
     }

@@ -11,7 +11,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 
 class StackVersionMatcherTest {
@@ -38,7 +38,8 @@ class StackVersionMatcherTest {
 
     @Test
     public void testMissingStackRepoDetails() {
-        when(image.getStackDetails()).thenReturn(new StackDetails("ver", null, "build"));
+        when(image.getStackDetails()).thenReturn(
+                new ImageStackDetails("ver", null, "build"));
         boolean result = underTest.isMatchingStackVersion(image, ACTIVATED_PARCELS);
 
         assertTrue(result);
@@ -46,7 +47,8 @@ class StackVersionMatcherTest {
 
     @Test
     public void testMissingStackInStackRepoDetails() {
-        when(image.getStackDetails()).thenReturn(new StackDetails("ver", new StackRepoDetails(null, null), "build"));
+        when(image.getStackDetails()).thenReturn(
+                new ImageStackDetails("ver", new StackRepoDetails(null, null), "build"));
         boolean result = underTest.isMatchingStackVersion(image, ACTIVATED_PARCELS);
 
         assertTrue(result);
@@ -54,7 +56,8 @@ class StackVersionMatcherTest {
 
     @Test
     public void testEmptyStackInStackRepoDetails() {
-        when(image.getStackDetails()).thenReturn(new StackDetails("ver", new StackRepoDetails(Map.of(), null), "build"));
+        when(image.getStackDetails()).thenReturn(
+                new ImageStackDetails("ver", new StackRepoDetails(Map.of(), null), "build"));
         boolean result = underTest.isMatchingStackVersion(image, ACTIVATED_PARCELS);
 
         assertTrue(result);
@@ -62,7 +65,8 @@ class StackVersionMatcherTest {
 
     @Test
     public void testUnrelatedStackInStackRepoDetails() {
-        when(image.getStackDetails()).thenReturn(new StackDetails("ver", new StackRepoDetails(Map.of("TEST", "DUMMY"), null), "build"));
+        when(image.getStackDetails()).thenReturn(
+                new ImageStackDetails("ver", new StackRepoDetails(Map.of("TEST", "DUMMY"), null), "build"));
         boolean result = underTest.isMatchingStackVersion(image, ACTIVATED_PARCELS);
 
         assertTrue(result);
@@ -70,7 +74,8 @@ class StackVersionMatcherTest {
 
     @Test
     public void testVersionMatch() {
-        when(image.getStackDetails()).thenReturn(new StackDetails("ver", new StackRepoDetails(Map.of(REPOSITORY_VERSION, "CDHVER"), null), "build"));
+        when(image.getStackDetails()).thenReturn(
+                new ImageStackDetails("ver", new StackRepoDetails(Map.of(REPOSITORY_VERSION, "CDHVER"), null), "build"));
         boolean result = underTest.isMatchingStackVersion(image, ACTIVATED_PARCELS);
 
         assertTrue(result);
@@ -78,7 +83,8 @@ class StackVersionMatcherTest {
 
     @Test
     public void testVersionNotMatch() {
-        when(image.getStackDetails()).thenReturn(new StackDetails("ver", new StackRepoDetails(Map.of(REPOSITORY_VERSION, "CDHDIFFERENTVER"), null), "build"));
+        when(image.getStackDetails()).thenReturn(
+                new ImageStackDetails("ver", new StackRepoDetails(Map.of(REPOSITORY_VERSION, "CDHDIFFERENTVER"), null), "build"));
         boolean result = underTest.isMatchingStackVersion(image, ACTIVATED_PARCELS);
 
         assertFalse(result);

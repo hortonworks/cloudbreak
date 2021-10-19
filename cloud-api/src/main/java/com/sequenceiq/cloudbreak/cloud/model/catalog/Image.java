@@ -63,7 +63,7 @@ public class Image {
 
     private final Map<String, Map<String, String>> imageSetsByProvider;
 
-    private final StackDetails stackDetails;
+    private final ImageStackDetails stackDetails;
 
     private boolean defaultImage;
 
@@ -91,7 +91,7 @@ public class Image {
             @JsonProperty(VERSION) String version,
             @JsonProperty(REPO) Map<String, String> repo,
             @JsonProperty(value = IMAGES, required = true) Map<String, Map<String, String>> imageSetsByProvider,
-            @JsonProperty(STACK_DETAILS) StackDetails stackDetails,
+            @JsonProperty(STACK_DETAILS) ImageStackDetails stackDetails,
             @JsonProperty(OS_TYPE) String osType,
             @JsonProperty(PACKAGE_VERSIONS) Map<String, String> packageVersions,
             @JsonProperty(PRE_WARM_PARCELS) List<List<String>> preWarmParcels,
@@ -155,7 +155,7 @@ public class Image {
     }
 
     @JsonProperty(STACK_DETAILS)
-    public StackDetails getStackDetails() {
+    public ImageStackDetails getStackDetails() {
         return stackDetails;
     }
 

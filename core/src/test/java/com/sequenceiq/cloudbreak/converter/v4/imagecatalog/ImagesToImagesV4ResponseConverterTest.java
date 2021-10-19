@@ -21,7 +21,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.DefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
@@ -68,7 +68,7 @@ public class ImagesToImagesV4ResponseConverterTest extends AbstractEntityConvert
         Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
         imageSetsByProvider.put("AWS", null);
         StackRepoDetails repoDetails = new StackRepoDetails(Collections.emptyMap(), Collections.emptyMap());
-        StackDetails stackDetails = new StackDetails("3.1", repoDetails, "1");
+        ImageStackDetails stackDetails = new ImageStackDetails("3.1", repoDetails, "1");
 
         return new Image("", System.currentTimeMillis(), "", osType, UUID.randomUUID().toString(), "",
                 Collections.emptyMap(), imageSetsByProvider, stackDetails, osType, Collections.emptyMap(),

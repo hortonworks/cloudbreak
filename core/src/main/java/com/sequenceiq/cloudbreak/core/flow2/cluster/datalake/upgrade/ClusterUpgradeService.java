@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.ImagePackageVersion;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -55,10 +55,10 @@ public class ClusterUpgradeService {
     }
 
     public boolean upgradeCluster(long stackId, Image currentImage, Image targetImage) {
-        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentImage.getStackDetails(), StackDetails::getStackBuildNumber);
+        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentImage.getStackDetails(), ImageStackDetails::getStackBuildNumber);
         boolean clusterManagerUpdateNeeded = isUpdateNeeded(currentImage.getCmBuildNumber(), targetImage.getCmBuildNumber());
         boolean clusterRuntimeUpgradeNeeded =
-                isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetImage.getStackDetails(), StackDetails::getStackBuildNumber));
+                isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetImage.getStackDetails(), ImageStackDetails::getStackBuildNumber));
 
         if (clusterManagerUpdateNeeded) {
             String cmVersion = targetImage.getPackageVersion(ImagePackageVersion.CM);
@@ -76,10 +76,10 @@ public class ClusterUpgradeService {
     public void clusterUpgradeFinished(long stackId, StatedImage currentImage, StatedImage targetImage) {
         Image targetIm = targetImage.getImage();
         Image currentIm = currentImage.getImage();
-        String clusterStackVersion = NullUtil.getIfNotNull(targetIm.getStackDetails(), StackDetails::getVersion);
-        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentIm.getStackDetails(), StackDetails::getStackBuildNumber);
+        String clusterStackVersion = NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getVersion);
+        String currentRuntimeBuildNumber = NullUtil.getIfNotNull(currentIm.getStackDetails(), ImageStackDetails::getStackBuildNumber);
         boolean clusterRuntimeUpgradeNeeded =
-                isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), StackDetails::getStackBuildNumber));
+                isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getStackBuildNumber));
 
         clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, "Cluster stack was successfully upgraded.");
@@ -96,7 +96,7 @@ public class ClusterUpgradeService {
 
     private Optional<String> getStackVersionFromImage(Image image) {
         return Optional.ofNullable(image.getStackDetails())
-                .map(StackDetails::getVersion);
+                .map(ImageStackDetails::getVersion);
     }
 
     public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
@@ -113,8 +113,8 @@ public class ClusterUpgradeService {
     }
 
     public boolean isClusterRuntimeUpgradeNeeded(Image currentImage, Image targetImage) {
-        return isUpdateNeeded(NullUtil.getIfNotNull(currentImage.getStackDetails(), StackDetails::getStackBuildNumber),
-                NullUtil.getIfNotNull(targetImage.getStackDetails(), StackDetails::getStackBuildNumber));
+        return isUpdateNeeded(NullUtil.getIfNotNull(currentImage.getStackDetails(), ImageStackDetails::getStackBuildNumber),
+                NullUtil.getIfNotNull(targetImage.getStackDetails(), ImageStackDetails::getStackBuildNumber));
     }
 
     private boolean isUpdateNeeded(String currentBuildNumber, String targetBuildNumber) {

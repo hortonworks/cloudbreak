@@ -9,7 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 
@@ -27,7 +27,7 @@ public class StackVersionMatcher {
 
     private String mapStackVersionWithDefault(Image image, String stackVersion) {
         return Optional.ofNullable(image.getStackDetails())
-                .map(StackDetails::getRepo)
+                .map(ImageStackDetails::getRepo)
                 .map(StackRepoDetails::getStack)
                 .map(stack -> stack.get(REPOSITORY_VERSION))
                 .orElse(stackVersion);

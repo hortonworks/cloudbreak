@@ -17,7 +17,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterUpgradeTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -236,8 +236,8 @@ public class ClusterUpgradeActions {
     }
 
     private boolean isPatchUpgrade(Image currentImage, Image targetImage) {
-        StackDetails currentImageStackDetails = currentImage.getStackDetails();
-        StackDetails targetImageStackDetails = targetImage.getStackDetails();
+        ImageStackDetails currentImageStackDetails = currentImage.getStackDetails();
+        ImageStackDetails targetImageStackDetails = targetImage.getStackDetails();
         return currentImageStackDetails != null && targetImageStackDetails != null
                 && currentImageStackDetails.getVersion().equals(targetImageStackDetails.getVersion());
     }

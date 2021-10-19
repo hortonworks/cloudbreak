@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class StackDetails {
+public class ImageStackDetails {
 
     private static final String VERSION = "version";
 
@@ -20,7 +20,7 @@ public class StackDetails {
     private final String stackBuildNumber;
 
     @JsonCreator
-    public StackDetails(
+    public ImageStackDetails(
             @JsonProperty(value = VERSION, required = true) String version,
             @JsonProperty(value = REPO, required = true) StackRepoDetails repo,
             @JsonProperty(BUILD_NUMBER) String stackBuildNumber) {
