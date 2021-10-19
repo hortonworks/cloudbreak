@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.cloudera.thunderhead.service.NullableScalarTypeProto;
 import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementGrpc.UserManagementBlockingStub;
@@ -531,6 +532,21 @@ public class UmsClient {
             }
         }
         return emptyResponse;
+    }
+
+    public MachineUser getOrCreateMachineUserWithoutAccessKey(String requestId, String accountId, String machineUserName) {
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(machineUserName, "machineUserName should not be null.");
+        validateAccountIdWithWarning(accountId);
+        //Idempotent api creates only if not existing.
+        UserManagementProto.CreateWorkloadMachineUserResponse response = newStub(requestId).createWorkloadMachineUser(
+                UserManagementProto.CreateWorkloadMachineUserRequest.newBuilder()
+                        .setAccountId(accountId)
+                        .setMachineUserName(machineUserName)
+                        .setGenerateAccessKey(NullableScalarTypeProto.BoolValue.newBuilder().setValue(false))
+                        .build());
+        LOGGER.info("Machine user created: {}.", response.getMachineUser());
+        return response.getMachineUser();
     }
 
     /**

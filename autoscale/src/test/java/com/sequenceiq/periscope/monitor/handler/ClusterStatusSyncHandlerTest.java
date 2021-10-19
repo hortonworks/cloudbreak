@@ -4,7 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -15,11 +17,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.periscope.api.model.ClusterState;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.ClusterPertain;
 import com.sequenceiq.periscope.monitor.event.ClusterStatusSyncEvent;
+import com.sequenceiq.periscope.service.AltusMachineUserService;
 import com.sequenceiq.periscope.service.ClusterService;
 
 public class ClusterStatusSyncHandlerTest {
@@ -34,8 +38,15 @@ public class ClusterStatusSyncHandlerTest {
     @Mock
     private CloudbreakCommunicator cloudbreakCommunicator;
 
+    @Mock
+    private AltusMachineUserService altusMachineUserService;
+
     @InjectMocks
     private ClusterStatusSyncHandler underTest;
+
+    private String testEnvironmentCrn = "testEnvironmentCrn";
+
+    private String testTenant = "testTenant";
 
     @Before
     public void setup() {
@@ -47,12 +58,31 @@ public class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.RUNNING);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
         when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.DELETE_COMPLETED));
+        when(clusterService.countByEnvironmentCrn("testEnvironmentCrn")).thenReturn(2);
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
         verify(clusterService).removeById(AUTOSCALE_CLUSTER_ID);
         verify(clusterService, never()).save(cluster);
         verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+        verify(altusMachineUserService, never()).deleteMachineUserForEnvironment(anyString(), anyString(), anyString());
+    }
+
+    @Test
+    public void testOnApplicationEventWhenCBStatusDeletedAndNoMoreEnvironmentClusters() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        cluster.setMachineUserCrn("testMachineUserCrn");
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(clusterService.countByEnvironmentCrn("testEnvironmentCrn")).thenReturn(1);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.DELETE_COMPLETED));
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService).removeById(AUTOSCALE_CLUSTER_ID);
+        verify(clusterService, never()).save(cluster);
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+        verify(altusMachineUserService, times(1))
+                .deleteMachineUserForEnvironment("testTenant", cluster.getMachineUserCrn(), "testEnvironmentCrn");
     }
 
     @Test
@@ -117,10 +147,14 @@ public class ClusterStatusSyncHandlerTest {
         Cluster cluster = getACluster(ClusterState.SUSPENDED);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
 
+
+        AutoscaleStackV4Response mockAutoscaleResponse = mock(AutoscaleStackV4Response.class);
         StackStatusV4Response stackStatusV4Response = new StackStatusV4Response();
         stackStatusV4Response.setStatus(Status.AVAILABLE);
         stackStatusV4Response.setClusterStatus(Status.AVAILABLE);
         when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(stackStatusV4Response);
+        when(cloudbreakCommunicator.getAutoscaleClusterByCrn(CLOUDBREAK_STACK_CRN)).thenReturn(mockAutoscaleResponse);
+        when(mockAutoscaleResponse.getEnvironmentCrn()).thenReturn("environmentcrn");
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
@@ -244,9 +278,12 @@ public class ClusterStatusSyncHandlerTest {
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
         cluster.setState(clusterState);
+        cluster.setEnvironmentCrn(testEnvironmentCrn);
+        cluster.setMachineUserCrn("testMachineUser");
         cluster.setStopStartScalingEnabled(Boolean.FALSE);
 
         ClusterPertain clusterPertain = new ClusterPertain();
+        clusterPertain.setTenant(testTenant);
         cluster.setClusterPertain(clusterPertain);
         return cluster;
     }

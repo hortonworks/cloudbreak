@@ -373,6 +373,35 @@ public class GrpcUmsClient {
     }
 
     /**
+     * Get or Create new machine user for given machineUserName.
+     *
+     * @param machineUserName new machine user name
+     * @param accountId       the accountId
+     * @param requestId       an optional request Id
+     * @return the machineUser
+     */
+    @Retryable(value = UmsOperationException.class, maxAttempts = 10, backoff = @Backoff(delay = 5000))
+    public MachineUser getOrCreateMachineUserWithoutAccessKey(String machineUserName, String accountId, Optional<String> requestId) {
+        try {
+            UmsClient client = makeClient(channelWrapper.getChannel());
+            String generatedRequestId = RequestIdUtil.getOrGenerate(requestId);
+            LOGGER.debug("Creating machine user {} for accountId {} using request ID {}", machineUserName, accountId, generatedRequestId);
+            MachineUser machineUser = client.getOrCreateMachineUserWithoutAccessKey(generatedRequestId, accountId, machineUserName);
+            LOGGER.debug("Machine User retrieved for machineUserName: {}, machineUser: {}", machineUserName, machineUser);
+            return machineUser;
+        } catch (StatusRuntimeException ex) {
+            if (Status.UNAVAILABLE.getCode().equals(ex.getStatus().getCode())) {
+                String errMessage = String.format("Cannot create machinue user '%s' for '%s' as " +
+                        "UMS API is UNAVAILABLE at the moment", machineUserName, accountId);
+                LOGGER.debug(errMessage, ex);
+                throw new UmsOperationException(errMessage, ex);
+            } else {
+                throw ex;
+            }
+        }
+    }
+
+    /**
      * Delete machine user
      *
      * @param machineUserName user name that should be deleted

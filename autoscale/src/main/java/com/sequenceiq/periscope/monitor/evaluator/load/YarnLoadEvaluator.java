@@ -104,7 +104,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
             }
         } catch (Exception ex) {
             LOGGER.info("Failed to process load alert for Cluster '{}', exception '{}'", stackCrn, ex);
-            eventPublisher.publishEvent(new UpdateFailedEvent(clusterId));
+            eventPublisher.publishEvent(new UpdateFailedEvent(clusterId, ex));
         } finally {
             LOGGER.debug("Finished loadEvaluator for cluster '{}' in '{}' ms", stackCrn, System.currentTimeMillis() - start);
         }

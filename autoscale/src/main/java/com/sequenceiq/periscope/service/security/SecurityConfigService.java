@@ -10,10 +10,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
-import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.domain.SecurityConfig;
+import com.sequenceiq.periscope.monitor.handler.CloudbreakCommunicator;
 import com.sequenceiq.periscope.repository.ClusterRepository;
 import com.sequenceiq.periscope.repository.SecurityConfigRepository;
 
@@ -29,7 +28,7 @@ public class SecurityConfigService {
     private SecurityConfigRepository securityConfigRepository;
 
     @Inject
-    private CloudbreakInternalCrnClient internalCrnClient;
+    private CloudbreakCommunicator cloudbreakCommunicator;
 
     @PostConstruct
     public void init() {
@@ -49,19 +48,12 @@ public class SecurityConfigService {
 
     public SecurityConfig syncSecurityConfigForCluster(Long clusterId) {
         String stackCrn = clusterRepository.findStackCrnById(clusterId);
-        SecurityConfig securityConfig = getRemoteSecurityConfig(stackCrn);
+        SecurityConfig securityConfig = cloudbreakCommunicator.getRemoteSecurityConfig(stackCrn);
         Optional<Cluster> cluster = clusterRepository.findById(clusterId);
         if (cluster.isPresent()) {
             securityConfig.setCluster(cluster.get());
             securityConfigRepository.save(securityConfig);
         }
         return securityConfig;
-    }
-
-    private SecurityConfig getRemoteSecurityConfig(String stackCrn) {
-        LOGGER.info("Looks like that SecurityConfig is not in database, calling Cloudbreak: {}", stackCrn);
-        CertificateV4Response response = internalCrnClient.withInternalCrn().autoscaleEndpoint().getCertificate(stackCrn);
-        LOGGER.info("We got a certificate back from Cloudbreak: {}", stackCrn);
-        return new SecurityConfig(response.getClientKeyPath(), response.getClientCertPath(), response.getServerCert());
     }
 }

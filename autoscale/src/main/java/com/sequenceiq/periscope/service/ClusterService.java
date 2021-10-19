@@ -65,6 +65,9 @@ public class ClusterService {
     @Inject
     private CloudbreakMessagesService messagesService;
 
+    @Inject
+    private AltusMachineUserService altusMachineUserService;
+
     @PostConstruct
     protected void init() {
         calculateClusterStateMetrics();
@@ -78,6 +81,7 @@ public class ClusterService {
         cluster.setStackType(stack.getStackType());
         cluster.setTunnel(stack.getTunnel());
         cluster.setState(ClusterState.PENDING);
+        cluster.setEnvironmentCrn(stack.getEnvironmentCrn());
 
         if (stack.getCloudPlatform() != null) {
             cluster.setCloudPlatform(stack.getCloudPlatform().toUpperCase());
@@ -97,6 +101,7 @@ public class ClusterService {
 
         cluster = save(cluster);
         securityConfigService.syncSecurityConfigForCluster(cluster.getId());
+        altusMachineUserService.initializeMachineUserForEnvironment(cluster);
         calculateClusterStateMetrics();
         return cluster;
     }
@@ -212,6 +217,14 @@ public class ClusterService {
         clusterRepository.setClusterLastEvaluated(clusterId, lastEvaluated);
     }
 
+    public void setEnvironmentCrn(Long clusterId, String environmentCrn) {
+        clusterRepository.setEnvironmentCrn(clusterId, environmentCrn);
+    }
+
+    public void setMachineUserCrn(Long clusterId, String machineUserCrn) {
+        clusterRepository.setMachineUserCrn(clusterId, machineUserCrn);
+    }
+
     public void setLastScalingActivity(Long clusterId, Long lastScalingActivity) {
         clusterRepository.setClusterLastScalingActivity(clusterId, lastScalingActivity);
     }
@@ -230,6 +243,10 @@ public class ClusterService {
 
     public List<Cluster> findClustersByClusterIds(List<Long> clusterIds) {
         return clusterRepository.findClustersByClusterIds(clusterIds);
+    }
+
+    public List<Cluster> findByEnvironmentCrnOrMachineUserCrn(String environmentCrn, String machineUserCrn) {
+        return clusterRepository.findByEnvironmentCrnOrMachineUserCrn(environmentCrn, machineUserCrn);
     }
 
     public List<Long> findLoadAlertClusterIdsForPeriscopeNodeId(StackType stackType, ClusterState state,
@@ -274,6 +291,12 @@ public class ClusterService {
         cluster.getTimeAlerts().clear();
         save(cluster);
         return cluster;
+    }
+
+    public Integer countByEnvironmentCrn(String environmentCrn) {
+        Integer countByEnvironmentCrn = clusterRepository.countByEnvironmentCrn(environmentCrn);
+        LOGGER.debug("Count of DH Clusters with Autoscaling by environmentcrn '{}' is '{}'", environmentCrn, countByEnvironmentCrn);
+        return countByEnvironmentCrn;
     }
 
     private void calculateClusterStateMetrics() {

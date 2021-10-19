@@ -16,11 +16,10 @@ public class RequestLogging {
         T response;
         try {
             response = callback.get();
+            LOGGER.info("Request '{}' finished in '{}' ms.", requestName, System.currentTimeMillis() - start);
         } catch (Exception ex) {
             LOGGER.error("Request '{}', Exception: ", requestName, ex);
             throw ex;
-        } finally {
-            LOGGER.info("Request '{}' finished in '{}' ms.", requestName, System.currentTimeMillis() - start);
         }
         return response;
     }

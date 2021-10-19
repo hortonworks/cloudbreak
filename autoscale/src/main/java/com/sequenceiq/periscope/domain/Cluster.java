@@ -73,6 +73,12 @@ public class Cluster implements Monitored, Clustered {
     @Column(name = "cb_stack_name")
     private String stackName;
 
+    @Column(name = "environment_crn")
+    private String environmentCrn;
+
+    @Column(name = "machine_user_crn")
+    private String machineUserCrn;
+
     @Column(name = "cloud_platform")
     private String cloudPlatform;
 
@@ -325,6 +331,22 @@ public class Cluster implements Monitored, Clustered {
 
     public void setStopStartScalingEnabled(Boolean stopStartScalingEnabled) {
         this.stopStartScalingEnabled = stopStartScalingEnabled;
+    }
+
+    public String getEnvironmentCrn() {
+        return environmentCrn;
+    }
+
+    public void setEnvironmentCrn(String environmentCrn) {
+        this.environmentCrn = environmentCrn;
+    }
+
+    public String getMachineUserCrn() {
+        return machineUserCrn;
+    }
+
+    public void setMachineUserCrn(String machineUserCrn) {
+        this.machineUserCrn = machineUserCrn;
     }
 }
 
