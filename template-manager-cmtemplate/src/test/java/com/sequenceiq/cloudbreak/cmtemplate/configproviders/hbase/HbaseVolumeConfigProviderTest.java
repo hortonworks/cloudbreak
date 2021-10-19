@@ -28,7 +28,7 @@ public class HbaseVolumeConfigProviderTest {
 
         assertEquals(
                 List.of(
-                        config("hbase_bucketcache_ioengine", "files:/hadoopfs/ephfs1/hbase_cache,/hadoopfs/ephfs2/hbase_cache,/hadoopfs/ephfs3/hbase_cache")
+                        config("hbase_bucketcache_ioengine", "file:/hadoopfs/ephfs1/hbase_cache")
                 ),
                 roleConfigs
         );
@@ -41,6 +41,11 @@ public class HbaseVolumeConfigProviderTest {
 
         List<ApiClusterTemplateConfig> roleConfigs = underTest.getRoleConfigs(HbaseRoles.REGIONSERVER, worker, preparatorWithHostGroups(worker));
 
-        assertEquals(List.of(), roleConfigs);
+        assertEquals(
+                List.of(
+                        config("hbase_bucketcache_ioengine", "offheap")
+                ),
+                roleConfigs
+        );
     }
 }

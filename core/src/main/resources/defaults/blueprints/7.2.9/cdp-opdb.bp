@@ -146,10 +146,6 @@
                 "value": "6979321856"
               },
               {
-                "name": "hbase_bucketcache_ioengine",
-                "value": "offheap"
-              },
-              {
                 "name": "hbase_regionserver_global_memstore_upperLimit",
                 "value": "0.25"
               },
