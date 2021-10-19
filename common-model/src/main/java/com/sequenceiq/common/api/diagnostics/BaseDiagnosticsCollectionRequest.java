@@ -53,6 +53,12 @@ public class BaseDiagnosticsCollectionRequest {
     @ApiModelProperty(DiagnosticsModelDescription.INCLUDE_SALT_LOGS)
     private Boolean includeSaltLogs = Boolean.FALSE;
 
+    @ApiModelProperty(DiagnosticsModelDescription.INCLUDE_SAR_OUTPUT)
+    private Boolean includeSarOutput = Boolean.FALSE;
+
+    @ApiModelProperty(DiagnosticsModelDescription.INCLUDE_NGINX_REPORT)
+    private Boolean includeNginxReport = Boolean.FALSE;
+
     @ApiModelProperty(DiagnosticsModelDescription.UPDATE_PACKAGE)
     private Boolean updatePackage = Boolean.FALSE;
 
@@ -143,6 +149,22 @@ public class BaseDiagnosticsCollectionRequest {
 
     public void setIncludeSaltLogs(Boolean includeSaltLogs) {
         this.includeSaltLogs = includeSaltLogs;
+    }
+
+    public Boolean getIncludeSarOutput() {
+        return includeSarOutput;
+    }
+
+    public void setIncludeSarOutput(Boolean includeSarOutput) {
+        this.includeSarOutput = includeSarOutput;
+    }
+
+    public Boolean getIncludeNginxReport() {
+        return includeNginxReport;
+    }
+
+    public void setIncludeNginxReport(Boolean includeNginxReport) {
+        this.includeNginxReport = includeNginxReport;
     }
 
     public Boolean getUpdatePackage() {

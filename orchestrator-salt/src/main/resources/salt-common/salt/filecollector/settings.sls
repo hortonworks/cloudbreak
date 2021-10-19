@@ -16,6 +16,16 @@
 {% set end_time = salt['pillar.get']('filecollector:endTime') %}
 {% set label_filter = salt['pillar.get']('filecollector:labelFilter') %}
 {% set include_salt_logs = salt['pillar.get']('filecollector:includeSaltLogs') %}
+{% if salt['pillar.get']('filecollector:includeSarOutput') and salt['pkg.version']('sysstat') %}
+  {% set include_sar_output = True %}
+{% else %}
+  {% set include_sar_output = False %}
+{% endif %}
+{% if salt['pillar.get']('filecollector:includeNginxReport') and salt['pkg.version']('goaccess') %}
+  {% set include_nginx_report = True %}
+{% else %}
+  {% set include_nginx_report = False %}
+{% endif %}
 {% set update_package = salt['pillar.get']('filecollector:updatePackage') %}
 {% set skip_test_cloud_storage = salt['pillar.get']('filecollector:skipTestCloudStorage') %}
 {% set additional_logs = salt['pillar.get']('filecollector:additionalLogs') %}
@@ -127,6 +137,8 @@
     "labelFilter": label_filter,
     "additionalLogs": additional_logs,
     "includeSaltLogs": include_salt_logs,
+    "includeSarOutput": include_sar_output,
+    "includeNginxReport": include_nginx_report,
     "updatePackage": update_package,
     "skipValidation": skip_validation,
     "skipWorkspaceCleanupOnStartup": skip_workspace_cleanup_on_startup,

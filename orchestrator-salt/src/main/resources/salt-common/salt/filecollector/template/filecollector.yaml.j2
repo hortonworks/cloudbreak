@@ -64,6 +64,12 @@ collector:
       useFullPath: false
       folderPrefix: report
       mandatory: true
+    - path: /var/lib/cdp-nodestatus/report/salt_keys_report.json
+      label: nodestatus_salt_keys
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report
+      mandatory: true
     - path: /etc/nginx/nginx.conf
       label: nginx_conf
       skipAnonymization: true
@@ -80,7 +86,19 @@ collector:
       skipLabelFromPath: true
       skipAnonymization: true
       useFullPath: false
-      folderPrefix: doctor{% if destination in ["CLOUD_STORAGE", "LOCAL"] %}
+      folderPrefix: doctor{% if filecollector.includeSarOutput %}
+    - path: /tmp/sar_output/*.txt
+      label: sar
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: sar{% endif %}{% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}{% if filecollector.includeNginxReport %}
+    - path: /tmp/nginx_report.html
+      label: nginx_report
+      skipLabelFromPath: true
+      skipAnonymization: true
+      useFullPath: false
+      folderPrefix: report{% endif %}
     - path: /tmp/cdp_report.html
       label: report
       skipLabelFromPath: true

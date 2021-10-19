@@ -49,6 +49,10 @@ public class DiagnosticParameters {
 
     private Boolean includeSaltLogs = Boolean.FALSE;
 
+    private Boolean includeSarOutput = Boolean.FALSE;
+
+    private Boolean includeNginxReport = Boolean.FALSE;
+
     private Boolean updatePackage = Boolean.FALSE;
 
     private Boolean skipValidation = Boolean.FALSE;
@@ -96,6 +100,8 @@ public class DiagnosticParameters {
         parameters.put(HOSTS_FILTER, Optional.ofNullable(hosts).orElse(null));
         parameters.put(EXCLUDE_HOSTS_FILTER, Optional.ofNullable(excludeHosts).orElse(null));
         parameters.put("includeSaltLogs", Optional.ofNullable(includeSaltLogs).orElse(false));
+        parameters.put("includeSarOutput", Optional.ofNullable(includeSarOutput).orElse(false));
+        parameters.put("includeNginxReport", Optional.ofNullable(includeNginxReport).orElse(false));
         parameters.put("updatePackage", Optional.ofNullable(updatePackage).orElse(false));
         parameters.put("skipValidation", Optional.ofNullable(skipValidation).orElse(false));
         parameters.put("skipUnresponsiveHosts", Optional.ofNullable(skipUnresponsiveHosts).orElse(false));
@@ -169,6 +175,14 @@ public class DiagnosticParameters {
 
     public void setIncludeSaltLogs(Boolean includeSaltLogs) {
         this.includeSaltLogs = includeSaltLogs;
+    }
+
+    public void setIncludeSarOutput(Boolean includeSarOutput) {
+        this.includeSarOutput = includeSarOutput;
+    }
+
+    public void setIncludeNginxReport(Boolean includeNginxReport) {
+        this.includeNginxReport = includeNginxReport;
     }
 
     public void setUpdatePackage(Boolean updatePackage) {
@@ -273,6 +287,14 @@ public class DiagnosticParameters {
 
     public Boolean getIncludeSaltLogs() {
         return includeSaltLogs;
+    }
+
+    public Boolean getIncludeSarOutput() {
+        return includeSarOutput;
+    }
+
+    public Boolean getIncludeNginxReport() {
+        return includeNginxReport;
     }
 
     public Boolean getUpdatePackage() {
@@ -438,6 +460,16 @@ public class DiagnosticParameters {
 
         public DiagnosticParametersBuilder withIncludeSaltLogs(Boolean includeSaltLogs) {
             diagnosticParameters.setIncludeSaltLogs(includeSaltLogs);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withIncludeSarOutput(Boolean includeSarOutput) {
+            diagnosticParameters.setIncludeSarOutput(includeSarOutput);
+            return this;
+        }
+
+        public DiagnosticParametersBuilder withIncludeNginxReport(Boolean includeNginxReport) {
+            diagnosticParameters.setIncludeNginxReport(includeNginxReport);
             return this;
         }
 
