@@ -52,6 +52,9 @@ public class LoadBalancerSANProvider {
         if (isNotBlank(lb.getDns())) {
             return Optional.of("DNS:" + lb.getDns());
         }
-        return Optional.of("IP:" + lb.getIp());
+        if (isNotBlank(lb.getIp())) {
+            return Optional.of("IP:" + lb.getIp());
+        }
+        return Optional.empty();
     }
 }
