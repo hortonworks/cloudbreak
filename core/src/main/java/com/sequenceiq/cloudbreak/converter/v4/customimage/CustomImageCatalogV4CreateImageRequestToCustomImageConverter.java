@@ -18,7 +18,7 @@ public class CustomImageCatalogV4CreateImageRequestToCustomImageConverter
     @Override
     public CustomImage convert(CustomImageCatalogV4CreateImageRequest source) {
         CustomImage result = new CustomImage();
-        result.setImageType(ImageType.valueOf(source.getImageType()));
+        result.setImageType(convertImageType(source.getImageType()));
         result.setBaseParcelUrl(source.getBaseParcelUrl());
         result.setCustomizedImageId(source.getSourceImageId());
         result.setVmImage(getVmImages(source.getVmImages()));
@@ -34,5 +34,10 @@ public class CustomImageCatalogV4CreateImageRequestToCustomImageConverter
 
             return vmImage;
         }).collect(Collectors.toSet());
+    }
+
+    private ImageType convertImageType(String imageType) {
+        ImageType type = ImageType.valueOf(imageType);
+        return type == ImageType.DATAHUB || type == ImageType.DATALAKE ? ImageType.RUNTIME : type;
     }
 }
