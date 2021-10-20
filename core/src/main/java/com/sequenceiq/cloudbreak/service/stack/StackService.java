@@ -282,6 +282,14 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         }
     }
 
+    public Stack getByCrnOrElseNull(String crn) {
+        try {
+            return transactionService.required(() -> stackRepository.findByResourceCrn(crn).orElse(null));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public Stack getByCrn(String crn) {
         try {
             return transactionService.required(() -> stackRepository.findByResourceCrn(crn).orElseThrow(notFound("Stack", crn)));
