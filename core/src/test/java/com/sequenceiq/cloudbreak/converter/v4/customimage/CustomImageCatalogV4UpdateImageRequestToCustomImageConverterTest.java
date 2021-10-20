@@ -22,10 +22,6 @@ public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverterTest {
 
     private static final String VALID_IMAGE_TYPE = "RUNTIME";
 
-    private static final String DEPRECATED_IMAGE_TYPE1 = "DATALAKE";
-
-    private static final String DEPRECATED_IMAGE_TYPE2 = "DATAHUB";
-
     private static final String INVALID_IMAGE_TYPE = "invalid image type";
 
     private static final String REGION = "region";
@@ -45,44 +41,6 @@ public class CustomImageCatalogV4UpdateImageRequestToCustomImageConverterTest {
         source.setSourceImageId(SOURCE_IMAGE_ID);
         source.setBaseParcelUrl(BASE_PARCEL_URL);
         source.setImageType(VALID_IMAGE_TYPE);
-        source.setVmImages(Collections.singleton(getVmImageRequest(REGION, IMAGE_REFERENCE)));
-
-        CustomImage result = victim.convert(source);
-        assertEquals(SOURCE_IMAGE_ID, result.getCustomizedImageId());
-        assertEquals(BASE_PARCEL_URL, result.getBaseParcelUrl());
-        assertEquals(ImageType.RUNTIME, result.getImageType());
-        assertEquals(1, result.getVmImage().size());
-
-        VmImage vmImage = result.getVmImage().stream().findFirst().get();
-        assertEquals(REGION, vmImage.getRegion());
-        assertEquals(IMAGE_REFERENCE, vmImage.getImageReference());
-    }
-
-    @Test
-    public void shouldConvertDatalakeImageType() {
-        CustomImageCatalogV4UpdateImageRequest source = new CustomImageCatalogV4UpdateImageRequest();
-        source.setSourceImageId(SOURCE_IMAGE_ID);
-        source.setBaseParcelUrl(BASE_PARCEL_URL);
-        source.setImageType(DEPRECATED_IMAGE_TYPE1);
-        source.setVmImages(Collections.singleton(getVmImageRequest(REGION, IMAGE_REFERENCE)));
-
-        CustomImage result = victim.convert(source);
-        assertEquals(SOURCE_IMAGE_ID, result.getCustomizedImageId());
-        assertEquals(BASE_PARCEL_URL, result.getBaseParcelUrl());
-        assertEquals(ImageType.RUNTIME, result.getImageType());
-        assertEquals(1, result.getVmImage().size());
-
-        VmImage vmImage = result.getVmImage().stream().findFirst().get();
-        assertEquals(REGION, vmImage.getRegion());
-        assertEquals(IMAGE_REFERENCE, vmImage.getImageReference());
-    }
-
-    @Test
-    public void shouldConvertDatahubImageType() {
-        CustomImageCatalogV4UpdateImageRequest source = new CustomImageCatalogV4UpdateImageRequest();
-        source.setSourceImageId(SOURCE_IMAGE_ID);
-        source.setBaseParcelUrl(BASE_PARCEL_URL);
-        source.setImageType(DEPRECATED_IMAGE_TYPE2);
         source.setVmImages(Collections.singleton(getVmImageRequest(REGION, IMAGE_REFERENCE)));
 
         CustomImage result = victim.convert(source);

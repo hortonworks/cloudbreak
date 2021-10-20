@@ -352,8 +352,8 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
 
     private StatedImages getStatedImagesFromCustomImageCatalog(ImageCatalog imageCatalog, Set<String> providers) throws CloudbreakImageCatalogException {
         try {
-            List<Image> cbImages = getImages(Set.of(ImageType.DATALAKE, ImageType.DATAHUB, ImageType.RUNTIME), imageCatalog, providers);
-            List<Image> freeIpaImages = getImages(Set.of(ImageType.FREEIPA), imageCatalog, providers);
+            List<Image> cbImages = getImages(ImageType.RUNTIME, imageCatalog, providers);
+            List<Image> freeIpaImages = getImages(ImageType.FREEIPA, imageCatalog, providers);
             return statedImages(new Images(null, cbImages, freeIpaImages,
                     Set.of(cbVersion)), imageCatalog.getImageCatalogUrl(), imageCatalog.getName());
         } catch (CloudbreakImageNotFoundException ex) {
@@ -361,11 +361,11 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    private List<Image> getImages(Set<ImageType> imageTypes, ImageCatalog imageCatalog, Set<String> providers)
+    private List<Image> getImages(ImageType imageType, ImageCatalog imageCatalog, Set<String> providers)
             throws CloudbreakImageNotFoundException, CloudbreakImageCatalogException {
         List<Image> images = new ArrayList<>();
         for (CustomImage customImage : imageCatalog.getCustomImages()) {
-            if (imageTypes.contains(customImage.getImageType())) {
+            if (imageType == customImage.getImageType()) {
                 StatedImage sourceImage = getSourceImageByImageType(customImage);
                 Optional<String> provider = sourceImage.getImage().getImageSetsByProvider().keySet().stream().findFirst();
                 provider.ifPresent(p -> {
@@ -777,8 +777,6 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         switch (customImage.getImageType()) {
             case FREEIPA:
                 return getImageByUrl(defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME, customImage.getCustomizedImageId());
-            case DATAHUB:
-            case DATALAKE:
             case RUNTIME:
                 return getImage(customImage.getCustomizedImageId());
             default:
