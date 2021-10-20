@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.controller;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CHANGE_FREEIPA_IMAGE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.REPAIR_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
@@ -321,7 +322,7 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
+    @CheckPermissionByResourceCrn(action = ENVIRONMENT_CHANGE_FREEIPA_IMAGE)
     public void changeImageCatalog(@ResourceCrn String environmentCrn, ChangeImageCatalogRequest changeImageCatalogRequest) {
         String accountId = crnService.getCurrentAccountId();
         imageCatalogChangeService.changeImageCatalog(environmentCrn, accountId, changeImageCatalogRequest.getImageCatalog());

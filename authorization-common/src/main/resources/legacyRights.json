@@ -38,6 +38,7 @@
   "datalake/stopDatalake": "datalake/write",
   "datalake/upgradeDatalake": "datalake/write",
   "datalake/syncComponentVersionsFromCm": "datalake/write",
+  "datalake/changeImageCatalog": "datalake/write",
   "datalake/rotateAutoTlsCertDatalake": "datalake/write",
   "datalake/refreshRecipes": "datalake/write",
   "datalake/resizeDatalake": "datalake/write",
@@ -59,6 +60,7 @@
   "datahub/upgradeDatahub": "datahub/write",
   "datahub/recoverDatahub": "datahub/write",
   "datahub/syncComponentVersionsFromCm": "datahub/write",
+  "datahub/changeImageCatalog": "datahub/write",
   "environments/describeDatabase": "datalake/read",
   "environments/describeDatabaseServer": "datalake/read",
   "environments/deleteDatabase": "datalake/write",
@@ -90,5 +92,6 @@
   "datahub/write": "datahub/write",
   "structured_events/read": "structured_events/read",
   "iam/listAssignedResourceRoles": "iam/listAssignedResourceRoles",
-  "environments/updateAzureEncryptionResources": "environments/write"
+  "environments/updateAzureEncryptionResources": "environments/write",
+  "environments/changeFreeipaImageCatalog": "environments/write"
 }

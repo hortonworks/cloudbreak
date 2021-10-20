@@ -633,7 +633,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_DATAHUB)
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.CHANGE_IMAGE_CATALOG_DATAHUB)
     public void changeImageCatalog(@ResourceName String name, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest) {
         stackOperations.changeImageCatalog(
                 NameOrCrn.ofName(name),
