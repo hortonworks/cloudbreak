@@ -60,3 +60,7 @@ audit-connector/                                                                
 core/src/main/resources/defaults/blueprints/*/cdp-data-engineering*.bp          @hortonworks/cloudbreak-bobcat
 core/src/main/resources/defaults/clustertemplates/*/*/dataengineering*.json     @hortonworks/cloudbreak-bobcat
 
+# Bobcat team should review autoscale related changes
+autoscale/                                                                      @hortonworks/cloudbreak-bobcat
+autoscale-api/                                                                  @hortonworks/cloudbreak-bobcat
+
