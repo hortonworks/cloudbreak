@@ -60,7 +60,7 @@ public class DatalakeService {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (cluster.getStack().getDatalakeCrn() != null) {
             LOGGER.debug("Add shared service response by datalakeCrn");
-            Stack datalakeStack = stackService.getByCrn(cluster.getStack().getDatalakeCrn());
+            Stack datalakeStack = stackService.getByCrnOrElseNull(cluster.getStack().getDatalakeCrn());
             if (datalakeStack != null) {
                 sharedServiceResponse.setSharedClusterId(datalakeStack.getId());
                 sharedServiceResponse.setSharedClusterName(datalakeStack.getName());
