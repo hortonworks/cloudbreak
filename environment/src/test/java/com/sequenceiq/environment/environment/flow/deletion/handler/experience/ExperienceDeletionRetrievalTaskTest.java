@@ -45,7 +45,7 @@ class ExperienceDeletionRetrievalTaskTest {
 
     @Test
     void testExperienceRetryingIntervalShouldBeTheExpected() {
-        assertEquals(6000, ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL);
+        assertEquals(6000, ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS);
     }
 
     @Test

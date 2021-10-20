@@ -22,3 +22,4 @@ environment:
         internalEnvironmentEndpoint: /dwx/{environmentCrn}
         policyPort: ${MOCK_INFRASTRUCTURE_BIND_PORT:10090}
         policyEndpoint: /prerequisites?cloudPlatform={cloudProvider}
+        forceDeleteCapable: false

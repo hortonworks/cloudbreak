@@ -24,8 +24,10 @@ public class CommonExperience {
 
     private String environmentEndpointPort;
 
+    private boolean forceDeleteCapable;
+
     public CommonExperience(String name, String description, String internalEnvironmentEndpoint, String address, String businessName, String policyEndpoint,
-            String environmentEndpointPort, String baseAddress, String policyPort) {
+            String environmentEndpointPort, String baseAddress, String policyPort, boolean forceDeleteCapable) {
         this.name = name;
         this.address = address;
         this.policyPort = policyPort;
@@ -33,6 +35,7 @@ public class CommonExperience {
         this.baseAddress = baseAddress;
         this.businessName = businessName;
         this.policyEndpoint = policyEndpoint;
+        this.forceDeleteCapable = forceDeleteCapable;
         this.environmentEndpointPort = environmentEndpointPort;
         this.internalEnvironmentEndpoint = internalEnvironmentEndpoint;
         getLogger(CommonExperience.class).debug(CommonExperience.class.getSimpleName() + " has been created: {}", toString());
@@ -121,6 +124,14 @@ public class CommonExperience {
         this.environmentEndpointPort = environmentEndpointPort;
     }
 
+    public boolean isForceDeleteCapable() {
+        return forceDeleteCapable;
+    }
+
+    public void setForceDeleteCapable(boolean forceDeleteCapable) {
+        this.forceDeleteCapable = forceDeleteCapable;
+    }
+
     @Override
     public String toString() {
         return "CommonExperience{" +
@@ -133,6 +144,7 @@ public class CommonExperience {
                 ", policyPort='" + policyPort + '\'' +
                 ", address='" + address + '\'' +
                 ", environmentEndpointPort='" + environmentEndpointPort + '\'' +
+                ", forceDeleteCapable='" + forceDeleteCapable + '\'' +
                 '}';
     }
 
