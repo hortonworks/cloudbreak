@@ -49,6 +49,7 @@ public enum AuthorizationResourceAction {
     UPGRADE_DATALAKE("datalake/upgradeDatalake", AuthorizationResourceType.DATALAKE),
     RECOVER_DATALAKE("datalake/recoverDatalake", AuthorizationResourceType.DATALAKE),
     SYNC_COMPONENT_VERSIONS_FROM_CM_DATALAKE("datalake/syncComponentVersionsFromCm", AuthorizationResourceType.DATALAKE),
+    CHANGE_IMAGE_CATALOG_DATALAKE("datalake/changeImageCatalog", AuthorizationResourceType.DATALAKE),
     ROTATE_CERT_DATALAKE("datalake/rotateAutoTlsCertDatalake", AuthorizationResourceType.DATALAKE),
     ENVIRONMENT_CREATE_DATAHUB("environments/createDatahub", AuthorizationResourceType.ENVIRONMENT),
     DESCRIBE_DATAHUB("datahub/describeDatahub", AuthorizationResourceType.DATAHUB),
@@ -68,6 +69,7 @@ public enum AuthorizationResourceAction {
     REFRESH_RECIPES_DATALAKE("datalake/refreshRecipes", AuthorizationResourceType.DATALAKE),
     UPGRADE_DATAHUB("datahub/upgradeDatahub", AuthorizationResourceType.DATAHUB),
     SYNC_COMPONENT_VERSIONS_FROM_CM_DATAHUB("datahub/syncComponentVersionsFromCm", AuthorizationResourceType.DATAHUB),
+    CHANGE_IMAGE_CATALOG_DATAHUB("datahub/changeImageCatalog", AuthorizationResourceType.DATAHUB),
     DESCRIBE_DATABASE("environments/describeDatabase", AuthorizationResourceType.DATABASE),
     DESCRIBE_DATABASE_SERVER("environments/describeDatabaseServer", AuthorizationResourceType.DATABASE_SERVER),
     DELETE_DATABASE("environments/deleteDatabase", AuthorizationResourceType.DATABASE),
@@ -93,6 +95,7 @@ public enum AuthorizationResourceAction {
     LIST_ASSIGNED_ROLES("iam/listAssignedResourceRoles", null),
     STRUCTURED_EVENTS_READ("structured_events/read", AuthorizationResourceType.STRUCTURED_EVENT),
     UPDATE_AZURE_ENCRYPTION_RESOURCES("environments/updateAzureEncryptionResources", AuthorizationResourceType.ENVIRONMENT),
+    ENVIRONMENT_CHANGE_FREEIPA_IMAGE("environments/changeFreeipaImageCatalog", AuthorizationResourceType.ENVIRONMENT),
     // deprecated actions, please do not use them
     ENVIRONMENT_READ("environments/read", AuthorizationResourceType.ENVIRONMENT),
     ENVIRONMENT_WRITE("environments/write", AuthorizationResourceType.ENVIRONMENT),
