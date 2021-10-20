@@ -61,8 +61,6 @@ public class DefaultImageCatalogService {
                                         FREEIPA_DEFAULT_CATALOG_NAME))),
                         defaultFreeIpaCatalogUrl, FREEIPA_DEFAULT_CATALOG_NAME);
                 break;
-            case DATAHUB:
-            case DATALAKE:
             case RUNTIME:
                 throw new BadRequestException(String.format("Runtime is required in case of '%s' image type", imageType));
             default:
@@ -78,8 +76,6 @@ public class DefaultImageCatalogService {
         switch (imageType) {
             case FREEIPA:
                 throw new BadRequestException(String.format("Runtime is not supported in case of '%s' image type", imageType));
-            case DATAHUB:
-            case DATALAKE:
             case RUNTIME:
                 ImageCatalog imageCatalog = getCloudbreakDefaultImageCatalog();
                 ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(provider), null, false, null, runtime);
