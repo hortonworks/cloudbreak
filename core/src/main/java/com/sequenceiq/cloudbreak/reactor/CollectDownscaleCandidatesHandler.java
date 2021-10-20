@@ -91,6 +91,8 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
                         .map(imd -> "InstanceID: " + imd.getInstanceId())
                         .collect(Collectors.joining(", ")));
                 if (!request.getDetails().isForced()) {
+                    Set<HostGroup> hostGroups = hostGroupService.findHostGroupsInCluster(stack.getCluster().getId());
+                    stack.getCluster().setHostGroups(hostGroups);
                     clusterApiConnectors.getConnector(stack).clusterDecomissionService()
                             .verifyNodesAreRemovable(stack, removableAndNotDeletedInstances);
                 }
