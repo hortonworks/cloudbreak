@@ -50,6 +50,8 @@ class CommonExperienceConnectorServiceTest {
 
     private static final String TEST_CLOUD_PLATFORM = "AWS";
 
+    private static final boolean NO_FORCE_DELETE = false;
+
     private static final int ONCE = 1;
 
     @Mock
@@ -68,6 +70,9 @@ class CommonExperienceConnectorServiceTest {
     private Invocation.Builder mockInvocationBuilder;
 
     @Mock
+    private Response.StatusType mockStatusType;
+
+    @Mock
     private WebTarget mockWebTarget;
 
     @Mock
@@ -82,6 +87,8 @@ class CommonExperienceConnectorServiceTest {
 
         when(mockWebTarget.getUri()).thenReturn(TEST_URI);
         lenient().when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
+        lenient().when(mockStatusType.getFamily()).thenReturn(Response.Status.Family.SUCCESSFUL);
+        lenient().when(mockResponse.getStatusInfo()).thenReturn(mockStatusType);
     }
 
     @Test
@@ -208,9 +215,10 @@ class CommonExperienceConnectorServiceTest {
     void testDeleteWorkspaceForEnvironmentShouldObtainWebTargetFromCreator() {
         when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
-        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
+        lenient().when(mockCommonExperienceResponseReader.read(any(), any(), any()))
+                .thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
 
-        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN, NO_FORCE_DELETE);
 
         verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForClusterFetch(any(), any());
         verify(mockCommonExperienceWebTargetProvider, times(ONCE)).createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN);
@@ -221,9 +229,10 @@ class CommonExperienceConnectorServiceTest {
         when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
-        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
+        lenient().when(mockCommonExperienceResponseReader.read(any(), any(), any()))
+                .thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
 
-        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN, NO_FORCE_DELETE);
 
         verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilder(any());
         verify(mockInvocationBuilderProvider, times(ONCE)).createInvocationBuilder(mockWebTarget);
@@ -234,9 +243,10 @@ class CommonExperienceConnectorServiceTest {
         when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
-        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
+        lenient().when(mockCommonExperienceResponseReader.read(any(), any(), any()))
+                .thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
 
-        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN, NO_FORCE_DELETE);
 
         verify(mockRetryableWebTarget, times(ONCE)).delete(any());
         verify(mockRetryableWebTarget, times(ONCE)).delete(mockInvocationBuilder);
@@ -249,35 +259,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(null);
 
         ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
-                () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN));
-
-        assertNotNull(expectedException);
-        assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
-    }
-
-    @Test
-    void testDeleteWorkspaceForEnvironmentWhenCallResultIsNotEmptyThenResponseReaderShouldBeInvokeToResolveContent() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
-        when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
-        when(mockRetryableWebTarget.delete(any())).thenReturn(mockResponse);
-        when(mockCommonExperienceResponseReader.read(any(), any(), any())).thenReturn(Optional.of(mock(DeleteCommonExperienceWorkspaceResponse.class)));
-
-        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN);
-
-        verify(mockCommonExperienceResponseReader, times(ONCE)).read(any(), any(), any());
-        verify(mockCommonExperienceResponseReader, times(ONCE)).read(TEST_URI.toString(), mockResponse, DeleteCommonExperienceWorkspaceResponse.class);
-    }
-
-    @Test
-    @MockitoSettings(strictness = Strictness.LENIENT)
-    void testDeleteWorkspaceForEnvironmentWhenResponseReaderUnableToResolveResponseThenIllegalStateExceptionShouldCome() {
-        when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
-        when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
-        when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
-        when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, CpInternalEnvironmentResponse.class)).thenReturn(Optional.empty());
-
-        ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
-                () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN));
+                () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN, NO_FORCE_DELETE));
 
         assertNotNull(expectedException);
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());
@@ -285,14 +267,11 @@ class CommonExperienceConnectorServiceTest {
 
     @Test
     void testDeleteWorkspaceForEnvironmentWhenResponseReaderIsAbleToResolveResponseThenResponseResultIterationHappens() {
-        DeleteCommonExperienceWorkspaceResponse mockCpInternalEnvironmentResponse = mock(DeleteCommonExperienceWorkspaceResponse.class);
         when(mockCommonExperienceWebTargetProvider.createWebTargetForClusterFetch(TEST_XP_BASE_PATH, TEST_ENV_CRN)).thenReturn(mockWebTarget);
         when(mockInvocationBuilderProvider.createInvocationBuilder(mockWebTarget)).thenReturn(mockInvocationBuilder);
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenReturn(mockResponse);
-        when(mockCommonExperienceResponseReader.read(TEST_URI.toString(), mockResponse, DeleteCommonExperienceWorkspaceResponse.class))
-                .thenReturn(Optional.of(mockCpInternalEnvironmentResponse));
 
-        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN);
+        underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN, NO_FORCE_DELETE);
     }
 
     @Test
@@ -302,7 +281,7 @@ class CommonExperienceConnectorServiceTest {
         when(mockRetryableWebTarget.delete(mockInvocationBuilder)).thenThrow(new RuntimeException());
 
         ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
-                () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN));
+                () -> underTest.deleteWorkspaceForEnvironment(TEST_XP_BASE_PATH, TEST_ENV_CRN, NO_FORCE_DELETE));
 
         assertNotNull(expectedException);
         assertEquals(COMMON_XP_RESPONSE_RESOLVE_ERROR_MSG, expectedException.getMessage());

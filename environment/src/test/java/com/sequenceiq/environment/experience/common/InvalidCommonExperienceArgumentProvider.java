@@ -19,21 +19,21 @@ public class InvalidCommonExperienceArgumentProvider implements ArgumentsProvide
     public Stream<? extends Arguments> provideArguments(ExtensionContext context) {
         return Stream.of(
                 Arguments.of(new CommonExperience()),
-                Arguments.of(new CommonExperience("", "", "", "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", null, "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", "", null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", null, null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", "", VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", "", XP_HOST_ADDRESS, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", null, VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", null, XP_HOST_ADDRESS, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", XP_INTERNAL_ENV_ENDPOINT, "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", XP_INTERNAL_ENV_ENDPOINT, null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, XP_HOST_ADDRESS, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort")),
-                Arguments.of(new CommonExperience("", "", XP_INTERNAL_ENV_ENDPOINT, VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort"))
+                Arguments.of(new CommonExperience("", "", "", "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", null, "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", "", null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", null, null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", "", VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", "", XP_HOST_ADDRESS, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", null, VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", null, XP_HOST_ADDRESS, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", XP_INTERNAL_ENV_ENDPOINT, "", "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", XP_INTERNAL_ENV_ENDPOINT, null, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", VALUE_NOT_SET, XP_HOST_ADDRESS, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false)),
+                Arguments.of(new CommonExperience("", "", XP_INTERNAL_ENV_ENDPOINT, VALUE_NOT_SET, "str", "somePolicyPath", "envPort", "baseAddress", "policyPort", false))
                 );
     }
     //CHECKSTYLE:ON

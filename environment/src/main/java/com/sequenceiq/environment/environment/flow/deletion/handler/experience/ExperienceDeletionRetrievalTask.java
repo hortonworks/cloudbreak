@@ -16,7 +16,7 @@ import io.micrometer.core.instrument.util.StringUtils;
 
 public class ExperienceDeletionRetrievalTask extends SimpleStatusCheckerTask<ExperiencePollerObject> {
 
-    public static final int EXPERIENCE_RETRYING_INTERVAL = 6000;
+    public static final int EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS = 6000;
 
     public static final int EXPERIENCE_RETRYING_COUNT = 1500;
 

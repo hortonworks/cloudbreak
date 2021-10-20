@@ -62,7 +62,7 @@ public class PollingService<T> {
                 return new ImmutablePair<>(PollingResult.FAILURE, actual);
             } else if (success) {
                 LOGGER.debug(statusCheckerTask.successMessage(t));
-                LOGGER.debug("Set the number of consecutive failures to 0, since we received a positve answer. Original number of consecutiveFailures: {}",
+                LOGGER.debug("Set the number of consecutive failures to 0, since we received a positive answer. Original number of consecutiveFailures: {}",
                         consecutiveFailures);
                 return new ImmutablePair<>(PollingResult.SUCCESS, actual);
             }
