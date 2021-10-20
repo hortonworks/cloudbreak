@@ -44,7 +44,7 @@ public class AzureVirtualMachineService {
     @Inject
     private AzureResourceGroupMetadataProvider azureResourceGroupMetadataProvider;
 
-    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 10)
+    @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 60)
     public Map<String, VirtualMachine> getVirtualMachinesByName(AzureClient azureClient, String resourceGroup, Collection<String> privateInstanceIds) {
         LOGGER.debug("Starting to retrieve vm metadata from Azure for {} for ids: {}", resourceGroup, privateInstanceIds);
         PagedList<VirtualMachine> virtualMachines = azureClient.getVirtualMachines(resourceGroup);
