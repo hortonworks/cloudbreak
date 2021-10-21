@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 
+import java.util.List;
+
 public enum DetailedStackStatus {
     UNKNOWN(null),
     // Provision statuses
@@ -84,6 +86,7 @@ public enum DetailedStackStatus {
     NODE_FAILURE(Status.NODE_FAILURE),
     CLUSTER_UPGRADE_INIT_FAILED(Status.AVAILABLE),
     CLUSTER_MANAGER_UPGRADE_FAILED(Status.AVAILABLE),
+    CLUSTER_UPGRADE_STARTED(Status.UPDATE_IN_PROGRESS),
     CLUSTER_UPGRADE_FAILED(Status.AVAILABLE),
     CLUSTER_UPGRADE_FINISHED(Status.AVAILABLE),
     STACK_IMAGE_UPDATE_FAILED(Status.UPDATE_FAILED),
@@ -116,5 +119,14 @@ public enum DetailedStackStatus {
 
     public Status getStatus() {
         return status;
+    }
+
+    public static List<DetailedStackStatus> getUpgradeFailureStatuses() {
+        return List.of(
+                DetailedStackStatus.CLUSTER_UPGRADE_FAILED,
+                DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED,
+                DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING,
+                DetailedStackStatus.NODE_FAILURE,
+                DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);
     }
 }

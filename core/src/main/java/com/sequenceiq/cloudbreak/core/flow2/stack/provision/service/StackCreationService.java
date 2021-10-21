@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.provision.service;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_RECOVERY_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.PROVISION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackProvisionConstants.START_DATE;
@@ -62,6 +64,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.notification.Notification;
 import com.sequenceiq.cloudbreak.notification.NotificationSender;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -250,7 +253,7 @@ public class StackCreationService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISIONED, "Stack provisioned.");
     }
 
-    public void handleStackCreationFailure(StackView stack, Exception errorDetails) {
+    public void handleStackCreationFailure(StackView stack, Exception errorDetails, ProvisionType provisionType) {
         LOGGER.info("Error during stack creation flow:", errorDetails);
         String errorReason = errorDetails == null ? "Unknown error" : errorDetails.getMessage();
         if (errorDetails instanceof CancellationException || ExceptionUtils.getRootCause(errorDetails) instanceof CancellationException) {
@@ -258,7 +261,8 @@ public class StackCreationService {
         } else {
             if (!stack.isStackInDeletionPhase()) {
                 handleFailure(stack, errorReason);
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
+                DetailedStackStatus failureStatus = (provisionType == ProvisionType.REGULAR) ? PROVISION_FAILED : CLUSTER_RECOVERY_FAILED;
+                stackUpdater.updateStackStatus(stack.getId(), failureStatus, errorReason);
                 flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
             } else {
                 flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
@@ -339,7 +343,7 @@ public class StackCreationService {
             }
         } catch (Exception ex) {
             LOGGER.info("Stack rollback failed on stack id : {}. Exception:", stack.getId(), ex);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_FAILED, format("Rollback failed: %s", ex.getMessage()));
+            stackUpdater.updateStackStatus(stack.getId(), PROVISION_FAILED, format("Rollback failed: %s", ex.getMessage()));
             flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_ROLLBACK_FAILED, ex.getMessage());
         }
     }

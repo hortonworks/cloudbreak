@@ -24,6 +24,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
@@ -133,6 +134,10 @@ public class SdxTestClient {
 
     public Action<SdxTestDto, SdxClient> upgrade() {
         return new SdxUpgradeAction();
+    }
+
+    public Action<SdxTestDto, SdxClient> recover() {
+        return new SdxRecoveryAction();
     }
 
     public Action<SdxInternalTestDto, SdxClient> resize() {

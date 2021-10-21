@@ -47,6 +47,7 @@ public class ClusterUpgradeService {
     public void initUpgradeCluster(long stackId, StatedImage targetImage) {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, targetImage.getImage().getUuid());
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
     }
 
     public void upgradeClusterManager(long stackId) {

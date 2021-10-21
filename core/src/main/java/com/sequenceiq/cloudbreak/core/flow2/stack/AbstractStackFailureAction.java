@@ -1,6 +1,9 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStackCreationAction.PROVISION_TYPE;
+
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -8,6 +11,7 @@ import javax.inject.Inject;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
 import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -34,7 +38,9 @@ public abstract class AbstractStackFailureAction<S extends FlowState, E extends 
         StackView stack = stackService.getViewByIdWithoutAuth(payload.getResourceId());
         MDCBuilder.buildMdcContext(stack);
         flow.setFlowFailed(payload.getException());
-        return new StackFailureContext(flowParameters, stack);
+        Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
+        ProvisionType provisionType = (ProvisionType) variables.getOrDefault(PROVISION_TYPE, ProvisionType.REGULAR);
+        return new StackFailureContext(flowParameters, stack, provisionType);
     }
 
     @Override

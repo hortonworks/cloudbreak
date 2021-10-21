@@ -83,19 +83,19 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
     }
 
     private SdxInternalTestDto validateDatalakeStatus(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) {
-        String statuReason = client.getDefaultClient()
+        String statusReason = client.getDefaultClient()
                 .sdxEndpoint()
                 .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
                 .getStatusReason();
-        if (statuReason.contains("Datalake backup failed")) {
-            LOGGER.error(String.format(" Sdx '%s' backup has been failed: '%s' ", testDto.getName(), statuReason));
-            throw new TestFailException(String.format(" Sdx '%s' backup has been failed: '%s' ", testDto.getName(), statuReason));
-        } else if (statuReason.contains("Datalake restore failed")) {
-            LOGGER.error(String.format(" Sdx '%s' restore has been failed: '%s' ", testDto.getName(), statuReason));
-            throw new TestFailException(String.format(" Sdx '%s' restore has been failed: '%s' ", testDto.getName(), statuReason));
+        if (statusReason.contains("Datalake backup failed")) {
+            LOGGER.error(String.format(" Sdx '%s' backup has been failed: '%s' ", testDto.getName(), statusReason));
+            throw new TestFailException(String.format(" Sdx '%s' backup has been failed: '%s' ", testDto.getName(), statusReason));
+        } else if (statusReason.contains("Datalake restore failed")) {
+            LOGGER.error(String.format(" Sdx '%s' restore has been failed: '%s' ", testDto.getName(), statusReason));
+            throw new TestFailException(String.format(" Sdx '%s' restore has been failed: '%s' ", testDto.getName(), statusReason));
         } else {
-            LOGGER.info(String.format(" Sdx '%s' backup/restore has been done with '%s'. ", testDto.getName(), statuReason));
-            Log.then(LOGGER, format(" Sdx '%s' backup/restore has been done with '%s'. ", testDto.getName(), statuReason));
+            LOGGER.info(String.format(" Sdx '%s' backup/restore has been done with '%s'. ", testDto.getName(), statusReason));
+            Log.then(LOGGER, format(" Sdx '%s' backup/restore has been done with '%s'. ", testDto.getName(), statusReason));
         }
         return testDto;
     }

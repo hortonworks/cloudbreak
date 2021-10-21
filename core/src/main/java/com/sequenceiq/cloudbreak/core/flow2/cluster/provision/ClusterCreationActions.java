@@ -660,10 +660,11 @@ public class ClusterCreationActions {
     @Bean(name = "CLUSTER_CREATION_FAILED_STATE")
     public Action<?, ?> clusterCreationFailedAction() {
         return new AbstractStackFailureAction<ClusterCreationState, ClusterCreationEvent>() {
+
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.error("Cluster creation failed with exception", payload.getException());
-                clusterCreationService.handleClusterCreationFailure(context.getStackView(), payload.getException());
+                clusterCreationService.handleClusterCreationFailure(context.getStackView(), payload.getException(), context.getProvisionType());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }

@@ -12,7 +12,6 @@ import javax.inject.Inject;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
@@ -55,8 +54,6 @@ import com.sequenceiq.cloudbreak.domain.FailurePolicy;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionEvent;
@@ -67,11 +64,8 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.common.api.type.LoadBalancerType;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.flow.core.Flow;
-import com.sequenceiq.flow.core.FlowParameters;
 
 @Configuration
 public class StackCreationActions {
@@ -90,9 +84,6 @@ public class StackCreationActions {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter metadataConverter;
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private LoadBalancerPersistenceService loadBalancerPersistenceService;
@@ -343,6 +334,7 @@ public class StackCreationActions {
     @Bean(name = "STACK_CREATION_FINISHED_STATE")
     public Action<?, ?> stackCreationFinishedAction() {
         return new AbstractStackCreationAction<>(StackWithFingerprintsEvent.class) {
+
             @Override
             protected void doExecute(StackCreationContext context, StackWithFingerprintsEvent payload, Map<Object, Object> variables) {
                 stackCreationService.stackCreationFinished(context.getStack());
@@ -360,19 +352,10 @@ public class StackCreationActions {
     @Bean(name = "STACK_CREATION_FAILED_STATE")
     public Action<?, ?> stackCreationFailureAction() {
         return new AbstractStackFailureAction<StackCreationState, StackCreationEvent>() {
-            @Override
-            protected StackFailureContext createFlowContext(
-                    FlowParameters flowParameters, StateContext<StackCreationState, StackCreationEvent> stateContext, StackFailureEvent payload) {
-                Flow flow = getFlow(flowParameters.getFlowId());
-                StackView stackView = stackService.getViewByIdWithoutAuth(payload.getResourceId());
-                MDCBuilder.buildMdcContext(stackView);
-                flow.setFlowFailed(payload.getException());
-                return new StackFailureContext(flowParameters, stackView);
-            }
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                stackCreationService.handleStackCreationFailure(context.getStackView(), payload.getException());
+                stackCreationService.handleStackCreationFailure(context.getStackView(), payload.getException(), context.getProvisionType());
                 getMetricService().incrementMetricCounter(MetricType.STACK_CREATION_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }

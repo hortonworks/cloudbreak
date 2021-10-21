@@ -21,7 +21,7 @@ public class StackStatusService {
     }
 
     public List<StackStatus> findAllStackStatusesById(long stackId) {
-        return repository.findAllByStackIdOrderByCreatedDesc(stackId);
+        return repository.findAllByStackIdOrderByCreatedAsc(stackId);
     }
 
 }
