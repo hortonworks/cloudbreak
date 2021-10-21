@@ -135,6 +135,29 @@ public class RecipeEngineTest {
         verify(recipeTemplateService, times(1)).updateAllGeneratedRecipes(anySet(), anyMap());
     }
 
+    @Test
+    public void testGetRecipeNameMapWithDuplications() throws CloudbreakException {
+        // GIVEN
+        Recipe recipe = new Recipe();
+        recipe.setName("myrecipe");
+        Set<HostGroup> hgs = new HashSet<>();
+        HostGroup hg1 = new HostGroup();
+        hg1.setRecipes(Set.of(recipe));
+        hg1.setName("master");
+        HostGroup hg2 = new HostGroup();
+        hg2.setRecipes(Set.of(recipe));
+        hg2.setName("worker");
+        hgs.add(hg1);
+        hgs.add(hg2);
+        given(stackService.getByIdWithListsInTransaction(eq(DUMMY_STACK_ID))).willReturn(stack());
+        given(hostGroupService.getByClusterWithRecipes(eq(DUMMY_STACK_ID))).willReturn(hgs);
+        // WHEN
+        recipeEngine.uploadRecipes(DUMMY_STACK_ID);
+        // THEN
+        verify(orchestratorRecipeExecutor, times(1)).uploadRecipes(any(Stack.class), anyMap());
+        verify(recipeTemplateService, times(1)).updateAllGeneratedRecipes(anySet(), anyMap());
+    }
+
     private Stack stack() {
         Stack stack = new Stack();
         stack.setId(DUMMY_STACK_ID);

@@ -186,6 +186,6 @@ public class RecipeEngine {
     private Map<String, Recipe> getRecipeNameMap(Set<HostGroup> hostGroups) {
         return hostGroups.stream()
                 .flatMap(hg -> hg.getRecipes().stream())
-                .collect(Collectors.toMap(Recipe::getName, recipe -> recipe));
+                .collect(Collectors.toMap(Recipe::getName, recipe -> recipe, (r1, r2) -> r1));
     }
 }
