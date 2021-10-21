@@ -1,7 +1,9 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_CREDENTIAL;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
+import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
 
 import java.util.List;
 import java.util.Set;
@@ -365,7 +367,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.CHANGE_IMAGE_CATALOG_DATALAKE)
-    public void changeImageCatalog(@ResourceName String name, SdxChangeImageCatalogRequest changeImageCatalogRequest) {
+    public void changeImageCatalog(@ResourceName String name, @RequestObject SdxChangeImageCatalogRequest changeImageCatalogRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         sdxImageCatalogChangeService.changeImageCatalog(sdxCluster, changeImageCatalogRequest.getImageCatalog());
     }
