@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILDING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_SERVICES;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.RECOVERY_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_BOOTSTRAP;
 
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRu
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -94,12 +96,17 @@ public class ClusterCreationService {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
     }
 
-    public void clusterInstallationFinished(StackView stackView) {
+    public void clusterInstallationFinished(StackView stackView, ProvisionType provisionType) {
         try {
             transactionService.required(() -> {
                 clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-                stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
-                flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_BUILT);
+                if (provisionType.isRecovery()) {
+                    stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.CLUSTER_RECOVERY_FINISHED, "Cluster recovery finished.");
+                    flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), RECOVERY_FINISHED);
+                } else {
+                    stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster creation finished.");
+                    flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_BUILT);
+                }
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);

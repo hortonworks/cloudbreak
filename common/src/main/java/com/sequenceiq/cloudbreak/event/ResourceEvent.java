@@ -230,6 +230,7 @@ public enum ResourceEvent {
     CLUSTER_BUILDING("cluster.building"),
     CLUSTER_RESET("cluster.reset"),
     CLUSTER_BUILT("cluster.built"),
+    RECOVERY_FINISHED("recovery.finished"),
     CLUSTER_DELETE_FAILED("ambari.cluster.delete.failed"),
     CLUSTER_DELETE_STARTED("cluster.termination.started"),
     CLUSTER_CHANGING_CREDENTIAL("cluster.changing.credential"),

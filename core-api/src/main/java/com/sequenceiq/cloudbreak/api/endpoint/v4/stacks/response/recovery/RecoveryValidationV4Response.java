@@ -4,14 +4,14 @@ public class RecoveryValidationV4Response {
 
     private String reason;
 
-    private RecoveryStatus recoveryStatus;
+    private RecoveryStatus status;
 
     public RecoveryValidationV4Response() {
     }
 
-    public RecoveryValidationV4Response(String reason, RecoveryStatus recoveryStatus) {
+    public RecoveryValidationV4Response(String reason, RecoveryStatus status) {
         this.reason = reason;
-        this.recoveryStatus = recoveryStatus;
+        this.status = status;
     }
 
     public String getReason() {
@@ -22,19 +22,19 @@ public class RecoveryValidationV4Response {
         this.reason = reason;
     }
 
-    public RecoveryStatus getRecoveryStatus() {
-        return recoveryStatus;
+    public RecoveryStatus getStatus() {
+        return status;
     }
 
-    public void setRecoveryStatus(RecoveryStatus recoveryStatus) {
-        this.recoveryStatus = recoveryStatus;
+    public void setStatus(RecoveryStatus status) {
+        this.status = status;
     }
 
     @Override
     public String toString() {
         return "RecoveryValidationV4Response{" +
                 "reason='" + reason + '\'' +
-                ", recoveryStatus=" + recoveryStatus +
+                ", status=" + status +
                 '}';
     }
 }
