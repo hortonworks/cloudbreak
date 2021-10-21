@@ -48,13 +48,12 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(enabled = false, dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
             when = "a valid SDX Internal Create request is sent",
             then = "SDX should be available AND deletable"
     )
-
     public void testDefaultSDXResizeSuccessfully(MockedTestContext testContext) {
         testContext
                 .given(sdxName, SdxInternalTestDto.class)
