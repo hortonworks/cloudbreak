@@ -20,8 +20,10 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_JUMPGATE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CCM_V2_USE_ONE_WAY_TLS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_IDENTITY_MAPPING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CLOUD_STORAGE_VALIDATION;
@@ -279,6 +281,14 @@ public class EntitlementService {
 
     public boolean ccmV2JumpgateEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_CCM_V2_JUMPGATE);
+    }
+
+    public boolean ccmV1ToV2JumpgateUpgradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CCM_V1_TO_V2_JUMPGATE_UPGRADE);
+    }
+
+    public boolean ccmV2ToV2JumpgateUpgradeEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE);
     }
 
     public boolean ccmV2UseOneWayTls(String accountId) {
