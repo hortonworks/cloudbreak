@@ -643,7 +643,7 @@ public class ClusterCreationActions {
         return new AbstractClusterCreationAction<>(ClusterProxyGatewayRegistrationSuccess.class) {
             @Override
             protected void doExecute(ClusterCreationViewContext context, ClusterProxyGatewayRegistrationSuccess payload, Map<Object, Object> variables) {
-                clusterCreationService.clusterInstallationFinished(context.getStack());
+                clusterCreationService.clusterInstallationFinished(context.getStack(), context.getProvisionType());
                 jobService.schedule(context.getStackId(), StackJobAdapter.class);
                 syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());

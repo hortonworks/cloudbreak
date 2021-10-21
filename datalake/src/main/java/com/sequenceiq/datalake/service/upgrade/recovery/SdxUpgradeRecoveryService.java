@@ -76,7 +76,7 @@ public class SdxUpgradeRecoveryService {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             RecoveryValidationV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                     stackV4Endpoint.getClusterRecoverableByNameInternal(0L, sdxCluster.getClusterName(), initiatorUserCrn));
-            return new SdxRecoverableResponse(response.getReason(), response.getRecoveryStatus());
+            return new SdxRecoverableResponse(response.getReason(), response.getStatus());
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
             String message = String.format("Stack recovery status validation failed on cluster: [%s]. Message: [%s]",

@@ -66,7 +66,7 @@ public class ClusterRecoveryServiceTest {
 
         RecoveryValidationV4Response response = underTest.validateRecovery(WORKSPACE_ID, stackNameOrCrn);
 
-        Assertions.assertEquals(expectedRecoveryStatus, response.getRecoveryStatus());
+        Assertions.assertEquals(expectedRecoveryStatus, response.getStatus());
         Assertions.assertEquals(expectedMessage, response.getReason());
     }
 
