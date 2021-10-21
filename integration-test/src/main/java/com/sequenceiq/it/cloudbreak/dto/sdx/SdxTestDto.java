@@ -56,6 +56,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
+import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 
@@ -158,6 +159,10 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto awaitForFlow() {
         return awaitForFlow(emptyRunningParameter());
+    }
+
+    public SdxTestDto awaitForFlowFail() {
+        return awaitForFlow(emptyRunningParameter().withWaitForFlowFail());
     }
 
     @Override
@@ -351,6 +356,14 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException("SDX Upgrade does not exist!");
         }
         return upgrade.getRequest();
+    }
+
+    public SdxRecoveryRequest getSdxRecoveryRequest() {
+        SdxRecoveryTestDto recovery = given(SdxRecoveryTestDto.class);
+        if (recovery == null) {
+            throw new IllegalArgumentException("SDX Recovery does not exist!");
+        }
+        return recovery.getRequest();
     }
 
     public SdxClusterResizeRequest getSdxResizeRequest() {

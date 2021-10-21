@@ -12,14 +12,12 @@ import javax.inject.Inject;
 import org.apache.commons.lang3.tuple.Pair;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.assertion.audit.DatalakeAuditGrpcServiceAssertion;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -27,6 +25,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxSecurityTests extends PreconditionSdxE2ETest {
+
     private static final String HOST_CERT_VALIDITY_CMD =
             "sudo openssl x509 -text -noout -in /var/lib/cloudera-scm-agent/agent-cert/cm-auto-host_cert_chain.pem | grep -A 2 Validity";
 
@@ -34,13 +33,7 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
     private SdxTestClient sdxTestClient;
 
     @Inject
-    private SdxUtil sdxUtil;
-
-    @Inject
     private SshJClientActions sshJClientActions;
-
-    @Inject
-    private DatalakeAuditGrpcServiceAssertion datalakeAuditGrpcServiceAssertion;
 
     @Test(dataProvider = TEST_CONTEXT, enabled = false)
     @UseSpotInstances
@@ -49,7 +42,7 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
             when = "autotls cert rotation is called on the SDX cluster",
             then = "host certificates' validity should be changed on all hosts, the cluster should be up and running"
     )
-    public void testSDXAutotlCertRotation(TestContext testContext) {
+    public void testSDXAutoTlsCertRotation(TestContext testContext) {
         String sdx = resourcePropertyProvider().getName();
 
         List<String> originalCertValidityOutput = new ArrayList<>();
@@ -68,8 +61,8 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
                 .then((tc, testDto, client) -> {
                     Map<String, Pair<Integer, String>> certValidityCmdResultByIpsMap = sshJClientActions.executeSshCommand(getInstanceGroups(testDto, client),
                             List.of(HostGroupType.MASTER.getName(), HostGroupType.IDBROKER.getName()), HOST_CERT_VALIDITY_CMD, false);
-                    originalCertValidityOutput.addAll(certValidityCmdResultByIpsMap.entrySet().stream()
-                            .map(e -> e.getValue().getValue()).collect(Collectors.toList()));
+                    originalCertValidityOutput.addAll(certValidityCmdResultByIpsMap.values().stream()
+                            .map(Pair::getValue).collect(Collectors.toList()));
                     return testDto;
                 })
                 .when(sdxTestClient.rotateAutotlsCertificates(), key(sdx))

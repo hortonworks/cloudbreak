@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.RECOVERY_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILDING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILT;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -113,11 +115,14 @@ public class ClusterCreationService {
         }
     }
 
-    public void handleClusterCreationFailure(StackView stackView, Exception exception) {
+    public void handleClusterCreationFailure(StackView stackView, Exception exception, ProvisionType provisionType) {
         if (stackView.getClusterView() != null) {
             String errorMessage = getErrorMessageFromException(exception);
-            clusterService.updateClusterStatusByStackId(stackView.getId(), CREATE_FAILED, errorMessage);
-            stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
+            Status failureStatus = provisionType.isRecovery() ? RECOVERY_FAILED : CREATE_FAILED;
+            DetailedStackStatus failureDetailedStatus = provisionType.isRecovery()
+                    ? DetailedStackStatus.CLUSTER_RECOVERY_FAILED : DetailedStackStatus.AVAILABLE;
+            clusterService.updateClusterStatusByStackId(stackView.getId(), failureStatus, errorMessage);
+            stackUpdater.updateStackStatus(stackView.getId(), failureDetailedStatus);
             flowMessageService.fireEventAndLog(stackView.getId(), CREATE_FAILED.name(), CLUSTER_CREATE_FAILED, errorMessage);
         } else {
             LOGGER.info("Cluster was null. Flow action was not required.");

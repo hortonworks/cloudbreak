@@ -25,6 +25,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 
 public class SdxUpgradeTests extends PreconditionSdxE2ETest {
+
     @Inject
     private SdxTestClient sdxTestClient;
 

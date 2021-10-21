@@ -1,9 +1,10 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import javax.inject.Inject;
@@ -51,10 +52,10 @@ public class ClusterRecoveryService {
         List<DetailedStackStatus> detailedStackStatusList = statusList.stream()
                 .map(StackStatus::getDetailedStackStatus)
                 .collect(Collectors.toList());
-        int lastRecoverySuccess = detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_RECOVERY_FINISHED);
-        int lastRecoveryFailure = detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_RECOVERY_FAILED);
-        int lastUpgradeSuccess = detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_UPGRADE_FINISHED);
-        int lastUpgradeFailure = detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
+        int lastRecoverySuccess = getLastRecoverySuccess(detailedStackStatusList);
+        int lastRecoveryFailure = getLastRecoveryFailure(detailedStackStatusList);
+        int lastUpgradeSuccess = getLastUpgradeSuccess(detailedStackStatusList);
+        int lastUpgradeFailure = getLastUpgradeFailure(detailedStackStatusList);
         String logMessage =
                 Stream.of(createLogEntry(lastUpgradeSuccess, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED),
                         createLogEntry(lastUpgradeFailure, DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
@@ -64,10 +65,9 @@ public class ClusterRecoveryService {
                         .collect(Collectors.joining(". "));
         LOGGER.debug(logMessage);
 
-        double maximum = DoubleStream.of(lastUpgradeFailure, lastRecoveryFailure, lastRecoverySuccess, lastUpgradeSuccess)
+        int maximumInt = IntStream.of(lastUpgradeFailure, lastRecoveryFailure, lastRecoverySuccess, lastUpgradeSuccess)
                 .max()
-                .getAsDouble();
-        int maximumInt = Double.valueOf(maximum).intValue();
+                .getAsInt();
         String reason;
         RecoveryStatus status;
         if (maximumInt == -1) {
@@ -85,6 +85,26 @@ public class ClusterRecoveryService {
         }
         LOGGER.info(reason);
         return new RecoveryValidationV4Response(reason, status);
+    }
+
+    private int getLastUpgradeSuccess(List<DetailedStackStatus> detailedStackStatusList) {
+        return detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_UPGRADE_FINISHED);
+    }
+
+    private int getLastRecoverySuccess(List<DetailedStackStatus> detailedStackStatusList) {
+        return detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_RECOVERY_FINISHED);
+    }
+
+    private int getLastRecoveryFailure(List<DetailedStackStatus> detailedStackStatusList) {
+        return detailedStackStatusList.lastIndexOf(DetailedStackStatus.CLUSTER_RECOVERY_FAILED);
+    }
+
+    private int getLastUpgradeFailure(List<DetailedStackStatus> detailedStackStatusList) {
+
+        return Collections.max(DetailedStackStatus.getUpgradeFailureStatuses()
+                .stream()
+                .map(detailedStackStatusList::lastIndexOf)
+                .collect(Collectors.toList()));
     }
 
     private Optional<String> createLogEntry(int index, DetailedStackStatus status) {

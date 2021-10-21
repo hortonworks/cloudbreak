@@ -6,6 +6,9 @@ public class SdxRecoveryResponse {
 
     private FlowIdentifier flowIdentifier;
 
+    public SdxRecoveryResponse() {
+    }
+
     public SdxRecoveryResponse(FlowIdentifier flowIdentifier) {
         this.flowIdentifier = flowIdentifier;
     }

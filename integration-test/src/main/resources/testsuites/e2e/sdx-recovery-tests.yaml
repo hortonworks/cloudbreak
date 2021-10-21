@@ -1,0 +1,5 @@
+name: "sdx-recovery-tests"
+tests:
+  - name: "sdx_e2e_recovery_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecoveryTests

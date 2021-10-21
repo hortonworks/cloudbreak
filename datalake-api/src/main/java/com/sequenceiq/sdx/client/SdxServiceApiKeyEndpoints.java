@@ -14,6 +14,7 @@ import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
 
@@ -36,6 +37,11 @@ public class SdxServiceApiKeyEndpoints extends AbstractKeyBasedServiceEndpoint i
     @Override
     public SdxUpgradeEndpoint sdxUpgradeEndpoint() {
         return getEndpoint(SdxUpgradeEndpoint.class);
+    }
+
+    @Override
+    public SdxRecoveryEndpoint sdxRecoveryEndpoint() {
+        return getEndpoint(SdxRecoveryEndpoint.class);
     }
 
     @Override

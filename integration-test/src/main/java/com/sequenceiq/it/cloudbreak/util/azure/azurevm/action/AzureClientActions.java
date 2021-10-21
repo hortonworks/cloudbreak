@@ -17,8 +17,8 @@ import org.springframework.stereotype.Component;
 import com.microsoft.azure.management.Azure;
 import com.microsoft.azure.management.compute.PowerState;
 import com.microsoft.azure.management.compute.VirtualMachine;
+import com.microsoft.azure.management.compute.VirtualMachineDataDisk;
 import com.microsoft.azure.management.resources.fluentcore.arm.models.HasId;
-import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionExecutor;
 import com.sequenceiq.it.cloudbreak.util.azure.AzureInstanceActionResult;
@@ -27,10 +27,8 @@ import rx.schedulers.Schedulers;
 
 @Component
 public class AzureClientActions {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientActions.class);
 
-    @Inject
-    private ResourcePropertyProvider resourcePropertyProvider;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AzureClientActions.class);
 
     @Inject
     private Azure azure;
@@ -40,7 +38,10 @@ public class AzureClientActions {
         instanceIds.forEach(id -> {
             String resourceGroup = getResourceGroupName(clusterName, id);
             VirtualMachine vm = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
-            diskIds.addAll(vm.dataDisks().values().stream().map(HasId::id).collect(Collectors.toList()));
+            Map<Integer, VirtualMachineDataDisk> dataDiskMap = vm.dataDisks();
+            if (dataDiskMap != null && !dataDiskMap.isEmpty()) {
+                diskIds.addAll(dataDiskMap.values().stream().map(HasId::id).collect(Collectors.toList()));
+            }
         });
         return diskIds;
     }

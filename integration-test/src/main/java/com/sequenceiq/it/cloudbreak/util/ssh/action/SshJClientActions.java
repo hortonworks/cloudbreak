@@ -11,6 +11,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -274,8 +275,7 @@ public class SshJClientActions extends SshJClient {
             Pair<Integer, String> cmdOut = execute(sshClient, fileListCommand);
             Log.log(LOGGER, format(" Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue()));
 
-            List<String> cmdOutputValues = List.of(cmdOut.getValue().split("[\\r\\n\\t]"))
-                    .stream().filter(Objects::nonNull).collect(Collectors.toList());
+            List<String> cmdOutputValues = Stream.of(cmdOut.getValue().split("[\\r\\n\\t]")).filter(Objects::nonNull).collect(Collectors.toList());
             boolean fileFound = cmdOutputValues.stream()
                     .anyMatch(outputValue -> outputValue.strip().startsWith("/"));
             String foundFilePath = cmdOutputValues.stream()
