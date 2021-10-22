@@ -62,7 +62,8 @@ public class DatalakeDrClient {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             BackupDatalakeRequest.Builder builder = BackupDatalakeRequest.newBuilder()
                     .setDatalakeName(datalakeName)
-                    .setBackupLocation(backupLocation);
+                    .setBackupLocation(backupLocation)
+                    .setCloseDbConnections(true);
             if (!Strings.isNullOrEmpty(backupName)) {
                 builder.setBackupName(backupName);
             }
@@ -218,9 +219,6 @@ public class DatalakeDrClient {
             if (!Strings.isNullOrEmpty(restoreId)) {
                 builder.setRestoreId(restoreId);
             }
-            if (!Strings.isNullOrEmpty(backupName)) {
-                builder.setBackupName(backupName);
-            }
             return statusConverter.convert(
                     newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                             .restoreDatalakeStatus(builder.build())
@@ -239,9 +237,6 @@ public class DatalakeDrClient {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             RestoreDatalakeStatusRequest.Builder builder = RestoreDatalakeStatusRequest.newBuilder()
                     .setDatalakeName(datalakeName);
-            if (!Strings.isNullOrEmpty(backupName)) {
-                builder.setBackupName(backupName);
-            }
             return newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn).restoreDatalakeStatus(builder.build()).getRestoreId();
         }
     }

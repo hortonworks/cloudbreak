@@ -71,6 +71,15 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getBackupLocationBytes();
+
+    /**
+     * <pre>
+     * Close the database connections while performing backup of the databases.
+     * </pre>
+     *
+     * <code>bool closeDbConnections = 4;</code>
+     */
+    boolean getCloseDbConnections();
   }
   /**
    * <pre>
@@ -93,6 +102,7 @@ public final class datalakeDRProto {
       datalakeName_ = "";
       backupName_ = "";
       backupLocation_ = "";
+      closeDbConnections_ = false;
     }
 
     @java.lang.Override
@@ -135,6 +145,11 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               backupLocation_ = s;
+              break;
+            }
+            case 32: {
+
+              closeDbConnections_ = input.readBool();
               break;
             }
             default: {
@@ -295,6 +310,19 @@ public final class datalakeDRProto {
       }
     }
 
+    public static final int CLOSEDBCONNECTIONS_FIELD_NUMBER = 4;
+    private boolean closeDbConnections_;
+    /**
+     * <pre>
+     * Close the database connections while performing backup of the databases.
+     * </pre>
+     *
+     * <code>bool closeDbConnections = 4;</code>
+     */
+    public boolean getCloseDbConnections() {
+      return closeDbConnections_;
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -318,6 +346,9 @@ public final class datalakeDRProto {
       if (!getBackupLocationBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, backupLocation_);
       }
+      if (closeDbConnections_ != false) {
+        output.writeBool(4, closeDbConnections_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -335,6 +366,10 @@ public final class datalakeDRProto {
       }
       if (!getBackupLocationBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, backupLocation_);
+      }
+      if (closeDbConnections_ != false) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeBoolSize(4, closeDbConnections_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -358,6 +393,8 @@ public final class datalakeDRProto {
           .equals(other.getBackupName());
       result = result && getBackupLocation()
           .equals(other.getBackupLocation());
+      result = result && (getCloseDbConnections()
+          == other.getCloseDbConnections());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -375,6 +412,9 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getBackupName().hashCode();
       hash = (37 * hash) + BACKUPLOCATION_FIELD_NUMBER;
       hash = (53 * hash) + getBackupLocation().hashCode();
+      hash = (37 * hash) + CLOSEDBCONNECTIONS_FIELD_NUMBER;
+      hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+          getCloseDbConnections());
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -519,6 +559,8 @@ public final class datalakeDRProto {
 
         backupLocation_ = "";
 
+        closeDbConnections_ = false;
+
         return this;
       }
 
@@ -548,6 +590,7 @@ public final class datalakeDRProto {
         result.datalakeName_ = datalakeName_;
         result.backupName_ = backupName_;
         result.backupLocation_ = backupLocation_;
+        result.closeDbConnections_ = closeDbConnections_;
         onBuilt();
         return result;
       }
@@ -607,6 +650,9 @@ public final class datalakeDRProto {
         if (!other.getBackupLocation().isEmpty()) {
           backupLocation_ = other.backupLocation_;
           onChanged();
+        }
+        if (other.getCloseDbConnections() != false) {
+          setCloseDbConnections(other.getCloseDbConnections());
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -900,6 +946,44 @@ public final class datalakeDRProto {
   checkByteStringIsUtf8(value);
         
         backupLocation_ = value;
+        onChanged();
+        return this;
+      }
+
+      private boolean closeDbConnections_ ;
+      /**
+       * <pre>
+       * Close the database connections while performing backup of the databases.
+       * </pre>
+       *
+       * <code>bool closeDbConnections = 4;</code>
+       */
+      public boolean getCloseDbConnections() {
+        return closeDbConnections_;
+      }
+      /**
+       * <pre>
+       * Close the database connections while performing backup of the databases.
+       * </pre>
+       *
+       * <code>bool closeDbConnections = 4;</code>
+       */
+      public Builder setCloseDbConnections(boolean value) {
+        
+        closeDbConnections_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * Close the database connections while performing backup of the databases.
+       * </pre>
+       *
+       * <code>bool closeDbConnections = 4;</code>
+       */
+      public Builder clearCloseDbConnections() {
+        
+        closeDbConnections_ = false;
         onChanged();
         return this;
       }
@@ -9643,24 +9727,6 @@ public final class datalakeDRProto {
      */
     com.google.protobuf.ByteString
         getRestoreIdBytes();
-
-    /**
-     * <pre>
-     * Name of the backup used to perform restore.
-     * </pre>
-     *
-     * <code>string backupName = 3;</code>
-     */
-    java.lang.String getBackupName();
-    /**
-     * <pre>
-     * Name of the backup used to perform restore.
-     * </pre>
-     *
-     * <code>string backupName = 3;</code>
-     */
-    com.google.protobuf.ByteString
-        getBackupNameBytes();
   }
   /**
    * <pre>
@@ -9682,7 +9748,6 @@ public final class datalakeDRProto {
     private RestoreDatalakeStatusRequest() {
       datalakeName_ = "";
       restoreId_ = "";
-      backupName_ = "";
     }
 
     @java.lang.Override
@@ -9719,12 +9784,6 @@ public final class datalakeDRProto {
               java.lang.String s = input.readStringRequireUtf8();
 
               restoreId_ = s;
-              break;
-            }
-            case 26: {
-              java.lang.String s = input.readStringRequireUtf8();
-
-              backupName_ = s;
               break;
             }
             default: {
@@ -9843,48 +9902,6 @@ public final class datalakeDRProto {
       }
     }
 
-    public static final int BACKUPNAME_FIELD_NUMBER = 3;
-    private volatile java.lang.Object backupName_;
-    /**
-     * <pre>
-     * Name of the backup used to perform restore.
-     * </pre>
-     *
-     * <code>string backupName = 3;</code>
-     */
-    public java.lang.String getBackupName() {
-      java.lang.Object ref = backupName_;
-      if (ref instanceof java.lang.String) {
-        return (java.lang.String) ref;
-      } else {
-        com.google.protobuf.ByteString bs = 
-            (com.google.protobuf.ByteString) ref;
-        java.lang.String s = bs.toStringUtf8();
-        backupName_ = s;
-        return s;
-      }
-    }
-    /**
-     * <pre>
-     * Name of the backup used to perform restore.
-     * </pre>
-     *
-     * <code>string backupName = 3;</code>
-     */
-    public com.google.protobuf.ByteString
-        getBackupNameBytes() {
-      java.lang.Object ref = backupName_;
-      if (ref instanceof java.lang.String) {
-        com.google.protobuf.ByteString b = 
-            com.google.protobuf.ByteString.copyFromUtf8(
-                (java.lang.String) ref);
-        backupName_ = b;
-        return b;
-      } else {
-        return (com.google.protobuf.ByteString) ref;
-      }
-    }
-
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -9905,9 +9922,6 @@ public final class datalakeDRProto {
       if (!getRestoreIdBytes().isEmpty()) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, restoreId_);
       }
-      if (!getBackupNameBytes().isEmpty()) {
-        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, backupName_);
-      }
       unknownFields.writeTo(output);
     }
 
@@ -9922,9 +9936,6 @@ public final class datalakeDRProto {
       }
       if (!getRestoreIdBytes().isEmpty()) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, restoreId_);
-      }
-      if (!getBackupNameBytes().isEmpty()) {
-        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, backupName_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -9946,8 +9957,6 @@ public final class datalakeDRProto {
           .equals(other.getDatalakeName());
       result = result && getRestoreId()
           .equals(other.getRestoreId());
-      result = result && getBackupName()
-          .equals(other.getBackupName());
       result = result && unknownFields.equals(other.unknownFields);
       return result;
     }
@@ -9963,8 +9972,6 @@ public final class datalakeDRProto {
       hash = (53 * hash) + getDatalakeName().hashCode();
       hash = (37 * hash) + RESTOREID_FIELD_NUMBER;
       hash = (53 * hash) + getRestoreId().hashCode();
-      hash = (37 * hash) + BACKUPNAME_FIELD_NUMBER;
-      hash = (53 * hash) + getBackupName().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -10107,8 +10114,6 @@ public final class datalakeDRProto {
 
         restoreId_ = "";
 
-        backupName_ = "";
-
         return this;
       }
 
@@ -10137,7 +10142,6 @@ public final class datalakeDRProto {
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest(this);
         result.datalakeName_ = datalakeName_;
         result.restoreId_ = restoreId_;
-        result.backupName_ = backupName_;
         onBuilt();
         return result;
       }
@@ -10192,10 +10196,6 @@ public final class datalakeDRProto {
         }
         if (!other.getRestoreId().isEmpty()) {
           restoreId_ = other.restoreId_;
-          onChanged();
-        }
-        if (!other.getBackupName().isEmpty()) {
-          backupName_ = other.backupName_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -10401,95 +10401,6 @@ public final class datalakeDRProto {
   checkByteStringIsUtf8(value);
         
         restoreId_ = value;
-        onChanged();
-        return this;
-      }
-
-      private java.lang.Object backupName_ = "";
-      /**
-       * <pre>
-       * Name of the backup used to perform restore.
-       * </pre>
-       *
-       * <code>string backupName = 3;</code>
-       */
-      public java.lang.String getBackupName() {
-        java.lang.Object ref = backupName_;
-        if (!(ref instanceof java.lang.String)) {
-          com.google.protobuf.ByteString bs =
-              (com.google.protobuf.ByteString) ref;
-          java.lang.String s = bs.toStringUtf8();
-          backupName_ = s;
-          return s;
-        } else {
-          return (java.lang.String) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Name of the backup used to perform restore.
-       * </pre>
-       *
-       * <code>string backupName = 3;</code>
-       */
-      public com.google.protobuf.ByteString
-          getBackupNameBytes() {
-        java.lang.Object ref = backupName_;
-        if (ref instanceof String) {
-          com.google.protobuf.ByteString b = 
-              com.google.protobuf.ByteString.copyFromUtf8(
-                  (java.lang.String) ref);
-          backupName_ = b;
-          return b;
-        } else {
-          return (com.google.protobuf.ByteString) ref;
-        }
-      }
-      /**
-       * <pre>
-       * Name of the backup used to perform restore.
-       * </pre>
-       *
-       * <code>string backupName = 3;</code>
-       */
-      public Builder setBackupName(
-          java.lang.String value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  
-        backupName_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Name of the backup used to perform restore.
-       * </pre>
-       *
-       * <code>string backupName = 3;</code>
-       */
-      public Builder clearBackupName() {
-        
-        backupName_ = getDefaultInstance().getBackupName();
-        onChanged();
-        return this;
-      }
-      /**
-       * <pre>
-       * Name of the backup used to perform restore.
-       * </pre>
-       *
-       * <code>string backupName = 3;</code>
-       */
-      public Builder setBackupNameBytes(
-          com.google.protobuf.ByteString value) {
-        if (value == null) {
-    throw new NullPointerException();
-  }
-  checkByteStringIsUtf8(value);
-        
-        backupName_ = value;
         onChanged();
         return this;
       }
@@ -16389,68 +16300,68 @@ public final class datalakeDRProto {
   static {
     java.lang.String[] descriptorData = {
       "\n\020datalakedr.proto\022\ndatalakedr\032\rversion." +
-      "proto\"Y\n\025BackupDatalakeRequest\022\024\n\014datala" +
+      "proto\"u\n\025BackupDatalakeRequest\022\024\n\014datala" +
       "keName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\026\n\016back" +
-      "upLocation\030\003 \001(\t\"\354\001\n\026BackupDatalakeRespo" +
-      "nse\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002 \001" +
-      "(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n" +
-      "\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001" +
-      "(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimesta" +
-      "mp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfail" +
-      "ureReason\030\n \001(\t\"\234\001\n\026RestoreDatalakeReque" +
-      "st\022\024\n\014datalakeName\030\001 \001(\t\022\022\n\nbackupName\030\002" +
-      " \001(\t\022\020\n\010backupId\030\003 \001(\t\022\027\n\017includeDatabas" +
-      "e\030\004 \001(\010\022\r\n\005force\030\005 \001(\010\022\036\n\026backupLocation" +
-      "Override\030\006 \001(\t\"\354\001\n\027RestoreDatalakeRespon" +
-      "se\022\021\n\taccountId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022" +
-      "\021\n\trestoreId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\ri" +
-      "nternalState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t" +
-      "\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimestamp" +
-      "\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailur" +
-      "eReason\030\n \001(\t\"Y\n\033BackupDatalakeStatusReq" +
-      "uest\022\024\n\014datalakeName\030\001 \001(\t\022\020\n\010backupId\030\002" +
-      " \001(\t\022\022\n\nbackupName\030\003 \001(\t\"\362\001\n\034BackupDatal" +
-      "akeStatusResponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n" +
-      "\taccountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010bac" +
-      "kupId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014ov" +
-      "erallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t" +
-      "\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocation" +
-      "\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\"[\n\034Restore" +
-      "DatalakeStatusRequest\022\024\n\014datalakeName\030\001 " +
-      "\001(\t\022\021\n\trestoreId\030\002 \001(\t\022\022\n\nbackupName\030\003 \001" +
-      "(\t\"\362\001\n\035RestoreDatalakeStatusResponse\022\021\n\t" +
-      "accountId\030\001 \001(\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010ba" +
-      "ckupId\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinterna" +
-      "lState\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016st" +
-      "artTimestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t" +
-      "\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfailureReaso" +
-      "n\030\n \001(\t\"\350\001\n\022DatalakeBackupInfo\022\022\n\nbackup" +
-      "Name\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCrn" +
-      "\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalStat" +
-      "e\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTi" +
-      "mestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016b" +
-      "ackupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001" +
-      "(\t\"1\n\031ListDatalakeBackupRequest\022\024\n\014datal" +
-      "akeName\030\001 \001(\t\"S\n\032ListDatalakeBackupRespo" +
-      "nse\0225\n\rdatalake_info\030\001 \003(\0132\036.datalakedr." +
-      "DatalakeBackupInfo2\315\004\n\ndatalakeDR\022A\n\nGet" +
-      "Version\022\027.version.VersionRequest\032\030.versi" +
-      "on.VersionResponse\"\000\022Y\n\016BackupDatalake\022!" +
-      ".datalakedr.BackupDatalakeRequest\032\".data" +
-      "lakedr.BackupDatalakeResponse\"\000\022\\\n\017Resto" +
-      "reDatalake\022\".datalakedr.RestoreDatalakeR" +
-      "equest\032#.datalakedr.RestoreDatalakeRespo" +
-      "nse\"\000\022k\n\024BackupDatalakeStatus\022\'.datalake" +
-      "dr.BackupDatalakeStatusRequest\032(.datalak" +
-      "edr.BackupDatalakeStatusResponse\"\000\022n\n\025Re" +
-      "storeDatalakeStatus\022(.datalakedr.Restore" +
-      "DatalakeStatusRequest\032).datalakedr.Resto" +
-      "reDatalakeStatusResponse\"\000\022f\n\023ListDatala" +
-      "keBackups\022%.datalakedr.ListDatalakeBacku" +
-      "pRequest\032&.datalakedr.ListDatalakeBackup" +
-      "Response\"\000B>\n+com.cloudera.thunderhead.s" +
-      "ervice.datalakedrB\017datalakeDRProtob\006prot" +
-      "o3"
+      "upLocation\030\003 \001(\t\022\032\n\022closeDbConnections\030\004" +
+      " \001(\010\"\354\001\n\026BackupDatalakeResponse\022\022\n\nbacku" +
+      "pName\030\001 \001(\t\022\021\n\taccountId\030\002 \001(\t\022\017\n\007userCr" +
+      "n\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022\025\n\rinternalSta" +
+      "te\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startT" +
+      "imestamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016" +
+      "backupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n " +
+      "\001(\t\"\234\001\n\026RestoreDatalakeRequest\022\024\n\014datala" +
+      "keName\030\001 \001(\t\022\022\n\nbackupName\030\002 \001(\t\022\020\n\010back" +
+      "upId\030\003 \001(\t\022\027\n\017includeDatabase\030\004 \001(\010\022\r\n\005f" +
+      "orce\030\005 \001(\010\022\036\n\026backupLocationOverride\030\006 \001" +
+      "(\t\"\354\001\n\027RestoreDatalakeResponse\022\021\n\taccoun" +
+      "tId\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\021\n\trestoreId" +
+      "\030\003 \001(\t\022\017\n\007userCrn\030\004 \001(\t\022\025\n\rinternalState" +
+      "\030\005 \001(\t\022\024\n\014overallState\030\006 \001(\t\022\026\n\016startTim" +
+      "estamp\030\007 \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016ba" +
+      "ckupLocation\030\t \001(\t\022\025\n\rfailureReason\030\n \001(" +
+      "\t\"Y\n\033BackupDatalakeStatusRequest\022\024\n\014data" +
+      "lakeName\030\001 \001(\t\022\020\n\010backupId\030\002 \001(\t\022\022\n\nback" +
+      "upName\030\003 \001(\t\"\362\001\n\034BackupDatalakeStatusRes" +
+      "ponse\022\022\n\nbackupName\030\001 \001(\t\022\021\n\taccountId\030\002" +
+      " \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010backupId\030\004 \001(\t\022" +
+      "\025\n\rinternalState\030\005 \001(\t\022\024\n\014overallState\030\006" +
+      " \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022\024\n\014endTimes" +
+      "tamp\030\010 \001(\t\022\026\n\016backupLocation\030\t \001(\t\022\025\n\rfa" +
+      "ilureReason\030\n \001(\t\"Y\n\034RestoreDatalakeStat" +
+      "usRequest\022\024\n\014datalakeName\030\001 \001(\t\022\021\n\tresto" +
+      "reId\030\002 \001(\tJ\004\010\003\020\004R\nbackupName\"\362\001\n\035Restore" +
+      "DatalakeStatusResponse\022\021\n\taccountId\030\001 \001(" +
+      "\t\022\021\n\trestoreId\030\002 \001(\t\022\020\n\010backupId\030\003 \001(\t\022\017" +
+      "\n\007userCrn\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024" +
+      "\n\014overallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007" +
+      " \001(\t\022\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLoca" +
+      "tion\030\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\"\350\001\n\022Da" +
+      "talakeBackupInfo\022\022\n\nbackupName\030\001 \001(\t\022\021\n\t" +
+      "accountId\030\002 \001(\t\022\017\n\007userCrn\030\003 \001(\t\022\020\n\010back" +
+      "upId\030\004 \001(\t\022\025\n\rinternalState\030\005 \001(\t\022\024\n\014ove" +
+      "rallState\030\006 \001(\t\022\026\n\016startTimestamp\030\007 \001(\t\022" +
+      "\024\n\014endTimestamp\030\010 \001(\t\022\026\n\016backupLocation\030" +
+      "\t \001(\t\022\025\n\rfailureReason\030\n \001(\t\"1\n\031ListData" +
+      "lakeBackupRequest\022\024\n\014datalakeName\030\001 \001(\t\"" +
+      "S\n\032ListDatalakeBackupResponse\0225\n\rdatalak" +
+      "e_info\030\001 \003(\0132\036.datalakedr.DatalakeBackup" +
+      "Info2\315\004\n\ndatalakeDR\022A\n\nGetVersion\022\027.vers" +
+      "ion.VersionRequest\032\030.version.VersionResp" +
+      "onse\"\000\022Y\n\016BackupDatalake\022!.datalakedr.Ba" +
+      "ckupDatalakeRequest\032\".datalakedr.BackupD" +
+      "atalakeResponse\"\000\022\\\n\017RestoreDatalake\022\".d" +
+      "atalakedr.RestoreDatalakeRequest\032#.datal" +
+      "akedr.RestoreDatalakeResponse\"\000\022k\n\024Backu" +
+      "pDatalakeStatus\022\'.datalakedr.BackupDatal" +
+      "akeStatusRequest\032(.datalakedr.BackupData" +
+      "lakeStatusResponse\"\000\022n\n\025RestoreDatalakeS" +
+      "tatus\022(.datalakedr.RestoreDatalakeStatus" +
+      "Request\032).datalakedr.RestoreDatalakeStat" +
+      "usResponse\"\000\022f\n\023ListDatalakeBackups\022%.da" +
+      "talakedr.ListDatalakeBackupRequest\032&.dat" +
+      "alakedr.ListDatalakeBackupResponse\"\000B>\n+" +
+      "com.cloudera.thunderhead.service.datalak" +
+      "edrB\017datalakeDRProtob\006proto3"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -16470,7 +16381,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_BackupDatalakeRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_BackupDatalakeRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "BackupName", "BackupLocation", });
+        new java.lang.String[] { "DatalakeName", "BackupName", "BackupLocation", "CloseDbConnections", });
     internal_static_datalakedr_BackupDatalakeResponse_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_datalakedr_BackupDatalakeResponse_fieldAccessorTable = new
@@ -16506,7 +16417,7 @@ public final class datalakeDRProto {
     internal_static_datalakedr_RestoreDatalakeStatusRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_datalakedr_RestoreDatalakeStatusRequest_descriptor,
-        new java.lang.String[] { "DatalakeName", "RestoreId", "BackupName", });
+        new java.lang.String[] { "DatalakeName", "RestoreId", });
     internal_static_datalakedr_RestoreDatalakeStatusResponse_descriptor =
       getDescriptor().getMessageTypes().get(7);
     internal_static_datalakedr_RestoreDatalakeStatusResponse_fieldAccessorTable = new
