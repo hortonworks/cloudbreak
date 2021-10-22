@@ -42,6 +42,7 @@ public enum RightV4 {
     SDX_REPAIR(AuthorizationResourceAction.REPAIR_DATALAKE),
     SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
     SDX_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATALAKE),
+    SDX_RESIZE(AuthorizationResourceAction.RESIZE_DATALAKE),
     // legacy
     DISTROX_READ(AuthorizationResourceAction.DATAHUB_READ),
     DISTROX_WRITE(AuthorizationResourceAction.DATAHUB_WRITE),
