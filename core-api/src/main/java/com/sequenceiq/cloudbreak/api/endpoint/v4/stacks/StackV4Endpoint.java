@@ -462,7 +462,7 @@ public interface StackV4Endpoint {
     @GET
     @Path("internal/{name}/cluster_recoverable")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = "validates if the cluster is recoverable or not", nickname = "getClusterRecoverableByName")
+    @ApiOperation(value = "validates if the cluster is recoverable or not", nickname = "getClusterRecoverableByNameInternal")
     RecoveryValidationV4Response getClusterRecoverableByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
@@ -533,7 +533,7 @@ public interface StackV4Endpoint {
     @PUT
     @Path("internal/{name}/change_image_catalog")
     @Produces(MediaType.APPLICATION_JSON)
-    @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalog")
+    @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalogInternal")
     void changeImageCatalogInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
 }
