@@ -179,4 +179,21 @@ public class Recipe implements ProvisionEntity, WorkspaceAwareResource, Archivab
     public void setGeneratedRecipes(Set<GeneratedRecipe> generatedRecipes) {
         this.generatedRecipes = generatedRecipes;
     }
+
+    @Override
+    public String toString() {
+        return "Recipe{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", resourceCrn='" + resourceCrn + '\'' +
+                ", description='" + description + '\'' +
+                ", recipeType=" + recipeType +
+                ", workspace=" + workspace +
+                ", creator='" + creator + '\'' +
+                ", archived=" + archived +
+                ", deletionTimestamp=" + deletionTimestamp +
+                ", created=" + created +
+                ", creationType=" + creationType +
+                '}';
+    }
 }

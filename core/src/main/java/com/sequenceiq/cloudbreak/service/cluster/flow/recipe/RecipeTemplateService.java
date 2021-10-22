@@ -77,7 +77,7 @@ public class RecipeTemplateService {
             }
             Map<String, GeneratedRecipe> generatedRecipeNameMap = generatedRecipes.stream()
                     .collect(Collectors.toMap(
-                            g -> g.getRecipe().getName(), g -> g
+                            g -> g.getRecipe().getName(), g -> g, (g1, g2) -> g1
                     ));
             List<RecipeModel> recipeModelList = generatedModels.get(hostGroup);
             if (generatedRecipes.size() != recipeModelList.size()) {
@@ -102,9 +102,9 @@ public class RecipeTemplateService {
         if (hasAnyTemplateInRecipes(hostGroupsWithRecipes)) {
             TemplatePreparationObject templatePreparationObject = measure(() -> stackToTemplatePreparationObjectConverter.convert(stack),
                     LOGGER, "Template prepartion object generation took {} ms for recipes generation.");
-            return hostGroupsWithRecipes.stream().collect(Collectors.toMap(h -> h, h -> convert(h.getRecipes(), templatePreparationObject)));
+            return hostGroupsWithRecipes.stream().collect(Collectors.toMap(h -> h, h -> convert(h.getRecipes(), templatePreparationObject), (h1, h2) -> h1));
         } else {
-            return hostGroupsWithRecipes.stream().collect(Collectors.toMap(h -> h, h -> convert(h.getRecipes())));
+            return hostGroupsWithRecipes.stream().collect(Collectors.toMap(h -> h, h -> convert(h.getRecipes()), (h1, h2) -> h1));
         }
     }
 
@@ -124,7 +124,7 @@ public class RecipeTemplateService {
     public Map<HostGroup, Set<GeneratedRecipe>> createGeneratedRecipes(Map<HostGroup, List<RecipeModel>> recipeModels, Map<String, Recipe> recipesNameMap,
             Workspace workspace) {
         return recipeModels.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> creteGeneratedRecipes(recipesNameMap, workspace, entry)));
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> creteGeneratedRecipes(recipesNameMap, workspace, entry), (k1, k2) -> k1));
     }
 
     private Set<GeneratedRecipe> creteGeneratedRecipes(Map<String, Recipe> recipesNameMap, Workspace workspace, Map.Entry<HostGroup,
