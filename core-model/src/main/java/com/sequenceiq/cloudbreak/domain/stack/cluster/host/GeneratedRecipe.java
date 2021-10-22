@@ -85,4 +85,13 @@ public class GeneratedRecipe implements ProvisionEntity, WorkspaceAwareResource 
     public void setRecipe(Recipe recipe) {
         this.recipe = recipe;
     }
+
+    @Override
+    public String toString() {
+        return "GeneratedRecipe{" +
+                "id=" + id +
+                ", hostGroup=" + hostGroup +
+                ", workspace=" + workspace +
+                '}';
+    }
 }

@@ -45,7 +45,7 @@ public class UpdateRecipeService {
         Set<String> recipesToFind = recipesPerHostGroup.stream().flatMap(rphg -> rphg.getRecipeNames().stream())
                 .collect(Collectors.toSet());
         Map<String, Set<String>> recipesToUpdate = recipesPerHostGroup.stream()
-                .collect(Collectors.toMap(UpdateHostGroupRecipes::getHostGroupName, UpdateHostGroupRecipes::getRecipeNames));
+                .collect(Collectors.toMap(UpdateHostGroupRecipes::getHostGroupName, UpdateHostGroupRecipes::getRecipeNames, (n1, n2) -> n1));
         LOGGER.debug("Update recipes {}", recipesToUpdate);
         Set<Recipe> recipes = recipeService.getByNamesForWorkspaceId(recipesToFind, workspaceId);
         validate(recipesToFind, recipes);
