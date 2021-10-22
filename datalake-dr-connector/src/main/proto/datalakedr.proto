@@ -53,6 +53,7 @@ message BackupDatalakeRequest {
   string datalakeName = 1; // The name of the datalake that has to be backed-up.
   string backupName = 2; // The name of the backup being performed.
   string backupLocation = 3; // Location where the data has to be backed-up.
+  bool closeDbConnections = 4; // Close the database connections while performing backup of the databases.
 }
 
 /**
@@ -128,9 +129,10 @@ message BackupDatalakeStatusResponse {
 * Request to get datalake restore status.
 */
 message RestoreDatalakeStatusRequest {
+  reserved 3;
+  reserved "backupName";
   string datalakeName = 1; // The name of the datalake.
   string restoreId = 2; // Id of the restore operation performed.
-  string backupName = 3; // Name of the backup used to perform restore.
 }
 
 /**
