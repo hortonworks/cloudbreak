@@ -163,4 +163,9 @@ public class EnvironmentReactorFlowManager {
 
         eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
+
+    public void triggerCcmUpgradeFlow(EnvironmentDto environment) {
+        LOGGER.info("Environment CCM upgrade flow triggered for environment {}", environment.getName());
+        // TODO in CB-14568
+    }
 }
