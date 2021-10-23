@@ -7,6 +7,10 @@ public enum Tunnel {
 
     private static final List<Tunnel> USE_CP_LIST = List.of(CCM, CCMV2, CLUSTER_PROXY, CCMV2_JUMPGATE);
 
+    public static Tunnel latestUpgradeTarget() {
+        return CCMV2_JUMPGATE;
+    }
+
     public boolean useCcm() {
         return this == CCM || this == CCMV2 || this == CCMV2_JUMPGATE;
     }

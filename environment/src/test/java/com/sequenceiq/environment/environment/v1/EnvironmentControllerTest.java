@@ -1,17 +1,18 @@
 package com.sequenceiq.environment.environment.v1;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
@@ -21,10 +22,12 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentCreationService;
+import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
 
-public class EnvironmentControllerTest {
+@ExtendWith(MockitoExtension.class)
+class EnvironmentControllerTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + UUID.randomUUID() + ":user:" + UUID.randomUUID();
 
@@ -39,16 +42,14 @@ public class EnvironmentControllerTest {
     @Mock
     private EnvironmentResponseConverter environmentResponseConverter;
 
+    @Mock
+    private EnvironmentUpgradeCcmService upgradeCcmService;
+
     @InjectMocks
     private EnvironmentController underTest;
 
-    @BeforeEach
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-    }
-
     @Test
-    public void testEndpointGatewayOptionsPreserved() {
+    void testEndpointGatewayOptionsPreserved() {
         EnvironmentNetworkRequest networkRequest = setupNetworkRequestWithEndpointGatway();
         EnvironmentRequest environmentRequest = new EnvironmentRequest();
         environmentRequest.setNetwork(networkRequest);
@@ -59,6 +60,18 @@ public class EnvironmentControllerTest {
 
         assertEquals(PublicEndpointAccessGateway.ENABLED, networkRequest.getPublicEndpointAccessGateway());
         assertEquals(SUBNETS, networkRequest.getEndpointGatewaySubnetIds());
+    }
+
+    @Test
+    void testUpgradeCcmByNameCallsService() {
+        underTest.upgradeCcmByName("name123");
+        verify(upgradeCcmService).upgradeCcmByName("name123");
+    }
+
+    @Test
+    void testUpgradeCcmByCrnCallsService() {
+        underTest.upgradeCcmByCrn("crn123");
+        verify(upgradeCcmService).upgradeCcmByCrn("crn123");
     }
 
     private EnvironmentNetworkRequest setupNetworkRequestWithEndpointGatway() {

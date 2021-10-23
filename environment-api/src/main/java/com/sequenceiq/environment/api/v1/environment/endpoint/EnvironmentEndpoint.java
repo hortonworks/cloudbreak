@@ -284,4 +284,18 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     ObjectStorageValidateResponse validateCloudStorage(@Valid EnvironmentCloudStorageValidationRequest environmentCloudStorageValidationRequest);
 
+    @PUT
+    @Path("/name/{name}/upgrade_ccm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPGRADE_CCM, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "upgradeCcmByEnvironmentNameV1")
+    void upgradeCcmByName(@PathParam("name") String name);
+
+    @PUT
+    @Path("/crn/{crn}/upgrade_ccm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPGRADE_CCM, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "upgradeCcmByEnvironmentCrnV1")
+    void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+
 }

@@ -76,6 +76,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentService;
 import com.sequenceiq.environment.environment.service.EnvironmentStackConfigUpdateService;
 import com.sequenceiq.environment.environment.service.EnvironmentStartService;
 import com.sequenceiq.environment.environment.service.EnvironmentStopService;
+import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmService;
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
@@ -120,6 +121,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     private final CloudStorageValidator cloudStorageValidator;
 
+    private final EnvironmentUpgradeCcmService upgradeCcmService;
+
     public EnvironmentController(
             EnvironmentApiConverter environmentApiConverter,
             EnvironmentResponseConverter environmentResponseConverter,
@@ -136,7 +139,8 @@ public class EnvironmentController implements EnvironmentEndpoint {
             EntitlementService entitlementService,
             EnvironmentLoadBalancerService environmentLoadBalancerService,
             EnvironmentFiltering environmentFiltering,
-            CloudStorageValidator cloudStorageValidator) {
+            CloudStorageValidator cloudStorageValidator,
+            EnvironmentUpgradeCcmService upgradeCcmService) {
         this.environmentApiConverter = environmentApiConverter;
         this.environmentResponseConverter = environmentResponseConverter;
         this.environmentService = environmentService;
@@ -153,6 +157,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
         this.environmentLoadBalancerService = environmentLoadBalancerService;
         this.environmentFiltering = environmentFiltering;
         this.cloudStorageValidator = cloudStorageValidator;
+        this.upgradeCcmService = upgradeCcmService;
     }
 
     @Override
@@ -432,5 +437,17 @@ public class EnvironmentController implements EnvironmentEndpoint {
             environmentCloudStorageValidationRequest) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return cloudStorageValidator.validateCloudStorage(accountId, environmentCloudStorageValidationRequest);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT /*for now*/)
+    public void upgradeCcmByName(@ResourceName String name) {
+        upgradeCcmService.upgradeCcmByName(name);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT /*for now*/)
+    public void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
+        upgradeCcmService.upgradeCcmByCrn(crn);
     }
 }
