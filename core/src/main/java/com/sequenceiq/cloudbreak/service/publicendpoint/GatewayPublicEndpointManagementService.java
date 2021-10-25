@@ -221,16 +221,16 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
     }
 
     public boolean renewCertificate(Stack stack) {
-        boolean result = true;
+        boolean certGeneratedSuccessfully = true;
         if (isCertRenewalTriggerable(stack)) {
             LOGGER.info("Renew certificate for stack: '{}'", stack.getName());
-            result = generateCertAndSaveForStack(stack);
-            if (StringUtils.isEmpty(stack.getCluster().getFqdn())) {
-                LOGGER.info("The cluster doesn't have public DNS entry, starting to create one.");
+            certGeneratedSuccessfully = generateCertAndSaveForStack(stack);
+            if (certGeneratedSuccessfully) {
+                LOGGER.info("Generate cert was successful update dns entry for cluster");
                 updateDnsEntryForCluster(stack);
             }
         }
-        return result;
+        return certGeneratedSuccessfully;
     }
 
     private boolean generateCertAndSaveForStack(Stack stack) {
@@ -287,7 +287,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         return keyPair;
     }
 
-    private void updateDnsEntryForCluster(Stack stack) {
+    public String updateDnsEntryForCluster(Stack stack) {
         String fqdn = updateDnsEntry(stack, null);
         if (fqdn != null) {
             Cluster cluster = stack.getCluster();
@@ -295,6 +295,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             clusterService.save(cluster);
             LOGGER.info("The '{}' domain name has been generated, registered through PEM service and saved for the cluster.", fqdn);
         }
+        return fqdn;
     }
 
     private String getEndpointNameForStack(Stack stack) {
