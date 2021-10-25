@@ -36,6 +36,7 @@ public enum RightV4 {
     DH_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATAHUB),
     DH_RECOVER(AuthorizationResourceAction.RECOVER_DATAHUB),
     DH_UPGRADE(AuthorizationResourceAction.UPGRADE_DATAHUB),
+    DH_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATAHUB),
     // sdx level
     SDX_UPGRADE(AuthorizationResourceAction.UPGRADE_DATALAKE),
     SDX_RECOVER(AuthorizationResourceAction.RECOVER_DATALAKE),
@@ -43,6 +44,7 @@ public enum RightV4 {
     SDX_RETRY(AuthorizationResourceAction.RETRY_DATALAKE_OPERATION),
     SDX_DESCRIBE(AuthorizationResourceAction.DESCRIBE_DATALAKE),
     SDX_RESIZE(AuthorizationResourceAction.RESIZE_DATALAKE),
+    SDX_REFRESH_RECIPES(AuthorizationResourceAction.REFRESH_RECIPES_DATALAKE),
     // legacy
     DISTROX_READ(AuthorizationResourceAction.DATAHUB_READ),
     DISTROX_WRITE(AuthorizationResourceAction.DATAHUB_WRITE),
