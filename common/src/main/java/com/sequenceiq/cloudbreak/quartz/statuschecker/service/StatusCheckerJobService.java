@@ -6,6 +6,7 @@ import java.security.SecureRandom;
 import java.time.Duration;
 import java.time.ZonedDateTime;
 import java.util.Date;
+import java.util.Map;
 import java.util.Random;
 
 import javax.inject.Inject;
@@ -31,6 +32,10 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 @Service
 public class StatusCheckerJobService {
 
+    public static final String SYNC_JOB_TYPE = "syncJobType";
+
+    public static final String LONG_SYNC_JOB_TYPE = "longSyncJobType";
+
     private static final String JOB_GROUP = "status-checker-jobs";
 
     private static final String TRIGGER_GROUP = "status-checker-triggers";
@@ -44,7 +49,7 @@ public class StatusCheckerJobService {
     private static final Random RANDOM = new SecureRandom();
 
     @Inject
-    private StatusCheckerConfig properties;
+    private StatusCheckerConfig statusCheckerConfig;
 
     @Inject
     private Scheduler scheduler;
@@ -54,35 +59,31 @@ public class StatusCheckerJobService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
-        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(properties.getIntervalInSeconds()));
+        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(statusCheckerConfig.getIntervalInSeconds()), statusCheckerConfig.getIntervalInSeconds());
         schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     public <T> void schedule(JobResourceAdapter<T> resource, int delayInSeconds) {
         JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
-        Trigger trigger = buildJobTrigger(jobDetail, delayInSeconds);
+        Trigger trigger = buildJobTrigger(jobDetail, delayInSeconds, statusCheckerConfig.getIntervalInSeconds());
         schedule(jobDetail, trigger, resource.getLocalId());
     }
 
-    private void schedule(JobDetail jobDetail, Trigger trigger, String localId) {
+    public void schedule(Long id, Class<? extends JobResourceAdapter<?>> resource) {
         try {
-            if (scheduler.getJobDetail(JobKey.jobKey(localId, JOB_GROUP)) != null) {
-                unschedule(localId);
-            }
-            scheduler.scheduleJob(jobDetail, trigger);
-        } catch (SchedulerException e) {
-            LOGGER.error(String.format("Error during scheduling quartz job: %s", localId), e);
-        }
-    }
-
-    public void schedule(Long id, Class<? extends JobResourceAdapter> resource) {
-        try {
-            Constructor<? extends JobResourceAdapter> c = resource.getConstructor(Long.class, ApplicationContext.class);
-            JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
+            Constructor<? extends JobResourceAdapter<?>> c = resource.getConstructor(Long.class, ApplicationContext.class);
+            JobResourceAdapter<?> resourceAdapter = c.newInstance(id, applicationContext);
             schedule(resourceAdapter);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
         }
+    }
+
+    public <T> void scheduleLongIntervalCheck(JobResourceAdapter<T> resource) {
+        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource(),
+                Map.of(SYNC_JOB_TYPE, LONG_SYNC_JOB_TYPE));
+        Trigger trigger = buildJobTrigger(jobDetail, statusCheckerConfig.getIntervalInSeconds(), statusCheckerConfig.getLongIntervalInSeconds());
+        schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     public void unschedule(String id) {
@@ -101,28 +102,43 @@ public class StatusCheckerJobService {
         }
     }
 
-    private <T> JobDetail buildJobDetail(String sdxId, String crn, Class<? extends Job> clazz) {
-        JobDataMap jobDataMap = new JobDataMap();
+    private void schedule(JobDetail jobDetail, Trigger trigger, String localId) {
+        try {
+            if (scheduler.getJobDetail(JobKey.jobKey(localId, JOB_GROUP)) != null) {
+                unschedule(localId);
+            }
+            scheduler.scheduleJob(jobDetail, trigger);
+        } catch (SchedulerException e) {
+            LOGGER.error(String.format("Error during scheduling quartz job: %s", localId), e);
+        }
+    }
 
-        jobDataMap.put(LOCAL_ID, sdxId);
+    private JobDetail buildJobDetail(String localId, String crn, Class<? extends Job> clazz) {
+        return buildJobDetail(localId, crn, clazz, Map.of());
+    }
+
+    private JobDetail buildJobDetail(String localId, String crn, Class<? extends Job> clazz, Map<String, String>  dataMap) {
+        JobDataMap jobDataMap = new JobDataMap();
+        jobDataMap.put(LOCAL_ID, localId);
         jobDataMap.put(REMOTE_RESOURCE_CRN, crn);
+        dataMap.forEach(jobDataMap::put);
 
         return JobBuilder.newJob(clazz)
-                .withIdentity(sdxId, JOB_GROUP)
+                .withIdentity(localId, JOB_GROUP)
                 .withDescription("Checking datalake status Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()
                 .build();
     }
 
-    private Trigger buildJobTrigger(JobDetail jobDetail, int delayInSeconds) {
+    private Trigger buildJobTrigger(JobDetail jobDetail, int delayInSeconds, int intervalInSeconds) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
                 .withDescription("Checking datalake status Trigger")
                 .startAt(delayedStart(delayInSeconds))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
-                        .withIntervalInSeconds(properties.getIntervalInSeconds())
+                        .withIntervalInSeconds(intervalInSeconds)
                         .repeatForever()
                         .withMisfireHandlingInstructionNextWithRemainingCount())
                 .build();

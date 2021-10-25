@@ -26,6 +26,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
@@ -125,7 +126,7 @@ public class StackStatusCheckerJobTest {
     public void init() {
         Tracer tracer = Mockito.mock(Tracer.class);
         underTest = new StackStatusCheckerJob(tracer);
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         when(flowLogService.isOtherFlowRunning(anyLong())).thenReturn(Boolean.FALSE);
         underTest.setLocalId("1");
         underTest.setRemoteResourceCrn("remote:crn");
@@ -141,6 +142,7 @@ public class StackStatusCheckerJobTest {
         stack.setCreator(user);
 
         when(stackService.get(anyLong())).thenReturn(stack);
+        when(jobExecutionContext.getMergedJobDataMap()).thenReturn(new JobDataMap());
     }
 
     @After

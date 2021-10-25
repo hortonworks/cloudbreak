@@ -15,12 +15,19 @@ public class StatusCheckerConfig {
     @Value("${statuschecker.intervalsec:180}")
     private int intervalInSeconds;
 
+    @Value("${statuschecker.longintervalsec:7200}")
+    private int longIntervalInSeconds;
+
     @Value("${statuschecker.enabled:true}")
     private boolean autoSyncEnabled;
 
     @PostConstruct
     void logEnablement() {
-        LOGGER.info("Auto sync is {}", autoSyncEnabled ? "enabled" : "disabled");
+        if (autoSyncEnabled) {
+            LOGGER.info("Auto sync is enabled. Short sync period is {} sec. Long sync period is {} sec.", intervalInSeconds, longIntervalInSeconds);
+        } else {
+            LOGGER.info("Auto sync is disabled.");
+        }
     }
 
     public boolean isAutoSyncEnabled() {
@@ -29,5 +36,9 @@ public class StatusCheckerConfig {
 
     public int getIntervalInSeconds() {
         return intervalInSeconds;
+    }
+
+    public int getLongIntervalInSeconds() {
+        return longIntervalInSeconds;
     }
 }
