@@ -64,10 +64,10 @@ public class ClusterPublicEndpointManagementService {
         }
     }
 
-    public boolean changeGateway(Stack stack, String newGatewayIp) {
+    public boolean changeGateway(Stack stack) {
         String result = null;
         if (gatewayPublicEndpointManagementService.manageCertificateAndDnsInPem()) {
-            result = gatewayPublicEndpointManagementService.updateDnsEntry(stack, newGatewayIp);
+            result = gatewayPublicEndpointManagementService.updateDnsEntryForCluster(stack);
         }
         return StringUtils.isNoneEmpty(result);
     }
@@ -102,7 +102,7 @@ public class ClusterPublicEndpointManagementService {
 
         if (newAddressesByFqdn.containsValue(ipWrapper)) {
             LOGGER.info("Gateway's DNS entry needs to be updated because primary gateway IP has been updated to: '{}'", ipWrapper);
-            changeGateway(stack, ipWrapper);
+            changeGateway(stack);
         }
     }
 
