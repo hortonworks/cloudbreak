@@ -298,7 +298,7 @@ public class ClusterTemplateTest extends AbstractMockTest {
     )
     public void testCreateAgainClusterTemplate(MockedTestContext testContext) {
         String generatedKey = resourcePropertyProvider().getName();
-
+        String envName = testContext.get(EnvironmentTestDto.class).getName();
         testContext
                 .given("placementSettings", PlacementSettingsTestDto.class)
                 .withRegion(MockCloudProvider.LONDON)
@@ -308,7 +308,8 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("^clustertemplate already exists with name.*"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("^Cluster definition already exists with " +
+                        "name.*" + envName))
                 .validate();
     }
 

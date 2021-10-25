@@ -36,10 +36,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Defaul
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -61,6 +61,7 @@ import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.network.NetworkService;
 import com.sequenceiq.cloudbreak.service.orchestrator.OrchestratorService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
@@ -134,6 +135,9 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     @Inject
     private ClusterTemplateViewToClusterTemplateViewV4ResponseConverter clusterTemplateViewToClusterTemplateViewV4ResponseConverter;
+
+    @Inject
+    private EnvironmentClientService environmentClientService;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
@@ -219,15 +223,33 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             throw new BadRequestException("The environment cannot be null.");
         }
 
-        if (resource.getStatus().isNonDefault() && clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
-            throw new DuplicateClusterTemplateException(
-                    format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
-        }
-
+        checkDuplication(resource);
         Optional<String> messageIfBlueprintIsInvalidInCluster = getMessageIfBlueprintIsInvalidInCluster(resource);
         if (messageIfBlueprintIsInvalidInCluster.isPresent()) {
             throw new BadRequestException(messageIfBlueprintIsInvalidInCluster.get());
         }
+
+    }
+
+    void checkDuplication(ClusterTemplate resource) {
+        Optional<ClusterTemplate> clusterTemplateOpt = clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace());
+        if (resource.getStatus().isNonDefault() && clusterTemplateOpt.isPresent()) {
+            ClusterTemplate clusterTemplate = clusterTemplateOpt.get();
+            String environmentCrn = clusterTemplate.getStackTemplate().getEnvironmentCrn();
+            LOGGER.debug("Cluster definition exists in the DB. type: {}, env crn: {}", clusterTemplate.getType(), environmentCrn);
+            if (environmentCrn == null && resource.getStackTemplate().getEnvironmentCrn() == null) {
+                throw new DuplicateClusterTemplateException("The default cluster definition could not be created with the same name");
+            } else if (isExistInTheSameEnvironment(clusterTemplate, resource)) {
+                String environmentName = environmentClientService.getByCrn(environmentCrn).getName();
+                throw new DuplicateClusterTemplateException(
+                        format("Cluster definition already exists with name '%s' for the environment of '%s'", resource.getName(), environmentName));
+            }
+        }
+    }
+
+    private boolean isExistInTheSameEnvironment(ClusterTemplate existed, ClusterTemplate newOne) {
+        return existed.getStackTemplate().getEnvironmentCrn() != null &&
+                existed.getStackTemplate().getEnvironmentCrn().equals(newOne.getStackTemplate().getEnvironmentCrn());
     }
 
     @Override
