@@ -272,7 +272,7 @@
             "configs": [
               {
                 "name": "hbase_bucketcache_ioengine",
-                "value": null
+                "value": ""
               }
             ]
           },
