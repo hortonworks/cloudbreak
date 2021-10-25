@@ -17,6 +17,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxContext;
@@ -27,6 +28,7 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartRequest;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairSuccessEvent;
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairWaitRequest;
+import com.sequenceiq.datalake.job.SdxClusterJobAdapter;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
 import com.sequenceiq.datalake.service.AbstractSdxAction;
@@ -50,6 +52,9 @@ public class SdxRepairActions {
 
     @Inject
     private SdxMetricService metricService;
+
+    @Inject
+    private StatusCheckerJobService jobService;
 
     @Bean(name = "SDX_REPAIR_START_STATE")
     public Action<?, ?> sdxRepairStarted() {
@@ -116,6 +121,7 @@ public class SdxRepairActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.SDX_REPAIR_FINISHED, "Repair finished, Datalake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_REPAIR_FINISHED, sdxCluster);
+                jobService.schedule(new SdxClusterJobAdapter(sdxCluster));
                 sendEvent(context, SDX_REPAIR_FINALIZED_EVENT.event(), payload);
             }
 

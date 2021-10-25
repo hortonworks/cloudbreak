@@ -27,6 +27,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -160,6 +161,7 @@ class StackStatusIntegrationTest {
         setUpStack();
         setUpClusterApi();
         when(environmentClientService.getByCrnAsInternal(anyString())).thenReturn(environment);
+        when(jobExecutionContext.getMergedJobDataMap()).thenReturn(new JobDataMap());
     }
 
     private void setUpRunningInstances() {

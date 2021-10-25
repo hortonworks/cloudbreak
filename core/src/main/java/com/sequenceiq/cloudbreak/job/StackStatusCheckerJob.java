@@ -123,10 +123,15 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 if (unschedulableStates().contains(stackStatus)) {
                     LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stackStatus);
                     jobService.unschedule(getLocalId());
+                } else if (shouldSwitchToLongSyncJob(stackStatus, context)) {
+                    LOGGER.debug("Stack sync will be scheduled to long polling, stack state is {}", stackStatus);
+                    jobService.unschedule(getLocalId());
+                    jobService.scheduleLongIntervalCheck(new StackJobAdapter(stack));
                 } else if (null == stackStatus || ignoredStates().contains(stackStatus)) {
                     LOGGER.debug("Stack sync is skipped, stack state is {}", stackStatus);
                 } else if (syncableStates().contains(stackStatus)) {
                     ThreadBasedUserCrnProvider.doAs(DATAHUB_INTERNAL_ACTOR_CRN, () -> doSync(stack));
+                    switchToShortSyncIfNecessary(context);
                 } else {
                     LOGGER.warn("Unhandled stack status, {}", stackStatus);
                 }
@@ -134,6 +139,28 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         } catch (Exception e) {
             LOGGER.info("Exception during cluster state check.", e);
         }
+    }
+
+    private void switchToShortSyncIfNecessary(JobExecutionContext context) {
+        if (isLongSyncJob(context)) {
+            Stack stack = stackService.get(getStackId());
+            Status stackStatus = stack.getStatus();
+            if (!longSyncableStates().contains(stackStatus)) {
+                jobService.schedule(new StackJobAdapter(stack));
+            }
+        }
+    }
+
+    private boolean shouldSwitchToLongSyncJob(Status stackStatus, JobExecutionContext context) {
+        return !isLongSyncJob(context) && longSyncableStates().contains(stackStatus);
+    }
+
+    private boolean isLongSyncJob(JobExecutionContext context) {
+        return StatusCheckerJobService.LONG_SYNC_JOB_TYPE.equals(context.getMergedJobDataMap().get(StatusCheckerJobService.SYNC_JOB_TYPE));
+    }
+
+    private Set<Status> longSyncableStates() {
+        return EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE);
     }
 
     @VisibleForTesting
@@ -144,7 +171,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.DELETE_IN_PROGRESS,
                 Status.DELETE_FAILED,
                 Status.DELETE_COMPLETED,
-                Status.DELETED_ON_PROVIDER_SIDE,
                 Status.EXTERNAL_DATABASE_CREATION_FAILED,
                 Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
                 Status.EXTERNAL_DATABASE_DELETION_FINISHED,
@@ -192,6 +218,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.BACKUP_FAILED,
                 Status.BACKUP_FINISHED,
                 Status.RESTORE_FINISHED,
+                Status.DELETED_ON_PROVIDER_SIDE,
                 Status.EXTERNAL_DATABASE_START_FAILED,
                 Status.EXTERNAL_DATABASE_START_IN_PROGRESS,
                 Status.EXTERNAL_DATABASE_START_FINISHED,
