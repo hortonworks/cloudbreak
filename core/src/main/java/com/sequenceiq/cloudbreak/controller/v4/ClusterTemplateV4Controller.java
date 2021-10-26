@@ -113,9 +113,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Blueprints fetched in {}ms");
         measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
-                LOGGER, "Cluster templates fetched in {}ms");
+                LOGGER, "Cluster definitions fetched in {}ms");
         Set<ClusterTemplateViewV4Response> result = measure(() -> clusterTemplateService.listInWorkspaceAndCleanUpInvalids(
-                threadLocalService.getRequestedWorkspaceId()), LOGGER, "cluster templates cleaned in {}ms");
+                threadLocalService.getRequestedWorkspaceId()), LOGGER, "cluster definitions cleaned in {}ms");
         return new ClusterTemplateViewV4Responses(result);
     }
 
@@ -125,7 +125,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
         measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Blueprints fetched in {}ms");
         measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
-                LOGGER, "Cluster templates fetched in {}ms");
+                LOGGER, "Cluster definitions fetched in {}ms");
         List<SdxClusterResponse> sdxClusters = sdxClientService.getByEnvironmentCrn(environmentCrn);
         Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
         Optional<String> runtimeVersion = sdxClusters.stream()

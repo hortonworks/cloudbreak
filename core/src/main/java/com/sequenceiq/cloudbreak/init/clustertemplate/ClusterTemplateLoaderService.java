@@ -43,9 +43,10 @@ public class ClusterTemplateLoaderService {
     public boolean isDefaultClusterTemplateUpdateNecessaryForUser(Collection<ClusterTemplate> clusterTemplates) {
         Map<String, String> defaultTemplates = defaultClusterTemplateCache.defaultClusterTemplateRequests();
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(clusterTemplates);
-        LOGGER.info("Merge default templates in db ({}) with cached templates {}", defaultTemplatesInDb.size(), defaultTemplates.size());
+        LOGGER.info("Merge default cluster definition in db ({}) with cached templates {}", defaultTemplatesInDb.size(), defaultTemplates.size());
         if (defaultTemplatesInDb.size() < defaultTemplates.size()) {
-            LOGGER.debug("Default templates in DB [{}] less than default templates size [{}]", defaultTemplatesInDb.size(), defaultTemplates.size());
+            LOGGER.debug("Default cluster definitions in DB [{}] less than default cluster definitions size [{}]", defaultTemplatesInDb.size(),
+                    defaultTemplates.size());
             return true;
         }
         if (!isAllDefaultTemplateExistsInDbByName(defaultTemplates, defaultTemplatesInDb)) {
@@ -87,10 +88,10 @@ public class ClusterTemplateLoaderService {
     public Set<ClusterTemplate> loadClusterTemplatesForWorkspace(Set<ClusterTemplate> templatesInDb, Workspace workspace,
             Function<Iterable<ClusterTemplate>, Collection<ClusterTemplate>> saveMethod) {
         Set<ClusterTemplate> clusterTemplatesToSave = collectClusterTemplatesToSaveInDb(templatesInDb, workspace);
-        LOGGER.debug("{} cluster templates in the db and {} cluster templates want to save", templatesInDb.size(), clusterTemplatesToSave.size());
+        LOGGER.debug("{} cluster definitions in the db and {} cluster definitions want to save", templatesInDb.size(), clusterTemplatesToSave.size());
         decorateWithCrn(clusterTemplatesToSave);
         Iterable<ClusterTemplate> savedClusterTemplates = measure(() -> saveMethod.apply(clusterTemplatesToSave), LOGGER,
-                "saved in {} ms {} cluster templates", clusterTemplatesToSave.size());
+                "saved in {} ms {} cluster definitions", clusterTemplatesToSave.size());
         return unifyTemplatesUpdatedAndUnmodified(templatesInDb, clusterTemplatesToSave, savedClusterTemplates);
     }
 
@@ -116,17 +117,17 @@ public class ClusterTemplateLoaderService {
 
     private Set<ClusterTemplate> collectClusterTemplatesToSaveInDb(Set<ClusterTemplate> templatesInDb, Workspace workspace) {
         Collection<String> defaultTemplateNames = measure(() -> defaultClusterTemplateCache.defaultClusterTemplateNames(), LOGGER,
-                "Default cluster templates fetched in {}ms");
+                "Default cluster definitions fetched in {}ms");
         List<ClusterTemplate> defaultTemplatesInDb = filterTemplatesForDefaults(templatesInDb);
         Collection<String> templateNamesMissingFromDb = collectTemplatesMissingFromDb(defaultTemplateNames, defaultTemplatesInDb);
         Collection<ClusterTemplate> updatedTemplates = collectOutdatedTemplatesInDb(defaultTemplatesInDb);
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Templates missing from DB: {}", templateNamesMissingFromDb);
+            LOGGER.debug("Cluster definitions missing from DB: {}", templateNamesMissingFromDb);
         }
         Set<Blueprint> blueprints = blueprintService.getAllAvailableInWorkspaceWithoutUpdate(workspace);
         Collection<ClusterTemplate> templatesMissingFromDb = measure(() ->
                         defaultClusterTemplateCache.defaultClusterTemplatesByNames(templateNamesMissingFromDb, blueprints), LOGGER,
-                "Missed cluster templates fetched in {}ms");
+                "Missed cluster definitions fetched in {}ms");
         return Stream.concat(templatesMissingFromDb.stream(), updatedTemplates.stream()).collect(Collectors.toSet());
     }
 

@@ -36,10 +36,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.Defaul
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -143,7 +143,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Override
     protected void prepareDeletion(ClusterTemplate resource) {
         if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
-            throw new AccessDeniedException("Default template deletion is forbidden");
+            throw new AccessDeniedException("Default cluster definition deletion is forbidden");
         }
     }
 
@@ -170,7 +170,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Override
     protected void prepareCreation(ClusterTemplate resource) {
 
-        measure(() -> validateBeforeCreate(resource), LOGGER, "Cluster template validated in {}ms");
+        measure(() -> validateBeforeCreate(resource), LOGGER, "Cluster definition validated in {}ms");
 
         if (resource.getStatus().isNonDefault()) {
             Stack stackTemplate = resource.getStackTemplate();
@@ -212,7 +212,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private void validateBeforeCreate(ClusterTemplate resource) {
 
         if (resource.getStackTemplate() == null && resource.getStatus() != ResourceStatus.DEFAULT) {
-            throw new BadRequestException("The stack template cannot be null.");
+            throw new BadRequestException("The Datahub template cannot be null.");
         }
 
         if (resource.getStatus() != ResourceStatus.DEFAULT && resource.getStackTemplate().getEnvironmentCrn() == null) {
@@ -220,8 +220,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         }
 
         if (resource.getStatus().isNonDefault() && clusterTemplateRepository.findByNameAndWorkspace(resource.getName(), resource.getWorkspace()).isPresent()) {
-            throw new DuplicateClusterTemplateException(
-                    format("clustertemplate already exists with name '%s' in workspace %s", resource.getName(), resource.getWorkspace().getName()));
+            throw new DuplicateClusterTemplateException(format("Cluster definition already exists with name '%s'", resource.getName()));
         }
 
         Optional<String> messageIfBlueprintIsInvalidInCluster = getMessageIfBlueprintIsInvalidInCluster(resource);
@@ -281,7 +280,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
 
     private Optional<String> getMessageIfBlueprintIsInvalidInCluster(ClusterTemplate clusterTemplate) {
         if (!clusterTemplate.getStatus().isDefault() && Objects.isNull(clusterTemplate.getStackTemplate().getCluster())) {
-            String msg = "Stack template in cluster definition should contain a – valid – cluster request!";
+            String msg = "Datahub template in cluster definition should contain a – valid – cluster request!";
             return Optional.of(msg);
         }
         String msg = null;
@@ -293,20 +292,20 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
                         .getCluster()
                         .getBlueprintName();
             } catch (IOException e) {
-                msg = "The cluster template in the cluster definition should be an existing one!";
+                msg = "The Datahub template in the cluster definition should be an existing one!";
             }
         } else {
             blueprintName = clusterTemplate.getStackTemplate().getCluster().getBlueprint().getName();
         }
         if (!nonNull(blueprintName)) {
-            msg = "Cluster definition should contain a cluster template!";
+            msg = "Cluster definition should contain a Datahub template!";
         } else if (clusterTemplate.getStatus().isNonDefault()) {
             String finalBlueprintName = blueprintName;
             boolean hasExistingBlueprint = blueprintService.getAllAvailableInWorkspace(clusterTemplate.getWorkspace())
                     .stream()
                     .anyMatch(blueprint -> blueprint.getName().equals(finalBlueprintName));
             if (!hasExistingBlueprint) {
-                msg = "The cluster template in the cluster definition should be exists!";
+                msg = "The Datahub template in the cluster definition must exist!";
             }
         }
         return Optional.ofNullable(msg);
@@ -341,15 +340,15 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     private void updateDefaultClusterTemplates(Workspace workspace) {
         Set<ClusterTemplate> clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
         if (clusterTemplateLoaderService.isDefaultClusterTemplateUpdateNecessaryForUser(clusterTemplates)) {
-            LOGGER.debug("Modifying clusterTemplates based on the defaults for the '{} ({})' workspace.", workspace.getName(), workspace.getId());
+            LOGGER.debug("Modifying clusterDefinitions based on the defaults for the '{} ({})' workspace.", workspace.getName(), workspace.getId());
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
-            LOGGER.debug("Outdated clusterTemplates collected: '{}'.", outdatedTemplates.size());
+            LOGGER.debug("Outdated clusterDefinitions collected: '{}'.", outdatedTemplates.size());
             delete(new HashSet<>(outdatedTemplates));
-            LOGGER.debug("Outdated clusterTemplates deleted: '{}'.", outdatedTemplates.size());
+            LOGGER.debug("Outdated clusterDefinitions deleted: '{}'.", outdatedTemplates.size());
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
-            LOGGER.debug("None deleted clusterTemplates collected: '{}'.", clusterTemplates.size());
+            LOGGER.debug("None deleted clusterDefinitions collected: '{}'.", clusterTemplates.size());
             clusterTemplateLoaderService.loadClusterTemplatesForWorkspace(clusterTemplates, workspace, this::createAll);
-            LOGGER.debug("ClusterTemplate modifications finished based on the defaults for '{}' workspace.", workspace.getId());
+            LOGGER.debug("ClusterDefinition modifications finished based on the defaults for '{}' workspace.", workspace.getId());
         }
     }
 
@@ -359,16 +358,16 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
                 .map(ct -> {
                     try {
                         return measure(() -> create(ct, ct.getWorkspace(), user),
-                                LOGGER, "Cluster template created in {}ms");
+                                LOGGER, "Cluster definition created in {}ms");
                     } catch (DuplicateClusterTemplateException duplicateClusterTemplateException) {
-                        LOGGER.info("Template was found, try to get it", duplicateClusterTemplateException);
+                        LOGGER.info("Cluster definition was found, try to get it", duplicateClusterTemplateException);
                         return getByNameForWorkspace(ct.getName(), ct.getWorkspace());
                     } catch (BadRequestException badRequestException) {
-                        LOGGER.info("Template save failed, but try to get it", badRequestException);
+                        LOGGER.info("Cluster definition save failed, but try to get it", badRequestException);
                         try {
                             return getByNameForWorkspace(ct.getName(), ct.getWorkspace());
                         } catch (NotFoundException notFoundException) {
-                            LOGGER.info("Template was not found", notFoundException);
+                            LOGGER.info("Cluster definition was not found", notFoundException);
                             throw notFoundException;
                         }
                     }
@@ -387,8 +386,7 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     public ClusterTemplate getByCrn(String crn, Long workspaceId) {
         Optional<ClusterTemplate> clusterTemplateOptional = clusterTemplateRepository.getByCrnForWorkspaceId(crn, workspaceId);
         if (clusterTemplateOptional.isEmpty()) {
-            throw new BadRequestException(
-                    format("cluster template does not exist with crn '%s' in workspace %s", crn, workspaceId));
+            throw new BadRequestException(format("Cluster definition does not exist with crn '%s'", crn));
         }
         return clusterTemplateOptional.get();
     }
