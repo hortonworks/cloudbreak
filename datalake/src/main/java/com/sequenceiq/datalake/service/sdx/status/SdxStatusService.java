@@ -36,6 +36,8 @@ public class SdxStatusService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxStatusService.class);
 
+    private static final String NOT_AVAILABLE = "N/A";
+
     @Inject
     private SdxClusterRepository sdxClusterRepository;
 
@@ -192,10 +194,14 @@ public class SdxStatusService {
     }
 
     public String getShortStatusMessage(StackStatusV4Response statusResponse) {
-        String stackStatus = statusResponse.getStatus() == null ? "N/A" : statusResponse.getStatus().name();
-        String stackStatusReason = statusResponse.getStatusReason() == null ? "N/A" : statusResponse.getStatusReason();
-        String clusterStatus = statusResponse.getClusterStatus() == null ? "N/A" : statusResponse.getClusterStatus().name();
-        String clusterStatusReason = statusResponse.getClusterStatusReason() == null ? "N/A" : statusResponse.getClusterStatusReason();
+        String stackStatus = statusResponse.getStatus() == null ? NOT_AVAILABLE : statusResponse.getStatus().name();
+        String stackStatusReason = statusResponse.getStatusReason() == null ? NOT_AVAILABLE : statusResponse.getStatusReason();
+        String clusterStatus = statusResponse.getClusterStatus() == null ? NOT_AVAILABLE : statusResponse.getClusterStatus().name();
+        String clusterStatusReason = statusResponse.getClusterStatusReason() == null ? NOT_AVAILABLE : statusResponse.getClusterStatusReason();
+        if (!stackStatusReason.equals(NOT_AVAILABLE) && stackStatusReason.equals(clusterStatusReason)) {
+            return String.format("Stack status: %s, cluster status: %s, reason: %s",
+                    stackStatus, clusterStatus, stackStatusReason);
+        }
         return String.format("Stack status: %s, reason: %s, cluster status: %s, reason: %s",
                 stackStatus, stackStatusReason, clusterStatus, clusterStatusReason);
     }

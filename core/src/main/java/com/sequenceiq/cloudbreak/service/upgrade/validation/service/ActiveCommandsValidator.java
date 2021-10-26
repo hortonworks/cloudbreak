@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade.validation.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,6 +15,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 
 @Component
 public class ActiveCommandsValidator implements ServiceUpgradeValidator {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ActiveCommandsValidator.class);
 
     @Inject
@@ -27,7 +27,7 @@ public class ActiveCommandsValidator implements ServiceUpgradeValidator {
         List<String> activeCommands = connector.clusterStatusService().getActiveCommandsList();
         if (CollectionUtils.isNotEmpty(activeCommands)) {
             throw new UpgradeValidationFailedException("There are active commands running on CM, upgrade is not possible. Active commands: "
-                    + activeCommands.stream().collect(Collectors.joining(",")));
+                    + String.join(",", activeCommands));
         }
     }
 }

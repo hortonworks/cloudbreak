@@ -13,8 +13,8 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckRequest;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckSuccess;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpddateCheckFailed;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckFailed;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -39,12 +39,12 @@ public class CloudProviderUpdateCheckHandler extends ExceptionCatcherEventHandle
         try {
             ac = connector.authentication().authenticate(request.getCloudContext(), request.getCloudCredential());
             connector.resources().checkUpdate(ac, request.getCloudStack(), request.getCloudResources());
-            response = new ClusterUpgradeUpdateCheckSuccess(request.getResourceId(), request.getCloudStack(), request.getCloudCredential(),
+            response = new ClusterUpgradeUpdateCheckFinishedEvent(request.getResourceId(), request.getCloudStack(), request.getCloudCredential(),
                     request.getCloudContext());
         } catch (Exception e) {
             String errorMessage = e.getMessage();
             LOGGER.error(errorMessage, e);
-            response = new ClusterUpgradeUpddateCheckFailed(request.getResourceId(), request.getCloudStack(), request.getCloudCredential(),
+            response = new ClusterUpgradeUpdateCheckFailed(request.getResourceId(), request.getCloudStack(), request.getCloudCredential(),
                     request.getCloudContext(), e);
         }
         LOGGER.debug("Cloud provider update check has finished");

@@ -32,11 +32,13 @@ import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeContext;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckSuccess;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeUpdateCheckFailedToClusterUpgradeValidationFailureEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckRequest;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFinalizeEvent;
@@ -64,6 +66,7 @@ import com.sequenceiq.flow.core.PayloadConverter;
 
 @Configuration
 public class ClusterUpgradeValidationActions {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeValidationActions.class);
 
     private static final String LOCK_COMPONENTS = "lockComponents";
@@ -149,7 +152,6 @@ public class ClusterUpgradeValidationActions {
             protected Object getFailurePayload(ClusterUpgradeValidationEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeDiskSpaceValidationFinishedEvent(payload.getResourceId());
             }
-
         };
     }
 
@@ -175,12 +177,30 @@ public class ClusterUpgradeValidationActions {
         };
     }
 
-    @Bean(name = "CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE")
-    public Action<?, ?> clusterUpgradeServiceValidation() {
-        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeUpdateCheckSuccess.class) {
+    @Bean(name = "CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeFreeIpaStatusValidation() {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeUpdateCheckFinishedEvent.class) {
 
             @Override
-            protected void doExecute(StackContext context, ClusterUpgradeUpdateCheckSuccess payload, Map<Object, Object> variables) {
+            protected void doExecute(StackContext context, ClusterUpgradeUpdateCheckFinishedEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Starting the validation if FreeIPA is reachable...");
+                ClusterUpgradeFreeIpaStatusValidationEvent event = new ClusterUpgradeFreeIpaStatusValidationEvent(payload.getResourceId());
+                sendEvent(context, event.selector(), event);
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterUpgradeUpdateCheckFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_UPGRADE_SERVICE_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeServiceValidation() {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeFreeIpaStatusValidationFinishedEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting to validate services.");
                 boolean lockComponents = (Boolean) variables.get(LOCK_COMPONENTS);
                 ClusterUpgradeServiceValidationEvent event = new ClusterUpgradeServiceValidationEvent(payload.getResourceId(), lockComponents);
@@ -188,10 +208,9 @@ public class ClusterUpgradeValidationActions {
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeUpdateCheckSuccess payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeFreeIpaStatusValidationFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeValidationFinishedEvent(payload.getResourceId(), ex);
             }
-
         };
     }
 
