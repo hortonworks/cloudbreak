@@ -92,7 +92,7 @@ class ClusterTemplateServiceCreationValidationTest {
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("Stack template in cluster definition should contain a – valid – cluster request!", e.getMessage());
+        Assert.assertEquals("Datahub template in cluster definition should contain a – valid – cluster request!", e.getMessage());
     }
 
     @Test
@@ -111,7 +111,7 @@ class ClusterTemplateServiceCreationValidationTest {
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("The cluster template in the cluster definition should be exists!", e.getMessage());
+        Assert.assertEquals("The Datahub template in the cluster definition must exist!", e.getMessage());
     }
 
     @Test
@@ -132,7 +132,7 @@ class ClusterTemplateServiceCreationValidationTest {
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
-        Assert.assertEquals("Cluster definition should contain a cluster template!", e.getMessage());
+        Assert.assertEquals("Cluster definition should contain a Datahub template!", e.getMessage());
     }
 
 }

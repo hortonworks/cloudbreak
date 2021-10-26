@@ -308,7 +308,8 @@ public class ClusterTemplateTest extends AbstractMockTest {
                 .given(ClusterTemplateTestDto.class)
                 .withName(resourcePropertyProvider().getName())
                 .when(clusterTemplateTestClient.createV4(), RunningParameter.key(generatedKey))
-                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class, expectedMessage("^clustertemplate already exists with name.*"))
+                .whenException(clusterTemplateTestClient.createV4(), BadRequestException.class,
+                        expectedMessage("^Cluster definition already exists with name.*"))
                 .validate();
     }
 
