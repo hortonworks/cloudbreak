@@ -23,10 +23,14 @@ public class FreeipaService {
     private FreeipaClientService freeipaClientService;
 
     public boolean freeipaStatusInDesiredState(Stack stack, Set<Status> desiredStatuses) {
+        return freeipaStatusInDesiredState(stack.getEnvironmentCrn(), desiredStatuses);
+    }
+
+    public boolean freeipaStatusInDesiredState(String envCrn, Set<Status> desiredStatuses) {
         boolean ret = false;
-        if (stack.getEnvironmentCrn() != null) {
+        if (envCrn != null) {
             try {
-                DescribeFreeIpaResponse freeIpaResponse = freeipaClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
+                DescribeFreeIpaResponse freeIpaResponse = freeipaClientService.getByEnvironmentCrn(envCrn);
                 ret = desiredStatuses.contains(freeIpaResponse.getStatus());
             } catch (CloudbreakServiceException e) {
                 if (e.getCause() instanceof NotFoundException) {

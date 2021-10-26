@@ -1,6 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config;
 
-import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpddateCheckFailed;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeUpdateCheckFailed;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.flow.core.PayloadConverter;
 
@@ -8,12 +8,12 @@ public class ClusterUpgradeUpdateCheckFailedToClusterUpgradeValidationFailureEve
         implements PayloadConverter<ClusterUpgradeValidationFailureEvent> {
     @Override
     public boolean canConvert(Class<?> sourceClass) {
-        return ClusterUpgradeUpddateCheckFailed.class.isAssignableFrom(sourceClass);
+        return ClusterUpgradeUpdateCheckFailed.class.isAssignableFrom(sourceClass);
     }
 
     @Override
     public ClusterUpgradeValidationFailureEvent convert(Object payload) {
-        ClusterUpgradeUpddateCheckFailed sourcePayload = (ClusterUpgradeUpddateCheckFailed) payload;
+        ClusterUpgradeUpdateCheckFailed sourcePayload = (ClusterUpgradeUpdateCheckFailed) payload;
         return new ClusterUpgradeValidationFailureEvent(sourcePayload.getResourceId(), (Exception) sourcePayload.getError());
     }
 }

@@ -24,5 +24,5 @@ public interface FreeIpaApiEndpoint {
 
     OperationV1Endpoint getOperationV1Endpoint();
 
-    ProgressV1Endpoint getProgrsessV1Endpoint();
+    ProgressV1Endpoint getProgressV1Endpoint();
 }
