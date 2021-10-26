@@ -46,6 +46,7 @@ altus:
     host: localhost
   ums:
     host: localhost
+    caller: environment
   audit:
     enabled: true
     endpoint: localhost:8982

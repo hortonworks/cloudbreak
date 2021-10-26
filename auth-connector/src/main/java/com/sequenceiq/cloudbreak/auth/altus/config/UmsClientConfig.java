@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.auth.altus.config;
 
+import static org.glassfish.jersey.internal.guava.Preconditions.checkArgument;
+import static org.glassfish.jersey.internal.guava.Preconditions.checkNotNull;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,6 +28,15 @@ public class UmsClientConfig {
     @Value("${altus.ums.client.list_service_principal_cloud_identities_page_size:100}")
     private int listServicePrincipalCloudIdentitiesPageSize;
 
+    @Value("${altus.ums.caller:cloudbreak}")
+    private String callingServiceName;
+
+    @PostConstruct
+    public void init() {
+        checkNotNull(callingServiceName, "callingServiceName must not be null.");
+        checkArgument(!callingServiceName.isBlank(), "callingServiceName must not be blank.");
+    }
+
     public int getListGroupsPageSize() {
         return listGroupsPageSize;
     }
@@ -45,5 +59,9 @@ public class UmsClientConfig {
 
     public int getListServicePrincipalCloudIdentitiesPageSize() {
         return listServicePrincipalCloudIdentitiesPageSize;
+    }
+
+    public String getCallingServiceName() {
+        return callingServiceName;
     }
 }

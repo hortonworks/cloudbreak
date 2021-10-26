@@ -133,6 +133,7 @@ info:
 altus:
   ums:
     host: localhost
+    caller: freeipa
   audit:
     enabled: true
     endpoint: localhost:8982

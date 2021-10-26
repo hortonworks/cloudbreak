@@ -114,6 +114,7 @@ vault:
 altus:
   ums:
     host: localhost
+    caller: periscope
   audit:
     enabled: true
     endpoint: localhost:8982

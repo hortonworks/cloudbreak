@@ -9,7 +9,9 @@ import org.springframework.util.StringUtils;
 
 import com.cloudera.thunderhead.service.authorization.AuthorizationGrpc;
 import com.cloudera.thunderhead.service.authorization.AuthorizationProto;
+import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
@@ -25,14 +27,17 @@ public class AuthorizationClient {
 
     private final Tracer tracer;
 
+    private final UmsClientConfig umsClientConfig;
+
     /**
      * Constructor.
      *
      * @param channel  the managed channel.
      * @param tracer   tracer
      */
-    AuthorizationClient(ManagedChannel channel, Tracer tracer) {
+    AuthorizationClient(ManagedChannel channel, UmsClientConfig umsClientConfig, Tracer tracer) {
         this.channel = checkNotNull(channel, "channel should not be null.");
+        this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
         this.tracer = tracer;
     }
 
@@ -75,7 +80,8 @@ public class AuthorizationClient {
         checkNotNull(requestId, "requestId should not be null.");
         return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTracingInterceptor(tracer),
-                new AltusMetadataInterceptor(requestId, INTERNAL_ACTOR_CRN)
+                new AltusMetadataInterceptor(requestId, INTERNAL_ACTOR_CRN),
+                new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())
         );
     }
 }
