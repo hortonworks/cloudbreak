@@ -86,7 +86,7 @@ public class InstanceGroupV1ToInstanceGroupV4Converter {
         response.setNodeCount(source.getNodeCount());
         response.setType(source.getType());
         response.setName(source.getName());
-        response.setTemplate(getIfNotNull(source.getTemplate(), instanceTemplateConverter::convert));
+        response.setTemplate(getIfNotNull(source.getTemplate(), environment, instanceTemplateConverter::convert));
         response.setRecoveryMode(source.getRecoveryMode());
         response.setRecipeNames(source.getRecipeNames());
         response.setScalabilityOption(source.getScalabilityOption());

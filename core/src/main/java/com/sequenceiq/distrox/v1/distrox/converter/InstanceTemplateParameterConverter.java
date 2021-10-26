@@ -26,6 +26,8 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsPla
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AzureInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.GcpInstanceTemplateV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.YarnInstanceTemplateV1Parameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
@@ -36,9 +38,9 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 public class InstanceTemplateParameterConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceTemplateParameterConverter.class);
 
-    public AwsInstanceTemplateV4Parameters convert(AwsInstanceTemplateV1Parameters source) {
+    public AwsInstanceTemplateV4Parameters convert(AwsInstanceTemplateV1Parameters source, DetailedEnvironmentResponse environment) {
         AwsInstanceTemplateV4Parameters response = new AwsInstanceTemplateV4Parameters();
-        response.setEncryption(getIfNotNull(source.getEncryption(), this::convert));
+        response.setEncryption(getIfNotNull(source.getEncryption(), environment, this::convert));
         response.setSpot(getIfNotNull(source.getSpot(), this::convert));
         response.setPlacementGroup(getIfNotNull(source.getPlacementGroup(), this::convert));
         return response;
@@ -51,10 +53,26 @@ public class InstanceTemplateParameterConverter {
         return target;
     }
 
-    private AwsEncryptionV4Parameters convert(AwsEncryptionV1Parameters source) {
+    private AwsEncryptionV4Parameters convert(AwsEncryptionV1Parameters source, DetailedEnvironmentResponse environment) {
         AwsEncryptionV4Parameters response = new AwsEncryptionV4Parameters();
-        response.setKey(source.getKey());
-        response.setType(source.getType());
+        EncryptionType dataHubEncryptionKeyType = source.getType();
+        if (dataHubEncryptionKeyType.equals(EncryptionType.CUSTOM)) {
+            response.setKey(source.getKey());
+            response.setType(source.getType());
+        } else {
+            String environmentEncryptionKeyArn = Optional.ofNullable(environment)
+                    .map(DetailedEnvironmentResponse::getAws)
+                    .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
+                    .map(AwsDiskEncryptionParameters::getEncryptionKeyArn)
+                    .orElse(null);
+            if (environmentEncryptionKeyArn != null && !environmentEncryptionKeyArn.isEmpty()) {
+                response.setKey(environmentEncryptionKeyArn);
+                response.setType(EncryptionType.CUSTOM);
+            } else {
+                response.setKey(source.getKey());
+                response.setType(source.getType());
+            }
+        }
         return response;
     }
 
@@ -125,15 +143,15 @@ public class InstanceTemplateParameterConverter {
         return response;
     }
 
-    public AwsInstanceTemplateV1Parameters convert(AwsInstanceTemplateV4Parameters source) {
+    public AwsInstanceTemplateV1Parameters convert(AwsInstanceTemplateV4Parameters source, DetailedEnvironmentResponse environment) {
         AwsInstanceTemplateV1Parameters response = new AwsInstanceTemplateV1Parameters();
-        response.setEncryption(getIfNotNull(source.getEncryption(), this::convert));
+        response.setEncryption(getIfNotNull(source.getEncryption(), environment, this::convert));
         response.setSpot(getIfNotNull(source.getSpot(), this::convert));
         response.setPlacementGroup(getIfNotNull(source.getPlacementGroup(), this::convert));
         return response;
     }
 
-    private AwsEncryptionV1Parameters convert(AwsEncryptionV4Parameters source) {
+    private AwsEncryptionV1Parameters convert(AwsEncryptionV4Parameters source, DetailedEnvironmentResponse environment) {
         AwsEncryptionV1Parameters response = new AwsEncryptionV1Parameters();
         response.setKey(source.getKey());
         response.setType(source.getType());

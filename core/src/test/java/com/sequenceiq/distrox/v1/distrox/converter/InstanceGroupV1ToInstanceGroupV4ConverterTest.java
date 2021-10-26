@@ -190,10 +190,11 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     @Test
     void convertFromAwsWithoutSecurityGroupsHappyPathTest() {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V4_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V1_PARAMETERS);
-        when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class))).thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
+        when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class), any())).
+                thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(InstanceGroupType.CORE);
-
-        Set<InstanceGroupV1Request> results = underTest.convertFrom(null, instanceGroups, null);
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        Set<InstanceGroupV1Request> results = underTest.convertFrom(null, instanceGroups, environment);
 
         assertThat(results).hasSameSizeAs(instanceGroups);
         InstanceGroupV1Request first = results.iterator().next();
@@ -225,8 +226,6 @@ class InstanceGroupV1ToInstanceGroupV4ConverterTest {
     @MethodSource("securityAccessDataProviderForConvertFrom")
     void createSecurityGroupFromEnvironmentTestForConvertFrom(String testCaseName, InstanceGroupType instanceGroupType) {
         when(instanceGroupParameterConverter.convert(AWS_INSTANCE_GROUP_V4_PARAMETERS)).thenReturn(AWS_INSTANCE_GROUP_V1_PARAMETERS);
-        when(instanceTemplateConverter.convert(any(InstanceTemplateV4Request.class))).thenReturn(INSTANCE_TEMPLATE_V1_REQUEST);
-
         List<InstanceGroupV4Request> instanceGroups = prepareInstanceGroupV4Requests(instanceGroupType);
 
         Set<InstanceGroupV1Request> results = underTest.convertFrom(null, instanceGroups, null);
