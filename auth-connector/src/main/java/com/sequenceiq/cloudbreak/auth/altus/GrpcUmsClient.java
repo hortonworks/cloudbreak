@@ -588,7 +588,7 @@ public class GrpcUmsClient {
             return resourceCrns.stream().map(r -> true).collect(Collectors.toList());
         }
         LOGGER.debug("Check if {} has rights on resources {}", memberCrn, resourceCrns);
-        PersonalResourceViewClient client = new PersonalResourceViewClient(channelWrapper.getChannel(), memberCrn, tracer);
+        PersonalResourceViewClient client = new PersonalResourceViewClient(channelWrapper.getChannel(), memberCrn, umsClientConfig, tracer);
         List<Boolean> retVal = client.hasRightOnResources(RequestIdUtil.getOrGenerate(requestId), memberCrn, right, resourceCrns);
         LOGGER.info("member {} has rights {}", memberCrn, retVal);
         return retVal;
@@ -761,7 +761,7 @@ public class GrpcUmsClient {
 
     @VisibleForTesting
     AuthorizationClient makeAuthorizationClient() {
-        return new AuthorizationClient(channelWrapper.getChannel(), tracer);
+        return new AuthorizationClient(channelWrapper.getChannel(), umsClientConfig, tracer);
     }
 
     /**

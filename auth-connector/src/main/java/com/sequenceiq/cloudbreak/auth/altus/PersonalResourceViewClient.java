@@ -6,7 +6,9 @@ import java.util.List;
 
 import com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewGrpc;
 import com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto;
+import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
+import com.sequenceiq.cloudbreak.grpc.altus.CallingServiceNameInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
 import io.grpc.ManagedChannel;
@@ -22,6 +24,8 @@ public class PersonalResourceViewClient {
 
     private final String actorCrn;
 
+    private final UmsClientConfig umsClientConfig;
+
     private final Tracer tracer;
 
     /**
@@ -31,9 +35,10 @@ public class PersonalResourceViewClient {
      * @param actorCrn the actor CRN.
      * @param tracer   tracer
      */
-    PersonalResourceViewClient(ManagedChannel channel, String actorCrn, Tracer tracer) {
+    PersonalResourceViewClient(ManagedChannel channel, String actorCrn, UmsClientConfig umsClientConfig, Tracer tracer) {
         this.channel = checkNotNull(channel, "channel should not be null.");
         this.actorCrn = checkNotNull(actorCrn, "actorCrn should not be null.");
+        this.umsClientConfig = checkNotNull(umsClientConfig, "umsClientConfig should not be null.");
         this.tracer = tracer;
     }
 
@@ -62,7 +67,8 @@ public class PersonalResourceViewClient {
         checkNotNull(requestId, "requestId should not be null.");
         return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(
                 GrpcUtil.getTracingInterceptor(tracer),
-                new AltusMetadataInterceptor(requestId, actorCrn)
+                new AltusMetadataInterceptor(requestId, actorCrn),
+                new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())
         );
     }
 }

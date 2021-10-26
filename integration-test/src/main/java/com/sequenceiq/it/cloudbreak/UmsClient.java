@@ -1,7 +1,10 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.lang.reflect.Field;
 import java.util.Map;
 import java.util.Set;
+
+import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsChannelConfig;
@@ -55,6 +58,9 @@ public class UmsClient extends MicroserviceClient<GrpcUmsClient, Void> {
     public static synchronized UmsClient createProxyUmsClient(Tracer tracer, String umsHost) {
         UmsClient clientEntity = new UmsClient();
         UmsClientConfig clientConfig = new UmsClientConfig();
+        Field callingServiceName = ReflectionUtils.findField(UmsClientConfig.class, "callingServiceName");
+        ReflectionUtils.makeAccessible(callingServiceName);
+        ReflectionUtils.setField(callingServiceName, clientConfig, "cloudbreak");
         clientEntity.umsClient = GrpcUmsClient.createClient(
                 UmsChannelConfig.newManagedChannelWrapper(umsHost, 8982), clientConfig, tracer);
         return clientEntity;

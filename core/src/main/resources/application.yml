@@ -101,6 +101,8 @@ altus:
   audit:
     enabled: true
     endpoint: localhost:8982
+  ums:
+    caller: cloudbreak
 
 cb:
   enabledplatforms: AZURE,AWS,GCP
