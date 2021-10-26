@@ -90,7 +90,7 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         InstanceTemplateV4Request source = new InstanceTemplateV4Request();
         source.setInstanceType(INSTANCE_TYPE);
 
-        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source);
+        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment);
 
         assertThat(instanceTemplateV1Request).isNotNull();
         assertThat(instanceTemplateV1Request.getRootVolume()).isNull();
@@ -114,7 +114,7 @@ class InstanceTemplateV1ToInstanceTemplateV4ConverterTest {
         AzureInstanceTemplateV1Parameters azureInstanceTemplateV1Parameters = new AzureInstanceTemplateV1Parameters();
         when(instanceTemplateParameterConverter.convert(azureInstanceTemplateV4Parameters)).thenReturn(azureInstanceTemplateV1Parameters);
 
-        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source);
+        InstanceTemplateV1Request instanceTemplateV1Request = underTest.convert(source, environment);
 
         assertThat(instanceTemplateV1Request).isNotNull();
         assertThat(instanceTemplateV1Request.getRootVolume()).isSameAs(rootVolumeV1Request);

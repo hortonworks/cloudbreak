@@ -28,7 +28,7 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         response.setRootVolume(getIfNotNull(source.getRootVolume(), volumeConverter::convert));
         response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertTo));
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
-        response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
+        response.setAws(getIfNotNull(source.getAws(), environment, instanceTemplateParameterConverter::convert));
         AzureInstanceTemplateV1Parameters azureParametersEffective = Objects.requireNonNullElse(source.getAzure(),
                 new AzureInstanceTemplateV1Parameters());
         response.setAzure(instanceTemplateParameterConverter.convert(azureParametersEffective, environment));
@@ -42,12 +42,12 @@ public class InstanceTemplateV1ToInstanceTemplateV4Converter {
         return response;
     }
 
-    public InstanceTemplateV1Request convert(InstanceTemplateV4Request source) {
+    public InstanceTemplateV1Request convert(InstanceTemplateV4Request source, DetailedEnvironmentResponse environment) {
         InstanceTemplateV1Request response = new InstanceTemplateV1Request();
         response.setRootVolume(getIfNotNull(source.getRootVolume(), volumeConverter::convert));
         response.setAttachedVolumes(getIfNotNull(source.getAttachedVolumes(), volumeConverter::convertFrom));
         response.setEphemeralVolume(getIfNotNull(source.getEphemeralVolume(), volumeConverter::convert));
-        response.setAws(getIfNotNull(source.getAws(), instanceTemplateParameterConverter::convert));
+        response.setAws(getIfNotNull(source.getAws(), environment, instanceTemplateParameterConverter::convert));
         response.setAzure(getIfNotNull(source.getAzure(), instanceTemplateParameterConverter::convert));
         response.setGcp(getIfNotNull(source.getGcp(), instanceTemplateParameterConverter::convert));
         response.setYarn(getIfNotNull(source.getYarn(), instanceTemplateParameterConverter::convert));
