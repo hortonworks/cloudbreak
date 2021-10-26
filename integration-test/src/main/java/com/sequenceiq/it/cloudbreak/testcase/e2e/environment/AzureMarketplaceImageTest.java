@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.config.azure.AzureMarketplaceImagePro
 
 import javax.inject.Inject;
 
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -24,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
+@Ignore("This test case should be re-enabled when azure marketplace images are recovered")
 public class AzureMarketplaceImageTest extends AbstractE2ETest {
 
     @Inject
