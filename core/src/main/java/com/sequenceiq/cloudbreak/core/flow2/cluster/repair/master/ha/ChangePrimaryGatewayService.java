@@ -98,7 +98,7 @@ public class ChangePrimaryGatewayService {
                 cluster.setClusterManagerIp(gatewayIp);
                 LOGGER.info("Primary gateway IP has been updated to: '{}'", gatewayIp);
                 clusterService.save(cluster);
-                clusterPublicEndpointManagementService.changeGateway(updatedStack, gatewayIp);
+                clusterPublicEndpointManagementService.changeGateway(updatedStack);
                 return null;
             });
         } else {
