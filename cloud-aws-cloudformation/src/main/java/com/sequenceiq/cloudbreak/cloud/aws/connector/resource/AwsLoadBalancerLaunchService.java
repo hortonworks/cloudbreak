@@ -48,6 +48,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.common.api.type.CommonStatus;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @Service
 public class AwsLoadBalancerLaunchService {
@@ -86,7 +87,8 @@ public class AwsLoadBalancerLaunchService {
         List<CloudLoadBalancer> cloudLoadBalancers = stack.getLoadBalancers();
         String cFStackName = cfStackUtil.getCfStackName(ac);
         if (!cloudLoadBalancers.isEmpty()) {
-            LOGGER.debug("Creating load balancers of types " + cloudLoadBalancers.stream().map(CloudLoadBalancer::getType));
+            LOGGER.debug("Creating load balancers of types " + cloudLoadBalancers.stream().map(CloudLoadBalancer::getType)
+                    .map(LoadBalancerType::name).collect(Collectors.joining(",")));
 
             AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
             String regionName = ac.getCloudContext().getLocation().getRegion().value();
