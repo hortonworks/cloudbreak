@@ -14,6 +14,20 @@ yum_cleanup_all_before_cm_agent_install:
   cmd.run:
     - name: yum clean all
 
+/opt/salt/scripts/check_cmagent_repo_url.sh:
+  file.managed:
+    - makedirs: True
+    - source: salt://cloudera/scripts/check_cm_repo_url.sh.j2
+    - template: jinja
+    - mode: 700
+
+check_cmagent_repo_url:
+  cmd.run:
+    - name: /opt/salt/scripts/check_cmagent_repo_url.sh 2>&1 | tee -a /var/log/check_cmagent_repo_url.log && exit ${PIPESTATUS[0]}
+    - failhard: True
+    - require:
+      - file: /opt/salt/scripts/check_cmagent_repo_url.sh
+
 {% endif %}
 
 # .dont_delete files are created as part of the image burning process

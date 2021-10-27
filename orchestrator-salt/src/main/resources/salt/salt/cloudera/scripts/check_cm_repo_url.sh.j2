@@ -1,0 +1,21 @@
+#!/bin/bash
+
+set -e
+
+{%- if salt['pillar.get']('cloudera-manager:paywall_username') %}
+AUTHENTICATION="-u {{ salt['pillar.get']('cloudera-manager:paywall_username') }}:{{ salt['pillar.get']('cloudera-manager:paywall_password') }}"
+{%- endif %}
+
+{% if pillar['proxy'] is defined and pillar['proxy']['host'] is defined and pillar['proxy']['port'] is defined and pillar['proxy']['protocol'] is defined %}
+
+PROXY="-x {{ pillar['proxy']['protocol'] }}://{{ pillar['proxy']['host'] }}:{{ pillar['proxy']['port'] }}"
+
+{% if 'user' in pillar['proxy'] %}
+PROXY_AUTH="-U {{ pillar['proxy']['user'] }}:{{ pillar['proxy']['password'] }}"
+{% endif %}
+
+{% endif %}
+
+REPO_URL="{{ salt['pillar.get']('cloudera-manager:repo:baseUrl') }}"
+
+curl -IL --fail $AUTHENTICATION $PROXY $PROXY_AUTH $REPO_URL
