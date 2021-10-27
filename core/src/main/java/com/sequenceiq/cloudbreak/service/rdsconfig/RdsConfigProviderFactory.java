@@ -14,7 +14,7 @@ public class RdsConfigProviderFactory {
     @Inject
     private Set<AbstractRdsConfigProvider> rdsConfigProviders;
 
-    private AbstractRdsConfigProvider getRdsConfigProviderForRdsType(DatabaseType type) {
+    public AbstractRdsConfigProvider getRdsConfigProviderForRdsType(DatabaseType type) {
         return rdsConfigProviders.stream().filter(rdsConfigProvider -> rdsConfigProvider.getRdsType() == type).findFirst()
                 .orElseThrow(() -> new UnsupportedOperationException(type.name() + " RdsConfigProvider is not supported!"));
     }

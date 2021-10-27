@@ -65,6 +65,10 @@ public interface ClusterApi {
         clusterModificationService().upgradeClusterRuntime(components, patchUpgrade, remoteDataContext);
     }
 
+    default void updateServiceConfig(String serviceType, Map<String, String> config) throws CloudbreakException {
+        clusterModificationService().updateServiceConfig(serviceType, config);
+    }
+
     default void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
         clusterModificationService().stopCluster(disableKnoxAutorestart);
     }

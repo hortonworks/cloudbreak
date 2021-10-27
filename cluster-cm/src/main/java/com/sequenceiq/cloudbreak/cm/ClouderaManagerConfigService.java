@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 
+import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -27,6 +29,7 @@ import com.cloudera.api.swagger.model.ApiVersionInfo;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
 public class ClouderaManagerConfigService {
@@ -107,24 +110,30 @@ public class ClouderaManagerConfigService {
         }
     }
 
-    public void modifyServiceConfigValue(ApiClient client, String clusterName, String serviceType, String configName, String newConfigValue) {
+    public void modifyServiceConfig(ApiClient client, String clusterName, String serviceType, Map<String, String> config) throws CloudbreakException {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-        LOGGER.info("Trying to modify {} {} to {}", serviceType, configName, newConfigValue);
+        LOGGER.info("Trying to modify config: {} for service {}", Arrays.asList(config), serviceType);
         getServiceName(clusterName, serviceType, servicesResourceApi)
                 .ifPresentOrElse(
-                        modifyServiceConfigValue(clusterName, servicesResourceApi, configName, newConfigValue),
-                        () -> LOGGER.info("{} service name is missing, skip modifying the {} property.", serviceType, configName));
+                        modifyServiceConfig(clusterName, servicesResourceApi, config),
+                        () -> {
+                            LOGGER.info("{} service name is missing, skip modification.", serviceType);
+                            throw new ClouderaManagerOperationFailedException(String.format("Service of type: %s is not found", serviceType));
+                        });
     }
 
-    private Consumer<String> modifyServiceConfigValue(String clusterName, ServicesResourceApi servicesResourceApi, String configName,
-            String newConfigValue) {
+    private Consumer<String> modifyServiceConfig(String clusterName, ServicesResourceApi servicesResourceApi, Map<String, String> config)
+            throws CloudbreakException  {
+        ApiServiceConfig apiServiceConfig = new ApiServiceConfig();
         return serviceName -> {
-            ApiConfig autorestartConfig = new ApiConfig().name(configName).value(newConfigValue);
-            ApiServiceConfig serviceConfig = new ApiServiceConfig().addItemsItem(autorestartConfig);
+            config.forEach((key, value) -> {
+                apiServiceConfig.addItemsItem(new ApiConfig().name(key).value(value));
+            });
             try {
-                servicesResourceApi.updateServiceConfig(clusterName, serviceName, "", serviceConfig);
+                servicesResourceApi.updateServiceConfig(clusterName, serviceName, "", apiServiceConfig);
             } catch (ApiException e) {
-                LOGGER.debug(String.format("Failed to set config %s to %s in service %s", configName, newConfigValue, serviceName), e);
+                LOGGER.error("Failed to set configs {} for service {}", Arrays.asList(config), serviceName, e);
+                throw new ClouderaManagerOperationFailedException(e.getMessage(), e);
             }
         };
     }
