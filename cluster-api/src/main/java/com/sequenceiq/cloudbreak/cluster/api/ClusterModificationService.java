@@ -39,6 +39,8 @@ public interface ClusterModificationService {
 
     void updateServiceConfigAndRestartService(String serviceName, String configName, String newConfigValue) throws Exception;
 
+    void updateServiceConfig(String serviceName, Map<String, String> config) throws CloudbreakException;
+
     void downloadAndDistributeParcels(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException;
 
     Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName);

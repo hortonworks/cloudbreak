@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
@@ -14,10 +13,14 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.junit.Assert;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -130,7 +133,7 @@ public class ClouderaManagerConfigServiceTest {
     }
 
     @Test
-    public void testModifyServiceConfigValue() throws ApiException {
+    public void testModifyServiceConfigValue() throws Exception {
         String hueType = "HUE";
         String hueName = "hue-1";
         String configName = "config_setting";
@@ -141,7 +144,7 @@ public class ClouderaManagerConfigServiceTest {
         when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
 
-        underTest.modifyServiceConfigValue(new ApiClient(), TEST_CLUSTER_NAME, hueType, configName, configValue);
+        underTest.modifyServiceConfig(new ApiClient(), TEST_CLUSTER_NAME, hueType, Collections.singletonMap(configName, configValue));
 
         ArgumentCaptor<ApiServiceConfig> apiServiceConfigArgumentCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
         verify(serviceResourceApi, times(1))
@@ -155,7 +158,41 @@ public class ClouderaManagerConfigServiceTest {
     }
 
     @Test
-    public void testModifyServiceConfigValueServiceMissing() throws ApiException {
+    public void testModifyServiceConfigs() throws Exception {
+        String hueType = "HUE";
+        String hueName = "hue-1";
+        String configName1 = "config_setting1";
+        String configValue1 = "new-config-value1";
+        String configName2 = "config_setting2";
+        String configValue2 = "new-config-value3";
+        ServicesResourceApi serviceResourceApi = mock(ServicesResourceApi.class);
+        ApiServiceList apiServiceList = new ApiServiceList().addItemsItem(new ApiService().name(hueName).type(hueType));
+
+        when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
+        when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
+        Map<String, String> configs = new HashMap<>();
+        configs.put(configName1, configValue1);
+        configs.put(configName2, configValue2);
+
+        underTest.modifyServiceConfig(new ApiClient(), TEST_CLUSTER_NAME, hueType, configs);
+
+        ArgumentCaptor<ApiServiceConfig> apiServiceConfigArgumentCaptor = ArgumentCaptor.forClass(ApiServiceConfig.class);
+        verify(serviceResourceApi, times(1))
+                .updateServiceConfig(eq(TEST_CLUSTER_NAME), eq(hueName), eq(""), apiServiceConfigArgumentCaptor.capture());
+
+        ApiServiceConfig actualBody = apiServiceConfigArgumentCaptor.getValue();
+        assertFalse(actualBody.getItems().isEmpty());
+        assertEquals(2, actualBody.getItems().size());
+        ApiConfig actualApiConfig = actualBody.getItems().get(0);
+        assertEquals(configName1, actualApiConfig.getName());
+        assertEquals(configValue1, actualApiConfig.getValue());
+        actualApiConfig = actualBody.getItems().get(1);
+        assertEquals(configName2, actualApiConfig.getName());
+        assertEquals(configValue2, actualApiConfig.getValue());
+    }
+
+    @Test
+    public void testModifyServiceConfigValueServiceMissing() throws Exception {
         String hueType = "HUE";
         String configName = "config_setting";
         String configValue = "new-config-value";
@@ -165,9 +202,10 @@ public class ClouderaManagerConfigServiceTest {
         when(serviceResourceApi.readServices(TEST_CLUSTER_NAME, DataView.SUMMARY.name())).thenReturn(apiServiceList);
         when(clouderaManagerApiFactory.getServicesResourceApi(any())).thenReturn(serviceResourceApi);
 
-        underTest.modifyServiceConfigValue(new ApiClient(), TEST_CLUSTER_NAME, hueType, configName, configValue);
-
-        verify(serviceResourceApi, never()).updateServiceConfig(any(), any(), any(), any());
+        Exception exception = Assertions.assertThrows(
+                ClouderaManagerOperationFailedException.class, ()
+                        -> underTest.modifyServiceConfig(new ApiClient(), TEST_CLUSTER_NAME, hueType, Collections.singletonMap(configName, configValue)));
+        Assert.assertEquals("Service of type: HUE is not found", exception.getMessage());
     }
 
     @Test

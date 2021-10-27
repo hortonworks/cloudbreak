@@ -14,6 +14,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -58,6 +59,11 @@ public class PostgresConfigService {
         if (!postgresConfig.isEmpty()) {
             servicePillar.put(POSTGRESQL_SERVER, new SaltPillarProperties("/postgresql/postgre.sls", singletonMap("postgres", postgresConfig)));
         }
+    }
+
+    public Set<RDSConfig> createRdsConfigIfNeeded(Stack stack, Cluster cluster, DatabaseType databaseType) {
+        return rdsConfigProviderFactory.getRdsConfigProviderForRdsType(databaseType)
+                .createPostgresRdsConfigIfNeeded(stack, cluster);
     }
 
     public Set<RDSConfig> createRdsConfigIfNeeded(Stack stack, Cluster cluster) {

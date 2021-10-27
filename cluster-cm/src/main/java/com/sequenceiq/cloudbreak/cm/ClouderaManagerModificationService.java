@@ -866,9 +866,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @Override
     public void updateServiceConfigAndRestartService(String serviceType, String configName, String newConfigValue) throws Exception {
-        configService.modifyServiceConfigValue(apiClient, stack.getName(), serviceType, configName, newConfigValue);
+        configService.modifyServiceConfig(apiClient, stack.getName(), serviceType, Collections.singletonMap(configName, newConfigValue));
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
         restartStaleServices(clustersResourceApi, false);
+    }
+
+    @Override
+    public void updateServiceConfig(String serviceName, Map<String, String> config) throws CloudbreakException {
+        configService.modifyServiceConfig(apiClient, stack.getName(), serviceName, config);
     }
 
     @Override
