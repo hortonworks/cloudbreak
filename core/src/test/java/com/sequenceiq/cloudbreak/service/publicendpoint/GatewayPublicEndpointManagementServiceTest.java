@@ -150,23 +150,12 @@ class GatewayPublicEndpointManagementServiceTest {
                 .thenReturn(null)
                 .thenReturn(environment);
 
-        String accountWorkloadSubdomain = "aWorkloadSubdomain";
-        UserManagementProto.Account umsAccount = UserManagementProto.Account.newBuilder()
-                .setWorkloadSubdomain(accountWorkloadSubdomain)
-                .build();
-        when(grpcUmsClient.getAccountDetails(eq("123"), any())).thenReturn(umsAccount);
-
-        String endpointName = stack.getPrimaryGatewayInstance().getShortHostname();
-        String fqdn = endpointName + ".anenvname.xcu2-8y8x.dev.cldr.work";
-        when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, envName, accountWorkloadSubdomain)).thenReturn(fqdn);
-        when(dnsManagementService.createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
-
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
 
-        verify(environmentClientService, times(2)).getByCrn(anyString());
-        verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(),
+        verify(environmentClientService, times(1)).getByCrn(anyString());
+        verify(dnsManagementService, times(0)).createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(),
                 anyBoolean(), any());
-        verify(clusterService, times(1)).save(cluster);
+        verify(clusterService, times(0)).save(cluster);
         Mockito.verifyNoMoreInteractions(environmentClientService);
         Mockito.verifyNoMoreInteractions(domainNameProvider);
         Mockito.verifyNoMoreInteractions(dnsManagementService);
@@ -274,7 +263,7 @@ class GatewayPublicEndpointManagementServiceTest {
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
 
-        verify(environmentClientService, times(1)).getByCrn(anyString());
+        verify(environmentClientService, times(2)).getByCrn(anyString());
         verify(grpcUmsClient, times(1)).getAccountDetails(eq("123"), any());
         verify(domainNameProvider, times(1)).getCommonName(endpointName, envName, accountWorkloadSubdomain);
         verify(domainNameProvider, times(1)).getFullyQualifiedEndpointName(Set.of(), endpointName, envName, accountWorkloadSubdomain);
