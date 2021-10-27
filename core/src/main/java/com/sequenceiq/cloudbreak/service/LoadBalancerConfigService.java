@@ -209,6 +209,11 @@ public class LoadBalancerConfigService {
         boolean azureLoadBalancerDisabled = CloudPlatform.AZURE.toString().equalsIgnoreCase(stack.getCloudPlatform()) &&
                 getLoadBalancerSku(source) == LoadBalancerSku.NONE;
         if (azureLoadBalancerDisabled) {
+            Optional<TargetGroup> oozieTargetGroup = setupOozieHATargetGroup(stack, true);
+            if (oozieTargetGroup.isPresent()) {
+                throw new CloudbreakServiceException("Unsupported setup: Load balancers are disabled, but Oozie HA is configured. " +
+                        "Either enable Azure load balancers, or use a non-HA Oozie setup.");
+            }
             LOGGER.debug("Azure load balancers have been explicitly disabled.");
             return Collections.emptySet();
         }

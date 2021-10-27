@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.YARN;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.fail;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -755,6 +756,26 @@ public class LoadBalancerConfigServiceTest extends SubnetTest {
 
             checkAvailabilitySetAttributes(loadBalancers);
         });
+    }
+
+    @Test
+    public void testAzureLoadBalancerDisabledWithOozieHA() {
+        Stack stack = createAzureStack(StackType.DATALAKE, PRIVATE_ID_1, true);
+        CloudSubnet subnet = getPrivateCloudSubnet(PRIVATE_ID_1, AZ_1);
+        DetailedEnvironmentResponse environment = createEnvironment(subnet, false);
+        AzureStackV4Parameters azureParameters = new AzureStackV4Parameters();
+        azureParameters.setLoadBalancerSku(LoadBalancerSku.NONE);
+        StackV4Request request = new StackV4Request();
+        request.setEnableLoadBalancer(false);
+        request.setAzure(azureParameters);
+
+        when(entitlementService.datalakeLoadBalancerEnabled(anyString())).thenReturn(true);
+        when(blueprint.getBlueprintText()).thenReturn(getBlueprintText("input/de-ha.bp"));
+        when(subnetSelector.findSubnetById(any(), anyString())).thenReturn(Optional.of(subnet));
+        when(availabilitySetNameService.generateName(any(), any())).thenReturn("");
+
+        assertThrows(CloudbreakServiceException.class,
+                () -> underTest.createLoadBalancers(stack, environment, request));
     }
 
     @Test
