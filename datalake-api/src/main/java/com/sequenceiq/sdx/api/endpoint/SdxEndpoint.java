@@ -39,6 +39,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxInstanceGroupNamesRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -261,5 +262,11 @@ public interface SdxEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "syncs CM and parcel versions from CM and updates SDX cluster version", nickname = "syncCmOnDatalakeClusterByCrn")
     SdxSyncComponentVersionsFromCmResponse syncComponentVersionsFromCmByCrn(@PathParam("crn") String crn);
+
+    @GET
+    @Path("instance_group_names")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Gather available instance group names by SDX cluster attributes", nickname = "getInstanceGroupNamesBySdxDetails")
+    Set<String> getInstanceGroupNamesBySdxDetails(@Valid SdxInstanceGroupNamesRequest request);
 
 }
