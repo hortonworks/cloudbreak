@@ -740,6 +740,10 @@ cb:
           - name: cloudera-manager-agent
             pattern: "(.*)-.*"
         prewarmed: true
+      - name: unbound-restart
+        command: "cat /etc/dhcp/dhclient-enter-hooks | grep -E 'systemctl|pkill'"
+        commandVersionPattern: ".*(systemctl|pkill).*"
+        prewarmed: true
   paywall.url: "https://archive.cloudera.com/p/cdp-public/"
   nodestatus:
     connectionTimeoutMs: 15000

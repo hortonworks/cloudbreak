@@ -79,6 +79,10 @@ public class InstanceMetadataUpdater {
         GatewayConfig gatewayConfig = getGatewayConfig(stack, enableKnox);
 
         Map<String, Map<String, String>> packageVersionsByNameByHost = getPackageVersionByNameByHost(gatewayConfig, hostOrchestrator);
+        boolean packageVersionsChanged = fixIncorrectPackageVersions(gatewayConfig, packageVersionsByNameByHost);
+        if (packageVersionsChanged) {
+            packageVersionsByNameByHost = getPackageVersionByNameByHost(gatewayConfig, hostOrchestrator);
+        }
 
         List<String> failedVersionQueriesByHost =
                 updateInstanceMetaDataIfVersionQueryFailed(packageVersionsByNameByHost, stack);
@@ -127,6 +131,21 @@ public class InstanceMetadataUpdater {
             }
         }
         return failedVersionQueriesByHost;
+    }
+
+    private boolean fixIncorrectPackageVersions(GatewayConfig gatewayConfig, Map<String, Map<String, String>> packageVersionsByNameByHost)
+            throws CloudbreakOrchestratorFailedException {
+        boolean changed = false;
+
+        boolean unboundIsRestartedWithSystemctl = packageVersionsByNameByHost.values().stream()
+                .anyMatch(versions -> versions.get("unbound-restart").equals("systemctl"));
+        if (unboundIsRestartedWithSystemctl) {
+            hostOrchestrator.replacePatternInFileOnAllHosts(gatewayConfig,
+                    "/etc/dhcp/dhclient-enter-hooks", "systemctl restart unbound", "pkill -u unbound -SIGHUP unbound");
+            changed = true;
+        }
+
+        return changed;
     }
 
     private Map<String, Multimap<String, String>> updateInstanceMetaDataWithPackageVersions(Map<String, Map<String, String>> packageVersionsByNameByHost,
