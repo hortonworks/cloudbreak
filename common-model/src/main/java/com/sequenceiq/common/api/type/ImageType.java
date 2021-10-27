@@ -4,5 +4,6 @@ public enum ImageType {
     FREEIPA,
     DATAHUB,
     DATALAKE,
+    RUNTIME,
     UNKNOWN
 }

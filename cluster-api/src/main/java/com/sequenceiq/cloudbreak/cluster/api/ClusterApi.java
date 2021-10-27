@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -60,8 +61,8 @@ public interface ClusterApi {
         return clusterModificationService().upscaleCluster(hostGroup, metas);
     }
 
-    default void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException {
-        clusterModificationService().upgradeClusterRuntime(components, patchUpgrade);
+    default void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade, Optional<String> remoteDataContext) throws CloudbreakException {
+        clusterModificationService().upgradeClusterRuntime(components, patchUpgrade, remoteDataContext);
     }
 
     default void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
@@ -80,8 +81,8 @@ public interface ClusterApi {
         clusterModificationService().downloadAndDistributeParcels(components, patchUpgrade);
     }
 
-    default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
-        clusterModificationService().removeUnusedParcels(usedParcelComponents);
+    default ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
+        return clusterModificationService().removeUnusedParcels(usedParcelComponents);
     }
 
     default void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {

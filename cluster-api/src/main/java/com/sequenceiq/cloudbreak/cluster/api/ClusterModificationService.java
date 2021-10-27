@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -28,7 +29,7 @@ public interface ClusterModificationService {
 
     void cleanupCluster(Telemetry telemetry) throws CloudbreakException;
 
-    void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade) throws CloudbreakException;
+    void upgradeClusterRuntime(Set<ClusterComponent> components, boolean patchUpgrade, Optional<String> remoteDataContext) throws CloudbreakException;
 
     Map<String, String> gatherInstalledParcels(String stackName);
 
@@ -38,9 +39,7 @@ public interface ClusterModificationService {
 
     Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName);
 
-    default void removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
-        throw new UnsupportedOperationException("Interface not implemented.");
-    }
+    ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException;
 
     default void stopComponents(Map<String, String> components, String hostname) {
         throw new UnsupportedOperationException("Interface not implemented.");
