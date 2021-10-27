@@ -18,6 +18,8 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.freeipa.client.operation.StageUserActivateOperation;
+import com.sequenceiq.freeipa.client.operation.StageUserAddOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -56,7 +58,6 @@ import com.sequenceiq.freeipa.client.operation.GroupAddMemberOperation;
 import com.sequenceiq.freeipa.client.operation.GroupAddOperation;
 import com.sequenceiq.freeipa.client.operation.GroupRemoveMemberOperation;
 import com.sequenceiq.freeipa.client.operation.GroupRemoveOperation;
-import com.sequenceiq.freeipa.client.operation.UserAddOperation;
 import com.sequenceiq.freeipa.client.operation.UserDisableOperation;
 import com.sequenceiq.freeipa.client.operation.UserEnableOperation;
 import com.sequenceiq.freeipa.client.operation.UserRemoveOperation;
@@ -560,11 +561,31 @@ public class UserSyncService {
 
     void addUsers(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers,
             BiConsumer<String, String> warnings) throws FreeIpaClientException {
-        List<UserAddOperation> operations = Lists.newArrayList();
+        addStageUsers(fmsToFreeipaBatchCallEnabled, freeIpaClient, fmsUsers, warnings);
+        activateStageUsers(fmsToFreeipaBatchCallEnabled, freeIpaClient, fmsUsers, warnings);
+    }
+
+    void addStageUsers(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers,
+            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+        List<StageUserAddOperation> operations = Lists.newArrayList();
+
         for (FmsUser fmsUser : fmsUsers) {
-            operations.add(UserAddOperation.create(fmsUser.getName(), fmsUser.getFirstName(), fmsUser.getLastName(),
+            operations.add(StageUserAddOperation.create(fmsUser.getName(), fmsUser.getFirstName(), fmsUser.getLastName(),
                     fmsUser.getState() == FmsUser.State.DISABLED));
         }
+        // TODO check what other error codes can be returned by stageuser_add
+        invokeOperation(operations, fmsToFreeipaBatchCallEnabled, freeIpaClient, warnings,
+                Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY), true);
+    }
+
+    void activateStageUsers(boolean fmsToFreeipaBatchCallEnabled, FreeIpaClient freeIpaClient, Set<FmsUser> fmsUsers,
+            BiConsumer<String, String> warnings) throws FreeIpaClientException {
+        List<StageUserActivateOperation> operations = Lists.newArrayList();
+
+        for (FmsUser fmsUser : fmsUsers) {
+            operations.add(StageUserActivateOperation.create(fmsUser.getName()));
+        }
+        // TODO check what other error codes can be returned by stageuser_activate
         invokeOperation(operations, fmsToFreeipaBatchCallEnabled, freeIpaClient, warnings,
                 Set.of(FreeIpaErrorCodes.DUPLICATE_ENTRY), true);
     }
