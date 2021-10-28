@@ -53,6 +53,7 @@ webhdfs_command()   {
       -X $method --negotiate -u : \
       "$WEBHDFS_URL$path?$query")
     exec {out_fd}>&-
+    chmod 600 $WEBHDFS_COOKIE_JAR
     if [ "$http_code" -ne 200 ]; then
       return $http_code
     fi
