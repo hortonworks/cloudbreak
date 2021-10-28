@@ -111,9 +111,9 @@ collector:
       compress: true{% endif %}
       label: {{ extra_log["label"] }}{% endfor %}{% endif %}
 {% if destination in ["CLOUD_STORAGE", "LOCAL", "SUPPORT"] %}
-    rules:{% for rule in telemetry.anonymizationRules %}{% set regex_value = rule["value"] %}{% set replacement = rule["replacement"] if rule["replacement"] else "[REDACTED]" %}
+    rules: {% if telemetry.anonymizationRules %}{% for rule in telemetry.anonymizationRules %}{% set regex_value = rule["value"] %}{% set replacement = rule["replacement"] if rule["replacement"] else "[REDACTED]" %}
     - pattern: {{ regex_value }}
-      replacement: "{{ replacement }}"{% endfor %}
+      replacement: "{{ replacement }}"{% endfor %}{% else %}[]{% endif %}
     compress: true
     compressFormat: gztar
     deleteCompressedFile: false
