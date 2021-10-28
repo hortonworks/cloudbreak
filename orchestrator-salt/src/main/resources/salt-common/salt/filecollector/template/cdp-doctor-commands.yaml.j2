@@ -30,7 +30,9 @@ commands:
     - command: cdp-doctor service status
       output: /tmp/doctor_services.txt{% if filecollector.clusterType == "FREEIPA" %}
     - command: /usr/local/bin/freeipa_backup -pl
-      output: /tmp/doctor_backup_permissions_check.txt{% else %}
+      output: /tmp/doctor_backup_permissions_check.txt{% if salt['file.file_exists']('/usr/local/bin/cipa') %}
+    - command: /usr/local/bin/cipa -d $(hostname -d) -W $(tail -n +2 /srv/pillar/freeipa/init.sls | jq -r '.freeipa.password')
+      output: /tmp/doctor_freeipa_consistency_check.txt{% endif %}{% else %}
     - command: cdp-doctor recipe results
       output: /tmp/doctor_recipes.txt
     - command: cdp-doctor scm list-commands
