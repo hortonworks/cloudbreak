@@ -8,7 +8,6 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -57,9 +56,7 @@ public class CustomImageCatalogV4ControllerTest {
 
     private static final String IMAGE_ID = "image id";
 
-    private static final String UUID = java.util.UUID.randomUUID().toString();
-
-    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + UUID + ":user:" + UUID;
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:1:user:2";
 
     private static final String ACCOUNT_ID = "123";
 
@@ -110,13 +107,6 @@ public class CustomImageCatalogV4ControllerTest {
 
     @InjectMocks
     private CustomImageCatalogV4Controller victim;
-
-    @BeforeAll
-    public static void initTest() {
-        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
-            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        }
-    }
 
     @Test
     public void testList() {

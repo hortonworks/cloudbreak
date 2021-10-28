@@ -7,8 +7,6 @@ import static org.mockito.Mockito.when;
 
 import javax.ws.rs.WebApplicationException;
 
-import org.assertj.core.util.Strings;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,31 +60,24 @@ public class SdxUpgradeRecoveryServiceTest {
 
     private SdxRecoveryRequest request;
 
-    private String userCrn;
-
     @BeforeEach
     public void setup() {
-        userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        if (Strings.isNullOrEmpty(userCrn)) {
-            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-            userCrn = USER_CRN;
-        }
         request = new SdxRecoveryRequest();
         request.setType(SdxRecoveryType.RECOVER_WITHOUT_DATA);
         when(cluster.getClusterName()).thenReturn(CLUSTER_NAME);
-        when(sdxService.getByNameOrCrn(userCrn, NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(cluster);
+        when(sdxService.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(cluster);
     }
 
     @Test
     public void testGetClusterRecoverableByNameInternalThrowsExceptionShouldThrowApiException() {
 
         WebApplicationException webApplicationException = new WebApplicationException();
-        doThrow(webApplicationException).when(stackV4Endpoint).getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, userCrn);
+        doThrow(webApplicationException).when(stackV4Endpoint).getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN);
         when(exceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
 
-        CloudbreakApiException actual = Assertions.assertThrows(CloudbreakApiException.class,
-                () -> underTest.triggerRecovery(userCrn, NameOrCrn.ofName(CLUSTER_NAME), request));
-        Assertions.assertEquals("Stack recovery status validation failed on cluster: [dummyCluster]. Message: [web-error]", actual.getMessage());
+        CloudbreakApiException actual = assertThrows(CloudbreakApiException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME), request)));
+        assertEquals("Stack recovery status validation failed on cluster: [dummyCluster]. Message: [web-error]", actual.getMessage());
     }
 
     @Test
@@ -94,10 +85,10 @@ public class SdxUpgradeRecoveryServiceTest {
         String errorMessage = "error message";
         RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(errorMessage, RecoveryStatus.NON_RECOVERABLE);
 
-        when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, userCrn)).thenReturn(recoveryV4Response);
+        when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> underTest.triggerRecovery(userCrn, NameOrCrn.ofName(CLUSTER_NAME), request));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME), request)));
         assertEquals(errorMessage, exception.getMessage());
     }
 
@@ -106,11 +97,12 @@ public class SdxUpgradeRecoveryServiceTest {
         String reason = "Datalake upgrade recovery requested. Cluster will be terminated and re-launched with the original runtime.";
         RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(reason, RecoveryStatus.RECOVERABLE);
 
-        when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, userCrn)).thenReturn(recoveryV4Response);
+        when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
         when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, SdxRecoveryType.RECOVER_WITHOUT_DATA))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
-        SdxRecoveryResponse response = underTest.triggerRecovery(userCrn, NameOrCrn.ofName(CLUSTER_NAME), request);
+        SdxRecoveryResponse response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerRecovery(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME), request));
         assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"), response.getFlowIdentifier());
     }
 }

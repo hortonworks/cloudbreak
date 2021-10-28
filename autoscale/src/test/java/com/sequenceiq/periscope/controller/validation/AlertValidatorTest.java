@@ -16,7 +16,6 @@ import java.util.Set;
 import javax.ws.rs.BadRequestException;
 
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -75,11 +74,6 @@ public class AlertValidatorTest {
 
     private Cluster aCluster;
 
-    @BeforeClass
-    public static void setupAll() {
-        ThreadBasedUserCrnProvider.setUserCrn(TEST_USER_CRN);
-    }
-
     @Before
     public void setup() {
         underTest.setDateService(dateService);
@@ -92,14 +86,14 @@ public class AlertValidatorTest {
         aCluster.setCloudPlatform("Yarn");
         aCluster.setAutoscalingEnabled(false);
 
-        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), "Yarn")).thenReturn(false);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "Yarn")).thenReturn(false);
         when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
                 List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("account.not.entitled.for.platform");
 
-        underTest.validateEntitlementAndDisableIfNotEntitled(aCluster);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
     }
 
@@ -107,14 +101,14 @@ public class AlertValidatorTest {
     public void testValidateEntitlementAndDisableIfNotEntitledWhenAccountNotEntitledThenDisableAutoscaling() {
         aCluster.setCloudPlatform("AWS");
 
-        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), "AWS")).thenReturn(false);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(false);
         when(messagesService.getMessage(AUTOSCALING_ENTITLEMENT_NOT_ENABLED,
                 List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled.for.platform");
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("account.not.entitled.for.platform");
 
-        underTest.validateEntitlementAndDisableIfNotEntitled(aCluster);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, times(1)).setAutoscaleState(aCluster.getId(), false);
     }
 
@@ -122,9 +116,9 @@ public class AlertValidatorTest {
     public void testValidateEntitlementAndDisableIfNotEntitledWhenAccountEntitledThenValidationSuccess() {
         aCluster.setCloudPlatform("AWS");
 
-        when(entitlementValidationService.autoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), "AWS")).thenReturn(true);
+        when(entitlementValidationService.autoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
 
-        underTest.validateEntitlementAndDisableIfNotEntitled(aCluster);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
     }
 
@@ -162,8 +156,8 @@ public class AlertValidatorTest {
 
     @Test
     public void testLoadAlertCreateWhenHostGroupNotSupported() {
-        Set requestHostGroups = Set.of("compute", "compute1");
-        Set supportedHostGroups = Set.of("compute1");
+        Set<String> requestHostGroups = Set.of("compute", "compute1");
+        Set<String> supportedHostGroups = Set.of("compute1");
 
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
@@ -179,8 +173,8 @@ public class AlertValidatorTest {
 
     @Test
     public void testTimeAlertCreateWhenHostGroupNotSupported() {
-        Set requestHostGroups = Set.of("compute", "compute1");
-        Set supportedHostGroups = Set.of("compute1");
+        Set<String> requestHostGroups = Set.of("compute", "compute1");
+        Set<String> supportedHostGroups = Set.of("compute1");
 
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
@@ -196,8 +190,8 @@ public class AlertValidatorTest {
 
     @Test
     public void testLoadAlertCreateWhenHostGroupSupported() {
-        Set requestHostGroups = Set.of("compute", "compute1");
-        Set supportedHostGroups = Set.of("compute", "compute1", "compute3");
+        Set<String> requestHostGroups = Set.of("compute", "compute1");
+        Set<String> supportedHostGroups = Set.of("compute", "compute1", "compute3");
 
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
@@ -207,8 +201,8 @@ public class AlertValidatorTest {
 
     @Test
     public void testTimeAlertCreateWhenHostGroupSupported() {
-        Set requestHostGroups = Set.of("compute", "compute1");
-        Set supportedHostGroups = Set.of("compute", "compute1");
+        Set<String> requestHostGroups = Set.of("compute", "compute1");
+        Set<String> supportedHostGroups = Set.of("compute", "compute1");
 
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
@@ -228,7 +222,7 @@ public class AlertValidatorTest {
         loadAlertRequest.setLoadAlertConfiguration(loadAlertConfigurationRequest);
         request.setLoadAlertRequests(List.of(loadAlertRequest));
 
-        Set supportedHostGroups = Set.of("compute", "compute1", "compute3");
+        Set<String> supportedHostGroups = Set.of("compute", "compute1", "compute3");
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
 
@@ -247,7 +241,7 @@ public class AlertValidatorTest {
         loadAlertRequest.setLoadAlertConfiguration(loadAlertConfigurationRequest);
         request.setLoadAlertRequests(List.of(loadAlertRequest));
 
-        Set supportedHostGroups = Set.of("compute", "compute1", "compute3");
+        Set<String> supportedHostGroups = Set.of("compute", "compute1", "compute3");
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
         when(messagesService.getMessage(UNSUPPORTED_AUTOSCALING_HOSTGROUP,
@@ -260,7 +254,7 @@ public class AlertValidatorTest {
         underTest.validateDistroXAutoscaleClusterRequest(aCluster, request);
     }
 
-        @Test
+    @Test
     public void testValidateDistroXAutoscaleClusterRequestWhenClusterSizeExceeded() {
         DistroXAutoscaleClusterRequest request = new DistroXAutoscaleClusterRequest();
         ScalingPolicyRequest sp1 = new ScalingPolicyRequest();
@@ -301,7 +295,7 @@ public class AlertValidatorTest {
 
         request.setTimeAlertRequests(timeAlertRequests);
 
-        Set supportedHostGroups = Set.of("compute", "compute1", "compute3");
+        Set<String> supportedHostGroups = Set.of("compute", "compute1", "compute3");
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
 
@@ -363,7 +357,7 @@ public class AlertValidatorTest {
         timeAlertRequests.add(timeAlertRequest2);
         request.setTimeAlertRequests(timeAlertRequests);
 
-        Set supportedHostGroups = Set.of("compute", "compute1", "compute3");
+        Set<String> supportedHostGroups = Set.of("compute", "compute1", "compute3");
         when(recommendationService.getAutoscaleRecommendations(anyString()))
                 .thenReturn(new AutoscaleRecommendationV4Response(supportedHostGroups, supportedHostGroups));
         when(messagesService.getMessage(UNSUPPORTED_AUTOSCALING_HOSTGROUP,

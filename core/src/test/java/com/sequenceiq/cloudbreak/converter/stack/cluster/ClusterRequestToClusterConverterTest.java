@@ -5,18 +5,18 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 
-import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -38,8 +38,10 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterTest<ClusterV4Request> {
+
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     @InjectMocks
     private ClusterV4RequestToClusterConverter underTest;
@@ -69,14 +71,10 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
     @SuppressFBWarnings(value = "UrF", justification = "This gets injected")
     private IdBrokerConverterUtil idBrokerConverterUtil =  new IdBrokerConverterUtil();
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(workspaceService.getForCurrentUser()).thenReturn(workspace);
-
-        if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
-            ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
-        }
-        when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
+        lenient().when(entitlementService.dataLakeEfsEnabled(anyString())).thenReturn(true);
     }
 
     @Test
@@ -108,7 +106,7 @@ public class ClusterRequestToClusterConverterTest extends AbstractJsonConverterT
         blueprint.setStackType(StackType.HDP.name());
         given(blueprintService.getByNameForWorkspaceAndLoadDefaultsIfNecessary(eq("my-blueprint"), any())).willReturn(blueprint);
         // WHEN
-        Cluster result = underTest.convert(request);
+        Cluster result = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.convert(request));
         // THEN
         assertAllFieldsNotNull(result, Arrays.asList("stack", "blueprint", "creationStarted", "creationFinished", "upSince", "statusReason", "clusterManagerIp",
                 "additionalFileSystem", "rdsConfigs", "attributes", "uptime", "ambariSecurityMasterKey", "proxyConfigCrn", "extendedBlueprintText",

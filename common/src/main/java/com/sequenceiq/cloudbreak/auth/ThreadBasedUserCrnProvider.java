@@ -41,7 +41,7 @@ public class ThreadBasedUserCrnProvider {
         }
     }
 
-    public static void setUserCrn(String userCrn) {
+    private static void setUserCrn(String userCrn) {
         if (StringUtils.isNotEmpty(USER_CRN.get())) {
             String errorMessage = String.format("Trying to set crn %s when it already contains %s!", userCrn, USER_CRN.get());
             String stackTrace = Arrays.stream(Thread.currentThread().getStackTrace())

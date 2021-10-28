@@ -6,12 +6,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
-import org.apache.commons.lang3.StringUtils;
+import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,10 +15,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import java.util.List;
+import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseConfigProviderTest {
+
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     @InjectMocks
     private final HbaseCloudStorageServiceConfigProvider underTest = new HbaseCloudStorageServiceConfigProvider();
@@ -32,9 +34,6 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
 
     @Before
     public void setUp() {
-        if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
-            ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
-        }
         when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(true);
     }
 
@@ -103,7 +102,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
-        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        boolean configurationNeeded = testIsConfigurationNeeded(preparationObject, cmTemplateProcessor);
         assertFalse(configurationNeeded);
     }
 
@@ -113,7 +112,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
-        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        boolean configurationNeeded = testIsConfigurationNeeded(preparationObject, cmTemplateProcessor);
         assertFalse(configurationNeeded);
     }
 
@@ -123,7 +122,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
-        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        boolean configurationNeeded = testIsConfigurationNeeded(preparationObject, cmTemplateProcessor);
         assertTrue(configurationNeeded);
     }
 
@@ -133,7 +132,7 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
-        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        boolean configurationNeeded = testIsConfigurationNeeded(preparationObject, cmTemplateProcessor);
         assertTrue(configurationNeeded);
     }
 
@@ -143,7 +142,11 @@ public class HbaseCloudStorageServiceConfigProviderTest extends AbstractHbaseCon
         String inputJson = getBlueprintText("input/clouderamanager.bp");
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
 
-        boolean configurationNeeded = underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject);
+        boolean configurationNeeded = testIsConfigurationNeeded(preparationObject, cmTemplateProcessor);
         assertTrue(configurationNeeded);
+    }
+
+    private boolean testIsConfigurationNeeded(TemplatePreparationObject preparationObject, CmTemplateProcessor cmTemplateProcessor) {
+        return ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.isConfigurationNeeded(cmTemplateProcessor, preparationObject));
     }
 }
