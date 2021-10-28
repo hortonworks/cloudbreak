@@ -9,6 +9,7 @@ import java.security.InvalidKeyException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -33,6 +34,7 @@ import com.microsoft.azure.storage.blob.CloudBlobContainer;
 import com.sequenceiq.cloudbreak.cloud.PlatformParametersConsts;
 import com.sequenceiq.cloudbreak.cloud.Setup;
 import com.sequenceiq.cloudbreak.cloud.azure.client.AzureClient;
+import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageCopyDetails;
 import com.sequenceiq.cloudbreak.cloud.azure.image.AzureImageSetupService;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -74,9 +76,24 @@ public class AzureSetup implements Setup {
             azureImageSetupService.copyVhdImageIfNecessary(ac, stack, image, region, client);
         } catch (Exception ex) {
             LOGGER.warn("Could not create image with the specified parameters", ex);
-            throw new CloudConnectorException(image.getImageName() + " image copy failed: " + ExceptionUtils.getRootCause(ex).getMessage(), ex);
+            throwExceptionWithDetails(ac, stack, image, ex);
         }
         LOGGER.debug("Prepare image has been executed");
+    }
+
+    private void throwExceptionWithDetails(AuthenticatedContext ac, CloudStack stack, Image image, Exception ex) {
+        Optional<AzureImageCopyDetails> imageCopyDetailsOptional = azureImageSetupService.getImageCopyDetails(ac, stack, image);
+        if (imageCopyDetailsOptional.isPresent()) {
+            AzureImageCopyDetails imageCopyDetails = imageCopyDetailsOptional.get();
+            String message = String.format("%s image copy failed. You may try to execute the copy manually, in that case please copy %s to the 'images' " +
+                            "container of the storage account '%s' in resource group '%s'. Reason of failure: %s",
+                    image.getImageName(), imageCopyDetails.getImageSource(), imageCopyDetails.getImageStorageName(),
+                    imageCopyDetails.getImageResourceGroupName(), ExceptionUtils.getRootCause(ex).getMessage());
+            LOGGER.debug(message);
+            throw new CloudConnectorException(message, ex);
+        } else {
+            throw new CloudConnectorException(image.getImageName() + " image copy failed: " + ExceptionUtils.getRootCause(ex).getMessage(), ex);
+        }
     }
 
     @Override

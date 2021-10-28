@@ -155,6 +155,23 @@ public class AzureImageSetupService {
         }
     }
 
+    public Optional<AzureImageCopyDetails> getImageCopyDetails(AuthenticatedContext ac, CloudStack stack, Image image) {
+        try {
+            if (azureImageFormatValidator.isMarketplaceImageFormat(image)) {
+                LOGGER.info("Skipping gathering image copy details as target image ({}) is an Azure Marketplace image!", image.getImageName());
+                return Optional.empty();
+            }
+
+            CloudContext cloudContext = ac.getCloudContext();
+            String imageStorageName = armStorage.getImageStorageName(new AzureCredentialView(ac.getCloudCredential()), cloudContext, stack);
+            String imageResourceGroupName = azureResourceGroupMetadataProvider.getImageResourceGroupName(cloudContext, stack);
+            return Optional.of(new AzureImageCopyDetails(imageStorageName, imageResourceGroupName, image.getImageName()));
+        } catch (Exception e) {
+            LOGGER.warn("Could not gather image copy details ", e);
+            return Optional.empty();
+        }
+    }
+
     private boolean storageContainsImage(AzureClient client, String resourceGroupName, String storageName, String imageName) {
         List<ListBlobItem> listBlobItems = client.listBlobInStorage(resourceGroupName, storageName, IMAGES_CONTAINER);
         for (ListBlobItem listBlobItem : listBlobItems) {
