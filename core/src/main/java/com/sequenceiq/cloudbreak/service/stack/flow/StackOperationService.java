@@ -303,6 +303,11 @@ public class StackOperationService {
         return result;
     }
 
+    public boolean rangerRazEnabled(Long workspaceId, String crn) {
+        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
+        return clusterService.isRangerRazEnabledOnCluster(stack);
+    }
+
     private boolean isStackStartable(Stack stack) {
         return stack.isStopped() || stack.isStartFailed();
     }

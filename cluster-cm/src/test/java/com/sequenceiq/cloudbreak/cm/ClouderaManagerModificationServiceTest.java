@@ -5,7 +5,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -1115,6 +1117,17 @@ class ClouderaManagerModificationServiceTest {
         assertEquals(2, operationStatus.getFailed().size());
         assertEquals("version3", operationStatus.getFailed().get("spark3"));
         assertEquals("version4", operationStatus.getFailed().get("product4"));
+    }
+
+    @Test
+    void testIsServicePresent() throws ApiException {
+        stack.getCluster().setName("test-cluster-name");
+        List<ApiService> services = List.of(new ApiService().type("RANGER_RAZ"), new ApiService().type("ATLAS"), new ApiService().type("HDFS"));
+        when(clouderaManagerApiFactory.getServicesResourceApi(apiClientMock)).thenReturn(servicesResourceApi);
+        when(servicesResourceApi.readServices(anyString(), anyString())).thenReturn(new ApiServiceList().items(services));
+
+        assertTrue(underTest.isServicePresent(stack.getCluster().getName(), "RANGER_RAZ"));
+        assertFalse(underTest.isServicePresent(stack.getCluster().getName(), "NON EXISTENT"));
     }
 
     private ClusterComponent createClusterComponent(ClouderaManagerProduct clouderaManagerProduct) {

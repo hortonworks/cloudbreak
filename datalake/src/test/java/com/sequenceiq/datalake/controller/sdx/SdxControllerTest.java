@@ -123,6 +123,26 @@ class SdxControllerTest {
         verify(sdxImageCatalogChangeService).changeImageCatalog(sdxCluster, request.getImageCatalog());
     }
 
+    @Test
+    void enableRangerRazByCrnTest() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByCrn(anyString(), anyString())).thenReturn(sdxCluster);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableRangerRazByCrn(sdxCluster.getCrn()));
+
+        verify(sdxService).updateRangerRazEnabled(sdxCluster);
+    }
+
+    @Test
+    void enableRangerRazByNameTest() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.enableRangerRazByName(sdxCluster.getName()));
+
+        verify(sdxService).updateRangerRazEnabled(sdxCluster);
+    }
+
     private SdxCluster getValidSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setClusterName("test-sdx-cluster");

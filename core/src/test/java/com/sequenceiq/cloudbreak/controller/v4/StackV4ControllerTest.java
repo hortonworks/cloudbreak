@@ -47,4 +47,14 @@ class StackV4ControllerTest {
 
         verify(stackOperations).changeImageCatalog(NameOrCrn.ofName(stackName), WORKSPACE_ID, imageCatalog);
     }
+
+    @Test
+    void rangerRazEnabledTest() {
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
+        String stackCrn = "test-crn";
+
+        underTest.rangerRazEnabledInternal(WORKSPACE_ID, stackCrn, USER_CRN);
+
+        verify(stackOperationService).rangerRazEnabled(WORKSPACE_ID, stackCrn);
+    }
 }

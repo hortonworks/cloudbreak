@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -456,5 +457,11 @@ public class StackV4Controller extends NotificationController implements StackV4
             ChangeImageCatalogV4Request changeImageCatalogRequest) {
         stackOperations.changeImageCatalog(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 changeImageCatalogRequest.getImageCatalog());
+    }
+
+    @Override
+    @InternalOnly
+    public RangerRazEnabledV4Response rangerRazEnabledInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
+        return new RangerRazEnabledV4Response(stackOperationService.rangerRazEnabled(restRequestThreadLocalService.getRequestedWorkspaceId(), crn));
     }
 }

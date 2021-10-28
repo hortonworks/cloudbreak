@@ -231,6 +231,18 @@ public interface SdxEndpoint {
     @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByCrn")
     FlowIdentifier rotateAutoTlsCertificatesByCrn(@PathParam("crn") String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
 
+    @PUT
+    @Path("/crn/{crn}/enable_ranger_raz")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Set the rangerRazEnabled flag of the cluster if Raz is installed manually", nickname = "enableRangerRazByCrn")
+    void enableRangerRazByCrn(@PathParam("crn") String crn);
+
+    @PUT
+    @Path("/name/{name}/enable_ranger_raz")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Set the rangerRazEnabled flag of the cluster if Raz is installed manually", nickname = "enableRangerRazByName")
+    void enableRangerRazByName(@PathParam("name") String name);
+
     @POST
     @Path("{name}/custom_image")
     @Produces(MediaType.APPLICATION_JSON)
