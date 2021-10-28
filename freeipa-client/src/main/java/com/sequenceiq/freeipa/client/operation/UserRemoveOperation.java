@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.client.operation;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -33,6 +34,11 @@ public class UserRemoveOperation extends AbstractFreeipaOperation<User> {
     @Override
     protected List<Object> getFlags() {
         return List.of(userUid);
+    }
+
+    @Override
+    protected Map<String, Object> getParams() {
+        return Map.of("skipcheck", "TRUE");
     }
 
     @Override

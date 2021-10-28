@@ -1,0 +1,34 @@
+--- stageuser.py.orig	2022-01-31 13:33:25.989475331 -0600
++++ stageuser.py	2022-02-01 17:12:51.007022077 -0600
+@@ -727,26 +727,12 @@
+                              "active %s", active_dn)
+             raise
+ 
+-        # add the user we just created into the default primary group
+-        config = ldap.get_ipa_config()
+-        def_primary_group = config.get('ipadefaultprimarygroup')
+-        group_dn = self.api.Object['group'].get_dn(def_primary_group)
++        # Return an empty entity to avoid the performance penalty of retrieving
++        # the activated user
++        result = {}
++        result['result'] = {}
++        result['value'] = args[-1]
+ 
+-        # if the user is already a member of default primary group,
+-        # do not raise error
+-        # this can happen if automember rule or default group is set
+-        try:
+-            ldap.add_entry_to_group(active_dn, group_dn)
+-        except errors.AlreadyGroupMember:
+-            pass
+-
+-        # Now retrieve the activated entry
+-        result = self.api.Command.user_show(
+-            args[-1],
+-            all=options.get('all', False),
+-            raw=options.get('raw', False),
+-            version=options.get('version'),
+-        )
+         result['summary'] = unicode(
+             _('Stage user %s activated' % staging_dn[0].value))
+ 

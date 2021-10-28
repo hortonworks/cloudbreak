@@ -37,6 +37,18 @@ add-httpd-x-cdp-trace-id:
     - source: salt://freeipa/scripts/getkeytab.py
     - onlyif: test -f /etc/ipa/default.conf
 
+/usr/lib/python2.7/site-packages/ipaserver/plugins/stageuser.py:
+  file.patch:
+    - source: salt://freeipa/scripts/stageuser.py.patch
+    - hash: md5=c34ee2a14a0480f07faef36507626bc6
+    - onlyif: test -f /etc/ipa/default.conf
+
+/usr/lib/python2.7/site-packages/ipaserver/plugins/user.py:
+  file.patch:
+    - source: salt://freeipa/scripts/user.py.patch
+    - hash: md5=ffa5662ae89286f27f5dc138a3c5316e
+    - onlyif: test -f /etc/ipa/default.conf
+
 restart_freeipa_after_plugin_change:
   service.running:
     - name: ipa
@@ -45,6 +57,8 @@ restart_freeipa_after_plugin_change:
     - watch:
       - file: /usr/lib/python2.7/site-packages/ipaserver/plugins/getkeytab.py
       - file: /usr/lib/python2.7/site-packages/ipaserver/rpcserver.py
+      - file: /usr/lib/python2.7/site-packages/ipaserver/plugins/stageuser.py
+      - file: /usr/lib/python2.7/site-packages/ipaserver/plugins/user.py
 
 set_number_of_krb5kdc_workers:
   file.replace:

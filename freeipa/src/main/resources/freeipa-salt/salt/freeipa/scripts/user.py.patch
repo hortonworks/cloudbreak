@@ -1,0 +1,62 @@
+--- user.py.orig	2022-01-31 13:33:26.231995098 -0600
++++ user.py	2022-02-01 17:14:20.753236423 -0600
+@@ -589,18 +589,6 @@
+ 
+     def post_callback(self, ldap, dn, entry_attrs, *keys, **options):
+         assert isinstance(dn, DN)
+-        config = ldap.get_ipa_config()
+-        # add the user we just created into the default primary group
+-        def_primary_group = config.get('ipadefaultprimarygroup')
+-        group_dn = self.api.Object['group'].get_dn(def_primary_group)
+-
+-        # if the user is already a member of default primary group,
+-        # do not raise error
+-        # this can happen if automember rule or default group is set
+-        try:
+-            ldap.add_entry_to_group(dn, group_dn)
+-        except errors.AlreadyGroupMember:
+-            pass
+ 
+         # Fetch the entry again to update memberof, mep data, etc updated
+         # at the end of the transaction.
+@@ -639,6 +627,10 @@
+         Bool('preserve?',
+             exclude='cli',
+         ),
++        Flag('skipcheck',
++             cli_name='skipcheck',
++             doc=_('Skip check if user is last admin'),
++             ),
+     )
+ 
+     def _preserve_user(self, pkey, delete_container, **options):
+@@ -707,7 +699,8 @@
+         # delete user (delete container).
+         # If the target entry is a Delete entry, skip the orphaning/removal
+         # of OTP tokens.
+-        check_protected_member(keys[-1])
++        if options.get('skipcheck') is None:
++            check_protected_member(keys[-1])
+ 
+         if not options.get('preserve', False):
+             # Remove any ID overrides tied with this user
+@@ -1013,11 +1006,18 @@
+ 
+     has_output = output.standard_value
+     msg_summary = _('Disabled user account "%(value)s"')
++    takes_options = (
++        Flag('skipcheck',
++             cli_name='skipcheck',
++             doc=_('Skip check if user is last admin'),
++             ),
++    )
+ 
+     def execute(self, *keys, **options):
+         ldap = self.obj.backend
+ 
+-        check_protected_member(keys[-1])
++        if options.get('skipcheck') is None:
++            check_protected_member(keys[-1])
+ 
+         dn = self.obj.get_either_dn(*keys, **options)
+         ldap.deactivate_entry(dn)
