@@ -498,7 +498,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    private ImageCatalog getCloudbreakDefaultImageCatalog() {
+    public ImageCatalog getCloudbreakDefaultImageCatalog() {
         ImageCatalog imageCatalog = new ImageCatalog();
         imageCatalog.setName(CDP_DEFAULT_CATALOG_NAME);
         imageCatalog.setImageCatalogUrl(defaultCatalogUrl);

@@ -21,15 +21,21 @@ public class ClouderaManagerProductTransformer {
     @Inject
     private PreWarmParcelParser preWarmParcelParser;
 
-    public Set<ClouderaManagerProduct> transform(Image image, boolean getCdhParcel, boolean getPrewarmParcels) {
+    public Set<ClouderaManagerProduct> transform(Image image, boolean getCdhParcel, boolean getPreWarmParcels) {
         Set<ClouderaManagerProduct> products = new HashSet<>();
         if (getCdhParcel) {
             products.add(getCdhParcel(image));
         }
-        if (getPrewarmParcels) {
+        if (getPreWarmParcels) {
             products.addAll(getPreWarmParcels(image));
         }
         return products;
+    }
+
+    public Map<String, String> transformToMap(Image image, boolean getCdhParcel, boolean getPreWarmParcels) {
+        return transform(image, getCdhParcel, getPreWarmParcels)
+                .stream()
+                .collect(Collectors.toMap(ClouderaManagerProduct::getName, ClouderaManagerProduct::getVersion));
     }
 
     private Set<ClouderaManagerProduct> getPreWarmParcels(Image image) {

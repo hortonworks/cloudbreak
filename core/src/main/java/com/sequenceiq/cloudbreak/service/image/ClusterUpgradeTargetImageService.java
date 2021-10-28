@@ -41,7 +41,7 @@ public class ClusterUpgradeTargetImageService {
     private ImageProvider imageProvider;
 
     public void saveImage(Long stackId, StatedImage targetImage) {
-        Optional<Component> existingTargetImage = findTargetImage(stackId);
+        Optional<Component> existingTargetImage = findTargetImageComponent(stackId);
         if (existingTargetImage.isPresent() && isTheSameImage(targetImage, existingTargetImage.get())) {
             LOGGER.debug("The target image {} is already present for stack {}", targetImage.getImage().getUuid(), stackId);
         } else {
@@ -52,12 +52,17 @@ public class ClusterUpgradeTargetImageService {
         }
     }
 
+    public Optional<Image> findTargetImage(Long stackId) {
+        Optional<Component> targetImageComponent = findTargetImageComponent(stackId);
+        return targetImageComponent.map(image -> imageProvider.convertJsonToImage(image.getAttributes()));
+    }
+
     private void removeOldTargetImage(Component existingTargetImage) {
         LOGGER.debug("Deleting previous target image component {}", existingTargetImage);
         componentConfigProviderService.deleteComponents(Collections.singleton(existingTargetImage));
     }
 
-    private Optional<Component> findTargetImage(Long stackId) {
+    private Optional<Component> findTargetImageComponent(Long stackId) {
         return stackImageService.findImageComponentByName(stackId, TARGET_IMAGE);
     }
 
