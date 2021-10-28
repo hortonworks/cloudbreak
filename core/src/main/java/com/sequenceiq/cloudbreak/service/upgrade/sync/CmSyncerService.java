@@ -34,6 +34,9 @@ public class CmSyncerService {
     @Inject
     private ComponentPersistingService componentPersistingService;
 
+    @Inject
+    private MixedPackageVersionService mixedPackageVersionService;
+
     /**
      * Will retrieve (if CM server is reachable):
      * - all the active parcels, CDH and prewarm parcels as well
@@ -66,6 +69,7 @@ public class CmSyncerService {
         LOGGER.debug("Synced CM versions and found components: {}", cmSyncOperationResult);
         componentPersistingService.persistComponentsToDb(stack, cmSyncOperationResult);
         CmSyncOperationSummary cmSyncOperationSummary = cmSyncOperationSummaryService.evaluate(cmSyncOperationResult);
+        mixedPackageVersionService.validatePackageVersions(stack.getId(), cmSyncOperationResult, candidateImages);
         LOGGER.info("CM sync was executed, summary: {}", cmSyncOperationSummary);
         return cmSyncOperationSummary;
     }

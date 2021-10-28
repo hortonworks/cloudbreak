@@ -34,20 +34,24 @@ public class ComponentVersionProvider {
     private List<ParcelInfoResponse> getParcelInfoResponse(Map<String, String> packageVersions) {
         List<ParcelInfoResponse> parcelInfoResponses = packageVersions.entrySet()
                 .stream()
-                .filter(this::imagePackageVersionExists)
+                .filter(entry -> imagePackageVersionExists(entry) && isNotCmPackageVersion(entry))
                 .map(entry -> new ParcelInfoResponse(
                         ImagePackageVersion.getByKey(entry.getKey()).get().getDisplayName(),
                         entry.getValue(),
                         packageVersions.get(entry.getKey() + GBN)))
                 .collect(Collectors.toList());
         LOGGER.debug("Package version on the image: {}, transformed parcel versions are: {}", packageVersions, parcelInfoResponses);
-        return  parcelInfoResponses;
+        return parcelInfoResponses;
     }
 
     private boolean imagePackageVersionExists(Map.Entry<String, String> entry) {
         return Arrays.stream(ImagePackageVersion.values())
                 .filter(ImagePackageVersion::hasProperDisplayName)
                 .anyMatch(imagePackageVersion -> imagePackageVersion.getKey().equals(entry.getKey()));
+    }
+
+    private boolean isNotCmPackageVersion(Map.Entry<String, String> entry) {
+        return !entry.getKey().equals(ImagePackageVersion.CM.getKey());
     }
 
 }

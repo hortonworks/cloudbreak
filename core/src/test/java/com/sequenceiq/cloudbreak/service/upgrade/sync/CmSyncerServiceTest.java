@@ -33,6 +33,8 @@ import com.sequenceiq.cloudbreak.service.upgrade.sync.operationresult.CmSyncOper
 @ExtendWith(MockitoExtension.class)
 public class CmSyncerServiceTest {
 
+    private static final long STACK_ID = 1L;
+
     @Mock
     private CmInstalledComponentFinderService cmInstalledComponentFinderService;
 
@@ -51,12 +53,16 @@ public class CmSyncerServiceTest {
     @Mock
     private Stack stack;
 
+    @Mock
+    private MixedPackageVersionService mixedPackageVersionService;
+
     @Test
     void testSyncFromCmToDbWhenCmServerRunningThenSyncIsExecuted() {
         when(cmServerQueryService.isCmServerRunning(stack)).thenReturn(true);
         Set<Image> candidateImages = Set.of(mock(Image.class));
         CmRepoSyncOperationResult cmRepoSyncOperationResult = mock(CmRepoSyncOperationResult.class);
         CmParcelSyncOperationResult cmParcelSyncOperationResult = mock(CmParcelSyncOperationResult.class);
+        when(stack.getId()).thenReturn(STACK_ID);
         when(cmInstalledComponentFinderService.findCmRepoComponent(stack, candidateImages)).thenReturn(cmRepoSyncOperationResult);
         when(cmInstalledComponentFinderService.findParcelComponents(stack, candidateImages)).thenReturn(cmParcelSyncOperationResult);
         when(cmSyncOperationSummaryService.evaluate(any())).thenReturn(CmSyncOperationSummary.builder().withSuccess("myMessage").build());
@@ -67,6 +73,8 @@ public class CmSyncerServiceTest {
         assertEquals("myMessage", cmSyncOperationSummary.getMessage());
         verify(cmInstalledComponentFinderService).findCmRepoComponent(stack, candidateImages);
         verify(cmInstalledComponentFinderService).findParcelComponents(stack, candidateImages);
+        verify(stack).getId();
+        verify(mixedPackageVersionService).validatePackageVersions(eq(STACK_ID), any(), eq(candidateImages));
         verifyEvaluateCmSyncResults(cmRepoSyncOperationResult, cmParcelSyncOperationResult);
         verifyPersistComponentsToDb(cmRepoSyncOperationResult, cmParcelSyncOperationResult);
     }
@@ -110,7 +118,8 @@ public class CmSyncerServiceTest {
         CmSyncOperationSummary cmSyncOperationSummary = underTest.syncFromCmToDb(stack, candidateImages);
 
         assertFalse(cmSyncOperationSummary.hasSucceeded());
-        assertEquals("No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. Please call Cloudera support",
+        assertEquals(
+                "No candidate images supplied for CM sync, it is not possible to sync parcels and CM version from the server. Please call Cloudera support",
                 cmSyncOperationSummary.getMessage());
         verify(cmServerQueryService).isCmServerRunning(eq(stack));
         verify(cmInstalledComponentFinderService, never()).findCmRepoComponent(any(), any());
