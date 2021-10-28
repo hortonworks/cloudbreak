@@ -15,7 +15,6 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -116,13 +115,6 @@ public class EnvironmentApiConverterTest {
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
-    @BeforeAll
-    static void before() {
-        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
-            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        }
-    }
-
     @BeforeEach
     void init() {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
@@ -146,7 +138,7 @@ public class EnvironmentApiConverterTest {
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        EnvironmentCreationDto actual = testInitCreationDto(request);
 
         assertEquals("test-aws", actual.getAccountId());
         assertEquals(USER_CRN, actual.getCreator());
@@ -189,7 +181,7 @@ public class EnvironmentApiConverterTest {
         when(telemetryApiConverter.convert(eq(request.getTelemetry()), any())).thenReturn(environmentTelemetry);
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentEditDto actual = underTest.initEditDto(request);
+        EnvironmentEditDto actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initEditDto(request));
 
         assertEquals("test-aws", actual.getAccountId());
         assertEquals(request.getDescription(), actual.getDescription());
@@ -221,7 +213,7 @@ public class EnvironmentApiConverterTest {
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        EnvironmentCreationDto actual = testInitCreationDto(request);
 
         assertEquals(ResourceGroupUsagePattern.USE_MULTIPLE,
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
@@ -250,7 +242,7 @@ public class EnvironmentApiConverterTest {
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        EnvironmentCreationDto actual = testInitCreationDto(request);
 
         assertEquals(ResourceGroupUsagePattern.USE_SINGLE,
                 actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
@@ -282,7 +274,7 @@ public class EnvironmentApiConverterTest {
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        EnvironmentCreationDto actual = testInitCreationDto(request);
 
         assertNull(actual.getParameters().getAzureParametersDto().getAzureResourceGroupDto().getResourceGroupUsagePattern());
         assertEquals("myResourceGroup",
@@ -320,7 +312,7 @@ public class EnvironmentApiConverterTest {
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        EnvironmentCreationDto actual = testInitCreationDto(request);
         assertEquals("dummy-key-arn",
                 actual.getParameters().getAwsParametersDto().getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
     }
@@ -350,7 +342,7 @@ public class EnvironmentApiConverterTest {
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        EnvironmentCreationDto actual = testInitCreationDto(request);
 
         assertEquals(KEY_URL,
                 actual.getParameters().getAzureParametersDto().getAzureResourceEncryptionParametersDto().getEncryptionKeyUrl());
@@ -382,10 +374,14 @@ public class EnvironmentApiConverterTest {
         when(tunnelConverter.convert(request.getTunnel())).thenReturn(request.getTunnel());
         when(networkRequestToDtoConverter.convert(request.getNetwork())).thenReturn(networkDto);
 
-        EnvironmentCreationDto actual = underTest.initCreationDto(request);
+        EnvironmentCreationDto actual = testInitCreationDto(request);
 
         assertEquals("dummy-encryption-key",
                 actual.getParameters().getGcpParametersDto().getGcpResourceEncryptionParametersDto().getEncryptionKey());
+    }
+
+    private EnvironmentCreationDto testInitCreationDto(EnvironmentRequest request) {
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.initCreationDto(request));
     }
 
     @Test

@@ -15,11 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.ClusterV4Request;
@@ -35,6 +36,7 @@ import com.sequenceiq.distrox.api.v1.distrox.model.cluster.cm.repository.Clouder
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.proxy.endpoint.ProxyEndpoint;
 
+@ExtendWith(MockitoExtension.class)
 class DistroXClusterToClusterConverterTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com";
@@ -51,6 +53,7 @@ class DistroXClusterToClusterConverterTest {
     @Mock
     private ProxyEndpoint proxyEndpoint;
 
+    @InjectMocks
     private DistroXClusterToClusterConverter underTest;
 
     private DistroXV1Request distroXV1RequestInput;
@@ -59,17 +62,8 @@ class DistroXClusterToClusterConverterTest {
 
     private DetailedEnvironmentResponse env;
 
-    @BeforeAll
-    static void beforeAll() {
-        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
-            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        }
-    }
-
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-        underTest = new DistroXClusterToClusterConverter(cmConverter, cloudStorageDecorator, gatewayConverter, proxyEndpoint);
         env = new DetailedEnvironmentResponse();
         clusterV4RequestInput = createClusterV4Request();
         distroXV1RequestInput = createDistroXV1Request();
@@ -82,7 +76,7 @@ class DistroXClusterToClusterConverterTest {
 
         when(gatewayConverter.convert(List.of("ALL"))).thenReturn(gr);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(gr, result.getGateway());
@@ -95,7 +89,7 @@ class DistroXClusterToClusterConverterTest {
         GatewayV4Request gr = new GatewayV4Request();
         when(gatewayConverter.convert(distroXV1RequestInput.getCluster().getExposedServices())).thenReturn(gr);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(gr, result.getGateway());
@@ -105,7 +99,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheNameShouldBeSetToNull() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertNull(result.getName());
@@ -113,7 +107,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheCustomContainerShouldBeSetToNull() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertNull(result.getCustomContainer());
@@ -121,7 +115,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheCustomQueueShouldBeSetToNull() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertNull(result.getCustomQueue());
@@ -129,15 +123,19 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheUsernameShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvert();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getUserName(), result.getUserName());
     }
 
+    private ClusterV4Request testConvert() {
+        return testConvertDistroXV1Request();
+    }
+
     @Test
     void testConvertWithoutEnvThePasswordShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getPassword(), result.getPassword());
@@ -145,7 +143,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheValidateBlueprintShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getValidateBlueprint(), result.getValidateBlueprint());
@@ -153,7 +151,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheBlueprintNameShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getBlueprintName(), result.getBlueprintName());
@@ -161,7 +159,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheDatabasesShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getDatabases(), result.getDatabases());
@@ -172,7 +170,7 @@ class DistroXClusterToClusterConverterTest {
         ClouderaManagerV4Request cmConversionResult = new ClouderaManagerV4Request();
         when(cmConverter.convert(distroXV1RequestInput.getCluster().getCm())).thenReturn(cmConversionResult);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(cmConversionResult, result.getCm());
@@ -184,9 +182,8 @@ class DistroXClusterToClusterConverterTest {
     @Test
     void testConvertWithoutEnvCmConversionShouldNotHappenIfInputCmIsNull() {
         distroXV1RequestInput.getCluster().setCm(null);
-        when(cmConverter.convert(any(ClouderaManagerV1Request.class))).thenReturn(new ClouderaManagerV4Request());
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertNull(result.getCm());
@@ -196,7 +193,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithoutEnvTheExecutionTypeShouldBeSetToDefault() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(ExecutorType.DEFAULT, result.getExecutorType());
@@ -212,7 +209,7 @@ class DistroXClusterToClusterConverterTest {
                 null
         )).thenReturn(decoratorResult);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput);
+        ClusterV4Request result = testConvertDistroXV1Request();
 
         assertNotNull(result);
         assertEquals(decoratorResult, result.getCloudStorage());
@@ -233,7 +230,7 @@ class DistroXClusterToClusterConverterTest {
 
         when(gatewayConverter.convert(List.of("ALL"))).thenReturn(gr);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(gr, result.getGateway());
@@ -246,7 +243,7 @@ class DistroXClusterToClusterConverterTest {
         GatewayV4Request gr = new GatewayV4Request();
         when(gatewayConverter.convert(distroXV1RequestInput.getCluster().getExposedServices())).thenReturn(gr);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(gr, result.getGateway());
@@ -256,7 +253,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheNameShouldBeSetToNull() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertNull(result.getName());
@@ -264,7 +261,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheCustomContainerShouldBeSetToNull() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertNull(result.getCustomContainer());
@@ -272,7 +269,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheCustomQueueShouldBeSetToNull() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertNull(result.getCustomQueue());
@@ -280,7 +277,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheUsernameShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getUserName(), result.getUserName());
@@ -288,7 +285,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvThePasswordShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getPassword(), result.getPassword());
@@ -296,7 +293,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheValidateBlueprintShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getValidateBlueprint(), result.getValidateBlueprint());
@@ -304,7 +301,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheBlueprintNameShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getBlueprintName(), result.getBlueprintName());
@@ -312,7 +309,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheDatabasesShouldBeSet() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(distroXV1RequestInput.getCluster().getDatabases(), result.getDatabases());
@@ -323,7 +320,7 @@ class DistroXClusterToClusterConverterTest {
         ClouderaManagerV4Request cmConversionResult = new ClouderaManagerV4Request();
         when(cmConverter.convert(distroXV1RequestInput.getCluster().getCm())).thenReturn(cmConversionResult);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(cmConversionResult, result.getCm());
@@ -335,9 +332,8 @@ class DistroXClusterToClusterConverterTest {
     @Test
     void testConvertWithEnvCmConversionShouldNotHappenIfInputCmIsNull() {
         distroXV1RequestInput.getCluster().setCm(null);
-        when(cmConverter.convert(any(ClouderaManagerV1Request.class))).thenReturn(new ClouderaManagerV4Request());
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertNull(result.getCm());
@@ -347,7 +343,7 @@ class DistroXClusterToClusterConverterTest {
 
     @Test
     void testConvertWithEnvTheExecutionTypeShouldBeSetToDefault() {
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(ExecutorType.DEFAULT, result.getExecutorType());
@@ -363,7 +359,7 @@ class DistroXClusterToClusterConverterTest {
                 env
         )).thenReturn(decoratorResult);
 
-        ClusterV4Request result = underTest.convert(distroXV1RequestInput, env);
+        ClusterV4Request result = testConvertDistroXV1RequestWithEnvironment();
 
         assertNotNull(result);
         assertEquals(decoratorResult, result.getCloudStorage());
@@ -380,8 +376,6 @@ class DistroXClusterToClusterConverterTest {
     @Test
     void testConvertClusterV4RequestToDistroXClusterV1RequestWhenExposedServicesAreNullThenItShouldNotBeSet() {
         clusterV4RequestInput.setGateway(null);
-
-        when(gatewayConverter.exposedService(any())).thenReturn(new ArrayList<>());
 
         DistroXClusterV1Request result = underTest.convert(clusterV4RequestInput);
 
@@ -552,4 +546,11 @@ class DistroXClusterToClusterConverterTest {
         return new GatewayV4Request();
     }
 
+    private ClusterV4Request testConvertDistroXV1Request() {
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(distroXV1RequestInput));
+    }
+
+    private ClusterV4Request testConvertDistroXV1RequestWithEnvironment() {
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.convert(distroXV1RequestInput, env));
+    }
 }

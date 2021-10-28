@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -65,11 +64,6 @@ public class AzureImageFormatValidatorTest {
 
     private CloudStack cloudStack;
 
-    @BeforeAll
-    static void setupAll() {
-        ThreadBasedUserCrnProvider.setUserCrn(TEST_USER_CRN);
-    }
-
     @Test
     void testImageHasValidVhdFormat() {
         Image image = new Image(VALID_IMAGE_NAME, new HashMap<>(), "centos7", "redhat7", "", "default", "default-id", new HashMap<>());
@@ -89,7 +83,9 @@ public class AzureImageFormatValidatorTest {
 
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(false);
 
-        Assertions.assertThrows(CloudConnectorException.class, () -> underTest.validate(authenticatedContext, cloudStack));
+        Assertions.assertThrows(CloudConnectorException.class,
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN,
+                        () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack))));
         verify(azureImageTermsSignerService, never()).isSigned(eq(AZURE_SUBSCRIPTION_ID), any(), any());
     }
 
@@ -103,7 +99,7 @@ public class AzureImageFormatValidatorTest {
         when(entitlementService.azureMarketplaceImagesEnabled(TEST_ACCOUNT_ID)).thenReturn(true);
         when(azureImageTermsSignerService.isSigned(anyString(), any(), any())).thenReturn(true);
 
-        underTest.validate(authenticatedContext, cloudStack);
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack));
 
         verify(entitlementService, times(1)).azureMarketplaceImagesEnabled(any());
         verify(azureImageTermsSignerService).isSigned(eq(AZURE_SUBSCRIPTION_ID), any(), any());
@@ -119,11 +115,12 @@ public class AzureImageFormatValidatorTest {
         when(azureImageTermsSignerService.isSigned(anyString(), any(), any())).thenReturn(false);
 
         CloudConnectorException exception = Assertions.assertThrows(CloudConnectorException.class,
-                () -> underTest.validate(authenticatedContext, cloudStack));
+                () -> ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validate(authenticatedContext, cloudStack)));
 
         assertEquals("Your image cloudera:cdp-7_2:freeipa:1.0.2103081333 seems to be an Azure Marketplace image, however " +
-                "its Terms and Conditions are not accepted! Please accept them and retry upgrade. On how to accept the Terms and Conditions of the image " +
-                "please refer to azure documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.",
+                        "its Terms and Conditions are not accepted! Please accept them and retry upgrade. " +
+                        "On how to accept the Terms and Conditions of the image " +
+                        "please refer to azure documentation at https://docs.microsoft.com/en-us/cli/azure/vm/image/terms?view=azure-cli-latest.",
                 exception.getMessage());
         verify(entitlementService, times(1)).azureMarketplaceImagesEnabled(any());
         verify(azureImageTermsSignerService).isSigned(eq(AZURE_SUBSCRIPTION_ID), any(), any());

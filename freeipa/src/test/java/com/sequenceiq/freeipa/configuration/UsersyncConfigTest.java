@@ -48,16 +48,22 @@ class UsersyncConfigTest {
     Tracer tracer;
 
     @Test
-    void testAsyncTaskExecutorDecoration() throws Exception {
+    void testAsyncTaskExecutorDecoration() {
         String expectedRequestId = "requestId";
         MDCBuilder.addRequestId(expectedRequestId);
-        ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
 
-        Future<?> future = usersyncTaskExecutor.submit(() -> {
-                assertEquals(expectedRequestId, MDCUtils.getRequestId().get());
-                assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
-            });
-        future.get(1L, TimeUnit.SECONDS);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            try {
+                Future<?> future = usersyncTaskExecutor.submit(() -> {
+                    assertEquals(expectedRequestId, MDCUtils.getRequestId().get());
+                    assertEquals(USER_CRN, ThreadBasedUserCrnProvider.getUserCrn());
+                });
+                future.get(1L, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+
     }
 
     @TestConfiguration

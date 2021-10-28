@@ -15,7 +15,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,6 +60,8 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CentralCmTemplateUpdaterTest {
+
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String FQDN = "fqdn";
 
@@ -110,9 +111,6 @@ public class CentralCmTemplateUpdaterTest {
 
     @Before
     public void setUp() {
-        if (StringUtils.isEmpty(ThreadBasedUserCrnProvider.getUserCrn())) {
-            ThreadBasedUserCrnProvider.setUserCrn("crn:cdp:iam:us-west-1:1234:user:1");
-        }
         when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(true);
 
         List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider(),
@@ -150,9 +148,9 @@ public class CentralCmTemplateUpdaterTest {
     private static Set<HostgroupView> toHostgroupViews(Map<String, List<Map<String, String>>> hostgroupMappings) {
         return hostgroupMappings.entrySet().stream()
                 .map(entry -> new HostgroupView(entry.getKey(), 0, InstanceGroupType.CORE,
-                    entry.getValue().stream()
-                        .map(each -> each.get(FQDN))
-                        .collect(toSet())
+                        entry.getValue().stream()
+                                .map(each -> each.get(FQDN))
+                                .collect(toSet())
                 ))
                 .collect(toSet());
     }
@@ -160,21 +158,21 @@ public class CentralCmTemplateUpdaterTest {
     @Test
     public void getCmTemplate() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/clouderamanager.bp", generated);
     }
 
     @Test
     public void getCmTemplateWhenShouldNotSplitJNAndZK() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/cb5660.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/cb5660.bp", generated);
     }
 
     @Test
     public void danglingVariableReferencesAreRemoved() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-variables.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/clouderamanager-variables.bp", generated);
     }
 
@@ -195,7 +193,7 @@ public class CentralCmTemplateUpdaterTest {
             }
         }));
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/namenode-ha.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/namenode-ha-injected.bp", generated);
     }
 
@@ -212,28 +210,33 @@ public class CentralCmTemplateUpdaterTest {
                 new CustomConfigurationPropertyView("role_config_name", "role_config_value", "balancer", "hdfs")
         ));
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/namenode-ha.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/namenode-ha-injected.bp", generated);
     }
 
     @Test
     public void getCmTemplateNoMetastore() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-nometastore.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/clouderamanager-nometastore.bp", generated);
     }
 
     @Test
     public void getCmTemplateNoMetastoreWithTemplateParams() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-fixparam.bp"));
-        ApiClusterTemplate generated = generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null);
+        ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/clouderamanager-fixparam.bp", generated);
+    }
+
+    private ApiClusterTemplate testGetCmTemplate() {
+        return ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN,
+                () -> generator.getCmTemplate(templatePreparationObject, getHostgroupMappings(), clouderaManagerRepo, null, null));
     }
 
     @Test
     public void getCmTemplateWithoutHosts() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-without-hosts.bp"));
-        String generated = generator.getBlueprintText(templatePreparationObject);
+        String generated = ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> generator.getBlueprintText(templatePreparationObject));
         Assert.assertEquals(new CmTemplateProcessor(getBlueprintText("output/clouderamanager-without-hosts.bp")).getTemplate().toString(),
                 new CmTemplateProcessor(generated).getTemplate().toString());
     }

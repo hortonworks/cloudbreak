@@ -119,10 +119,6 @@ public class ImageCatalogServiceTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    private static final String CDP_DEFAULT_CATALOG_NAME = "cdp-default";
-
-    private static final String CATALOG_NAME = "test-catalog";
-
     private static final String CUSTOM_CATALOG_NAME = "custom-catalog";
 
     private static final String CUSTOM_BASE_PARCEL_URL = "https://myarchive.test.com";
@@ -884,11 +880,8 @@ public class ImageCatalogServiceTest {
 
         Set<ImageCatalog> imageCatalogs = getImageCatalogs();
         when(imageCatalogRepository.findAllByIdNotArchived(any())).thenReturn(imageCatalogs);
-        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
-            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        }
 
-        Set<ImageCatalog> actual = underTest.findAllByIdsWithDefaults(null, false);
+        Set<ImageCatalog> actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.findAllByIdsWithDefaults(null, false));
 
         assertEquals(3, actual.size());
         assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals("default")).findFirst().get()));
@@ -901,11 +894,8 @@ public class ImageCatalogServiceTest {
         Set<ImageCatalog> imageCatalogs = getImageCatalogs();
         when(imageCatalogRepository.findAllByIdNotArchived(any())).thenReturn(imageCatalogs);
         setMockedLegacyCatalogEnabled(true);
-        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
-            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        }
 
-        Set<ImageCatalog> actual = underTest.findAllByIdsWithDefaults(null, false);
+        Set<ImageCatalog> actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.findAllByIdsWithDefaults(null, false));
 
         assertEquals(4, actual.size());
         assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals("default")).findFirst().get()));

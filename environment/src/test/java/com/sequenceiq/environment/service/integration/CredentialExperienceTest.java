@@ -27,10 +27,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
-import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.CredentialConnector;
 import com.sequenceiq.cloudbreak.cloud.handler.CredentialPrerequisitesHandler;
@@ -135,10 +135,6 @@ public class CredentialExperienceTest {
         when(cloudPlatformConnectors.getDefault(any())).thenReturn(connector);
         when(connector.credentials()).thenReturn(credentialConnector);
 
-        if (ThreadBasedUserCrnProvider.getUserCrn() == null) {
-            ThreadBasedUserCrnProvider.setUserCrn(USER_CRN);
-        }
-
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
     }
 
@@ -190,7 +186,7 @@ public class CredentialExperienceTest {
         when(commonExperienceConnectorService.collectPolicy(anyString(), anyString())).thenReturn(getExperiencePolicyJson(cloudProvider, COMMON_POLICY));
         when(liftieApi.getPolicy(anyString())).thenReturn(getExperiencePolicyJson(cloudProvider, LIFTIE_POLICY));
 
-        return credentialV1Controller.getPrerequisitesForCloudPlatform(cloudProvider, "addr");
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> credentialV1Controller.getPrerequisitesForCloudPlatform(cloudProvider, "addr"));
     }
 
     private ExperiencePolicyResponse getExperiencePolicyJson(String cloudProvider, String policy) {
