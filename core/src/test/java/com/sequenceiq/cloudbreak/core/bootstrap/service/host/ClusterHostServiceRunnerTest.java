@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
@@ -288,6 +289,7 @@ public class ClusterHostServiceRunnerTest {
     public void testDecoratePillarWithMountInfo() {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
+        when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
         when(cluster.getName()).thenReturn("clustername");
         when(cluster.getStack()).thenReturn(stack);
         when(componentLocator.getComponentLocation(any(), any())).thenReturn(new HashMap<>());

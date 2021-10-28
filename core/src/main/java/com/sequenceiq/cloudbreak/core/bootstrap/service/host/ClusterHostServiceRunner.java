@@ -368,8 +368,12 @@ public class ClusterHostServiceRunner {
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .collect(Collectors.toMap(
                                 InstanceMetaData::getDiscoveryFQDN,
-                                node -> singletonMap("mount_path", getMountPath(group)),
-                                (l, r) -> singletonMap("mount_path", getMountPath(group)))).entrySet().stream())
+                                node -> Map.of("mount_path", getMountPath(group),
+                                        "cloud_platform", stack.getCloudPlatform(),
+                                        "temporary_storage", group.getTemplate().getTemporaryStorage().name()),
+                                (l, r) -> Map.of("mount_path", getMountPath(group),
+                                        "cloud_platform", stack.getCloudPlatform(),
+                                        "temporary_storage", group.getTemplate().getTemporaryStorage().name()))).entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         servicePillar.put("startup", new SaltPillarProperties("/mount/startup.sls", singletonMap("mount", mountPathMap)));
 
