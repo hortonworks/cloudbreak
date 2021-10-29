@@ -36,6 +36,7 @@ public class FreeIpaConverter {
                     .map(this::convertAws)
                     .ifPresent(response::setAws);
             response.setImage(convertImage(freeIpaCreation.getImageCatalog(), freeIpaCreation.getImageId()));
+            response.setEnableMultiAz(freeIpaCreation.isEnableMultiAz());
             return response;
         }
     }
