@@ -27,7 +27,7 @@ public class CrnValidator extends AbstractCrnValidator<String> {
 
     @Override
     protected String getInvalidCrnErrorMessage(String req) {
-        return String.format("Invalid crn provided: %s", req);
+        return String.format("Invalid Crn was provided. '%s' does not match the Crn pattern", req);
     }
 
     @Override

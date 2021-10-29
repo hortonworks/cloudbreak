@@ -8,10 +8,10 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
-import com.sequenceiq.cloudbreak.validation.ValidatorUtil;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseEntry;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedDatabaseProvider;
 import com.sequenceiq.cloudbreak.validation.externaldatabase.SupportedExternalDatabaseServiceEntry;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.redbeams.api.endpoint.v4.database.request.DatabaseV4Request;
 import com.sequenceiq.redbeams.api.util.DatabaseVendorUtil;
 

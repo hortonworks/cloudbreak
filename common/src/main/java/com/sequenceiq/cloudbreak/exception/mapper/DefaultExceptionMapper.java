@@ -1,17 +1,14 @@
-package com.sequenceiq.redbeams.controller.mapper;
+package com.sequenceiq.cloudbreak.exception.mapper;
 
 import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.Provider;
-
-import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
-import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Provider
 public class DefaultExceptionMapper extends BaseExceptionMapper<Exception> {
 
     @Override
-    protected Object getEntity(Exception exception) {
-        return new ExceptionResponse("Internal server error: " + exception.getMessage());
+    protected String getErrorMessage(Exception exception) {
+        return "Default error handler: " + exception.getMessage();
     }
 
     @Override

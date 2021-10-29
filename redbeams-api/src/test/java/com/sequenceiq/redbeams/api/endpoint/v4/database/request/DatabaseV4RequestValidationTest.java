@@ -179,7 +179,7 @@ public class DatabaseV4RequestValidationTest {
                 DATABASE_PROTOCOL + DATABASE_HOST_PORT_DB,
                 DATABASE_TYPE,
                 "abc",
-                Set.<String>of("Invalid crn provided")
+                Set.<String>of("Invalid Crn was provided. 'abc' does not match the Crn pattern")
             }
         });
     }
@@ -206,8 +206,8 @@ public class DatabaseV4RequestValidationTest {
 
             for (ConstraintViolation<DatabaseV4Request> violation : violations) {
                 String violationMessage = violation.getMessage();
-                assertTrue("Unexpected message: " + violationMessage,
-                    expectedErrorMessages.stream().anyMatch(m -> violationMessage.contains(m)));
+                assertTrue("Unexpected message: " + violationMessage + ", expected: " + String.join(", ", expectedErrorMessages),
+                    expectedErrorMessages.stream().anyMatch(violationMessage::contains));
             }
         }
     }

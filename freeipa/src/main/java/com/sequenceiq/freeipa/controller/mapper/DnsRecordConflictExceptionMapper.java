@@ -4,7 +4,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordConflictException;
 
@@ -12,8 +11,8 @@ import com.sequenceiq.freeipa.service.freeipa.dns.DnsRecordConflictException;
 public class DnsRecordConflictExceptionMapper extends BaseExceptionMapper<DnsRecordConflictException> {
 
     @Override
-    protected Object getEntity(DnsRecordConflictException exception) {
-        return new ExceptionResponse("Error during DNS record operation: " + exception.getMessage());
+    protected String getErrorMessage(DnsRecordConflictException exception) {
+        return "Error during DNS record operation: " + exception.getMessage();
     }
 
     @Override

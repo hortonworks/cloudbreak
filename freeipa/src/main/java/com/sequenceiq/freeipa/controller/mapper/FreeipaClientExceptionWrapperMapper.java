@@ -1,20 +1,24 @@
 package com.sequenceiq.freeipa.controller.mapper;
 
+import static org.slf4j.LoggerFactory.getLogger;
+
 import javax.ws.rs.core.Response.Status;
 
+import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionWrapper;
 
 @Component
 public class FreeipaClientExceptionWrapperMapper extends BaseExceptionMapper<FreeIpaClientExceptionWrapper> {
 
+    private static final Logger LOGGER = getLogger(FreeipaClientExceptionWrapperMapper.class);
+
     @Override
-    protected Object getEntity(FreeIpaClientExceptionWrapper exception) {
-        return new ExceptionResponse("Error during interaction with FreeIPA: " + exception.getWrappedException().getMessage());
-    }
+    protected String getErrorMessage(FreeIpaClientExceptionWrapper exception) {
+        LOGGER.info("Error during interaction with FreeIPA (client exception wrapper): {}", exception.getMessage());
+        return "Error during interaction with FreeIPA: " + exception.getWrappedException().getMessage();    }
 
     @Override
     public Status getResponseStatus(FreeIpaClientExceptionWrapper exception) {

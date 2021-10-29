@@ -1067,9 +1067,17 @@ public abstract class TestContext implements ApplicationContextAware {
             getExceptionMap().put(stepKey, new TestFailException(message));
             LOGGER.error(message);
             htmlLoggerForExceptionValidation(message, stepKey);
-        } else if (!isMessageEquals(actualException, runningParameter)) {
-            String message = String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
-                    runningParameter.getExpectedMessage(), ResponseUtil.getErrorMessage(actualException));
+        } else if (!isMessageEquals(actualException, runningParameter) || !isPayloadEquals(actualException, runningParameter)) {
+            List<String> messages = new ArrayList<>();
+            if (!isMessageEquals(actualException, runningParameter)) {
+                messages.add(String.format("Expected exception message (%s) does not match with the actual exception message (%s).",
+                        runningParameter.getExpectedMessage(), ResponseUtil.getErrorMessage(actualException)));
+            }
+            if (!isPayloadEquals(actualException, runningParameter)) {
+                messages.add(String.format("Expected exception payload (%s) does not match with the actual exception payload (%s).",
+                        runningParameter.getExpectedPayload(), ResponseUtil.getErrorPayload(actualException)));
+            }
+            String message = String.join("\n", messages);
             getExceptionMap().put(stepKey, new TestFailException(message));
             LOGGER.error(message);
             htmlLoggerForExceptionValidation(message, stepKey);
@@ -1093,6 +1101,11 @@ public abstract class TestContext implements ApplicationContextAware {
     private boolean isMessageEquals(Exception exception, RunningParameter runningParameter) {
         return StringUtils.isBlank(runningParameter.getExpectedMessage())
                 || Pattern.compile(runningParameter.getExpectedMessage()).matcher(ResponseUtil.getErrorMessage(exception)).find();
+    }
+
+    private boolean isPayloadEquals(Exception exception, RunningParameter runningParameter) {
+        return StringUtils.isBlank(runningParameter.getExpectedPayload())
+                || Pattern.compile(runningParameter.getExpectedPayload()).matcher(ResponseUtil.getErrorPayload(exception)).find();
     }
 
     public void handleExceptionsDuringTest(TestErrorLog testErrorLog) {

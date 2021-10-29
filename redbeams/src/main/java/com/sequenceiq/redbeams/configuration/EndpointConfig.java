@@ -11,10 +11,10 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
+import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.flow.controller.FlowController;
 import com.sequenceiq.flow.controller.FlowPublicController;
 import com.sequenceiq.redbeams.api.RedbeamsApi;
-import com.sequenceiq.redbeams.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.redbeams.controller.mapper.WebApplicationExceptionMapper;
 import com.sequenceiq.redbeams.controller.v4.database.DatabaseV4Controller;
 import com.sequenceiq.redbeams.controller.v4.databaseserver.DatabaseServerV4Controller;

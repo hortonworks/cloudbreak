@@ -2,6 +2,9 @@ package com.sequenceiq.cloudbreak.controller.mapper;
 
 import static ch.qos.logback.classic.Level.INFO;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.messaging.handler.annotation.support.MethodArgumentNotValidException;
@@ -9,7 +12,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.FieldError;
 
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
-import com.sequenceiq.cloudbreak.json.ValidationResult;
+import com.sequenceiq.cloudbreak.exception.mapper.ValidationResultResponse;
 
 import ch.qos.logback.classic.Level;
 
@@ -22,12 +25,12 @@ public class MethodArgumentNotValidExceptionMapper extends BaseExceptionMapper<M
     }
 
     @Override
-    protected Object getEntity(MethodArgumentNotValidException exception) {
-        ValidationResult result = new ValidationResult();
+    protected Object getPayload(MethodArgumentNotValidException exception) {
+        List<ValidationResultResponse> results = new ArrayList<>();
         for (FieldError err : exception.getBindingResult().getFieldErrors()) {
-            result.addValidationError(err.getField(), err.getDefaultMessage());
+            results.add(new ValidationResultResponse(err.getField(), err.getDefaultMessage()));
         }
-        return result;
+        return results;
     }
 
     @Override

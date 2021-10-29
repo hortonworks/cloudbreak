@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedPayload;
 import static org.junit.Assert.assertNotNull;
 
 import javax.inject.Inject;
@@ -111,7 +112,7 @@ public class LdapConfigTest extends AbstractMockTest {
                 .given(LdapTestDto.class)
                 .valid()
                 .withEnvironmentCrn("")
-                .whenException(ldapTestClient.createV1(), BadRequestException.class, expectedMessage(".*environmentCrn.*must not be empty.*"))
+                .whenException(ldapTestClient.createV1(), BadRequestException.class, expectedPayload(".*environmentCrn.*must not be empty.*"))
                 .validate();
     }
 

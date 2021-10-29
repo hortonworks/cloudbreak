@@ -60,8 +60,19 @@ public abstract class BaseExceptionMapper<E extends Throwable> implements Except
         return e.getMessage();
     }
 
-    protected Object getEntity(E exception) {
-        return new ExceptionResponse(getErrorMessage(exception));
+    /**
+     * The error message should be consistent. The response generates the message json from the entity and If we use different java class then the result will
+     * different. For example:
+     * Entity class: ExceptionResponse -> {"message":"error message"}
+     * Entity class: ValidationResult -> {"validationErrors":{"getByCrn.arg0":"Invalid request object"}}
+     * It is very hard to process on the client side. So we should respond with the ExceptionResponse and add the payload if it is available.
+     */
+    protected final ExceptionResponse getEntity(E exception) {
+        return new ExceptionResponse(getErrorMessage(exception), getPayload(exception));
+    }
+
+    protected Object getPayload(E exception) {
+        return null;
     }
 
     protected boolean logException() {

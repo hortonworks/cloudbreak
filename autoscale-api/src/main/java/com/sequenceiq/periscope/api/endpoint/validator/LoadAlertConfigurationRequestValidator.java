@@ -3,7 +3,7 @@ package com.sequenceiq.periscope.api.endpoint.validator;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.cloudbreak.validation.ValidatorUtil;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.periscope.api.model.LoadAlertConfigurationRequest;
 
 public class LoadAlertConfigurationRequestValidator implements ConstraintValidator<ValidLoadAlertConfiguration, LoadAlertConfigurationRequest> {

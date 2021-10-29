@@ -2,20 +2,25 @@ package com.sequenceiq.cloudbreak.common.exception;
 
 public class ExceptionResponse {
 
-    private String message;
+    private final String message;
 
-    public ExceptionResponse() {
-    }
+    private final  Object payload;
 
     public ExceptionResponse(String message) {
         this.message = message;
+        this.payload = null;
+    }
+
+    public ExceptionResponse(String message, Object payload) {
+        this.message = message;
+        this.payload = payload;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
+    public Object getPayload() {
+        return payload;
     }
 }

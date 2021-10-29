@@ -14,9 +14,9 @@ import org.springframework.context.annotation.Configuration;
 
 import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
+import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
 import com.sequenceiq.datalake.controller.diagnostics.DiagnosticsController;
-import com.sequenceiq.datalake.controller.mapper.DefaultExceptionMapper;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.operation.OperationController;
 import com.sequenceiq.datalake.controller.progress.ProgressController;

@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
-import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
@@ -56,7 +55,7 @@ public class EnvironmentResourceDeletionService {
             clusterTemplateV4Endpoint.deleteMultiple(TEMP_WORKSPACE_ID, new HashSet<>(), null, environmentCrn);
         } catch (WebApplicationException e) {
             propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
-        } catch (ProcessingException | UnableToDeleteClusterDefinitionException e) {
+        } catch (ProcessingException e) {
             propagateException("Failed to delete cluster definition(s) from Cloudbreak due to:", e);
         }
     }

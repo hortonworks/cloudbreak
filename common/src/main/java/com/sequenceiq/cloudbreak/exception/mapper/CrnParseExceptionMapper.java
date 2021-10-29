@@ -1,11 +1,10 @@
-package com.sequenceiq.freeipa.controller.mapper;
+package com.sequenceiq.cloudbreak.exception.mapper;
 
 import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
-import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 
 @Component
 public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseException> {
@@ -18,10 +17,5 @@ public class CrnParseExceptionMapper extends BaseExceptionMapper<CrnParseExcepti
     @Override
     public Class<CrnParseException> getExceptionType() {
         return CrnParseException.class;
-    }
-
-    @Override
-    protected String getErrorMessage(CrnParseException exception) {
-        return getResponseStatus(exception).getReasonPhrase() + ": " + exception.getMessage();
     }
 }

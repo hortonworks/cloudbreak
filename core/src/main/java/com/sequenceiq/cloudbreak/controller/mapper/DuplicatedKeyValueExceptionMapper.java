@@ -6,7 +6,6 @@ import javax.ws.rs.core.Response.Status;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
 import com.sequenceiq.cloudbreak.exception.mapper.BaseExceptionMapper;
 import com.sequenceiq.cloudbreak.service.DuplicateKeyValueException;
 
@@ -18,11 +17,6 @@ public class DuplicatedKeyValueExceptionMapper extends BaseExceptionMapper<Dupli
     @Override
     protected Level getLogLevel() {
         return INFO;
-    }
-
-    @Override
-    protected Object getEntity(DuplicateKeyValueException exception) {
-        return new ExceptionResponse(errorMessage(exception));
     }
 
     @Override

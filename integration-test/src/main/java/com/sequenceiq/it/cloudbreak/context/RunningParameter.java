@@ -24,6 +24,8 @@ public class RunningParameter {
 
     private String expectedMessage;
 
+    private String expectedPayload;
+
     private Class urlClass;
 
     private Method urlMethod;
@@ -88,12 +90,21 @@ public class RunningParameter {
         return this;
     }
 
+    public RunningParameter withExpectedPayload(String payload) {
+        expectedPayload = payload;
+        return this;
+    }
+
     public String getKey() {
         return key;
     }
 
     public String getExpectedMessage() {
         return expectedMessage;
+    }
+
+    public String getExpectedPayload() {
+        return expectedPayload;
     }
 
     public Class getUrlClass() {
@@ -177,6 +188,11 @@ public class RunningParameter {
     public static RunningParameter expectedMessage(String message) {
         return new RunningParameter()
                 .withExpectedMessage(message);
+    }
+
+    public static RunningParameter expectedPayload(String payload) {
+        return new RunningParameter()
+                .withExpectedPayload(payload);
     }
 
     public static RunningParameter httpMockUrl(Class url, Method method) {

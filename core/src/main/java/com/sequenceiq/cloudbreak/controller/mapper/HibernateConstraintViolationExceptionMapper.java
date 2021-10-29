@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class HibernateConstraintViolationExceptionMapper extends SendNotificationExceptionMapper<ConstraintViolationException> {
 
     @Override
-    protected Object getEntity(ConstraintViolationException exception) {
+    protected String getErrorMessage(ConstraintViolationException exception) {
         return exception.getLocalizedMessage();
     }
 
