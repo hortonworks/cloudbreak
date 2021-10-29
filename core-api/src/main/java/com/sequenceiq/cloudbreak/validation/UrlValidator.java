@@ -7,6 +7,8 @@ import static org.apache.commons.validator.routines.UrlValidator.NO_FRAGMENTS;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import com.sequenceiq.common.api.util.ValidatorUtil;
+
 public class UrlValidator implements ConstraintValidator<ValidUrl, String> {
 
     @Override

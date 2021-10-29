@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -146,6 +147,28 @@ public class EnvironmentTest extends AbstractMockTest {
                 .when(environmentTestClient.create())
                 .when(environmentTestClient.get())
                 .then(EnvironmentTest::checkEnvironmentCrnIsNotEmpty)
+                .validate();
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is an environment resource created",
+            when = "obtaining the environment with crn via name API",
+            then = "invalid crn error occurred")
+    public void testEnvCrnDescribeWithName(MockedTestContext testContext) {
+        testContext
+                .given(CredentialTestDto.class)
+                .when(credentialTestClient.create())
+                .given(EnvironmentTestDto.class)
+                .when((testContext1, testDto, client) -> {
+                    testDto.setResponse(
+                            client.getInternalClient(testContext)
+                                    .environmentV1Endpoint()
+                                    .getByCrn("someName"));
+                    return testDto;
+                }, key("wrongCrn"))
+                .expect(BadRequestException.class, expectedMessage("Invalid Crn was provided. 'someName' does not match the Crn pattern")
+                        .withKey("wrongCrn"))
                 .validate();
     }
 

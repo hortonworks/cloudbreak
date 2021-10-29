@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.DatalakeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.exception.UnableToDeleteClusterDefinitionException;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.exception.EnvironmentServiceException;
@@ -147,23 +146,6 @@ class EnvironmentResourceDeletionServiceTest {
 
         verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(anyLong(), any(), any(), anyString());
         verify(clusterTemplateV4Endpoint, times(1)).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
-    }
-
-    @Test
-    void testWhenDeleteClusterDefinitionsThrowsUnableToDeleteClusterDefinitionExceptionThenItShouldBeCatchedAndEnvironmentServiceExceptionShouldBeThrown() {
-        doThrow(UnableToDeleteClusterDefinitionException.class).when(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(),
-                eq(ENVIRONMENT_CRN));
-        ClusterTemplateViewV4Response templateViewV4Response = new ClusterTemplateViewV4Response();
-        templateViewV4Response.setName("name");
-        templateViewV4Response.setStatus(ResourceStatus.USER_MANAGED);
-        when(clusterTemplateViewV4Responses.getResponses()).thenReturn(Set.of(templateViewV4Response));
-        when(clusterTemplateV4Endpoint.listByEnv(anyLong(), anyString())).thenReturn(clusterTemplateViewV4Responses);
-
-        Assertions.assertThrows(EnvironmentServiceException.class,
-                () -> environmentResourceDeletionServiceUnderTest.deleteClusterDefinitionsOnCloudbreak(ENVIRONMENT_CRN));
-
-        verify(clusterTemplateV4Endpoint).deleteMultiple(anyLong(), any(), any(), anyString());
-        verify(clusterTemplateV4Endpoint).deleteMultiple(eq(WORKSPACE_ID), any(), any(), eq(ENVIRONMENT_CRN));
     }
 
     @Configuration

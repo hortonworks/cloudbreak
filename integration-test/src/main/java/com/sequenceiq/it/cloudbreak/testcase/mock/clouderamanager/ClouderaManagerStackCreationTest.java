@@ -1,6 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedPayload;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
@@ -60,9 +60,9 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
         String parcelKey = "parcelEx";
         String nameKey = "nameEx";
 
-        String versionValidation = "\\{\"validationErrors\":\\{\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.version\":\"must not be empty\"\\}\\}";
-        String parcelValidation = "\\{\"validationErrors\":\\{\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.parcel\":\"must not be empty\"\\}\\}";
-        String nameValidation = "\\{\"validationErrors\":\\{\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.name\":\"must not be empty\"\\}\\}";
+        String versionValidation = "\\[\\{\"field\":\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.version\",\"result\":\"must not be empty\"\\}\\]";
+        String parcelValidation = "\\[\\{\"field\":\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.parcel\",\"result\":\"must not be empty\"\\}\\]";
+        String nameValidation = "\\[\\{\"field\":\"post\\.arg1\\.cluster\\.cm.products\\[0\\]\\.name\",\"result\":\"must not be empty\"\\}\\]";
 
         testContext
                 .given(partialProduct, ClouderaManagerProductTestDto.class)
@@ -76,19 +76,19 @@ public class ClouderaManagerStackCreationTest extends AbstractClouderaManagerTes
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(clouderaManager)
                 .given(StackTestDto.class).withCluster(cluster)
-                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(versionValidation))
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedPayload(versionValidation))
                 .given(partialProduct, ClouderaManagerProductTestDto.class)
                 .withName("CDH")
                 .withVersion("7.0.0.0")
                 .withParcel("")
                 .given(StackTestDto.class)
-                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(parcelValidation))
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedPayload(parcelValidation))
                 .given(partialProduct, ClouderaManagerProductTestDto.class)
                 .withName("")
                 .withVersion("7.0.0.0")
                 .withParcel("http://cdh/parcel")
                 .given(StackTestDto.class)
-                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedMessage(nameValidation))
+                .whenException(stackTestClient.createV4(), BadRequestException.class, expectedPayload(nameValidation))
                 .validate();
     }
 

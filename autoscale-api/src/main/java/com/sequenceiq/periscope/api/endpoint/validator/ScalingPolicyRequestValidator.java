@@ -5,7 +5,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
-import com.sequenceiq.cloudbreak.validation.ValidatorUtil;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 import com.sequenceiq.periscope.api.model.AdjustmentType;
 import com.sequenceiq.periscope.api.model.ScalingPolicyBase;
 

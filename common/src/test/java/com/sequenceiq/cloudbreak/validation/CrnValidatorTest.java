@@ -57,7 +57,7 @@ public class CrnValidatorTest {
     public void testValidationIfCrnIsInvalid() {
         setupContext();
         assertFalse(underTest.isValid("invalidcrn", context));
-        assertEquals("Invalid crn provided: invalidcrn", errorMessageCaptor.getValue());
+        assertEquals("Invalid Crn was provided. 'invalidcrn' does not match the Crn pattern", errorMessageCaptor.getValue());
     }
 
     @Test

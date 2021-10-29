@@ -78,9 +78,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
 import com.sequenceiq.common.api.telemetry.response.VmLogsResponse;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXMaintenanceModeV1Request;
@@ -141,7 +143,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}")
     @ApiOperation(value = GET_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getDistroXV1ByCrn")
-    StackV4Response getByCrn(@PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
+    StackV4Response getByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @QueryParam("entries") Set<String> entries);
 
     @DELETE
     @Path("name/{name}")
@@ -153,7 +155,8 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}")
     @ApiOperation(value = DELETE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteDistroXV1ByCrn")
-    void deleteByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") Boolean forced);
+    void deleteByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @DELETE
     @Path("")
@@ -171,7 +174,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/sync")
     @ApiOperation(value = SYNC_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "syncDistroXV1ByCrn")
-    void syncByCrn(@PathParam("crn") String crn);
+    void syncByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("name/{name}/retry")
@@ -190,7 +193,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/retry")
     @ApiOperation(value = RETRY_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
             nickname = "retryDistroXV1ByCrn")
-    void retryByCrn(@PathParam("crn") String crn);
+    void retryByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/stop")
@@ -202,7 +205,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/stop")
     @ApiOperation(value = STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "stopDistroXV1ByCrn")
-    FlowIdentifier putStopByCrn(@PathParam("crn") String crn);
+    FlowIdentifier putStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/stop")
@@ -220,13 +223,13 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/start")
     @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByName")
-    FlowIdentifier putStartByName(@PathParam("name") String name);
+    FlowIdentifier putStartByName(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("name") String name);
 
     @PUT
     @Path("crn/{crn}/start")
     @ApiOperation(value = START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByCrn")
-    FlowIdentifier putStartByCrn(@PathParam("crn") String crn);
+    FlowIdentifier putStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/start")
@@ -250,7 +253,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/scaling")
     @ApiOperation(value = SCALE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "putScalingDistroXV1ByCrn")
-    void putScalingByCrn(@PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
+    void putScalingByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn, @Valid DistroXScaleV1Request updateRequest);
 
     @POST
     @Path("name/{name}/manual_repair")
@@ -270,7 +273,8 @@ public interface DistroXV1Endpoint {
             @ApiResponse(code = 200, message = "successful operation", response = FlowIdentifier.class),
             @ApiResponse(code = 0, message = "unsuccessful operation", response = Void.class)
     })
-    FlowIdentifier repairClusterByCrn(@PathParam("crn") String crn, @Valid DistroXRepairV1Request clusterRepairRequest);
+    FlowIdentifier repairClusterByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid DistroXRepairV1Request clusterRepairRequest);
 
     @GET
     @Path("name/{name}/cli_create")
@@ -282,7 +286,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/cli_create")
     @ApiOperation(value = GET_STACK_REQUEST_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getDistroXRequestV1ByCrn")
-    Object getRequestfromCrn(@PathParam("crn") String crn);
+    Object getRequestfromCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @GET
     @Path("name/{name}/status")
@@ -294,7 +298,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/status")
     @ApiOperation(value = GET_STATUS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "statusDistroXV1ByCrn")
-    StackStatusV4Response getStatusByCrn(@PathParam("crn") String crn);
+    StackStatusV4Response getStatusByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @DELETE
     @Path("name/{name}/instance")
@@ -308,7 +312,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/instance")
     @ApiOperation(value = DELETE_INSTANCE_BY_ID_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstanceDistroXV1ByCrn")
-    void deleteInstanceByCrn(@PathParam("crn") String crn,
+    void deleteInstanceByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("instanceId") String instanceId);
 
@@ -325,7 +329,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/instances")
     @ApiOperation(value = DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "deleteInstancesDistroXV1ByCrn")
-    void deleteInstancesByCrn(@PathParam("crn") String crn,
+    void deleteInstancesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @QueryParam("id") List<String> instances,
             MultipleInstanceDeleteRequest request,
             @QueryParam("forced") @DefaultValue("false") boolean forced);
@@ -341,7 +345,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/maintenance")
     @ApiOperation(value = SET_MAINTENANCE_MODE_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.MAINTENANCE_NOTES,
             nickname = "setDistroXMaintenanceModeByCrn")
-    void setClusterMaintenanceModeByCrn(@PathParam("crn") String crn,
+    void setClusterMaintenanceModeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
             @NotNull DistroXMaintenanceModeV1Request maintenanceMode);
 
     @DELETE
@@ -354,7 +358,8 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/cluster")
     @ApiOperation(value = DELETE_WITH_KERBEROS_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CLUSTER_NOTES,
             nickname = "deleteWithKerberosDistroXV1ByCrn")
-    void deleteWithKerberosByCrn(@PathParam("crn") String crn, @QueryParam("forced") @DefaultValue("false") boolean forced);
+    void deleteWithKerberosByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @QueryParam("forced") @DefaultValue("false") boolean forced);
 
     @POST
     @Path("cli_create")
@@ -389,14 +394,14 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.LIST_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
             nickname = "listDistroxDiagnosticsCollectionsV1")
-    ListDiagnosticsCollectionResponse listCollections(@PathParam("crn") String crn);
+    ListDiagnosticsCollectionResponse listCollections(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("diagnostics/{crn}/collections/cancel")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.CANCEL_COLLECTIONS, produces = MediaType.APPLICATION_JSON,
             nickname = "cancelDistroxDiagnosticsCollectionsV1")
-    void cancelCollections(@PathParam("crn") String crn);
+    void cancelCollections(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @POST
     @Path("diagnostics/cm")
@@ -410,28 +415,29 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DiagnosticsOperationDescriptions.GET_CM_ROLES, produces = MediaType.APPLICATION_JSON,
             nickname = "getDistroxCmRoles")
-    List<String> getCmRoles(@PathParam("stackCrn") String stackCrn);
+    List<String> getCmRoles(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("stackCrn") String stackCrn);
 
     @GET
     @Path("progress/resource/crn/{resourceCrn}/last")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_LAST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
             nickname = "getDistroXLastFlowLogProgressByResourceCrn")
-    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+    FlowProgressResponse getLastFlowLogProgressByResourceCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("progress/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = LIST_FLOW_PROGRESS, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
             nickname = "getDistroXFlowLogsProgressByResourceCrn")
-    List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn);
+    List<FlowProgressResponse> getFlowLogsProgressByResourceCrn(
+            @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn);
 
     @GET
     @Path("operation/resource/crn/{resourceCrn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = GET_OPERATION, produces = "application/json", notes = Notes.FLOW_OPERATION_PROGRESS_NOTES,
             nickname = "getDistroXOperationProgressByResourceCrn")
-    OperationView getOperationProgressByResourceCrn(@PathParam("resourceCrn") String resourceCrn,
+    OperationView getOperationProgressByResourceCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("resourceCrn") String resourceCrn,
             @DefaultValue("false") @QueryParam("detailed") boolean detailed);
 
     @POST
@@ -439,7 +445,7 @@ public interface DistroXV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
             nickname = "renewDistroXCertificate")
-    FlowIdentifier renewCertificate(@PathParam("crn") String crn);
+    FlowIdentifier renewCertificate(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/rotate_autotls_certificates")
@@ -452,7 +458,8 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/rotate_autotls_certificates")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ROTATE_CERTIFICATES, nickname = "rotateAutoTlsCertificatesByCrn")
-    CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@PathParam("crn") String crn, @Valid CertificatesRotationV4Request rotateCertificateRequest);
+    CertificatesRotationV4Response rotateAutoTlsCertificatesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid CertificatesRotationV4Request rotateCertificateRequest);
 
     @PUT
     @Path("name/{name}/refresh_recipes")
@@ -464,13 +471,15 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/refresh_recipes")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = REFRESH_RECIPES_BY_CRN, nickname = "refreshRecipesByCrn")
-    UpdateRecipesV4Response refreshRecipesByCrn(@PathParam("crn") String crn, @Valid UpdateRecipesV4Request request);
+    UpdateRecipesV4Response refreshRecipesByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid UpdateRecipesV4Request request);
 
     @POST
     @Path("crn/{crn}/attach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ATTACH_RECIPE_BY_CRN, nickname = "attachRecipesByCrn")
-    AttachRecipeV4Response attachRecipeByCrn(@PathParam("crn") String crn, @Valid AttachRecipeV4Request request);
+    AttachRecipeV4Response attachRecipeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid AttachRecipeV4Request request);
 
     @POST
     @Path("name/{name}/attach_recipe")
@@ -482,7 +491,8 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/detach_recipe")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DETACH_RECIPE_BY_CRN, nickname = "detachRecipesByCrn")
-    DetachRecipeV4Response detachRecipeByCrn(@PathParam("crn") String crn, @Valid DetachRecipeV4Request request);
+    DetachRecipeV4Response detachRecipeByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @Valid DetachRecipeV4Request request);
 
     @POST
     @Path("name/{name}/detach_recipe")
@@ -500,7 +510,7 @@ public interface DistroXV1Endpoint {
     @Path("crn/{crn}/sync_component_versions_from_cm")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "syncs from distrox cluster CM the CM and parcel versions", produces = MediaType.APPLICATION_JSON, nickname = "syncDistroxCmByCrn")
-    DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@PathParam("crn") String crn);
+    DistroXSyncCmV1Response syncComponentVersionsFromCmByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/change_image_catalog")
@@ -518,5 +528,5 @@ public interface DistroXV1Endpoint {
     @Path("/crn/{crn}/get_cluster_recoverable")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "validates if the distrox cluster is recoverable or not", nickname = "getClusterRecoverableByCrn")
-    RecoveryValidationV4Response getClusterRecoverableByCrn(@PathParam("crn") String crn);
+    RecoveryValidationV4Response getClusterRecoverableByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 }

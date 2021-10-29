@@ -26,7 +26,7 @@ import com.sequenceiq.freeipa.controller.OperationV1Controller;
 import com.sequenceiq.freeipa.controller.ProgressV1Controller;
 import com.sequenceiq.freeipa.controller.UserV1Controller;
 import com.sequenceiq.freeipa.controller.UtilV1Controller;
-import com.sequenceiq.freeipa.controller.mapper.DefaultExceptionMapper;
+import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.freeipa.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.freeipa.kerberos.v1.KerberosConfigV1Controller;
 import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Controller;

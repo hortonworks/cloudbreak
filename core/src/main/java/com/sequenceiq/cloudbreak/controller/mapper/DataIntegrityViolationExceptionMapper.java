@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 public class DataIntegrityViolationExceptionMapper extends SendNotificationExceptionMapper<DataIntegrityViolationException> {
 
     @Override
-    protected Object getEntity(DataIntegrityViolationException exception) {
+    protected String getErrorMessage(DataIntegrityViolationException exception) {
         return exception.getLocalizedMessage();
     }
 

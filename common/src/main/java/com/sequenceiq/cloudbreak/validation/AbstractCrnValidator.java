@@ -10,6 +10,7 @@ import javax.validation.ConstraintValidatorContext;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public abstract class AbstractCrnValidator<T> implements ConstraintValidator<ValidCrn, T> {
 
@@ -31,7 +32,7 @@ public abstract class AbstractCrnValidator<T> implements ConstraintValidator<Val
         }
         if (crnInputIsInvalid(req)) {
             String errorMessage = getInvalidCrnErrorMessage(req);
-            addValidationErrorMessage(errorMessage, constraintValidatorContext);
+            ValidatorUtil.addConstraintViolation(constraintValidatorContext, errorMessage);
             return false;
         }
         if (resourceDescriptors.length != 0 && crnInputHasInvalidServiceOrResourceType(req, effect)) {
@@ -39,7 +40,7 @@ public abstract class AbstractCrnValidator<T> implements ConstraintValidator<Val
                     .map(CrnResourceDescriptor::createServiceAndResourceTypePair)
                     .collect(Collectors.toSet());
             String errorMessage = getErrorMessageIfServiceOrResourceTypeInvalid(req, serviceAndResourceTypePairs, effect);
-            addValidationErrorMessage(errorMessage, constraintValidatorContext);
+            ValidatorUtil.addConstraintViolation(constraintValidatorContext, errorMessage);
             return false;
         }
         return true;
@@ -62,8 +63,4 @@ public abstract class AbstractCrnValidator<T> implements ConstraintValidator<Val
     protected abstract boolean crnInputIsInvalid(T req);
 
     protected abstract boolean crnInputIsEmpty(T req);
-
-    private void addValidationErrorMessage(String errorMessage, ConstraintValidatorContext context) {
-        context.buildConstraintViolationWithTemplate(errorMessage).addConstraintViolation();
-    }
 }

@@ -4,6 +4,7 @@ import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public class DatabaseVendorValidator implements ConstraintValidator<ValidDatabaseVendor, String> {
 
