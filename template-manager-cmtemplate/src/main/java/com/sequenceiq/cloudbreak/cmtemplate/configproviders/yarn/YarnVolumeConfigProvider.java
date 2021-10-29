@@ -35,14 +35,17 @@ public class YarnVolumeConfigProvider implements CmHostGroupRoleConfigProvider {
                     }
                 }
                 String localDirsVolumePath;
+                String logDirsVolumePath;
                 if (hostGroupView != null && hostGroupView.getTemporaryStorage() == TemporaryStorage.EPHEMERAL_VOLUMES && temporaryStorageVolumeCount != 0) {
                     localDirsVolumePath = buildEphemeralVolumePathString(temporaryStorageVolumeCount, "nodemanager");
+                    logDirsVolumePath = buildEphemeralVolumePathString(temporaryStorageVolumeCount, "nodemanager/log");
                 } else {
                     localDirsVolumePath = buildVolumePathStringZeroVolumeHandled(volumeCount, "nodemanager");
+                    logDirsVolumePath = buildVolumePathStringZeroVolumeHandled(volumeCount, "nodemanager/log");
                 }
                 return List.of(
                         config(NODE_LOCAL_DIRS, localDirsVolumePath),
-                        config(NODE_LOG_DIRS, buildVolumePathStringZeroVolumeHandled(volumeCount, "nodemanager/log"))
+                        config(NODE_LOG_DIRS, logDirsVolumePath)
                 );
             default:
                 return List.of();

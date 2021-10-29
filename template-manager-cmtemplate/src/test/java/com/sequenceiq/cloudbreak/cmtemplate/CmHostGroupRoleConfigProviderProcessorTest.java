@@ -272,7 +272,8 @@ public class CmHostGroupRoleConfigProviderProcessorTest {
         assertEquals(
                 List.of(
                         config("yarn_nodemanager_local_dirs", "/hadoopfs/ephfs1/nodemanager,/hadoopfs/ephfs2/nodemanager,/hadoopfs/ephfs3/nodemanager"),
-                        config("yarn_nodemanager_log_dirs", "/hadoopfs/fs1/nodemanager/log,/hadoopfs/fs2/nodemanager/log")
+                        config("yarn_nodemanager_log_dirs", "/hadoopfs/ephfs1/nodemanager/log,/hadoopfs/ephfs2/nodemanager/log," +
+                                "/hadoopfs/ephfs3/nodemanager/log")
                 ),
                 roleConfigs.get("yarn-NODEMANAGER-BASE")
         );
