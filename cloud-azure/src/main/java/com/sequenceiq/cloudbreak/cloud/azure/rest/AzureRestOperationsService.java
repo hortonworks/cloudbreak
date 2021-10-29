@@ -45,8 +45,8 @@ public class AzureRestOperationsService {
             LOGGER.warn(message);
             throw new AzureRestResponseException(message);
         } catch (HttpStatusCodeException e) {
-            String message = String.format("Error during http %s operation", httpMethod.toString());
-            LOGGER.warn(message);
+            String message = String.format("Error during http %s operation: %s", httpMethod.toString(), e.getMessage());
+            LOGGER.warn(message, e);
             throw new AzureRestResponseException(message, e);
         }
     }

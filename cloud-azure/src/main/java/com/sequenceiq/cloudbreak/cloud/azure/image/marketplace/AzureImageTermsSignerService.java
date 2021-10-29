@@ -45,7 +45,7 @@ public class AzureImageTermsSignerService {
             return azureImageTerms.getProperties().isAccepted();
         } catch (Exception e) {
             String message = errorMessageBuilder.buildWithReason(e.getMessage());
-            LOGGER.warn(message);
+            LOGGER.warn(message, e);
             throw new CloudConnectorException(message, e);
         }
     }
@@ -75,7 +75,7 @@ public class AzureImageTermsSignerService {
         } catch (Exception e) {
             String message =
                     errorMessageBuilder.buildWithReason(String.format("error when signing vm image terms and conditions, message is '%s'", e.getMessage()));
-            LOGGER.warn(message);
+            LOGGER.warn(message, e);
             throw new CloudConnectorException(message, e);
         }
     }
