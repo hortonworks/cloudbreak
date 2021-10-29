@@ -65,7 +65,7 @@
           },
           "instanceType": "e2-standard-16"
         },
-        "nodeCount": 0,
+        "nodeCount": 1,
         "type": "CORE",
         "recoveryMode": "MANUAL"
       },
