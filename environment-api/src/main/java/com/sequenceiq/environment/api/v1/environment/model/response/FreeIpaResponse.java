@@ -20,6 +20,9 @@ public class FreeIpaResponse implements Serializable {
     @ApiModelProperty(EnvironmentModelDescription.FREEIPA_IMAGE)
     private FreeIpaImageResponse image;
 
+    @ApiModelProperty(value = EnvironmentModelDescription.MULTIAZ_FREEIPA)
+    private boolean enableMultiAz;
+
     public Integer getInstanceCountByGroup() {
         return instanceCountByGroup;
     }
@@ -44,12 +47,21 @@ public class FreeIpaResponse implements Serializable {
         this.image = image;
     }
 
+    public boolean isEnableMultiAz() {
+        return enableMultiAz;
+    }
+
+    public void setEnableMultiAz(boolean enableMultiAz) {
+        this.enableMultiAz = enableMultiAz;
+    }
+
     @Override
     public String toString() {
         return "FreeIpaResponse{" +
                 "instanceCountByGroup=" + instanceCountByGroup +
                 ", aws=" + aws +
                 ", image=" + image +
+                ", enableMultiAz=" + enableMultiAz +
                 '}';
     }
 }
