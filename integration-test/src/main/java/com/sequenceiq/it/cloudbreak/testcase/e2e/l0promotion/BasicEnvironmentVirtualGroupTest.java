@@ -47,16 +47,16 @@ public class BasicEnvironmentVirtualGroupTest extends AbstractE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BasicEnvironmentVirtualGroupTest.class);
 
-    @Value("${integrationtest.aws.l0.adminGroupName}")
+    @Value("${integrationtest.userGroup.adminGroupName:}")
     private String adminGroupName;
 
-    @Value("${integrationtest.aws.l0.adminGroupCrn}")
+    @Value("${integrationtest.userGroup.adminGroupCrn:}")
     private String adminGroupCrn;
 
-    @Value("${integrationtest.aws.l0.userGroupName}")
+    @Value("${integrationtest.userGroup.userGroupName:}")
     private String userGroupName;
 
-    @Value("${integrationtest.aws.l0.userGroupCrn}")
+    @Value("${integrationtest.userGroup.userGroupCrn:}")
     private String userGroupCrn;
 
     @Inject

@@ -50,6 +50,11 @@ integrationtest:
     secretkey: nHkdxgZR0BaNHaSYM3ooS6rIlpV5E+k1CIkr+jFId2g=
     crn:
     name:
+  userGroup:
+    adminGroupName: testgroupa
+    adminGroupCrn: "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:testgroupa/ebc27aff-7d91-4f76-bf98-e81dbbd615e9"
+    userGroupName: testgroupb
+    userGroupCrn: "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:testgroupb/b983b572-9774-4f8f-8377-861b511442de"
   testsuite:
     pollingInterval: 1000
     threadPoolSize: 8
@@ -125,11 +130,6 @@ integrationtest:
       upgrade:
         imageId: 9c1c8959-86a7-4b7d-af5a-be252f8b395d
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
-    l0:
-      adminGroupName: testgroupa
-      adminGroupCrn: "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:testgroupa/ebc27aff-7d91-4f76-bf98-e81dbbd615e9"
-      userGroupName: testgroupb
-      userGroupCrn: "crn:altus:iam:us-west-1:f8e2f110-fc7e-4e46-ae55-381aacc6718c:group:testgroupb/b983b572-9774-4f8f-8377-861b511442de"
 
   # azure parameters
   azure:
