@@ -9,13 +9,27 @@ public class DatalakeResizeFlowChainStartEvent extends SdxEvent {
 
     private SdxCluster sdxCluster;
 
-    public DatalakeResizeFlowChainStartEvent(Long sdxId, SdxCluster newSdxCluster, String userId) {
+    private final String backupLocation;
+
+    private final boolean backup;
+
+    public DatalakeResizeFlowChainStartEvent(Long sdxId, SdxCluster newSdxCluster, String userId, String backupLocation, boolean backup) {
         super(sdxId, userId);
         this.sdxCluster = newSdxCluster;
+        this.backupLocation = backupLocation;
+        this.backup = backup;
+    }
+
+    public boolean shouldTakeBackup() {
+        return backup;
     }
 
     public SdxCluster getSdxCluster() {
         return sdxCluster;
+    }
+
+    public String getBackupLocation() {
+        return backupLocation;
     }
 
     @Override

@@ -40,6 +40,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .withNetwork(networkKey)
                 .withCreateFreeIpa(Boolean.FALSE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
+                .withBackup("location/of/the/backup")
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .given(sdxName, SdxInternalTestDto.class)
