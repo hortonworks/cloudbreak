@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.google.api.client.repackaged.com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -161,7 +160,7 @@ public class StackV4RequestToStackConverter {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(source.getEnvironmentCrn());
         DetailedEnvironmentResponse environment = null;
-        if (!Strings.isNullOrEmpty(source.getEnvironmentCrn())) {
+        if (!StringUtils.isEmpty(source.getEnvironmentCrn())) {
             environment = measure(() -> environmentClientService.getByCrn(source.getEnvironmentCrn()),
                     LOGGER, "Environment responded in {} ms for stack {}", source.getName());
         }
@@ -337,8 +336,8 @@ public class StackV4RequestToStackConverter {
     }
 
     private void validateStackAuthentication(StackV4Request source) {
-        if (Strings.isNullOrEmpty(source.getAuthentication().getPublicKey())
-                && Strings.isNullOrEmpty(source.getAuthentication().getPublicKeyId())) {
+        if (StringUtils.isEmpty(source.getAuthentication().getPublicKey())
+                && StringUtils.isEmpty(source.getAuthentication().getPublicKeyId())) {
             throw new BadRequestException("You should define the publickey or publickeyid!");
         } else if (source.getAuthentication().getLoginUserName() != null) {
             throw new BadRequestException("You can not modify the default user!");
@@ -452,7 +451,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpMock(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!Strings.isNullOrEmpty(subnetId)) {
+        if (!StringUtils.isEmpty(subnetId)) {
             InstanceGroupMockNetworkV4Parameters mock = new InstanceGroupMockNetworkV4Parameters();
             mock.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setMock(mock);
@@ -467,7 +466,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpGcp(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!Strings.isNullOrEmpty(subnetId)) {
+        if (!StringUtils.isEmpty(subnetId)) {
             InstanceGroupGcpNetworkV4Parameters gcp = new InstanceGroupGcpNetworkV4Parameters();
             gcp.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setGcp(gcp);
@@ -476,7 +475,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpAzure(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!Strings.isNullOrEmpty(subnetId)) {
+        if (!com.google.common.base.Strings.isNullOrEmpty(subnetId)) {
             InstanceGroupAzureNetworkV4Parameters azure = new InstanceGroupAzureNetworkV4Parameters();
             azure.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setAzure(azure);
@@ -485,7 +484,7 @@ public class StackV4RequestToStackConverter {
     }
 
     private void setUpAws(InstanceGroupV4Request instanceGroup, InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, String subnetId) {
-        if (!Strings.isNullOrEmpty(subnetId)) {
+        if (!StringUtils.isEmpty(subnetId)) {
             InstanceGroupAwsNetworkV4Parameters aws = new InstanceGroupAwsNetworkV4Parameters();
             aws.setSubnetIds(List.of(subnetId));
             instanceGroupNetworkV4Request.setAws(aws);

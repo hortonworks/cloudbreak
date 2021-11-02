@@ -8,9 +8,9 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.testng.annotations.Test;
 
-import com.google.api.client.repackaged.org.apache.commons.codec.binary.Base64;
 import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
