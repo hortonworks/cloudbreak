@@ -61,8 +61,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxInstanceGroupNamesRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -386,8 +386,9 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public Set<String> getInstanceGroupNamesBySdxDetails(SdxInstanceGroupNamesRequest request) {
-        return sdxService.getInstanceGroupNamesBySdxDetails(request.getClusterShape(), request.getRuntimeVersion(), request.getCloudPlatform());
+    public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion,
+            String cloudPlatform) {
+        return sdxService.getInstanceGroupNamesBySdxDetails(clusterShape, runtimeVersion, cloudPlatform);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

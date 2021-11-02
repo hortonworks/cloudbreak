@@ -1281,6 +1281,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion, String cloudPlatform) {
+        if (clusterShape == null || StringUtils.isAnyBlank(runtimeVersion, cloudPlatform)) {
+            throw new BadRequestException("The following query params needs to be filled for this request: clusterShape, runtimeVersion, cloudPlatform");
+        }
         Set<String> result = new HashSet<>();
         StackV4Request stackV4Request = cdpConfigService.getConfigForKey(new CDPConfigKey(
                 CloudPlatform.valueOf(cloudPlatform), clusterShape, runtimeVersion
