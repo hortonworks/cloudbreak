@@ -187,7 +187,7 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             if (creation) {
                 finished = describeInstancesResult.getReservations().stream()
                         .flatMap(s -> s.getInstances().stream())
-                        .allMatch(this::instanceRunning);
+                        .allMatch(this::instanceRunningOrTerminated);
             } else {
                 finished = describeInstancesResult.getReservations().stream()
                         .flatMap(s -> s.getInstances().stream())
@@ -203,6 +203,10 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
             }
         }
         return finished;
+    }
+
+    private boolean instanceRunningOrTerminated(Instance instance) {
+        return instanceRunning(instance) || instanceTerminated(instance);
     }
 
     private boolean instanceRunning(Instance instance) {
@@ -231,9 +235,13 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
         LOGGER.info("Terminate instance with instance id: {}", resource.getInstanceId());
-        TerminateInstancesRequest request = new TerminateInstancesRequest().withInstanceIds(resource.getInstanceId());
-        TerminateInstancesResult terminateInstancesResult = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().deleteInstance(request), null);
-        return terminateInstancesResult == null ? null : resource;
+        if (resource.getInstanceId() != null) {
+            TerminateInstancesRequest request = new TerminateInstancesRequest().withInstanceIds(resource.getInstanceId());
+            TerminateInstancesResult terminateInstancesResult = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().deleteInstance(request), null);
+            return terminateInstancesResult == null ? null : resource;
+        } else {
+            return resource;
+        }
     }
 
     @Override

@@ -126,6 +126,7 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
                 .collect(Collectors.toCollection(LinkedHashSet::new));
         Map<String, CloudResource> resourcesByInstanceId = resources.stream()
                 .filter(resource -> ResourceType.AWS_INSTANCE.equals(resource.getType()))
+                .filter(cloudResource -> cloudResource.getInstanceId() != null)
                 .collect(Collectors.toMap(CloudResource::getInstanceId, Function.identity()));
         final AtomicInteger counter = new AtomicInteger(0);
         Map<Integer, List<String>> instanceIdBatches = preferredInstanceIds.stream()
