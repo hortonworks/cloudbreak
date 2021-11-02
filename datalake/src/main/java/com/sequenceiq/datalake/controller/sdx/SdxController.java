@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Controller;
@@ -387,8 +386,8 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public Set<String> getInstanceGroupNamesBySdxDetails(@NotEmpty SdxClusterShape clusterShape, @NotEmpty String runtimeVersion,
-            @NotEmpty String cloudPlatform) {
+    public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion,
+            String cloudPlatform) {
         return sdxService.getInstanceGroupNamesBySdxDetails(clusterShape, runtimeVersion, cloudPlatform);
     }
 

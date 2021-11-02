@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -280,8 +279,7 @@ public interface SdxEndpoint {
     @Path("instance_group_names")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gather available instance group names by SDX cluster attributes", nickname = "getInstanceGroupNamesBySdxDetails")
-    Set<String> getInstanceGroupNamesBySdxDetails(@QueryParam("clusterShape") @NotEmpty SdxClusterShape clusterShape,
-            @QueryParam("runtimeVersion") @NotEmpty String runtimeVersion,
-            @QueryParam("cloudPlatform") @NotEmpty String cloudPlatform);
+    Set<String> getInstanceGroupNamesBySdxDetails(@QueryParam("clusterShape") SdxClusterShape clusterShape,
+            @QueryParam("runtimeVersion") String runtimeVersion, @QueryParam("cloudPlatform") String cloudPlatform);
 
 }
