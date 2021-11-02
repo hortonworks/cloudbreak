@@ -5,7 +5,7 @@ public class FreeIpaModelDescriptions {
     public static final String REGION = "region of the freeipa stack";
     public static final String AVAILABILITY_ZONE = "availability zone of the freeipa stack";
     public static final String PLACEMENT_SETTINGS = "placement configuration parameters for a cluster (e.g. 'region', 'availabilityZone')";
-    public static final String INSTANCE_GROUPS = "collection of instance groupst";
+    public static final String INSTANCE_GROUPS = "collection of instance groups";
     public static final String AUTHENTICATION = "freeipa stack related authentication";
     public static final String NETWORK = "freeipa stack related network";
     public static final String IMAGE_SETTINGS = "settings for custom images";
@@ -17,7 +17,7 @@ public class FreeIpaModelDescriptions {
     public static final String FREEIPA_APPLICATION_VERSION = "version of the application provisioned FreeIPA";
     public static final String CLOUD_PLATFORM = "Cloud Platform for FreeIPA";
     public static final String USE_CCM = "whether to use CCM for communicating with the freeipa instance";
-    public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
+    public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with CCM and cluster proxy.";
     public static final String VARIANT = "Configuration of cloud platform variant.";
     public static final String TAGS = "Tags for freeipa server.";
     public static final String USERSYNC_STATUS_DETAILS = "user sync status details for the environment";
@@ -44,9 +44,9 @@ public class FreeIpaModelDescriptions {
     }
 
     public static class InstanceMetaDataModelDescription {
-        public static final String PRIVATE_IP = "private ip of the insctance";
-        public static final String PUBLIC_IP = "public ip of the instance";
-        public static final String INSTANCE_ID = "id of the instance";
+        public static final String PRIVATE_IP = "private IP of the instance";
+        public static final String PUBLIC_IP = "public IP of the instance";
+        public static final String INSTANCE_ID = "ID of the instance";
         public static final String DISCOVERY_FQDN = "the fully qualified domain name of the node in the service discovery cluster";
     }
 
@@ -63,8 +63,8 @@ public class FreeIpaModelDescriptions {
 
     public static class SecurityGroupModelDescription {
         public static final String SECURITY_RULES = "list of security rules that relates to the security group";
-        public static final String SECURITY_GROUP_ID = "Exisiting security group id";
-        public static final String SECURITY_GROUP_IDS = "Exisiting security group ids";
+        public static final String SECURITY_GROUP_ID = "Existing security group ID";
+        public static final String SECURITY_GROUP_IDS = "Existing security group IDs";
     }
 
     public static class SecurityRuleModelDescription {
@@ -92,7 +92,7 @@ public class FreeIpaModelDescriptions {
         public static final String GCP_PARAMETERS = "provider specific parameters of the specified network";
         public static final String OPENSTACK_PARAMETERS_DEPRECATED = "provider specific parameters of the specified network";
         public static final String OUTBOUND_INTERNET_TRAFFIC = "A flag to enable or disable the outbound internet traffic from the instances.";
-        public static final String NETWORK_CIDRS = "the network cidrs which have to be reacheable from the instances";
+        public static final String NETWORK_CIDRS = "the network CIDRs which have to be reachable from the instances";
     }
 
     public static class FreeIpaServerSettingsModelDescriptions {

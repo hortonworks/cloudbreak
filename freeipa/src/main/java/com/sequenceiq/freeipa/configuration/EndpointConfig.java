@@ -54,6 +54,9 @@ public class EndpointConfig extends ResourceConfig {
     @Value("${freeipa.structuredevent.rest.enabled:false}")
     private Boolean auditEnabled;
 
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
+
     @Inject
     private List<ExceptionMapper<?>> exceptionMappers;
 
@@ -78,10 +81,10 @@ public class EndpointConfig extends ResourceConfig {
     private void registerSwagger() {
         BeanConfig swaggerConfig = new BeanConfig();
         swaggerConfig.setTitle("FreeIPA API");
-        swaggerConfig.setDescription("");
+        swaggerConfig.setDescription("API for working with FreeIPA clusters");
         swaggerConfig.setVersion(applicationVersion);
         swaggerConfig.setSchemes(new String[]{"http", "https"});
-        swaggerConfig.setBasePath(FreeIpaApi.API_ROOT_CONTEXT);
+        swaggerConfig.setBasePath(contextPath + FreeIpaApi.API_ROOT_CONTEXT);
         swaggerConfig.setLicenseUrl("https://github.com/sequenceiq/cloudbreak/blob/master/LICENSE");
         swaggerConfig.setResourcePackage("com.sequenceiq.freeipa.api,com.sequenceiq.flow.api,com.sequenceiq.authorization," +
                 "com.sequenceiq.cloudbreak.structuredevent.rest.endpoint");

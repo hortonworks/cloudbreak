@@ -75,16 +75,17 @@ public class StackToDescribeFreeIpaResponseConverter {
         Optional.ofNullable(image).ifPresent(i -> describeFreeIpaResponse.setImage(imageSettingsResponseConverter.convert(i)));
         Optional.ofNullable(freeIpa).ifPresent(f -> describeFreeIpaResponse.setFreeIpa(freeIpaServerResponseConverter.convert(f)));
         describeFreeIpaResponse.setNetwork(networkResponseConverter.convert(stack));
-        describeFreeIpaResponse.setPlacement(convert(stack));
+        describeFreeIpaResponse.setPlacement(convertToPlacementResponse(stack));
+        describeFreeIpaResponse.setTunnel(stack.getTunnel());
         describeFreeIpaResponse.setInstanceGroups(instanceGroupConverter.convert(stack.getInstanceGroups()));
         describeFreeIpaResponse.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(stack));
         describeFreeIpaResponse.setStatus(stack.getStackStatus().getStatus());
         describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());
         describeFreeIpaResponse.setStatusReason(stack.getStackStatus().getStatusReason());
         decorateFreeIpaServerResponseWithIps(describeFreeIpaResponse.getFreeIpa(), describeFreeIpaResponse.getInstanceGroups());
-        decoreateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
+        decorateFreeIpaServerResponseWithLoadBalancedHost(stack, describeFreeIpaResponse.getFreeIpa(), freeIpa);
         describeFreeIpaResponse.setAppVersion(stack.getAppVersion());
-        decorateWithCloudStorgeAndTelemetry(stack, describeFreeIpaResponse);
+        decorateWithCloudStorageAndTelemetry(stack, describeFreeIpaResponse);
         Optional.ofNullable(userSyncStatus).ifPresent(u -> describeFreeIpaResponse.setUserSyncStatus(userSyncStatusConverter.convert(u)));
         return describeFreeIpaResponse;
     }
@@ -99,7 +100,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         }
     }
 
-    private void decorateWithCloudStorgeAndTelemetry(Stack stack, DescribeFreeIpaResponse response) {
+    private void decorateWithCloudStorageAndTelemetry(Stack stack, DescribeFreeIpaResponse response) {
         TelemetryResponse telemetryResponse = telemetryConverter.convert(stack.getTelemetry());
         if (telemetryResponse != null) {
             response.setTelemetry(telemetryResponse);
@@ -115,17 +116,18 @@ public class StackToDescribeFreeIpaResponseConverter {
         }
     }
 
-    private void decoreateFreeIpaServerResponseWithLoadBalancedHost(Stack stack, FreeIpaServerResponse freeIpaServerResponse, FreeIpa freeIpa) {
+    private void decorateFreeIpaServerResponseWithLoadBalancedHost(Stack stack, FreeIpaServerResponse freeIpaServerResponse, FreeIpa freeIpa) {
         if (Objects.nonNull(freeIpaServerResponse) && balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)) {
             freeIpaServerResponse.setFreeIpaHost(FreeIpaDomainUtils.getFreeIpaFqdn(freeIpa.getDomain()));
             freeIpaServerResponse.setFreeIpaPort(stack.getGatewayport());
         }
     }
 
-    private PlacementResponse convert(Stack source) {
+    private PlacementResponse convertToPlacementResponse(Stack source) {
         PlacementResponse placementResponse = new PlacementResponse();
         placementResponse.setAvailabilityZone(source.getAvailabilityZone());
         placementResponse.setRegion(source.getRegion());
         return placementResponse;
     }
+
 }

@@ -6,7 +6,7 @@ import io.swagger.annotations.SwaggerDefinition;
 
 @SwaggerDefinition(securityDefinition = @SecurityDefinition(
     apiKeyAuthDefinitions = {
-        @ApiKeyAuthDefinition(key = "crnHeader", in = ApiKeyAuthDefinition.ApiKeyLocation.HEADER, name = "x-cdp-actor-crn")
+        @ApiKeyAuthDefinition(key = RedbeamsApi.CRN_HEADER_API_KEY, in = ApiKeyAuthDefinition.ApiKeyLocation.HEADER, name = "x-cdp-actor-crn")
     }))
 public class RedbeamsApi {
 

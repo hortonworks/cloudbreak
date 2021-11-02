@@ -86,8 +86,8 @@ public class EnvironmentModelDescription {
     public static final String DEFAULT_SECURITY_GROUPS = "Security groups where all other hosts are placed. Comma separated list.";
     public static final String SECURITY_CIDR = "CIDR range which is allowed for inbound traffic. Either IPv4 or IPv6 is allowed.";
 
-    public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with ccm and cluster proxy.";
-    public static final String OVERRIDE_TUNNEL = "Flag that marks that the request was intented to set the tunnel version by hand and it will not be " +
+    public static final String TUNNEL = "Configuration that the connection going directly or with cluster proxy or with CCM and cluster proxy.";
+    public static final String OVERRIDE_TUNNEL = "Flag that marks that the request was intended to set the tunnel version by hand and it will not be " +
             "overwritten by Cloudbreak";
 
     public static final String LOG_CLOUD_STORAGE = "Cloud storage configuration for this environment. Service logs will be stored in the defined location.";
