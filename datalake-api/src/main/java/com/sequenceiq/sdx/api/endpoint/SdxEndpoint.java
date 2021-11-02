@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -38,8 +39,8 @@ import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
+import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxInstanceGroupNamesRequest;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -279,6 +280,8 @@ public interface SdxEndpoint {
     @Path("instance_group_names")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Gather available instance group names by SDX cluster attributes", nickname = "getInstanceGroupNamesBySdxDetails")
-    Set<String> getInstanceGroupNamesBySdxDetails(@Valid SdxInstanceGroupNamesRequest request);
+    Set<String> getInstanceGroupNamesBySdxDetails(@QueryParam("clusterShape") @NotEmpty SdxClusterShape clusterShape,
+            @QueryParam("runtimeVersion") @NotEmpty String runtimeVersion,
+            @QueryParam("cloudPlatform") @NotEmpty String cloudPlatform);
 
 }
