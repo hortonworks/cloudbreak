@@ -54,8 +54,6 @@ public class ClusterProxyService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterProxyService.class);
 
-    private static final boolean ALWAYS_PRIVATE_IP = true;
-
     @Inject
     private StackService stackService;
 
@@ -109,7 +107,7 @@ public class ClusterProxyService {
     }
 
     private void registerGateway(Stack stack) {
-        String knoxUrl = stack.getTunnel().useCcmV2OrJumpgate() ? knoxUrlForCcmV2(stack) : knoxUrlForNoCcmAndCcmV1(stack);
+        String knoxUrl = knoxUrl(stack);
         ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl);
         clusterProxyRegistrationClient.updateConfig(request);
     }
@@ -122,13 +120,14 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
-                .withServices(serviceConfigsForNoCcmAndCcmV1(stack)).withAccountId(getAccountId(stack));
+                .withServices(serviceConfigs(stack))
+                .withAccountId(getAccountId(stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
-            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withCcmV2Entries(ccmV2Configs(stack));
+            requestBuilder.withCcmV2Entries(ccmV2Configs(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
+            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
         }
         return requestBuilder.build();
     }
@@ -136,33 +135,25 @@ public class ClusterProxyService {
     private ConfigRegistrationRequest createProxyConfigReRegisterRequest(Stack stack) {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
-                .withServices(serviceConfigsForNoCcmAndCcmV1(stack)).withKnoxUrl(knoxUrlForNoCcmAndCcmV1(stack)).withAccountId(getAccountId(stack));
+                .withServices(serviceConfigs(stack))
+                .withKnoxUrl(knoxUrl(stack))
+                .withAccountId(getAccountId(stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
-            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withCcmV2Entries(ccmV2Configs(stack)).withKnoxUrl(knoxUrlForCcmV2(stack));
+            requestBuilder.withCcmV2Entries(ccmV2Configs(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
-            requestBuilder.withServices(serviceConfigsForCcmV2(stack)).withKnoxUrl(knoxUrlForCcmV2(stack))
-                    .withEnvironmentCrn(stack.getEnvironmentCrn()).withUseCcmV2(true);
+            requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn())
+                    .withUseCcmV2(true);
         }
         return requestBuilder.build();
     }
 
-    private List<ClusterServiceConfig> serviceConfigsForNoCcmAndCcmV1(Stack stack) {
-        boolean preferPrivateIp = stack.getTunnel().useCcmV1();
-        String primaryGWInternalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort(), preferPrivateIp);
-        LOGGER.info("Primary GW internal admin URL is: {}", primaryGWInternalAdminUrl);
-        List<ClusterServiceConfig> clusterServiceConfigs = getClusterServiceConfigsForGWs(stack, preferPrivateIp);
-        clusterServiceConfigs.add(cmServiceConfig(stack, null, CLOUDERA_MANAGER_SERVICE_NAME, clusterManagerUrlForNoCcmAndCcmV1(stack, preferPrivateIp)));
-        clusterServiceConfigs.add(cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, primaryGWInternalAdminUrl));
-        LOGGER.info("Service configs: {}", clusterServiceConfigs);
-        return clusterServiceConfigs;
-    }
-
-    private List<ClusterServiceConfig> serviceConfigsForCcmV2(Stack stack) {
-        String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort(), ALWAYS_PRIVATE_IP);
+    private List<ClusterServiceConfig> serviceConfigs(Stack stack) {
+        boolean preferPrivateIp = privateIpShouldBePreferred(stack);
+        String internalAdminUrl = internalAdminUrl(stack, ServiceFamilies.GATEWAY.getDefaultPort(), preferPrivateIp);
         LOGGER.info("Primary GW internal admin URL is: {}", internalAdminUrl);
-        List<ClusterServiceConfig> clusterServiceConfigs = getClusterServiceConfigsForGWs(stack, ALWAYS_PRIVATE_IP);
+        List<ClusterServiceConfig> clusterServiceConfigs = getClusterServiceConfigsForGWs(stack, preferPrivateIp);
         clusterServiceConfigs.add(cmServiceConfig(stack, clientCertificates(stack), CLOUDERA_MANAGER_SERVICE_NAME, internalAdminUrl));
         clusterServiceConfigs.add(cmServiceConfig(stack, clientCertificates(stack), CB_INTERNAL, internalAdminUrl));
         LOGGER.info("Service configs: {}", clusterServiceConfigs);
@@ -240,27 +231,23 @@ public class ClusterProxyService {
         return clientCertificate;
     }
 
-    private String knoxUrlForNoCcmAndCcmV1(Stack stack) {
-        String gatewayIp = stack.getPrimaryGatewayInstance().getIpWrapper(stack.getTunnel().useCcmV1());
-        Cluster cluster = stack.getCluster();
-        return String.format("https://%s/%s", gatewayIp, cluster.getGateway().getPath());
-    }
-
-    private String knoxUrlForCcmV2(Stack stack) {
-        String gatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
-        Cluster cluster = stack.getCluster();
-        return String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
-                KnownServiceIdentifier.KNOX.toString().toLowerCase(),
-                cluster.getGateway().getPath());
-    }
-
     private String clusterId(Cluster cluster) {
         return cluster.getId().toString();
     }
 
-    private String clusterManagerUrlForNoCcmAndCcmV1(Stack stack, boolean preferPrivateIp) {
+    private String knoxUrl(Stack stack) {
+        boolean preferPrivateIp = privateIpShouldBePreferred(stack);
         String gatewayIp = stack.getPrimaryGatewayInstance().getIpWrapper(preferPrivateIp);
-        return String.format("https://%s/clouderamanager", gatewayIp);
+        Cluster cluster = stack.getCluster();
+        String knoxUrl = String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
+                KnownServiceIdentifier.KNOX.toString().toLowerCase(),
+                cluster.getGateway().getPath());
+        LOGGER.info("The generated URL for Knox: '{}'", knoxUrl);
+        return knoxUrl;
+    }
+
+    private boolean privateIpShouldBePreferred(Stack stack) {
+        return stack.getTunnel().useCcm();
     }
 
     private String internalAdminUrl(Stack stack, int port, boolean preferPrivateIp) {
@@ -303,4 +290,14 @@ public class ClusterProxyService {
                 : com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration.disabled();
     }
 
+    public void reRegisterCluster(Long stackId) {
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        if (clusterProxyEnablementService.isClusterProxyApplicable(stack.getCloudPlatform())) {
+            LOGGER.info("Cluster Proxy integration is ENABLED, starting re-registering with Cluster Proxy service");
+            reRegisterCluster(stack);
+            LOGGER.info("Cluster has been re-registered with Cluster Proxy service successfully.");
+        } else {
+            LOGGER.debug("Cluster Proxy integration is DISABLED, skipping re-registering with Cluster Proxy service");
+        }
+    }
 }
