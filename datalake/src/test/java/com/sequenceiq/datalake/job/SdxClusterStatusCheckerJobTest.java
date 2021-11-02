@@ -17,6 +17,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -37,15 +38,16 @@ import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobSe
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
-import com.sequenceiq.datalake.job.SdxClusterStatusCheckerTest.TestAppContext;
+import com.sequenceiq.datalake.job.SdxClusterStatusCheckerJobTest.TestAppContext;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.core.FlowLogService;
 
 import io.opentracing.Tracer;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(classes = TestAppContext.class)
-class SdxClusterStatusCheckerTest {
+class SdxClusterStatusCheckerJobTest {
 
     private static final Long SDX_ID = 456L;
 
@@ -68,6 +70,9 @@ class SdxClusterStatusCheckerTest {
 
     @MockBean
     private Tracer tracer;
+
+    @MockBean
+    private FlowLogService flowLogService;
 
     @Mock
     private CloudbreakServiceCrnEndpoints cloudbreakServiceCrnEndpoints;
@@ -106,6 +111,16 @@ class SdxClusterStatusCheckerTest {
 
         jobDataMap = new JobDataMap();
         when(jobExecutionContext.getMergedJobDataMap()).thenReturn(jobDataMap);
+
+        when(flowLogService.isOtherFlowRunning(any())).thenReturn(false);
+    }
+
+    @Test
+    public void doNotExecuteTracedJobWhenThereIsARunningFlow() {
+        JobExecutionContext context = Mockito.mock(JobExecutionContext.class);
+        when(flowLogService.isOtherFlowRunning(any())).thenReturn(true);
+        underTest.executeTracedJob(context);
+        verify(cloudbreakInternalCrnClient, times(0)).withInternalCrn();
     }
 
     @Test
