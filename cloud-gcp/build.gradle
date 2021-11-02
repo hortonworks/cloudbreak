@@ -25,14 +25,34 @@ dependencies {
     implementation group: 'org.apache.commons',            name: 'commons-lang3',                              version: apacheCommonsLangVersion
     implementation group: 'commons-io',                    name: 'commons-io',                                 version: '2.4'
     implementation group: 'commons-codec',                 name: 'commons-codec',                              version: commonsCodecVersion
-    implementation (group: 'com.google.apis',       name: 'google-api-services-compute',                version: 'v1-rev235-1.25.0') {
-        exclude group: 'com.google.guava',  module: 'guava'
+    implementation (group: 'com.google.apis',              name: 'google-api-services-compute',                version: 'v1-rev20211019-1.32.1') {
+        exclude group: 'com.google.api-client', module:'google-api-client'
     }
-    implementation group: 'com.google.apis',               name: 'google-api-services-iam',                    version: 'v1-rev316-1.25.0'
-    implementation group: 'com.google.apis',               name: 'google-api-services-storage',                version: 'v1-rev171-1.25.0'
-    implementation group: 'com.google.apis',               name: 'google-api-services-dns',                    version: 'v2beta1-rev99-1.25.0'
-    implementation group: 'com.google.apis',               name: 'google-api-services-cloudkms',               version: 'v1-rev108-1.25.0'
-    implementation group: 'com.google.apis',               name: 'google-api-services-sqladmin',               version: 'v1beta4-rev76-1.25.0'
+    implementation (group: 'com.google.apis',               name: 'google-api-services-iam',                    version: 'v1-rev20211013-1.32.1') {
+        exclude group: 'com.google.api-client', module:'google-api-client'
+    }
+    implementation (group: 'com.google.apis',               name: 'google-api-services-storage',                version: 'v1-rev20211018-1.32.1'){
+        exclude group: 'com.google.api-client', module:'google-api-client'
+    }
+    implementation (group: 'com.google.apis',               name: 'google-api-services-dns',                    version: 'v2beta1-rev20200806-1.30.10'){
+        exclude group: 'com.google.api-client', module:'google-api-client'
+    }
+    implementation (group: 'com.google.apis',               name: 'google-api-services-cloudkms',               version: 'v1-rev20210928-1.32.1'){
+        exclude group: 'com.google.api-client', module:'google-api-client'
+    }
+    implementation (group: 'com.google.apis',               name: 'google-api-services-sqladmin',               version: 'v1-rev20210929-1.32.1'){
+        exclude group: 'com.google.api-client', module:'google-api-client'
+    }
+    implementation (group: 'com.google.auth',               name: 'google-auth-library-oauth2-http',            version: '1.2.2') {
+        exclude group: 'com.google.http-client', module:'google-http-client'
+    }
+    implementation (group: 'com.google.http-client',        name: 'google-http-client-jackson2',                version: '1.40.1') {
+        exclude group: 'com.google.http-client', module:'google-http-client'
+    }
+    implementation (group: 'com.google.api-client',        name: 'google-api-client',                version: '1.31.5') {
+        exclude group: 'junit', module: 'junit'
+    }
+    implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
 
     testImplementation project(path: ':core-model', configuration: 'tests')
     testImplementation project(':cloud-reactor')

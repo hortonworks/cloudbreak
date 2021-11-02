@@ -76,7 +76,6 @@ dependencies {
     exclude group: 'org.hibernate', module: 'hibernate-envers'
   }
   implementation     group: 'com.google.guava',          name: 'guava',                                version: guavaVersion
-
   implementation     group: 'org.apache.kerby',          name: 'kerb-util',                            version: '2.0.0'
 
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                     version: '1.5.3'
@@ -146,7 +145,7 @@ dependencies {
 
   testImplementation group: 'com.hubspot.jinjava', name: 'jinjava',    version: jinjavaVersion
   testImplementation group: 'net.sf.json-lib',     name: 'json-lib',   version: '2.4',  classifier: 'jdk15'
-
+  testImplementation group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                     version: jacksonVersion
   testImplementation project(path: ':authorization-common', configuration: 'tests')
 }
 
