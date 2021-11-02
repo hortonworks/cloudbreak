@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.common.api.cloudstorage.CloudStorageResponse;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
@@ -42,6 +43,9 @@ public class DescribeFreeIpaResponse {
     @NotNull
     @ApiModelProperty(FreeIpaModelDescriptions.PLACEMENT_SETTINGS)
     private PlacementResponse placement;
+
+    @ApiModelProperty(value = FreeIpaModelDescriptions.TUNNEL)
+    private Tunnel tunnel;
 
     @NotNull
     @Valid
@@ -119,6 +123,14 @@ public class DescribeFreeIpaResponse {
 
     public void setPlacement(PlacementResponse placement) {
         this.placement = placement;
+    }
+
+    public Tunnel getTunnel() {
+        return tunnel;
+    }
+
+    public void setTunnel(Tunnel tunnel) {
+        this.tunnel = tunnel;
     }
 
     public List<InstanceGroupResponse> getInstanceGroups() {

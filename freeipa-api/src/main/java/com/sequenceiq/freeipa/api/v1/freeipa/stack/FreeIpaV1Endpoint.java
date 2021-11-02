@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
+import com.sequenceiq.freeipa.api.FreeIpaApi;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaNotes;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaOperationDescriptions;
@@ -43,11 +44,15 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.Authorization;
 
 @RetryAndMetrics
 @Path("/v1/freeipa")
 @Consumes(MediaType.APPLICATION_JSON)
-@Api(value = "/v1/freeipa", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
+@Api(value = "/v1/freeipa",
+        protocols = "http,https",
+        authorizations = {@Authorization(value = FreeIpaApi.CRN_HEADER_API_KEY)},
+        consumes = MediaType.APPLICATION_JSON)
 public interface FreeIpaV1Endpoint {
     @POST
     @Path("")

@@ -6,13 +6,16 @@ import static org.mockito.Mockito.when;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.NullSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -46,8 +49,6 @@ class StackToDescribeFreeIpaResponseConverterTest {
     private static final String NAME = "freeIpa";
 
     private static final String RESOURCE_CRN = "crn1";
-
-    private static final String CHILD_ENVIRONMENT_CRN = "crn:child";
 
     private static final String CLOUD_PLATFORM = "AWS";
 
@@ -111,17 +112,19 @@ class StackToDescribeFreeIpaResponseConverterTest {
     @Mock
     private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
 
-    @BeforeAll
-    static void initInstanceGroupResponse() {
+    @BeforeEach
+    void initInstanceGroupResponse() {
         InstanceMetaDataResponse instanceMetaDataResponse = new InstanceMetaDataResponse();
         instanceMetaDataResponse.setPrivateIp(SERVER_IP);
         INSTANCE_GROUP_RESPONSE.setMetaData(Set.of(instanceMetaDataResponse));
     }
 
-    @Test
-    void convert() {
+    @ParameterizedTest(name = "tunnel={0}")
+    @EnumSource(Tunnel.class)
+    @NullSource
+    void convertTest(Tunnel tunnel) {
         FreeIpaServerResponse freeIpaServerResponse = new FreeIpaServerResponse();
-        Stack stack = createStack();
+        Stack stack = createStack(tunnel);
         ImageEntity image = new ImageEntity();
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setDomain(DOMAIN);
@@ -152,8 +155,9 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 // TODO decorateFreeIpaServerResponseWithIps
                 .returns(APP_VERSION, DescribeFreeIpaResponse::getAppVersion)
                 .returns(VARIANT, DescribeFreeIpaResponse::getVariant)
-                // TODO decorateWithCloudStorgeAndTelemetry
-                .returns(USERSYNC_STATUS_RESPONSE, DescribeFreeIpaResponse::getUserSyncStatus);
+                // TODO decorateWithCloudStorageAndTelemetry
+                .returns(USERSYNC_STATUS_RESPONSE, DescribeFreeIpaResponse::getUserSyncStatus)
+                .returns(tunnel, DescribeFreeIpaResponse::getTunnel);
 
         assertThat(freeIpaServerResponse)
                 .returns(Set.of(SERVER_IP), FreeIpaServerResponse::getServerIp)
@@ -161,7 +165,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
                 .returns(GATEWAY_PORT, FreeIpaServerResponse::getFreeIpaPort);
     }
 
-    private Stack createStack() {
+    private Stack createStack(Tunnel tunnel) {
         Stack stack = new Stack();
         stack.setEnvironmentCrn(ENV_CRN);
         stack.setName(NAME);
@@ -172,6 +176,7 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stack.setAppVersion(APP_VERSION);
         stack.setPlatformvariant(VARIANT);
         stack.setGatewayport(GATEWAY_PORT);
+        stack.setTunnel(tunnel);
         return stack;
     }
 
@@ -183,4 +188,5 @@ class StackToDescribeFreeIpaResponseConverterTest {
         stackStatus.setDetailedStackStatus(DETAILED_STACK_STATUS);
         return stackStatus;
     }
+
 }
