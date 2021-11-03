@@ -66,6 +66,7 @@ public class GroupResourceService {
                 try {
                     CloudResource buildableResource = builder.create(context, auth, group, network);
                     if (buildableResource != null) {
+                        buildableResource = CloudResource.builder().cloudResource(buildableResource).group(group.getName()).build();
                         createResource(auth, buildableResource);
                         CloudResource resource = builder.build(context, auth, group, network, group.getSecurity(), buildableResource);
                         updateResource(auth, resource);
