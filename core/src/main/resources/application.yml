@@ -836,3 +836,7 @@ notification:
 crn:
   partition: cdp
   region: us-west-1
+
+existingstackpatcher:
+  intervalhours: 1
+  enabled: true
