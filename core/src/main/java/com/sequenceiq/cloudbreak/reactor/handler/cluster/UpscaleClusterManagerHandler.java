@@ -4,10 +4,10 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.core.cluster.ClusterUpscaleService;
-import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpscaleService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.UpscaleClusterManagerResult;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
@@ -20,7 +20,7 @@ public class UpscaleClusterManagerHandler implements EventHandler<UpscaleCluster
     private EventBus eventBus;
 
     @Inject
-    private ClusterUpscaleService clusterUpscaleService;
+    private ClusterManagerUpscaleService clusterManagerUpscaleService;
 
     @Override
     public String selector() {
@@ -32,7 +32,7 @@ public class UpscaleClusterManagerHandler implements EventHandler<UpscaleCluster
         UpscaleClusterManagerRequest request = event.getData();
         UpscaleClusterManagerResult result;
         try {
-            clusterUpscaleService.upscaleClusterManager(request.getResourceId(), request.getHostGroupName(),
+            clusterManagerUpscaleService.upscaleClusterManager(request.getResourceId(), request.getHostGroupName(),
                     request.getScalingAdjustment(), request.isPrimaryGatewayChanged());
             result = new UpscaleClusterManagerResult(request);
         } catch (Exception e) {
