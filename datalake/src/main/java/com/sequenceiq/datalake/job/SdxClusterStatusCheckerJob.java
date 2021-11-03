@@ -8,7 +8,6 @@ import javax.inject.Inject;
 
 import org.quartz.DisallowConcurrentExecution;
 import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -24,6 +23,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.core.FlowLogService;
 
 import io.opentracing.Tracer;
 
@@ -43,6 +43,9 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     private SdxStatusService sdxStatusService;
 
     @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
     private StatusCheckerJobService jobService;
 
     public SdxClusterStatusCheckerJob(Tracer tracer) {
@@ -55,7 +58,11 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
     }
 
     @Override
-    protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
+    protected void executeTracedJob(JobExecutionContext context) {
+        if (getLocalId() != null && flowLogService.isOtherFlowRunning(Long.valueOf(getLocalId()))) {
+            LOGGER.debug("Sdx StatusChecker Job cannot run, because flow is running for datalake: {}", getLocalId());
+            return;
+        }
         LOGGER.debug("Sdx StatusChecker Job is running for datalake: '{}'", getLocalId());
         if (getRemoteResourceCrn() == null) {
             jobService.unschedule(getLocalId());
