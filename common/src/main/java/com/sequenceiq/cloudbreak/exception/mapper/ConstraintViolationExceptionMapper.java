@@ -24,7 +24,10 @@ public class ConstraintViolationExceptionMapper extends BaseExceptionMapper<Cons
             return exception.getConstraintViolations().stream().findFirst().get().getMessage();
         }
         return "More than one validation errors happened: \n" +
-                exception.getConstraintViolations().stream().map(ConstraintViolation::getMessage).collect(Collectors.joining("\n"));
+                exception.getConstraintViolations()
+                        .stream()
+                        .sorted((o1, o2) -> o1.getMessage().equals(o2.getMessage()) ? 0 : 1)
+                        .map(ConstraintViolation::getMessage).collect(Collectors.joining("\n"));
     }
 
     @Override
