@@ -51,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.decorator.HostGroupDecorator;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.recipe.UpdateRecipeService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.UpdateNodeCountValidator;
@@ -100,6 +101,9 @@ public class ClusterCommonService {
 
     @Inject
     private UpdateRecipeService updateRecipeService;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     public FlowIdentifier put(String crn, UpdateClusterV4Request updateJson) {
         Stack stack = stackService.getByCrn(crn);
@@ -151,7 +155,8 @@ public class ClusterCommonService {
                     accountId,
                     blueprint,
                     hostGroup.get(),
-                    updateJson.getHostGroupAdjustment().getScalingAdjustment());
+                    updateJson.getHostGroupAdjustment().getScalingAdjustment(),
+                    instanceGroupService.findNotTerminatedByStackId(stack.getId()));
         }
         return clusterOperationService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }

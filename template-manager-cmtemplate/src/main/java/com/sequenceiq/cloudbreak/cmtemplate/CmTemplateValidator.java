@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -49,10 +50,12 @@ public class CmTemplateValidator implements BlueprintValidator {
     }
 
     @Override
-    public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, HostGroup hostGroup, Integer adjustment) {
+    public void validateHostGroupScalingRequest(String accountId, Blueprint blueprint, HostGroup hostGroup, Integer adjustment,
+            Collection<InstanceGroup> instanceGroups) {
         CmTemplateProcessor templateProcessor = processorFactory.get(blueprint.getBlueprintText());
         Versioned blueprintVersion = () -> templateProcessor.getVersion().get();
         Set<String> services = templateProcessor.getComponentsByHostGroup().get(hostGroup.getName());
+        validateNodeManagerAdjustment(hostGroup, adjustment, instanceGroups, templateProcessor);
         for (BlackListedDownScaleRole role : BlackListedDownScaleRole.values()) {
             if (services.contains(role.name()) && adjustment < 0) {
                 validateRole(accountId, role, blueprintVersion, templateProcessor);
@@ -62,6 +65,22 @@ public class CmTemplateValidator implements BlueprintValidator {
             if (services.contains(role.name()) && adjustment > 0) {
                 validateRole(accountId, role, blueprintVersion, templateProcessor);
             }
+        }
+    }
+
+    private void validateNodeManagerAdjustment(HostGroup hostGroup, Integer adjustment, Collection<InstanceGroup> instanceGroups,
+            CmTemplateProcessor templateProcessor) {
+        Map<String, Set<String>> nodeManagerComponentInGroups = templateProcessor.getComponentsByHostGroup().entrySet().stream()
+                .filter(entry -> entry.getValue().contains("NODEMANAGER"))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (nodeManagerComponentInGroups.containsKey(hostGroup.getName())) {
+            instanceGroups.stream().filter(instanceGroup -> nodeManagerComponentInGroups.containsKey(instanceGroup.getGroupName()))
+                    .map(InstanceGroup::getNodeCount).reduce(Integer::sum).ifPresent(nodeManagerCountInGroups -> {
+                if (nodeManagerCountInGroups + adjustment <= 0) {
+                    throw new BadRequestException("Scaling adjustment is not allowed, based on the template it would eliminate all the instances with " +
+                            "NODEMANAGER role which is not supported.");
+                }
+            });
         }
     }
 

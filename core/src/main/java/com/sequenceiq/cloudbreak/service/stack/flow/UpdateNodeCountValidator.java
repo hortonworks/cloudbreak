@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackDownscaleValidatorService;
 
@@ -40,6 +41,9 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private CmTemplateValidator cmTemplateValidator;
+
+    @Inject
+    private InstanceGroupService instanceGroupService;
 
     public void validataHostMetadataStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
@@ -88,7 +92,8 @@ public class UpdateNodeCountValidator {
                     accountId,
                     stack.getCluster().getBlueprint(),
                     hostGroup.get(),
-                    scalingAdjustment);
+                    scalingAdjustment,
+                    instanceGroupService.findNotTerminatedByStackId(stack.getId()));
         }
     }
 

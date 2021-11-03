@@ -10,6 +10,8 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.SecurityGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
@@ -42,6 +44,9 @@ public class InstanceGroupService {
     @Inject
     private InstanceGroupNetworkService instanceGroupNetworkService;
 
+    @Inject
+    private TransactionService transactionService;
+
     public Set<InstanceGroup> findByStackId(Long stackId) {
         return repository.findByStackId(stackId);
     }
@@ -51,13 +56,17 @@ public class InstanceGroupService {
     }
 
     public Set<InstanceGroup> findNotTerminatedByStackId(Long stackId) {
-        Set<InstanceGroup> instanceGroups = repository.findByStackId(stackId);
-        instanceGroups.forEach(
-                ig -> {
-                    ig.replaceInstanceMetadata(ig.getNotTerminatedInstanceMetaDataSet());
-                }
-        );
-        return instanceGroups;
+        try {
+            return transactionService.required(() -> {
+                Set<InstanceGroup> instanceGroups = repository.findByStackId(stackId);
+                instanceGroups.forEach(
+                        ig -> ig.replaceInstanceMetadata(ig.getNotTerminatedInstanceMetaDataSet())
+                );
+                return instanceGroups;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new CloudbreakServiceException("Can't load instance groups for stack ID.", e);
+        }
     }
 
     public Set<InstanceGroup> saveAll(Set<InstanceGroup> instanceGroups, Workspace workspace) {
