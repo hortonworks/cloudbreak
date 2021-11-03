@@ -1,47 +1,45 @@
 package com.sequenceiq.datalake.service.recovery;
 
-import javax.inject.Inject;
-
-import org.springframework.stereotype.Service;
-
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.datalake.service.resize.recovery.ResizeRecoveryService;
-import com.sequenceiq.datalake.service.upgrade.recovery.SdxUpgradeRecoveryService;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 
-@Service
 /**
- * Recovers an SDX cluster from a failure during Resize or Upgrade.
+ * Defines a service that can be used to recover CB deployed infrastructure.
  *
- * Chooses the appropriate recovery action to take based on the state of the SDX cluster.
- * <ul>
- *     <li>{@Code SdxUpgradeRecoveryService}</li>
- *     <li>{@Code ResizeRecoveryService}</li>
- * </ul>
+ * Services that can recovery failed infrastructure must be able to <em>validate</em> that a recoveyr action is appropriate and
+ * be able to <em>trigger</em> the recovery.
+ *
+ * The Recovery Service is parameterized by the type of recovery request made to it. The recovery request should be a value object representing
+ * an HTTP response object.
+ * @param <T> entity representing additional properties for the recovery
  */
-public class RecoveryService {
-    @Inject
-    private SdxUpgradeRecoveryService sdxUpgradeRecoveryService;
+public interface RecoveryService<T extends UpgradeRecoveryRequest> {
+    /**
+     * Starts recovery of the CB infrastructure related to the recovery request.
+     *
+     * This should validate that recovery is appropriate before triggerng the recovery.
+     *
+     * The {@code <T>} type carries additional information about the recovery, it may be considered optional.
+     *
+     * Trigger recovery may start a Flow or FlowChain to perform the recovery operations.
+     *
+     * @param userCrn the CRN of the user requesting recovery
+     * @param nameOrCrn the name or CRN of the resource to recover
+     * @param upgradeRecoveryRequest detailed information about the recovery
+     * @return a response containing the identifier of the triggered recovery Flow
+     */
+    SdxRecoveryResponse triggerRecovery(String userCrn, NameOrCrn nameOrCrn, T upgradeRecoveryRequest);
 
-    @Inject
-    private ResizeRecoveryService resizeRecoveryService;
-
-    // todo: refactor this to return a flow identifier
-    public SdxRecoveryResponse triggerRecovery(String crn, NameOrCrn nameOrCrn, SdxRecoveryRequest sdxRecoveryRequest) {
-        if (resizeRecoveryService.canRecover()) {
-            return resizeRecoveryService.triggerRecovery();
-        } else {
-            return sdxUpgradeRecoveryService.triggerRecovery(crn, nameOrCrn, sdxRecoveryRequest);
-        }
-    }
-
-    public SdxRecoverableResponse validateRecovery(String crn, NameOrCrn nameOrCrn) {
-        if (resizeRecoveryService.canRecover()) {
-            return resizeRecoveryService.validateRecovery();
-        } else {
-            return sdxUpgradeRecoveryService.validateRecovery(crn, nameOrCrn);
-        }
-    }
+    /**
+     * Validates that triggering a recovery is allowed.
+     *
+     * Recovery validation should be used in {@code triggerRecovery} to make sure that a particular recovery is still allowed before it's triggered.
+     *
+     * @param userCrn the CRN of the user requesting recovery validation
+     * @param nameOrCrn the name or CRN of the resource to validate
+     * @return a message detailing if recovery is allowed and the reason why
+     */
+    SdxRecoverableResponse validateRecovery(String userCrn, NameOrCrn nameOrCrn);
 }

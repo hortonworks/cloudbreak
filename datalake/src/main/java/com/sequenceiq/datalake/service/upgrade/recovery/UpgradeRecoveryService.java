@@ -20,17 +20,18 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.service.recovery.RecoveryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryType;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryRequest;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryType;
 
 @Component
-public class SdxUpgradeRecoveryService {
+public class UpgradeRecoveryService implements RecoveryService<UpgradeRecoveryRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SdxUpgradeRecoveryService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeRecoveryService.class);
 
     @Inject
     private SdxService sdxService;
@@ -47,7 +48,7 @@ public class SdxUpgradeRecoveryService {
     @Inject
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
-    public SdxRecoveryResponse triggerRecovery(String userCrn, NameOrCrn clusterNameOrCrn, SdxRecoveryRequest recoverRequest) {
+    public SdxRecoveryResponse triggerRecovery(String userCrn, NameOrCrn clusterNameOrCrn, UpgradeRecoveryRequest recoverRequest) {
         SdxCluster cluster = sdxService.getByNameOrCrn(userCrn, clusterNameOrCrn);
         MDCBuilder.buildMdcContext(cluster);
         return initSdxRecovery(recoverRequest, cluster);
@@ -59,7 +60,7 @@ public class SdxUpgradeRecoveryService {
         return validateStackStatus(cluster);
     }
 
-    private SdxRecoveryResponse initSdxRecovery(SdxRecoveryRequest request, SdxCluster cluster) {
+    private SdxRecoveryResponse initSdxRecovery(UpgradeRecoveryRequest request, SdxCluster cluster) {
 
         SdxRecoverableResponse validationResponse = validateStackStatus(cluster);
 
@@ -85,7 +86,7 @@ public class SdxUpgradeRecoveryService {
         }
     }
 
-    private FlowIdentifier triggerDatalakeUpgradeRecoveryFlow(SdxRecoveryType recoveryType, SdxCluster cluster) {
+    private FlowIdentifier triggerDatalakeUpgradeRecoveryFlow(UpgradeRecoveryType recoveryType, SdxCluster cluster) {
         return sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, recoveryType);
     }
 

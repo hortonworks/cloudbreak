@@ -6,22 +6,22 @@ import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 
 @ApiModel
-public class SdxRecoveryRequest {
+public class UpgradeRecoveryRequest {
 
     @ApiModelProperty(ModelDescriptions.RECOVERY_TYPE)
-    private SdxRecoveryType type;
+    private UpgradeRecoveryType type;
 
-    public SdxRecoveryType getType() {
+    public UpgradeRecoveryType getType() {
         return type;
     }
 
-    public void setType(SdxRecoveryType type) {
+    public void setType(UpgradeRecoveryType type) {
         this.type = type;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", SdxRecoveryRequest.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", UpgradeRecoveryRequest.class.getSimpleName() + "[", "]")
                 .add("type=" + type)
                 .toString();
     }

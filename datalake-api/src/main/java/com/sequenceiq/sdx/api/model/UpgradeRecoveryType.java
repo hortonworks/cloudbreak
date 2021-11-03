@@ -1,6 +1,6 @@
 package com.sequenceiq.sdx.api.model;
 
-public enum SdxRecoveryType {
+public enum UpgradeRecoveryType {
 
     RECOVER_WITH_DATA,
     RECOVER_WITHOUT_DATA;

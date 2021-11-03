@@ -11,7 +11,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 
 public class SdxRecoveryAction implements Action<SdxTestDto, SdxClient> {
@@ -20,7 +20,7 @@ public class SdxRecoveryAction implements Action<SdxTestDto, SdxClient> {
 
     @Override
     public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
-        SdxRecoveryRequest recoveryRequest = testDto.getSdxRecoveryRequest();
+        UpgradeRecoveryRequest recoveryRequest = testDto.getSdxRecoveryRequest();
 
         Log.when(LOGGER, " SDX endpoint: %s" + client.getDefaultClient().sdxEndpoint() + ", SDX's environment: " + testDto.getRequest().getEnvironment());
         Log.whenJson(LOGGER, " SDX recovery request: ", recoveryRequest);

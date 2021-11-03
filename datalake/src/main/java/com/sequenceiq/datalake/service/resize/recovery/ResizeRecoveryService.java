@@ -2,9 +2,12 @@ package com.sequenceiq.datalake.service.resize.recovery;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.datalake.service.recovery.RecoveryService;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryRequest;
 
 @Service
 /**
@@ -13,7 +16,8 @@ import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
  * The main entry point is {@code triggerRecovery}, which starts a cloudbreak Flow to recover the Data Lake.
  * To ensure a Resize recovery is appropriate, use one of {@code canRecover} or {@code validateRecovery}.
  */
-public class ResizeRecoveryService {
+// todo: replace UpgradeRecoveryRequest with something more appropriate
+public class ResizeRecoveryService implements RecoveryService<UpgradeRecoveryRequest> {
 
     /**
      * Determines if it's possible to run a <em>Resize</em> recovery, returning a simple boolean indicator
@@ -29,7 +33,8 @@ public class ResizeRecoveryService {
      * This is distinguished from {@code canRecover} by including a detailed validation message, usable as a web response.
      * @return detailed validation message, as a web response
      */
-    public SdxRecoverableResponse validateRecovery() {
+    @Override
+    public SdxRecoverableResponse validateRecovery(String userCrn, NameOrCrn nameOrCrn) {
         // todo: implement me
         throw new BadRequestException("SDX Resize Recovery is not yet implemented");
     }
@@ -38,8 +43,9 @@ public class ResizeRecoveryService {
      * Checks if recovery is possible, then performs the resize recovery if appropriate.
      * @return a response containing information for the triggered recovery Flow.
      */
-    public SdxRecoveryResponse triggerRecovery() {
-        validateRecovery();
+    @Override
+    public SdxRecoveryResponse triggerRecovery(String userCrn, NameOrCrn nameOrCrn, UpgradeRecoveryRequest upgradeRecoveryRequest) {
+        validateRecovery(null, null);
         // todo: implement me
         return null;
     }

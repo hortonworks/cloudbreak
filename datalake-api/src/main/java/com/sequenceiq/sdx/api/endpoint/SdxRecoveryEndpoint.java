@@ -14,7 +14,7 @@ import org.springframework.validation.annotation.Validated;
 
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 
 import io.swagger.annotations.Api;
@@ -30,13 +30,13 @@ public interface SdxRecoveryEndpoint {
     @Path("{name}/recover")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "recovers the datalake upgrade", nickname = "recoverDatalakeCluster")
-    SdxRecoveryResponse recoverClusterByName(@PathParam("name") String name, @Valid SdxRecoveryRequest recoverSdxClusterRequest);
+    SdxRecoveryResponse recoverClusterByName(@PathParam("name") String name, @Valid UpgradeRecoveryRequest recoverSdxClusterRequest);
 
     @POST
     @Path("/crn/{crn}/recover")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "recovers the datalake upgrade", nickname = "recoverDatalakeClusterByCrn")
-    SdxRecoveryResponse recoverClusterByCrn(@PathParam("crn") String crn, @Valid SdxRecoveryRequest recoverSdxClusterRequest);
+    SdxRecoveryResponse recoverClusterByCrn(@PathParam("crn") String crn, @Valid UpgradeRecoveryRequest recoverSdxClusterRequest);
 
     @GET
     @Path("{name}/recoverable")

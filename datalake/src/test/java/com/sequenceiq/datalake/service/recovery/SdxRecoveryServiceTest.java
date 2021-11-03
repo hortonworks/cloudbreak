@@ -14,13 +14,13 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.datalake.service.resize.recovery.ResizeRecoveryService;
-import com.sequenceiq.datalake.service.upgrade.recovery.SdxUpgradeRecoveryService;
+import com.sequenceiq.datalake.service.upgrade.recovery.UpgradeRecoveryService;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RecoveryServiceTest {
+public class SdxRecoveryServiceTest {
 
     public static final String USER_CRN = "userCrn";
 
@@ -29,24 +29,24 @@ public class RecoveryServiceTest {
     public static final NameOrCrn NAME_OR_CRN = NameOrCrn.ofCrn(RESOURCE_CRN);
 
     @Mock
-    private SdxUpgradeRecoveryService mockSdxUpgradeRecoveryService;
+    private UpgradeRecoveryService mockUpgradeRecoveryService;
 
     @Mock
     private ResizeRecoveryService mockResizeRecoveryService;
 
     @InjectMocks
-    private RecoveryService recoveryService;
+    private SdxRecoveryService sdxRecoveryService;
 
     @Test
     public void testRecoveryServiceCanRecoverFromUpgradeFailureByClusterName() {
-        SdxRecoveryRequest request = new SdxRecoveryRequest();
+        UpgradeRecoveryRequest request = new UpgradeRecoveryRequest();
         SdxRecoveryResponse response = new SdxRecoveryResponse();
-        when(mockSdxUpgradeRecoveryService.triggerRecovery(USER_CRN, NAME_OR_CRN, request)).thenReturn(response);
+        when(mockUpgradeRecoveryService.triggerRecovery(USER_CRN, NAME_OR_CRN, request)).thenReturn(response);
 
-        SdxRecoveryResponse result = recoveryService.triggerRecovery(USER_CRN, NAME_OR_CRN, request);
+        SdxRecoveryResponse result = sdxRecoveryService.triggerRecovery(USER_CRN, NAME_OR_CRN, request);
 
         // Basically, just check that we pass through
-        Mockito.verify(mockSdxUpgradeRecoveryService).triggerRecovery(USER_CRN, NAME_OR_CRN, request);
+        Mockito.verify(mockUpgradeRecoveryService).triggerRecovery(USER_CRN, NAME_OR_CRN, request);
         assertNotNull(result);
         assertEquals(response, result);
     }
@@ -54,29 +54,29 @@ public class RecoveryServiceTest {
     @Test
     public void testRecoveryServiceCanValidateUpgradeFailureByClusterName() {
         SdxRecoverableResponse response = new SdxRecoverableResponse("Some reason", RecoveryStatus.RECOVERABLE);
-        when(mockSdxUpgradeRecoveryService.validateRecovery(USER_CRN, NAME_OR_CRN)).thenReturn(response);
+        when(mockUpgradeRecoveryService.validateRecovery(USER_CRN, NAME_OR_CRN)).thenReturn(response);
 
-        SdxRecoverableResponse result = recoveryService.validateRecovery(USER_CRN, NAME_OR_CRN);
+        SdxRecoverableResponse result = sdxRecoveryService.validateRecovery(USER_CRN, NAME_OR_CRN);
 
         // Basically, just check that we pass through
-        Mockito.verify(mockSdxUpgradeRecoveryService).validateRecovery(USER_CRN, NAME_OR_CRN);
+        Mockito.verify(mockUpgradeRecoveryService).validateRecovery(USER_CRN, NAME_OR_CRN);
         assertNotNull(result);
         assertEquals(response, result);
     }
 
     @Test
     public void testRecoveryServiceCanSwitchToResizeRecovery() {
-        SdxRecoveryRequest request = new SdxRecoveryRequest();
+        UpgradeRecoveryRequest request = new UpgradeRecoveryRequest();
         SdxRecoveryResponse response = new SdxRecoveryResponse();
-        when(mockResizeRecoveryService.triggerRecovery()).thenReturn(response);
+        when(mockResizeRecoveryService.triggerRecovery(null, null, null)).thenReturn(response);
         when(mockResizeRecoveryService.canRecover()).thenReturn(true);
 
-        SdxRecoveryResponse result = recoveryService.triggerRecovery(USER_CRN, NAME_OR_CRN, request);
+        SdxRecoveryResponse result = sdxRecoveryService.triggerRecovery(USER_CRN, NAME_OR_CRN, request);
 
         // Basically, just check that we pass through to the Resize Recovery Service
-        Mockito.verifyNoInteractions(mockSdxUpgradeRecoveryService);
+        Mockito.verifyNoInteractions(mockUpgradeRecoveryService);
         Mockito.verify(mockResizeRecoveryService).canRecover();
-        Mockito.verify(mockResizeRecoveryService).triggerRecovery();
+        Mockito.verify(mockResizeRecoveryService).triggerRecovery(null, null, null);
         assertNotNull(result);
         assertEquals(response, result);
     }
@@ -84,13 +84,13 @@ public class RecoveryServiceTest {
     @Test
     public void testRecoveryServiceCanValidateResizeRecovery() {
         SdxRecoverableResponse resizeRecoverableResponse = new SdxRecoverableResponse("Resize recovery is allowed.", RecoveryStatus.RECOVERABLE);
-        when(mockResizeRecoveryService.validateRecovery()).thenReturn(resizeRecoverableResponse);
+        when(mockResizeRecoveryService.validateRecovery(null, null)).thenReturn(resizeRecoverableResponse);
         when(mockResizeRecoveryService.canRecover()).thenReturn(true);
 
-        SdxRecoverableResponse result = recoveryService.validateRecovery(USER_CRN, NAME_OR_CRN);
+        SdxRecoverableResponse result = sdxRecoveryService.validateRecovery(USER_CRN, NAME_OR_CRN);
 
         // Basically, just check that we pass through
-        Mockito.verify(mockResizeRecoveryService).validateRecovery();
+        Mockito.verify(mockResizeRecoveryService).validateRecovery(null, null);
         assertNotNull(result);
         assertEquals(resizeRecoverableResponse, result);
     }

@@ -27,12 +27,12 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
-import com.sequenceiq.sdx.api.model.SdxRecoveryType;
+import com.sequenceiq.sdx.api.model.UpgradeRecoveryType;
 
 @ExtendWith(MockitoExtension.class)
-public class SdxUpgradeRecoveryServiceTest {
+public class UpgradeRecoveryServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com";
 
@@ -56,14 +56,14 @@ public class SdxUpgradeRecoveryServiceTest {
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
 
     @InjectMocks
-    private SdxUpgradeRecoveryService underTest;
+    private UpgradeRecoveryService underTest;
 
-    private SdxRecoveryRequest request;
+    private UpgradeRecoveryRequest request;
 
     @BeforeEach
     public void setup() {
-        request = new SdxRecoveryRequest();
-        request.setType(SdxRecoveryType.RECOVER_WITHOUT_DATA);
+        request = new UpgradeRecoveryRequest();
+        request.setType(UpgradeRecoveryType.RECOVER_WITHOUT_DATA);
         when(cluster.getClusterName()).thenReturn(CLUSTER_NAME);
         when(sdxService.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(cluster);
     }
@@ -98,7 +98,7 @@ public class SdxUpgradeRecoveryServiceTest {
         RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(reason, RecoveryStatus.RECOVERABLE);
 
         when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
-        when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, SdxRecoveryType.RECOVER_WITHOUT_DATA))
+        when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, UpgradeRecoveryType.RECOVER_WITHOUT_DATA))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         SdxRecoveryResponse response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
