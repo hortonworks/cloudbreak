@@ -3,12 +3,14 @@ package com.sequenceiq.cloudbreak.cmtemplate;
 import static com.sequenceiq.cloudbreak.TestUtil.hostGroup;
 import static java.util.stream.Collectors.toSet;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Set;
 
 import org.junit.Test;
@@ -23,6 +25,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
@@ -98,7 +101,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1, Collections.emptyList()));
     }
 
     @Test
@@ -111,7 +114,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1, Collections.emptyList()));
     }
 
     @Test
@@ -124,7 +127,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
     }
 
     @Test
@@ -137,7 +140,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
     }
 
     @Test
@@ -150,7 +153,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
     }
 
     @Test
@@ -163,7 +166,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
     }
 
     @Test
@@ -176,7 +179,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
     }
 
     @Test
@@ -189,7 +192,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
     }
 
     @Test
@@ -202,7 +205,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
     }
 
     @Test
@@ -215,7 +218,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
     }
 
     @Test
@@ -228,7 +231,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
     }
 
     @Test
@@ -241,7 +244,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
     }
 
     @Test
@@ -254,7 +257,7 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
     }
 
     @Test
@@ -267,7 +270,63 @@ public class CmTemplateValidatorTest {
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
     }
 
+    @Test
+    public void testValidationIfNodeManagerCountWillBeHigherThanZeroInOtherGroup() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("compute");
+
+        InstanceGroup compute = new InstanceGroup();
+        compute.setGroupName("compute");
+        compute.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup worker = new InstanceGroup();
+        worker.setGroupName("worker");
+        worker.setInstanceMetaData(Set.of(new InstanceMetaData()));
+
+        subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Set.of(compute, worker));
+    }
+
+    @Test
+    public void testValidationIfNodeManagerCountWillBeHigherThanZeroInTheSameGroup() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("compute");
+
+        InstanceGroup compute = new InstanceGroup();
+        compute.setGroupName("compute");
+        compute.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup worker = new InstanceGroup();
+        worker.setGroupName("worker");
+        worker.setInstanceMetaData(Set.of());
+
+        subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Set.of(compute, worker));
+    }
+
+    @Test
+    public void testValidationIfNodeManagerCountWillBeZero() {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+
+        HostGroup hostGroup = new HostGroup();
+        hostGroup.setName("compute");
+
+        InstanceGroup compute = new InstanceGroup();
+        compute.setGroupName("compute");
+        compute.setInstanceMetaData(Set.of(new InstanceMetaData(), new InstanceMetaData(), new InstanceMetaData()));
+        InstanceGroup worker = new InstanceGroup();
+        worker.setGroupName("worker");
+        worker.setInstanceMetaData(Set.of());
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class, () ->
+                subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -3, Set.of(compute, worker)));
+        assertEquals("Scaling adjustment is not allowed, based on the template it would eliminate all the instances with " +
+                "NODEMANAGER role which is not supported.", badRequestException.getMessage());
+    }
 }
