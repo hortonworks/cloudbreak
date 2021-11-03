@@ -43,4 +43,9 @@ public class DistroXUpgradeTestDto extends AbstractSdxTestDto<DistroXUpgradeV1Re
         getRequest().setReplaceVms(replaceVms);
         return this;
     }
+
+    public DistroXUpgradeTestDto withLockComponents(Boolean lockComponents) {
+        getRequest().setLockComponents(lockComponents);
+        return this;
+    }
 }

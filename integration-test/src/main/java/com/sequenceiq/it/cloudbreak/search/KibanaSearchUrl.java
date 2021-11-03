@@ -60,17 +60,23 @@ public class KibanaSearchUrl implements SearchUrl {
 
     private String getAppState() {
         return String.format("(columns:!('@message','@app'," + KEY + "),filters:!(('$state':(store:appState),"
-                        + "meta:(alias:!n,disabled:!f,index:'0ec45520-98e6-11eb-85ad-c5cb99d34f92',key:" + KEY + ",negate:!f,params:!(%s),"
+                        + "meta:(alias:!n,disabled:!f,index:manual-fields,key:" + KEY + ",negate:!f,params:!(%s),"
                         + "type:phrases,value:'%s'),query:(bool:(minimum_should_match:1,should:!(%s"
-                        + "))))),index:'0ec45520-98e6-11eb-85ad-c5cb99d34f92',interval:auto,query:(language:kuery,query:''),sort:!('@timestamp',desc))",
-                getResourceList(), getResourceList(), getResourceQueries());
+                        + "))))),index:manual-fields,interval:auto,query:(language:kuery,query:''),sort:!('@timestamp',desc))",
+                getResourceListParams(), getResourceListValue(), getResourceQueries());
 
     }
 
-    private String getResourceList() {
+    private String getResourceListParams() {
         List<String> list = searchables.stream().map(Searchable::getSearchId).collect(Collectors.toList());
 
         return String.join(",", list);
+    }
+
+    private String getResourceListValue() {
+        List<String> list = searchables.stream().map(Searchable::getSearchId).collect(Collectors.toList());
+
+        return String.join(",%20", list);
     }
 
     private String getResourceQueries() {

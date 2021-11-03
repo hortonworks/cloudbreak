@@ -1,0 +1,5 @@
+name: "distrox-os-upgrade-tests"
+tests:
+  - name: "distrox_os_upgrade_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.DistroXOSUpgradeTests
