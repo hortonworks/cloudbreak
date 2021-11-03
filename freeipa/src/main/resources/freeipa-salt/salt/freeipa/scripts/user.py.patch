@@ -1,5 +1,31 @@
 --- user.py.orig	2021-11-02 14:04:05.743893028 +0000
-+++ user.py	2021-11-02 14:04:59.068365187 +0000
++++ user.py	2021-11-03 16:47:41.703871621 +0000
+@@ -589,18 +589,18 @@
+ 
+     def post_callback(self, ldap, dn, entry_attrs, *keys, **options):
+         assert isinstance(dn, DN)
+-        config = ldap.get_ipa_config()
++#        config = ldap.get_ipa_config()
+         # add the user we just created into the default primary group
+-        def_primary_group = config.get('ipadefaultprimarygroup')
+-        group_dn = self.api.Object['group'].get_dn(def_primary_group)
++#        def_primary_group = config.get('ipadefaultprimarygroup')
++#        group_dn = self.api.Object['group'].get_dn(def_primary_group)
+ 
+         # if the user is already a member of default primary group,
+         # do not raise error
+         # this can happen if automember rule or default group is set
+-        try:
+-            ldap.add_entry_to_group(dn, group_dn)
+-        except errors.AlreadyGroupMember:
+-            pass
++#        try:
++#            ldap.add_entry_to_group(dn, group_dn)
++#        except errors.AlreadyGroupMember:
++#            pass
+ 
+         # Fetch the entry again to update memberof, mep data, etc updated
+         # at the end of the transaction.
 @@ -1017,7 +1017,7 @@
      def execute(self, *keys, **options):
          ldap = self.obj.backend
