@@ -13,10 +13,13 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_D
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_START_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.LOAD_BALANCER_UPDATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.RECOVERY_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.RESTORE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UNREACHABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 
 import java.util.ArrayList;
@@ -106,9 +109,9 @@ public class CloudbreakWaitObject implements WaitObject {
 
     @Override
     public boolean isFailed() {
-        List<Status> failedStatuses = List.of(UPDATE_FAILED, BACKUP_FAILED, RESTORE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                START_FAILED, STOP_FAILED, EXTERNAL_DATABASE_CREATION_FAILED, EXTERNAL_DATABASE_DELETION_FAILED, EXTERNAL_DATABASE_START_FAILED,
-                EXTERNAL_DATABASE_STOP_FAILED, LOAD_BALANCER_UPDATE_FAILED);
+        List<Status> failedStatuses = List.of(UPDATE_FAILED, BACKUP_FAILED, RESTORE_FAILED, RECOVERY_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED,
+                DELETE_FAILED, START_FAILED, STOP_FAILED, UNREACHABLE, NODE_FAILURE, EXTERNAL_DATABASE_CREATION_FAILED, EXTERNAL_DATABASE_DELETION_FAILED,
+                EXTERNAL_DATABASE_START_FAILED, EXTERNAL_DATABASE_STOP_FAILED, LOAD_BALANCER_UPDATE_FAILED);
         return !ListUtils.retainAll(failedStatuses, actualStatusesEnumValues()).isEmpty();
     }
 
