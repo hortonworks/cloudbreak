@@ -35,4 +35,19 @@ public class ParcelResourceV31Controller implements ParcelResourceApi {
     public ResponseEntity<ApiCommand> activateCommand(String mockUuid, String clusterName, String product, String version) {
         return parcelResourceOperation.activateCommand(mockUuid, clusterName, product, version);
     }
+
+    @Override
+    public ResponseEntity<ApiCommand> deactivateCommand(String mockUuid, String clusterName, String product, String version) {
+        return parcelResourceOperation.deactivateCommand(mockUuid, clusterName, product, version);
+    }
+
+    @Override
+    public ResponseEntity<ApiCommand> startRemovalOfDistributionCommand(String mockUuid, String clusterName, String product, String version) {
+        return parcelResourceOperation.startRemovalOfDistributionCommand(mockUuid, clusterName, product, version);
+    }
+
+    @Override
+    public ResponseEntity<ApiCommand> removeDownloadCommand(String mockUuid, String clusterName, String product, String version) {
+        return parcelResourceOperation.removeDownloadCommand(mockUuid, clusterName, product, version);
+    }
 }

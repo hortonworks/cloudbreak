@@ -109,10 +109,10 @@ public class ClouderaManagerPollingServiceProvider {
         return startDefaultPolling(stack, apiClient, commandId, "Configure for kerberos");
     }
 
-    public PollingResult startPollingCmParcelActivation(Stack stack, ApiClient apiClient, BigDecimal commandId) {
+    public PollingResult startPollingCmParcelActivation(Stack stack, ApiClient apiClient, BigDecimal commandId, List<ClouderaManagerProduct> products) {
         LOGGER.debug("Waiting for Cloudera Manager to deploy client configuratuions. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,
-                new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
+                new ClouderaManagerParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService, products));
     }
 
     public PollingResult startPollingCmSingleParcelActivation(Stack stack, ApiClient apiClient, BigDecimal commandId, ClouderaManagerProduct product) {

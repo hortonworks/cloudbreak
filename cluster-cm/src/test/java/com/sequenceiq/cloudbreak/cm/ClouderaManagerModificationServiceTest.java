@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -303,7 +304,7 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerResourceApi.refreshParcelRepos()).thenReturn(new ApiCommand().id(REFRESH_PARCEL_REPOS_ID));
         when(clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
                 .thenReturn(PollingResult.SUCCESS);
-        when(clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID))
+        when(clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClientMock, REFRESH_PARCEL_REPOS_ID, Collections.emptyList()))
                 .thenReturn(PollingResult.SUCCESS);
         setUpListClusterHosts();
         setUpReadHosts(false);
@@ -462,7 +463,7 @@ class ClouderaManagerModificationServiceTest {
     }
 
     static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
-        return new Object[][]{
+        return new Object[][] {
                 // testCaseName batchResponseFactory
                 {"response=null", (Supplier<ApiBatchResponse>) () -> null},
                 {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},

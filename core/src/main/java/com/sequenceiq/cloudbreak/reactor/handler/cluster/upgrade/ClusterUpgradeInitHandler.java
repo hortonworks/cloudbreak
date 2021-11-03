@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpgradeService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
@@ -28,9 +27,6 @@ import reactor.bus.Event;
 @Component
 public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<ClusterUpgradeInitRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeInitHandler.class);
-
-    @Inject
-    private ClusterManagerUpgradeService clusterManagerUpgradeService;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -59,7 +55,7 @@ public class ClusterUpgradeInitHandler extends ExceptionCatcherEventHandler<Clus
         Selectable result;
         try {
             Set<ClusterComponent> componentsByBlueprint = parcelService.getParcelComponentsByBlueprint(stack);
-            clusterManagerUpgradeService.removeUnusedComponents(request.getResourceId(), componentsByBlueprint);
+            parcelService.removeUnusedParcelComponents(stack, componentsByBlueprint);
             clusterApiConnectors.getConnector(stack).downloadAndDistributeParcels(componentsByBlueprint, request.isPatchUpgrade());
             result = new ClusterUpgradeInitSuccess(request.getResourceId());
         } catch (Exception e) {

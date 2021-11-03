@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.io.IOException;
@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntri
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
@@ -42,8 +43,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 
 @Service
 public class ClouderaManagerClusterCreationSetupService {
@@ -65,7 +65,7 @@ public class ClouderaManagerClusterCreationSetupService {
     private BlueprintUtils blueprintUtils;
 
     @Inject
-    private ParcelService parcelService;
+    private ParcelFilterService parcelFilterService;
 
     public List<ClusterComponent> prepareClouderaManagerCluster(ClusterV4Request request, Cluster cluster,
             Optional<Component> stackClouderaManagerRepoConfig,
@@ -205,7 +205,7 @@ public class ClouderaManagerClusterCreationSetupService {
                     .withParcel(stack.get(osType));
             Set<ClouderaManagerProduct> products = Sets.newHashSet(cmProduct);
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint(), true);
+            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
             return filteredProducts;
         } else {
@@ -214,7 +214,7 @@ public class ClouderaManagerClusterCreationSetupService {
                     .map(json -> json.getSilent(ClouderaManagerProduct.class))
                     .collect(Collectors.toSet());
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelService.filterParcelsByBlueprint(products, cluster.getBlueprint(), false);
+            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
             return filteredProducts;
         }
