@@ -37,7 +37,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -62,7 +60,7 @@ public class InstanceMetadataUpdater {
     private HostOrchestrator hostOrchestrator;
 
     @Inject
-    private GatewayConfigService gatewayConfigService;
+    private GatewayConfigProvider gatewayConfigProvider;
 
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
@@ -75,8 +73,7 @@ public class InstanceMetadataUpdater {
 
     public void updatePackageVersionsOnAllInstances(Long stackId) throws Exception {
         Stack stack = getStackForFreshInstanceStatuses(stackId);
-        Boolean enableKnox = stack.getCluster().getGateway() != null;
-        GatewayConfig gatewayConfig = getGatewayConfig(stack, enableKnox);
+        GatewayConfig gatewayConfig = gatewayConfigProvider.getGatewayConfig(stack);
 
         Map<String, Map<String, String>> packageVersionsByNameByHost = getPackageVersionByNameByHost(gatewayConfig, hostOrchestrator);
 
@@ -97,16 +94,6 @@ public class InstanceMetadataUpdater {
 
     private Stack getStackForFreshInstanceStatuses(Long stackId) {
         return stackService.getByIdWithListsInTransaction(stackId);
-    }
-
-    private GatewayConfig getGatewayConfig(Stack stack, Boolean enableKnox) {
-        GatewayConfig gatewayConfig = null;
-        for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
-            if (InstanceMetadataType.GATEWAY_PRIMARY.equals(gateway.getInstanceMetadataType())) {
-                gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
-            }
-        }
-        return gatewayConfig;
     }
 
     private List<String> updateInstanceMetaDataIfVersionQueryFailed(Map<String, Map<String, String>> packageVersionsByNameByHost,

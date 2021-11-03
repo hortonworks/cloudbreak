@@ -820,6 +820,17 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
+    public Map<String, String> replacePatternInFileOnAllHosts(GatewayConfig gatewayConfig, String file, String pattern, String replace)
+            throws CloudbreakOrchestratorFailedException {
+        try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
+            return SaltStates.replacePatternInFile(retry, saltConnector, file, pattern, replace);
+        } catch (RuntimeException e) {
+            LOGGER.info("Error occurred during file replace execution in file '{}' while replacing pattern '{}' with '{}'", file, pattern, replace, e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
+        }
+    }
+
+    @Override
     public void uploadRecipes(List<GatewayConfig> allGatewayConfigs, Map<String, List<RecipeModel>> recipes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);

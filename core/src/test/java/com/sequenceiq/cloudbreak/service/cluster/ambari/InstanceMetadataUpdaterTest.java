@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -41,7 +40,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.GatewayConfigService;
+import com.sequenceiq.cloudbreak.service.cluster.GatewayConfigProvider;
 import com.sequenceiq.cloudbreak.service.cluster.InstanceMetadataUpdater;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -51,7 +50,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 public class InstanceMetadataUpdaterTest {
 
     @Mock
-    private GatewayConfigService gatewayConfigService;
+    private GatewayConfigProvider gatewayConfigProvider;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -74,7 +73,7 @@ public class InstanceMetadataUpdaterTest {
     @Before
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
         MockitoAnnotations.initMocks(this);
-        when(gatewayConfigService.getGatewayConfig(any(Stack.class), any(InstanceMetaData.class), anyBoolean())).thenReturn(gatewayConfig);
+        when(gatewayConfigProvider.getGatewayConfig(any(Stack.class))).thenReturn(gatewayConfig);
 
         InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();
         packageByName.setName("packageByName");

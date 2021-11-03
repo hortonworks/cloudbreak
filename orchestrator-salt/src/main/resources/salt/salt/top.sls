@@ -13,6 +13,7 @@ base:
     - logrotate
     - ntp
     - postgresql.root-certs
+    - bugfix
 
   'G@roles:ad_member and G@os_family:RedHat':
     - match: compound

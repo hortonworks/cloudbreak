@@ -330,6 +330,21 @@ public class SaltStates {
         });
     }
 
+    public static Map<String, String> replacePatternInFile(Retry retry, SaltConnector sc, String file, String pattern, String replace) {
+        return retry.testWith2SecDelayMax15Times(() -> {
+            try {
+                String[] args = new String[]{file, String.format("pattern='%s'", pattern), String.format("repl='%s'", replace)};
+                CommandExecutionResponse resp = measure(() -> sc.run(Glob.ALL, "file.replace", LOCAL, CommandExecutionResponse.class, args), LOGGER,
+                        "Command run took {}ms for file.replace with args [{}]", (Object) args);
+                List<Map<String, String>> result = resp.getResult();
+                return CollectionUtils.isEmpty(result) ? new HashMap<>() : result.get(0);
+            } catch (RuntimeException e) {
+                LOGGER.error("Salt run command failed", e);
+                throw new Retry.ActionFailedException("Salt run command failed");
+            }
+        });
+    }
+
     public static Map<String, String> runCommandOnHosts(Retry retry, SaltConnector sc, Target<String> target, String command) {
         return retry.testWith2SecDelayMax15Times(() -> {
             try {
