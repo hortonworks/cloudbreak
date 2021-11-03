@@ -2,11 +2,10 @@ package com.sequenceiq.cloudbreak.job;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
+import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 public class StackJobAdapter extends JobResourceAdapter<Stack> {
 
@@ -34,7 +33,7 @@ public class StackJobAdapter extends JobResourceAdapter<Stack> {
     }
 
     @Override
-    public Class<? extends CrudRepository> getRepositoryClassForResource() {
+    public Class<StackRepository> getRepositoryClassForResource() {
         return StackRepository.class;
     }
 }

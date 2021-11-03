@@ -10,9 +10,7 @@ import java.util.Random;
 
 import javax.inject.Inject;
 
-import org.quartz.Job;
 import org.quartz.JobBuilder;
-import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
@@ -34,10 +32,6 @@ public class StructuredSynchronizerJobService {
 
     private static final String TRIGGER_GROUP = "structured-synchronizer-triggers";
 
-    private static final String LOCAL_ID = "localId";
-
-    private static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredSynchronizerJobService.class);
 
     private static final Random RANDOM = new SecureRandom();
@@ -53,11 +47,11 @@ public class StructuredSynchronizerJobService {
     @Inject
     private ApplicationContext applicationContext;
 
-    public void schedule(Long id, Class<? extends JobResourceAdapter> resource) {
+    public <T> void schedule(Long id, Class<? extends JobResourceAdapter<T>> resource) {
         try {
-            Constructor<? extends JobResourceAdapter> c = resource.getConstructor(Long.class, ApplicationContext.class);
-            JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
-            JobDetail jobDetail = buildJobDetail(resourceAdapter.getLocalId(), resourceAdapter.getRemoteResourceId(), resourceAdapter.getJobClassForResource());
+            Constructor<? extends JobResourceAdapter<T>> c = resource.getConstructor(Long.class, ApplicationContext.class);
+            JobResourceAdapter<T> resourceAdapter = c.newInstance(id, applicationContext);
+            JobDetail jobDetail = buildJobDetail(resourceAdapter);
             Trigger trigger = buildJobTrigger(jobDetail);
             schedule(resourceAdapter.getLocalId(), jobDetail, trigger);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
@@ -66,7 +60,7 @@ public class StructuredSynchronizerJobService {
     }
 
     public <T> void scheduleWithDelay(JobResourceAdapter<T> resource) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+        JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTriggerWithDelay(jobDetail);
         schedule(resource.getLocalId(), jobDetail, trigger);
     }
@@ -92,16 +86,11 @@ public class StructuredSynchronizerJobService {
         }
     }
 
-    private <T> JobDetail buildJobDetail(String sdxId, String crn, Class<? extends Job> clazz) {
-        JobDataMap jobDataMap = new JobDataMap();
-
-        jobDataMap.put(LOCAL_ID, sdxId);
-        jobDataMap.put(REMOTE_RESOURCE_CRN, crn);
-
-        return JobBuilder.newJob(clazz)
-                .withIdentity(sdxId, JOB_GROUP)
+    private <T> JobDetail buildJobDetail(JobResourceAdapter<T> resourceAdapter) {
+        return JobBuilder.newJob(resourceAdapter.getJobClassForResource())
+                .withIdentity(resourceAdapter.getLocalId(), JOB_GROUP)
                 .withDescription("Creating Structured Synchronization Event")
-                .usingJobData(jobDataMap)
+                .usingJobData(resourceAdapter.toJobDataMap())
                 .storeDurably()
                 .build();
     }

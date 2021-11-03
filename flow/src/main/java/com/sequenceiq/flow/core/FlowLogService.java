@@ -60,6 +60,8 @@ public interface FlowLogService {
 
     List<FlowLog> findAllByResourceIdOrderByCreatedDesc(Long id);
 
+    Optional<FlowLog> getLastFlowLog(Long resourceId);
+
     List<FlowLog> findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(Long id);
 
     int purgeFinalizedFlowLogs();

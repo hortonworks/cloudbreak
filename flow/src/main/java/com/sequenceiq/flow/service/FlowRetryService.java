@@ -9,6 +9,7 @@ import javax.annotation.Resource;
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.PageRequest;
@@ -22,6 +23,7 @@ import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.RetryResponse;
 import com.sequenceiq.flow.domain.RetryableFlow;
+import com.sequenceiq.flow.domain.RetryableStateResponse;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.repository.FlowLogRepository;
 
@@ -46,33 +48,58 @@ public class FlowRetryService {
     @Resource
     private List<FlowConfiguration<?>> flowConfigs;
 
-    public RetryResponse retry(Long stackId) {
-        if (isFlowPending(stackId)) {
-            LOGGER.info("Retry cannot be performed, because there is already an active flow. stackId: {}", stackId);
-            throw new BadRequestException("Retry cannot be performed, because there is already an active flow.");
-        }
+    public Optional<FlowLog> getLastRetryableFailedFlow(Long stackId) {
+        return Optional.ofNullable(getRetryableStateResponse(stackId).getLastSuccessfulStateFlowLog());
+    }
 
+    private RetryableStateResponse getRetryableStateResponse(Long stackId) {
+        if (isFlowPending(stackId)) {
+            return RetryableStateResponse.flowPending();
+        }
         List<FlowLog> flowLogs = flowLogRepository.findAllByResourceIdOrderByCreatedDesc(stackId, PageRequest.of(0, LAST_FIFTY_FLOWLOGS));
         List<RetryableFlow> retryableFlows = getRetryableFlows(flowLogs);
         if (CollectionUtils.isEmpty(retryableFlows)) {
             String lastKnownState = getLastKnownStateMessage(flowLogs);
-            LOGGER.info("Retry cannot be performed. The last flow did not fail or not retryable.{} stackId: {}", lastKnownState, stackId);
-            throw new BadRequestException("Retry cannot be performed. The last flow did not fail or not retryable." + lastKnownState);
+            return RetryableStateResponse.lastFlowNotFailedOrNotRetryable(lastKnownState);
         }
-
         Optional<FlowLog> failedFlowLog = getMostRecentFailedLog(flowLogs);
         Optional<FlowLog> lastSuccessfulStateFlowLog = failedFlowLog.map(log -> getLastSuccessfulStateLog(log.getCurrentState(), flowLogs));
         if (lastSuccessfulStateFlowLog.isPresent()) {
             String name = retryableFlows.get(0).getName();
-            flow2Handler.restartFlow(lastSuccessfulStateFlowLog.get());
-            if (lastSuccessfulStateFlowLog.get().getFlowChainId() != null) {
-                return new RetryResponse(name, new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateFlowLog.get().getFlowChainId()));
-            } else {
-                return new RetryResponse(name, new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateFlowLog.get().getFlowId()));
-            }
+            return RetryableStateResponse.retryable(name, lastSuccessfulStateFlowLog.get());
         } else {
-            LOGGER.info("Cannot restart previous flow because there is no successful state in the flow. stackId: {}", stackId);
-            throw new BadRequestException("Cannot restart previous flow because there is no successful state in the flow.");
+            return RetryableStateResponse.noSuccessfulState();
+        }
+    }
+
+    public RetryResponse retry(Long stackId) {
+        RetryableStateResponse retryableStateResponse = getRetryableStateResponse(stackId);
+        switch (retryableStateResponse.getState()) {
+            case FLOW_PENDING:
+                String flowPendingMessage = "Retry cannot be performed, because there is already an active flow.";
+                LOGGER.info(flowPendingMessage + " stackId: {}", stackId);
+                throw new BadRequestException(flowPendingMessage);
+            case LAST_NOT_FAILED_OR_NOT_RETRYABLE:
+                String notFailedOrNotRetryableMessage = "Retry cannot be performed. The last flow did not fail or not retryable."
+                        + retryableStateResponse.getLastKnownStateMessage();
+                LOGGER.info(notFailedOrNotRetryableMessage + " stackId: {}", stackId);
+                throw new BadRequestException(notFailedOrNotRetryableMessage);
+            case NO_SUCCESSFUL_STATE:
+                String noSuccessfulStateMessage = "Cannot restart previous flow because there is no successful state in the flow.";
+                LOGGER.info(noSuccessfulStateMessage + " stackId: {}", stackId);
+                throw new BadRequestException(noSuccessfulStateMessage);
+            case RETRYABLE:
+                FlowLog lastSuccessfulStateFlowLog = retryableStateResponse.getLastSuccessfulStateFlowLog();
+                flow2Handler.restartFlow(lastSuccessfulStateFlowLog);
+                if (lastSuccessfulStateFlowLog.getFlowChainId() != null) {
+                    return new RetryResponse(retryableStateResponse.getName(),
+                            new FlowIdentifier(FlowType.FLOW_CHAIN, lastSuccessfulStateFlowLog.getFlowChainId()));
+                } else {
+                    return new RetryResponse(retryableStateResponse.getName(),
+                            new FlowIdentifier(FlowType.FLOW, lastSuccessfulStateFlowLog.getFlowId()));
+                }
+            default:
+                throw new NotImplementedException("Retry state handling is not implemented: " + retryableStateResponse.getState());
         }
     }
 
