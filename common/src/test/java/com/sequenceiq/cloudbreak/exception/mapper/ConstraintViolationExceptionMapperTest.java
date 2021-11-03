@@ -3,7 +3,9 @@ package com.sequenceiq.cloudbreak.exception.mapper;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
@@ -49,10 +51,13 @@ public class ConstraintViolationExceptionMapperTest {
         ConstraintViolationException exception = new ConstraintViolationException("Error message", Set.of(constraintViolation1, constraintViolation2));
         Response response = underTest.toResponse(exception);
         ExceptionResponse entity = (ExceptionResponse) response.getEntity();
-        String actual = JsonUtil.writeValueAsStringSilentSafe(entity);
-        String expected = "{\"message\":\"More than one validation errors happened: \\nsomething validation error occurred" +
-                "\\nother validation error happened\",\"payload\":[{\"field\":\"path.smgth\",\"result\":\"something validation error occurred\"}," +
-                "{\"field\":\"\",\"result\":\"other validation error happened\"}]}";
-        Assertions.assertEquals(expected, actual);
+        Assertions.assertTrue(entity.getMessage().contains("More than one validation errors happened: \n"));
+        Assertions.assertTrue(entity.getMessage().contains("something validation error occurred"));
+        Assertions.assertTrue(entity.getMessage().contains("other validation error happened"));
+        List<String> result = ((List<ValidationResultResponse>) entity.getPayload()).stream()
+                .map(v -> v.getField() + ":" + v.getResult())
+                .collect(Collectors.toList());
+        Assertions.assertTrue(result.contains("path.smgth:something validation error occurred"));
+        Assertions.assertTrue(result.contains(":other validation error happened"));
     }
 }
