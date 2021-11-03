@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
+import java.util.Collections;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -112,6 +115,41 @@ class StructuredEventToClusterShapeConverterTest {
         Assert.assertEquals(2, syncClusterShape.getNodes());
         Assert.assertEquals("master=2", syncClusterShape.getHostGroupNodeCount());
         Assert.assertFalse(syncClusterShape.getTemporaryStorageUsed());
+    }
+
+    @Test
+    public void testLengthLimitedDefinitionDetails() {
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+
+        UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals("", flowClusterShape.getDefinitionDetails());
+
+        StackDetails stackDetails = new StackDetails();
+        InstanceGroupDetails master = createInstanceGroupDetails("master", 2, null);
+        stackDetails.setInstanceGroups(List.of(master));
+        structuredFlowEvent.setStack(stackDetails);
+
+        flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals("[{\"groupName\":\"master\",\"nodeCount\":2}]", flowClusterShape.getDefinitionDetails());
+
+        master = createInstanceGroupDetails("master", 2, null);
+        stackDetails.setInstanceGroups(Collections.nCopies(10, master));
+        structuredFlowEvent.setStack(stackDetails);
+
+        flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        int definitionLength = StringUtils.length(flowClusterShape.getDefinitionDetails());
+        Assertions.assertTrue(definitionLength >= 0 && definitionLength <= 3000);
+
+        master = createInstanceGroupDetails("master", 2, null);
+        stackDetails.setInstanceGroups(Collections.nCopies(100, master));
+        structuredFlowEvent.setStack(stackDetails);
+
+        flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        Assertions.assertEquals("", flowClusterShape.getDefinitionDetails());
     }
 
     private StackDetails createStackDetails() {
