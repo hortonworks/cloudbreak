@@ -1,0 +1,11 @@
+--- user.py.orig	2021-11-02 14:04:05.743893028 +0000
++++ user.py	2021-11-02 14:04:59.068365187 +0000
+@@ -1017,7 +1017,7 @@
+     def execute(self, *keys, **options):
+         ldap = self.obj.backend
+ 
+-        check_protected_member(keys[-1])
++#        check_protected_member(keys[-1])
+ 
+         dn = self.obj.get_either_dn(*keys, **options)
+         ldap.deactivate_entry(dn)
