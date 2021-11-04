@@ -46,7 +46,7 @@ add-httpd-x-cdp-trace-id:
 /usr/lib/python2.7/site-packages/ipaserver/plugins/user.py:
   file.patch:
     - source: salt://freeipa/scripts/user.py.patch
-    - hash: md5=b8d19ea39d1fe75d030618a80cbb4b24
+    - hash: md5=0253bf54de719d8ddeee46a9faf39d4c
     - onlyif: test -f /etc/ipa/default.conf
 
 restart_freeipa_after_plugin_change:
