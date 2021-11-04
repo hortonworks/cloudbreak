@@ -92,6 +92,7 @@ public class OperationDescriptions {
             "if it's enabled.";
         public static final String CHANGE_IMAGE_CATALOG = "Changes image catalog of the cluster";
         public static final String RANGER_RAZ_ENABLED = "Determines if Ranger Raz is present in the cluster.";
+        public static final String GENERATE_IMAGE_CATALOG = "Generates an image catalog that only contains the currently used image for creating instances";
     }
 
     public static class ClusterOpDescription {

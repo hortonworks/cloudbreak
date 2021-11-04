@@ -18,7 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
@@ -107,14 +107,14 @@ public class ImagesToImagesV4ResponseConverter {
         json.setPreWarmParcels(source.getPreWarmParcels());
     }
 
-    private BaseStackDetailsV4Response convertStackDetailsToJson(StackDetails stackDetails, String osType, StackType stackType) {
+    private BaseStackDetailsV4Response convertStackDetailsToJson(ImageStackDetails stackDetails, String osType, StackType stackType) {
         if (StackType.CDH.equals(stackType)) {
             return convertClouderaManagerStackDetailsToJson(stackDetails);
         }
         return null;
     }
 
-    private ClouderaManagerStackDetailsV4Response convertClouderaManagerStackDetailsToJson(StackDetails stackDetails) {
+    private ClouderaManagerStackDetailsV4Response convertClouderaManagerStackDetailsToJson(ImageStackDetails stackDetails) {
         ClouderaManagerStackDetailsV4Response json = new ClouderaManagerStackDetailsV4Response();
         json.setVersion(stackDetails.getVersion());
         json.setRepository(convertClouderaManagerStackRepoDetailsToJson(stackDetails.getRepo()));

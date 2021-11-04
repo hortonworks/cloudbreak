@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.image;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.domain.CustomImage;
 import com.sequenceiq.cloudbreak.domain.VmImage;
@@ -60,12 +60,12 @@ public class CustomImageProvider {
         return repo.entrySet().stream().collect(toMap(Map.Entry::getKey, e -> changeBaseUrlToCustomUrl(e.getValue(), customBaseUrl)));
     }
 
-    private StackDetails getStackDetailsWithCustomBaseUrl(StackDetails details, String customBaseUrl) {
+    private ImageStackDetails getStackDetailsWithCustomBaseUrl(ImageStackDetails details, String customBaseUrl) {
         if (details != null) {
             Map<String, String> stack = details.getRepo().getStack().entrySet()
                     .stream().collect(toMap(Map.Entry::getKey, e -> changeBaseUrlToCustomUrl(e.getValue(), customBaseUrl)));
             StackRepoDetails repoDetails = new StackRepoDetails(stack, details.getRepo().getUtil());
-            return new StackDetails(details.getVersion(), repoDetails, details.getStackBuildNumber());
+            return new ImageStackDetails(details.getVersion(), repoDetails, details.getStackBuildNumber());
         }
         return null;
     }

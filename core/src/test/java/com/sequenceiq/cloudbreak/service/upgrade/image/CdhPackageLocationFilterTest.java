@@ -10,7 +10,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 
 class CdhPackageLocationFilterTest {
@@ -34,7 +34,7 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testRepoIsNull() {
         Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new StackDetails("1", null, "1"));
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", null, "1"));
 
         boolean result = underTest.filterImage(image, mock(Image.class), null);
 
@@ -44,7 +44,7 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testStackIsNull() {
         Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(null, null), "1"));
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(null, null), "1"));
 
         boolean result = underTest.filterImage(image, mock(Image.class), null);
 
@@ -54,7 +54,7 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testCurrentImageNull() {
         Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
 
         boolean result = underTest.filterImage(image, null, null);
 
@@ -64,7 +64,7 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testCurrentImageOsTypeEmpty() {
         Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn(" ");
 
@@ -76,7 +76,7 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testOsTypeMissing() {
         Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of(), Map.of()), "1"));
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn("redhat7");
 
@@ -88,7 +88,7 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testNotMatching() {
         Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://random.org/asdf/"), Map.of()), "1"));
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://random.org/asdf/"), Map.of()), "1"));
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn("redhat7");
 
@@ -100,7 +100,7 @@ class CdhPackageLocationFilterTest {
     @Test
     public void testMatching() {
         Image image = mock(Image.class);
-        when(image.getStackDetails()).thenReturn(new StackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://archive.cloudera.com/asdf/"),
+        when(image.getStackDetails()).thenReturn(new ImageStackDetails("1", new StackRepoDetails(Map.of("redhat7", "http://archive.cloudera.com/asdf/"),
                 Map.of()), "1"));
         Image currentImage = mock(Image.class);
         when(currentImage.getOsType()).thenReturn("redhat7");

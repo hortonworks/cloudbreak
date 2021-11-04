@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
@@ -44,6 +45,7 @@ import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
+import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -116,6 +118,9 @@ public class StackOperationsTest {
 
     @Mock
     private FlowLogService flowLogService;
+
+    @Mock
+    private GenerateImageCatalogService generateImageCatalogService;
 
     private Stack stack;
 
@@ -230,6 +235,18 @@ public class StackOperationsTest {
         when(flowLogService.isOtherFlowRunning(stack.getId())).thenReturn(true);
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.changeImageCatalog(nameOrCrn, stack.getWorkspace().getId(), IMAGE_CATALOG));
+    }
+
+    @Test
+    public void testGenerateImageCatalog() {
+        NameOrCrn nameOrCrn = NameOrCrn.ofName(stack.getName());
+        CloudbreakImageCatalogV3 imageCatalog = mock(CloudbreakImageCatalogV3.class);
+        when(stackService.getByNameOrCrnInWorkspace(nameOrCrn, stack.getWorkspace().getId())).thenReturn(stack);
+        when(generateImageCatalogService.generateImageCatalogForStack(stack)).thenReturn(imageCatalog);
+
+        CloudbreakImageCatalogV3 actual = underTest.generateImageCatalog(nameOrCrn, stack.getWorkspace().getId());
+
+        assertEquals(imageCatalog, actual);
     }
 
     private StackV4Response stackResponse() {

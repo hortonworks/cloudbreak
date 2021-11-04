@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.model.component;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -111,7 +111,7 @@ public class ImageBasedDefaultCDHEntriesTest {
 
     private List<Image> getImages() {
         StackRepoDetails stackRepoDetails = new StackRepoDetails(getRepo(), null);
-        StackDetails stackDetails = new StackDetails(null, stackRepoDetails, null);
+        ImageStackDetails stackDetails = new ImageStackDetails(null, stackRepoDetails, null);
         List<List<String>> parcels = getParcels();
         Image defaultImage = mock(Image.class);
         when(defaultImage.isDefaultImage()).thenReturn(true);

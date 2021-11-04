@@ -33,7 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
@@ -258,7 +258,7 @@ public class ImageService {
     private void addStackRepo(Stack stack, Set<Component> components, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage)
             throws CloudbreakImageCatalogException {
         if (catalogBasedImage.getStackDetails() != null) {
-            StackDetails stackDetails = catalogBasedImage.getStackDetails();
+            ImageStackDetails stackDetails = catalogBasedImage.getStackDetails();
             StackType stackType = determineStackType(stackDetails);
             Component stackRepoComponent = getStackComponent(stack, stackDetails, stackType, catalogBasedImage.getOsType());
             components.add(stackRepoComponent);
@@ -268,7 +268,7 @@ public class ImageService {
     private void addCmRepo(Stack stack, Set<Component> components, com.sequenceiq.cloudbreak.cloud.model.catalog.Image catalogBasedImage)
             throws CloudbreakImageCatalogException {
         if (catalogBasedImage.getStackDetails() != null) {
-            StackDetails stackDetails = catalogBasedImage.getStackDetails();
+            ImageStackDetails stackDetails = catalogBasedImage.getStackDetails();
             StackType stackType = determineStackType(stackDetails);
             ClouderaManagerRepo clouderaManagerRepo = getClouderaManagerRepo(catalogBasedImage, stackType);
             components.add(new Component(CM_REPO_DETAILS, CM_REPO_DETAILS.name(), new Json(clouderaManagerRepo), stack));
@@ -285,7 +285,7 @@ public class ImageService {
         components.add(new Component(IMAGE, IMAGE.name(), new Json(image), stack));
     }
 
-    private Component getStackComponent(Stack stack, StackDetails stackDetails, StackType stackType, String osType) {
+    private Component getStackComponent(Stack stack, ImageStackDetails stackDetails, StackType stackType, String osType) {
         ComponentType componentType = stackType.getComponentType();
         if (CDH_PRODUCT_DETAILS.equals(componentType)) {
             ClouderaManagerProduct product = createProductRepo(stackDetails, osType);
@@ -321,7 +321,7 @@ public class ImageService {
         }
     }
 
-    public StackType determineStackType(StackDetails stackDetails) throws CloudbreakImageCatalogException {
+    public StackType determineStackType(ImageStackDetails stackDetails) throws CloudbreakImageCatalogException {
         String repoId = stackDetails.getRepo().getStack().get(StackRepoDetails.REPO_ID_TAG);
         Optional<StackType> stackType = EnumSet.allOf(StackType.class).stream().filter(st -> repoId.contains(st.name())).findFirst();
         if (stackType.isPresent()) {
@@ -332,7 +332,7 @@ public class ImageService {
 
     }
 
-    private StackRepoDetails createStackRepo(StackDetails stack) {
+    private StackRepoDetails createStackRepo(ImageStackDetails stack) {
         StackRepoDetails repo = new StackRepoDetails();
         repo.setHdpVersion(stack.getVersion());
         repo.setStack(stack.getRepo().getStack());
@@ -340,7 +340,7 @@ public class ImageService {
         return repo;
     }
 
-    private ClouderaManagerProduct createProductRepo(StackDetails stack, String osType) {
+    private ClouderaManagerProduct createProductRepo(ImageStackDetails stack, String osType) {
         ClouderaManagerProduct cmProduct = new ClouderaManagerProduct();
         Map<String, String> stackInfo = stack.getRepo().getStack();
         cmProduct.

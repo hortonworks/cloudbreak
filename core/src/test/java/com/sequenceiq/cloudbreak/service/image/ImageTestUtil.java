@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 
 public class ImageTestUtil {
@@ -37,10 +37,10 @@ public class ImageTestUtil {
         Map<String, Map<String, String>> imageSetsByProvider = new HashMap<>();
         imageSetsByProvider.put(PLATFORM, regionImageIdMap);
 
-        StackDetails stackDetails = null;
+        ImageStackDetails stackDetails = null;
         if (prewarmed) {
             StackRepoDetails repoDetails = new StackRepoDetails(stackDetailsMap, Collections.emptyMap());
-            stackDetails = new StackDetails(stackVersion, repoDetails, "1");
+            stackDetails = new ImageStackDetails(stackVersion, repoDetails, "1");
         }
         return new Image("imageDate", System.currentTimeMillis(), "imageDesc", "centos7", uuid, stackVersion, Collections.emptyMap(),
                 imageSetsByProvider, stackDetails, "centos", packageVersions,

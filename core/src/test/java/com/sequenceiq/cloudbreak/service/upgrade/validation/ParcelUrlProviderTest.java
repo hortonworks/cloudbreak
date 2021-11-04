@@ -20,7 +20,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.StackRepoDetails;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -83,7 +83,7 @@ public class ParcelUrlProviderTest {
     }
 
     private StatedImage createImage(StackRepoDetails stackRepoDetails) {
-        return StatedImage.statedImage(new Image(null, null, null, null, IMAGE_ID, null, null, null, new StackDetails(null, stackRepoDetails, null), null,
+        return StatedImage.statedImage(new Image(null, null, null, null, IMAGE_ID, null, null, null, new ImageStackDetails(null, stackRepoDetails, null), null,
                 null, createPreWarmParcels(), null, null, false, null, null), IMAGE_CATALOG_URL, IMAGE_CATALOG_NAME);
     }
 

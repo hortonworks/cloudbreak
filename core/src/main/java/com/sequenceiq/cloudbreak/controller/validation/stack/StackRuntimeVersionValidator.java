@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.cluster.cm.Cloud
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.datalake.SdxClientService;
@@ -102,7 +102,7 @@ public class StackRuntimeVersionValidator {
     private Optional<String> findStackVersionInImage(Image image) {
         return Optional.of(image)
                 .map(Image::getStackDetails)
-                .map(StackDetails::getVersion);
+                .map(ImageStackDetails::getVersion);
     }
 
     private Optional<String> findStackVersionInStackRequest(StackV4Request stackRequest) {

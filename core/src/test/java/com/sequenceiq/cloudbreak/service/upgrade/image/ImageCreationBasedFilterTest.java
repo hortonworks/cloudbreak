@@ -11,7 +11,7 @@ import org.apache.commons.lang3.mutable.MutableObject;
 import org.junit.jupiter.api.Test;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.StackDetails;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.ImageStackDetails;
 
 class ImageCreationBasedFilterTest {
 
@@ -200,8 +200,8 @@ class ImageCreationBasedFilterTest {
     }
 
     private void mockSameVersion(Image current, Image candidate) {
-        StackDetails currentStackDetails = mock(StackDetails.class);
-        StackDetails candidateStackDetails = mock(StackDetails.class);
+        ImageStackDetails currentStackDetails = mock(ImageStackDetails.class);
+        ImageStackDetails candidateStackDetails = mock(ImageStackDetails.class);
 
         when(current.getStackDetails()).thenReturn(currentStackDetails);
         when(candidate.getStackDetails()).thenReturn(candidateStackDetails);
@@ -210,8 +210,8 @@ class ImageCreationBasedFilterTest {
     }
 
     private void mockDifferentVersion(Image current, Image candidate) {
-        StackDetails currentStackDetails = mock(StackDetails.class);
-        StackDetails candidateStackDetails = mock(StackDetails.class);
+        ImageStackDetails currentStackDetails = mock(ImageStackDetails.class);
+        ImageStackDetails candidateStackDetails = mock(ImageStackDetails.class);
 
         when(current.getStackDetails()).thenReturn(currentStackDetails);
         when(candidate.getStackDetails()).thenReturn(candidateStackDetails);
