@@ -365,7 +365,7 @@ public class SdxController implements SdxEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.CHANGE_IMAGE_CATALOG_DATALAKE)
-    public void changeImageCatalog(@ResourceName String name, SdxChangeImageCatalogRequest changeImageCatalogRequest) {
+    public void changeImageCatalog(@ResourceName String name, @RequestObject SdxChangeImageCatalogRequest changeImageCatalogRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         sdxImageCatalogChangeService.changeImageCatalog(sdxCluster, changeImageCatalogRequest.getImageCatalog());
     }
