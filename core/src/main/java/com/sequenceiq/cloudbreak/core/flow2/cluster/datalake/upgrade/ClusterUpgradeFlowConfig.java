@@ -79,7 +79,7 @@ public class ClusterUpgradeFlowConfig extends AbstractFlowConfiguration<ClusterU
 
     @Override
     public String getDisplayName() {
-        return "Upgrade Datalake cluster";
+        return "Upgrade cluster";
     }
 
     @Override
