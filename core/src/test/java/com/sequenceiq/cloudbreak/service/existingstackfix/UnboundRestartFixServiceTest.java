@@ -2,12 +2,9 @@ package com.sequenceiq.cloudbreak.service.existingstackfix;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -24,14 +21,19 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.repository.StackFixRepository;
-import com.sequenceiq.cloudbreak.service.cluster.GatewayConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.service.FlowService;
 
 @ExtendWith(MockitoExtension.class)
 class UnboundRestartFixServiceTest {
+
+    private static final String POLLABLE_ID = "pollable-id";
 
     @Mock
     private StackFixRepository stackFixRepository;
@@ -43,10 +45,10 @@ class UnboundRestartFixServiceTest {
     private StackImageService stackImageService;
 
     @Mock
-    private GatewayConfigProvider gatewayConfigProvider;
+    private ClusterOperationService clusterOperationService;
 
     @Mock
-    private HostOrchestrator hostOrchestrator;
+    private FlowService flowService;
 
     @InjectMocks
     private UnboundRestartFixService underTest;
@@ -100,25 +102,18 @@ class UnboundRestartFixServiceTest {
     }
 
     @Test
-    void failedHostsFailsToApply() throws CloudbreakOrchestratorFailedException {
-        when(hostOrchestrator.replacePatternInFileOnAllHosts(any(), any(), any(), any())).thenReturn(
-                Map.of("host1", "false", "host2", "null"));
+    void failedFlowState() {
+        when(clusterOperationService.updateSalt(stack)).thenReturn(new FlowIdentifier(FlowType.FLOW, POLLABLE_ID));
+        setFlowState(true, true);
 
         assertThatThrownBy(() -> underTest.doApply(stack))
-                .hasMessageStartingWith("Host(s) of stack stack-crn had an invalid response");
-    }
-
-    @Test
-    void orchestratorExceptionTranslates() throws CloudbreakOrchestratorFailedException {
-        doThrow(new CloudbreakOrchestratorFailedException("oops")).when(hostOrchestrator).replacePatternInFileOnAllHosts(any(), any(), any(), any());
-
-        assertThatThrownBy(() -> underTest.doApply(stack))
-                .hasMessage("Failed to replace unbound service restart on all hosts");
+                .hasMessageStartingWith("Failed to update salt for stack");
     }
 
     @Test
     void allHostsSucceedToApply() throws CloudbreakOrchestratorFailedException {
-        when(hostOrchestrator.replacePatternInFileOnAllHosts(any(), any(), any(), any())).thenReturn(Map.of("host", "success"));
+        when(clusterOperationService.updateSalt(stack)).thenReturn(new FlowIdentifier(FlowType.FLOW, POLLABLE_ID));
+        setFlowState(true, false);
 
         underTest.doApply(stack);
     }
@@ -136,6 +131,13 @@ class UnboundRestartFixServiceTest {
         Image image = mock(Image.class);
         when(image.getImageId()).thenReturn(id);
         when(stackImageService.getCurrentImage(stack)).thenReturn(image);
+    }
+
+    private void setFlowState(boolean finished, boolean failed) {
+        FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
+        flowCheckResponse.setHasActiveFlow(!finished);
+        flowCheckResponse.setLatestFlowFinalizedAndFailed(failed);
+        when(flowService.getFlowState(POLLABLE_ID)).thenReturn(flowCheckResponse);
     }
 
 }

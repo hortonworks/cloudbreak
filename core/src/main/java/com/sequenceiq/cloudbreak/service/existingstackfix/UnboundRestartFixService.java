@@ -2,27 +2,28 @@ package com.sequenceiq.cloudbreak.service.existingstackfix;
 
 import static com.sequenceiq.cloudbreak.domain.stack.StackFix.StackFixType.UNBOUND_RESTART;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.dyngr.Polling;
+import com.dyngr.core.AttemptResults;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackFix;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
-import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.service.cluster.GatewayConfigProvider;
+import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.flow.api.model.FlowCheckResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.service.FlowService;
 
 @Service
 public class UnboundRestartFixService extends ExistingStackFixService {
@@ -41,10 +42,10 @@ public class UnboundRestartFixService extends ExistingStackFixService {
     private StackImageService stackImageService;
 
     @Inject
-    private GatewayConfigProvider gatewayConfigProvider;
+    private ClusterOperationService clusterOperationService;
 
     @Inject
-    private HostOrchestrator hostOrchestrator;
+    private FlowService flowService;
 
     @Override
     public StackFix.StackFixType getStackFixType() {
@@ -70,19 +71,17 @@ public class UnboundRestartFixService extends ExistingStackFixService {
             LOGGER.info("UnboundRestartFixService cannot run, because CM server is unreachable of stack: {}", stack.getResourceCrn());
             throw new RuntimeException("CM server is unreachable for stack: " + stack.getResourceCrn());
         }
-        try {
-            Map<String, String> hostResponses = hostOrchestrator.replacePatternInFileOnAllHosts(gatewayConfigProvider.getGatewayConfig(stack),
-                    "/etc/dhcp/dhclient-enter-hooks", "systemctl restart unbound", "pkill -u unbound -SIGHUP unbound");
-            LOGGER.debug("Replace unbound service restart responses for stack {}: {}", stack.getResourceCrn(), hostResponses);
-            List<String> failedHosts = hostResponses.entrySet().stream()
-                    .filter(entry -> StringUtils.equalsAny(entry.getValue(), "false", "null", null))
-                    .map(Map.Entry::getKey)
-                    .collect(Collectors.toList());
-            if (!failedHosts.isEmpty()) {
-                throw new RuntimeException(String.format("Host(s) of stack %s had an invalid response: %s", stack.getResourceCrn(), failedHosts));
-            }
-        } catch (CloudbreakOrchestratorFailedException e) {
-            throw new RuntimeException("Failed to replace unbound service restart on all hosts", e);
+        FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(() -> clusterOperationService.updateSalt(stack));
+        Boolean success = Polling.waitPeriodly(1, TimeUnit.MINUTES)
+                .run(() -> {
+                    FlowCheckResponse flowState = flowService.getFlowState(flowIdentifier.getPollableId());
+                    if (flowState.getHasActiveFlow()) {
+                        return AttemptResults.justContinue();
+                    }
+                    return AttemptResults.finishWith(!flowState.getLatestFlowFinalizedAndFailed());
+                });
+        if (!success) {
+            throw new RuntimeException("Failed to update salt for stack " + stack.getResourceCrn());
         }
     }
 

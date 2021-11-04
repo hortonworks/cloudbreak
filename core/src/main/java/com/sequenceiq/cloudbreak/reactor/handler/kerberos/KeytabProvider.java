@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -33,7 +35,12 @@ public class KeytabProvider {
     public ServiceKeytabResponse getServiceKeytabResponse(Stack stack, GatewayConfig primaryGatewayConfig) {
         ServiceKeytabRequest request = cmServiceKeytabRequestFactory.create(stack, primaryGatewayConfig);
         try {
-            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            String accountId;
+            if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+                accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
+            } else {
+                accountId = ThreadBasedUserCrnProvider.getAccountId();
+            }
             return ThreadBasedUserCrnProvider.doAsInternalActor(() -> kerberosMgmtV1Endpoint.generateServiceKeytab(request, accountId));
         } catch (WebApplicationException e) {
             String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
