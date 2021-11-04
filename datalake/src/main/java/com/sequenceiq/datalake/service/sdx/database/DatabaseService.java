@@ -63,7 +63,7 @@ public class DatabaseService {
     @Value("${sdx.db.operation.sleeptime_sec:10}")
     private int sleepTimeInSec;
 
-    @Value("${sdx.db.operation.duration_min:60}")
+    @Value("${sdx.db.operation.duration_min:80}")
     private int durationInMinutes;
 
     @Inject

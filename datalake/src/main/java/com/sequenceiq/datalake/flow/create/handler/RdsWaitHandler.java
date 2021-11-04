@@ -40,7 +40,7 @@ public class RdsWaitHandler extends ExceptionCatcherEventHandler<RdsWaitRequest>
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RdsWaitHandler.class);
 
-    @Value("${sdx.db.operation.duration_min:60}")
+    @Value("${sdx.db.operation.duration_min:80}")
     private int durationInMinutes;
 
     @Inject
