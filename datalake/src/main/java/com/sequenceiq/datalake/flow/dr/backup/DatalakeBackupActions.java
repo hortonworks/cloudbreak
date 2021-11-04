@@ -11,6 +11,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -318,7 +319,7 @@ public class DatalakeBackupActions {
                 LOGGER.error("Datalake backup failed for datalake with id: {}", payload.getResourceId(), exception);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FAILED,
-                        getFailureReason(variables), payload.getResourceId());
+                        getFailureReason(variables, exception), payload.getResourceId());
 
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
@@ -336,14 +337,16 @@ public class DatalakeBackupActions {
         };
     }
 
-    private String getFailureReason(Map<Object, Object> variables) {
-        if (!variables.containsKey(REASON)) {
-            return "Datalake backup failed, Datalake is running.";
-        }
-        if (variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
-            return "Upgrade not stared, Datalake backup failed.";
+    private String getFailureReason(Map<Object, Object> variables, Exception exception) {
+        StringBuilder reason = new StringBuilder();
+        if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
+            reason.append("Upgrade not started, datalake backup failed.");
         } else {
-            return "Datalake backup failed, Datalake is running.";
+            reason.append("Backup failed, returning datalake to running state.");
         }
+        if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
+            reason.append(" Failure message: ").append(exception.getMessage());
+        }
+        return reason.toString();
     }
 }
