@@ -225,7 +225,7 @@ public interface DistroXV1Endpoint {
     @Path("name/{name}/start")
     @ApiOperation(value = START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "startDistroXV1ByName")
-    FlowIdentifier putStartByName(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("name") String name);
+    FlowIdentifier putStartByName(@PathParam("name") String name);
 
     @PUT
     @Path("crn/{crn}/start")
