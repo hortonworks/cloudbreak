@@ -134,4 +134,34 @@ public class BackupRestoreSaltConfigGeneratorTest {
 
         assertEquals(location + "/"  + BACKUP_ID + DATABASE_BACKUP_POSTFIX, disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
     }
+
+    @Test
+    public void testObjectStorageUrlIsPrefixedWithGSForGCPCloudplatform() throws URISyntaxException {
+        String cloudPlatform = "gcp";
+        String location = "/test/backups";
+        Stack placeholderStack = new Stack();
+        placeholderStack.setCloudPlatform(cloudPlatform);
+
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+
+        Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
+        Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
+
+        assertEquals("gs://test/backups/backupId_database_backup", disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
+    }
+
+    @Test
+    public void testGSSchemeIsPassedThroughUnchanged() throws Exception {
+        String cloudPlatform = "gcp";
+        String location = "gs://eng-sdx-daily-datalake/bderriso-provo/data/backup01";
+        Stack placeholderStack = new Stack();
+        placeholderStack.setCloudPlatform(cloudPlatform);
+
+        SaltConfig saltConfig = saltConfigGenerator.createSaltConfig(location, BACKUP_ID, RANGER_ADMIN_GROUP, true, placeholderStack);
+
+        Map<String, Object> disasterRecoveryProperties = saltConfig.getServicePillarConfig().get("disaster-recovery").getProperties();
+        Map<String, String> disasterRecoveryKeyValuePairs = (Map<String, String>) disasterRecoveryProperties.get(DISASTER_RECOVERY_KEY);
+
+        assertEquals(location + "/"  + BACKUP_ID + DATABASE_BACKUP_POSTFIX, disasterRecoveryKeyValuePairs.get(OBJECT_STORAGE_URL_KEY));
+    }
 }
