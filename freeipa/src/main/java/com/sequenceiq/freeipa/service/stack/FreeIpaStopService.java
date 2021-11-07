@@ -37,8 +37,8 @@ public class FreeIpaStopService {
         MDCBuilder.addAccountId(accountId);
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
-            LOGGER.info("No FreeIpa found in environment");
-            throw new NotFoundException("No FreeIpa found in environment");
+            LOGGER.info("No FreeIPA found in environment");
+            throw new NotFoundException("No FreeIPA found in environment");
         }
 
         stacks.stream()
@@ -62,10 +62,11 @@ public class FreeIpaStopService {
             LOGGER.debug("Stack stop is ignored");
             result = false;
         } else if (!stack.isAvailable() && !stack.isStopFailed()) {
-            LOGGER.debug("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.");
+            LOGGER.debug("Cannot update the status of stack '{}' to STOPPED, because it isn't in AVAILABLE state.", stack.getName());
             throw new BadRequestException(
                     String.format("Cannot update the status of stack '%s' to STOPPED, because it isn't in AVAILABLE state.", stack.getName()));
         }
         return result;
     }
+
 }
