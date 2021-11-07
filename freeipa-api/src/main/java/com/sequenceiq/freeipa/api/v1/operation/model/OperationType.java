@@ -11,7 +11,8 @@ public enum OperationType {
     DOWNSCALE,
     UPSCALE,
     BIND_USER_CREATE,
-    UPGRADE;
+    UPGRADE,
+    UPGRADE_CCM;
 
     public static OperationType fromSyncOperationType(SyncOperationType syncOperationType) {
         switch (syncOperationType) {

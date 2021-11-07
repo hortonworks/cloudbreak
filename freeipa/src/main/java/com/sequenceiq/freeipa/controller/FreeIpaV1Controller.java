@@ -26,11 +26,13 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.State;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -74,6 +76,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaListService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStackHealthDetailsService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
 import com.sequenceiq.freeipa.util.CrnService;
 
@@ -148,6 +151,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private ImageCatalogGeneratorService imageCatalogGeneratorService;
+
+    @Inject
+    private FreeIpaUpgradeCcmService upgradeCcmService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -355,4 +361,14 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
         String accountId = crnService.getCurrentAccountId();
         return imageCatalogGeneratorService.generate(environmentCrn, accountId);
     }
+
+    @Override
+    @InternalOnly
+    public OperationStatus upgradeCcmInternal(
+            @ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @NotEmpty String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.USER) @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return upgradeCcmService.upgradeCcm(environmentCrn, accountId);
+    }
+
 }

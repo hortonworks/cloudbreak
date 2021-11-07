@@ -36,8 +36,8 @@ public class FreeIpaStartService {
         MDCBuilder.addAccountId(accountId);
         List<Stack> stacks = stackService.findAllByEnvironmentCrnAndAccountId(environmentCrn, accountId);
         if (stacks.isEmpty()) {
-            LOGGER.debug("No FreeIpa found in environment");
-            throw new NotFoundException("No FreeIpa found in environment");
+            LOGGER.debug("No FreeIPA found in environment");
+            throw new NotFoundException("No FreeIPA found in environment");
         }
         stacks.stream()
                 .filter(s -> s.getStackStatus().getStatus().isStartable())
@@ -47,7 +47,8 @@ public class FreeIpaStartService {
     private void triggerStackStart(Stack stack) {
         MDCBuilder.buildMdcContext(stack);
         LOGGER.debug("Trigger start event, new status: {}", START_REQUESTED);
-        stackUpdater.updateStackStatus(stack, START_REQUESTED, "Started of stack infrastructure has been requested.");
+        stackUpdater.updateStackStatus(stack, START_REQUESTED, "Starting of stack infrastructure has been requested.");
         flowManager.notify(STACK_START_EVENT.event(), new StackEvent(STACK_START_EVENT.event(), stack.getId()));
     }
+
 }
