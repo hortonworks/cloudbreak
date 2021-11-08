@@ -30,13 +30,11 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
-import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @ExtendWith(MockitoExtension.class)
 public class SdxStartServiceTest {
@@ -77,13 +75,9 @@ public class SdxStartServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         sdxCluster.setEnvCrn("envCrn");
 
-        DescribeFreeIpaResponse freeIpaResponse = new DescribeFreeIpaResponse();
-        freeIpaResponse.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
-
-        when(freeipaService.describe("envCrn")).thenReturn(freeIpaResponse);
-
         underTest.triggerStartIfClusterNotRunning(sdxCluster);
 
+        verify(freeipaService).checkFreeipaRunning("envCrn");
         verify(sdxReactorFlowManager).triggerSdxStartFlow(sdxCluster);
     }
 
@@ -101,14 +95,12 @@ public class SdxStartServiceTest {
         SdxCluster sdxCluster = sdxCluster();
         sdxCluster.setEnvCrn("envCrn");
 
-        DescribeFreeIpaResponse freeipa = new DescribeFreeIpaResponse();
-        freeipa.setStatus(Status.STOPPED);
-        freeipa.setAvailabilityStatus(AvailabilityStatus.UNAVAILABLE);
+        BadRequestException freeIpaException = new BadRequestException("Freeipa should be in Available state but currently is " + Status.STOPPED);
 
-        when(freeipaService.describe("envCrn")).thenReturn(freeipa);
+        doThrow(freeIpaException).when(freeipaService).checkFreeipaRunning("envCrn");
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerStartIfClusterNotRunning(sdxCluster));
-        assertEquals("Freeipa should be in Available state but currently is " + freeipa.getStatus().name(), exception.getMessage());
+        assertEquals("Freeipa should be in Available state but currently is " + Status.STOPPED, exception.getMessage());
     }
 
     @Test
@@ -161,7 +153,7 @@ public class SdxStartServiceTest {
         RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.start(CLUSTER_ID));
 
         verifyNoInteractions(cloudbreakFlowService);
-        assertEquals("Can not start cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
+        assertEquals("Cannot start cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
     }
 
     private SdxCluster sdxCluster() {

@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus.NON_RECOVERABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus.RECOVERABLE;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -21,9 +25,11 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 
 @Service
 public class ClusterRecoveryService {
@@ -39,6 +45,9 @@ public class ClusterRecoveryService {
     @Inject
     private StackStatusService stackStatusService;
 
+    @Inject
+    private FreeipaService freeipaService;
+
     public FlowIdentifier recoverCluster(Long workspaceId, NameOrCrn stackNameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
         MDCBuilder.buildMdcContext(stack);
@@ -48,6 +57,10 @@ public class ClusterRecoveryService {
 
     public RecoveryValidationV4Response validateRecovery(Long workspaceId, NameOrCrn stackNameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
+        return validateFreeIpaStatus(stack).merge(validateStackStatus(stack));
+    }
+
+    private RecoveryValidationV4Response validateStackStatus(Stack stack) {
         List<StackStatus> statusList = stackStatusService.findAllStackStatusesById(stack.getId());
         List<DetailedStackStatus> detailedStackStatusList = statusList.stream()
                 .map(StackStatus::getDetailedStackStatus)
@@ -72,18 +85,33 @@ public class ClusterRecoveryService {
         RecoveryStatus status;
         if (maximumInt == -1) {
             reason = "There has been no failed upgrades for this cluster hence recovery is not permitted.";
-            status = RecoveryStatus.NON_RECOVERABLE;
+            status = NON_RECOVERABLE;
         } else if (maximumInt == lastRecoveryFailure) {
             reason = "Last cluster recovery has failed, recovery can be retried.";
-            status = RecoveryStatus.RECOVERABLE;
+            status = RECOVERABLE;
         } else if (maximumInt == lastUpgradeFailure) {
             reason = "Last cluster upgrade has failed, recovery can be launched to restore the cluster to its pre-upgrade state.";
-            status = RecoveryStatus.RECOVERABLE;
+            status = RECOVERABLE;
         } else {
             reason = "Cluster is not in a recoverable state now, neither uncorrected upgrade or recovery failures are present.";
-            status = RecoveryStatus.NON_RECOVERABLE;
+            status = NON_RECOVERABLE;
         }
         LOGGER.info(reason);
+        return new RecoveryValidationV4Response(reason, status);
+    }
+
+    private RecoveryValidationV4Response validateFreeIpaStatus(Stack stack) {
+        boolean freeIpaAvailable = freeipaService.freeipaStatusInDesiredState(stack, Set.of(Status.AVAILABLE));
+        String reason = "";
+        RecoveryStatus status;
+        if (!freeIpaAvailable) {
+            reason = "Recovery cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again.";
+            status = NON_RECOVERABLE;
+            LOGGER.info(reason);
+        } else {
+            status = RECOVERABLE;
+            LOGGER.debug("Recovery can be performed because the FreeIPA is available.");
+        }
         return new RecoveryValidationV4Response(reason, status);
     }
 

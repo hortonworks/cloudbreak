@@ -77,7 +77,7 @@ public class SdxUpgradeRecoveryServiceTest {
 
         CloudbreakApiException actual = assertThrows(CloudbreakApiException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME), request)));
-        assertEquals("Stack recovery status validation failed on cluster: [dummyCluster]. Message: [web-error]", actual.getMessage());
+        assertEquals("Stack recovery validation failed on cluster: [dummyCluster]. Message: [web-error]", actual.getMessage());
     }
 
     @Test
