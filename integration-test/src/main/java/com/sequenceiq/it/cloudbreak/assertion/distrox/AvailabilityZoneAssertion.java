@@ -24,6 +24,7 @@ public class AvailabilityZoneAssertion implements Assertion<DistroXTestDto, Clou
             return testDto;
         }
         List<InstanceGroupV4Response> instanceGroups = testDto.getResponse().getInstanceGroups();
+        checkAwsNativeVariantIfMultiAzEnabled(testContext, testDto);
         instanceGroups.stream().forEach(instanceGroup -> {
             if (instanceGroup.getAvailabilityZones() == null || instanceGroup.getAvailabilityZones().size() <= 1) {
                 return;
@@ -40,6 +41,13 @@ public class AvailabilityZoneAssertion implements Assertion<DistroXTestDto, Clou
             }
         });
         return testDto;
+    }
+
+    private void checkAwsNativeVariantIfMultiAzEnabled(TestContext testContext, DistroXTestDto testDto) {
+        if ("AWS_NATIVE".equals(testContext.getCloudProvider().getVariant()) &&
+                !testContext.getCloudProvider().getVariant().equals(testDto.getResponse().getVariant())) {
+            throw new TestFailException("The Multi-AZ enabled but the stack variant is not AWS_NATIVE: " + testDto.getResponse().getVariant());
+        }
     }
 
     private boolean allAvailabilityZoneHasNearlyTheSameInstanceCount(Map<String, Integer> instanceNoByAvailabilityZone, int max) {

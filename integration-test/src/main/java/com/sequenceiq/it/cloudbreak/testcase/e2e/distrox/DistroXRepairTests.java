@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.it.cloudbreak.assertion.distrox.AvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -54,9 +55,11 @@ public class DistroXRepairTests extends AbstractE2ETest {
 
         testContext
                 .given(distrox, DistroXTestDto.class)
+                .when(distroXTestClient.fetchPreferredSubnetForInstanceNetworkIfMultiAzEnabled())
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
+                .then(new AvailabilityZoneAssertion())
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instancesToDelete = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());
@@ -68,6 +71,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .when(distroXTestClient.repair(MASTER), key(distrox))
                 .await(STACK_AVAILABLE, key(distrox))
                 .awaitForHealthyInstances()
+                .then(new AvailabilityZoneAssertion())
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instanceIds = distroxUtil.getInstanceIds(testDto, client, MASTER.getName());
