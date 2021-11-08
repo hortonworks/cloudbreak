@@ -331,4 +331,35 @@ class CloudFormationTemplateBuilderDBTest {
         assertThat(result).doesNotContain("\"CreatedDBParameterGroup\": { \"Value\": { \"Ref\": \"DBParameterGroup\" } },");
     }
 
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    void buildTestWhenKmsKeyIdPresent(String templatePath) throws IOException {
+        //GIVEN
+        String awsCloudFormationTemplate = factoryBean.getObject().getTemplate(templatePath, "UTF-8").toString();
+        //WHEN
+        RDSModelContext modelContext = new RDSModelContext()
+                .withIsKmsCustom(true)
+                .withGetKmsKey("dummyKeyArn")
+                .withTemplate(awsCloudFormationTemplate);
+        String result = cloudFormationTemplateBuilder.build(modelContext);
+        assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
+        assertThat(result).contains("\"StorageEncrypted\": true");
+        assertThat(result).contains("\"KmsKeyId\" : \"dummyKeyArn\"");
+    }
+
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("templatesPathDataProvider")
+    void buildTestWhenKmsKeyIdAbsent(String templatePath) throws IOException {
+        //GIVEN
+        String awsCloudFormationTemplate = factoryBean.getObject().getTemplate(templatePath, "UTF-8").toString();
+        //WHEN
+        RDSModelContext modelContext = new RDSModelContext()
+                .withIsKmsCustom(false)
+                .withTemplate(awsCloudFormationTemplate);
+        String result = cloudFormationTemplateBuilder.build(modelContext);
+        assertThat(JsonUtil.isValid(result)).overridingErrorMessage("Invalid JSON: " + result).isTrue();
+        assertThat(result).contains("\"StorageEncrypted\": true");
+        assertThat(result).doesNotContain("\"KmsKeyId\" : \"dummyKeyArn\"");
+    }
+
 }

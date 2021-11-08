@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -173,6 +175,14 @@ public class DBStackToDatabaseStackConverter {
                         VOLUME_ENCRYPTION_KEY_ID, key.get());
                 params = getMergedMap(params, encryptionParameters);
             }
+        } else if (CloudPlatform.AWS.name().equals(stack.getCloudPlatform())) {
+            DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack);
+            Optional<String> key = getEncryptionKeyArnFromEnv(environment);
+            if (key.isPresent()) {
+                Map<String, Object> awsEncryptionParameters = Map.of(
+                        VOLUME_ENCRYPTION_KEY_ID, key.get());
+                params = getMergedMap(params, awsEncryptionParameters);
+            }
         }
         return params;
     }
@@ -221,6 +231,14 @@ public class DBStackToDatabaseStackConverter {
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                 .map(AzureResourceEncryptionParameters::getEncryptionKeyResourceGroupName).orElse(null);
+    }
+
+    private Optional<String> getEncryptionKeyArnFromEnv(DetailedEnvironmentResponse environment) {
+        return  Optional.ofNullable(environment)
+                .map(DetailedEnvironmentResponse::getAws)
+                .map(AwsEnvironmentParameters::getAwsDiskEncryptionParameters)
+                .map(AwsDiskEncryptionParameters::getEncryptionKeyArn);
+
     }
 
 }
