@@ -54,6 +54,14 @@ public interface ImageCatalogV4Endpoint {
             @QueryParam("withImages") @DefaultValue("false") Boolean withImages);
 
     @GET
+    @Path("name/{name}/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_BY_NAME_IN_WORKSPACE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,
+            nickname = "getImageCatalogInWorkspaceInternal")
+    ImageCatalogV4Response getByNameInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("withImages") @DefaultValue("false") Boolean withImages, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @GET
     @Path("crn/{crn}")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ImageCatalogOpDescription.GET_BY_CRN_IN_WORKSPACE, produces = MediaType.APPLICATION_JSON, notes = IMAGE_CATALOG_NOTES,

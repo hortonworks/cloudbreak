@@ -66,7 +66,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.BaseStackDetailsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
@@ -106,6 +105,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -212,6 +212,9 @@ class SdxServiceTest {
 
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
+
+    @Mock
+    private ImageCatalogService imageCatalogService;
 
     @InjectMocks
     private SdxService underTest;
@@ -1078,18 +1081,14 @@ class SdxServiceTest {
     @Test
     void testCreateSdxClusterWithCustomRequestContainsImageInfo() throws Exception {
         ImageV4Response imageResponse = getImageResponse();
-        ImagesV4Response imagesV4Response = new ImagesV4Response();
-        imagesV4Response.setCdhImages(List.of(imageResponse));
 
-        when(cloudbreakInternalCrnClient.withInternalCrn()).thenReturn(cloudbreakServiceCrnEndpoints);
-        when(cloudbreakServiceCrnEndpoints.imageCatalogV4Endpoint()).thenReturn(imageCatalogV4Endpoint);
-        when(imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(any(), any(), any(), any())).thenReturn(imagesV4Response);
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.7/aws/light_duty.json");
         when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
         SdxCustomClusterRequest sdxClusterRequest = createSdxCustomClusterRequest(LIGHT_DUTY, "cdp-default", "imageId_1");
         setSpot(sdxClusterRequest);
         withCloudStorage(sdxClusterRequest);
+        when(imageCatalogService.getImageResponseFromImageRequest(eq(sdxClusterRequest.getImageSettingsV4Request()), any())).thenReturn(imageResponse);
 
         long id = 10L;
         when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
