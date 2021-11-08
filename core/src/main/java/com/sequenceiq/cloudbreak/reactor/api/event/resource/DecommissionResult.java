@@ -6,7 +6,6 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 
 public class DecommissionResult extends AbstractClusterScaleResult<DecommissionRequest> {
-    public static final String DECOMMISSION_ERROR_PHASE = "DECOMMISSION";
 
     public static final String UNKNOWN_ERROR_PHASE = "";
 

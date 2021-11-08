@@ -1,6 +1,8 @@
 name: "aws-e2e-tests"
 tests:
-  - name: "aws_e2e_tests"
+  - name: "aws_native_e2e_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest

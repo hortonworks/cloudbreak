@@ -128,7 +128,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = normalize(stackName);
         name = adjustPartLength(name);
         name = appendPart(name, stackId);
-        name = appendPart(name, "ClusterNodeSecurityGroup");
+        name = appendPart(name, "SecurityGroup");
         name = appendPart(name, StringUtils.capitalize(normalize(instanceGroupName)));
         name = adjustBaseLength(name, maxResourceNameLength);
 

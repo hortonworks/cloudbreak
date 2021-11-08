@@ -8,6 +8,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 public class StructuredEventToClusterShapeConverter {
 
     private static final int DEFAULT_INTEGER_VALUE = -1;
+
+    private static final int MAX_STRING_LENGTH = 3000;
 
     public UsageProto.CDPClusterShape convert(StructuredFlowEvent structuredFlowEvent) {
         UsageProto.CDPClusterShape.Builder cdpClusterShape = UsageProto.CDPClusterShape.newBuilder();
@@ -69,7 +72,10 @@ public class StructuredEventToClusterShapeConverter {
             Collections.sort(hostGroupNodeCount);
             cdpClusterShape.setHostGroupNodeCount(String.join(", ", hostGroupNodeCount));
             cdpClusterShape.setTemporaryStorageUsed(hostGroupTemporaryStorage.contains(TemporaryStorage.EPHEMERAL_VOLUMES.name()));
-            cdpClusterShape.setDefinitionDetails(JsonUtil.writeValueAsStringSilentSafe(stackDetails.getInstanceGroups()));
+            String definitionDetailsJsonString = JsonUtil.writeValueAsStringSilentSafe(stackDetails.getInstanceGroups());
+            if (StringUtils.length(definitionDetailsJsonString) <= MAX_STRING_LENGTH) {
+                cdpClusterShape.setDefinitionDetails(definitionDetailsJsonString);
+            }
         }
 
         return cdpClusterShape;

@@ -233,7 +233,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         String projectId = context.getProjectId();
         String zone = context.getLocation().getAvailabilityZone().value();
 
-        //upscale will give us all groups here
         List<CloudResource> instanceGroupResources = filterGroupFromName(filterResourcesByType(context.getGroupResources(group.getName()),
                 ResourceType.GCP_INSTANCE_GROUP), group.getName());
 

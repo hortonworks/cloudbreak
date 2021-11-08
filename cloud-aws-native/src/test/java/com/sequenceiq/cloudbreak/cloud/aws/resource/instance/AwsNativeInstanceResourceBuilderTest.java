@@ -113,6 +113,7 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .name("name")
                 .type(ResourceType.AWS_INSTANCE)
                 .status(CommonStatus.CREATED)
+                .group("groupName")
                 .params(emptyMap())
                 .build();
 
@@ -121,6 +122,7 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .type(ResourceType.AWS_SECURITY_GROUP)
                 .status(CommonStatus.CREATED)
                 .reference("sg-id")
+                .group("groupName")
                 .params(emptyMap())
                 .build();
 
@@ -197,6 +199,7 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .name("name")
                 .type(ResourceType.AWS_INSTANCE)
                 .status(CommonStatus.CREATED)
+                .group("groupName")
                 .params(emptyMap())
                 .build();
 
@@ -205,6 +208,7 @@ public class AwsNativeInstanceResourceBuilderTest {
                 .type(ResourceType.AWS_SECURITY_GROUP)
                 .status(CommonStatus.CREATED)
                 .reference("sg-id")
+                .group("groupName")
                 .params(emptyMap())
                 .build();
 
