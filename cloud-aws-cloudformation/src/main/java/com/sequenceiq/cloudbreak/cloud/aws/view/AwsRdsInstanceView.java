@@ -86,4 +86,12 @@ public class AwsRdsInstanceView {
         return !Strings.isNullOrEmpty(getSslCertificateIdentifier());
     }
 
+    public boolean isKmsCustom() {
+        String encryptionKeyArn = databaseServer.getStringParameter("key");
+        return !encryptionKeyArn.isEmpty() && encryptionKeyArn != null;
+    }
+
+    public String getEncryptionKeyArn() {
+        return databaseServer.getStringParameter("key");
+    }
 }

@@ -26,6 +26,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseEngine;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
@@ -348,6 +350,35 @@ public class DBStackToDatabaseStackConverterTest {
         DatabaseStack convertedStack = underTest.convert(dbStack);
 
         assertThat(convertedStack.getDatabaseServer().isUseSslEnforcement()).isTrue();
+    }
+
+    @Test
+    public void testConversionAwsWithAwsEncryptionResourcesPresent() {
+        Network network = new Network();
+        network.setAttributes(new Json(NETWORK_ATTRIBUTES));
+        dbStack.setNetwork(network);
+        dbStack.setCloudPlatform("AWS");
+        dbStack.setParameters(new HashMap<>());
+        DatabaseServer server = new DatabaseServer();
+        server.setDatabaseVendor(DatabaseVendor.POSTGRES);
+        server.setAttributes(new Json(DATABASE_SERVER_ATTRIBUTES));
+        dbStack.setDatabaseServer(server);
+        dbStack.setTags(new Json(STACK_TAGS));
+        dbStack.setTemplate("template");
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        environmentResponse.setCloudPlatform("AWS");
+        environmentResponse.setAws(AwsEnvironmentParameters.builder()
+                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParameters.builder()
+                        .withEncryptionKeyArn("value")
+                        .build())
+                .build());
+        when(environmentService.getByCrn(anyString())).thenReturn(environmentResponse);
+
+        DatabaseStack convertedStack = underTest.convert(dbStack);
+
+        Map<String, Object> parameters = convertedStack.getDatabaseServer().getParameters();
+        assertThat(parameters.get("key").toString()).isEqualTo("value");
+        assertThat(parameters.size()).isEqualTo(3);
     }
 
 }

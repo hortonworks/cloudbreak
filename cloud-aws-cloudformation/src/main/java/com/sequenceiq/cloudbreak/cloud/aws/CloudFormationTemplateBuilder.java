@@ -119,6 +119,8 @@ public class CloudFormationTemplateBuilder {
         model.put("useSslEnforcement", context.useSslEnforcement);
         model.put("sslCertificateIdentifierDefined", context.sslCertificateIdentifierDefined);
         model.put("hasSecurityGroup", context.hasSecurityGroup);
+        model.put("hasCustomKmsEnabled", context.hasCustomKmsEnabled);
+        model.put("kmsKey", context.kmsKey);
         model.put("networkCidrs", context.networkCidrs);
         try {
             String template = freeMarkerTemplateUtils.processTemplateIntoString(new Template("aws-rds-template", context.template, freemarkerConfiguration),
@@ -165,6 +167,10 @@ public class CloudFormationTemplateBuilder {
 
         private List<String> networkCidrs = new ArrayList<>();
 
+        private boolean hasCustomKmsEnabled;
+
+        private String kmsKey;
+
         public RDSModelContext withTemplate(String template) {
             this.template = template;
             return this;
@@ -195,6 +201,15 @@ public class CloudFormationTemplateBuilder {
             return this;
         }
 
+        public RDSModelContext withIsKmsCustom(boolean hasCustomKmsEnabled) {
+            this.hasCustomKmsEnabled = hasCustomKmsEnabled;
+            return this;
+        }
+
+        public RDSModelContext withGetKmsKey(String kmsKey) {
+            this.kmsKey = kmsKey;
+            return this;
+        }
     }
 
 }

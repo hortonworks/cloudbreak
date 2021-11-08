@@ -206,6 +206,9 @@
                 "Port": { "Ref": "PortParameter" },
                 </#if>
                 "StorageEncrypted": true,
+                <#if hasCustomKmsEnabled>
+                "KmsKeyId" : "${kmsKey}",
+                </#if>
                 "StorageType": { "Ref": "StorageTypeParameter" },
                 <#if hasSecurityGroup>
                 "VPCSecurityGroups": { "Ref": "VPCSecurityGroupsParameter" }

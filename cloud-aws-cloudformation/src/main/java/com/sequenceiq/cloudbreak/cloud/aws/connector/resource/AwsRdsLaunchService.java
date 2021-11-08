@@ -107,7 +107,10 @@ public class AwsRdsLaunchService {
                     .withHasPort(databaseServer.getPort() != null)
                     .withUseSslEnforcement(useSslEnforcement)
                     .withSslCertificateIdentifierDefined(new AwsRdsInstanceView(databaseServer).isSslCertificateIdentifierDefined())
-                    .withHasSecurityGroup(!databaseServer.getSecurity().getCloudSecurityIds().isEmpty());
+                    .withHasSecurityGroup(!databaseServer.getSecurity().getCloudSecurityIds().isEmpty())
+                    .withIsKmsCustom(stack.getDatabaseServer().getParameters().containsKey("key"))
+                    .withGetKmsKey(getKmsKey(stack));
+
             String cfTemplate = cloudFormationTemplateBuilder.build(rdsModelContext);
             LOGGER.debug("CloudFormationTemplate: {}", cfTemplate);
             cfClient.createStack(awsStackRequestHelper.createCreateStackRequest(ac, stack, cFStackName, cfTemplate));
@@ -206,6 +209,14 @@ public class AwsRdsLaunchService {
 
     private Map<String, String> getCfStackOutputs(String cFStackName, AmazonCloudFormationClient client) {
         return cfStackUtil.getOutputs(cFStackName, client);
+    }
+
+    private String getKmsKey(DatabaseStack stack) {
+        if (stack.getDatabaseServer().getParameters().containsKey("key")) {
+            return stack.getDatabaseServer().getParameters().get("key").toString();
+        } else {
+            return null;
+        }
     }
 
 }
