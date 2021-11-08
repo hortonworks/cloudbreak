@@ -26,6 +26,7 @@ import io.swagger.annotations.ApiOperation;
 @Consumes(MediaType.APPLICATION_JSON)
 @Api(value = "/sdx", protocols = "http,https", consumes = MediaType.APPLICATION_JSON)
 public interface SdxRecoveryEndpoint {
+
     @POST
     @Path("{name}/recover")
     @Produces(MediaType.APPLICATION_JSON)

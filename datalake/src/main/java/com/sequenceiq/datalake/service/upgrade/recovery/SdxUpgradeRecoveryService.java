@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
+import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
@@ -42,6 +43,9 @@ public class SdxUpgradeRecoveryService {
     private CloudbreakMessagesService messagesService;
 
     @Inject
+    private FreeipaService freeipaService;
+
+    @Inject
     private StackV4Endpoint stackV4Endpoint;
 
     @Inject
@@ -56,12 +60,12 @@ public class SdxUpgradeRecoveryService {
     public SdxRecoverableResponse validateRecovery(String userCrn, NameOrCrn clusterNameOrCrn) {
         SdxCluster cluster = sdxService.getByNameOrCrn(userCrn, clusterNameOrCrn);
         MDCBuilder.buildMdcContext(cluster);
-        return validateStackStatus(cluster);
+        return validateStackRecoverable(cluster);
     }
 
     private SdxRecoveryResponse initSdxRecovery(SdxRecoveryRequest request, SdxCluster cluster) {
 
-        SdxRecoverableResponse validationResponse = validateStackStatus(cluster);
+        SdxRecoverableResponse validationResponse = validateStackRecoverable(cluster);
 
         if (validationResponse.getStatus() == NON_RECOVERABLE) {
             LOGGER.debug("Cluster is not in a recoverable state with message: {}", validationResponse.getReason());
@@ -71,7 +75,7 @@ public class SdxUpgradeRecoveryService {
         return new SdxRecoveryResponse(flowIdentifier);
     }
 
-    private SdxRecoverableResponse validateStackStatus(SdxCluster sdxCluster) {
+    private SdxRecoverableResponse validateStackRecoverable(SdxCluster sdxCluster) {
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
             RecoveryValidationV4Response response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
@@ -79,7 +83,7 @@ public class SdxUpgradeRecoveryService {
             return new SdxRecoverableResponse(response.getReason(), response.getStatus());
         } catch (WebApplicationException e) {
             String exceptionMessage = exceptionMessageExtractor.getErrorMessage(e);
-            String message = String.format("Stack recovery status validation failed on cluster: [%s]. Message: [%s]",
+            String message = String.format("Stack recovery validation failed on cluster: [%s]. Message: [%s]",
                     sdxCluster.getClusterName(), exceptionMessage);
             throw new CloudbreakApiException(message, e);
         }

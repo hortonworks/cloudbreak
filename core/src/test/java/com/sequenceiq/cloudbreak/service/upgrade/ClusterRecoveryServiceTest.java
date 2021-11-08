@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,8 +23,10 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.Recove
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 
 @RunWith(Parameterized.class)
 public class ClusterRecoveryServiceTest {
@@ -38,9 +41,12 @@ public class ClusterRecoveryServiceTest {
     public List<StackStatus> stackStatusList;
 
     @Parameterized.Parameter(1)
-    public RecoveryStatus expectedRecoveryStatus;
+    public boolean freeIpaStatus;
 
     @Parameterized.Parameter(2)
+    public RecoveryStatus expectedRecoveryStatus;
+
+    @Parameterized.Parameter(3)
     public String expectedMessage;
 
     @Mock
@@ -48,6 +54,9 @@ public class ClusterRecoveryServiceTest {
 
     @Mock
     private StackStatusService stackStatusService;
+
+    @Mock
+    private FreeipaService freeipaService;
 
     @InjectMocks
     private ClusterRecoveryService underTest;
@@ -63,6 +72,7 @@ public class ClusterRecoveryServiceTest {
 
         when(stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, WORKSPACE_ID)).thenReturn(STACK);
         when(stackStatusService.findAllStackStatusesById(STACK.getId())).thenReturn(stackStatusList);
+        when(freeipaService.freeipaStatusInDesiredState(STACK, Set.of(Status.AVAILABLE))).thenReturn(freeIpaStatus);
 
         RecoveryValidationV4Response response = underTest.validateRecovery(WORKSPACE_ID, stackNameOrCrn);
 
@@ -70,27 +80,31 @@ public class ClusterRecoveryServiceTest {
         Assertions.assertEquals(expectedMessage, response.getReason());
     }
 
-    @Parameterized.Parameters(name = "{index}: Cluster is {1} with previous statuses {0} with message: {2}")
+    @Parameterized.Parameters(name = "{index}: Cluster with available={1} FreeIPA is {2} with previous statuses {0} with message: {3}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
                 {List.of(
                         getStackStatus(DetailedStackStatus.AVAILABLE)),
+                        true,
                         RecoveryStatus.NON_RECOVERABLE,
                         "There has been no failed upgrades for this cluster hence recovery is not permitted."},
                 {List.of(
                         getStackStatus(DetailedStackStatus.AVAILABLE),
                         getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FAILED)),
+                        true,
                         RecoveryStatus.RECOVERABLE,
                         "Last cluster upgrade has failed, recovery can be launched to restore the cluster to its pre-upgrade state."},
                 {List.of(
                         getStackStatus(DetailedStackStatus.AVAILABLE),
                         getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
                         getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FAILED)),
+                        true,
                         RecoveryStatus.RECOVERABLE,
                         "Last cluster recovery has failed, recovery can be retried."},
                 {List.of(
                         getStackStatus(DetailedStackStatus.AVAILABLE),
                         getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FAILED)),
+                        true,
                         RecoveryStatus.RECOVERABLE,
                         "Last cluster recovery has failed, recovery can be retried."},
                 {List.of(
@@ -98,6 +112,7 @@ public class ClusterRecoveryServiceTest {
                         getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FAILED),
                         getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FINISHED),
                         getStackStatus(DetailedStackStatus.AVAILABLE)),
+                        true,
                         RecoveryStatus.NON_RECOVERABLE,
                         "Cluster is not in a recoverable state now, neither uncorrected upgrade or recovery failures are present."},
                 {List.of(
@@ -105,8 +120,54 @@ public class ClusterRecoveryServiceTest {
                         getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
                         getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FINISHED),
                         getStackStatus(DetailedStackStatus.AVAILABLE)),
+                        true,
                         RecoveryStatus.NON_RECOVERABLE,
                         "Cluster is not in a recoverable state now, neither uncorrected upgrade or recovery failures are present."},
+
+
+                {List.of(
+                        getStackStatus(DetailedStackStatus.AVAILABLE)),
+                        false,
+                        RecoveryStatus.NON_RECOVERABLE,
+                        "Recovery cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again."
+                                + " Next issue: There has been no failed upgrades for this cluster hence recovery is not permitted."},
+                {List.of(
+                        getStackStatus(DetailedStackStatus.AVAILABLE),
+                        getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FAILED)),
+                        false,
+                        RecoveryStatus.NON_RECOVERABLE,
+                        "Recovery cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again."},
+                {List.of(
+                        getStackStatus(DetailedStackStatus.AVAILABLE),
+                        getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
+                        getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FAILED)),
+                        false,
+                        RecoveryStatus.NON_RECOVERABLE,
+                        "Recovery cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again."},
+                {List.of(
+                        getStackStatus(DetailedStackStatus.AVAILABLE),
+                        getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FAILED)),
+                        false,
+                        RecoveryStatus.NON_RECOVERABLE,
+                        "Recovery cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again."},
+                {List.of(
+                        getStackStatus(DetailedStackStatus.AVAILABLE),
+                        getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FAILED),
+                        getStackStatus(DetailedStackStatus.CLUSTER_RECOVERY_FINISHED),
+                        getStackStatus(DetailedStackStatus.AVAILABLE)),
+                        false,
+                        RecoveryStatus.NON_RECOVERABLE,
+                        "Recovery cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again. "
+                                + "Next issue: Cluster is not in a recoverable state now, neither uncorrected upgrade or recovery failures are present."},
+                {List.of(
+                        getStackStatus(DetailedStackStatus.AVAILABLE),
+                        getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FAILED),
+                        getStackStatus(DetailedStackStatus.CLUSTER_UPGRADE_FINISHED),
+                        getStackStatus(DetailedStackStatus.AVAILABLE)),
+                        false,
+                        RecoveryStatus.NON_RECOVERABLE,
+                        "Recovery cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again. "
+                                + "Next issue: Cluster is not in a recoverable state now, neither uncorrected upgrade or recovery failures are present."},
 
         });
     }

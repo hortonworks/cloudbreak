@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -22,6 +23,7 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
@@ -36,6 +38,9 @@ public class MockSdxTests extends AbstractMockTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
 
     @Inject
     private ImageCatalogTestClient imageCatalogTestClient;
@@ -193,10 +198,13 @@ public class MockSdxTests extends AbstractMockTest {
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
+                .withCreateFreeIpa(Boolean.TRUE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .when(sdxTestClient.createInternal(), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))

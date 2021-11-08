@@ -1,8 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.stop;
 
 import javax.inject.Inject;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ClientErrorException;
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.WebApplicationException;
 
@@ -18,14 +16,13 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
-import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.cert.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 
 @Component
 public class SdxStopService {
@@ -61,7 +58,7 @@ public class SdxStopService {
 
     public FlowIdentifier triggerStopIfClusterNotStopped(SdxCluster cluster) {
         MDCBuilder.buildMdcContext(cluster);
-        checkFreeipaRunning(cluster.getEnvCrn());
+        freeipaService.checkFreeipaRunning(cluster.getEnvCrn());
         return sdxReactorFlowManager.triggerSdxStopFlow(cluster);
     }
 
@@ -76,10 +73,6 @@ public class SdxStopService {
             cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
         } catch (NotFoundException e) {
             LOGGER.error("Can not find stack on cloudbreak side {}", sdxCluster.getClusterName());
-        } catch (ClientErrorException e) {
-            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
-            LOGGER.error("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
-            throw new RuntimeException("Cannot stop cluster, error happened during operation: " + errorMessage);
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error("Can not stop stack {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
@@ -95,12 +88,5 @@ public class SdxStopService {
     public void stopAllDatahub(Long sdxId) {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         distroxService.stopAttachedDistrox(sdxCluster.getEnvCrn());
-    }
-
-    private void checkFreeipaRunning(String envCrn) {
-        DescribeFreeIpaResponse freeipa = freeipaService.describe(envCrn);
-        if (freeipa != null && freeipa.getAvailabilityStatus() != null && !freeipa.getAvailabilityStatus().isAvailable()) {
-            throw new BadRequestException("Freeipa should be in Available state but currently is " + freeipa.getStatus().name());
-        }
     }
 }
