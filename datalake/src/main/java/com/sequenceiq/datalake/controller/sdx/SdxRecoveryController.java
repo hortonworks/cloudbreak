@@ -13,7 +13,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
-import com.sequenceiq.datalake.service.upgrade.recovery.SdxUpgradeRecoveryService;
+import com.sequenceiq.datalake.service.recovery.RecoveryService;
 import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
@@ -23,13 +23,13 @@ import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 public class SdxRecoveryController implements SdxRecoveryEndpoint {
 
     @Inject
-    private SdxUpgradeRecoveryService sdxUpgradeRecoveryService;
+    private RecoveryService recoveryService;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RECOVER_DATALAKE)
     public SdxRecoveryResponse recoverClusterByName(@ResourceName String name, @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxUpgradeRecoveryService.triggerRecovery(userCrn, NameOrCrn.ofName(name), recoverSdxClusterRequest);
+        return recoveryService.triggerRecovery(userCrn, NameOrCrn.ofName(name), recoverSdxClusterRequest);
     }
 
     @Override
@@ -37,20 +37,20 @@ public class SdxRecoveryController implements SdxRecoveryEndpoint {
     public SdxRecoveryResponse recoverClusterByCrn(@ResourceCrn @TenantAwareParam String crn,
             @Valid SdxRecoveryRequest recoverSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxUpgradeRecoveryService.triggerRecovery(userCrn, NameOrCrn.ofCrn(crn), recoverSdxClusterRequest);
+        return recoveryService.triggerRecovery(userCrn, NameOrCrn.ofCrn(crn), recoverSdxClusterRequest);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.RECOVER_DATALAKE)
     public SdxRecoverableResponse getClusterRecoverableByName(@ResourceName String name) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxUpgradeRecoveryService.validateRecovery(userCrn, NameOrCrn.ofName(name));
+        return recoveryService.validateRecovery(userCrn, NameOrCrn.ofName(name));
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.RECOVER_DATALAKE)
     public SdxRecoverableResponse getClusterRecoverableByCrn(@ResourceCrn @TenantAwareParam String crn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return sdxUpgradeRecoveryService.validateRecovery(userCrn, NameOrCrn.ofCrn(crn));
+        return recoveryService.validateRecovery(userCrn, NameOrCrn.ofCrn(crn));
     }
 }
