@@ -33,6 +33,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -269,6 +270,22 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto withResourceGroup(String resourceGroupUsage, String resourceGroupName) {
         return getCloudProvider().withResourceGroup(this, resourceGroupUsage, resourceGroupName);
+    }
+
+    public EnvironmentTestDto withAwsResourceEncryptionParameters(String encryptionKeyArn) {
+        if (CloudPlatform.AWS.equals(getTestContext().getCloudProvider().getCloudPlatform())) {
+            AwsDiskEncryptionParameters awsDiskEncryptionParameters = AwsDiskEncryptionParameters.builder()
+                    .withEncryptionKeyArn(encryptionKeyArn)
+                    .build();
+            if (getRequest().getAws() == null) {
+                getRequest().setAws(AwsEnvironmentParameters.builder()
+                        .withAwsDiskEncryptionParameters(awsDiskEncryptionParameters)
+                        .build());
+            } else {
+                getRequest().getAws().setAwsDiskEncryptionParameters(awsDiskEncryptionParameters);
+            }
+        }
+        return this;
     }
 
     public EnvironmentTestDto withAws(AwsEnvironmentParameters awsEnvironmentParameters) {
