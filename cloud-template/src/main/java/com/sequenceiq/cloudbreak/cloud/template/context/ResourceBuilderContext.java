@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
@@ -72,7 +73,7 @@ public class ResourceBuilderContext extends DynamicModel {
 
     public synchronized void addGroupResources(String groupName, Collection<CloudResource> resources) {
         List<CloudResource> list = groupResources.computeIfAbsent(groupName, k -> new ArrayList<>());
-        list.addAll(resources);
+        list.addAll(resources.stream().filter(cloudResource -> groupName.equals(cloudResource.getGroup())).collect(Collectors.toList()));
     }
 
     public synchronized void addComputeResources(Long index, Collection<CloudResource> resources) {

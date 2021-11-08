@@ -104,19 +104,19 @@ public class StructuredEventToStatusDetailsConverterTest {
         Assertions.assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getStackStatusReason());
         Assertions.assertEquals(StringUtils.repeat("*", 10), flowStatusDetails.getClusterStatusReason());
 
-        stackDetails.setStatusReason(StringUtils.repeat("*", 5000));
-        clusterDetails.setStatusReason(StringUtils.repeat("*", 5000));
+        stackDetails.setStatusReason(StringUtils.repeat("*", 1500));
+        clusterDetails.setStatusReason(StringUtils.repeat("*", 1500));
         flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getStackStatusReason());
-        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getClusterStatusReason());
+        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getStackStatusReason());
+        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getClusterStatusReason());
 
-        stackDetails.setStatusReason(StringUtils.repeat("*", 10000));
-        clusterDetails.setStatusReason(StringUtils.repeat("*", 10000));
+        stackDetails.setStatusReason(StringUtils.repeat("*", 3000));
+        clusterDetails.setStatusReason(StringUtils.repeat("*", 3000));
         flowStatusDetails = underTest.convert(structuredFlowEvent);
 
-        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getStackStatusReason());
-        Assertions.assertEquals(StringUtils.repeat("*", 5000), flowStatusDetails.getClusterStatusReason());
+        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getStackStatusReason());
+        Assertions.assertEquals(StringUtils.repeat("*", 1500), flowStatusDetails.getClusterStatusReason());
 
     }
 

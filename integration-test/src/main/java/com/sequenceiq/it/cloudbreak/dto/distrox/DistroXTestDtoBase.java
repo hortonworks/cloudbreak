@@ -43,19 +43,17 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         return this;
     }
 
-    public DistroXTestDtoBase<T> withEnvironment(Class<EnvironmentTestDto> environmentKey) {
+    public DistroXTestDtoBase<T> withEnvironment() {
         return withEnvironmentKey(EnvironmentTestDto.class.getSimpleName());
     }
 
     public DistroXTestDtoBase<T> withEnvironmentKey(String environmentKey) {
         EnvironmentTestDto env = getTestContext().get(environmentKey);
-        if (env == null) {
-            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+        DistroXTestDtoBase<T> ret = this;
+        if (env != null && env.getResponse() != null) {
+            ret = withEnvironmentName(env.getResponse().getName());
         }
-        if (env.getResponse() == null) {
-            throw new IllegalArgumentException("Env response is null with given key: " + environmentKey);
-        }
-        return withEnvironmentName(env.getResponse().getName());
+        return ret;
     }
 
     public DistroXTestDtoBase<T> withName(String name) {

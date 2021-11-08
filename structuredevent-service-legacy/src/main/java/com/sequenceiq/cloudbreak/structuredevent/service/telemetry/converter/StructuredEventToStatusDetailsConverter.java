@@ -14,7 +14,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 @Component
 public class StructuredEventToStatusDetailsConverter {
 
-    private static final int MAX_STRING_LENGTH = 5000;
+    private static final int MAX_STRING_LENGTH = 1500;
 
     public UsageProto.CDPStatusDetails convert(StructuredFlowEvent structuredFlowEvent) {
 
