@@ -10,10 +10,12 @@ import static java.lang.Math.abs;
 import static java.lang.String.format;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -95,31 +97,24 @@ public class StackOperationService {
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
-    public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
-        InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
-        String instanceGroupName = metaData.getInstanceGroupName();
-        if (!forced) {
-            int scalingAdjustment = -1;
-            updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
-            updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
-            updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
-        }
-        return flowManager.triggerStackRemoveInstance(stack.getId(), instanceGroupName, metaData.getPrivateId(), forced);
+    public FlowIdentifier removeInstance(Stack stack, String instanceId, boolean forced) {
+        return removeInstances(stack, Collections.singleton(instanceId), forced);
     }
 
-    public FlowIdentifier removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
+    public FlowIdentifier removeInstances(Stack stack, Collection<String> instanceIds, boolean forced) {
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
+        Map<String, Integer> adjustmentByHostGroup = instanceIdsByHostgroupMap.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, instanceIdsByHostgroup -> instanceIdsByHostgroup.getValue().size() * -1));
+        updateNodeCountValidator.validateClouderaManagerLimitationForDownscale(adjustmentByHostGroup);
         if (!forced) {
-            for (Map.Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
-                String instanceGroupName = entry.getKey();
-                int scalingAdjustment = entry.getValue().size() * -1;
-                updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
-                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
-                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+            for (Map.Entry<String, Integer> hostgroupWithAdjustment : adjustmentByHostGroup.entrySet()) {
+                updateNodeCountValidator.validateServiceRoles(stack, hostgroupWithAdjustment.getKey(), hostgroupWithAdjustment.getValue());
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, hostgroupWithAdjustment.getKey(), hostgroupWithAdjustment.getValue());
+                updateNodeCountValidator.validateScalingAdjustment(hostgroupWithAdjustment.getKey(), hostgroupWithAdjustment.getValue(), stack);
             }
         }
         return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);

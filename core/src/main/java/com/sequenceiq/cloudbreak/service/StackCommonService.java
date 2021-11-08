@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_RETRY_FLOW_STA
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,6 +51,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
+import com.sequenceiq.cloudbreak.service.stack.flow.UpdateNodeCountValidator;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -115,6 +117,9 @@ public class StackCommonService {
 
     @Inject
     private NodeCountLimitValidator nodeCountLimitValidator;
+
+    @Inject
+    private UpdateNodeCountValidator updateNodeCountLimitValidator;
 
     @Inject
     private StackScaleV4RequestToUpdateStackV4RequestConverter stackScaleV4RequestToUpdateStackV4RequestConverter;
@@ -202,13 +207,12 @@ public class StackCommonService {
     }
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
         validateStackIsNotDataLake(stack.orElse(null), instanceIds);
-        return stackOperationService.removeInstances(stack.orElse(null), workspaceId, instanceIds, forced, user);
+        return stackOperationService.removeInstances(stack.orElse(null), instanceIds, forced);
     }
 
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -230,6 +234,8 @@ public class StackCommonService {
     public FlowIdentifier putScalingInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, StackScaleV4Request updateRequest) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+
+
         MDCBuilder.buildMdcContext(stack);
         updateRequest.setStackId(stack.getId());
         validateNetworkScaleRequest(stack, updateRequest.getStackNetworkScaleV4Request());
@@ -241,6 +247,7 @@ public class StackCommonService {
         if (scalingAdjustment > 0) {
             flowIdentifier = put(stack, updateStackJson);
         } else {
+            updateNodeCountLimitValidator.validateClouderaManagerLimitationForDownscale(Map.of(updateRequest.getGroup(), scalingAdjustment));
             UpdateClusterV4Request updateClusterJson = stackScaleV4RequestToUpdateClusterV4RequestConverter.convert(updateRequest);
             workspaceService.get(workspaceId, user);
             flowIdentifier = clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);
@@ -310,13 +317,12 @@ public class StackCommonService {
     }
 
     public FlowIdentifier deleteInstanceInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, String instanceId, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
         validateStackIsNotDataLake(stack.orElse(null), Set.of(instanceId));
-        return stackOperationService.removeInstance(stack.orElse(null), workspaceId, instanceId, forced, user);
+        return stackOperationService.removeInstance(stack.orElse(null), instanceId, forced);
     }
 
     private void validateStackIsNotDataLake(Stack stack, Set<String> instanceIds) {

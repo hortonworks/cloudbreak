@@ -17,7 +17,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncEvent.STA
 import static com.sequenceiq.cloudbreak.core.flow2.stack.update.loadbalancer.StackLoadBalancerUpdateEvent.STACK_LOAD_BALANCER_UPDATE_EVENT;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -128,18 +127,6 @@ public class ReactorFlowManager {
     public FlowIdentifier triggerStackSync(Long stackId) {
         String selector = STACK_SYNC_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackSyncTriggerEvent(selector, stackId, true));
-    }
-
-    public void triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId) {
-        triggerStackRemoveInstance(stackId, hostGroup, privateId, false);
-    }
-
-    public FlowIdentifier triggerStackRemoveInstance(Long stackId, String hostGroup, Long privateId, boolean forced) {
-        String selector = FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT;
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
-        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(privateId),
-                ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
-        return reactorNotifier.notify(stackId, selector, event);
     }
 
     public FlowIdentifier triggerStackRemoveInstances(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
