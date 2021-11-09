@@ -2,8 +2,13 @@ package com.sequenceiq.cloudbreak.aspect;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.any;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,18 +17,19 @@ import java.util.List;
 
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.hamcrest.core.IsInstanceOf;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -180,10 +186,59 @@ public class SecretAspectsTest {
         verify(secretService, times(1)).delete(eq("path"));
     }
 
+    @Test
+    public void testProceedSaveInCorrectPathWhenAccountIdIsDefined() throws Exception {
+        DummyAccountIdAwareResourceEntity dummyEntity = new DummyAccountIdAwareResourceEntity("accountId", "secret");
+        when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
+
+        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<String> valueCaptor = ArgumentCaptor.forClass(String.class);
+
+        when(secretService.put(pathCaptor.capture(), valueCaptor.capture())).thenReturn("");
+
+        underTest.proceedOnRepositorySave(proceedingJoinPoint);
+
+        assertTrue(pathCaptor.getValue().startsWith("accountId/dummyaccountidawareresourceentity/secret"));
+        assertEquals("secret", valueCaptor.getValue());
+    }
+
+    @Test
+    public void testThrowCloudbreakServiceExceptionWhenAccountIdIsNullOnEntity() throws Exception {
+        DummyAccountIdAwareResourceEntity dummyEntity = new DummyAccountIdAwareResourceEntity(null, "secret");
+        when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.proceedOnRepositorySave(proceedingJoinPoint));
+        verifySecretManagementIgnoredDuringSave(dummyEntity.getSecret());
+    }
+
+    @Test
+    public void testThrowCloudbreakServiceExceptionWhenEntityIsNotAccountIdAwareResource() throws Exception {
+        DummyEntity dummyEntity = new DummyEntity(new Secret("secret"));
+        when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
+
+        assertThrows(CloudbreakServiceException.class, () -> underTest.proceedOnRepositorySave(proceedingJoinPoint));
+        verifySecretManagementIgnoredDuringSave(dummyEntity.secret);
+    }
+
+    @Test
+    public void testProceedDeleteInCorrectPathWhenAccountIdIsDefined() {
+        DummyAccountIdAwareResourceEntity dummyEntity = new DummyAccountIdAwareResourceEntity("accountId",
+                new Secret("secret", "accountId/dummyaccountidawareresourceentity/secret/test-123"));
+        when(proceedingJoinPoint.getArgs()).thenReturn(new Object[] { dummyEntity });
+
+        ArgumentCaptor<String> pathCaptor = ArgumentCaptor.forClass(String.class);
+
+        doNothing().when(secretService).delete(pathCaptor.capture());
+
+        underTest.proceedOnRepositoryDelete(proceedingJoinPoint);
+
+        assertTrue(pathCaptor.getValue().startsWith("accountId/dummyaccountidawareresourceentity/secret/test-123"));
+    }
+
     private void verifySecretManagementIgnoredDuringSave(Secret secret) throws Exception {
         verify(secretService, times(0)).put(anyString(), anyString());
 
-        Assert.assertFalse(secret instanceof SecretProxy);
+        assertFalse(secret instanceof SecretProxy);
     }
 
     private static class DummyEntity {
@@ -206,6 +261,37 @@ public class SecretAspectsTest {
         @Override
         public Tenant getTenant() {
             return tenant;
+        }
+    }
+
+    private static class DummyAccountIdAwareResourceEntity implements AccountIdAwareResource {
+
+        private final String accountId;
+
+        @SecretValue
+        private final Secret secret;
+
+        DummyAccountIdAwareResourceEntity(String accountId, String secret) {
+            this.accountId = accountId;
+            this.secret = new Secret(secret);
+        }
+
+        DummyAccountIdAwareResourceEntity(String accountId, Secret secret) {
+            this.accountId = accountId;
+            this.secret = secret;
+        }
+
+        public Secret getSecret() {
+            return secret;
+        }
+
+        public String getRaw() {
+            return secret.getRaw();
+        }
+
+        @Override
+        public String getAccountId() {
+            return accountId;
         }
     }
 }

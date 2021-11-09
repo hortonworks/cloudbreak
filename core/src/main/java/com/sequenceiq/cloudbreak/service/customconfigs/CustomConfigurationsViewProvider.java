@@ -23,7 +23,9 @@ public class CustomConfigurationsViewProvider {
     }
 
     public CustomConfigurationPropertyView getCustomConfigurationPropertyView(@Nonnull CustomConfigurationProperty customConfigurationProperty) {
-        return new CustomConfigurationPropertyView(customConfigurationProperty.getName(), customConfigurationProperty.getValue(),
-                customConfigurationProperty.getRoleType(), customConfigurationProperty.getServiceType());
+        return new CustomConfigurationPropertyView(customConfigurationProperty.getName(),
+                customConfigurationProperty.getValue(),
+                customConfigurationProperty.getRoleType(),
+                customConfigurationProperty.getServiceType());
     }
 }
