@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -23,11 +24,12 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.metric.SdxMetricService;
-import com.sequenceiq.datalake.service.sdx.SdxImageCatalogChangeService;
+import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -37,11 +39,14 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 
 @ExtendWith(MockitoExtension.class)
 class SdxControllerTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:hortonworks:user:test@test.com";
+
+    private static final String SDX_CLUSTER_NAME = "test-sdx-cluster";
 
     @Mock
     private SdxStatusService sdxStatusService;
@@ -56,7 +61,7 @@ class SdxControllerTest {
     private SdxMetricService metricService;
 
     @Mock
-    private SdxImageCatalogChangeService sdxImageCatalogChangeService;
+    private SdxImageCatalogService sdxImageCatalogService;
 
     @InjectMocks
     private SdxController sdxController;
@@ -80,10 +85,10 @@ class SdxControllerTest {
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
         SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> sdxController.create("test-sdx-cluster", createSdxClusterRequest));
-        verify(sdxService).createSdx(eq(USER_CRN), eq("test-sdx-cluster"), eq(createSdxClusterRequest), nullable(StackV4Request.class));
+                () -> sdxController.create(SDX_CLUSTER_NAME, createSdxClusterRequest));
+        verify(sdxService).createSdx(eq(USER_CRN), eq(SDX_CLUSTER_NAME), eq(createSdxClusterRequest), nullable(StackV4Request.class));
         verify(sdxStatusService, times(1)).getActualStatusForSdx(sdxCluster);
-        assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
+        assertEquals(SDX_CLUSTER_NAME, sdxClusterResponse.getName());
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
@@ -102,8 +107,8 @@ class SdxControllerTest {
         when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
         ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
 
-        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.get("test-sdx-cluster"));
-        assertEquals("test-sdx-cluster", sdxClusterResponse.getName());
+        SdxClusterResponse sdxClusterResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.get(SDX_CLUSTER_NAME));
+        assertEquals(SDX_CLUSTER_NAME, sdxClusterResponse.getName());
         assertEquals("test-env", sdxClusterResponse.getEnvironmentName());
         assertEquals("crn:sdxcluster", sdxClusterResponse.getCrn());
         assertEquals(SdxClusterStatusResponse.REQUESTED, sdxClusterResponse.getStatus());
@@ -113,14 +118,24 @@ class SdxControllerTest {
     @Test
     void changeImageCatalogTest() {
         SdxCluster sdxCluster = getValidSdxCluster();
-        when(sdxService.getByNameInAccount(anyString(), anyString())).thenReturn(sdxCluster);
+        when(sdxService.getByNameInAccount(any(), anyString())).thenReturn(sdxCluster);
 
         SdxChangeImageCatalogRequest request = new SdxChangeImageCatalogRequest();
         request.setImageCatalog("image-catalog");
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> sdxController.changeImageCatalog(sdxCluster.getName(), request));
+        sdxController.changeImageCatalog(sdxCluster.getName(), request);
 
-        verify(sdxImageCatalogChangeService).changeImageCatalog(sdxCluster, request.getImageCatalog());
+        verify(sdxImageCatalogService).changeImageCatalog(sdxCluster, request.getImageCatalog());
+    }
+
+    @Test
+    void generateImageCatalogTest() {
+        CloudbreakImageCatalogV3 imageCatalog = mock(CloudbreakImageCatalogV3.class);
+        when(sdxImageCatalogService.generateImageCatalog(SDX_CLUSTER_NAME)).thenReturn(imageCatalog);
+
+        SdxGenerateImageCatalogResponse actual = sdxController.generateImageCatalog(SDX_CLUSTER_NAME);
+
+        assertEquals(imageCatalog, actual.getImageCatalog());
     }
 
     @Test
@@ -145,7 +160,7 @@ class SdxControllerTest {
 
     private SdxCluster getValidSdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
-        sdxCluster.setClusterName("test-sdx-cluster");
+        sdxCluster.setClusterName(SDX_CLUSTER_NAME);
         sdxCluster.setClusterShape(SdxClusterShape.MEDIUM_DUTY_HA);
         sdxCluster.setEnvName("test-env");
         sdxCluster.setCrn("crn:sdxcluster");

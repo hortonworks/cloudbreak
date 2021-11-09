@@ -22,6 +22,8 @@ class StackV4ControllerTest {
 
     private static final long WORKSPACE_ID = 1236L;
 
+    private static final String STACK_NAME = "stack name";
+
     @Mock
     private StackOperations stackOperations;
 
@@ -38,14 +40,13 @@ class StackV4ControllerTest {
     void changeImageCatalogInternalTest() {
         when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
 
-        String stackName = "name";
         String imageCatalog = "image-catalog";
         ChangeImageCatalogV4Request request = new ChangeImageCatalogV4Request();
         request.setImageCatalog(imageCatalog);
 
-        underTest.changeImageCatalogInternal(WORKSPACE_ID, stackName, USER_CRN, request);
+        underTest.changeImageCatalogInternal(WORKSPACE_ID, STACK_NAME, USER_CRN, request);
 
-        verify(stackOperations).changeImageCatalog(NameOrCrn.ofName(stackName), WORKSPACE_ID, imageCatalog);
+        verify(stackOperations).changeImageCatalog(NameOrCrn.ofName(STACK_NAME), WORKSPACE_ID, imageCatalog);
     }
 
     @Test
@@ -56,5 +57,14 @@ class StackV4ControllerTest {
         underTest.rangerRazEnabledInternal(WORKSPACE_ID, stackCrn, USER_CRN);
 
         verify(stackOperationService).rangerRazEnabled(WORKSPACE_ID, stackCrn);
+    }
+
+    @Test
+    void generateImageCatalogInternalTest() {
+        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
+
+        underTest.generateImageCatalogInternal(WORKSPACE_ID, STACK_NAME, USER_CRN);
+
+        verify(stackOperations).generateImageCatalog(NameOrCrn.ofName(STACK_NAME), WORKSPACE_ID);
     }
 }
