@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class UserDisableOperation extends AbstractFreeipaOperation<Object> {
@@ -31,6 +32,11 @@ public class UserDisableOperation extends AbstractFreeipaOperation<Object> {
     @Override
     protected List<Object> getFlags() {
         return List.of(userUid);
+    }
+
+    @Override
+    protected Map<String, Object> getParams() {
+        return Map.of("skipcheck", "TRUE");
     }
 
     @Override
