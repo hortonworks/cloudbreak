@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.cloud.aws.scheduler.BackoffCancellablePo
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -31,12 +30,13 @@ import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.waiters.PollingStrategy;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterParameters;
+import com.amazonaws.waiters.WaiterTimedOutException;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.CustomAmazonWaiterProvider;
@@ -96,20 +96,6 @@ public class AwsAutoScalingService {
         }
     }
 
-    public void scheduleStatusChecks(Map<String, Integer> groupsWithSize, AuthenticatedContext ac, Date timeBeforeASUpdate)
-            throws AmazonAutoscalingFailed {
-
-        AmazonEc2Client amClient = awsClient.createEc2Client(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        AmazonAutoScalingClient asClient = awsClient.createAutoScalingClient(new AwsCredentialView(ac.getCloudCredential()),
-                ac.getCloudContext().getLocation().getRegion().value());
-        for (Map.Entry<String, Integer> groupWithSize : groupsWithSize.entrySet()) {
-            String autoScalingGroupName = groupWithSize.getKey();
-            Integer expectedSize = groupWithSize.getValue();
-            waitForGroup(amClient, asClient, autoScalingGroupName, expectedSize, ac.getCloudContext().getId(), null);
-        }
-    }
-
     private void waitForGroup(AmazonEc2Client amClient, AmazonAutoScalingClient asClient, String autoScalingGroupName, Integer requiredInstanceCount,
             Long stackId, List<String> knownInstances) throws AmazonAutoscalingFailed {
         Waiter<DescribeAutoScalingGroupsRequest> groupInServiceWaiter = asClient.waiters().groupInService();
@@ -126,6 +112,9 @@ public class AwsAutoScalingService {
         try {
             instancesInServiceWaiter.run(new WaiterParameters<>(new DescribeAutoScalingGroupsRequest().withAutoScalingGroupNames(autoScalingGroupName))
                     .withPollingStrategy(backoff));
+        } catch (WaiterTimedOutException e) {
+            String message = String.format("Polling timed out. Not all the %s instance(s) reached InService state.", requiredInstanceCount);
+            throw new AmazonAutoscalingFailed(message, e);
         } catch (Exception e) {
             throw new AmazonAutoscalingFailed(e.getMessage(), e);
         }

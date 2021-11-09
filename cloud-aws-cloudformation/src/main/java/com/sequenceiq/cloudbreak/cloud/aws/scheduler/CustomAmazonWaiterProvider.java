@@ -1,8 +1,11 @@
 package com.sequenceiq.cloudbreak.cloud.aws.scheduler;
 
+import java.time.Duration;
 import java.util.Date;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
 
+import javax.annotation.PreDestroy;
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
@@ -22,6 +25,7 @@ import com.amazonaws.waiters.WaiterAcceptor;
 import com.amazonaws.waiters.WaiterBuilder;
 import com.amazonaws.waiters.WaiterExecutorServiceFactory;
 import com.amazonaws.waiters.WaiterState;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonRdsClient;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstanceForModifyFailureAcceptor;
@@ -30,7 +34,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.scheduler.acceptor.DescribeDbInstance
 @Component
 public class CustomAmazonWaiterProvider {
 
-    private static final String IN_SERVICE = "InService";
+    public static final String IN_SERVICE = "InService";
 
     private static final int DEFAULT_MAX_ATTEMPTS = 60;
 
@@ -38,16 +42,25 @@ public class CustomAmazonWaiterProvider {
 
     private static final int DEFAULT_DELAY_IN_SECONDS = 30;
 
+    private static final int EXECUTOR_SERVICE_TIMEOUT = 30;
+
     @Inject
     private DescribeDbInstanceForModifySuccessAcceptor describeDbInstanceForModifySuccessAcceptor;
 
     @Inject
     private DescribeDbInstanceForModifyFailureAcceptor describeDbInstanceForModifyFailureAcceptor;
 
+    private final ExecutorService executorService = WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("CustomAmazonWaiters");
+
+    @PreDestroy
+    public void shutDown() {
+        MoreExecutors.shutdownAndAwaitTermination(executorService, Duration.ofSeconds(EXECUTOR_SERVICE_TIMEOUT));
+    }
+
     public Waiter<DescribeAutoScalingGroupsRequest> getAutoscalingInstancesInServiceWaiter(AmazonAutoScalingClient asClient, Integer requiredCount) {
         return new WaiterBuilder<DescribeAutoScalingGroupsRequest, DescribeAutoScalingGroupsResult>()
                 .withSdkFunction(asClient::describeAutoScalingGroups)
-                .withAcceptors(new WaiterAcceptor<DescribeAutoScalingGroupsResult>() {
+                .withAcceptors(new WaiterAcceptor<>() {
                     @Override
                     public boolean matches(DescribeAutoScalingGroupsResult describeAutoScalingGroupsResult) {
                         return describeAutoScalingGroupsResult.getAutoScalingGroups().get(0).getInstances()
@@ -61,13 +74,14 @@ public class CustomAmazonWaiterProvider {
                 })
                 .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
-                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+                .withExecutorService(executorService)
+                .build();
     }
 
     public Waiter<DescribeScalingActivitiesRequest> getAutoscalingActivitiesWaiter(AmazonAutoScalingClient asClient, Date timeBeforeASUpdate) {
         return new WaiterBuilder<DescribeScalingActivitiesRequest, DescribeScalingActivitiesResult>()
                 .withSdkFunction(asClient::describeScalingActivities)
-                .withAcceptors(new WaiterAcceptor<DescribeScalingActivitiesResult>() {
+                .withAcceptors(new WaiterAcceptor<>() {
                     @Override
                     public boolean matches(DescribeScalingActivitiesResult describeScalingActivitiesResult) {
                         Optional<Activity> firstActivity = describeScalingActivitiesResult.getActivities().stream().findFirst();
@@ -84,13 +98,14 @@ public class CustomAmazonWaiterProvider {
                 })
                 .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(ACTIVITIES_DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
-                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+                .withExecutorService(executorService)
+                .build();
     }
 
     public Waiter<DescribeDBInstancesRequest> getDbInstanceStopWaiter(AmazonRdsClient rdsClient) {
         return new WaiterBuilder<DescribeDBInstancesRequest, DescribeDBInstancesResult>()
                 .withSdkFunction(rdsClient::describeDBInstances)
-                .withAcceptors(new WaiterAcceptor<DescribeDBInstancesResult>() {
+                .withAcceptors(new WaiterAcceptor<>() {
                     @Override
                     public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
                         return describeDBInstancesResult.getDBInstances().stream().allMatch(instance -> "stopped".equals(instance.getDBInstanceStatus()));
@@ -100,7 +115,7 @@ public class CustomAmazonWaiterProvider {
                     public WaiterState getState() {
                         return WaiterState.SUCCESS;
                     }
-                }, new WaiterAcceptor<DescribeDBInstancesResult>() {
+                }, new WaiterAcceptor<>() {
                     @Override
                     public boolean matches(DescribeDBInstancesResult describeDBInstancesResult) {
                         return describeDBInstancesResult.getDBInstances().stream()
@@ -118,7 +133,7 @@ public class CustomAmazonWaiterProvider {
                 })
                 .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
-                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+                .withExecutorService(executorService).build();
     }
 
     public Waiter<DescribeDBInstancesRequest> getDbInstanceModifyWaiter(AmazonRdsClient rdsClient) {
@@ -127,6 +142,6 @@ public class CustomAmazonWaiterProvider {
                 .withAcceptors(describeDbInstanceForModifySuccessAcceptor, describeDbInstanceForModifyFailureAcceptor)
                 .withDefaultPollingStrategy(new PollingStrategy(new MaxAttemptsRetryStrategy(DEFAULT_MAX_ATTEMPTS),
                         new FixedDelayStrategy(DEFAULT_DELAY_IN_SECONDS)))
-                .withExecutorService(WaiterExecutorServiceFactory.buildExecutorServiceForWaiter("AmazonRDSWaiters")).build();
+                .withExecutorService(executorService).build();
     }
 }

@@ -167,8 +167,8 @@ public class AwsUpscaleService {
         int successCount = asgSizeAfterFail.values().stream().reduce(Integer::sum).orElse(0);
         LOGGER.info("AWS Autoscaling group update failed, original autoscaling group state has been recovered");
         throw new CloudConnectorException(String.format("Autoscaling group update failed: Amazon Autoscaling Group was not able to reach the desired state "
-                        + "(%d instances instead of %d), please check your quotas on AWS. Original autoscaling group state has been recovered.",
-                successCount, desiredCount), amazonAutoscalingFailed);
+                        + "(%d instances instead of %d). Original autoscaling group state has been recovered. Failure reason: %s",
+                successCount, desiredCount, amazonAutoscalingFailed.getMessage()), amazonAutoscalingFailed);
     }
 
     private void recoverOriginalState(AuthenticatedContext ac,
