@@ -20,6 +20,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.authorization.resource.AuthorizationVariableType;
 import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 
 @Component
@@ -63,13 +64,11 @@ public class RequestPropertyAuthorizationFactory extends TypedAuthorizationFacto
             if (fieldObject != null) {
                 return calcAuthorizationFromObject(action, authorizationVariableType, fieldObject, userCrn);
             } else if (!methodAnnotation.skipOnNull()) {
-                throw new AccessDeniedException(String.format("Property [%s] of request object is null and it should be authorized, " +
-                        "thus should be filled in.", methodAnnotation.path()));
+                throw new BadRequestException(String.format("Property [%s] of the request object must not be null.", methodAnnotation.path()));
             }
         } catch (NestedNullException nne) {
             if (!skipOnNull) {
-                throw new AccessDeniedException(String.format("Property [%s] of request object is null and it should be authorized, " +
-                        "thus should be filled in.", methodAnnotation.path()));
+                throw new BadRequestException(String.format("Property [%s] of the request object must not be null.", methodAnnotation.path()));
             }
         } catch (NotFoundException nfe) {
             LOGGER.warn("Resource not found during permission check of resource object, this should be handled by microservice.");

@@ -2,7 +2,9 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -167,9 +169,17 @@ public class DistroXV1Request extends DistroXV1Base implements TaggableRequest {
     @JsonIgnore
     public Set<String> getAllRecipes() {
         Set<String> recipes = Sets.newHashSet();
-        instanceGroups.stream()
-                .filter(instanceGroup -> instanceGroup.getRecipeNames() != null)
-                .forEach(instanceGroup -> recipes.addAll(instanceGroup.getRecipeNames()));
+        if (instanceGroups != null) {
+            instanceGroups.stream()
+                    .filter(Objects::nonNull)
+                    .map(InstanceGroupV1Request::getRecipeNames)
+                    .filter(Objects::nonNull)
+                    .forEach(recipeNames -> recipes.addAll(recipeNames
+                            .stream()
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toSet())
+                    ));
+        }
         return recipes;
     }
 }

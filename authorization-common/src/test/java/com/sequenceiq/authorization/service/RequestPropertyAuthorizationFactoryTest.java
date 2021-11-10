@@ -36,6 +36,7 @@ import com.sequenceiq.authorization.service.model.AuthorizationRule;
 import com.sequenceiq.authorization.service.model.HasRight;
 import com.sequenceiq.authorization.service.model.HasRightOnAll;
 import com.sequenceiq.authorization.utils.CrnAccountValidator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RequestPropertyAuthorizationFactoryTest {
@@ -140,8 +141,8 @@ public class RequestPropertyAuthorizationFactoryTest {
     public void testOnNullWhenRequired() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject());
 
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("Property [field] of request object is null and it should be authorized, thus should be filled in.");
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Property [field] of the request object must not be null.");
 
         underTest.getAuthorization(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field"), USER_CRN, null, null);
     }
@@ -160,8 +161,8 @@ public class RequestPropertyAuthorizationFactoryTest {
     public void testOnNestedNullWhenRequired() {
         when(commonPermissionCheckingUtils.getParameter(any(), any(), any(), any())).thenReturn(new SampleRequestObject());
 
-        thrown.expect(AccessDeniedException.class);
-        thrown.expectMessage("Property [field.field] of request object is null and it should be authorized, thus should be filled in.");
+        thrown.expect(BadRequestException.class);
+        thrown.expectMessage("Property [field.field] of the request object must not be null.");
 
         underTest.getAuthorization(getAnnotation(CRN_LIST, EDIT_CREDENTIAL, false, "field.field"), USER_CRN, null, null);
     }
