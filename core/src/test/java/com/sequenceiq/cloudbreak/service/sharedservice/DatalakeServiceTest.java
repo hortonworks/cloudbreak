@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.sharedservice;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
@@ -71,11 +73,28 @@ public class DatalakeServiceTest {
 
     @Test
     public void testAddSharedServiceResponseWhenDatalakeCrnIsNotNull() {
+        Stack resultStack = new Stack();
+        resultStack.setName("teststack");
+        resultStack.setId(1L);
+        lenient().when(stackService.getByCrnOrElseNull(anyString())).thenReturn(resultStack);
         Stack source = new Stack();
         source.setDatalakeCrn("crn");
         StackV4Response x = new StackV4Response();
         underTest.addSharedServiceResponse(source, x);
-        verify(stackService, times(1)).getByCrn("crn");
+        verify(stackService, times(1)).getByCrnOrElseNull("crn");
+        assertEquals(1L, x.getSharedService().getSharedClusterId());
+        assertEquals("teststack", x.getSharedService().getSharedClusterName());
+    }
+
+    @Test
+    public void testAddSharedServiceResponseWhenDatalakeCrnIsNotNullAndDatalakeIsMissing() {
+        Stack source = new Stack();
+        source.setDatalakeCrn("crn");
+        StackV4Response x = new StackV4Response();
+        underTest.addSharedServiceResponse(source, x);
+        verify(stackService, times(1)).getByCrnOrElseNull("crn");
+        assertNull(x.getSharedService().getSharedClusterId());
+        assertNull(x.getSharedService().getSharedClusterName());
     }
 
     @Test
@@ -84,7 +103,7 @@ public class DatalakeServiceTest {
         source.setDatalakeCrn(null);
         StackV4Response x = new StackV4Response();
         underTest.addSharedServiceResponse(source, x);
-        verify(stackService, never()).getByCrn("crn");
+        verify(stackService, never()).getByCrnOrElseNull("crn");
     }
 
     @Test
@@ -97,10 +116,23 @@ public class DatalakeServiceTest {
 
     @Test
     public void testGetDatalakeStackByDatahubStackWhereDatalakeCrnIsNotNull() {
+        Stack resultStack = new Stack();
+        resultStack.setName("teststack");
+        lenient().when(stackService.getByCrnOrElseNull(anyString())).thenReturn(resultStack);
         Stack stack = new Stack();
         stack.setDatalakeCrn("crn");
-        underTest.getDatalakeStackByDatahubStack(stack);
-        verify(stackService, times(1)).getByCrn("crn");
+        Optional<Stack> datalake = underTest.getDatalakeStackByDatahubStack(stack);
+        verify(stackService, times(1)).getByCrnOrElseNull("crn");
+        assert datalake.isPresent();
+    }
+
+    @Test
+    public void testGetDatalakeStackByDatahubStackWhereDatalakeCrnIsNotNullAndDatalakeIsMissing() {
+        Stack stack = new Stack();
+        stack.setDatalakeCrn("crn");
+        Optional<Stack> datalake = underTest.getDatalakeStackByDatahubStack(stack);
+        verify(stackService, times(1)).getByCrnOrElseNull("crn");
+        assert datalake.isEmpty();
     }
 
     @Test
@@ -155,7 +187,7 @@ public class DatalakeServiceTest {
 
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
 
-        verify(stackService, times(1)).getByCrn("crn");
+        verify(stackService, times(1)).getByCrnOrElseNull("crn");
         Assertions.assertFalse(res.isDatalakeCluster());
 
     }
@@ -169,7 +201,7 @@ public class DatalakeServiceTest {
 
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
 
-        verify(stackService, times(0)).getByCrn("crn");
+        verify(stackService, times(0)).getByCrnOrElseNull("crn");
         Assertions.assertTrue(res.isDatalakeCluster());
     }
 
@@ -182,7 +214,7 @@ public class DatalakeServiceTest {
 
         SharedServiceConfigsView res = underTest.createSharedServiceConfigsView(stack);
 
-        verify(stackService, times(0)).getByCrn("crn");
+        verify(stackService, times(0)).getByCrnOrElseNull("crn");
         Assertions.assertFalse(res.isDatalakeCluster());
     }
 

@@ -73,12 +73,14 @@ public class DatalakeService {
         SharedServiceV4Response sharedServiceResponse = new SharedServiceV4Response();
         if (!Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
             LOGGER.debug("Checking datalake through the datalakeCrn.");
-            Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+            Stack datalakeStack = stackService.getByCrnOrElseNull(stack.getDatalakeCrn());
             if (datalakeStack != null) {
                 LOGGER.debug("Datalake (stack id {}, name {}) has been found for stack: {}",
                         datalakeStack.getId(), datalakeStack.getName(), stack.getResourceCrn());
                 sharedServiceResponse.setSharedClusterName(datalakeStack.getName());
                 sharedServiceResponse.setSharedClusterId(datalakeStack.getId());
+            } else {
+                LOGGER.debug("Unable to find datalake with CRN {}", stack.getDatalakeCrn());
             }
         }
         stackResponse.setSharedService(sharedServiceResponse);
@@ -86,7 +88,7 @@ public class DatalakeService {
 
     public Optional<Stack> getDatalakeStackByDatahubStack(Stack datahubStack) {
         if (!Strings.isNullOrEmpty(datahubStack.getDatalakeCrn())) {
-            return Optional.of(stackService.getByCrn(datahubStack.getDatalakeCrn()));
+            return Optional.ofNullable(stackService.getByCrnOrElseNull(datahubStack.getDatalakeCrn()));
         }
         LOGGER.info("There is no datalake has been set for the cluster.");
         return Optional.empty();
@@ -135,7 +137,7 @@ public class DatalakeService {
                 if (Strings.isNullOrEmpty(stack.getDatalakeCrn())) {
                     break;
                 }
-                Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+                Stack datalakeStack = stackService.getByCrnOrElseNull(stack.getDatalakeCrn());
                 if (datalakeStack == null) {
                     break;
                 }
