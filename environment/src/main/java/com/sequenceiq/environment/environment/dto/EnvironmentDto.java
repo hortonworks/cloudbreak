@@ -93,6 +93,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
 
     private EnvironmentDeletionType deletionType;
 
+    private String domain;
+
     @Override
     public Long getResourceId() {
         return id;
@@ -410,6 +412,14 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.deletionType = deletionType;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
     public Map<String, String> mergeTags(CostTagging costTagging) {
         CDPTagMergeRequest mergeRequest = CDPTagMergeRequest.Builder
                 .builder()
@@ -426,7 +436,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
                 + "name='" + name + '\''
                 + ", cloudPlatform='" + cloudPlatform + '\''
                 + ", resourceCrn='" + resourceCrn + '\''
-                + ", status=" + status
+                + ", status='" + status + '\''
+                + ", domain='" + domain + '\''
                 + '}';
     }
 
@@ -498,6 +509,8 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         private String environmentServiceVersion;
 
         private EnvironmentDeletionType deletionType;
+
+        private String domain;
 
         private Builder() {
         }
@@ -662,6 +675,11 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
             return this;
         }
 
+        public Builder withEnvironmentDomain(String domain) {
+            this.domain = domain;
+            return this;
+        }
+
         public EnvironmentDto build() {
             EnvironmentDto environmentDto = new EnvironmentDto();
             environmentDto.setId(id);
@@ -696,6 +714,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
             environmentDto.setProxyConfig(proxyConfig);
             environmentDto.setEnvironmentServiceVersion(environmentServiceVersion);
             environmentDto.setDeletionType(deletionType);
+            environmentDto.setDomain(domain);
             return environmentDto;
         }
     }

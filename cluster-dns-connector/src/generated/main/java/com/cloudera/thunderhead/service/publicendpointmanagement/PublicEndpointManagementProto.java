@@ -6273,6 +6273,50 @@ public final class PublicEndpointManagementProto {
      * @return The csr.
      */
     com.google.protobuf.ByteString getCsr();
+
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     * @return The clusterCrn.
+     */
+    java.lang.String getClusterCrn();
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     * @return The bytes for clusterCrn.
+     */
+    com.google.protobuf.ByteString
+        getClusterCrnBytes();
+
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 7;</code>
+     * @return The clientName.
+     */
+    java.lang.String getClientName();
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 7;</code>
+     * @return The bytes for clientName.
+     */
+    com.google.protobuf.ByteString
+        getClientNameBytes();
   }
   /**
    * <pre>
@@ -6295,6 +6339,8 @@ public final class PublicEndpointManagementProto {
       environment_ = "";
       endpoint_ = "";
       csr_ = com.google.protobuf.ByteString.EMPTY;
+      clusterCrn_ = "";
+      clientName_ = "";
     }
 
     @java.lang.Override
@@ -6353,6 +6399,18 @@ public final class PublicEndpointManagementProto {
             case 42: {
 
               csr_ = input.readBytes();
+              break;
+            }
+            case 50: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterCrn_ = s;
+              break;
+            }
+            case 58: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clientName_ = s;
               break;
             }
             default: {
@@ -6556,6 +6614,102 @@ public final class PublicEndpointManagementProto {
       return csr_;
     }
 
+    public static final int CLUSTERCRN_FIELD_NUMBER = 6;
+    private volatile java.lang.Object clusterCrn_;
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     * @return The clusterCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getClusterCrn() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 6;</code>
+     * @return The bytes for clusterCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClusterCrnBytes() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLIENTNAME_FIELD_NUMBER = 7;
+    private volatile java.lang.Object clientName_;
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 7;</code>
+     * @return The clientName.
+     */
+    @java.lang.Override
+    public java.lang.String getClientName() {
+      java.lang.Object ref = clientName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clientName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 7;</code>
+     * @return The bytes for clientName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClientNameBytes() {
+      java.lang.Object ref = clientName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clientName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -6585,6 +6739,12 @@ public final class PublicEndpointManagementProto {
       if (!csr_.isEmpty()) {
         output.writeBytes(5, csr_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 6, clusterCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clientName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 7, clientName_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -6611,6 +6771,12 @@ public final class PublicEndpointManagementProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(5, csr_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, clusterCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clientName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, clientName_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -6636,6 +6802,10 @@ public final class PublicEndpointManagementProto {
           != other.getAddWildcard()) return false;
       if (!getCsr()
           .equals(other.getCsr())) return false;
+      if (!getClusterCrn()
+          .equals(other.getClusterCrn())) return false;
+      if (!getClientName()
+          .equals(other.getClientName())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -6658,6 +6828,10 @@ public final class PublicEndpointManagementProto {
           getAddWildcard());
       hash = (37 * hash) + CSR_FIELD_NUMBER;
       hash = (53 * hash) + getCsr().hashCode();
+      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterCrn().hashCode();
+      hash = (37 * hash) + CLIENTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getClientName().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -6805,6 +6979,10 @@ public final class PublicEndpointManagementProto {
 
         csr_ = com.google.protobuf.ByteString.EMPTY;
 
+        clusterCrn_ = "";
+
+        clientName_ = "";
+
         return this;
       }
 
@@ -6836,6 +7014,8 @@ public final class PublicEndpointManagementProto {
         result.endpoint_ = endpoint_;
         result.addWildcard_ = addWildcard_;
         result.csr_ = csr_;
+        result.clusterCrn_ = clusterCrn_;
+        result.clientName_ = clientName_;
         onBuilt();
         return result;
       }
@@ -6901,6 +7081,14 @@ public final class PublicEndpointManagementProto {
         }
         if (other.getCsr() != com.google.protobuf.ByteString.EMPTY) {
           setCsr(other.getCsr());
+        }
+        if (!other.getClusterCrn().isEmpty()) {
+          clusterCrn_ = other.clusterCrn_;
+          onChanged();
+        }
+        if (!other.getClientName().isEmpty()) {
+          clientName_ = other.clientName_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -7307,6 +7495,208 @@ public final class PublicEndpointManagementProto {
       public Builder clearCsr() {
         
         csr_ = getDefaultInstance().getCsr();
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterCrn_ = "";
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       * @return The clusterCrn.
+       */
+      public java.lang.String getClusterCrn() {
+        java.lang.Object ref = clusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       * @return The bytes for clusterCrn.
+       */
+      public com.google.protobuf.ByteString
+          getClusterCrnBytes() {
+        java.lang.Object ref = clusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       * @param value The clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterCrn() {
+        
+        clusterCrn_ = getDefaultInstance().getClusterCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 6;</code>
+       * @param value The bytes for clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clientName_ = "";
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 7;</code>
+       * @return The clientName.
+       */
+      public java.lang.String getClientName() {
+        java.lang.Object ref = clientName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clientName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 7;</code>
+       * @return The bytes for clientName.
+       */
+      public com.google.protobuf.ByteString
+          getClientNameBytes() {
+        java.lang.Object ref = clientName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clientName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 7;</code>
+       * @param value The clientName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClientName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clientName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 7;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClientName() {
+        
+        clientName_ = getDefaultInstance().getClientName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 7;</code>
+       * @param value The bytes for clientName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClientNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clientName_ = value;
         onChanged();
         return this;
       }
@@ -11508,6 +11898,50 @@ public final class PublicEndpointManagementProto {
      * @return The csr.
      */
     com.google.protobuf.ByteString getCsr();
+
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 4;</code>
+     * @return The clusterCrn.
+     */
+    java.lang.String getClusterCrn();
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 4;</code>
+     * @return The bytes for clusterCrn.
+     */
+    com.google.protobuf.ByteString
+        getClusterCrnBytes();
+
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 5;</code>
+     * @return The clientName.
+     */
+    java.lang.String getClientName();
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 5;</code>
+     * @return The bytes for clientName.
+     */
+    com.google.protobuf.ByteString
+        getClientNameBytes();
   }
   /**
    * <pre>
@@ -11529,6 +11963,8 @@ public final class PublicEndpointManagementProto {
       accountId_ = "";
       environmentName_ = "";
       csr_ = com.google.protobuf.ByteString.EMPTY;
+      clusterCrn_ = "";
+      clientName_ = "";
     }
 
     @java.lang.Override
@@ -11576,6 +12012,18 @@ public final class PublicEndpointManagementProto {
             case 26: {
 
               csr_ = input.readBytes();
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clusterCrn_ = s;
+              break;
+            }
+            case 42: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              clientName_ = s;
               break;
             }
             default: {
@@ -11724,6 +12172,102 @@ public final class PublicEndpointManagementProto {
       return csr_;
     }
 
+    public static final int CLUSTERCRN_FIELD_NUMBER = 4;
+    private volatile java.lang.Object clusterCrn_;
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 4;</code>
+     * @return The clusterCrn.
+     */
+    @java.lang.Override
+    public java.lang.String getClusterCrn() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clusterCrn_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The crn of the cluster. You can leave this empty when testing for random endpoints.
+     * </pre>
+     *
+     * <code>string clusterCrn = 4;</code>
+     * @return The bytes for clusterCrn.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClusterCrnBytes() {
+      java.lang.Object ref = clusterCrn_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clusterCrn_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CLIENTNAME_FIELD_NUMBER = 5;
+    private volatile java.lang.Object clientName_;
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 5;</code>
+     * @return The clientName.
+     */
+    @java.lang.Override
+    public java.lang.String getClientName() {
+      java.lang.Object ref = clientName_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        clientName_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The service requesting the certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample' or leave it empty
+     * </pre>
+     *
+     * <code>string clientName = 5;</code>
+     * @return The bytes for clientName.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getClientNameBytes() {
+      java.lang.Object ref = clientName_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        clientName_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -11747,6 +12291,12 @@ public final class PublicEndpointManagementProto {
       if (!csr_.isEmpty()) {
         output.writeBytes(3, csr_);
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, clusterCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clientName_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 5, clientName_);
+      }
       unknownFields.writeTo(output);
     }
 
@@ -11765,6 +12315,12 @@ public final class PublicEndpointManagementProto {
       if (!csr_.isEmpty()) {
         size += com.google.protobuf.CodedOutputStream
           .computeBytesSize(3, csr_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, clusterCrn_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clientName_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, clientName_);
       }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
@@ -11787,6 +12343,10 @@ public final class PublicEndpointManagementProto {
           .equals(other.getEnvironmentName())) return false;
       if (!getCsr()
           .equals(other.getCsr())) return false;
+      if (!getClusterCrn()
+          .equals(other.getClusterCrn())) return false;
+      if (!getClientName()
+          .equals(other.getClientName())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -11804,6 +12364,10 @@ public final class PublicEndpointManagementProto {
       hash = (53 * hash) + getEnvironmentName().hashCode();
       hash = (37 * hash) + CSR_FIELD_NUMBER;
       hash = (53 * hash) + getCsr().hashCode();
+      hash = (37 * hash) + CLUSTERCRN_FIELD_NUMBER;
+      hash = (53 * hash) + getClusterCrn().hashCode();
+      hash = (37 * hash) + CLIENTNAME_FIELD_NUMBER;
+      hash = (53 * hash) + getClientName().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -11947,6 +12511,10 @@ public final class PublicEndpointManagementProto {
 
         csr_ = com.google.protobuf.ByteString.EMPTY;
 
+        clusterCrn_ = "";
+
+        clientName_ = "";
+
         return this;
       }
 
@@ -11976,6 +12544,8 @@ public final class PublicEndpointManagementProto {
         result.accountId_ = accountId_;
         result.environmentName_ = environmentName_;
         result.csr_ = csr_;
+        result.clusterCrn_ = clusterCrn_;
+        result.clientName_ = clientName_;
         onBuilt();
         return result;
       }
@@ -12034,6 +12604,14 @@ public final class PublicEndpointManagementProto {
         }
         if (other.getCsr() != com.google.protobuf.ByteString.EMPTY) {
           setCsr(other.getCsr());
+        }
+        if (!other.getClusterCrn().isEmpty()) {
+          clusterCrn_ = other.clusterCrn_;
+          onChanged();
+        }
+        if (!other.getClientName().isEmpty()) {
+          clientName_ = other.clientName_;
+          onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
         onChanged();
@@ -12317,6 +12895,208 @@ public final class PublicEndpointManagementProto {
       public Builder clearCsr() {
         
         csr_ = getDefaultInstance().getCsr();
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clusterCrn_ = "";
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 4;</code>
+       * @return The clusterCrn.
+       */
+      public java.lang.String getClusterCrn() {
+        java.lang.Object ref = clusterCrn_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clusterCrn_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 4;</code>
+       * @return The bytes for clusterCrn.
+       */
+      public com.google.protobuf.ByteString
+          getClusterCrnBytes() {
+        java.lang.Object ref = clusterCrn_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clusterCrn_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 4;</code>
+       * @param value The clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrn(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clusterCrn_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClusterCrn() {
+        
+        clusterCrn_ = getDefaultInstance().getClusterCrn();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The crn of the cluster. You can leave this empty when testing for random endpoints.
+       * </pre>
+       *
+       * <code>string clusterCrn = 4;</code>
+       * @param value The bytes for clusterCrn to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClusterCrnBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clusterCrn_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object clientName_ = "";
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 5;</code>
+       * @return The clientName.
+       */
+      public java.lang.String getClientName() {
+        java.lang.Object ref = clientName_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          clientName_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 5;</code>
+       * @return The bytes for clientName.
+       */
+      public com.google.protobuf.ByteString
+          getClientNameBytes() {
+        java.lang.Object ref = clientName_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          clientName_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 5;</code>
+       * @param value The clientName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClientName(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        clientName_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 5;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearClientName() {
+        
+        clientName_ = getDefaultInstance().getClientName();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The service requesting the certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample' or leave it empty
+       * </pre>
+       *
+       * <code>string clientName = 5;</code>
+       * @param value The bytes for clientName to set.
+       * @return This builder for chaining.
+       */
+      public Builder setClientNameBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        clientName_ = value;
         onChanged();
         return this;
       }
@@ -13685,6 +14465,28 @@ public final class PublicEndpointManagementProto {
      */
     com.google.protobuf.ByteString
         getCertificatesBytes(int index);
+
+    /**
+     * <pre>
+     * User friendly message explaining why a signing request failed
+     * This is not sent if the request was successful
+     * </pre>
+     *
+     * <code>string causeOfFailure = 3;</code>
+     * @return The causeOfFailure.
+     */
+    java.lang.String getCauseOfFailure();
+    /**
+     * <pre>
+     * User friendly message explaining why a signing request failed
+     * This is not sent if the request was successful
+     * </pre>
+     *
+     * <code>string causeOfFailure = 3;</code>
+     * @return The bytes for causeOfFailure.
+     */
+    com.google.protobuf.ByteString
+        getCauseOfFailureBytes();
   }
   /**
    * <pre>
@@ -13705,6 +14507,7 @@ public final class PublicEndpointManagementProto {
     private PollCertificateSigningResponse() {
       status_ = 0;
       certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+      causeOfFailure_ = "";
     }
 
     @java.lang.Override
@@ -13751,6 +14554,12 @@ public final class PublicEndpointManagementProto {
                 mutable_bitField0_ |= 0x00000001;
               }
               certificates_.add(s);
+              break;
+            }
+            case 26: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              causeOfFailure_ = s;
               break;
             }
             default: {
@@ -14013,6 +14822,54 @@ public final class PublicEndpointManagementProto {
       return certificates_.getByteString(index);
     }
 
+    public static final int CAUSEOFFAILURE_FIELD_NUMBER = 3;
+    private volatile java.lang.Object causeOfFailure_;
+    /**
+     * <pre>
+     * User friendly message explaining why a signing request failed
+     * This is not sent if the request was successful
+     * </pre>
+     *
+     * <code>string causeOfFailure = 3;</code>
+     * @return The causeOfFailure.
+     */
+    @java.lang.Override
+    public java.lang.String getCauseOfFailure() {
+      java.lang.Object ref = causeOfFailure_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        causeOfFailure_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * User friendly message explaining why a signing request failed
+     * This is not sent if the request was successful
+     * </pre>
+     *
+     * <code>string causeOfFailure = 3;</code>
+     * @return The bytes for causeOfFailure.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCauseOfFailureBytes() {
+      java.lang.Object ref = causeOfFailure_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        causeOfFailure_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
     private byte memoizedIsInitialized = -1;
     @java.lang.Override
     public final boolean isInitialized() {
@@ -14032,6 +14889,9 @@ public final class PublicEndpointManagementProto {
       }
       for (int i = 0; i < certificates_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, certificates_.getRaw(i));
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(causeOfFailure_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 3, causeOfFailure_);
       }
       unknownFields.writeTo(output);
     }
@@ -14054,6 +14914,9 @@ public final class PublicEndpointManagementProto {
         size += dataSize;
         size += 1 * getCertificatesList().size();
       }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(causeOfFailure_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, causeOfFailure_);
+      }
       size += unknownFields.getSerializedSize();
       memoizedSize = size;
       return size;
@@ -14072,6 +14935,8 @@ public final class PublicEndpointManagementProto {
       if (status_ != other.status_) return false;
       if (!getCertificatesList()
           .equals(other.getCertificatesList())) return false;
+      if (!getCauseOfFailure()
+          .equals(other.getCauseOfFailure())) return false;
       if (!unknownFields.equals(other.unknownFields)) return false;
       return true;
     }
@@ -14089,6 +14954,8 @@ public final class PublicEndpointManagementProto {
         hash = (37 * hash) + CERTIFICATES_FIELD_NUMBER;
         hash = (53 * hash) + getCertificatesList().hashCode();
       }
+      hash = (37 * hash) + CAUSEOFFAILURE_FIELD_NUMBER;
+      hash = (53 * hash) + getCauseOfFailure().hashCode();
       hash = (29 * hash) + unknownFields.hashCode();
       memoizedHashCode = hash;
       return hash;
@@ -14230,6 +15097,8 @@ public final class PublicEndpointManagementProto {
 
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
         bitField0_ = (bitField0_ & ~0x00000001);
+        causeOfFailure_ = "";
+
         return this;
       }
 
@@ -14263,6 +15132,7 @@ public final class PublicEndpointManagementProto {
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.certificates_ = certificates_;
+        result.causeOfFailure_ = causeOfFailure_;
         onBuilt();
         return result;
       }
@@ -14322,6 +15192,10 @@ public final class PublicEndpointManagementProto {
             ensureCertificatesIsMutable();
             certificates_.addAll(other.certificates_);
           }
+          onChanged();
+        }
+        if (!other.getCauseOfFailure().isEmpty()) {
+          causeOfFailure_ = other.causeOfFailure_;
           onChanged();
         }
         this.mergeUnknownFields(other.unknownFields);
@@ -14609,6 +15483,107 @@ public final class PublicEndpointManagementProto {
         onChanged();
         return this;
       }
+
+      private java.lang.Object causeOfFailure_ = "";
+      /**
+       * <pre>
+       * User friendly message explaining why a signing request failed
+       * This is not sent if the request was successful
+       * </pre>
+       *
+       * <code>string causeOfFailure = 3;</code>
+       * @return The causeOfFailure.
+       */
+      public java.lang.String getCauseOfFailure() {
+        java.lang.Object ref = causeOfFailure_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          causeOfFailure_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * User friendly message explaining why a signing request failed
+       * This is not sent if the request was successful
+       * </pre>
+       *
+       * <code>string causeOfFailure = 3;</code>
+       * @return The bytes for causeOfFailure.
+       */
+      public com.google.protobuf.ByteString
+          getCauseOfFailureBytes() {
+        java.lang.Object ref = causeOfFailure_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          causeOfFailure_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * User friendly message explaining why a signing request failed
+       * This is not sent if the request was successful
+       * </pre>
+       *
+       * <code>string causeOfFailure = 3;</code>
+       * @param value The causeOfFailure to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCauseOfFailure(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        causeOfFailure_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * User friendly message explaining why a signing request failed
+       * This is not sent if the request was successful
+       * </pre>
+       *
+       * <code>string causeOfFailure = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCauseOfFailure() {
+        
+        causeOfFailure_ = getDefaultInstance().getCauseOfFailure();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * User friendly message explaining why a signing request failed
+       * This is not sent if the request was successful
+       * </pre>
+       *
+       * <code>string causeOfFailure = 3;</code>
+       * @param value The bytes for causeOfFailure to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCauseOfFailureBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        causeOfFailure_ = value;
+        onChanged();
+        return this;
+      }
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
@@ -14657,6 +15632,1947 @@ public final class PublicEndpointManagementProto {
 
     @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RevokeCertificateRequestOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.RevokeCertificateRequest)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     *The account id of the CDP tenant
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The accountId.
+     */
+    java.lang.String getAccountId();
+    /**
+     * <pre>
+     *The account id of the CDP tenant
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
+     */
+    com.google.protobuf.ByteString
+        getAccountIdBytes();
+
+    /**
+     * <pre>
+     *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+     * </pre>
+     *
+     * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The certificates.
+     */
+    java.lang.String getCertificates();
+    /**
+     * <pre>
+     *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+     * </pre>
+     *
+     * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The bytes for certificates.
+     */
+    com.google.protobuf.ByteString
+        getCertificatesBytes();
+
+    /**
+     * <pre>
+     * As default 'UNSPECIFIED' will be set if not sent in the request
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+     * @return The enum numeric value on the wire for reason.
+     */
+    int getReasonValue();
+    /**
+     * <pre>
+     * As default 'UNSPECIFIED' will be set if not sent in the request
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+     * @return The reason.
+     */
+    com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason getReason();
+
+    /**
+     * <pre>
+     * The service requesting the revoke certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample'
+     * </pre>
+     *
+     * <code>string requestingService = 4;</code>
+     * @return The requestingService.
+     */
+    java.lang.String getRequestingService();
+    /**
+     * <pre>
+     * The service requesting the revoke certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample'
+     * </pre>
+     *
+     * <code>string requestingService = 4;</code>
+     * @return The bytes for requestingService.
+     */
+    com.google.protobuf.ByteString
+        getRequestingServiceBytes();
+  }
+  /**
+   * <pre>
+   *Request object for RevokeCertificate method
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.RevokeCertificateRequest}
+   */
+  public static final class RevokeCertificateRequest extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.RevokeCertificateRequest)
+      RevokeCertificateRequestOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RevokeCertificateRequest.newBuilder() to construct.
+    private RevokeCertificateRequest(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RevokeCertificateRequest() {
+      accountId_ = "";
+      certificates_ = "";
+      reason_ = 0;
+      requestingService_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RevokeCertificateRequest();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RevokeCertificateRequest(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              accountId_ = s;
+              break;
+            }
+            case 18: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              certificates_ = s;
+              break;
+            }
+            case 24: {
+              int rawValue = input.readEnum();
+
+              reason_ = rawValue;
+              break;
+            }
+            case 34: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              requestingService_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateRequest_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateRequest_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.Builder.class);
+    }
+
+    /**
+     * <pre>
+     * Enumeration indicating the reason for revocation
+     * </pre>
+     *
+     * Protobuf enum {@code publicendpointmanagement.RevokeCertificateRequest.RevocationReason}
+     */
+    public enum RevocationReason
+        implements com.google.protobuf.ProtocolMessageEnum {
+      /**
+       * <code>UNSPECIFIED = 0;</code>
+       */
+      UNSPECIFIED(0),
+      /**
+       * <code>KEY_COMPROMISE = 1;</code>
+       */
+      KEY_COMPROMISE(1),
+      /**
+       * <code>CA_COMPROMISE = 2;</code>
+       */
+      CA_COMPROMISE(2),
+      /**
+       * <code>AFFILIATION_CHANGED = 3;</code>
+       */
+      AFFILIATION_CHANGED(3),
+      /**
+       * <code>SUPERSEDED = 4;</code>
+       */
+      SUPERSEDED(4),
+      /**
+       * <code>CESSATION_OF_OPERATION = 5;</code>
+       */
+      CESSATION_OF_OPERATION(5),
+      /**
+       * <code>CERTIFICATE_HOLD = 6;</code>
+       */
+      CERTIFICATE_HOLD(6),
+      /**
+       * <code>REMOVE_FROM_CRL = 8;</code>
+       */
+      REMOVE_FROM_CRL(8),
+      /**
+       * <code>PRIVILEGE_WITHDRAWN = 9;</code>
+       */
+      PRIVILEGE_WITHDRAWN(9),
+      /**
+       * <code>AA_COMPROMISE = 10;</code>
+       */
+      AA_COMPROMISE(10),
+      UNRECOGNIZED(-1),
+      ;
+
+      /**
+       * <code>UNSPECIFIED = 0;</code>
+       */
+      public static final int UNSPECIFIED_VALUE = 0;
+      /**
+       * <code>KEY_COMPROMISE = 1;</code>
+       */
+      public static final int KEY_COMPROMISE_VALUE = 1;
+      /**
+       * <code>CA_COMPROMISE = 2;</code>
+       */
+      public static final int CA_COMPROMISE_VALUE = 2;
+      /**
+       * <code>AFFILIATION_CHANGED = 3;</code>
+       */
+      public static final int AFFILIATION_CHANGED_VALUE = 3;
+      /**
+       * <code>SUPERSEDED = 4;</code>
+       */
+      public static final int SUPERSEDED_VALUE = 4;
+      /**
+       * <code>CESSATION_OF_OPERATION = 5;</code>
+       */
+      public static final int CESSATION_OF_OPERATION_VALUE = 5;
+      /**
+       * <code>CERTIFICATE_HOLD = 6;</code>
+       */
+      public static final int CERTIFICATE_HOLD_VALUE = 6;
+      /**
+       * <code>REMOVE_FROM_CRL = 8;</code>
+       */
+      public static final int REMOVE_FROM_CRL_VALUE = 8;
+      /**
+       * <code>PRIVILEGE_WITHDRAWN = 9;</code>
+       */
+      public static final int PRIVILEGE_WITHDRAWN_VALUE = 9;
+      /**
+       * <code>AA_COMPROMISE = 10;</code>
+       */
+      public static final int AA_COMPROMISE_VALUE = 10;
+
+
+      public final int getNumber() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalArgumentException(
+              "Can't get the number of an unknown enum value.");
+        }
+        return value;
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       * @deprecated Use {@link #forNumber(int)} instead.
+       */
+      @java.lang.Deprecated
+      public static RevocationReason valueOf(int value) {
+        return forNumber(value);
+      }
+
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
+      public static RevocationReason forNumber(int value) {
+        switch (value) {
+          case 0: return UNSPECIFIED;
+          case 1: return KEY_COMPROMISE;
+          case 2: return CA_COMPROMISE;
+          case 3: return AFFILIATION_CHANGED;
+          case 4: return SUPERSEDED;
+          case 5: return CESSATION_OF_OPERATION;
+          case 6: return CERTIFICATE_HOLD;
+          case 8: return REMOVE_FROM_CRL;
+          case 9: return PRIVILEGE_WITHDRAWN;
+          case 10: return AA_COMPROMISE;
+          default: return null;
+        }
+      }
+
+      public static com.google.protobuf.Internal.EnumLiteMap<RevocationReason>
+          internalGetValueMap() {
+        return internalValueMap;
+      }
+      private static final com.google.protobuf.Internal.EnumLiteMap<
+          RevocationReason> internalValueMap =
+            new com.google.protobuf.Internal.EnumLiteMap<RevocationReason>() {
+              public RevocationReason findValueByNumber(int number) {
+                return RevocationReason.forNumber(number);
+              }
+            };
+
+      public final com.google.protobuf.Descriptors.EnumValueDescriptor
+          getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
+        return getDescriptor().getValues().get(ordinal());
+      }
+      public final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptorForType() {
+        return getDescriptor();
+      }
+      public static final com.google.protobuf.Descriptors.EnumDescriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.getDescriptor().getEnumTypes().get(0);
+      }
+
+      private static final RevocationReason[] VALUES = values();
+
+      public static RevocationReason valueOf(
+          com.google.protobuf.Descriptors.EnumValueDescriptor desc) {
+        if (desc.getType() != getDescriptor()) {
+          throw new java.lang.IllegalArgumentException(
+            "EnumValueDescriptor is not for this type.");
+        }
+        if (desc.getIndex() == -1) {
+          return UNRECOGNIZED;
+        }
+        return VALUES[desc.getIndex()];
+      }
+
+      private final int value;
+
+      private RevocationReason(int value) {
+        this.value = value;
+      }
+
+      // @@protoc_insertion_point(enum_scope:publicendpointmanagement.RevokeCertificateRequest.RevocationReason)
+    }
+
+    public static final int ACCOUNTID_FIELD_NUMBER = 1;
+    private volatile java.lang.Object accountId_;
+    /**
+     * <pre>
+     *The account id of the CDP tenant
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The accountId.
+     */
+    @java.lang.Override
+    public java.lang.String getAccountId() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        accountId_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *The account id of the CDP tenant
+     * </pre>
+     *
+     * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getAccountIdBytes() {
+      java.lang.Object ref = accountId_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        accountId_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int CERTIFICATES_FIELD_NUMBER = 2;
+    private volatile java.lang.Object certificates_;
+    /**
+     * <pre>
+     *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+     * </pre>
+     *
+     * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The certificates.
+     */
+    @java.lang.Override
+    public java.lang.String getCertificates() {
+      java.lang.Object ref = certificates_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        certificates_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+     * </pre>
+     *
+     * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The bytes for certificates.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getCertificatesBytes() {
+      java.lang.Object ref = certificates_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        certificates_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    public static final int REASON_FIELD_NUMBER = 3;
+    private int reason_;
+    /**
+     * <pre>
+     * As default 'UNSPECIFIED' will be set if not sent in the request
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+     * @return The enum numeric value on the wire for reason.
+     */
+    @java.lang.Override public int getReasonValue() {
+      return reason_;
+    }
+    /**
+     * <pre>
+     * As default 'UNSPECIFIED' will be set if not sent in the request
+     * </pre>
+     *
+     * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+     * @return The reason.
+     */
+    @java.lang.Override public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason getReason() {
+      @SuppressWarnings("deprecation")
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason.valueOf(reason_);
+      return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason.UNRECOGNIZED : result;
+    }
+
+    public static final int REQUESTINGSERVICE_FIELD_NUMBER = 4;
+    private volatile java.lang.Object requestingService_;
+    /**
+     * <pre>
+     * The service requesting the revoke certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample'
+     * </pre>
+     *
+     * <code>string requestingService = 4;</code>
+     * @return The requestingService.
+     */
+    @java.lang.Override
+    public java.lang.String getRequestingService() {
+      java.lang.Object ref = requestingService_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        requestingService_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     * The service requesting the revoke certificate.
+     * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+     * For testing purpose you can put the requestingService as 'sample'
+     * </pre>
+     *
+     * <code>string requestingService = 4;</code>
+     * @return The bytes for requestingService.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getRequestingServiceBytes() {
+      java.lang.Object ref = requestingService_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        requestingService_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(certificates_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 2, certificates_);
+      }
+      if (reason_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason.UNSPECIFIED.getNumber()) {
+        output.writeEnum(3, reason_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestingService_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 4, requestingService_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(certificates_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, certificates_);
+      }
+      if (reason_ != com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason.UNSPECIFIED.getNumber()) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeEnumSize(3, reason_);
+      }
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestingService_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, requestingService_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest) obj;
+
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getCertificates()
+          .equals(other.getCertificates())) return false;
+      if (reason_ != other.reason_) return false;
+      if (!getRequestingService()
+          .equals(other.getRequestingService())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + ACCOUNTID_FIELD_NUMBER;
+      hash = (53 * hash) + getAccountId().hashCode();
+      hash = (37 * hash) + CERTIFICATES_FIELD_NUMBER;
+      hash = (53 * hash) + getCertificates().hashCode();
+      hash = (37 * hash) + REASON_FIELD_NUMBER;
+      hash = (53 * hash) + reason_;
+      hash = (37 * hash) + REQUESTINGSERVICE_FIELD_NUMBER;
+      hash = (53 * hash) + getRequestingService().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *Request object for RevokeCertificate method
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.RevokeCertificateRequest}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.RevokeCertificateRequest)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequestOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateRequest_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateRequest_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        accountId_ = "";
+
+        certificates_ = "";
+
+        reason_ = 0;
+
+        requestingService_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateRequest_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest(this);
+        result.accountId_ = accountId_;
+        result.certificates_ = certificates_;
+        result.reason_ = reason_;
+        result.requestingService_ = requestingService_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.getDefaultInstance()) return this;
+        if (!other.getAccountId().isEmpty()) {
+          accountId_ = other.accountId_;
+          onChanged();
+        }
+        if (!other.getCertificates().isEmpty()) {
+          certificates_ = other.certificates_;
+          onChanged();
+        }
+        if (other.reason_ != 0) {
+          setReasonValue(other.getReasonValue());
+        }
+        if (!other.getRequestingService().isEmpty()) {
+          requestingService_ = other.requestingService_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object accountId_ = "";
+      /**
+       * <pre>
+       *The account id of the CDP tenant
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return The accountId.
+       */
+      public java.lang.String getAccountId() {
+        java.lang.Object ref = accountId_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          accountId_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *The account id of the CDP tenant
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
+       */
+      public com.google.protobuf.ByteString
+          getAccountIdBytes() {
+        java.lang.Object ref = accountId_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          accountId_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *The account id of the CDP tenant
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountId(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *The account id of the CDP tenant
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearAccountId() {
+        
+        accountId_ = getDefaultInstance().getAccountId();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *The account id of the CDP tenant
+       * </pre>
+       *
+       * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
+       */
+      public Builder setAccountIdBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        accountId_ = value;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object certificates_ = "";
+      /**
+       * <pre>
+       *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+       * </pre>
+       *
+       * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The certificates.
+       */
+      public java.lang.String getCertificates() {
+        java.lang.Object ref = certificates_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          certificates_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+       * </pre>
+       *
+       * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The bytes for certificates.
+       */
+      public com.google.protobuf.ByteString
+          getCertificatesBytes() {
+        java.lang.Object ref = certificates_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          certificates_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+       * </pre>
+       *
+       * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The certificates to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCertificates(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        certificates_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+       * </pre>
+       *
+       * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearCertificates() {
+        
+        certificates_ = getDefaultInstance().getCertificates();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+       * </pre>
+       *
+       * <code>string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The bytes for certificates to set.
+       * @return This builder for chaining.
+       */
+      public Builder setCertificatesBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        certificates_ = value;
+        onChanged();
+        return this;
+      }
+
+      private int reason_ = 0;
+      /**
+       * <pre>
+       * As default 'UNSPECIFIED' will be set if not sent in the request
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+       * @return The enum numeric value on the wire for reason.
+       */
+      @java.lang.Override public int getReasonValue() {
+        return reason_;
+      }
+      /**
+       * <pre>
+       * As default 'UNSPECIFIED' will be set if not sent in the request
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+       * @param value The enum numeric value on the wire for reason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setReasonValue(int value) {
+        
+        reason_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * As default 'UNSPECIFIED' will be set if not sent in the request
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+       * @return The reason.
+       */
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason getReason() {
+        @SuppressWarnings("deprecation")
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason.valueOf(reason_);
+        return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason.UNRECOGNIZED : result;
+      }
+      /**
+       * <pre>
+       * As default 'UNSPECIFIED' will be set if not sent in the request
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+       * @param value The reason to set.
+       * @return This builder for chaining.
+       */
+      public Builder setReason(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.RevocationReason value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        
+        reason_ = value.getNumber();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * As default 'UNSPECIFIED' will be set if not sent in the request
+       * </pre>
+       *
+       * <code>.publicendpointmanagement.RevokeCertificateRequest.RevocationReason reason = 3;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearReason() {
+        
+        reason_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private java.lang.Object requestingService_ = "";
+      /**
+       * <pre>
+       * The service requesting the revoke certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample'
+       * </pre>
+       *
+       * <code>string requestingService = 4;</code>
+       * @return The requestingService.
+       */
+      public java.lang.String getRequestingService() {
+        java.lang.Object ref = requestingService_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          requestingService_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The service requesting the revoke certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample'
+       * </pre>
+       *
+       * <code>string requestingService = 4;</code>
+       * @return The bytes for requestingService.
+       */
+      public com.google.protobuf.ByteString
+          getRequestingServiceBytes() {
+        java.lang.Object ref = requestingService_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          requestingService_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       * The service requesting the revoke certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample'
+       * </pre>
+       *
+       * <code>string requestingService = 4;</code>
+       * @param value The requestingService to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRequestingService(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        requestingService_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The service requesting the revoke certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample'
+       * </pre>
+       *
+       * <code>string requestingService = 4;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearRequestingService() {
+        
+        requestingService_ = getDefaultInstance().getRequestingService();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       * The service requesting the revoke certificate.
+       * It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+       * For testing purpose you can put the requestingService as 'sample'
+       * </pre>
+       *
+       * <code>string requestingService = 4;</code>
+       * @param value The bytes for requestingService to set.
+       * @return This builder for chaining.
+       */
+      public Builder setRequestingServiceBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        requestingService_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.RevokeCertificateRequest)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.RevokeCertificateRequest)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RevokeCertificateRequest>
+        PARSER = new com.google.protobuf.AbstractParser<RevokeCertificateRequest>() {
+      @java.lang.Override
+      public RevokeCertificateRequest parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RevokeCertificateRequest(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RevokeCertificateRequest> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RevokeCertificateRequest> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest getDefaultInstanceForType() {
+      return DEFAULT_INSTANCE;
+    }
+
+  }
+
+  public interface RevokeCertificateResponseOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:publicendpointmanagement.RevokeCertificateResponse)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <pre>
+     *Status showing if the requested revoke was successful
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The status.
+     */
+    java.lang.String getStatus();
+    /**
+     * <pre>
+     *Status showing if the requested revoke was successful
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The bytes for status.
+     */
+    com.google.protobuf.ByteString
+        getStatusBytes();
+  }
+  /**
+   * <pre>
+   *Response object for RevokeCertificate method
+   * </pre>
+   *
+   * Protobuf type {@code publicendpointmanagement.RevokeCertificateResponse}
+   */
+  public static final class RevokeCertificateResponse extends
+      com.google.protobuf.GeneratedMessageV3 implements
+      // @@protoc_insertion_point(message_implements:publicendpointmanagement.RevokeCertificateResponse)
+      RevokeCertificateResponseOrBuilder {
+  private static final long serialVersionUID = 0L;
+    // Use RevokeCertificateResponse.newBuilder() to construct.
+    private RevokeCertificateResponse(com.google.protobuf.GeneratedMessageV3.Builder<?> builder) {
+      super(builder);
+    }
+    private RevokeCertificateResponse() {
+      status_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RevokeCertificateResponse();
+    }
+
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+    getUnknownFields() {
+      return this.unknownFields;
+    }
+    private RevokeCertificateResponse(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      this();
+      if (extensionRegistry == null) {
+        throw new java.lang.NullPointerException();
+      }
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            case 10: {
+              java.lang.String s = input.readStringRequireUtf8();
+
+              status_ = s;
+              break;
+            }
+            default: {
+              if (!parseUnknownField(
+                  input, unknownFields, extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateResponse_descriptor;
+    }
+
+    @java.lang.Override
+    protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateResponse_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.Builder.class);
+    }
+
+    public static final int STATUS_FIELD_NUMBER = 1;
+    private volatile java.lang.Object status_;
+    /**
+     * <pre>
+     *Status showing if the requested revoke was successful
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The status.
+     */
+    @java.lang.Override
+    public java.lang.String getStatus() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        return (java.lang.String) ref;
+      } else {
+        com.google.protobuf.ByteString bs = 
+            (com.google.protobuf.ByteString) ref;
+        java.lang.String s = bs.toStringUtf8();
+        status_ = s;
+        return s;
+      }
+    }
+    /**
+     * <pre>
+     *Status showing if the requested revoke was successful
+     * </pre>
+     *
+     * <code>string status = 1;</code>
+     * @return The bytes for status.
+     */
+    @java.lang.Override
+    public com.google.protobuf.ByteString
+        getStatusBytes() {
+      java.lang.Object ref = status_;
+      if (ref instanceof java.lang.String) {
+        com.google.protobuf.ByteString b = 
+            com.google.protobuf.ByteString.copyFromUtf8(
+                (java.lang.String) ref);
+        status_ = b;
+        return b;
+      } else {
+        return (com.google.protobuf.ByteString) ref;
+      }
+    }
+
+    private byte memoizedIsInitialized = -1;
+    @java.lang.Override
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    @java.lang.Override
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
+      }
+      unknownFields.writeTo(output);
+    }
+
+    @java.lang.Override
+    public int getSerializedSize() {
+      int size = memoizedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
+        size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
+      }
+      size += unknownFields.getSerializedSize();
+      memoizedSize = size;
+      return size;
+    }
+
+    @java.lang.Override
+    public boolean equals(final java.lang.Object obj) {
+      if (obj == this) {
+       return true;
+      }
+      if (!(obj instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse)) {
+        return super.equals(obj);
+      }
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse) obj;
+
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
+    }
+
+    @java.lang.Override
+    public int hashCode() {
+      if (memoizedHashCode != 0) {
+        return memoizedHashCode;
+      }
+      int hash = 41;
+      hash = (19 * hash) + getDescriptor().hashCode();
+      hash = (37 * hash) + STATUS_FIELD_NUMBER;
+      hash = (53 * hash) + getStatus().hashCode();
+      hash = (29 * hash) + unknownFields.hashCode();
+      memoizedHashCode = hash;
+      return hash;
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        java.nio.ByteBuffer data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        java.nio.ByteBuffer data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseDelimitedWithIOException(PARSER, input, extensionRegistry);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input);
+    }
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return com.google.protobuf.GeneratedMessageV3
+          .parseWithIOException(PARSER, input, extensionRegistry);
+    }
+
+    @java.lang.Override
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder() {
+      return DEFAULT_INSTANCE.toBuilder();
+    }
+    public static Builder newBuilder(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse prototype) {
+      return DEFAULT_INSTANCE.toBuilder().mergeFrom(prototype);
+    }
+    @java.lang.Override
+    public Builder toBuilder() {
+      return this == DEFAULT_INSTANCE
+          ? new Builder() : new Builder().mergeFrom(this);
+    }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * <pre>
+     *Response object for RevokeCertificate method
+     * </pre>
+     *
+     * Protobuf type {@code publicendpointmanagement.RevokeCertificateResponse}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessageV3.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:publicendpointmanagement.RevokeCertificateResponse)
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponseOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateResponse_descriptor;
+      }
+
+      @java.lang.Override
+      protected com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateResponse_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.Builder.class);
+      }
+
+      // Construct using com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessageV3.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessageV3
+                .alwaysUseFieldBuilders) {
+        }
+      }
+      @java.lang.Override
+      public Builder clear() {
+        super.clear();
+        status_ = "";
+
+        return this;
+      }
+
+      @java.lang.Override
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.internal_static_publicendpointmanagement_RevokeCertificateResponse_descriptor;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse getDefaultInstanceForType() {
+        return com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.getDefaultInstance();
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse build() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      @java.lang.Override
+      public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse buildPartial() {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse(this);
+        result.status_ = status_;
+        onBuilt();
+        return result;
+      }
+
+      @java.lang.Override
+      public Builder clone() {
+        return super.clone();
+      }
+      @java.lang.Override
+      public Builder setField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.setField(field, value);
+      }
+      @java.lang.Override
+      public Builder clearField(
+          com.google.protobuf.Descriptors.FieldDescriptor field) {
+        return super.clearField(field);
+      }
+      @java.lang.Override
+      public Builder clearOneof(
+          com.google.protobuf.Descriptors.OneofDescriptor oneof) {
+        return super.clearOneof(oneof);
+      }
+      @java.lang.Override
+      public Builder setRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          int index, java.lang.Object value) {
+        return super.setRepeatedField(field, index, value);
+      }
+      @java.lang.Override
+      public Builder addRepeatedField(
+          com.google.protobuf.Descriptors.FieldDescriptor field,
+          java.lang.Object value) {
+        return super.addRepeatedField(field, value);
+      }
+      @java.lang.Override
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse) {
+          return mergeFrom((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse other) {
+        if (other == com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.getDefaultInstance()) return this;
+        if (!other.getStatus().isEmpty()) {
+          status_ = other.status_;
+          onChanged();
+        }
+        this.mergeUnknownFields(other.unknownFields);
+        onChanged();
+        return this;
+      }
+
+      @java.lang.Override
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      @java.lang.Override
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse) e.getUnfinishedMessage();
+          throw e.unwrapIOException();
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+
+      private java.lang.Object status_ = "";
+      /**
+       * <pre>
+       *Status showing if the requested revoke was successful
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return The status.
+       */
+      public java.lang.String getStatus() {
+        java.lang.Object ref = status_;
+        if (!(ref instanceof java.lang.String)) {
+          com.google.protobuf.ByteString bs =
+              (com.google.protobuf.ByteString) ref;
+          java.lang.String s = bs.toStringUtf8();
+          status_ = s;
+          return s;
+        } else {
+          return (java.lang.String) ref;
+        }
+      }
+      /**
+       * <pre>
+       *Status showing if the requested revoke was successful
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return The bytes for status.
+       */
+      public com.google.protobuf.ByteString
+          getStatusBytes() {
+        java.lang.Object ref = status_;
+        if (ref instanceof String) {
+          com.google.protobuf.ByteString b = 
+              com.google.protobuf.ByteString.copyFromUtf8(
+                  (java.lang.String) ref);
+          status_ = b;
+          return b;
+        } else {
+          return (com.google.protobuf.ByteString) ref;
+        }
+      }
+      /**
+       * <pre>
+       *Status showing if the requested revoke was successful
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatus(
+          java.lang.String value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *Status showing if the requested revoke was successful
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @return This builder for chaining.
+       */
+      public Builder clearStatus() {
+        
+        status_ = getDefaultInstance().getStatus();
+        onChanged();
+        return this;
+      }
+      /**
+       * <pre>
+       *Status showing if the requested revoke was successful
+       * </pre>
+       *
+       * <code>string status = 1;</code>
+       * @param value The bytes for status to set.
+       * @return This builder for chaining.
+       */
+      public Builder setStatusBytes(
+          com.google.protobuf.ByteString value) {
+        if (value == null) {
+    throw new NullPointerException();
+  }
+  checkByteStringIsUtf8(value);
+        
+        status_ = value;
+        onChanged();
+        return this;
+      }
+      @java.lang.Override
+      public final Builder setUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.setUnknownFields(unknownFields);
+      }
+
+      @java.lang.Override
+      public final Builder mergeUnknownFields(
+          final com.google.protobuf.UnknownFieldSet unknownFields) {
+        return super.mergeUnknownFields(unknownFields);
+      }
+
+
+      // @@protoc_insertion_point(builder_scope:publicendpointmanagement.RevokeCertificateResponse)
+    }
+
+    // @@protoc_insertion_point(class_scope:publicendpointmanagement.RevokeCertificateResponse)
+    private static final com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse DEFAULT_INSTANCE;
+    static {
+      DEFAULT_INSTANCE = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse();
+    }
+
+    public static com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse getDefaultInstance() {
+      return DEFAULT_INSTANCE;
+    }
+
+    private static final com.google.protobuf.Parser<RevokeCertificateResponse>
+        PARSER = new com.google.protobuf.AbstractParser<RevokeCertificateResponse>() {
+      @java.lang.Override
+      public RevokeCertificateResponse parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new RevokeCertificateResponse(input, extensionRegistry);
+      }
+    };
+
+    public static com.google.protobuf.Parser<RevokeCertificateResponse> parser() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<RevokeCertificateResponse> getParserForType() {
+      return PARSER;
+    }
+
+    @java.lang.Override
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse getDefaultInstanceForType() {
       return DEFAULT_INSTANCE;
     }
 
@@ -14752,6 +17668,16 @@ public final class PublicEndpointManagementProto {
   private static final 
     com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
       internal_static_publicendpointmanagement_PollCertificateSigningResponse_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_RevokeCertificateRequest_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_RevokeCertificateRequest_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_publicendpointmanagement_RevokeCertificateResponse_descriptor;
+  private static final 
+    com.google.protobuf.GeneratedMessageV3.FieldAccessorTable
+      internal_static_publicendpointmanagement_RevokeCertificateResponse_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -14778,62 +17704,79 @@ public final class PublicEndpointManagementProto {
       "\030\001 \001(\t\022\023\n\013environment\030\002 \001(\t\022\020\n\010endpoint\030" +
       "\003 \001(\t\022\026\n\016removeWildcard\030\004 \001(\010\0226\n\tdnsTarg" +
       "et\030\005 \001(\0132#.publicendpointmanagement.DnsT" +
-      "arget\"\030\n\026DeleteDnsEntryResponse\"|\n\030Creat" +
-      "eCertificateRequest\022\021\n\taccountId\030\001 \001(\t\022\023" +
-      "\n\013environment\030\002 \001(\t\022\020\n\010endpoint\030\003 \001(\t\022\023\n" +
-      "\013addWildcard\030\004 \001(\010\022\021\n\003csr\030\005 \001(\014B\004\210\265\030\001\".\n" +
-      "\031CreateCertificateResponse\022\021\n\trequestId\030" +
-      "\001 \001(\t\"3\n\036PollCertificateCreationRequest\022" +
-      "\021\n\trequestId\030\001 \001(\t\"\\\n\037PollCertificateCre" +
-      "ationResponse\022\016\n\006status\030\001 \001(\t\022\r\n\005error\030\002" +
-      " \001(\t\022\032\n\014certificates\030\003 \003(\tB\004\210\265\030\001\"c\n!Gene" +
-      "rateManagedDomainNamesRequest\022\021\n\taccount" +
-      "Id\030\001 \001(\t\022\027\n\017environmentName\030\002 \001(\t\022\022\n\nsub" +
-      "domains\030\003 \003(\t\"\260\001\n\"GenerateManagedDomainN" +
-      "amesResponse\022Z\n\007domains\030\001 \003(\0132I.publicen" +
-      "dpointmanagement.GenerateManagedDomainNa" +
-      "mesResponse.DomainsEntry\032.\n\014DomainsEntry" +
-      "\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"Z\n\031Cert" +
-      "ificateSigningRequest\022\021\n\taccountId\030\001 \001(\t" +
-      "\022\027\n\017environmentName\030\002 \001(\t\022\021\n\003csr\030\003 \001(\014B\004" +
-      "\210\265\030\001\"0\n\032CertificateSigningResponse\022\022\n\nwo" +
-      "rkflowId\030\001 \001(\t\"3\n\035PollCertificateSigning" +
-      "Request\022\022\n\nworkflowId\030\001 \001(\t\"\334\001\n\036PollCert" +
-      "ificateSigningResponse\022V\n\006status\030\001 \001(\0162F" +
-      ".publicendpointmanagement.PollCertificat" +
-      "eSigningResponse.SigningStatus\022\032\n\014certif" +
-      "icates\030\002 \003(\tB\004\210\265\030\001\"F\n\rSigningStatus\022\t\n\005U" +
-      "NSET\020\000\022\017\n\013IN_PROGRESS\020\001\022\r\n\tSUCCEEDED\020\002\022\n" +
-      "\n\006FAILED\020\0032\212\010\n\030PublicEndpointManagement\022" +
-      "A\n\nGetVersion\022\027.version.VersionRequest\032\030" +
-      ".version.VersionResponse\"\000\022u\n\016CreateDnsE" +
-      "ntry\022/.publicendpointmanagement.CreateDn" +
-      "sEntryRequest\0320.publicendpointmanagement" +
-      ".CreateDnsEntryResponse\"\000\022u\n\016DeleteDnsEn" +
-      "try\022/.publicendpointmanagement.DeleteDns" +
-      "EntryRequest\0320.publicendpointmanagement." +
-      "DeleteDnsEntryResponse\"\000\022~\n\021CreateCertif" +
-      "icate\0222.publicendpointmanagement.CreateC" +
-      "ertificateRequest\0323.publicendpointmanage" +
-      "ment.CreateCertificateResponse\"\000\022\220\001\n\027Pol" +
-      "lCertificateCreation\0228.publicendpointman" +
-      "agement.PollCertificateCreationRequest\0329" +
-      ".publicendpointmanagement.PollCertificat" +
-      "eCreationResponse\"\000\022\231\001\n\032GenerateManagedD" +
-      "omainNames\022;.publicendpointmanagement.Ge" +
-      "nerateManagedDomainNamesRequest\032<.public" +
-      "endpointmanagement.GenerateManagedDomain" +
-      "NamesResponse\"\000\022~\n\017SignCertificate\0223.pub" +
-      "licendpointmanagement.CertificateSigning" +
-      "Request\0324.publicendpointmanagement.Certi" +
-      "ficateSigningResponse\"\000\022\215\001\n\026PollCertific" +
-      "ateSigning\0227.publicendpointmanagement.Po" +
-      "llCertificateSigningRequest\0328.publicendp" +
-      "ointmanagement.PollCertificateSigningRes" +
-      "ponse\"\000Bu\n9com.cloudera.thunderhead.serv" +
-      "ice.publicendpointmanagementB\035PublicEndp" +
-      "ointManagementProtoZ\031com/cloudera/cdp/pr" +
-      "otobufb\006proto3"
+      "arget\"\030\n\026DeleteDnsEntryResponse\"\244\001\n\030Crea" +
+      "teCertificateRequest\022\021\n\taccountId\030\001 \001(\t\022" +
+      "\023\n\013environment\030\002 \001(\t\022\020\n\010endpoint\030\003 \001(\t\022\023" +
+      "\n\013addWildcard\030\004 \001(\010\022\021\n\003csr\030\005 \001(\014B\004\210\265\030\001\022\022" +
+      "\n\nclusterCrn\030\006 \001(\t\022\022\n\nclientName\030\007 \001(\t\"." +
+      "\n\031CreateCertificateResponse\022\021\n\trequestId" +
+      "\030\001 \001(\t\"3\n\036PollCertificateCreationRequest" +
+      "\022\021\n\trequestId\030\001 \001(\t\"\\\n\037PollCertificateCr" +
+      "eationResponse\022\016\n\006status\030\001 \001(\t\022\r\n\005error\030" +
+      "\002 \001(\t\022\032\n\014certificates\030\003 \003(\tB\004\210\265\030\001\"c\n!Gen" +
+      "erateManagedDomainNamesRequest\022\021\n\taccoun" +
+      "tId\030\001 \001(\t\022\027\n\017environmentName\030\002 \001(\t\022\022\n\nsu" +
+      "bdomains\030\003 \003(\t\"\260\001\n\"GenerateManagedDomain" +
+      "NamesResponse\022Z\n\007domains\030\001 \003(\0132I.publice" +
+      "ndpointmanagement.GenerateManagedDomainN" +
+      "amesResponse.DomainsEntry\032.\n\014DomainsEntr" +
+      "y\022\013\n\003key\030\001 \001(\t\022\r\n\005value\030\002 \001(\t:\0028\001\"\202\001\n\031Ce" +
+      "rtificateSigningRequest\022\021\n\taccountId\030\001 \001" +
+      "(\t\022\027\n\017environmentName\030\002 \001(\t\022\021\n\003csr\030\003 \001(\014" +
+      "B\004\210\265\030\001\022\022\n\nclusterCrn\030\004 \001(\t\022\022\n\nclientName" +
+      "\030\005 \001(\t\"0\n\032CertificateSigningResponse\022\022\n\n" +
+      "workflowId\030\001 \001(\t\"3\n\035PollCertificateSigni" +
+      "ngRequest\022\022\n\nworkflowId\030\001 \001(\t\"\364\001\n\036PollCe" +
+      "rtificateSigningResponse\022V\n\006status\030\001 \001(\016" +
+      "2F.publicendpointmanagement.PollCertific" +
+      "ateSigningResponse.SigningStatus\022\032\n\014cert" +
+      "ificates\030\002 \003(\tB\004\210\265\030\001\022\026\n\016causeOfFailure\030\003" +
+      " \001(\t\"F\n\rSigningStatus\022\t\n\005UNSET\020\000\022\017\n\013IN_P" +
+      "ROGRESS\020\001\022\r\n\tSUCCEEDED\020\002\022\n\n\006FAILED\020\003\"\242\003\n" +
+      "\030RevokeCertificateRequest\022\021\n\taccountId\030\001" +
+      " \001(\t\022\032\n\014certificates\030\002 \001(\tB\004\210\265\030\001\022S\n\006reas" +
+      "on\030\003 \001(\0162C.publicendpointmanagement.Revo" +
+      "keCertificateRequest.RevocationReason\022\031\n" +
+      "\021requestingService\030\004 \001(\t\"\346\001\n\020RevocationR" +
+      "eason\022\017\n\013UNSPECIFIED\020\000\022\022\n\016KEY_COMPROMISE" +
+      "\020\001\022\021\n\rCA_COMPROMISE\020\002\022\027\n\023AFFILIATION_CHA" +
+      "NGED\020\003\022\016\n\nSUPERSEDED\020\004\022\032\n\026CESSATION_OF_O" +
+      "PERATION\020\005\022\024\n\020CERTIFICATE_HOLD\020\006\022\023\n\017REMO" +
+      "VE_FROM_CRL\020\010\022\027\n\023PRIVILEGE_WITHDRAWN\020\t\022\021" +
+      "\n\rAA_COMPROMISE\020\n\"+\n\031RevokeCertificateRe" +
+      "sponse\022\016\n\006status\030\001 \001(\t2\212\t\n\030PublicEndpoin" +
+      "tManagement\022A\n\nGetVersion\022\027.version.Vers" +
+      "ionRequest\032\030.version.VersionResponse\"\000\022u" +
+      "\n\016CreateDnsEntry\022/.publicendpointmanagem" +
+      "ent.CreateDnsEntryRequest\0320.publicendpoi" +
+      "ntmanagement.CreateDnsEntryResponse\"\000\022u\n" +
+      "\016DeleteDnsEntry\022/.publicendpointmanageme" +
+      "nt.DeleteDnsEntryRequest\0320.publicendpoin" +
+      "tmanagement.DeleteDnsEntryResponse\"\000\022~\n\021" +
+      "CreateCertificate\0222.publicendpointmanage" +
+      "ment.CreateCertificateRequest\0323.publicen" +
+      "dpointmanagement.CreateCertificateRespon" +
+      "se\"\000\022\220\001\n\027PollCertificateCreation\0228.publi" +
+      "cendpointmanagement.PollCertificateCreat" +
+      "ionRequest\0329.publicendpointmanagement.Po" +
+      "llCertificateCreationResponse\"\000\022\231\001\n\032Gene" +
+      "rateManagedDomainNames\022;.publicendpointm" +
+      "anagement.GenerateManagedDomainNamesRequ" +
+      "est\032<.publicendpointmanagement.GenerateM" +
+      "anagedDomainNamesResponse\"\000\022~\n\017SignCerti" +
+      "ficate\0223.publicendpointmanagement.Certif" +
+      "icateSigningRequest\0324.publicendpointmana" +
+      "gement.CertificateSigningResponse\"\000\022\215\001\n\026" +
+      "PollCertificateSigning\0227.publicendpointm" +
+      "anagement.PollCertificateSigningRequest\032" +
+      "8.publicendpointmanagement.PollCertifica" +
+      "teSigningResponse\"\000\022~\n\021RevokeCertificate" +
+      "\0222.publicendpointmanagement.RevokeCertif" +
+      "icateRequest\0323.publicendpointmanagement." +
+      "RevokeCertificateResponse\"\000Bu\n9com.cloud" +
+      "era.thunderhead.service.publicendpointma" +
+      "nagementB\035PublicEndpointManagementProtoZ" +
+      "\031com/cloudera/cdp/protobufb\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -14888,7 +17831,7 @@ public final class PublicEndpointManagementProto {
     internal_static_publicendpointmanagement_CreateCertificateRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_publicendpointmanagement_CreateCertificateRequest_descriptor,
-        new java.lang.String[] { "AccountId", "Environment", "Endpoint", "AddWildcard", "Csr", });
+        new java.lang.String[] { "AccountId", "Environment", "Endpoint", "AddWildcard", "Csr", "ClusterCrn", "ClientName", });
     internal_static_publicendpointmanagement_CreateCertificateResponse_descriptor =
       getDescriptor().getMessageTypes().get(8);
     internal_static_publicendpointmanagement_CreateCertificateResponse_fieldAccessorTable = new
@@ -14930,7 +17873,7 @@ public final class PublicEndpointManagementProto {
     internal_static_publicendpointmanagement_CertificateSigningRequest_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_publicendpointmanagement_CertificateSigningRequest_descriptor,
-        new java.lang.String[] { "AccountId", "EnvironmentName", "Csr", });
+        new java.lang.String[] { "AccountId", "EnvironmentName", "Csr", "ClusterCrn", "ClientName", });
     internal_static_publicendpointmanagement_CertificateSigningResponse_descriptor =
       getDescriptor().getMessageTypes().get(14);
     internal_static_publicendpointmanagement_CertificateSigningResponse_fieldAccessorTable = new
@@ -14948,7 +17891,19 @@ public final class PublicEndpointManagementProto {
     internal_static_publicendpointmanagement_PollCertificateSigningResponse_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
         internal_static_publicendpointmanagement_PollCertificateSigningResponse_descriptor,
-        new java.lang.String[] { "Status", "Certificates", });
+        new java.lang.String[] { "Status", "Certificates", "CauseOfFailure", });
+    internal_static_publicendpointmanagement_RevokeCertificateRequest_descriptor =
+      getDescriptor().getMessageTypes().get(17);
+    internal_static_publicendpointmanagement_RevokeCertificateRequest_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_RevokeCertificateRequest_descriptor,
+        new java.lang.String[] { "AccountId", "Certificates", "Reason", "RequestingService", });
+    internal_static_publicendpointmanagement_RevokeCertificateResponse_descriptor =
+      getDescriptor().getMessageTypes().get(18);
+    internal_static_publicendpointmanagement_RevokeCertificateResponse_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessageV3.FieldAccessorTable(
+        internal_static_publicendpointmanagement_RevokeCertificateResponse_descriptor,
+        new java.lang.String[] { "Status", });
     com.google.protobuf.ExtensionRegistry registry =
         com.google.protobuf.ExtensionRegistry.newInstance();
     registry.add(com.cloudera.thunderhead.service.common.options.Options.FieldExtension.skipLogging);

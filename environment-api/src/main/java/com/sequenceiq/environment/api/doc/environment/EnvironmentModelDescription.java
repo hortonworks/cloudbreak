@@ -139,6 +139,7 @@ public class EnvironmentModelDescription {
 
     public static final String ENVIRONMENT_SERVICE_VERSION = "The version of the Cloudbreak build used to create the environment.";
     public static final String ENVIRONMENT_DELETION_TYPE = "Deletion type of environment.";
+    public static final String ENVIRONMENT_DOMAIN_NAME = "The domain name that's has been generated for the environment.";
 
     public static final String AWS_DISK_ENCRYPTION_PARAMETERS = "AWS Disk encryption parameters";
     private EnvironmentModelDescription() {

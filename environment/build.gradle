@@ -74,6 +74,7 @@ dependencies {
     implementation     project(":structuredevent-service-cdp")
     implementation     project(":status-checker")
     implementation     project(":template-manager-tag")
+    implementation     project(':cluster-dns-connector')
 
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
     implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version

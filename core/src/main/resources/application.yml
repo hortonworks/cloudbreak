@@ -845,3 +845,7 @@ crn:
 existingstackpatcher:
   intervalhours: 1
   enabled: true
+
+clusterdns:
+  host: localhost
+  port: 8982

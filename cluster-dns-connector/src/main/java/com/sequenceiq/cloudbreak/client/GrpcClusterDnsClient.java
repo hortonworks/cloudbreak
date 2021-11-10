@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
@@ -84,7 +85,7 @@ public class GrpcClusterDnsClient {
             ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Create a dns entry with account id: {} and requestId: {} for cloud DNS: {}", accountId, requestId, cloudDns);
             CreateDnsEntryResponse response = client.createDnsEntryWithCloudDns(requestId.orElse(UUID.randomUUID().toString()), accountId,
-                endpoint, environment, cloudDns, hostedZoneId);
+                    endpoint, environment, cloudDns, hostedZoneId);
             LOGGER.info("Dns entry creation finished for cloud DNS {}", cloudDns);
             return response;
         }
@@ -96,8 +97,21 @@ public class GrpcClusterDnsClient {
             ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             LOGGER.info("Delete a dns entry with account id: {} and requestId: {} for cloud DNS: {}", accountId, requestId, client);
             DeleteDnsEntryResponse response = client.deleteDnsEntryWithCloudDns(requestId.orElse(UUID.randomUUID().toString()), accountId,
-                endpoint, environment, cloudDns, hostedZoneId);
+                    endpoint, environment, cloudDns, hostedZoneId);
             LOGGER.info("Dns entry deletion finished for cloud DNS {}", cloudDns);
+            return response;
+        }
+    }
+
+    public GenerateManagedDomainNamesResponse generateManagedDomain(String environmentName, List<String> subDomains, String accountId,
+            Optional<String> requestId) {
+        String requestIdValue = requestId.orElse(UUID.randomUUID().toString());
+        try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
+            ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
+            LOGGER.info("Generating managed domain names for environment: '{}', subdomain: '{}', account id: '{}', requestId: '{}'", environmentName,
+                    String.join(",", subDomains), accountId, requestId);
+            GenerateManagedDomainNamesResponse response = client.generateManagedDomainNames(requestIdValue, environmentName, subDomains, accountId);
+            LOGGER.info("Domain names generation has been finished, returned values: '{}'", response.getDomainsMap());
             return response;
         }
     }

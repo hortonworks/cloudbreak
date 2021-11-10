@@ -156,6 +156,9 @@ public class Environment implements AuthResource, AccountAwareResource {
     @Column(name = "environment_service_version")
     private String environmentServiceVersion;
 
+    @Column(name = "environment_domain")
+    private String domain;
+
     public Environment() {
         regions = new Json(new HashSet<Region>());
         tags = new Json(new EnvironmentTags(new HashMap<>(), new HashMap<>()));
@@ -522,6 +525,14 @@ public class Environment implements AuthResource, AccountAwareResource {
         this.deletionType = deletionType;
     }
 
+    public String getDomain() {
+        return domain;
+    }
+
+    public void setDomain(String domain) {
+        this.domain = domain;
+    }
+
     @Override
     public String toString() {
         return "Environment{" +
@@ -533,6 +544,7 @@ public class Environment implements AuthResource, AccountAwareResource {
                 ", statusReason='" + statusReason + '\'' +
                 ", freeIpaEnableMultiAz='" + freeIpaEnableMultiAz + '\'' +
                 ", deletionType='" + deletionType + '\'' +
+                ", domain='" + domain + '\'' +
                 '}';
     }
 }

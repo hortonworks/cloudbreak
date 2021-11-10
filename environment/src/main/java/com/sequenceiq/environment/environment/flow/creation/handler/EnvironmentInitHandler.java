@@ -24,6 +24,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationEvent;
 import com.sequenceiq.environment.environment.flow.creation.event.EnvCreationFailureEvent;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.domain.PemBasedEnvironmentDomainProvider;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.v1.converter.EnvironmentNetworkConverter;
@@ -48,18 +49,22 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
 
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap;
 
+    private final PemBasedEnvironmentDomainProvider domainProvider;
+
     protected EnvironmentInitHandler(
             EventSender eventSender,
             EnvironmentService environmentService,
             EnvironmentNetworkService environmentNetworkService,
             EventBus eventBus, VirtualGroupService virtualGroupService,
-            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap) {
+            Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap,
+            PemBasedEnvironmentDomainProvider domainProvider) {
         super(eventSender);
         this.environmentService = environmentService;
         this.eventBus = eventBus;
         this.virtualGroupService = virtualGroupService;
         this.environmentNetworkService = environmentNetworkService;
         this.environmentNetworkConverterMap = environmentNetworkConverterMap;
+        this.domainProvider = domainProvider;
     }
 
     @Override
@@ -80,6 +85,7 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void initEnvironment(Environment environment) {
+        generateDomainForEnvironment(environment);
         String environmentCrnForVirtualGroups = getEnvironmentCrnForVirtualGroups(environment);
         if (!createVirtualGroups(environment, environmentCrnForVirtualGroups)) {
             // To keep backward compatibility, if somebody passes the group name, then we shall just use it
@@ -100,6 +106,12 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
         }
         environmentService.assignEnvironmentAdminRole(environment.getCreator(), environmentCrnForVirtualGroups);
         setLocationAndRegions(environment);
+        environmentService.save(environment);
+    }
+
+    private void generateDomainForEnvironment(Environment environment) {
+        String domain = domainProvider.generate(environment);
+        environment.setDomain(domain);
     }
 
     private String getEnvironmentCrnForVirtualGroups(Environment environment) {
@@ -127,7 +139,6 @@ public class EnvironmentInitHandler extends EventSenderAwareHandler<EnvironmentD
         if (cloudRegions.areRegionsSupported()) {
             environmentService.setRegions(environment, regionWrapper.getRegions(), cloudRegions);
         }
-        environmentService.save(environment);
     }
 
     private void goToValidationState(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environmentDto) {

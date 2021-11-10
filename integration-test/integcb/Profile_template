@@ -21,6 +21,7 @@ export ENVIRONMENT_FREEIPA_SYNCHRONIZEONSTART=false
 export ENVIRONMENT_EXPERIENCE_SCAN_ENABLED=true
 
 export ALTUS_AUDIT_ENDPOINT=thunderhead-mock
+export CLUSTERDNS_HOST=thunderhead-mock
 export MOCK_INFRASTRUCTURE_HOST=mock-infrastructure
 
 export CPUS_FOR_CLOUDBREAK=8.0

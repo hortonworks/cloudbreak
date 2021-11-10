@@ -215,4 +215,8 @@ crn:
   partition: cdp
   region: us-west-1
 
+clusterdns:
+  host: localhost
+  port: 8982
+
 

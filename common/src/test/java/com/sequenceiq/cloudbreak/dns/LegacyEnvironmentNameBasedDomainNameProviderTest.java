@@ -8,19 +8,19 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.util.ReflectionTestUtils;
 
-class EnvironmentBasedDomainNameProviderTest {
+class LegacyEnvironmentNameBasedDomainNameProviderTest {
 
-    private EnvironmentBasedDomainNameProvider underTest;
+    private LegacyEnvironmentNameBasedDomainNameProvider underTest;
 
     @BeforeEach
     void setUp() {
-        underTest = new EnvironmentBasedDomainNameProvider();
+        underTest = new LegacyEnvironmentNameBasedDomainNameProvider();
     }
 
     @Test
     void testGetDomainWhenEnvironmentNameIsNull() {
         IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName(null, "anAccountName"));
-        assertEquals(EnvironmentBasedDomainNameProvider.ENV_NAME_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
+        assertEquals(LegacyEnvironmentNameBasedDomainNameProvider.ENV_NAME_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
     @Test
@@ -29,13 +29,13 @@ class EnvironmentBasedDomainNameProviderTest {
         IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> {
             underTest.getDomainName(anEnvName, null);
         });
-        assertEquals(String.format(EnvironmentBasedDomainNameProvider.ACCOUNT_NAME_IS_EMTPY_FORMAT, anEnvName), iSE.getMessage());
+        assertEquals(String.format(LegacyEnvironmentNameBasedDomainNameProvider.ACCOUNT_NAME_IS_EMTPY_FORMAT, anEnvName), iSE.getMessage());
     }
 
     @Test
     void testGetDomainWhenEnvironmentNameIsEmpty() {
         IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> underTest.getDomainName("", "anAccountName"));
-        assertEquals(EnvironmentBasedDomainNameProvider.ENV_NAME_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
+        assertEquals(LegacyEnvironmentNameBasedDomainNameProvider.ENV_NAME_SHOULD_BE_SPECIFIED_MSG, iSE.getMessage());
     }
 
     @Test
@@ -44,7 +44,7 @@ class EnvironmentBasedDomainNameProviderTest {
         IllegalStateException iSE = assertThrows(IllegalStateException.class, () -> {
             underTest.getDomainName(anEnvName, "");
         });
-        assertEquals(String.format(EnvironmentBasedDomainNameProvider.ACCOUNT_NAME_IS_EMTPY_FORMAT, anEnvName), iSE.getMessage());
+        assertEquals(String.format(LegacyEnvironmentNameBasedDomainNameProvider.ACCOUNT_NAME_IS_EMTPY_FORMAT, anEnvName), iSE.getMessage());
     }
 
     @Test
@@ -122,31 +122,4 @@ class EnvironmentBasedDomainNameProviderTest {
                 && actualMessage.contains("is longer than the allowed 62 characters"));
     }
 
-    @Test
-    void testGetCommonNameWhenTheEndpointNameIsLessThan17AndEnvNameLessThan8Chars() {
-        String endpointName = "test-cl-master0";
-        String envName = "shrt-nv";
-        String accountName = "xcu2-8y8x";
-        String rootDomain = "wl.cloudera.site";
-        ReflectionTestUtils.setField(underTest, "rootDomain", rootDomain);
-
-        String commonName = underTest.getCommonName(endpointName, envName, accountName);
-
-        String expected = String.format("bbd9025ff9fd7c4d.%s.%s.%s", envName, accountName, rootDomain);
-        assertEquals(expected, commonName);
-    }
-
-    @Test
-    void testGetCommonNameWhenTheEndpointNameIsLongerThan17AndEnvNameLongerThan8Chars() {
-        String endpointName = "test-cl-longyloooooooooooong-name-master0";
-        String envName = "notashort-env-name-as28chars";
-        String accountName = "xcu2-8y8x";
-        String rootDomain = "wl.cloudera.site";
-        ReflectionTestUtils.setField(underTest, "rootDomain", rootDomain);
-
-        String commonName = underTest.getCommonName(endpointName, envName, accountName);
-
-        String expected = String.format("a7c2a45fc8f917fe.%s.%s.%s", envName.substring(0, 8), accountName, rootDomain);
-        assertEquals(expected, commonName);
-    }
 }

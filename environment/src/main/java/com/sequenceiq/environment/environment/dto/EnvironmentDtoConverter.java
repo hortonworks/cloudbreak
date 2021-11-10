@@ -113,7 +113,8 @@ public class EnvironmentDtoConverter {
                 .withAdminGroupName(environment.getAdminGroupName())
                 .withProxyConfig(environment.getProxyConfig())
                 .withEnvironmentDeletionType(environment.getDeletionType())
-                .withEnvironmentServiceVersion(environment.getEnvironmentServiceVersion());
+                .withEnvironmentServiceVersion(environment.getEnvironmentServiceVersion())
+                .withEnvironmentDomain(environment.getDomain());
 
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
         doIfNotNull(environment.getParameters(), parameters -> builder.withParameters(

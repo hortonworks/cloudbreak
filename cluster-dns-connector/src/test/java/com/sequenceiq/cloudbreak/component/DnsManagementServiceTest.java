@@ -1,105 +1,95 @@
 package com.sequenceiq.cloudbreak.component;
 
-import java.io.IOException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.List;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-import javax.inject.Inject;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.junit.Ignore;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
-
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto;
 import com.sequenceiq.cloudbreak.certificate.service.DnsManagementService;
+import com.sequenceiq.cloudbreak.client.GrpcClusterDnsClient;
 
-@Ignore
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = DnsManagementServiceTest.CreateCertificationTestConfig.class)
-@TestPropertySource(properties = {
-        "clusterdns.host=localhost",
-        "clusterdns.port=8982",
-        "cert.polling.attempt=50",
-        "cert.base.domain.name=workload-dev.cloudera.com",
-        "altus.ums.host=ums.thunderhead-dev.cloudera.com",
-        "actor.crn=<ypur-actor-crn>",
-        "account.id=<your-account-id>"
-})
+@ExtendWith(MockitoExtension.class)
 public class DnsManagementServiceTest {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DnsManagementServiceTest.class);
+    private static final String EXAMPLE_CLDR_DOMAIN = "envname.cldr.site";
 
-    @Inject
-    private DnsManagementService dnsManagementService;
+    @Mock
+    private GrpcClusterDnsClient grpcClusterDnsClient;
 
-    @Value("${account.id}")
-    private String accountId;
+    @InjectMocks
+    private DnsManagementService underTest;
 
     @Test
-    public void createAndDeleteDnsEntryWithIp() throws IOException {
-        String endpoint = "gknox";
-        String environment = "gtopolyai-without-freeipa";
-        boolean wildcard = false;
-        List<String> ips = List.of("10.65.65.152");
-        dnsManagementService.createOrUpdateDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
-        LOGGER.info("dns is registered");
-        dnsManagementService.deleteDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
-        LOGGER.info("dns is deleted");
+    void testGenerateManagedDomainWhenDNSClientFailsWithAnException() {
+        when(grpcClusterDnsClient.generateManagedDomain(anyString(), any(), anyString(), any()))
+                .thenThrow(new RuntimeException("Something went wrong"));
 
+        Assertions.assertThrows(RuntimeException.class, () -> underTest.generateManagedDomain("accountId", "anEnvironmentName"));
+        verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
     @Test
-    public void createDnsEntryWithIp() throws IOException {
-//        String endpoint = "gasd";
-//        String endpoint = "gasd1";
-        String endpoint = "gknox";
-        String environment = "gtopolyai-without-freeipa";
-        boolean wildcard = false;
-        List<String> ips = List.of("10.65.65.212");
-        dnsManagementService.createOrUpdateDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
-        LOGGER.info("dns is registered");
+    void testGenerateManagedDomainWhenDNSClientReturnsWithNull() {
+        when(grpcClusterDnsClient.generateManagedDomain(anyString(), any(), anyString(), any()))
+                .thenReturn(null);
+
+        String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
+
+        Assertions.assertNull(result);
+        verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
     @Test
-    public void deleteDnsEntryWithIp() throws IOException {
-        //gtopolyai-cluster.gtopolya.xcu2-8y8x.workload-dev.cloudera.com
-        String endpoint = "gtopolyai-cluster";
-        String environment = "gtopolyai-without-freeipa";
-        boolean wildcard = false;
-        List<String> ips = List.of("10.65.65.66");
-        dnsManagementService.deleteDnsEntryWithIp(accountId, endpoint, environment, wildcard, ips);
-        verifyHost(endpoint);
-        LOGGER.info("dns is deleted");
+    void testGenerateManagedDomainWhenDNSClientReturnsButDoesNotContainTheRequestedSubDomain() {
+        PublicEndpointManagementProto.GenerateManagedDomainNamesResponse resp = getGenerateManagedDomainNamesResponse("someSubDomain");
+        when(grpcClusterDnsClient.generateManagedDomain(anyString(), any(), anyString(), any()))
+                .thenReturn(resp);
+
+        String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
+
+        Assertions.assertNull(result);
+        verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
     @Test
-    public void verifyHost() throws UnknownHostException {
-        verifyHost("gtopolyai-cluster");
+    void testGenerateManagedDomainWhenDNSClientReturnsButDoesContainTheRequestedWildCardSubDomain() {
+        PublicEndpointManagementProto.GenerateManagedDomainNamesResponse resp = getGenerateManagedDomainNamesResponse("*");
+        when(grpcClusterDnsClient.generateManagedDomain(anyString(), any(), anyString(), any()))
+                .thenReturn(resp);
+
+        String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(EXAMPLE_CLDR_DOMAIN, result);
+        verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
-    private void verifyHost(String endpoint) throws UnknownHostException {
-        InetAddress inetHost = InetAddress.getByName(endpoint + ".gtopolya.xcu2-8y8x.workload-dev.cloudera.com");
-        String hostName = inetHost.getHostName();
-        LOGGER.info("The host name was: " + hostName);
-        LOGGER.info("The hosts IP address is: " + inetHost.getHostAddress());
+    @Test
+    void testGenerateManagedDomainWhenDNSClientReturnsButDoesContainTheRequestedDomainWithWildCardAsPrefixSubdomain() {
+        PublicEndpointManagementProto.GenerateManagedDomainNamesResponse resp = PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.newBuilder()
+                .putDomains("*", "*." + EXAMPLE_CLDR_DOMAIN)
+                .build();
+        when(grpcClusterDnsClient.generateManagedDomain(anyString(), any(), anyString(), any()))
+                .thenReturn(resp);
+
+        String result = underTest.generateManagedDomain("accountId", "anEnvironmentName");
+
+        Assertions.assertNotNull(result);
+        Assertions.assertEquals(EXAMPLE_CLDR_DOMAIN, result);
+        verify(grpcClusterDnsClient).generateManagedDomain(anyString(), any(), anyString(), any());
     }
 
-    @Configuration
-    @ComponentScan(
-            basePackages = {"com.sequenceiq.cloudbreak.certificate",
-                    "com.sequenceiq.cloudbreak.client",
-                    "com.sequenceiq.cloudbreak.auth.altus",
-                    "com.sequenceiq.cloudbreak.auth"}
-    )
-    public static class CreateCertificationTestConfig {
-
+    private PublicEndpointManagementProto.GenerateManagedDomainNamesResponse getGenerateManagedDomainNamesResponse(String subDomain) {
+        return PublicEndpointManagementProto.GenerateManagedDomainNamesResponse.newBuilder()
+                .putDomains(subDomain, EXAMPLE_CLDR_DOMAIN)
+                .build();
     }
 }

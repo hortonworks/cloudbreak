@@ -107,6 +107,8 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
 
         private EnvironmentDeletionType deletionType;
 
+        private String environmentDomain;
+
         private Builder() {
         }
 
@@ -250,6 +252,11 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             return this;
         }
 
+        public Builder withEnvironmentDomain(String environmentDomain) {
+            this.environmentDomain = environmentDomain;
+            return this;
+        }
+
         public SimpleEnvironmentResponse build() {
             SimpleEnvironmentResponse simpleEnvironmentResponse = new SimpleEnvironmentResponse();
             simpleEnvironmentResponse.setCrn(crn);
@@ -280,6 +287,7 @@ public class SimpleEnvironmentResponse extends EnvironmentBaseResponse {
             simpleEnvironmentResponse.setEnvironmentServiceVersion(environmentServiceVersion);
             simpleEnvironmentResponse.setCcmV2TlsType(ccmV2TlsType);
             simpleEnvironmentResponse.setDeletionType(deletionType);
+            simpleEnvironmentResponse.setEnvironmentDomain(environmentDomain);
             return simpleEnvironmentResponse;
         }
     }
