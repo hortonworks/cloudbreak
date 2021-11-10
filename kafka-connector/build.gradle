@@ -1,0 +1,27 @@
+apply plugin: 'com.google.protobuf'
+apply plugin: 'java'
+
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+  }
+}
+
+dependencies {
+  implementation project(':streaming-common')
+  implementation project(':grpc-common')
+
+  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util',             version: '3.6.1'
+  implementation     group: 'org.apache.kafka',                    name: 'kafka-clients',                  version: '3.0.0'
+
+  implementation ("io.grpc:grpc-all:1.22.0") {
+    exclude group: 'org.mockito'
+  }
+  testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
+  testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                 version: mockitoVersion
+}

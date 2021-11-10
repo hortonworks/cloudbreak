@@ -1,0 +1,29 @@
+apply plugin: 'com.google.protobuf'
+apply plugin: 'java'
+
+buildscript {
+  repositories {
+    mavenCentral()
+    maven { url = "$repoUrl" }
+  }
+  dependencies {
+    classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.17'
+  }
+}
+
+dependencies {
+  implementation project(':streaming-common')
+  implementation project(':grpc-common')
+
+  implementation     group: 'org.apache.kudu',                     name: 'kudu-client',                    version: '1.7.0'
+  implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
+  implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.10.11'
+  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util',             version: '3.6.1'
+
+  implementation ("io.grpc:grpc-all:1.22.0") {
+    exclude group: 'org.mockito'
+  }
+  testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
+  testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion
+  testImplementation group: 'org.mockito',                         name: 'mockito-inline',                 version: mockitoVersion
+}
