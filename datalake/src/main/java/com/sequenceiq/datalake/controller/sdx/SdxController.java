@@ -33,6 +33,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
@@ -45,7 +46,7 @@ import com.sequenceiq.datalake.configuration.CDPConfigService;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.metric.MetricType;
 import com.sequenceiq.datalake.metric.SdxMetricService;
-import com.sequenceiq.datalake.service.sdx.SdxImageCatalogChangeService;
+import com.sequenceiq.datalake.service.sdx.SdxImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.SdxRepairService;
 import com.sequenceiq.datalake.service.sdx.SdxRetryService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -65,6 +66,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -114,7 +116,7 @@ public class SdxController implements SdxEndpoint {
     private StorageValidationService storageValidationService;
 
     @Inject
-    private SdxImageCatalogChangeService sdxImageCatalogChangeService;
+    private SdxImageCatalogService sdxImageCatalogService;
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
@@ -370,7 +372,7 @@ public class SdxController implements SdxEndpoint {
     @CheckPermissionByRequestProperty(type = NAME, path = "imageCatalog", action = DESCRIBE_IMAGE_CATALOG)
     public void changeImageCatalog(@ResourceName String name, @RequestObject SdxChangeImageCatalogRequest changeImageCatalogRequest) {
         SdxCluster sdxCluster = getSdxClusterByName(name);
-        sdxImageCatalogChangeService.changeImageCatalog(sdxCluster, changeImageCatalogRequest.getImageCatalog());
+        sdxImageCatalogService.changeImageCatalog(sdxCluster, changeImageCatalogRequest.getImageCatalog());
     }
 
     @Override
@@ -392,6 +394,13 @@ public class SdxController implements SdxEndpoint {
     public Set<String> getInstanceGroupNamesBySdxDetails(SdxClusterShape clusterShape, String runtimeVersion,
             String cloudPlatform) {
         return sdxService.getInstanceGroupNamesBySdxDetails(clusterShape, runtimeVersion, cloudPlatform);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
+    public SdxGenerateImageCatalogResponse generateImageCatalog(@ResourceName String name) {
+        CloudbreakImageCatalogV3 imageCatalog = sdxImageCatalogService.generateImageCatalog(name);
+        return new SdxGenerateImageCatalogResponse(imageCatalog);
     }
 
     private SdxCluster getSdxClusterByName(String name) {

@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRec
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.RangerRazEnabledV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
@@ -51,6 +52,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
@@ -463,5 +465,13 @@ public class StackV4Controller extends NotificationController implements StackV4
     @InternalOnly
     public RangerRazEnabledV4Response rangerRazEnabledInternal(Long workspaceId, String crn, @InitiatorUserCrn String initiatorUserCrn) {
         return new RangerRazEnabledV4Response(stackOperationService.rangerRazEnabled(restRequestThreadLocalService.getRequestedWorkspaceId(), crn));
+    }
+
+    @Override
+    @InternalOnly
+    public GenerateImageCatalogV4Response generateImageCatalogInternal(Long workspaceId, String name, @InitiatorUserCrn String initiatorUserCrn) {
+        CloudbreakImageCatalogV3 imageCatalog
+                = stackOperations.generateImageCatalog(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        return new GenerateImageCatalogV4Response(imageCatalog);
     }
 }

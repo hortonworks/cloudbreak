@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.api.endpoint;
 
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.CHANGE_IMAGE_CATALOG;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
 
 import java.util.List;
@@ -40,6 +41,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
+import com.sequenceiq.sdx.api.model.SdxGenerateImageCatalogResponse;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxSyncComponentVersionsFromCmResponse;
 import com.sequenceiq.sdx.api.model.SdxValidateCloudStorageRequest;
@@ -282,4 +284,9 @@ public interface SdxEndpoint {
     Set<String> getInstanceGroupNamesBySdxDetails(@QueryParam("clusterShape") SdxClusterShape clusterShape,
             @QueryParam("runtimeVersion") String runtimeVersion, @QueryParam("cloudPlatform") String cloudPlatform);
 
+    @GET
+    @Path("name/{name}/generate_image_catalog")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GENERATE_IMAGE_CATALOG, nickname = "generateImageCatalog")
+    SdxGenerateImageCatalogResponse generateImageCatalog(@PathParam("name") String name);
 }

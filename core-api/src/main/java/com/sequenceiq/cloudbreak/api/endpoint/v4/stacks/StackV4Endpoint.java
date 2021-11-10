@@ -24,6 +24,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DELETE_WITH_KERBEROS_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DETACH_RECIPE_IN_WORKSPACE;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.DETACH_RECIPE_IN_WORKSPACE_INTERNAL;
+import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_IMAGE_CATALOG;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.RANGER_RAZ_ENABLED;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GENERATE_HOSTS_INVENTORY;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.GET_BY_CRN_IN_WORKSPACE;
@@ -93,6 +94,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.BackupV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.dr.RestoreV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
@@ -538,6 +540,13 @@ public interface StackV4Endpoint {
     @ApiOperation(value = CHANGE_IMAGE_CATALOG, nickname = "changeImageCatalogInternal")
     void changeImageCatalogInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn, @Valid @NotNull ChangeImageCatalogV4Request changeImageCatalogRequest);
+
+    @GET
+    @Path("internal/{name}/generate_image_catalog")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = GENERATE_IMAGE_CATALOG, nickname = "generateImageCatalogInternal")
+    GenerateImageCatalogV4Response generateImageCatalogInternal(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
+            @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
     @GET
     @Path("internal/{crn}/ranger_raz_enabled")

@@ -3,9 +3,11 @@ package com.sequenceiq.datalake.service.sdx;
 import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAULT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -20,14 +22,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.imagecatalog.GenerateImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.flow.core.FlowLogService;
 
 @ExtendWith(MockitoExtension.class)
-class SdxImageCatalogChangeServiceTest {
+class SdxImageCatalogServiceTest {
 
     private static final Long STACK_ID = 123L;
 
@@ -39,6 +43,8 @@ class SdxImageCatalogChangeServiceTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:cloudera:user:username";
 
+    private static final String EXCEPTION_MESSAGE = "exception message";
+
     @Mock
     private FlowLogService flowLogService;
 
@@ -46,7 +52,7 @@ class SdxImageCatalogChangeServiceTest {
     private StackV4Endpoint stackV4Endpoint;
 
     @InjectMocks
-    private SdxImageCatalogChangeService underTest;
+    private SdxImageCatalogService underTest;
 
     @Captor
     private ArgumentCaptor<ChangeImageCatalogV4Request> requestCaptor;
@@ -84,4 +90,24 @@ class SdxImageCatalogChangeServiceTest {
                 .returns(IMAGE_CATALOG, ChangeImageCatalogV4Request::getImageCatalog);
     }
 
+    @Test
+    void shouldCallGenererateImageCatalog() {
+        CloudbreakImageCatalogV3 imageCatalogV3 = mock(CloudbreakImageCatalogV3.class);
+        GenerateImageCatalogV4Response response = new GenerateImageCatalogV4Response(imageCatalogV3);
+        when(stackV4Endpoint.generateImageCatalogInternal(WORKSPACE_ID_DEFAULT, CLUSTER_NAME, USER_CRN)).thenReturn(response);
+
+        CloudbreakImageCatalogV3 actual = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateImageCatalog(CLUSTER_NAME));
+
+        assertEquals(imageCatalogV3, actual);
+    }
+
+    @Test
+    void generateImageCatalogShouldThrowApiExceptionInCaseOfServiceException() {
+        when(stackV4Endpoint.generateImageCatalogInternal(WORKSPACE_ID_DEFAULT, CLUSTER_NAME, USER_CRN))
+                .thenThrow(new CloudbreakServiceException(EXCEPTION_MESSAGE));
+
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.generateImageCatalog(CLUSTER_NAME)))
+                .isInstanceOf(CloudbreakApiException.class)
+                .hasMessage(EXCEPTION_MESSAGE);
+    }
 }
