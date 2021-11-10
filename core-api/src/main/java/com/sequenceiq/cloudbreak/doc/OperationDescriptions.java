@@ -201,6 +201,7 @@ public class OperationDescriptions {
                 + "from the default image catalog";
         public static final String LIST_BY_WORKSPACE = "list image catalogs for the given workspace";
         public static final String GET_BY_NAME_IN_WORKSPACE = "get image catalog by name in workspace";
+        public static final String GET_BY_NAME_IN_WORKSPACE_INTERNAL = "get image catalog by name in workspace internal";
         public static final String GET_BY_CRN_IN_WORKSPACE = "get image catalog by crn in workspace";
         public static final String CREATE_IN_WORKSPACE = "create image catalog in workspace";
         public static final String DELETE_BY_NAME_IN_WORKSPACE = "delete image catalog by name in workspace";

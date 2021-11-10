@@ -22,6 +22,7 @@ import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
@@ -37,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4R
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.authorization.ImageCatalogFiltering;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.common.type.ResourceEvent;
@@ -101,6 +103,19 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_IMAGE_CATALOG)
     public ImageCatalogV4Response getByName(Long workspaceId, @ResourceName String name, Boolean withImages) {
+        ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
+        ImageCatalogV4Response imageCatalogResponse = imageCatalogToImageCatalogV4ResponseConverter.convert(catalog);
+        Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);
+        if (images != null) {
+            imageCatalogResponse.setImages(imagesToImagesV4ResponseConverter.convert(images));
+        }
+        return imageCatalogResponse;
+    }
+
+    @Override
+    @InternalOnly
+    public ImageCatalogV4Response getByNameInternal(Long workspaceId, @ResourceName String name, Boolean withImages,
+            @InitiatorUserCrn String initiatorUserCrn) {
         ImageCatalog catalog = imageCatalogService.getImageCatalogByName(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId());
         ImageCatalogV4Response imageCatalogResponse = imageCatalogToImageCatalogV4ResponseConverter.convert(catalog);
         Images images = imageCatalogService.propagateImagesIfRequested(restRequestThreadLocalService.getRequestedWorkspaceId(), name, withImages);

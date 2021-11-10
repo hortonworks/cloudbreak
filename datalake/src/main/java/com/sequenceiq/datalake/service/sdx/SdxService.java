@@ -44,9 +44,7 @@ import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.ImageCatalogV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
@@ -107,6 +105,7 @@ import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -191,6 +190,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Inject
+    private ImageCatalogService imageCatalogService;
+
     @Value("${info.app.version}")
     private String sdxClusterServiceVersion;
 
@@ -255,55 +257,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             return sdxCluster.get();
         } else {
             throw notFound("SDX cluster", clusterCrn).get();
-        }
-    }
-
-    public ImageV4Response getImageResponseFromImageRequest(ImageSettingsV4Request imageSettingsV4Request, CloudPlatform cloudPlatform) {
-        String accountId = ThreadBasedUserCrnProvider.getAccountId();
-
-        if (imageSettingsV4Request == null) {
-            return null;
-        }
-
-        ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().imageCatalogV4Endpoint();
-
-        try {
-            LOGGER.info("Calling cloudbreak to get image response for the given image catalog {} and image id {}",
-                    imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
-            ImagesV4Response imagesV4Response = null;
-            try {
-                if (Strings.isBlank(imageSettingsV4Request.getCatalog())) {
-                    imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId(), accountId);
-                } else {
-                    imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(WORKSPACE_ID_DEFAULT,
-                            imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId(), accountId);
-                }
-            } catch (Exception e) {
-                LOGGER.error("Sdx service fails to get image using image id", e);
-            }
-
-            if (imagesV4Response == null) {
-                return null;
-            }
-
-            for (ImageV4Response imageV4Response : imagesV4Response.getCdhImages()) {
-                // find the image can be used on the cloud platform of the environment
-                if (imageV4Response.getImageSetsByProvider() != null) {
-                    if (imageV4Response.getImageSetsByProvider().containsKey(cloudPlatform.name().toLowerCase())) {
-                        return imageV4Response;
-                    }
-                }
-            }
-
-            String errorMessage = String.format("SDX cluster is on the cloud platform %s, but the image requested with uuid %s:%s does not support it",
-                    cloudPlatform.name(), imageSettingsV4Request.getCatalog() != null ? imageSettingsV4Request.getCatalog() : "default",
-                    imageSettingsV4Request.getId());
-            LOGGER.error(errorMessage);
-
-            return null;
-        } catch (javax.ws.rs.NotFoundException e) {
-            LOGGER.info("Sdx cluster not found on CB side", e);
-            return null;
         }
     }
 
@@ -387,7 +340,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         validateSdxRequest(name, sdxClusterRequest.getEnvironment(), getAccountIdFromCrn(userCrn));
         DetailedEnvironmentResponse environment = validateAndGetEnvironment(sdxClusterRequest.getEnvironment());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        ImageV4Response imageV4Response = getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
+        ImageV4Response imageV4Response = imageCatalogService.getImageResponseFromImageRequest(imageSettingsV4Request, cloudPlatform);
         validateInternalSdxRequest(internalStackV4Request, sdxClusterRequest.getClusterShape());
         validateRuntimeAndImage(sdxClusterRequest, environment, imageSettingsV4Request, imageV4Response);
         String runtimeVersion = getRuntime(sdxClusterRequest, internalStackV4Request, imageV4Response);

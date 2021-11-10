@@ -121,7 +121,7 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
     @Description(
             given = "there is a running DataLake and image catalogs created by ENV_CREATOR_A",
             when = "a change image catalog request is sent to use an image catalog created by ENV_CREATOR_A",
-            then = "ENV_CREATOR_A, ACCOUNT_ADMIN and ENV_CREATOR_B with env admin right can perform the operation")
+            then = "ENV_CREATOR_A, ACCOUNT_ADMIN and ENV_CREATOR_B with shared resource user and environment admin right can perform the operation")
     public void testChangeDataLakeImageCatalog(MockedTestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         createDefaultImageCatalog(testContext);
@@ -173,9 +173,9 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running DataLake and image catalog created by ENV_CREATOR_A",
+            given = "there is a running DataLake created by ENV_CREATOR_A and image catalogs created by ENV_CREATOR_A and ENV_CREATOR_B",
             when = "a change image catalog request is sent",
-            then = "ENV_CREATOR_B should get forbidden excepion by using ENV_CREATOR_B's image catalog")
+            then = "ENV_CREATOR_B should get forbidden excepion by using any image catalog")
     public void testChangeDataLakeImageCatalogFails(MockedTestContext testContext) {
         useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_A);
         createDefaultImageCatalog(testContext);
@@ -192,15 +192,30 @@ public class ChangeImageCatalogTest extends AbstractIntegrationTest {
                 .when(sdxTestClient.detailedDescribeInternal())
                 .validate();
 
-        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
-        ImageCatalogTestDto imageCatalog = resourceCreator.createNewImageCatalog(testContext);
+        ImageCatalogTestDto imageCatalogA = resourceCreator.createNewImageCatalog(testContext);
 
+        useRealUmsUser(testContext, AuthUserKeys.ENV_CREATOR_B);
+        ImageCatalogTestDto imageCatalogB = resourceCreator.createNewImageCatalog(testContext);
+
+        //ENV_CREATOR_B can't change DL image catalog in case of DL is created by ENV_CREATOR_A
         testContext.given(SdxChangeImageCatalogTestDto.class)
-                .withImageCatalog(imageCatalog.getName())
+                .withImageCatalog(imageCatalogB.getName())
                 .whenException(sdxTestClient.changeImageCatalog(), ForbiddenException.class,
                         expectedMessage("Doesn't have " +
                                 "'datalake/changeImageCatalog' right on any of the environment[(]s[)] " +
                                 "[\\[]crn: crn:cdp:environments:us-west-1:.*:environment:.*[]] or on .*"))
+                .validate();
+
+        //ENV_CREATOR_B can't change ENV_CREATOR_A's DH image catalog in case of having environment admin right but the catalog is created by ENV_CREATOR_A
+        testContext
+                .given(UmsTestDto.class)
+                .assignTarget(EnvironmentTestDto.class.getSimpleName())
+                .withEnvironmentAdmin()
+                .when(umsTestClient.assignResourceRole(AuthUserKeys.ENV_CREATOR_B))
+                .given(SdxChangeImageCatalogTestDto.class)
+                .withImageCatalog(imageCatalogA.getName())
+                .whenException(sdxTestClient.changeImageCatalog(), ForbiddenException.class,
+                        expectedMessage("Doesn't have 'environments/useSharedResource' right on imageCatalog .*"))
                 .validate();
     }
 
