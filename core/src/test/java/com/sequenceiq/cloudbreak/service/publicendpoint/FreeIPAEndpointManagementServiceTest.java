@@ -22,7 +22,6 @@ import org.mockito.MockitoAnnotations;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
-import com.sequenceiq.cloudbreak.dns.EnvironmentBasedDomainNameProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
@@ -76,7 +75,6 @@ public class FreeIPAEndpointManagementServiceTest {
         stack = mock(Stack.class);
         when(stack.getEnvironmentCrn()).thenReturn(ENVIRONMENT_CRN);
         when(stack.getId()).thenReturn(1L);
-        when(domainNameProvider.getDomainName(any(), any())).thenReturn("cloudera.domain");
         doNothing().when(dnsV1Endpoint).addDnsCnameRecordInternal(any(), any());
         doNothing().when(dnsV1Endpoint).addDnsARecordInternal(any(), any());
         doNothing().when(dnsV1Endpoint).deleteDnsCnameRecord(any(), any(), any());

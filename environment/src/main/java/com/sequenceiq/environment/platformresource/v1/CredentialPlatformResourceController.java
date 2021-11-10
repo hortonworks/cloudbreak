@@ -339,7 +339,7 @@ public class CredentialPlatformResourceController implements CredentialPlatformR
         LOGGER.info("Get /platform_resources/ssh_keys, request: {}", request);
         CloudSshKeys sshKeys = platformParameterService.getCloudSshKeys(request);
         PlatformSshKeysResponse response = cloudSshKeysToPlatformSshKeysV1ResponseConverter.convert(sshKeys);
-        LOGGER.info("Resp /platform_resources/ssh_keys, request: {}, sshKeys: {}, response: {}", request, sshKeys, response);
+        LOGGER.info("Resp /platform_resources/ssh_keys, request: {}, sshKeys: {}", request, sshKeys);
         return response;
     }
 

@@ -1,11 +1,6 @@
 package com.sequenceiq.cloudbreak.dns;
 
-import static com.google.common.hash.Hashing.sipHash24;
-
-import java.util.Set;
 import java.util.regex.Pattern;
-
-import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -13,16 +8,20 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.validation.HueWorkaroundValidatorService;
-
+/**
+ * @deprecated as all the CDP CP service should use the PEM provided domain.
+ * But for existing environments with DL and DHs we need the old logic to keep backward compatibility.
+ */
+@Deprecated
 @Component
-public class EnvironmentBasedDomainNameProvider {
+public class LegacyEnvironmentNameBasedDomainNameProvider {
+
     static final String ENV_NAME_SHOULD_BE_SPECIFIED_MSG = "Domain name cannot be generated, since environment name must be specified!";
 
     static final String ACCOUNT_NAME_IS_EMTPY_FORMAT = "Domain name cannot be generated for environment: %s, " +
             " WorkloadSubdomain in your UMS Account details is null, or empty!";
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(EnvironmentBasedDomainNameProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LegacyEnvironmentNameBasedDomainNameProvider.class);
 
     private static final String DOMAIN_PART_DELIMITER = ".";
 
@@ -34,9 +33,6 @@ public class EnvironmentBasedDomainNameProvider {
 
     @Value("${gateway.cert.base.domain.name:wl.cloudera.site}")
     private String rootDomain;
-
-    @Inject
-    private HueWorkaroundValidatorService hueWorkaroundValidatorService;
 
     public String getDomainName(String environmentName, String accountName) {
         if (StringUtils.isEmpty(environmentName)) {
@@ -62,29 +58,6 @@ public class EnvironmentBasedDomainNameProvider {
         validateDomainPattern(result);
         LOGGER.info("Generated domain: '{}'", result);
         return result;
-    }
-
-    public String getFullyQualifiedEndpointName(Set<String> hueHostGroups, String endpointName, String environmentName, String accountName) {
-        if (StringUtils.isEmpty(endpointName)) {
-            throw new IllegalStateException("Endpoint name must be specified!");
-        }
-        String domain = getDomainName(environmentName, accountName);
-        String fullyQualifiedEndpointName = endpointName + DOMAIN_PART_DELIMITER + domain;
-        try {
-            hueWorkaroundValidatorService.validateForEnvironmentDomainName(hueHostGroups, fullyQualifiedEndpointName);
-        } catch (Exception e) {
-            throw new IllegalStateException(e.getMessage());
-        }
-        return fullyQualifiedEndpointName;
-    }
-
-    //It is responsible for creating a CN for the generated CSR, so the result could not exceed 64 chars.
-    public String getCommonName(String endpointName, String environmentName, String accountName) {
-        String domain = getDomainName(environmentName, accountName);
-        //Hashing the concatenation of endpoint and environment names with SipHash24 as they are unique within a base-domain and account
-        String uniqueNameToBeHashed = endpointName + environmentName;
-        String clusterHash = sipHash24().hashUnencodedChars(uniqueNameToBeHashed).toString();
-        return clusterHash + DOMAIN_PART_DELIMITER + domain;
     }
 
     private void validateDomainPattern(String result) {

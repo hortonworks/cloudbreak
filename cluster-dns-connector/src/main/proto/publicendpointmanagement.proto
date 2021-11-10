@@ -57,6 +57,10 @@ service PublicEndpointManagement {
   // If the workflow is not yet complete, it returns the status as SigningStatus.IN_PROGRESS
   rpc PollCertificateSigning(PollCertificateSigningRequest)
     returns (PollCertificateSigningResponse) {}
+
+  //Revoke a TLS certificate
+  rpc RevokeCertificate(RevokeCertificateRequest)
+    returns (RevokeCertificateResponse) {}
 }
 
 message AWSElbDnsTarget {
@@ -129,6 +133,12 @@ message CreateCertificateRequest {
   // The encoded csr request. We pass the csr instead of domains to allow clients
   // to hold on to the private keys.
   bytes csr = 5 [(options.FieldExtension.skipLogging) = true];
+  // The crn of the cluster. You can leave this empty when testing for random endpoints.
+  string clusterCrn = 6;
+  // The service requesting the certificate.
+  // It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+  // For testing purpose you can put the requestingService as 'sample' or leave it empty
+  string clientName = 7;
 
 }
 
@@ -187,6 +197,15 @@ message CertificateSigningRequest {
   // This byte array should be derived from binary form of the CSR, i.e. DER
   bytes csr = 3 [(options.FieldExtension.skipLogging) = true];
 
+  // The crn of the cluster. You can leave this empty when testing for random endpoints.
+  string clusterCrn = 4;
+
+  // The service requesting the certificate.
+  // It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+  // For testing purpose you can put the requestingService as 'sample' or leave it empty
+  string clientName = 5;
+
+
 }
 
 // Response object for the SignCertificate method.
@@ -223,4 +242,45 @@ message PollCertificateSigningResponse {
   // Each item in the list following this certificate belongs to the authority
   // which signed the preceding certificate.
   repeated string certificates = 2 [(options.FieldExtension.skipLogging) = true];
+
+  // User friendly message explaining why a signing request failed
+  // This is not sent if the request was successful
+  string causeOfFailure = 3;
+}
+
+//Request object for RevokeCertificate method
+message RevokeCertificateRequest {
+  //The account id of the CDP tenant
+  string accountId = 1;
+
+  //Leaf certificate in PEM encoded representation of X.509 certificate which needs to be revoked
+  string certificates = 2 [(options.FieldExtension.skipLogging) = true];
+
+  // Enumeration indicating the reason for revocation
+  enum RevocationReason {
+      UNSPECIFIED = 0;
+      KEY_COMPROMISE = 1;
+      CA_COMPROMISE = 2;
+      AFFILIATION_CHANGED = 3;
+      SUPERSEDED = 4;
+      CESSATION_OF_OPERATION = 5;
+      CERTIFICATE_HOLD = 6;
+      REMOVE_FROM_CRL = 8;
+      PRIVILEGE_WITHDRAWN = 9;
+      AA_COMPROMISE = 10;
+  }
+
+  // As default 'UNSPECIFIED' will be set if not sent in the request
+  RevocationReason reason = 3;
+
+  // The service requesting the revoke certificate.
+  // It must be a service listed in Service enum of Crn class - https://github.infra.cloudera.com/thunderhead/thunderhead/blob/04fe5f2483d553fecf324f0ee21fb8691e5a34c2/services/libs/protocols/src/main/java/com/cloudera/thunderhead/service/common/crn/Crn.java#L123
+  // For testing purpose you can put the requestingService as 'sample'
+  string requestingService = 4;
+}
+
+//Response object for RevokeCertificate method
+message RevokeCertificateResponse {
+  //Status showing if the requested revoke was successful
+  string status = 1;
 }

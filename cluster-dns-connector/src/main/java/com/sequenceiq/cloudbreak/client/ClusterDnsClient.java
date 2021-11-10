@@ -14,6 +14,8 @@ import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointM
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest;
+import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
 import com.google.protobuf.ByteString;
@@ -132,6 +134,21 @@ public class ClusterDnsClient {
             .setEnvironment(environment);
 
         return newStub(requestId).deleteDnsEntry(requestBuilder.build());
+    }
+
+    public GenerateManagedDomainNamesResponse generateManagedDomainNames(String requestId, String environmentName, List<String> subDomains, String accountId) {
+        checkNotNull(requestId, "requestId should not be null.");
+        checkNotNull(environmentName, "environmentName should not be null.");
+        checkNotNull(subDomains, "subDomain should not be null.");
+        checkNotNull(accountId, "accountId should not be null.");
+
+        GenerateManagedDomainNamesRequest.Builder requestBuilder = GenerateManagedDomainNamesRequest.newBuilder();
+        requestBuilder.setEnvironmentName(environmentName);
+        requestBuilder.setAccountId(accountId);
+        requestBuilder.addAllSubdomains(subDomains);
+
+        GenerateManagedDomainNamesRequest request = requestBuilder.build();
+        return newStub(requestId).generateManagedDomainNames(request);
     }
 
     /**

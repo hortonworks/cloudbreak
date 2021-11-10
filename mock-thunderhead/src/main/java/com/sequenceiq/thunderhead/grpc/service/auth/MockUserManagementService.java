@@ -218,6 +218,8 @@ import io.grpc.stub.StreamObserver;
 @Service
 public class MockUserManagementService extends UserManagementImplBase {
 
+    public static final String ACCOUNT_SUBDOMAIN = "xcu2-8y8x";
+
     @VisibleForTesting
     static final long PASSWORD_LIFETIME = 31449600000L;
 
@@ -234,8 +236,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     private static final String CDP_PRIVATE_KEY = "cdp_private_key";
 
     private static final int MOCK_USER_COUNT = 100;
-
-    private static final String ACCOUNT_SUBDOMAIN = "xcu2-8y8x";
 
     private static final String ACCOUNT_ID_ALTUS = "altus";
 

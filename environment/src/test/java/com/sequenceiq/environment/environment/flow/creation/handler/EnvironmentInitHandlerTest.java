@@ -32,6 +32,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.domain.PemBasedEnvironmentDomainProvider;
 import com.sequenceiq.environment.network.EnvironmentNetworkService;
 import com.sequenceiq.environment.network.dao.domain.AwsNetwork;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
@@ -74,9 +75,11 @@ class EnvironmentInitHandlerTest {
 
     private final Map<CloudPlatform, EnvironmentNetworkConverter> environmentNetworkConverterMap = Mockito.mock(HashMap.class);
 
+    private final PemBasedEnvironmentDomainProvider domainProvider = Mockito.mock(PemBasedEnvironmentDomainProvider.class);
+
     private final EnvironmentInitHandler environmentInitHandler
             = new EnvironmentInitHandler(eventSender, environmentService, environmentNetworkService,
-            eventBus, virtualGroupService, environmentNetworkConverterMap);
+            eventBus, virtualGroupService, environmentNetworkConverterMap, domainProvider);
 
     @Test
     void testInitFailure() {

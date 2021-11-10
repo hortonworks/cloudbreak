@@ -119,6 +119,9 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
     @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_DELETION_TYPE)
     private EnvironmentDeletionType deletionType;
 
+    @ApiModelProperty(EnvironmentModelDescription.ENVIRONMENT_DOMAIN_NAME)
+    private String environmentDomain;
+
     @JsonIgnore
     public boolean isCloudStorageLoggingEnabled() {
         return telemetry != null && telemetry.getFeatures() != null && telemetry.getFeatures().getCloudStorageLogging() != null
@@ -388,6 +391,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
         this.deletionType = deletionType;
     }
 
+    public String getEnvironmentDomain() {
+        return environmentDomain;
+    }
+
+    public void setEnvironmentDomain(String environmentDomain) {
+        this.environmentDomain = environmentDomain;
+    }
+
     @Override
     public String toString() {
         return "EnvironmentBaseResponse{" +
@@ -423,6 +434,7 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
                 ", environmentServiceVersion='" + environmentServiceVersion + '\'' +
                 ", ccmV2TlsType='" + ccmV2TlsType + '\'' +
                 ", deletionType='" + deletionType + '\'' +
+                ", environmentDomain='" + environmentDomain + '\'' +
                 '}';
     }
 }

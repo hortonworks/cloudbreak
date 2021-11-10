@@ -3,7 +3,7 @@ package com.sequenceiq.thunderhead;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication(scanBasePackages = { "com.sequenceiq.cloudbreak.auth.crn", "com.sequenceiq.thunderhead" })
+@SpringBootApplication(scanBasePackages = { "com.sequenceiq.cloudbreak.auth.crn", "com.sequenceiq.thunderhead", "com.sequenceiq.cloudbreak.dns" })
 public class MockThunderheadApplication {
     public static void main(String[] args) {
         if (args.length == 0) {

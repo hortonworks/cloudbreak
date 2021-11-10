@@ -96,11 +96,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         if (success) {
             try {
                 String fullQualifiedDomainName = getDomainNameProvider()
-                        .getFullyQualifiedEndpointName(
-                                hueHostGroups,
-                                endpointName,
-                                environment.getName(),
-                                getWorkloadSubdomain(accountId));
+                        .getFullyQualifiedEndpointName(hueHostGroups, endpointName, environment);
                 if (fullQualifiedDomainName != null) {
                     LOGGER.info("Dns entry updated: ip: {}, FQDN: {}", gatewayIp, fullQualifiedDomainName);
                     return fullQualifiedDomainName;
@@ -158,15 +154,14 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
         }
 
         if (success) {
-            setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment.getName(), accountId);
+            setLoadBalancerFqdn(hueHostGroups, loadBalancer, endpoint, environment, accountId);
         }
 
         return success;
     }
 
-    private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, String envName, String accountId) {
-        loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(
-                hueHostGroups, endpoint, envName, getWorkloadSubdomain(accountId)));
+    private void setLoadBalancerFqdn(Set<String> hueHostGroups, LoadBalancer loadBalancer, String endpoint, DetailedEnvironmentResponse env, String accountId) {
+        loadBalancer.setFqdn(getDomainNameProvider().getFullyQualifiedEndpointName(hueHostGroups, endpoint, env));
         loadBalancerPersistenceService.save(loadBalancer);
         LOGGER.info("Set load balancer's FQDN to {}.", loadBalancer.getFqdn());
     }
@@ -245,17 +240,16 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
             Set<String> loadBalancerEndpoints = getLoadBalancerNamesForStack(stack);
             DetailedEnvironmentResponse environment = environmentClientService.getByCrn(stack.getEnvironmentCrn());
             String environmentName = environment.getName();
-            String workloadSubdomain = getWorkloadSubdomain(accountId);
 
-            String commonName = getDomainNameProvider().getCommonName(endpointName, environmentName, workloadSubdomain);
+            String commonName = getDomainNameProvider().getCommonName(endpointName, environment);
             String fullyQualifiedEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(
-                    hueHostGroups, endpointName, environmentName, workloadSubdomain);
+                    hueHostGroups, endpointName, environment);
             List<String> subjectAlternativeNames = new ArrayList<>();
             subjectAlternativeNames.add(commonName);
             subjectAlternativeNames.add(fullyQualifiedEndpointName);
             for (String loadBalancerEndpoint : loadBalancerEndpoints) {
                 String loadBalancerEndpointName = getDomainNameProvider().getFullyQualifiedEndpointName(
-                        hueHostGroups, loadBalancerEndpoint, environmentName, workloadSubdomain);
+                        hueHostGroups, loadBalancerEndpoint, environment);
                 subjectAlternativeNames.add(loadBalancerEndpointName);
             }
 

@@ -267,6 +267,37 @@ public final class PublicEndpointManagementGrpc {
     return getPollCertificateSigningMethod;
   }
 
+  private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse> getRevokeCertificateMethod;
+
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RevokeCertificate",
+      requestType = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.class,
+      responseType = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
+  public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest,
+      com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse> getRevokeCertificateMethod() {
+    io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse> getRevokeCertificateMethod;
+    if ((getRevokeCertificateMethod = PublicEndpointManagementGrpc.getRevokeCertificateMethod) == null) {
+      synchronized (PublicEndpointManagementGrpc.class) {
+        if ((getRevokeCertificateMethod = PublicEndpointManagementGrpc.getRevokeCertificateMethod) == null) {
+          PublicEndpointManagementGrpc.getRevokeCertificateMethod = getRevokeCertificateMethod =
+              io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse>newBuilder()
+              .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RevokeCertificate"))
+              .setSampledToLocalTracing(true)
+              .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest.getDefaultInstance()))
+              .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
+                  com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse.getDefaultInstance()))
+              .setSchemaDescriptor(new PublicEndpointManagementMethodDescriptorSupplier("RevokeCertificate"))
+              .build();
+        }
+      }
+    }
+    return getRevokeCertificateMethod;
+  }
+
   /**
    * Creates a new async stub that supports all call types for the service
    */
@@ -410,6 +441,16 @@ public final class PublicEndpointManagementGrpc {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPollCertificateSigningMethod(), responseObserver);
     }
 
+    /**
+     * <pre>
+     *Revoke a TLS certificate
+     * </pre>
+     */
+    public void revokeCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse> responseObserver) {
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRevokeCertificateMethod(), responseObserver);
+    }
+
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
@@ -468,6 +509,13 @@ public final class PublicEndpointManagementGrpc {
                 com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest,
                 com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse>(
                   this, METHODID_POLL_CERTIFICATE_SIGNING)))
+          .addMethod(
+            getRevokeCertificateMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
+              new MethodHandlers<
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest,
+                com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse>(
+                  this, METHODID_REVOKE_CERTIFICATE)))
           .build();
     }
   }
@@ -588,6 +636,17 @@ public final class PublicEndpointManagementGrpc {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getPollCertificateSigningMethod(), getCallOptions()), request, responseObserver);
     }
+
+    /**
+     * <pre>
+     *Revoke a TLS certificate
+     * </pre>
+     */
+    public void revokeCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest request,
+        io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse> responseObserver) {
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRevokeCertificateMethod(), getCallOptions()), request, responseObserver);
+    }
   }
 
   /**
@@ -697,6 +756,16 @@ public final class PublicEndpointManagementGrpc {
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse pollCertificateSigning(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getPollCertificateSigningMethod(), getCallOptions(), request);
+    }
+
+    /**
+     * <pre>
+     *Revoke a TLS certificate
+     * </pre>
+     */
+    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse revokeCertificate(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest request) {
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRevokeCertificateMethod(), getCallOptions(), request);
     }
   }
 
@@ -816,6 +885,17 @@ public final class PublicEndpointManagementGrpc {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getPollCertificateSigningMethod(), getCallOptions()), request);
     }
+
+    /**
+     * <pre>
+     *Revoke a TLS certificate
+     * </pre>
+     */
+    public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse> revokeCertificate(
+        com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest request) {
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRevokeCertificateMethod(), getCallOptions()), request);
+    }
   }
 
   private static final int METHODID_GET_VERSION = 0;
@@ -826,6 +906,7 @@ public final class PublicEndpointManagementGrpc {
   private static final int METHODID_GENERATE_MANAGED_DOMAIN_NAMES = 5;
   private static final int METHODID_SIGN_CERTIFICATE = 6;
   private static final int METHODID_POLL_CERTIFICATE_SIGNING = 7;
+  private static final int METHODID_REVOKE_CERTIFICATE = 8;
 
   private static final class MethodHandlers<Req, Resp> implements
       io.grpc.stub.ServerCalls.UnaryMethod<Req, Resp>,
@@ -875,6 +956,10 @@ public final class PublicEndpointManagementGrpc {
         case METHODID_POLL_CERTIFICATE_SIGNING:
           serviceImpl.pollCertificateSigning((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest) request,
               (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse>) responseObserver);
+          break;
+        case METHODID_REVOKE_CERTIFICATE:
+          serviceImpl.revokeCertificate((com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateRequest) request,
+              (io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.RevokeCertificateResponse>) responseObserver);
           break;
         default:
           throw new AssertionError();
@@ -945,6 +1030,7 @@ public final class PublicEndpointManagementGrpc {
               .addMethod(getGenerateManagedDomainNamesMethod())
               .addMethod(getSignCertificateMethod())
               .addMethod(getPollCertificateSigningMethod())
+              .addMethod(getRevokeCertificateMethod())
               .build();
         }
       }

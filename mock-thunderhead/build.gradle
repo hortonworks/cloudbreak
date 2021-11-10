@@ -81,4 +81,5 @@ dependencies {
   }
   implementation project(':datalake-dr-connector')
   implementation project (':cloud-api')
+  implementation project(':cluster-dns-connector')
 }
