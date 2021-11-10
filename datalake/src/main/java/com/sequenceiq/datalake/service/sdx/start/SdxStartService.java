@@ -16,6 +16,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
+import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.cert.CloudbreakPoller;
@@ -33,6 +34,9 @@ public class SdxStartService {
 
     @Inject
     private SdxService sdxService;
+
+    @Inject
+    private DistroxService distroxService;
 
     @Inject
     private StackV4Endpoint stackV4Endpoint;
@@ -80,4 +84,16 @@ public class SdxStartService {
         SdxCluster sdxCluster = sdxService.getById(sdxId);
         cloudbreakPoller.pollStartUntilAvailable(sdxCluster, pollingConfig);
     }
+
+    public void startAllDatahubs(Long sdxId) {
+        SdxCluster sdxCluster = sdxService.getById(sdxId);
+        try {
+            distroxService.startAttachedDistrox(sdxCluster.getEnvCrn());
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            LOGGER.info("Can not start datahub {} from cloudbreak: {}", sdxCluster.getStackId(), errorMessage, e);
+            throw new RuntimeException("Can not start datahub, error happened during operation: " + errorMessage);
+        }
+    }
+
 }

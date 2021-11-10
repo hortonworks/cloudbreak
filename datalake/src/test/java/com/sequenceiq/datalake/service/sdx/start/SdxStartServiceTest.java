@@ -30,6 +30,7 @@ import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.FreeipaService;
+import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.AvailabilityChecker;
@@ -42,6 +43,9 @@ public class SdxStartServiceTest {
     private static final String CLUSTER_NAME = "clusterName";
 
     private static final Long CLUSTER_ID = 1L;
+
+    private static final String ENV_CRN =
+            "crn:cdp:environments:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:environment:4044a133-e941-48d4-82c4-ce1e231160d9";
 
     @InjectMocks
     private SdxStartService underTest;
@@ -69,6 +73,9 @@ public class SdxStartServiceTest {
 
     @Mock
     private AvailabilityChecker availabilityChecker;
+
+    @Mock
+    private DistroxService distroxService;
 
     @Test
     public void testTriggerStart() {
@@ -156,11 +163,35 @@ public class SdxStartServiceTest {
         assertEquals("Cannot start cluster, error happened during operation: Error message: \"error\"", exception.getMessage());
     }
 
+    @Test
+    public void testStartDatahubSucceed() {
+        SdxCluster sdxCluster = sdxCluster();
+        when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
+
+        underTest.startAllDatahubs(CLUSTER_ID);
+
+        verify(distroxService).startAttachedDistrox(eq(ENV_CRN));
+    }
+
+    @Test
+    public void testStartDatahubThrowsWebException() {
+        SdxCluster sdxCluster = sdxCluster();
+        when(sdxService.getById(CLUSTER_ID)).thenReturn(sdxCluster);
+        WebApplicationException clientErrorException = mock(WebApplicationException.class);
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("Error message: \"error\"");
+        doThrow(clientErrorException).when(distroxService).startAttachedDistrox(eq(ENV_CRN));
+        RuntimeException exception = Assertions.assertThrows(RuntimeException.class, () -> underTest.startAllDatahubs(CLUSTER_ID));
+
+        assertEquals("Can not start datahub, error happened during operation: Error message: \"error\"", exception.getMessage());
+
+    }
+
     private SdxCluster sdxCluster() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setId(CLUSTER_ID);
         sdxCluster.setClusterName(CLUSTER_NAME);
         sdxCluster.setAccountId("accountid");
+        sdxCluster.setEnvCrn(ENV_CRN);
         return sdxCluster;
     }
 

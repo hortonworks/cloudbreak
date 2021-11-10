@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -32,6 +33,11 @@ import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 public class DistroxService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroxService.class);
+
+    private enum Type {
+        STOP,
+        START
+    }
 
     @Value("${dl.dh.polling.attempt:90}")
     private Integer attempt;
@@ -61,22 +67,35 @@ public class DistroxService {
             Polling.stopAfterAttempt(attempt)
                     .stopIfException(true)
                     .waitPeriodly(sleeptime, TimeUnit.SECONDS)
-                    .run(checkDistroxStatus(pollingCrn));
+                    .run(checkDistroxStatus(pollingCrn, Type.STOP, this::stackAndClusterStopped));
         }
 
     }
 
-    private AttemptMaker<Void> checkDistroxStatus(ArrayList<String> pollingCrn) {
+    public void startAttachedDistrox(String envCrn) {
+        Collection<StackViewV4Response> attachedDistroXClusters = getAttachedDistroXClusters(envCrn);
+        ArrayList<String> pollingCrn = attachedDistroXClusters.stream().map(StackViewV4Response::getCrn).collect(Collectors.toCollection(ArrayList::new));
+        if (!pollingCrn.isEmpty()) {
+            distroXV1Endpoint.putStartByCrns(pollingCrn);
+            Polling.stopAfterAttempt(attempt)
+                    .stopIfException(true)
+                    .waitPeriodly(sleeptime, TimeUnit.SECONDS)
+                    .run(checkDistroxStatus(pollingCrn, Type.START, this::stackAndClusterStarted));
+
+        }
+    }
+
+    private AttemptMaker<Void> checkDistroxStatus(ArrayList<String> pollingCrn, Type type, Function<StackV4Response, Boolean> statusChecker) {
         return () -> {
             List<String> remaining = new ArrayList<>();
             List<AttemptResult<Void>> results = pollingCrn.stream()
                     .map(crn -> {
                         StackV4Response stack = distroXV1Endpoint.getByCrn(crn, Collections.emptySet());
-                        if (stackAndClusterStopped(stack, stack.getCluster())) {
+                        if (statusChecker.apply(stack)) {
                             return AttemptResults.<Void>finishWith(null);
                         } else {
                             remaining.add(crn);
-                            return checkStopStatus(stack);
+                            return checkStatus(stack, type);
                         }
                     }).collect(Collectors.toList());
 
@@ -97,23 +116,34 @@ public class DistroxService {
         return AttemptResults.finishWith(null);
     }
 
-    private AttemptResult<Void> checkStopStatus(StackV4Response stack) {
+    private AttemptResult<Void> checkStatus(StackV4Response stack, Type type) {
         ClusterV4Response cluster = stack.getCluster();
-        if (Status.STOP_FAILED.equals(stack.getStatus())) {
-            LOGGER.info("Datahub stack stop failed for '{}' with status: {} and reason: {}", stack.getName(), stack.getStatus(), stack.getStatusReason());
-            return AttemptResults.breakFor("Datahub stop failed '" + stack.getName() + "', " + stack.getStatusReason());
-        } else if (cluster != null && Status.STOP_FAILED.equals(cluster.getStatus())) {
-            LOGGER.info("Datahub cluster stop failed for '{}' status: {} and reason: {}", cluster.getName(), cluster.getStatus(), cluster.getStatusReason());
-            return AttemptResults.breakFor("Datahub stop failed '" + cluster.getName() + "', reason: " + cluster.getStatusReason());
+        if (Status.STOP_FAILED.equals(stack.getStatus()) || Status.START_FAILED.equals(stack.getStatus())) {
+            LOGGER.info("Datahub stack " + type +
+                    " failed for '{}' with status: {} and reason: {}", stack.getName(), stack.getStatus(), stack.getStatusReason());
+            return AttemptResults.breakFor("Datahub " + type + " failed '" + stack.getName() + "', " + stack.getStatusReason());
+        } else if (cluster != null && (Status.STOP_FAILED.equals(cluster.getStatus()) || Status.START_FAILED.equals(cluster.getStatus()))) {
+            LOGGER.info("Datahub cluster " + type +
+                    " failed for '{}' status: {} and reason: {}", cluster.getName(), cluster.getStatus(), cluster.getStatusReason());
+            return AttemptResults.breakFor("Datahub " + type + " failed '" + cluster.getName() + "', reason: " + cluster.getStatusReason());
         } else {
             return AttemptResults.justContinue();
         }
     }
 
-    private boolean stackAndClusterStopped(StackV4Response stackV4Response, ClusterV4Response cluster) {
+    private boolean stackAndClusterStopped(StackV4Response stackV4Response) {
+        ClusterV4Response cluster = stackV4Response.getCluster();
         return stackV4Response.getStatus().isStopped()
                 && cluster != null
                 && cluster.getStatus() != null
                 && cluster.getStatus().isStopped();
+    }
+
+    private boolean stackAndClusterStarted(StackV4Response stackV4Response) {
+        ClusterV4Response cluster = stackV4Response.getCluster();
+        return stackV4Response.getStatus().isAvailable()
+                && cluster != null
+                && cluster.getStatus() != null
+                && cluster.getStatus().isAvailable();
     }
 }
