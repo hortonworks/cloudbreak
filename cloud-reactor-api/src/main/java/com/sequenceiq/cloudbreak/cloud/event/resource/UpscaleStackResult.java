@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.event.resource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -35,6 +36,14 @@ public class UpscaleStackResult extends CloudPlatformResult {
 
     public boolean isFailed() {
         return resourceStatus == ResourceStatus.FAILED;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", UpscaleStackResult.class.getSimpleName() + "[", "]")
+                .add("resourceStatus=" + resourceStatus)
+                .add("results=" + results)
+                .toString();
     }
 
 }

@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.azure;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -41,6 +40,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -48,7 +48,7 @@ public class AzureResourceConnectorTest {
 
     private static final AdjustmentType ADJUSTMENT_TYPE = AdjustmentType.EXACT;
 
-    private static final long THRESHOLD = 1L;
+    private static final long THRESHOLD = 1;
 
     private static final String STACK_NAME = "someStackNameValue";
 
@@ -151,10 +151,11 @@ public class AzureResourceConnectorTest {
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(false);
 
-        underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
+        underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
 
-        verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(eq(ac), eq(stack), eq(ADJUSTMENT_TYPE),
-                eq(THRESHOLD), eq(instances), any());
+        verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(eq(ac), eq(stack), eq(adjustmentTypeWithThreshold),
+                eq(instances), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(azureUtils, times(1)).getCustomSubnetIds(network);
@@ -168,10 +169,11 @@ public class AzureResourceConnectorTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.IN_PROGRESS);
         when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
 
-        underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
+        underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
 
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
-                any(CloudStack.class), any(AdjustmentType.class), anyLong(), any(), any());
+                any(CloudStack.class), eq(adjustmentTypeWithThreshold), any(), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(client, never()).createTemplateDeployment(any(), any(), any(), any());
@@ -186,10 +188,11 @@ public class AzureResourceConnectorTest {
         when(client.getTemplateDeploymentStatus(RESOURCE_GROUP_NAME, STACK_NAME)).thenReturn(ResourceStatus.CREATED);
         when(azureImageFormatValidator.isMarketplaceImageFormat(imageModel)).thenReturn(false);
 
-        underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
+        underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
 
         verify(azureComputeResourceService, times(1)).buildComputeResourcesForLaunch(any(AuthenticatedContext.class),
-                any(CloudStack.class), any(AdjustmentType.class), anyLong(), any(), any());
+                any(CloudStack.class), eq(adjustmentTypeWithThreshold), any(), any());
         verify(azureCloudResourceService, times(1)).getInstanceCloudResources(STACK_NAME, instances, groups, RESOURCE_GROUP_NAME);
         verify(azureUtils, times(1)).getCustomNetworkId(network);
         verify(client, times(1)).createTemplateDeployment(any(), any(), any(), any());
@@ -203,7 +206,8 @@ public class AzureResourceConnectorTest {
         when(client.createTemplateDeployment(any(), any(), any(), any())).thenReturn(deployment);
         when(azureImageFormatValidator.isMarketplaceImageFormat(any())).thenReturn(true);
 
-        underTest.launch(ac, stack, notifier, ADJUSTMENT_TYPE, THRESHOLD);
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(ADJUSTMENT_TYPE, THRESHOLD);
+        underTest.launch(ac, stack, notifier, adjustmentTypeWithThreshold);
 
         verify(azureMarketplaceImageProviderService, times(1)).get(imageModel);
     }
