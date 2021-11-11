@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import static java.lang.String.format;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -15,20 +15,18 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
-import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
+import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -38,12 +36,6 @@ public class ClusterUpscaleService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private ClusterService clusterService;
-
-    @Inject
-    private ClusterHostServiceRunner hostRunner;
 
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
@@ -58,38 +50,15 @@ public class ClusterUpscaleService {
     private RecipeEngine recipeEngine;
 
     @Inject
-    private ClusterServiceRunner clusterServiceRunner;
-
-    @Inject
     private KerberosConfigService kerberosConfigService;
 
-    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged)
-            throws CloudbreakException, ClusterClientInitException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.debug("Start adding cluster containers");
-        Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
-
-        Map<String, String> hosts = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment);
-        if (primaryGatewayChanged) {
-            clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
-        }
-        for (String hostName : hosts.keySet()) {
-            if (!hostsPerHostGroup.containsKey(hostGroupName)) {
-                hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
-            }
-            hostsPerHostGroup.get(hostGroupName).add(hostName);
-        }
-        clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
-
-        ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
-    }
+    @Inject
+    private ParcelService parcelService;
 
     public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start executing pre recipes");
-        HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
-                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
+        HostGroup hostGroup = getHostGroup(hostGroupName, stack);
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
         recipeEngine.uploadUpscaleRecipes(stack, hostGroup, hostGroups);
     }
@@ -97,12 +66,39 @@ public class ClusterUpscaleService {
     public void installServicesOnNewHosts(Long stackId, String hostGroupName, Boolean repair, Boolean restartServices) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         LOGGER.debug("Start installing CM services");
-        HostGroup hostGroup = Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
-                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-        Set<InstanceMetaData> runningInstanceMetaDataSet = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
+        removeUnusedParcelComponents(stack);
+        HostGroup hostGroup = getHostGroup(hostGroupName, stack);
         recipeEngine.executePostAmbariStartRecipes(stack, Set.of(hostGroup));
-        ClusterApi connector = clusterApiConnectors.getConnector(stack);
+        Set<InstanceMetaData> runningInstanceMetaDataSet = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
+        ClusterApi connector = getClusterConnector(stack);
         List<String> upscaledHosts = connector.upscaleCluster(hostGroup, runningInstanceMetaDataSet);
+        restartServicesIfNecessary(repair, restartServices, stack, connector);
+        setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
+    }
+
+    private void removeUnusedParcelComponents(Stack stack) throws CloudbreakException {
+        ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stack);
+        if (!parcelOperationStatus.getFailed().isEmpty()) {
+            LOGGER.error("There are failed parcel removals: {}", parcelOperationStatus);
+            throw new CloudbreakException(format("Failed to remove the following parcels: %s", parcelOperationStatus.getFailed()));
+        }
+    }
+
+    private void setInstanceStatus(Set<InstanceMetaData> runningInstanceMetaDataSet, List<String> upscaledHosts) {
+        runningInstanceMetaDataSet.stream()
+                .filter(instanceMetaData -> upscaledHosts.contains(instanceMetaData.getDiscoveryFQDN()))
+                .forEach(instanceMetaData -> {
+                    instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
+                    instanceMetaDataService.save(instanceMetaData);
+                });
+    }
+
+    private HostGroup getHostGroup(String hostGroupName, Stack stack) {
+        return Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
+                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
+    }
+
+    private void restartServicesIfNecessary(Boolean repair, Boolean restartServices, Stack stack, ClusterApi connector) throws CloudbreakException {
         if (shouldRestartServices(repair, restartServices, stack)) {
             try {
                 LOGGER.info("Trying to restart services");
@@ -111,12 +107,6 @@ public class ClusterUpscaleService {
                 LOGGER.info("Restart services failed", e);
             }
         }
-        runningInstanceMetaDataSet.stream()
-                .filter(instanceMetaData -> upscaledHosts.contains(instanceMetaData.getDiscoveryFQDN()))
-                .forEach(instanceMetaData -> {
-                    instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
-                    instanceMetaDataService.save(instanceMetaData);
-                });
     }
 
     private boolean shouldRestartServices(Boolean repair, Boolean restartServices, Stack stack) {

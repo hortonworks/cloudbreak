@@ -1,6 +1,10 @@
 package com.sequenceiq.mock.clouderamanager.base;
 
+import static com.sequenceiq.mock.clouderamanager.CommandId.DEACTIVATE_PARCEL;
+import static com.sequenceiq.mock.clouderamanager.CommandId.REMOVE_PARCEL;
 import static com.sequenceiq.mock.clouderamanager.CommandId.START_PARCEL_DOWNLOAD;
+import static com.sequenceiq.mock.clouderamanager.CommandId.UNDISTRIBUTE_PARCEL;
+
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.Optional;
@@ -61,5 +65,20 @@ public class ParcelResourceOperation {
     public ResponseEntity<ApiCommand> activateCommand(String mockUuid, String clusterName, String product, String version) {
         clouderaManagerStoreService.addOrUpdateProduct(mockUuid, product, version);
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(CommandId.ACTIVATE_PARCEL));
+    }
+
+    public ResponseEntity<ApiCommand> deactivateCommand(String mockUuid, String clusterName, String product, String version) {
+        clouderaManagerStoreService.addOrUpdateProduct(mockUuid, product, version);
+        return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(DEACTIVATE_PARCEL));
+    }
+
+    public ResponseEntity<ApiCommand> startRemovalOfDistributionCommand(String mockUuid, String clusterName, String product, String version) {
+        clouderaManagerStoreService.addOrUpdateProduct(mockUuid, product, version);
+        return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(UNDISTRIBUTE_PARCEL));
+    }
+
+    public ResponseEntity<ApiCommand> removeDownloadCommand(String mockUuid, String clusterName, String product, String version) {
+        clouderaManagerStoreService.addOrUpdateProduct(mockUuid, product, version);
+        return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(REMOVE_PARCEL));
     }
 }

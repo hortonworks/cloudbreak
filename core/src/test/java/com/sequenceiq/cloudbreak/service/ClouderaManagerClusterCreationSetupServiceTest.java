@@ -1,11 +1,11 @@
 package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anySet;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHEntries;
 import com.sequenceiq.cloudbreak.cloud.model.component.ImageBasedDefaultCDHInfo;
 import com.sequenceiq.cloudbreak.cmtemplate.utils.BlueprintUtils;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -47,8 +48,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
+import com.sequenceiq.cloudbreak.service.parcel.ParcelFilterService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 
@@ -72,7 +72,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
     @Mock
-    private ParcelService parcelService;
+    private ParcelFilterService parcelFilterService;
 
     @Mock
     private StackMatrixService stackMatrixService;
@@ -124,8 +124,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
                 SOME_CDH_VERSION, new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(SOME_CDH_VERSION),
                         mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)),
                 NEWER_CDH_VERSION, new ImageBasedDefaultCDHInfo(getDefaultCDHInfo(NEWER_CDH_VERSION),
-                        mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class))
-        );
+                        mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class)));
         when(imageBasedDefaultCDHEntries.getEntries(workspace.getId(), null, IMAGE_CATALOG_NAME)).thenReturn(defaultCDHInfoMap);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
         stackMatrixV4Response.setCdh(Collections.singletonMap(OLDER_CDH_VERSION, null));
@@ -138,13 +137,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.0.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(OLDER_CDH_VERSION);
-        when(parcelService.filterParcelsByBlueprint(anySet(), any(Blueprint.class), anyBoolean())).thenReturn(clouderaManagerProductSet);
+        when(parcelFilterService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
-                Optional.empty(), List.of(),  Optional.of(imageComponent));
+                Optional.empty(), List.of(), Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, OLDER_CDH_VERSION);
-        verify(parcelService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class), anyBoolean());
+        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     @Test
@@ -153,13 +152,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.9.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(null);
-        when(parcelService.filterParcelsByBlueprint(anySet(), any(Blueprint.class), anyBoolean())).thenReturn(clouderaManagerProductSet);
+        when(parcelFilterService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
-                Optional.empty(), List.of(),  Optional.of(imageComponent));
+                Optional.empty(), List.of(), Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, NEWER_CDH_VERSION);
-        verify(parcelService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class), anyBoolean());
+        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     @Test(expected = BadRequestException.class)
@@ -167,7 +166,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn("5.6.7");
 
         underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
-                Optional.empty(), List.of(),  Optional.of(imageComponent));
+                Optional.empty(), List.of(), Optional.of(imageComponent));
     }
 
     @Test
@@ -181,14 +180,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.5.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
-        when(parcelService.filterParcelsByBlueprint(anySet(), any(Blueprint.class), anyBoolean())).thenReturn(clouderaManagerProductSet);
-
+        when(parcelFilterService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, Optional.of(cmRepoComponent),
                 productComponentList, Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
-        verify(parcelService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class), anyBoolean());
+        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     private void assertVersionsMatch(Collection<ClusterComponent> clusterComponents, String cmVersion, String cdhVersion) {
@@ -206,9 +204,9 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private ClusterComponent findComponentByType(Collection<ClusterComponent> clusterComponents, ComponentType type) {
         return clusterComponents.stream()
-            .filter(component -> type.equals(component.getComponentType()))
-            .findAny()
-            .orElseThrow(() -> new AssertionError("component not found: " + type));
+                .filter(component -> type.equals(component.getComponentType()))
+                .findAny()
+                .orElseThrow(() -> new AssertionError("component not found: " + type));
     }
 
     private ClouderaManagerRepo getClouderaManagerRepo(boolean defaultRepo) {
@@ -220,9 +218,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private ClouderaManagerProduct getClouderaManagerProductRepo() {
         ClouderaManagerProduct product = new ClouderaManagerProduct();
-        product.withName("CDH").
-                withVersion(SOME_CDH_VERSION).
-                withParcel("https://archive.cloudera.com/cdh6/6.2.0/parcels/");
+        product.withName("CDH").withVersion(SOME_CDH_VERSION).withParcel("https://archive.cloudera.com/cdh6/6.2.0/parcels/");
         return product;
     }
 

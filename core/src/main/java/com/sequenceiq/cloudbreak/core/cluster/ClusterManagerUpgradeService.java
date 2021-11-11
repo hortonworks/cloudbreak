@@ -16,13 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
-import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
@@ -36,12 +34,12 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
 import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Service
 public class ClusterManagerUpgradeService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterManagerUpgradeService.class);
 
     @Inject
@@ -66,17 +64,7 @@ public class ClusterManagerUpgradeService {
     private ClusterHostServiceRunner clusterHostServiceRunner;
 
     @Inject
-    private ClusterComponentUpdater clusterComponentUpdater;
-
-    @Inject
     private CsdParcelDecorator csdParcelDecorator;
-
-    public ParcelOperationStatus removeUnusedComponents(Long stackId, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint);
-        clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
-        return removalStatus;
-    }
 
     public void upgradeClusterManager(Long stackId, boolean runtimeServicesStartNeeded) throws CloudbreakOrchestratorException, CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
