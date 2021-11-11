@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -43,7 +42,6 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonResourceType;
 
 @Service
@@ -74,10 +72,8 @@ public class StackUpscaleService {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ADDING_NEW_INSTANCES, statusReason);
     }
 
-    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment, String hostGroupName,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
-        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment), hostGroupName,
-                String.valueOf(adjustmentTypeWithThreshold.getAdjustmentType()), String.valueOf(adjustmentTypeWithThreshold.getThreshold()));
+    public void addInstanceFireEventAndLog(Stack stack, Integer scalingAdjustment, String hostGroupName) {
+        flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_ADDING_INSTANCES, String.valueOf(scalingAdjustment), hostGroupName);
     }
 
     public void finishAddInstances(StackScalingFlowContext context, UpscaleStackResult payload) {
@@ -85,8 +81,6 @@ public class StackUpscaleService {
         List<CloudResourceStatus> results = payload.getResults();
         validateResourceResults(context, payload.getErrorDetails(), results);
         Set<Resource> resourceSet = transformResults(results, context.getStack());
-        Set<Long> successfulPrivateIds = results.stream().map(CloudResourceStatus::getPrivateId).collect(Collectors.toSet());
-        metadataSetupService.cleanupRequestedInstancesIfNotInList(context.getStack().getId(), context.getInstanceGroupName(), successfulPrivateIds);
         if (resourceSet.isEmpty()) {
             metadataSetupService.cleanupRequestedInstancesWithoutFQDN(context.getStack().getId(), context.getInstanceGroupName());
             throw new OperationException("Failed to upscale the cluster since all create request failed. Resource set is empty");
@@ -96,10 +90,11 @@ public class StackUpscaleService {
 
     public void extendingMetadata(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.EXTENDING_METADATA);
+        clusterService.updateClusterStatusByStackId(stack.getId(), UPDATE_IN_PROGRESS);
     }
 
     void reRegisterWithClusterProxy(long stackId) {
-        stackUpdater.updateStackStatus(stackId, REGISTERING_TO_CLUSTER_PROXY, "Re-registering with Cluster Proxy service.");
+        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Re-registering with Cluster Proxy service.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY);
     }
 

@@ -69,8 +69,6 @@ import com.sequenceiq.cloudbreak.cloud.model.Network;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.Subnet;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
-import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.LoadBalancerType;
@@ -170,16 +168,14 @@ class AwsUpscaleServiceTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
-        awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold);
+        awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList);
         verify(awsAutoScalingService, times(1)).updateAutoscalingGroup(any(AmazonAutoScalingClient.class), eq("workerASG"), eq(5));
         verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),
                 eq(amazonCloudFormationClient), any(), any());
         verify(awsAutoScalingService, times(1)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
         ArgumentCaptor<List<CloudResource>> captor = ArgumentCaptor.forClass(List.class);
         verify(awsComputeResourceService, times(1))
-                .buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack), anyList(), captor.capture(), any(), any(),
-                        eq(adjustmentTypeWithThreshold));
+                .buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack), anyList(), captor.capture(), any(), any());
         verify(awsTaggingService, times(1)).tagRootVolumes(eq(authenticatedContext), any(AmazonEc2Client.class), eq(allInstances), eq(tags));
         verify(awsCloudWatchService, times(1)).addCloudWatchAlarmsForSystemFailures(any(), eq("eu-west-1"),
                 any(AwsCredentialView.class));
@@ -242,9 +238,8 @@ class AwsUpscaleServiceTest {
                 .when(awsAutoScalingService).scheduleStatusChecks(
                 eq(List.of(worker)), eq(authenticatedContext), eq(amazonCloudFormationClient), any(Date.class), any());
 
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-                () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold));
+                () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList));
         Assertions.assertEquals("Autoscaling group update failed: Amazon Autoscaling Group was not able to reach the desired state (3 instances instead of 5). "
                 + "Original autoscaling group state has been recovered. Failure reason: autoscaling failed", exception.getMessage());
 
@@ -252,7 +247,7 @@ class AwsUpscaleServiceTest {
         verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),
                 eq(amazonCloudFormationClient), any(), any());
         verify(awsComputeResourceService, times(0)).buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack),
-                anyList(), anyList(), any(), any(), eq(adjustmentTypeWithThreshold));
+                anyList(), anyList(), any(), any());
         verify(awsAutoScalingService, times(1)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker4"));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker5"));
@@ -317,12 +312,11 @@ class AwsUpscaleServiceTest {
         when(awsAutoScalingService.getAutoscalingGroups(eq(amazonAutoScalingClient), any()))
                 .thenReturn(List.of(newWorkerASGroup));
 
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
-        when(awsComputeResourceService.buildComputeResourcesForUpscale(any(), any(), anyList(), anyList(), anyList(), anyList(),
-                eq(adjustmentTypeWithThreshold))).thenThrow(new CloudConnectorException("volume create error"));
+        when(awsComputeResourceService.buildComputeResourcesForUpscale(any(), any(), anyList(), anyList(), anyList(), anyList()))
+                .thenThrow(new CloudConnectorException("volume create error"));
 
         CloudConnectorException exception = assertThrows(CloudConnectorException.class,
-                () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold));
+                () -> awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList));
         Assertions.assertEquals("Failed to create some resource on AWS for upscaled nodes, please check your quotas on AWS. " +
                 "Original autoscaling group state has been recovered. Exception: volume create error", exception.getMessage());
 
@@ -330,7 +324,7 @@ class AwsUpscaleServiceTest {
         verify(awsAutoScalingService, times(1)).scheduleStatusChecks(eq(List.of(worker)), eq(authenticatedContext),
                 eq(amazonCloudFormationClient), any(), any());
         verify(awsComputeResourceService, times(1)).buildComputeResourcesForUpscale(eq(authenticatedContext), eq(cloudStack),
-                anyList(), anyList(), any(), any(), eq(adjustmentTypeWithThreshold));
+                anyList(), anyList(), any(), any());
         verify(awsAutoScalingService, times(2)).suspendAutoScaling(eq(authenticatedContext), eq(cloudStack));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker4"));
         verify(awsAutoScalingService, times(1)).terminateInstance(eq(amazonAutoScalingClient), eq("i-worker5"));
@@ -395,8 +389,7 @@ class AwsUpscaleServiceTest {
                 instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
 
         List<CloudResource> cloudResourceList = Collections.emptyList();
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
-        awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList, adjustmentTypeWithThreshold);
+        awsUpscaleService.upscale(authenticatedContext, cloudStack, cloudResourceList);
 
         verify(cfStackUtil, times(2)).addLoadBalancerTargets(any(), any(), any());
     }

@@ -88,8 +88,7 @@ public class UpscaleFlowEventChainFactory implements FlowEventChainFactory<Stack
                 event.getInstanceGroup(),
                 event.getAdjustment(),
                 event.getHostNames(),
-                event.getNetworkScaleDetails(),
-                event.getAdjustmentTypeWithThreshold());
+                event.getNetworkScaleDetails());
         stackScaleTriggerEvent = event.isRepair() ? stackScaleTriggerEvent.setRepair() : stackScaleTriggerEvent;
         flowEventChain.add(stackScaleTriggerEvent);
     }

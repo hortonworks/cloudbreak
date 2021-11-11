@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 @Service
 public class AzureComputeResourceService {
@@ -35,18 +35,17 @@ public class AzureComputeResourceService {
     @Inject
     private AzureContextService azureContextService;
 
-    public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, List<CloudResource> instances, List<CloudResource> networkResources) {
+    public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack, AdjustmentType adjustmentType, Long threshold,
+            List<CloudResource> instances, List<CloudResource> networkResources) {
         ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
 
         azureContextService.addInstancesToContext(instances, context, stack.getGroups());
-        return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentTypeWithThreshold);
+        return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentType, threshold);
     }
 
     public List<CloudResourceStatus> buildComputeResourcesForUpscale(AuthenticatedContext ac, CloudStack stack, List<Group> groupsWithNewInstances,
-            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources) {
         ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
 
@@ -57,7 +56,7 @@ public class AzureComputeResourceService {
             contextResources.addAll(reattachableVolumeSets);
             azureContextService.addResourcesToContext(contextResources, context, groupsWithNewInstances);
         }
-        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances, adjustmentTypeWithThreshold);
+        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances);
     }
 
     public List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources,

@@ -7,7 +7,6 @@ import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 
 import reactor.rx.Promise;
 
@@ -26,8 +25,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
     private final ClusterManagerType clusterManagerType;
 
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
-            NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
-        super(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), networkScaleDetails, adjustmentTypeWithThreshold);
+            NetworkScaleDetails networkScaleDetails) {
+        super(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), networkScaleDetails);
         this.scalingType = scalingType;
         singleMasterGateway = false;
         kerberosSecured = false;
@@ -38,8 +37,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
             Set<String> hostNames, boolean singlePrimaryGateway, boolean kerberosSecured, Promise<AcceptResult> accepted, boolean singleNodeCluster,
-            boolean restartServices, ClusterManagerType clusterManagerType, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
-        super(selector, stackId, instanceGroup, adjustment, hostNames, adjustmentTypeWithThreshold, accepted);
+            boolean restartServices, ClusterManagerType clusterManagerType) {
+        super(selector, stackId, instanceGroup, adjustment, hostNames, accepted);
         this.scalingType = scalingType;
         singleMasterGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;

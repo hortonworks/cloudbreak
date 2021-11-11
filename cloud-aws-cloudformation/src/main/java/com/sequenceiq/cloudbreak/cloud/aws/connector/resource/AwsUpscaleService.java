@@ -43,7 +43,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -83,8 +82,7 @@ public class AwsUpscaleService {
     @Inject
     private AwsMetadataCollector awsMetadataCollector;
 
-    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
         String regionName = ac.getCloudContext().getLocation().getRegion().value();
         AwsCredentialView credentialView = new AwsCredentialView(ac.getCloudCredential());
 
@@ -121,8 +119,7 @@ public class AwsUpscaleService {
                     .filter(cloudResource -> ResourceType.AWS_SUBNET.equals(cloudResource.getType()))
                     .collect(Collectors.toList());
             List<CloudResourceStatus> cloudResourceStatuses = awsComputeResourceService
-                    .buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources,
-                            adjustmentTypeWithThreshold);
+                    .buildComputeResourcesForUpscale(ac, stack, groupsWithNewInstances, newInstances, reattachableVolumeSets, networkResources);
 
             List<String> failedResources = cloudResourceStatuses.stream().map(CloudResourceStatus::getCloudResource)
                     .filter(cloudResource -> CommonStatus.FAILED == cloudResource.getStatus())

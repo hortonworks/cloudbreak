@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.CREATED;
-import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.STARTED;
 import static com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INSTANCE_METADATA_RESTORED;
 
@@ -124,21 +123,6 @@ public class MetadataSetupService {
         });
     }
 
-    public void cleanupRequestedInstancesIfNotInList(Long stackId, String instanceGroupName, Set<Long> privateIds) {
-        Optional<InstanceGroup> instanceGroup = instanceGroupService.findOneByStackIdAndGroupName(stackId, instanceGroupName);
-        instanceGroup.ifPresent(ig -> {
-            List<InstanceMetaData> createdInstanceMetaDatas = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(ig, InstanceStatus.REQUESTED);
-            List<InstanceMetaData> removableInstanceMetaDatas = createdInstanceMetaDatas.stream()
-                    .filter(instanceMetaData -> !privateIds.contains(instanceMetaData.getPrivateId()))
-                    .collect(Collectors.toList());
-            for (InstanceMetaData removableInstanceMetaData : removableInstanceMetaDatas) {
-                removableInstanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
-                removableInstanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-            }
-            instanceMetaDataService.saveAll(removableInstanceMetaDatas);
-        });
-    }
-
     public void cleanupRequestedInstancesWithoutFQDN(Long stackId, String instanceGroupName) {
         try {
             transactionService.required(() -> {
@@ -186,8 +170,7 @@ public class MetadataSetupService {
                 Long privateId = template.getPrivateId();
                 String instanceId = cloudInstance.getInstanceId();
                 InstanceMetaData instanceMetaDataEntry = createInstanceMetadataIfAbsent(allInstanceMetadata, privateId, instanceId);
-                if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == CREATED ||
-                        cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == STARTED) {
+                if (instanceMetaDataEntry.getInstanceId() == null && cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == CREATED) {
                     newInstances++;
                 }
                 // CB 1.0.x clusters do not have private id thus we cannot correlate them with instance groups thus keep the original one
