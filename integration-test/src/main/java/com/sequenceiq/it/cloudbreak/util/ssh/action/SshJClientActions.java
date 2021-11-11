@@ -80,7 +80,7 @@ public class SshJClientActions extends SshJClient {
                     .map(InstanceGroupV4Response::getMetadata)
                     .filter(Objects::nonNull)
                     .flatMap(Collection::stream)
-                    .map(x -> publicIp ? x.getPublicIp() : x.getPrivateIp())
+                    .map(x -> publicIp && StringUtils.isNotEmpty(x.getPublicIp()) ? x.getPublicIp() : x.getPrivateIp())
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
             assert !instanceGroupIpList.isEmpty();
@@ -296,7 +296,7 @@ public class SshJClientActions extends SshJClient {
                 "df | grep " + mountDir + " | awk '{print $1,$6}' | " +
                         "sed -e \"s/\\(.*\\) \\(.*\\)/\\\"\\1\\\":\\\"\\2\\\"/\" | paste -s -d ',' | sed 's/.*/{\\0}/'";
 
-        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDistroXInstanceGroupIps(instanceGroups, hostGroupNames, true).stream()
+        Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDistroXInstanceGroupIps(instanceGroups, hostGroupNames, false).stream()
                 .collect(Collectors.toMap(ip -> ip, ip -> executeSshCommand(ip, diskMountPointListCmd)));
         Integer okStatusCode = 0;
         deviceMountPointMappingsByIp.forEach((ip, outPair) -> {
