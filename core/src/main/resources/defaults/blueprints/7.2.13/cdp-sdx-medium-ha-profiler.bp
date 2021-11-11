@@ -272,7 +272,13 @@
           {
             "base": true,
             "refName": "hbase-REGIONSERVER-BASE",
-            "roleType": "REGIONSERVER"
+            "roleType": "REGIONSERVER",
+            "configs": [
+              {
+                "name": "hbase_bucketcache_ioengine",
+                "value": ""
+              }
+            ]
           },
           {
             "base": true,
