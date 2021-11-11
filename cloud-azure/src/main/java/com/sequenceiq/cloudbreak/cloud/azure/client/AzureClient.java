@@ -658,7 +658,7 @@ public class AzureClient {
     }
 
     public Network getNetworkByResourceGroup(String resourceGroup, String virtualNetwork) {
-        return azure.networks().getByResourceGroup(resourceGroup, virtualNetwork);
+        return handleAuthException(() -> azure.networks().getByResourceGroup(resourceGroup, virtualNetwork));
     }
 
     public Map<String, Subnet> getSubnets(String resourceGroup, String virtualNetwork) {
