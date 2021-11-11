@@ -54,7 +54,7 @@ import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ApplicationDet
 import com.sequenceiq.cloudbreak.cloud.yarn.client.model.response.ResponseContext;
 import com.sequenceiq.cloudbreak.cloud.yarn.loadbalancer.service.launch.YarnLoadBalancerLaunchService;
 import com.sequenceiq.cloudbreak.cloud.yarn.status.YarnApplicationStatus;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -75,7 +75,7 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception {
         YarnClient yarnClient = yarnClientUtil.createYarnClient(authenticatedContext);
         String applicationName = applicationNameUtil.createApplicationName(authenticatedContext);
 
@@ -250,7 +250,8 @@ public class YarnResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         throw new CloudOperationNotSupportedException("Upscale stack operation is not supported on YARN");
     }
 

@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 
 @ExtendWith(MockitoExtension.class)
 class ResourceConnectorTest {
@@ -42,7 +42,7 @@ class ResourceConnectorTest {
 
         @Override
         public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
-                AdjustmentType adjustmentType, Long threshold) {
+                AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
             return null;
         }
 
@@ -101,7 +101,8 @@ class ResourceConnectorTest {
         }
 
         @Override
-        public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+        public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+                AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
             return null;
         }
 

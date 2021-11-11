@@ -29,6 +29,8 @@ public class StackScaleV4RequestToUpdateStackV4RequestConverter {
             int scaleNumber = source.getDesiredCount() - instanceGroup.get().getNodeCount();
             instanceGroupAdjustmentJson.setScalingAdjustment(scaleNumber);
             instanceGroupAdjustmentJson.setNetworkScaleRequest(source.getStackNetworkScaleV4Request());
+            instanceGroupAdjustmentJson.setAdjustmentType(source.getAdjustmentType());
+            instanceGroupAdjustmentJson.setThreshold(source.getThreshold());
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
         } else {
             throw new BadRequestException(String.format("Group '%s' not available on stack", source.getGroup()));

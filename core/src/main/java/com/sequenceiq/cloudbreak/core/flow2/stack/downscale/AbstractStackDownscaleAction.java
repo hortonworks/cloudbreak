@@ -35,6 +35,8 @@ import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackScalingService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public abstract class AbstractStackDownscaleAction<P extends Payload>
@@ -93,7 +95,7 @@ public abstract class AbstractStackDownscaleAction<P extends Payload>
         boolean repair = extractRepair(payload, variables);
         CloudStack cloudStack = cloudStackConverter.convertForDownscale(stack, instanceIds);
         return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, instanceGroupName, instanceIds, adjustment,
-                repair);
+                repair, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, adjustment.longValue()));
     }
 
     private boolean extractRepair(P payload, Map<Object, Object> variables) {

@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.util.FreeMarkerTemplateUtils;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -206,7 +207,7 @@ public class AwsLaunchTest {
         AuthenticatedContext authenticatedContext = componentTestUtil.getAuthenticatedContext();
         authenticatedContext.putParameter(AmazonEc2Client.class, amazonEc2Client);
         awsResourceConnector.launch(authenticatedContext, componentTestUtil.getStackForLaunch(InstanceStatus.CREATE_REQUESTED, InstanceStatus.CREATE_REQUESTED),
-                persistenceNotifier, AdjustmentType.EXACT, Long.MAX_VALUE);
+                persistenceNotifier, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, Long.MAX_VALUE));
 
         // assert
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.AWS_VPC.equals(cloudResource.getType())), any());
@@ -251,7 +252,7 @@ public class AwsLaunchTest {
         authenticatedContext.putParameter(AmazonElasticFileSystemClient.class, amazonElasticFileSystemClient);
         authenticatedContext.putParameter(AmazonEfsClient.class, amazonEfsClient);
         awsResourceConnector.launch(authenticatedContext, componentTestUtil.getStackForLaunch(InstanceStatus.CREATE_REQUESTED, InstanceStatus.CREATE_REQUESTED),
-                persistenceNotifier, AdjustmentType.EXACT, Long.MAX_VALUE);
+                persistenceNotifier, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, Long.MAX_VALUE));
 
         // assert
         verify(persistenceNotifier).notifyAllocation(argThat(cloudResource -> ResourceType.AWS_VPC.equals(cloudResource.getType())), any());

@@ -45,6 +45,7 @@ import com.sequenceiq.cloudbreak.cloud.template.ComputeResourceBuilder;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
 import com.sequenceiq.cloudbreak.cloud.template.init.ResourceBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.task.ResourcePollTaskFactory;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -81,18 +82,15 @@ public class ComputeResourceService {
     private ResourceActionFactory resourceActionFactory;
 
     public List<CloudResourceStatus> buildResourcesForLaunch(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
-            AdjustmentType adjustmentType, Long threshold) {
-        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, cloudStack.getGroups(), false, adjustmentType, threshold);
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        LOGGER.info("Build compute resources for launch with adjustment type and threshold: {}", adjustmentTypeWithThreshold);
+        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, cloudStack.getGroups(), false, adjustmentTypeWithThreshold);
     }
 
     public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
-            Iterable<Group> groups) {
-        return buildResourcesForUpscale(ctx, auth, cloudStack, groups, AdjustmentType.EXACT, (long) getFullNodeCount(groups));
-    }
-
-    public List<CloudResourceStatus> buildResourcesForUpscale(ResourceBuilderContext ctx, AuthenticatedContext auth, CloudStack cloudStack,
-            Iterable<Group> groups, AdjustmentType adjustmentType, Long threshold) {
-        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, groups, true, adjustmentType, threshold);
+            Iterable<Group> groups, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        LOGGER.info("Build compute resources for upscale with adjustment type and threshold: {}", adjustmentTypeWithThreshold);
+        return new ResourceBuilder(ctx, auth).buildResources(cloudStack, groups, true, adjustmentTypeWithThreshold);
     }
 
     public List<CloudResourceStatus> deleteResources(ResourceBuilderContext context, AuthenticatedContext auth,
@@ -265,7 +263,7 @@ public class ComputeResourceService {
         }
 
         public List<CloudResourceStatus> buildResources(CloudStack cloudStack, Iterable<Group> groups,
-                Boolean upscale, AdjustmentType adjustmentType, Long threshold) {
+                Boolean upscale, AdjustmentTypeWithThreshold adjustmentTypeAndThreshold) {
             List<CloudResourceStatus> results = new ArrayList<>();
             Collection<Future<ResourceRequestResult<List<CloudResourceStatus>>>> futures = new ArrayList<>();
             for (Group group : getOrderedCopy(groups)) {
@@ -289,7 +287,11 @@ public class ComputeResourceService {
                     List<List<CloudResourceStatus>> cloudResourceStatusChunks = waitForRequests(futures).get(FutureResult.SUCCESS);
                     List<CloudResourceStatus> resourceStatuses = waitForResourceCreations(cloudResourceStatusChunks);
                     List<CloudResourceStatus> failedResources = filterResourceStatuses(resourceStatuses, ResourceStatus.FAILED);
-                    CloudFailureContext cloudFailureContext = new CloudFailureContext(auth, new ScaleContext(upscale, adjustmentType, threshold), ctx);
+                    if (adjustmentTypeAndThreshold == null) {
+                        adjustmentTypeAndThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size());
+                    }
+                    CloudFailureContext cloudFailureContext = new CloudFailureContext(auth,
+                            new ScaleContext(upscale, adjustmentTypeAndThreshold.getAdjustmentType(), adjustmentTypeAndThreshold.getThreshold()), ctx);
                     cloudFailureHandler.rollbackIfNecessary(cloudFailureContext, failedResources, resourceStatuses, group, resourceBuilders,
                             getFullNodeCount(groups)
                     );

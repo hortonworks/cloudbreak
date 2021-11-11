@@ -36,7 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -60,7 +60,7 @@ public class MockResourceConnector implements ResourceConnector<Object> {
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
-            AdjustmentType adjustmentType, Long threshold) {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         List<CloudVmInstanceStatus> instanceIdIterator = launch(authenticatedContext, stack);
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         return generateResources(cloudContext, instanceIdIterator);
@@ -143,7 +143,8 @@ public class MockResourceConnector implements ResourceConnector<Object> {
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources) {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         CloudContext cloudContext = authenticatedContext.getCloudContext();
         List<Group> scaledGroups = cloudResourceHelper.getScaledGroups(stack);
         List<Group> groups = scaledGroups.stream()
@@ -181,9 +182,9 @@ public class MockResourceConnector implements ResourceConnector<Object> {
                 String volumeId = cloudInstance.getInstanceId() + "_" + uuid;
                 CloudResource volumeResource = generateResource("cloudvolume" + uuid, cloudContext, cloudInstance, volumeId,
                         ResourceType.MOCK_VOLUME);
-                ret.add(new CloudResourceStatus(volumeResource, CREATED));
+                ret.add(new CloudResourceStatus(volumeResource, CREATED, cloudInstance.getTemplate().getPrivateId()));
             }
-            ret.add(new CloudResourceStatus(instanceResource, CREATED));
+            ret.add(new CloudResourceStatus(instanceResource, CREATED, cloudInstance.getTemplate().getPrivateId()));
         }
         return ret;
     }
