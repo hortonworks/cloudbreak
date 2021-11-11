@@ -553,6 +553,8 @@ public class ModelDescriptions {
     public static class InstanceGroupAdjustmentModelDescription {
         public static final String SCALING_ADJUSTMENT = "scaling adjustment of the instance groups";
         public static final String WITH_CLUSTER_EVENT = "on stack update, update cluster too";
+        public static final String ADJUSTMENT_TYPE = "scaling adjustment type";
+        public static final String THRESHOLD = "scaling threshold";
         public static final String FORCE = "Force remove instance";
     }
 

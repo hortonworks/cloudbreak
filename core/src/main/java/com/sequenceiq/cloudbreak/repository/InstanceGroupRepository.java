@@ -24,6 +24,9 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
     @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName = :groupName")
     Optional<InstanceGroup> findOneWithInstanceMetadataByGroupNameInStack(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
+    @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName = :groupName")
+    Optional<InstanceGroup> findOneByStackIdAndGroupName(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
     Set<InstanceGroup> findBySecurityGroup(SecurityGroup securityGroup);
 
     Set<InstanceGroup> findByStackId(@Param("stackId") Long stackId);

@@ -43,7 +43,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.AbstractResourceConnector;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.cloudbreak.util.NullUtil;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
@@ -95,7 +95,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext ac, CloudStack stack, PersistenceNotifier notifier,
-            AdjustmentType adjustmentType, Long threshold) {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         AzureCredentialView azureCredentialView = new AzureCredentialView(ac.getCloudCredential());
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
@@ -147,7 +147,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
             List<String> subnetNameList = azureUtils.getCustomSubnetIds(stack.getNetwork());
             List<CloudResource> networkResources = azureCloudResourceService.collectAndSaveNetworkAndSubnet(
                     resourceGroupName, stackName, notifier, cloudContext, subnetNameList, networkName, client);
-            azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentType, threshold, instances, networkResources);
+            azureComputeResourceService.buildComputeResourcesForLaunch(ac, stack, adjustmentTypeWithThreshold, instances, networkResources);
         } catch (CloudException e) {
             throw azureUtils.convertToCloudConnectorException(e, "Stack provisioning");
         } catch (Exception e) {
@@ -318,10 +318,11 @@ public class AzureResourceConnector extends AbstractResourceConnector {
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources) {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         AzureClient client = ac.getParameter(AzureClient.class);
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(new AzureCredentialView(ac.getCloudCredential()), stack, client, ac);
-        return azureUpscaleService.upscale(ac, stack, resources, azureStackView, client);
+        return azureUpscaleService.upscale(ac, stack, resources, azureStackView, client, adjustmentTypeWithThreshold);
     }
 
     @Override

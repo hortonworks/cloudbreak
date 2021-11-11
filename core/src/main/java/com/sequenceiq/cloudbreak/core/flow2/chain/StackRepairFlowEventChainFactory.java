@@ -13,6 +13,8 @@ import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerE
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
@@ -34,7 +36,8 @@ public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<S
             List<String> instances = unhealthyInstances.getInstancesForGroup(hostGroupName);
             flowEventChain.add(
                     new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getResourceId(), hostGroupName,
-                            instances.size(), ScalingType.UPSCALE_TOGETHER, NetworkScaleDetails.getEmpty()));
+                            instances.size(), ScalingType.UPSCALE_TOGETHER, NetworkScaleDetails.getEmpty(),
+                            new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size())));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }

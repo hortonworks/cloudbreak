@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupAdjustmentModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupNetworkScaleModelDescription;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.model.JsonEntity;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkScaleV1Request;
 
@@ -26,6 +27,12 @@ public class DistroXScaleV1Request implements JsonEntity {
 
     @ApiModelProperty(value = InstanceGroupNetworkScaleModelDescription.NETWORK_SCALE_REQUEST)
     private NetworkScaleV1Request networkScaleRequest;
+
+    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.ADJUSTMENT_TYPE)
+    private AdjustmentType adjustmentType = AdjustmentType.EXACT;
+
+    @ApiModelProperty(value = InstanceGroupAdjustmentModelDescription.THRESHOLD)
+    private Long threshold;
 
     public String getGroup() {
         return group;
@@ -49,5 +56,21 @@ public class DistroXScaleV1Request implements JsonEntity {
 
     public void setNetworkScaleRequest(NetworkScaleV1Request networkScaleRequest) {
         this.networkScaleRequest = networkScaleRequest;
+    }
+
+    public void setAdjustmentType(AdjustmentType adjustmentType) {
+        this.adjustmentType = adjustmentType;
+    }
+
+    public AdjustmentType getAdjustmentType() {
+        return adjustmentType;
+    }
+
+    public void setThreshold(Long threshold) {
+        this.threshold = threshold;
+    }
+
+    public Long getThreshold() {
+        return threshold;
     }
 }

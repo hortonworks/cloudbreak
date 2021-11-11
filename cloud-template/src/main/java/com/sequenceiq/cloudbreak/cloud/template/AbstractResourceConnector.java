@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Lists;
@@ -39,7 +41,7 @@ import com.sequenceiq.cloudbreak.cloud.template.group.GroupResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -52,6 +54,8 @@ import com.sequenceiq.common.api.type.ResourceType;
  * Compute resource can be rolled back based on the different failure policies configured. Network resource failure immediately results in a failing deployment.
  */
 public abstract class AbstractResourceConnector implements ResourceConnector<List<CloudResource>> {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractResourceConnector.class);
 
     @Inject
     private NetworkResourceService networkResourceService;
@@ -85,7 +89,8 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> launch(AuthenticatedContext auth, CloudStack stack, PersistenceNotifier notifier,
-            AdjustmentType adjustmentType, Long threshold) throws Exception {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception {
+        LOGGER.info("Launch stack ({}) with adjustment type and threshold: {}", auth.getCloudContext().getName(), adjustmentTypeWithThreshold);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 
@@ -102,7 +107,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
         cloudResourceStatuses.addAll(groupStatuses);
 
         //compute
-        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack, adjustmentType, threshold);
+        List<CloudResourceStatus> computeStatuses = computeResourceService.buildResourcesForLaunch(context, auth, stack, adjustmentTypeWithThreshold);
         cloudResourceStatuses.addAll(computeStatuses);
 
         return cloudResourceStatuses;
@@ -168,7 +173,9 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     }
 
     @Override
-    public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) {
+    public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+        LOGGER.info("Upscale stack ({}) with adjustment type and threshold: {}", auth.getCloudContext().getName(), adjustmentTypeWithThreshold);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
         Variant variant = cloudContext.getVariant();
@@ -186,10 +193,11 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
         //compute
         diskReattachment(resources, scalingGroup, context);
-        return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup));
+        return computeResourceService.buildResourcesForUpscale(context, auth, stack, Collections.singletonList(scalingGroup), adjustmentTypeWithThreshold);
     }
 
     protected void diskReattachment(List<CloudResource> resources, Group scalingGroup, ResourceBuilderContext context) {
+        LOGGER.info("Disk reattachment with resources: {} for group: {}", resources, scalingGroup);
         List<CloudResource> diskSets = resources.stream()
                 .filter(cloudResource -> scalingGroup.getName().equalsIgnoreCase(cloudResource.getGroup()))
                 .filter(cloudResource -> getDiskResourceType().equals(cloudResource.getType()))
@@ -227,6 +235,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
     @Override
     public List<CloudResourceStatus> downscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources, List<CloudInstance> vms,
             List<CloudResource> resourcesToRemove) {
+        LOGGER.info("Downscale stack with resources: {} vms: {}, resources to remove: {}", resources, vms, resourcesToRemove);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
 
@@ -239,6 +248,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> update(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources) throws Exception {
+        LOGGER.info("Update stack with resources: {}", resources);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();
         Variant variant = cloudContext.getVariant();

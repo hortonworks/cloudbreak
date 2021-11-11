@@ -98,6 +98,8 @@ import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -350,7 +352,7 @@ public class AwsRepairTest {
         when(amazonAutoScalingClient.waiters()).thenReturn(asWaiters);
         when(asWaiters.groupInService()).thenReturn(describeAutoScalingGroupsRequestWaiter);
 
-        underTest.upscale(authenticatedContext, stack, cloudResources);
+        underTest.upscale(authenticatedContext, stack, cloudResources, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L));
 
         verify(amazonAutoScalingClient).resumeProcesses(argThat(argument -> AUTOSCALING_GROUP_NAME.equals(argument.getAutoScalingGroupName())
                 && argument.getScalingProcesses().contains("Launch")));

@@ -57,6 +57,8 @@ import com.sequenceiq.cloudbreak.cloud.template.init.ContextBuilders;
 import com.sequenceiq.cloudbreak.cloud.template.loadbalancer.LoadBalancerResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.network.NetworkResourceService;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -220,10 +222,11 @@ public class GcpResourceConnectorTest {
                 any(ResourceBuilderContext.class),
                 any(AuthenticatedContext.class),
                 any(CloudStack.class),
-                anyCollection())
+                anyCollection(),
+                any())
         ).thenReturn(List.of());
 
-        underTest.upscale(authenticatedContext, cloudStack, cloudResourceList);
+        underTest.upscale(authenticatedContext, cloudStack, cloudResourceList, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L));
 
         verify(contextBuilders, times(1)).get(any(Platform.class));
         verify(networkResourceService, times(1)).getNetworkResources(any(Variant.class), anyList());
@@ -233,7 +236,8 @@ public class GcpResourceConnectorTest {
                 any(ResourceBuilderContext.class),
                 any(AuthenticatedContext.class),
                 any(CloudStack.class),
-                anyCollection()
+                anyCollection(),
+                any()
         );
     }
 
