@@ -22,7 +22,8 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class AwsEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
 
-    private static final String ENCRYPTION_KEY_ARN = "dummyEncryptionKeyArn";
+//This is a dummy encryption key arn just given in a proper format.
+    private static final String ENCRYPTION_KEY_ARN = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
