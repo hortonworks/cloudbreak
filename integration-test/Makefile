@@ -59,6 +59,9 @@ docker-compose:
 check-results:
 	./scripts/check-results.sh
 
+compress-results:
+	./scripts/compress-results.sh
+
 stop-containers:
 	./scripts/stop-containers.sh
 
