@@ -12,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
@@ -22,14 +23,14 @@ import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
 public class AwsEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
 
-//This is a dummy encryption key arn just given in a proper format.
-    private static final String ENCRYPTION_KEY_ARN = "arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab";
-
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
     @Inject
     private CredentialTestClient credentialTestClient;
+
+    @Inject
+    private AwsProperties awsProperties;
 
     @Override
     protected void setupTest(TestContext testContext) {
@@ -44,7 +45,7 @@ public class AwsEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
             when = "create an Environment with encryption parameters",
             then = "should use encryption parameters for resource encryption.")
     public void testEnvironmentWithCustomerManagedKey(TestContext testContext) {
-
+        String encryptionKeyArn = awsProperties.getDiskEncryptionKey();
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
@@ -53,7 +54,7 @@ public class AwsEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
                 .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
-                .withAwsResourceEncryptionParameters(ENCRYPTION_KEY_ARN)
+                .withAwsResourceEncryptionParameters(encryptionKeyArn)
                 .withTelemetry("telemetry")
                 .withCreateFreeIpa(Boolean.FALSE)
                 .when(environmentTestClient.create())

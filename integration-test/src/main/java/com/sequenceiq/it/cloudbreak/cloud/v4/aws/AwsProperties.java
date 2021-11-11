@@ -27,6 +27,8 @@ public class AwsProperties {
 
     private Boolean multiaz;
 
+    private String diskEncryptionKey;
+
     private final Instance instance = new Instance();
 
     private final Instance storageOptimizedInstance = new Instance();
@@ -61,6 +63,14 @@ public class AwsProperties {
 
     public void setRegion(String region) {
         this.region = region;
+    }
+
+    public String getDiskEncryptionKey() {
+        return diskEncryptionKey;
+    }
+
+    public void setDiskEncryptionKey(String diskEncryptionKey) {
+        this.diskEncryptionKey = diskEncryptionKey;
     }
 
     public Boolean getMultiaz() {
