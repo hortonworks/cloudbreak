@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.core.cluster.ClusterManagerUpgradeService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.upgrade.ClusterUpgradeFailedEvent;
@@ -46,9 +45,6 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
     @Inject
     private ParcelService parcelService;
 
-    @Inject
-    private ClusterManagerUpgradeService clusterManagerUpgradeService;
-
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterUpgradeRequest.class);
@@ -71,7 +67,7 @@ public class ClusterUpgradeHandler extends ExceptionCatcherEventHandler<ClusterU
             ClusterApi connector = clusterApiConnectors.getConnector(stack);
             Set<ClusterComponent> components = parcelService.getParcelComponentsByBlueprint(stack);
             connector.upgradeClusterRuntime(components, request.isPatchUpgrade(), remoteDataContext);
-            ParcelOperationStatus parcelOperationStatus = clusterManagerUpgradeService.removeUnusedComponents(stackId, components);
+            ParcelOperationStatus parcelOperationStatus = parcelService.removeUnusedParcelComponents(stack, components);
             if (parcelOperationStatus.getFailed().isEmpty()) {
                 result = new ClusterUpgradeSuccess(request.getResourceId());
             } else {

@@ -1,12 +1,7 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -19,34 +14,30 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
-import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 
 public class ClouderaManagerParcelActivationListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelActivationListenerTask.class);
 
+    private final List<ClouderaManagerProduct> products;
+
     public ClouderaManagerParcelActivationListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService) {
+            ClusterEventService clusterEventService, List<ClouderaManagerProduct> products) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
+        this.products = products;
     }
 
     @Override
     protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         ApiClient apiClient = pollerObject.getApiClient();
         Stack stack = pollerObject.getStack();
-        List<ClouderaManagerProduct> clouderaManagerProducts = getClouderaManagerProductsFromStack(stack);
         ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
-        List<ApiParcel> notActivated = getNotActivatedOrMissingParcels(clouderaManagerProducts, parcels);
+        List<ApiParcel> notActivated = getNotActivatedOrMissingParcels(parcels);
         if (notActivated.isEmpty()) {
             LOGGER.debug("Parcels are activated.");
             return true;
@@ -56,47 +47,12 @@ public class ClouderaManagerParcelActivationListenerTask extends AbstractClouder
         }
     }
 
-    private <T> Function<Json, T> toAttributeClass(Class<T> attributeClass) {
-        return attribute -> {
-            try {
-                return Optional.ofNullable(attribute)
-                        .orElseThrow(() -> new CloudbreakServiceException("Cluster component attribute json cannot be null."))
-                        .get(attributeClass);
-            } catch (IOException e) {
-                throw new CloudbreakServiceException("Cannot deserialize the component: " + attributeClass, e);
-            }
-        };
-    }
-
-    private List<ClouderaManagerProduct> getClouderaManagerProductsFromStack(Stack stack) {
-        return getClusterComponents(stack).stream()
-                .filter(createClusterComponentFilter(stack))
-                .map(ClusterComponent::getAttributes)
-                .map(toAttributeClass(ClouderaManagerProduct.class))
-                .collect(Collectors.toList());
-    }
-
-    private Set<ClusterComponent> getClusterComponents(Stack stack) {
-        return Optional.ofNullable(stack)
-                .map(Stack::getCluster)
-                .map(Cluster::getComponents).orElse(Set.of());
-    }
-
-    private Predicate<ClusterComponent> createClusterComponentFilter(Stack stack) {
-        boolean datalake = stack != null && stack.isDatalake();
-        Predicate<ClusterComponent> datalakeClusterComponentFilter =
-                clusterComponent -> clusterComponent.getName().equals(StackType.CDH.name());
-        Predicate<ClusterComponent> distroxClusterComponentFilter =
-                clusterComponent -> ComponentType.CDH_PRODUCT_DETAILS.equals(clusterComponent.getComponentType());
-        return datalake ? datalakeClusterComponentFilter : distroxClusterComponentFilter;
-    }
-
     private ApiParcelList getClouderaManagerParcels(ApiClient apiClient, String stackName) throws ApiException {
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiPojoFactory.getParcelsResourceApi(apiClient);
         return parcelsResourceApi.readParcels(stackName, "summary");
     }
 
-    private List<ApiParcel> getNotActivatedOrMissingParcels(List<ClouderaManagerProduct> products, ApiParcelList parcels) {
+    private List<ApiParcel> getNotActivatedOrMissingParcels(ApiParcelList parcels) {
         List<ApiParcel> notActivated = new ArrayList<>(parcels.getItems().size());
         products.forEach(product -> findParcelAndAddNotActivated(product, parcels, notActivated));
         return notActivated;

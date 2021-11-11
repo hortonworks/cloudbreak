@@ -107,7 +107,7 @@ public class ClusterProxyService {
     }
 
     private void registerGateway(Stack stack) {
-        String knoxUrl = knoxUrl(stack);
+        String knoxUrl = stack.getTunnel().useCcmV2OrJumpgate() ? knoxUrlForCcmV2(stack) : knoxUrlForNoCcmAndCcmV1(stack);
         ConfigUpdateRequest request = new ConfigUpdateRequest(stack.getResourceCrn(), knoxUrl);
         clusterProxyRegistrationClient.updateConfig(request);
     }
@@ -136,15 +136,17 @@ public class ClusterProxyService {
         ConfigRegistrationRequestBuilder requestBuilder = new ConfigRegistrationRequestBuilder(stack.getResourceCrn())
                 .withAliases(singletonList(clusterId(stack.getCluster())))
                 .withServices(serviceConfigs(stack))
-                .withKnoxUrl(knoxUrl(stack))
+                .withKnoxUrl(knoxUrlForNoCcmAndCcmV1(stack))
                 .withAccountId(getAccountId(stack));
         if (stack.getTunnel().useCcmV1()) {
             requestBuilder.withTunnelEntries(tunnelEntries(stack));
         } else if (stack.getTunnel().useCcmV2()) {
-            requestBuilder.withCcmV2Entries(ccmV2Configs(stack));
+            requestBuilder.withCcmV2Entries(ccmV2Configs(stack))
+                    .withKnoxUrl(knoxUrlForCcmV2(stack));
         } else if (stack.getTunnel().useCcmV2Jumpgate()) {
             requestBuilder.withEnvironmentCrn(stack.getEnvironmentCrn())
-                    .withUseCcmV2(true);
+                    .withUseCcmV2(true)
+                    .withKnoxUrl(knoxUrlForCcmV2(stack));
         }
         return requestBuilder.build();
     }
@@ -235,14 +237,21 @@ public class ClusterProxyService {
         return cluster.getId().toString();
     }
 
-    private String knoxUrl(Stack stack) {
-        boolean preferPrivateIp = privateIpShouldBePreferred(stack);
-        String gatewayIp = stack.getPrimaryGatewayInstance().getIpWrapper(preferPrivateIp);
+    private String knoxUrlForNoCcmAndCcmV1(Stack stack) {
+        String gatewayIp = stack.getPrimaryGatewayInstance().getIpWrapper(stack.getTunnel().useCcmV1());
+        Cluster cluster = stack.getCluster();
+        String knoxUrl = String.format("https://%s/%s", gatewayIp, cluster.getGateway().getPath());
+        LOGGER.info("The generated URL for Knox when the tunnel is direct ClusterProxy or CCMv1: '{}'", knoxUrl);
+        return knoxUrl;
+    }
+
+    private String knoxUrlForCcmV2(Stack stack) {
+        String gatewayIp = stack.getPrimaryGatewayInstance().getPrivateIp();
         Cluster cluster = stack.getCluster();
         String knoxUrl = String.format("https://%s:%d/%s/%s", gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(),
                 KnownServiceIdentifier.KNOX.toString().toLowerCase(),
                 cluster.getGateway().getPath());
-        LOGGER.info("The generated URL for Knox: '{}'", knoxUrl);
+        LOGGER.info("The generated URL for Knox in case of CCMv2(.x): '{}'", knoxUrl);
         return knoxUrl;
     }
 

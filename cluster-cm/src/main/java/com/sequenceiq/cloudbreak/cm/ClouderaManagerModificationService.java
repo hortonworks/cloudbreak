@@ -6,8 +6,8 @@ import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUD
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 
 import java.math.BigDecimal;
@@ -463,9 +463,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                 refreshParcelRepos.getId());
         handlePollingResult(activateParcelsPollingResult, "Cluster was terminated while waiting for parcel repository refresh",
                 "Timeout while Cloudera Manager was refreshing parcel repositories.");
-
+        List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId());
         PollingResult downloadPollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient,
-                refreshParcelRepos.getId());
+                refreshParcelRepos.getId(), products);
         handlePollingResult(downloadPollingResult, "Cluster was terminated while waiting for parcel download",
                 "Timeout while Cloudera Manager was downloading parcels.");
         LOGGER.debug("Refreshed parcel repos");
@@ -622,7 +622,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     private void activateParcels(ClustersResourceApi clustersResourceApi) throws ApiException, CloudbreakException {
         LOGGER.debug("Deploying client configurations on upscaled hosts.");
         BigDecimal deployCommandId = deployClientConfig(clustersResourceApi, stack);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, deployCommandId);
+        List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId());
+        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, deployCommandId, products);
         handlePollingResult(pollingResult, "Cluster was terminated while waiting for parcels activation", "Timeout while Cloudera Manager activate parcels.");
         LOGGER.debug("Parcels are activated on upscaled hosts.");
     }
