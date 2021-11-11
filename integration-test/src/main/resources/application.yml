@@ -118,7 +118,7 @@ integrationtest:
       volumeCount: 1
       volumeType: gp2
     storageOptimizedInstance:
-      type: m5d.large
+      type: m5d.xlarge
       rootVolumeSize: 100
       volumeSize: 100
       volumeCount: 1
