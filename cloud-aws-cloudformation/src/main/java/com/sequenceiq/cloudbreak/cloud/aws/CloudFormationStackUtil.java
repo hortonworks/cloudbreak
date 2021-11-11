@@ -9,6 +9,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -129,7 +130,11 @@ public class CloudFormationStackUtil {
                             .filter(cloudInstance -> cloudInstance.getInstanceId() == null)
                             .collect(Collectors.toList())
                             .iterator();
-                    for (String instanceId : entry.getValue()) {
+                    List<String> knownInstanceIds = group.getInstances().stream().map(CloudInstance::getInstanceId)
+                                    .filter(Objects::nonNull)
+                                    .collect(Collectors.toList());
+                    List<String> newInstanceIds = entry.getValue().stream().filter(s -> !knownInstanceIds.contains(s)).collect(Collectors.toList());
+                    for (String instanceId : newInstanceIds) {
                         CloudResource cloudResource = CloudResource.builder()
                                 .type(ResourceType.AWS_INSTANCE)
                                 .instanceId(instanceId)

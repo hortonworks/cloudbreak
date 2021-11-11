@@ -13,7 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ExternalDatabaseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.TlsInfo;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
-import com.sequenceiq.common.api.type.AdjustmentType;
+import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 
 /**
  * Cloudbreak handles the entities on the Cloud provider side as generic resources and supports CRUD operations on them.
@@ -47,16 +47,16 @@ public interface ResourceConnector<R> {
      * need to wait/block until the infrastructure creation is finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)}
      * method is invoked to check regularly whether the infrastructure and all resources have already been created or not.
      *
-     * @param authenticatedContext the authenticated context which holds the client object
-     * @param stack                contains the full description of infrastructure
-     * @param persistenceNotifier  Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platfrom
-     * @param adjustmentType       defines the failure policy (i.e. what shall the cloudbpaltform do if not all of the VMs can be strarted)
-     * @param threshold            threshold related adjustmentType
+     * @param authenticatedContext      the authenticated context which holds the client object
+     * @param stack                     contains the full description of infrastructure
+     * @param persistenceNotifier       Cloud platform notifies the Cloudbreak over this interface if a resource is allocated on the Cloud platfrom
+     * @param adjustmentTypeWithThreshold   defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
+
      * @return the status of resources allocated on Cloud platform
      * @throws Exception in case of any error
      */
     List<CloudResourceStatus> launch(AuthenticatedContext authenticatedContext, CloudStack stack, PersistenceNotifier persistenceNotifier,
-            AdjustmentType adjustmentType, Long threshold) throws Exception;
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws Exception;
 
     /**
      * Updates an existing stack with one or more load balancers, if the load balances do not already exist. This method will initiate the
@@ -218,14 +218,16 @@ public interface ResourceConnector<R> {
      * finished, but it can return immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the
      * infrastructure and all resources have already been updated or not.
      *
-     * @param authenticatedContext the authenticated context which holds the client object
-     * @param stack                contains the full description of the new infrastructure including new instances
-     *                             ({@link com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate}) where the CREATE_REQUESTED status
-     *                             {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is a new instance and needs to be created.
-     * @param resources            resources that needs to be updated (e.g HEAT_TEMPLATE)
+     * @param authenticatedContext      the authenticated context which holds the client object
+     * @param stack                     contains the full description of the new infrastructure including new instances
+     *                                  ({@link com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate}) where the CREATE_REQUESTED status
+     *                                  {@link com.sequenceiq.cloudbreak.cloud.model.InstanceStatus} denotes that it is a new instance and needs to be created.
+     * @param resources                 resources that needs to be updated (e.g HEAT_TEMPLATE)
+     * @param adjustmentTypeWithThreshold   defines the failure policy (i.e. what shall the cloudplatform do if not all of the VMs can be started)
      * @return the status of updated resources
      */
-    List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources);
+    List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold);
 
     /**
      * Update of infrastructure on Cloud platform, delete instances. It does not need to wait/block until the infrastructure update is
