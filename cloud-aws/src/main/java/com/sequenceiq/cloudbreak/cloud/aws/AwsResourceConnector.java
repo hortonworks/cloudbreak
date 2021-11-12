@@ -104,6 +104,7 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.common.type.CommonResourceType;
+import com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag;
 import com.sequenceiq.cloudbreak.common.type.ResourceType;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionWentFailException;
@@ -424,7 +425,8 @@ public class AwsResourceConnector implements ResourceConnector<Object> {
                 new Parameter().withParameterKey("CBUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.CORE)),
                 new Parameter().withParameterKey("CBGateWayUserData").withParameterValue(stack.getImage().getUserDataByType(InstanceGroupType.GATEWAY)),
                 new Parameter().withParameterKey("StackName").withParameterValue(stackName),
-                new Parameter().withParameterKey("StackOwner").withParameterValue(ac.getCloudContext().getUserId()),
+                new Parameter().withParameterKey("StackOwner")
+                        .withParameterValue(stack.getTags().getOrDefault(DefaultApplicationTag.OWNER.key(), ac.getCloudContext().getUserId())),
                 new Parameter().withParameterKey("KeyName").withParameterValue(keyPairName),
                 new Parameter().withParameterKey("AMI").withParameterValue(stack.getImage().getImageName()),
                 new Parameter().withParameterKey("RootDeviceName").withParameterValue(getRootDeviceName(ac, stack))
