@@ -54,7 +54,7 @@ public class DefaultCostTaggingServiceTest {
         Assert.assertEquals("Apache", result.get(DefaultApplicationTag.CB_ACOUNT_NAME.key()));
         Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.CB_USER_NAME.key()));
         Assert.assertEquals("2.2.0", result.get(DefaultApplicationTag.CB_VERSION.key()));
-        Assert.assertEquals("apache1@apache.com", result.get(DefaultApplicationTag.OWNER.key()));
+        Assert.assertEquals("apache1", result.get(DefaultApplicationTag.OWNER.key()));
         Assert.assertEquals(String.valueOf(epochSeconds), result.get("cb-creation-timestamp"));
     }
 

@@ -15,6 +15,7 @@ import static com.sequenceiq.cloudbreak.common.type.DefaultApplicationTag.OWNER;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -78,7 +79,7 @@ public class DefaultCostTaggingService {
         result.put(transform(CB_USER_NAME.key(), platform), transform(owner, platform));
         result.put(transform(CB_VERSION.key(), platform), transform(cbVersion, platform));
         if (sourceMap == null || Strings.isNullOrEmpty(sourceMap.get(transform(OWNER.key(), platform)))) {
-            result.put(transform(OWNER.key(), platform), transform(owner, platform));
+            result.put(transform(OWNER.key(), platform), transform(getUserName(owner), platform));
         }
         result.put(transform(CB_CREATION_TIMESTAMP.key(), platform), transform(String.valueOf(clock.getCurrentInstant().getEpochSecond()), platform));
         return result;
@@ -94,5 +95,14 @@ public class DefaultCostTaggingService {
         Map<String, String> result = new HashMap<>();
         result.put(DefaultApplicationTag.CB_RESOURCE_TYPE.key(), cloudbreakResourceType.key());
         return result;
+    }
+
+    /**
+     * Extract username from email, so that user@cloudera.com and user@ums.mock will have the same tag value
+     */
+    private String getUserName(String owner) {
+        return Optional.ofNullable(owner)
+                .map(username -> username.split("@")[0])
+                .orElse(null);
     }
 }

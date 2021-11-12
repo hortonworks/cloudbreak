@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.common.type;
 
 public enum DefaultApplicationTag {
 
-    OWNER("Owner"),
+    OWNER("owner"),
     CB_USER_NAME("cb-user-name"),
     CB_VERSION("cb-version"),
     CB_ACOUNT_NAME("cb-account-name"),
