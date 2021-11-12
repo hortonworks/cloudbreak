@@ -34,6 +34,16 @@ class EnvironmentStatusTest {
                 { "UPDATE_FAILED",                          EnvironmentStatus.UPDATE_FAILED,                        false },
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS, false },
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, false },
+                { "UPGRADE_CCM_VALIDATION_IN_PROGRESS",     EnvironmentStatus.UPGRADE_CCM_VALIDATION_IN_PROGRESS,   false },
+                { "UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS",     EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS,   false },
+                { "UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS",    EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS,  false },
+                { "UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS",     EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS,   false },
+                { "UPGRADE_CCM_ROLLING_BACK",               EnvironmentStatus.UPGRADE_CCM_ROLLING_BACK,             false },
+                { "UPGRADE_CCM_VALIDATION_FAILED",          EnvironmentStatus.UPGRADE_CCM_VALIDATION_FAILED,        false },
+                { "UPGRADE_CCM_ON_FREEIPA_FAILED",          EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_FAILED,        false },
+                { "UPGRADE_CCM_ON_DATALAKE_FAILED",         EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_FAILED,       false },
+                { "UPGRADE_CCM_ON_DATAHUB_FAILED",          EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_FAILED,        false },
+                { "UPGRADE_CCM_FAILED",                     EnvironmentStatus.UPGRADE_CCM_FAILED,                   false },
         };
     }
     // CHECKSTYLE:ON
@@ -72,6 +82,17 @@ class EnvironmentStatusTest {
                 { "UPDATE_FAILED",                          EnvironmentStatus.UPDATE_FAILED,                        true },
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS, false },
                 { "ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS", EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_DELETE_IN_PROGRESS, false },
+                { "FREEIPA_DELETED_ON_PROVIDER_SIDE",       EnvironmentStatus.FREEIPA_DELETED_ON_PROVIDER_SIDE,     true },
+                { "UPGRADE_CCM_VALIDATION_IN_PROGRESS",     EnvironmentStatus.UPGRADE_CCM_VALIDATION_IN_PROGRESS,   false },
+                { "UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS",     EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS,   false },
+                { "UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS",    EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS,  false },
+                { "UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS",     EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS,   false },
+                { "UPGRADE_CCM_ROLLING_BACK",               EnvironmentStatus.UPGRADE_CCM_ROLLING_BACK,             false },
+                { "UPGRADE_CCM_VALIDATION_FAILED",          EnvironmentStatus.UPGRADE_CCM_VALIDATION_FAILED,        true },
+                { "UPGRADE_CCM_ON_FREEIPA_FAILED",          EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_FAILED,        true },
+                { "UPGRADE_CCM_ON_DATALAKE_FAILED",         EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_FAILED,       true },
+                { "UPGRADE_CCM_ON_DATAHUB_FAILED",          EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_FAILED,        true },
+                { "UPGRADE_CCM_FAILED",                     EnvironmentStatus.UPGRADE_CCM_FAILED,                   true },
         };
     }
     // CHECKSTYLE:ON

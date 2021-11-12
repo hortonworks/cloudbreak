@@ -19,8 +19,8 @@ public enum EnvironmentStatus {
 
     RDBMS_DELETE_IN_PROGRESS("External Database deletion in progress"),
 
-    FREEIPA_CREATION_IN_PROGRESS("Free IPA creation in progress"),
-    FREEIPA_DELETE_IN_PROGRESS("Free IPA deletion in progress"),
+    FREEIPA_CREATION_IN_PROGRESS("FreeIPA creation in progress"),
+    FREEIPA_DELETE_IN_PROGRESS("FreeIPA deletion in progress"),
 
     EXPERIENCE_DELETE_IN_PROGRESS("Experience deletion in progress"),
 
@@ -53,8 +53,8 @@ public enum EnvironmentStatus {
     STOP_DATAHUB_FAILED("Failed to Stop Data Hubs"),
     STOP_DATALAKE_STARTED("Stopping Data Lake"),
     STOP_DATALAKE_FAILED("Failed to Stop Data Lake"),
-    STOP_FREEIPA_STARTED("Stopping Free IPA"),
-    STOP_FREEIPA_FAILED("Failed to Stop Free IPA"),
+    STOP_FREEIPA_STARTED("Stopping FreeIPA"),
+    STOP_FREEIPA_FAILED("Failed to Stop FreeIPA"),
 
     ENV_STOPPED("Stopped"),
 
@@ -62,17 +62,28 @@ public enum EnvironmentStatus {
     START_DATAHUB_FAILED("Failed to Start Data Hubs"),
     START_DATALAKE_STARTED("Starting Data Lake"),
     START_DATALAKE_FAILED("Failed to Start Data Lake"),
-    START_FREEIPA_STARTED("Starting Free IPA"),
-    START_FREEIPA_FAILED("Failed to Start Free IPA"),
+    START_FREEIPA_STARTED("Starting FreeIPA"),
+    START_FREEIPA_FAILED("Failed to Start FreeIPA"),
     START_SYNCHRONIZE_USERS_STARTED("Starting to synchronize users"),
     START_SYNCHRONIZE_USERS_FAILED("Failed to synchronize users"),
 
-    FREEIPA_DELETED_ON_PROVIDER_SIDE("Free IPA deleted on cloud provider side"),
+    FREEIPA_DELETED_ON_PROVIDER_SIDE("FreeIPA deleted on cloud provider side"),
 
     LOAD_BALANCER_ENV_UPDATE_STARTED("Starting load balancer update for environment"),
     LOAD_BALANCER_ENV_UPDATE_FAILED("Failed to update environment with load balancer"),
     LOAD_BALANCER_STACK_UPDATE_STARTED("Starting load balancer update for all data lakes and data hubs"),
-    LOAD_BALANCER_STACK_UPDATE_FAILED("Failed to update data lakes and data hubs with load balancer");
+    LOAD_BALANCER_STACK_UPDATE_FAILED("Failed to update data lakes and data hubs with load balancer"),
+
+    UPGRADE_CCM_VALIDATION_IN_PROGRESS("Validation for CCM upgrade"),
+    UPGRADE_CCM_VALIDATION_FAILED("Validation for CCM upgrade failed"),
+    UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS("Upgrading CCM on FreeIPA"),
+    UPGRADE_CCM_ON_FREEIPA_FAILED("Upgrading CCM on FreeIPA failed"),
+    UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS("Upgrading CCM on Data Lake"),
+    UPGRADE_CCM_ON_DATALAKE_FAILED("Upgrading CCM on Data Lake failed"),
+    UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS("Upgrading CCM on Data Hub clusters"),
+    UPGRADE_CCM_ON_DATAHUB_FAILED("Upgrading CCM on Data Hub clusters failed"),
+    UPGRADE_CCM_FAILED("Upgrade CCM failed"),
+    UPGRADE_CCM_ROLLING_BACK("Rolling back failed CCM upgrade");
 
     private static final Set<EnvironmentStatus> STARTABLE_STATUSES = Set.of(
             AVAILABLE,
@@ -115,7 +126,12 @@ public enum EnvironmentStatus {
             STOP_DATAHUB_FAILED,
             STOP_DATALAKE_FAILED,
             STOP_FREEIPA_FAILED,
-            FREEIPA_DELETED_ON_PROVIDER_SIDE
+            FREEIPA_DELETED_ON_PROVIDER_SIDE,
+            UPGRADE_CCM_VALIDATION_FAILED,
+            UPGRADE_CCM_ON_FREEIPA_FAILED,
+            UPGRADE_CCM_ON_DATALAKE_FAILED,
+            UPGRADE_CCM_ON_DATAHUB_FAILED,
+            UPGRADE_CCM_FAILED
     );
 
     private static final Set<EnvironmentStatus> STOP_IN_PROGRESS_OR_STOPPED_STATUSES = Set.of(

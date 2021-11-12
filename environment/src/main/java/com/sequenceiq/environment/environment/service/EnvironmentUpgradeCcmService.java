@@ -36,7 +36,8 @@ public class EnvironmentUpgradeCcmService {
 
     private FlowIdentifier upgradeCcm(EnvironmentDto environment) {
         validateUpgrade(environment);
-        return reactorFlowManager.triggerCcmUpgradeFlow(environment);
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return reactorFlowManager.triggerCcmUpgradeFlow(environment, userCrn);
     }
 
     private void validateUpgrade(EnvironmentDto environment) {

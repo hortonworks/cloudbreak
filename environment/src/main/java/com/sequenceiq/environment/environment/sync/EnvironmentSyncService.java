@@ -42,6 +42,7 @@ public class EnvironmentSyncService {
                     return START_FREEIPA_STARTED;
                 case STOP_IN_PROGRESS:
                     return STOP_FREEIPA_STARTED;
+                // TODO: add CCM upgrade statuses here
                 default:
                     break;
             }

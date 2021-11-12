@@ -53,11 +53,11 @@ class EnvironmentUpgradeCcmServiceTest {
     private void testUpgradeCcm(EnvironmentDto env, EnvironmentStatus status, Runnable upgradeCall) {
         if (status == EnvironmentStatus.AVAILABLE) {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, upgradeCall);
-            verify(reactorFlowManager).triggerCcmUpgradeFlow(env);
+            verify(reactorFlowManager).triggerCcmUpgradeFlow(env, USER_CRN);
         } else {
             assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, upgradeCall))
                     .isInstanceOf(BadRequestException.class);
-            verify(reactorFlowManager, never()).triggerCcmUpgradeFlow(any());
+            verify(reactorFlowManager, never()).triggerCcmUpgradeFlow(any(), anyString());
         }
     }
 

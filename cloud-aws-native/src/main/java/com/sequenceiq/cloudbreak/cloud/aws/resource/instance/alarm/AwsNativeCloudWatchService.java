@@ -73,7 +73,7 @@ public class AwsNativeCloudWatchService {
     public void addCloudWatchAlarmsForSystemFailures(CloudResource resource, String regionName, AwsCredentialView credentialView) {
         try {
             PutMetricAlarmRequest metricAlarmRequest = createPutMetricAlarmRequest(resource.getInstanceId(), regionName);
-            LOGGER.debug("The following cloudwatch alarm – for instanceId: {} – has created and about to put it on AWS side: [{}]",
+            LOGGER.debug("The following cloudwatch alarm - for instanceId: {} - has created and about to put it on AWS side: [{}]",
                     resource.getReference(), metricAlarmRequest);
             commonAwsClient.createCloudWatchClient(credentialView, regionName).putMetricAlarm(metricAlarmRequest);
         } catch (AmazonCloudWatchException acwe) {

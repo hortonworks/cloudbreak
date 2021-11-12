@@ -124,7 +124,19 @@ public enum EnvironmentStatus {
     // Start updating the LoadBalancer on Data Hubs in an Environment
     LOAD_BALANCER_STACK_UPDATE_STARTED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_STACK_UPDATE_STARTED),
     // Failed to updating the LoadBalancer on Data Hubs in an Environment (Detailed message in the statusReason)
-    LOAD_BALANCER_STACK_UPDATE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_STACK_UPDATE_FAILED);
+    LOAD_BALANCER_STACK_UPDATE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.LOAD_BALANCER_STACK_UPDATE_FAILED),
+
+    // Upgrade CCM
+    UPGRADE_CCM_VALIDATION_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_VALIDATION_IN_PROGRESS),
+    UPGRADE_CCM_VALIDATION_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_VALIDATION_FAILED),
+    UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_IN_PROGRESS),
+    UPGRADE_CCM_ON_FREEIPA_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_FREEIPA_FAILED),
+    UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_IN_PROGRESS),
+    UPGRADE_CCM_ON_DATALAKE_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATALAKE_FAILED),
+    UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_IN_PROGRESS),
+    UPGRADE_CCM_ON_DATAHUB_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ON_DATAHUB_FAILED),
+    UPGRADE_CCM_ROLLING_BACK(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_ROLLING_BACK),
+    UPGRADE_CCM_FAILED(com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.UPGRADE_CCM_FAILED);
 
     public static final Set<EnvironmentStatus> AVAILABLE_STATUSES = Set.of(
             CREATION_INITIATED,

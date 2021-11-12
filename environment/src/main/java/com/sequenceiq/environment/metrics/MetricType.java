@@ -20,7 +20,10 @@ public enum MetricType implements Metric {
     ENV_STACK_CONFIG_UPDATE_FAILED("environment.stack.config.update.failed"),
 
     ENV_LOAD_BALANCER_UPDATE_FINISHED("environment.loadbalancer.update.finished"),
-    ENV_LOAD_BALANCER_UPDATE_FAILED("environment.loadbalancer.update.failed");
+    ENV_LOAD_BALANCER_UPDATE_FAILED("environment.loadbalancer.update.failed"),
+
+    ENV_UPGRADE_CCM_FINISHED("environment.upgrade.ccm.finished"),
+    ENV_UPGRADE_CCM_FAILED("environment.upgrade.ccm.failed");
 
     private final String metricName;
 
