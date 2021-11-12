@@ -1,4 +1,4 @@
-package com.sequenceiq.environment.exception.mapper;
+package com.sequenceiq.cloudbreak.exception.mapper;
 
 import javax.ws.rs.core.Response;
 
@@ -9,17 +9,20 @@ import org.springframework.stereotype.Component;
 import io.grpc.StatusRuntimeException;
 
 @Component
-public class StatusRuntimeExceptionMapper extends EnvironmentBaseExceptionMapper<StatusRuntimeException> {
+public class StatusRuntimeExceptionMapper extends BaseExceptionMapper<StatusRuntimeException> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusRuntimeExceptionMapper.class);
 
     @Override
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     public Response.Status getResponseStatus(StatusRuntimeException exception) {
         switch (exception.getStatus().getCode()) {
             case OK:
                 return Response.Status.OK;
             case NOT_FOUND:
                 return Response.Status.NOT_FOUND;
+            case FAILED_PRECONDITION:
+                return Response.Status.BAD_REQUEST;
             case PERMISSION_DENIED:
                 return Response.Status.FORBIDDEN;
             case UNIMPLEMENTED:
