@@ -1,19 +1,5 @@
 package com.sequenceiq.cloudbreak.domain.stack.cluster;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
@@ -37,19 +23,18 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.ConfigStrategy;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Container;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
-import com.sequenceiq.cloudbreak.converter.CertExpirationStateConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ConfigStrategyConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ExecutorTypeConverter;
 import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
@@ -61,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
+import com.sequenceiq.common.api.type.CertExpirationState;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
@@ -309,10 +295,18 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.name = name;
     }
 
+    /**
+     * @deprecated {@link #getStatus} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#getStatus}.
+     */
+    @Deprecated
     public Status getStatus() {
         return status;
     }
 
+    /**
+     * @deprecated {@link #setStatus} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#setStatus}.
+     */
+    @Deprecated
     public void setStatus(Status status) {
         this.status = status;
     }
@@ -341,10 +335,18 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.upSince = upSince;
     }
 
+    /**
+     * @deprecated {@link #getStatusReason} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#getStatusReason}.
+     */
+    @Deprecated
     public String getStatusReason() {
         return statusReason;
     }
 
+    /**
+     * @deprecated {@link #setStatusReason} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#setStatusReason}.
+     */
+    @Deprecated
     public void setStatusReason(String statusReason) {
         this.statusReason = statusReason;
     }
@@ -419,62 +421,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setClusterManagerIp(String clusterManagerIp) {
         this.clusterManagerIp = clusterManagerIp;
-    }
-
-    public boolean isClusterReadyForStop() {
-        return AVAILABLE.equals(status) || STOPPED.equals(status);
-    }
-
-    public boolean isAvailable() {
-        return AVAILABLE.equals(status);
-    }
-
-    public boolean isMaintenanceModeEnabled() {
-        return MAINTENANCE_MODE_ENABLED.equals(status);
-    }
-
-    public boolean isStopped() {
-        return STOPPED.equals(status);
-    }
-
-    public boolean isStopFailed() {
-        return STOP_FAILED.equals(status);
-    }
-
-    public boolean isStartFailed() {
-        return START_FAILED.equals(status);
-    }
-
-    public boolean isStartRequested() {
-        return START_REQUESTED.equals(status);
-    }
-
-    public boolean isStopInProgress() {
-        return STOP_IN_PROGRESS.equals(status) || STOP_REQUESTED.equals(status);
-    }
-
-    public boolean isRequested() {
-        return REQUESTED.equals(status);
-    }
-
-    public boolean isDeleteInProgress() {
-        return DELETE_IN_PROGRESS.equals(status);
-    }
-
-    public boolean isDeleteCompleted() {
-        return DELETE_COMPLETED.equals(status);
-    }
-
-    public boolean isClusterReadyForStart() {
-        return STOPPED.equals(status) || START_REQUESTED.equals(status);
-    }
-
-    public boolean isModificationInProgress() {
-        return CREATE_IN_PROGRESS.equals(status)
-                || UPDATE_IN_PROGRESS.equals(status)
-                || STOP_IN_PROGRESS.equals(status)
-                || START_IN_PROGRESS.equals(status)
-                || DELETE_IN_PROGRESS.equals(status);
     }
 
     public String getAttributes() {

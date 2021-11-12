@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.cluster;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
@@ -33,6 +32,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
@@ -40,7 +40,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
-import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
@@ -51,12 +50,10 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
-import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
@@ -66,6 +63,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.altus.AltusMachineUserService;
 import com.sequenceiq.cloudbreak.service.filesystem.FileSystemConfigService;
 import com.sequenceiq.cloudbreak.service.gateway.GatewayService;
@@ -75,7 +73,6 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -105,9 +102,6 @@ public class ClusterService {
     private HostGroupService hostGroupService;
 
     @Inject
-    private StatusToPollGroupConverter statusToPollGroupConverter;
-
-    @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
@@ -129,10 +123,10 @@ public class ClusterService {
     private AltusMachineUserService altusMachineUserService;
 
     @Inject
-    private UsageLoggingUtil usageLoggingUtil;
+    private RuntimeVersionService runtimeVersionService;
 
     @Inject
-    private RuntimeVersionService runtimeVersionService;
+    private StackUpdater stackUpdater;
 
     public Cluster saveClusterAndComponent(Cluster cluster, List<ClusterComponent> components, String stackName) {
         Cluster savedCluster;
@@ -274,43 +268,18 @@ public class ClusterService {
         return (rdsConfig == null || ResourceStatus.DEFAULT == rdsConfig.getStatus()) && cluster.getDatabaseServerCrn() == null;
     }
 
-    public Cluster updateClusterStatusByStackId(Long stackId, Status status, String statusReason) {
-        LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, status, statusReason);
-        StackStatus stackStatus = stackService.getCurrentStatusByStackId(stackId);
-        Optional<Cluster> cluster = retrieveClusterByStackIdWithoutAuth(stackId);
-        Optional<Status> clusterOldStatus = cluster.map(Cluster::getStatus);
-        cluster = cluster.map(c -> {
-            c.setStatus(status);
-            c.setStatusReason(statusReason);
-            return c;
-        }).map(repository::save);
-        handleInMemoryState(stackId, stackStatus, cluster, clusterOldStatus);
-        return cluster.orElse(null);
+    public Cluster updateClusterStatusByStackId(Long stackId, DetailedStackStatus detailedStackStatus, String statusReason) {
+        LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, detailedStackStatus, statusReason);
+        Stack stack = stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
+        return stack.getCluster();
     }
 
-    private void handleInMemoryState(Long stackId, StackStatus stackStatus, Optional<Cluster> cluster, Optional<Status> clusterOldStatus) {
-        cluster.ifPresent(c -> {
-            clusterOldStatus.ifPresent(oldstatus -> usageLoggingUtil.logClusterStatusChangeUsageEvent(oldstatus, c));
-            if (c.getStatus().isRemovableStatus()) {
-                InMemoryStateStore.deleteCluster(c.getId());
-                if (stackStatus.getStatus().isRemovableStatus()) {
-                    InMemoryStateStore.deleteStack(stackId);
-                }
-            } else {
-                InMemoryStateStore.putCluster(c.getId(), statusToPollGroupConverter.convert(c.getStatus()));
-                if (InMemoryStateStore.getStack(stackId) == null) {
-                    InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(stackStatus.getStatus()));
-                }
-            }
-        });
+    public Cluster updateClusterStatusByStackId(Long stackId, DetailedStackStatus detailedStackStatus) {
+        return updateClusterStatusByStackId(stackId, detailedStackStatus, "");
     }
 
-    public Cluster updateClusterStatusByStackId(Long stackId, Status status) {
-        return updateClusterStatusByStackId(stackId, status, "");
-    }
-
-    public Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, Status status) throws TransactionExecutionException {
-        return transactionService.notSupported(() -> updateClusterStatusByStackId(stackId, status, ""));
+    public Cluster updateClusterStatusByStackIdOutOfTransaction(Long stackId, DetailedStackStatus detailedStackStatus) throws TransactionExecutionException {
+        return transactionService.notSupported(() -> updateClusterStatusByStackId(stackId, detailedStackStatus, ""));
     }
 
     public Cluster updateCluster(Cluster cluster) {
@@ -414,7 +383,6 @@ public class ClusterService {
         cluster.getHostGroups().clear();
         cluster.getHostGroups().addAll(hostGroups);
         LOGGER.debug("Cluster requested [BlueprintId: {}]", cluster.getBlueprint().getId());
-        cluster.setStatus(REQUESTED);
         cluster.setStack(stack);
         cluster = repository.save(cluster);
         return cluster;

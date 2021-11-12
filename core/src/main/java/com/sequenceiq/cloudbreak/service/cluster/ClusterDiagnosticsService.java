@@ -48,7 +48,7 @@ public class ClusterDiagnosticsService {
             Stack stack = transactionService.required(() -> stackService.getByIdWithListsInTransaction(stackId));
             InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
             if (stack.getCluster() != null) {
-                InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getCluster().getStatus()));
+                InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getStatus()));
             }
             clusterApiConnectors.getConnector(stack).clusterDiagnosticsService().collectDiagnostics(parameters);
         } catch (TransactionService.TransactionExecutionException e) {

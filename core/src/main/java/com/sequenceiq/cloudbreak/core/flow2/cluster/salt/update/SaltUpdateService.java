@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.salt.update;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.SALT_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -24,7 +25,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Component
 public class SaltUpdateService {
@@ -35,9 +35,6 @@ public class SaltUpdateService {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private TransactionService transactionService;
@@ -59,7 +56,6 @@ public class SaltUpdateService {
     public void clusterInstallationFinished(StackView stackView) {
         try {
             transactionService.required(() -> {
-                clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
                 stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Salt update finished.");
                 flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SALT_UPDATE_FINISHED);
             });
@@ -71,8 +67,7 @@ public class SaltUpdateService {
     public void handleClusterCreationFailure(StackView stackView, Exception exception) {
         if (stackView.getClusterView() != null) {
             String errorMessage = clusterCreationService.getErrorMessageFromException(exception);
-            clusterService.updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED, errorMessage);
-            stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
+            stackUpdater.updateStackStatus(stackView.getId(), SALT_UPDATE_FAILED, errorMessage);
             flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(), CLUSTER_SALT_UPDATE_FAILED, errorMessage);
         } else {
             LOGGER.info("Cluster was null. Flow action was not required.");

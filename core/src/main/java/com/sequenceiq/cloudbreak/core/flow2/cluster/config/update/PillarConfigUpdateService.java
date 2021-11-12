@@ -23,7 +23,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
@@ -36,9 +35,6 @@ public class PillarConfigUpdateService {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private TransactionService transactionService;
@@ -64,9 +60,7 @@ public class PillarConfigUpdateService {
     public void configUpdateFinished(StackView stackView) {
         try {
             transactionService.required(() -> {
-                clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
-                stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE,
-                    "Config update finished.");
+                stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Config update finished.");
             });
             flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(),
                 CLUSTER_PILLAR_CONFIG_UPDATE_FINISHED);
@@ -81,11 +75,7 @@ public class PillarConfigUpdateService {
                 String errorMessage = clusterCreationService
                     .getErrorMessageFromException(exception);
                 transactionService.required(() -> {
-                    clusterService
-                        .updateClusterStatusByStackId(stackView.getId(), UPDATE_FAILED,
-                            errorMessage);
-                    stackUpdater
-                        .updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
+                    stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.PILLAR_CONFIG_UPDATE_FAILED);
                 });
                 flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(),
                     CLUSTER_PILLAR_CONFIG_UPDATE_FAILED, errorMessage);

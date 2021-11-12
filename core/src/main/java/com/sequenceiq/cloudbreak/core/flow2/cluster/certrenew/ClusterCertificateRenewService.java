@@ -12,16 +12,15 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.converter.util.ExceptionMessageFormatterUtil;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterCreationService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 @Service
 public class ClusterCertificateRenewService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCreationService.class);
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClusterCertificateRenewService.class);
 
     @Inject
     private StackUpdater stackUpdater;
@@ -29,27 +28,21 @@ public class ClusterCertificateRenewService {
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
 
-    @Inject
-    private ClusterService clusterService;
-
     void reissueCertificate(long stackId) {
         String statusReason = "Reissuing the certificate of the cluster.";
         LOGGER.debug(statusReason);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, statusReason);
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CERTIFICATE_RENEWAL_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CERTIFICATE_REISSUE);
     }
 
     void redeployCertificateOnCluster(long stackId) {
         String statusReason = "The redeployment of the reissued certificate to the cluster has been started.";
         LOGGER.debug(statusReason);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, statusReason);
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CERTIFICATE_REDEPLOY_IN_PROGRESS, statusReason);
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_CERTIFICATE_REDEPLOY);
     }
 
     void certificateRenewalFinished(long stackId) {
-        clusterService.updateClusterStatusByStackId(stackId, AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Renewal of the cluster's certificate finished.");
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), ResourceEvent.CLUSTER_CERTIFICATE_RENEWAL_FINISHED);
     }
@@ -58,8 +51,7 @@ public class ClusterCertificateRenewService {
         if (stackView.getClusterView() != null) {
             Long stackId = stackView.getId();
             String errorMessage = ExceptionMessageFormatterUtil.getErrorMessageFromException(exception);
-            clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorMessage);
-            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE);
+            stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CERTIFICATE_RENEWAL_FAILED, errorMessage);
             flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), ResourceEvent.CLUSTER_CERTIFICATE_RENEWAL_FAILED, errorMessage);
         } else {
             LOGGER.info("Cluster was null. Flow action was not required.");

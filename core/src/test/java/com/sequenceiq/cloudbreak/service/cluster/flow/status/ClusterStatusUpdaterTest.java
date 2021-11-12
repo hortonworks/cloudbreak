@@ -1,16 +1,17 @@
 package com.sequenceiq.cloudbreak.service.cluster.flow.status;
 
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.BDDMockito;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -74,78 +75,77 @@ public class ClusterStatusUpdaterTest {
     @Test
     public void testUpdateClusterStatusShouldUpdateStackStatusWhenStackStatusChanged() {
         // GIVEN
-        Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
+        Stack stack = createStackWithCluster(DetailedStackStatus.AVAILABLE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
-        Mockito.verify(clusterService, Mockito.times(1)).updateClusterStatusByStackId(stack.getId(), Status.STOPPED);
+        verify(clusterService, times(1)).updateClusterMetadata(eq(stack.getId()));
+        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(stack.getId()), eq(DetailedStackStatus.STOPPED),
+                eq("Services are installed but not running."));
     }
 
     @Test
-    public void testUpdateClusterStatusShouldUpdateStackStatusWhenThereAreStoppedServices() {
+    public void testUpdateStackStatusWhenStackIsAvailableAndClusterStatusIsInstalled() {
         // GIVEN
-        Stack stack = createStack(Status.AVAILABLE, Status.UPDATE_FAILED);
-        // WHEN
-        underTest.updateClusterStatus(stack, stack.getCluster());
-        // THEN
-        Mockito.verify(clusterService, Mockito.times(1)).updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
-    }
-
-    @Test
-    public void testUpdateClusterStatusShouldNotUpdateStackStatusWhenMaintenanceModeIsEnabledAndCLusterIsAvailable() {
-        // GIVEN
-        Stack stack = createStack(Status.AVAILABLE, Status.MAINTENANCE_MODE_ENABLED);
-        // WHEN
-        underTest.updateClusterStatus(stack, stack.getCluster());
-        // THEN
-        Mockito.verify(clusterService, Mockito.never()).updateClusterStatusByStackId(eq(stack.getId()), any(Status.class));
-    }
-
-    @Test
-    public void testUpdateClusterStatusShouldUpdateStackStatusWhenMaintenanceModeIsEnabledButClusterIsStopped() {
-        // GIVEN
-        Stack stack = createStack(Status.AVAILABLE, Status.MAINTENANCE_MODE_ENABLED);
+        Stack stack = createStackWithCluster(DetailedStackStatus.AVAILABLE);
         when(clusterStatusService.getStatus(anyBoolean())).thenReturn(ClusterStatusResult.of(ClusterStatus.INSTALLED));
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
-        Mockito.verify(clusterService, Mockito.times(1)).updateClusterStatusByStackId(stack.getId(), Status.STOPPED);
+        verify(clusterService, times(1)).updateClusterMetadata(eq(stack.getId()));
+        verify(clusterService, times(1)).updateClusterStatusByStackId(eq(stack.getId()), eq(DetailedStackStatus.STOPPED),
+                eq("Services are installed but not running."));
     }
 
     @Test
-    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusNotChanged() {
+    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInDeletionPhase() {
         // GIVEN
-        Stack stack = createStack(Status.AVAILABLE, Status.AVAILABLE);
+        Stack stack = createStackWithCluster(DetailedStackStatus.DELETE_IN_PROGRESS);
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
-        Mockito.verify(clusterService, Mockito.times(0)).updateClusterStatusByStackId(any(Long.class), any(Status.class));
+        verify(clusterService, times(0)).updateClusterStatusByStackId(any(Long.class), any(DetailedStackStatus.class));
+        verify(cloudbreakEventService, times(1))
+                .fireCloudbreakEvent(eq(TEST_STACK_ID), eq(Status.DELETE_IN_PROGRESS.name()), eq(CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC), any());
     }
 
     @Test
-    public void testUpdateClusterStatusShouldUpdateWhenStackStatusStopped() {
+    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInStopPhase() {
         // GIVEN
-        Stack stack = createStack(Status.STOPPED, Status.AVAILABLE);
+        Stack stack = createStackWithCluster(DetailedStackStatus.STOPPED);
         // WHEN
         underTest.updateClusterStatus(stack, stack.getCluster());
         // THEN
-        BDDMockito.verify(clusterService, BDDMockito.times(1)).updateClusterStatusByStackId(any(Long.class), eq(stack.getStatus()));
+        verify(clusterService, times(0)).updateClusterStatusByStackId(any(Long.class), any(DetailedStackStatus.class));
+        verify(cloudbreakEventService, times(1))
+                .fireCloudbreakEvent(eq(TEST_STACK_ID), eq(Status.STOPPED.name()), eq(CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC), any());
     }
 
-    private Stack createStack(Status stackStatus) {
+    @Test
+    public void testUpdateClusterStatusShouldOnlyNotifyWhenStackStatusIsInModificationPhase() {
+        // GIVEN
+        Stack stack = createStackWithCluster(DetailedStackStatus.UPSCALE_IN_PROGRESS);
+        // WHEN
+        underTest.updateClusterStatus(stack, stack.getCluster());
+        // THEN
+        verify(clusterService, times(0)).updateClusterStatusByStackId(any(Long.class), any(DetailedStackStatus.class));
+        verify(cloudbreakEventService, times(1))
+                .fireCloudbreakEvent(eq(TEST_STACK_ID), eq(Status.UPDATE_IN_PROGRESS.name()), eq(CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC), any());
+    }
+
+    private Stack createStack(DetailedStackStatus detailedStackStatus) {
         Stack stack = new Stack();
         stack.setId(TEST_STACK_ID);
-        stack.setStackStatus(new StackStatus(stack, stackStatus, "", DetailedStackStatus.UNKNOWN));
+        stack.setStackStatus(new StackStatus(stack, detailedStackStatus.getStatus(), "", detailedStackStatus));
         return stack;
     }
 
-    private Stack createStack(Status stackStatus, Status clusterStatus) {
-        Stack stack = createStack(stackStatus);
+    private Stack createStackWithCluster(DetailedStackStatus detailedStackStatus) {
+        Stack stack = createStack(detailedStackStatus);
         Cluster cluster = new Cluster();
         cluster.setClusterManagerIp("10.0.0.1");
         cluster.setId(TEST_CLUSTER_ID);
-        cluster.setStatus(clusterStatus);
         Blueprint blueprint = new Blueprint();
         blueprint.setStackName(TEST_BLUEPRINT);
         cluster.setBlueprint(blueprint);

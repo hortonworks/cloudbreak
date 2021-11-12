@@ -62,8 +62,7 @@ public class ClusterStartService {
             LOGGER.info(updatingDnsMsg);
             String clusterManagerIp = stackUtil.extractClusterManagerIp(stack);
             clusterPublicEndpointManagementService.start(stack);
-            clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format(updatingDnsMsg + " Cluster manager ip: %s",
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_IN_PROGRESS, String.format(updatingDnsMsg + " Cluster manager ip: %s",
                     clusterManagerIp));
             flowMessageService.fireEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), CLUSTER_DNS_ENTRY_UPDATE_FINISHED, clusterManagerIp);
         } else {
@@ -72,8 +71,7 @@ public class ClusterStartService {
     }
 
     public void startingCluster(StackView stack) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.START_IN_PROGRESS);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_OPERATION, String.format("Starting the cluster. Cluster manager ip: %s",
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_IN_PROGRESS, String.format("Starting the cluster. Cluster manager ip: %s",
                 stackUtil.extractClusterManagerIp(stack)));
         flowMessageService.fireEventAndLog(stack.getId(), Status.UPDATE_IN_PROGRESS.name(), CLUSTER_STARTING, stackUtil.extractClusterManagerIp(stack));
     }
@@ -84,14 +82,12 @@ public class ClusterStartService {
         cluster.setUpSince(new Date().getTime());
         clusterService.updateCluster(cluster);
         updateInstancesToHealthy(stack);
-        clusterService.updateClusterStatusByStackId(stack.getId(), Status.AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Cluster started.");
         flowMessageService.fireEventAndLog(stack.getId(), Status.AVAILABLE.name(), CLUSTER_STARTED);
     }
 
     public void handleClusterStartFailure(StackView stackView, String errorReason) {
-        clusterService.updateClusterStatusByStackId(stackView.getId(), Status.START_FAILED);
-        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + errorReason);
+        stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.START_FAILED, "Cluster could not be started: " + errorReason);
         flowMessageService.fireEventAndLog(stackView.getId(), Status.START_FAILED.name(), CLUSTER_START_FAILED, errorReason);
     }
 

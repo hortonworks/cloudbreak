@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
@@ -22,9 +21,8 @@ public class StackImageUpdateFlowTriggerCondition implements FlowTriggerConditio
     @Override
     public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
         FlowTriggerConditionResult result = FlowTriggerConditionResult.OK;
-        StackView stack = stackService.getViewByIdWithoutAuth(stackId);
-        Status clusterStatus = stack.getClusterView().getStatus();
-        boolean triggerable = stack.isAvailable() && clusterStatus.isAvailable();
+        StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
+        boolean triggerable = stackView.isAvailable();
         if (!triggerable) {
             String msg = "Image update cannot be triggered because the cluster is not available.";
             LOGGER.debug(msg);

@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -76,7 +76,7 @@ class DatalakeRecoverySetupNewInstancesHandlerTest {
 
         assertEquals(EventSelectorUtil.selector(DatalakeRecoverySetupNewInstancesSuccess.class), nextFlowStepSelector.selector());
         verify(stackService).getByIdWithClusterInTransaction(STACK_ID);
-        verify(clusterService).updateClusterStatusByStackId(STACK_ID, Status.REQUESTED);
+        verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_RECOVERY_IN_PROGRESS);
         verify(stackCreatorService).sortInstanceGroups(stack);
         verify(instanceMetaDataService, times(2)).saveInstanceAndGetUpdatedStack(eq(stack), anyInt(), any(), eq(true), eq(Collections.emptySet()), eq(false),
                 any());

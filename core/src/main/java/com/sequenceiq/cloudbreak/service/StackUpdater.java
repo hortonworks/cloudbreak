@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.service;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
@@ -11,11 +13,16 @@ import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 
 @Component
 public class StackUpdater {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackUpdater.class);
 
     @Inject
     private StackService stackService;
@@ -25,6 +32,12 @@ public class StackUpdater {
 
     @Inject
     private SecurityConfigService securityConfigService;
+
+    @Inject
+    private ClusterService clusterService;
+
+    @Inject
+    private UsageLoggingUtil usageLoggingUtil;
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
         return doUpdateStackStatus(stackId, detailedStatus, "");
@@ -51,22 +64,48 @@ public class StackUpdater {
         return stackService.save(stack);
     }
 
-    private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
+    private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus newDetailedStatus, String statusReason) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
-        Status status = detailedStatus.getStatus();
-        if (!stack.isDeleteCompleted()) {
-            stack.setStackStatus(new StackStatus(stack, status, statusReason, detailedStatus));
-            if (status.isRemovableStatus()) {
+        StackStatus actualStackStatus = stack.getStackStatus();
+        LOGGER.info("Update stack status from: {}/{} to: {}/{} stack: {} reason: {}", actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus(),
+                newDetailedStatus.getStatus(), newDetailedStatus, stackId, statusReason);
+        Status newStatus = newDetailedStatus.getStatus();
+        if (actualStackStatus.getStatus().equals(newStatus)) {
+            LOGGER.debug("New status is the same as previous status {}/{}, skip status update.",
+                    actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus());
+            return stack;
+        } else if (!stack.isDeleteCompleted()) {
+            stack.setStackStatus(new StackStatus(stack, newStatus, statusReason, newDetailedStatus));
+            Cluster cluster = stack.getCluster();
+            if (newStatus.isRemovableStatus()) {
                 InMemoryStateStore.deleteStack(stackId);
-                if (stack.getCluster() != null && stack.getCluster().getStatus().isRemovableStatus()) {
-                    InMemoryStateStore.deleteCluster(stack.getCluster().getId());
+                if (cluster != null) {
+                    InMemoryStateStore.deleteCluster(cluster.getId());
                 }
             } else {
-                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(status));
+                InMemoryStateStore.putStack(stackId, statusToPollGroupConverter.convert(newStatus));
+                if (cluster != null) {
+                    InMemoryStateStore.putCluster(cluster.getId(), statusToPollGroupConverter.convert(newStatus));
+                }
             }
             stack = stackService.save(stack);
+            saveDeprecatedClusterStatus(statusReason, stack, newStatus);
+            usageLoggingUtil.logClusterStatusChangeUsageEvent(actualStackStatus.getStatus(), newStatus, cluster);
+        } else {
+            LOGGER.info("Stack is in DELETE_COMPLETED status, cannot update status.");
         }
         return stack;
+    }
+
+    private void saveDeprecatedClusterStatus(String statusReason, Stack stack, Status newStatus) {
+        Cluster cluster = stack.getCluster();
+        if (cluster != null) {
+            Status previous = cluster.getStatus();
+            LOGGER.debug("Update deprecated cluster status from: {} to: {} reason: {} cluster: {}", previous, newStatus, statusReason, cluster.getId());
+            cluster.setStatus(newStatus);
+            cluster.setStatusReason(statusReason);
+            clusterService.save(cluster);
+        }
     }
 
 }

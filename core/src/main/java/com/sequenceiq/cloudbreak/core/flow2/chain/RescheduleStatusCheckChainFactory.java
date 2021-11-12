@@ -36,7 +36,7 @@ public class RescheduleStatusCheckChainFactory implements FlowEventChainFactory<
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(RescheduleStatusCheckTriggerEvent event) {
         StackView stack = stackService.getViewByIdWithoutAuth(event.getResourceId());
-        if (stack != null && stack.isAvailable() && stack.getClusterView() != null && stack.getClusterView().isAvailable()) {
+        if (stack != null && stack.isAvailable() && stack.getClusterView() != null) {
             jobService.schedule(new StackJobAdapter(convertToStack(stack)), repairScheduleDelayInSeconds);
         }
         return new FlowTriggerEventQueue(getName(), event, new ConcurrentLinkedDeque<>());

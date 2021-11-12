@@ -46,8 +46,7 @@ public class ClusterUpgradeService {
 
     public void initUpgradeCluster(long stackId, StatedImage targetImage) {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), DATALAKE_UPGRADE, targetImage.getImage().getUuid());
-        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_STARTED, "Cluster upgrade has been started.");
     }
 
     public void upgradeClusterManager(long stackId) {
@@ -64,7 +63,7 @@ public class ClusterUpgradeService {
             String cmVersion = targetImage.getPackageVersion(ImagePackageVersion.CM);
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_MANAGER_UPGRADE_FINISHED, cmVersion);
         }
-        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_UPGRADE_IN_PROGRESS);
         if (clusterRuntimeUpgradeNeeded) {
             flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_UPGRADE);
         } else {
@@ -81,7 +80,6 @@ public class ClusterUpgradeService {
         boolean clusterRuntimeUpgradeNeeded =
                 isUpdateNeeded(currentRuntimeBuildNumber, NullUtil.getIfNotNull(targetIm.getStackDetails(), ImageStackDetails::getStackBuildNumber));
 
-        clusterService.updateClusterStatusByStackId(stackId, Status.AVAILABLE);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_UPGRADE_FINISHED, "Cluster stack was successfully upgraded.");
 
         Optional<String> stackVersion = getStackVersionFromImage(targetIm);
@@ -100,8 +98,7 @@ public class ClusterUpgradeService {
     }
 
     public void handleUpgradeClusterFailure(long stackId, String errorReason, DetailedStackStatus detailedStatus) {
-        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_FAILED, errorReason);
-        stackUpdater.updateStackStatus(stackId, detailedStatus);
+        stackUpdater.updateStackStatus(stackId, detailedStatus, errorReason);
         switch (detailedStatus) {
             case CLUSTER_MANAGER_UPGRADE_FAILED:
                 flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), CLUSTER_MANAGER_UPGRADE_FAILED, errorReason);

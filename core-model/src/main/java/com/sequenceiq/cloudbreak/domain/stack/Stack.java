@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COM
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
@@ -656,8 +657,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return REQUESTED.equals(getStatus()) || CREATE_IN_PROGRESS.equals(getStatus());
     }
 
-    public boolean isStackReadyForStop() {
-        return AVAILABLE.equals(getStatus()) || STOP_REQUESTED.equals(getStatus()) || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
+    public boolean isReadyForStop() {
+        return AVAILABLE.equals(getStatus())
+                || STOPPED.equals(getStatus())
+                || STOP_REQUESTED.equals(getStatus())
+                || STOP_IN_PROGRESS.equals(getStatus())
+                || EXTERNAL_DATABASE_STOP_FINISHED.equals(getStatus());
     }
 
     public boolean isExternalDatabaseStopped() {
@@ -671,6 +676,18 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 || STOP_IN_PROGRESS.equals(status)
                 || START_IN_PROGRESS.equals(status)
                 || DELETE_IN_PROGRESS.equals(status);
+    }
+
+    public boolean isMaintenanceModeEnabled() {
+        return MAINTENANCE_MODE_ENABLED.equals(getStatus());
+    }
+
+    public boolean isStopInProgress() {
+        return STOP_IN_PROGRESS.equals(getStatus()) || STOP_REQUESTED.equals(getStatus());
+    }
+
+    public boolean isReadyForStart() {
+        return STOPPED.equals(getStatus()) || START_REQUESTED.equals(getStatus()) || START_IN_PROGRESS.equals(getStatus());
     }
 
     public boolean isMultipleGateway() {

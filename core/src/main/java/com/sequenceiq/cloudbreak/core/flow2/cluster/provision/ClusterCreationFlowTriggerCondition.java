@@ -22,10 +22,10 @@ public class ClusterCreationFlowTriggerCondition implements FlowTriggerCondition
     public FlowTriggerConditionResult isFlowTriggerable(Long stackId) {
         FlowTriggerConditionResult result = FlowTriggerConditionResult.OK;
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
-        boolean triggerable = stackView.isAvailable() && stackView.getClusterView() != null && stackView.getClusterView().isRequested();
+        boolean triggerable = stackView.isCreateInProgress();
         if (!triggerable) {
-            String msg = "Cluster creation cannot be triggered, because cluster is not in requested status or stack is not available.";
-            LOGGER.debug(msg);
+            String msg = "Cluster creation cannot be triggered, because stack is not in create in progress status.";
+            LOGGER.warn(msg);
             result = new FlowTriggerConditionResult(msg);
         }
         return result;

@@ -13,9 +13,10 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.security.access.AccessDeniedException;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackDownscaleValidatorServiceTest {
@@ -74,21 +75,21 @@ public class StackDownscaleValidatorServiceTest {
 
     @Test
     public void testCheckClusterInValidStatusWhenValidStatus() {
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.AVAILABLE);
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
 
-        underTest.checkClusterInValidStatus(cluster);
+        underTest.checkClusterInValidStatus(stack);
     }
 
     @Test
     public void testCheckClusterInValidStatusWhenInStoppedStatus() {
-        Cluster cluster = new Cluster();
-        cluster.setStatus(Status.STOPPED);
+        Stack stack = new Stack();
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Cluster is in Stopped status. Please start the cluster for downscale.");
 
-        underTest.checkClusterInValidStatus(cluster);
+        underTest.checkClusterInValidStatus(stack);
     }
 
     @Test

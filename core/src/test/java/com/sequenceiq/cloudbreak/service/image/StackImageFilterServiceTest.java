@@ -26,10 +26,10 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.security.authentication.AuthenticatedUserService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -37,7 +37,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateS
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -91,7 +90,7 @@ public class StackImageFilterServiceTest {
 
     @Test
     public void testGetApplicableImagesCdh() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
+        Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
@@ -111,7 +110,7 @@ public class StackImageFilterServiceTest {
 
     @Test
     public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
+        Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
@@ -130,7 +129,7 @@ public class StackImageFilterServiceTest {
 
     @Test
     public void testGetApplicableImagesWhenStackImageUpdateServiceRejectsAll() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
-        Stack stack = getStack(Status.AVAILABLE, Status.AVAILABLE);
+        Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
         when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
@@ -147,10 +146,10 @@ public class StackImageFilterServiceTest {
 
     @Test
     public void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException {
-        Stack stack = getStack(Status.CREATE_IN_PROGRESS, Status.AVAILABLE);
+        Stack stack = getStack(DetailedStackStatus.UPSCALE_IN_PROGRESS);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         setupLoggedInUser();
-        thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
+        thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
 
         underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
@@ -158,10 +157,10 @@ public class StackImageFilterServiceTest {
 
     @Test
     public void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException {
-        Stack stack = getStack(Status.AVAILABLE, Status.UPDATE_FAILED);
+        Stack stack = getStack(DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         setupLoggedInUser();
-        thrown.expectMessage("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
+        thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
 
         underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
@@ -188,14 +187,13 @@ public class StackImageFilterServiceTest {
         return new com.sequenceiq.cloudbreak.cloud.model.Image("", Collections.emptyMap(), "", "", "", "", id, Collections.emptyMap());
     }
 
-    private Stack getStack(Status stackStatus, Status clusterStatus) {
+    private Stack getStack(DetailedStackStatus detailedStackStatus) {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setCloudPlatform(PROVIDER_AWS);
         stack.setName(STACK_NAME);
-        stack.setStackStatus(new StackStatus(stack, stackStatus, "", DetailedStackStatus.UNKNOWN));
+        stack.setStackStatus(new StackStatus(stack, detailedStackStatus.getStatus(), "", detailedStackStatus));
         Cluster cluster = new Cluster();
-        cluster.setStatus(clusterStatus);
         stack.setCluster(cluster);
         return stack;
     }

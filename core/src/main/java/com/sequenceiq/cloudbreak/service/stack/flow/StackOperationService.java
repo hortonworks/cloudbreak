@@ -160,13 +160,13 @@ public class StackOperationService {
             throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         }
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
-        if (cluster != null && !cluster.isStopped() && !stack.isStopFailed()) {
+        if (cluster != null && !stack.isStopped() && !stack.isStopFailed()) {
             if (!updateCluster) {
                 throw NotAllowedStatusUpdate
                         .stack(stack)
                         .to(STOPPED)
                         .badRequest();
-            } else if (cluster.isClusterReadyForStop() || cluster.isStopFailed()) {
+            } else if (stack.isReadyForStop() || stack.isStopFailed()) {
                 setStackStatusToStopRequested(stack);
                 return clusterOperationService.updateStatus(stack.getId(), StatusRequest.STOPPED);
             } else {
@@ -205,7 +205,7 @@ public class StackOperationService {
     }
 
     private FlowIdentifier stop(Stack stack, Cluster cluster, boolean updateCluster, User user) {
-        if (cluster != null && cluster.isStopInProgress()) {
+        if (cluster != null && stack.isStopInProgress()) {
             setStackStatusToStopRequested(stack);
             return FlowIdentifier.notTriggered();
         } else {
@@ -258,9 +258,9 @@ public class StackOperationService {
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.startable());
         dataLakeStatusCheckerService.validateRunningState(stack);
-        if (stack.isAvailable() && (cluster == null || cluster.isAvailable())) {
+        if (stack.isAvailable()) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
-        } else if (isStackStartable(stack) || isClusterStartable(cluster)) {
+        } else if (stack.isReadyForStart() || stack.isStartFailed()) {
             Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowIdentifier = flowManager.triggerStackStart(stack.getId());
             if (updateCluster && cluster != null) {
@@ -306,14 +306,6 @@ public class StackOperationService {
     public boolean rangerRazEnabled(Long workspaceId, String crn) {
         Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
         return clusterService.isRangerRazEnabledOnCluster(stack);
-    }
-
-    private boolean isStackStartable(Stack stack) {
-        return stack.isStopped() || stack.isStartFailed();
-    }
-
-    private boolean isClusterStartable(Cluster cluster) {
-        return cluster != null && (cluster.isStopped() || cluster.isStartFailed());
     }
 
     private void setStackStatusToStopRequested(Stack stack) {

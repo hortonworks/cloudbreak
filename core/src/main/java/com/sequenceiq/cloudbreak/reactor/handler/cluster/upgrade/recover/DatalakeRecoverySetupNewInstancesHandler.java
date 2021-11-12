@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
@@ -64,7 +63,7 @@ public class DatalakeRecoverySetupNewInstancesHandler extends ExceptionCatcherEv
         try {
             Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
             setupNewInstances(stack);
-            clusterService.updateClusterStatusByStackId(stackId, Status.REQUESTED);
+            clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_RECOVERY_IN_PROGRESS);
             return new DatalakeRecoverySetupNewInstancesSuccess(stackId);
         } catch (Exception e) {
             LOGGER.error("Setting up new instances for stack failed", e);

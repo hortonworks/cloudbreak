@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 
 import java.util.HashSet;
@@ -15,9 +14,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.MaintenanceModeStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupV4Request;
@@ -32,6 +32,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.updates.HostGroupV4RequestToHostGroupConverter;
@@ -41,8 +43,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
@@ -191,30 +191,25 @@ public class ClusterCommonService {
         Cluster cluster = stack.getCluster();
         if (cluster == null) {
             throw new BadRequestException(String.format("Cluster does not exist on stack with '%s' id.", stack.getId()));
-        } else if (!stack.isAvailable()) {
-            throw new BadRequestException(String.format(
-                    "Stack '%s' is currently in '%s' state. Maintenance mode can be set to a cluster if the underlying stack is 'AVAILABLE'.",
-                    stack.getId(), stack.getStatus()));
-        } else if (!cluster.isAvailable() && !cluster.isMaintenanceModeEnabled()) {
+        } else if (!stack.isAvailable() && !stack.isMaintenanceModeEnabled()) {
             throw new BadRequestException(String.format(
                     "Cluster '%s' is currently in '%s' state. Maintenance mode can be set to a cluster if it is 'AVAILABLE'.",
-                    cluster.getId(), cluster.getStatus()));
+                    stack.getId(), stack.getStatus()));
         }
 
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         switch (maintenanceMode) {
             case ENABLED:
-                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), MAINTENANCE_MODE_ENABLED, ResourceEvent.MAINTENANCE_MODE_ENABLED);
+                saveAndFireEventOnClusterStatusChange(stack, DetailedStackStatus.MAINTENANCE_MODE_ENABLED, ResourceEvent.MAINTENANCE_MODE_ENABLED);
                 break;
             case DISABLED:
-                saveAndFireEventOnClusterStatusChange(cluster, stack.getId(), AVAILABLE, ResourceEvent.MAINTENANCE_MODE_DISABLED);
+                saveAndFireEventOnClusterStatusChange(stack, DetailedStackStatus.AVAILABLE, ResourceEvent.MAINTENANCE_MODE_DISABLED);
                 break;
             case VALIDATION_REQUESTED:
-                if (!MAINTENANCE_MODE_ENABLED.equals(cluster.getStatus())) {
+                if (!MAINTENANCE_MODE_ENABLED.equals(stack.getStatus())) {
                     throw new BadRequestException(String.format(
                             "Maintenance mode is not enabled for cluster '%s' (status:'%s'), it should be enabled before validation.",
-                            cluster.getId(),
-                            cluster.getStatus()));
+                            cluster.getId(), stack.getStatus()));
                 }
                 flowIdentifier = clusterOperationService.triggerMaintenanceModeValidation(stack);
                 clusterService.save(cluster);
@@ -274,11 +269,11 @@ public class ClusterCommonService {
         return String.format("[%s]%n%s%n", section, rawBody);
     }
 
-    private void saveAndFireEventOnClusterStatusChange(Cluster cluster, Long stackId, Status status, ResourceEvent event) {
-        if (!status.equals(cluster.getStatus())) {
-            cluster.setStatus(status);
-            clusterService.save(cluster);
-            cloudbreakEventService.fireCloudbreakEvent(stackId, event.name(), event);
+    private void saveAndFireEventOnClusterStatusChange(Stack stack, DetailedStackStatus newDetailedStackStatus, ResourceEvent event) {
+        Status actualStatus = stack.getStatus();
+        if (!actualStatus.equals(newDetailedStackStatus.getStatus())) {
+            clusterService.updateClusterStatusByStackId(stack.getId(), newDetailedStackStatus);
+            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), event.name(), event);
         }
     }
 

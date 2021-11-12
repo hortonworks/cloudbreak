@@ -12,15 +12,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.image.update.StackImageUpdateService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
@@ -56,9 +55,8 @@ public class StackImageFilterService {
         if (Objects.nonNull(statedImages)) {
             LOGGER.info("Selecting applicable images from catalog {} from {} candidates.", imageCatalogName, statedImages.getImages().getNumberOfImages());
         }
-        if (!Status.AVAILABLE.equals(stack.getStackStatus().getStatus())
-                || (!stack.getCluster().isAvailable() && !stack.getCluster().isMaintenanceModeEnabled())) {
-            throw new BadRequestException("To retrieve list of images for upgrade both stack and cluster have to be in AVAILABLE state");
+        if (!stack.isAvailable() && !stack.isMaintenanceModeEnabled()) {
+            throw new BadRequestException("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
         }
 
         String currentImageUuid = getCurrentImageUuid(stack);

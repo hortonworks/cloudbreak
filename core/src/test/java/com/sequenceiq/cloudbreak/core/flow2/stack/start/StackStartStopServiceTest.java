@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.start;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -22,7 +23,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 
@@ -34,9 +34,6 @@ class StackStartStopServiceTest {
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
-
-    @Mock
-    private ClusterService clusterService;
 
     @Mock
     private MetadataSetupService metadatSetupService;
@@ -78,6 +75,7 @@ class StackStartStopServiceTest {
 
     private static boolean isStopPossibleByStatus(Status status) {
         return status == STOP_REQUESTED ||
+                status == STOP_IN_PROGRESS ||
                 status == EXTERNAL_DATABASE_STOP_FINISHED;
     }
 
