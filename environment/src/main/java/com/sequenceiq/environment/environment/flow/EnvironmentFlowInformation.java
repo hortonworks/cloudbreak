@@ -13,6 +13,7 @@ import com.sequenceiq.environment.environment.flow.deletion.config.EnvDeleteFlow
 import com.sequenceiq.environment.environment.flow.loadbalancer.config.LoadBalancerUpdateFlowConfig;
 import com.sequenceiq.environment.environment.flow.start.config.EnvStartFlowConfig;
 import com.sequenceiq.environment.environment.flow.stop.config.EnvStopFlowConfig;
+import com.sequenceiq.environment.environment.flow.upgrade.ccm.config.UpgradeCcmFlowConfig;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 
@@ -26,7 +27,8 @@ public class EnvironmentFlowInformation implements ApplicationFlowInformation {
                 EnvClustersDeleteFlowConfig.class,
                 EnvStopFlowConfig.class,
                 EnvStartFlowConfig.class,
-                LoadBalancerUpdateFlowConfig.class);
+                LoadBalancerUpdateFlowConfig.class,
+                UpgradeCcmFlowConfig.class);
     }
 
     @Override

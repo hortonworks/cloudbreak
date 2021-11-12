@@ -101,7 +101,7 @@ public class EnvClustersDeleteActions {
                 EnvironmentStatus environmentStatus = EnvironmentStatus.DATALAKE_CLUSTERS_DELETE_IN_PROGRESS;
                 ResourceEvent resourceEvent = ResourceEvent.ENVIRONMENT_DATALAKE_CLUSTERS_DELETION_STARTED;
                 EnvClustersDeleteState envClustersDeleteState = EnvClustersDeleteState.DATALAKE_CLUSTERS_DELETE_STARTED_STATE;
-                String logDeleteState = "Data Lake clustesr";
+                String logDeleteState = "Data Lake clusters";
 
                 EnvironmentDeletionDto envDto = commonUpdateEnvironmentAndNotify(context, payload, environmentStatus, resourceEvent,
                         envClustersDeleteState, logDeleteState);

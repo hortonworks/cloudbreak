@@ -139,6 +139,18 @@ public enum ResourceEvent {
     ENVIRONMENT_LOAD_BALANCER_UPDATE_FINISHED("environment.loadbalancer.update.success"),
     ENVIRONMENT_LOAD_BALANCER_UPDATE_FAILED("environment.loadbalancer.update.failed"),
 
+    ENVIRONMENT_UPGRADE_CCM_VALIDATION_STARTED("environment.upgrade.ccm.validation.started"),
+    ENVIRONMENT_UPGRADE_CCM_VALIDATION_FAILED("environment.upgrade.ccm.validation.failed"),
+    ENVIRONMENT_UPGRADE_CCM_ON_FREEIPA_STARTED("environment.upgrade.ccm.freeipa.started"),
+    ENVIRONMENT_UPGRADE_CCM_ON_FREEIPA_FAILED("environment.upgrade.ccm.freeipa.failed"),
+    ENVIRONMENT_UPGRADE_CCM_ON_DATALAKE_STARTED("environment.upgrade.ccm.datalake.started"),
+    ENVIRONMENT_UPGRADE_CCM_ON_DATALAKE_FAILED("environment.upgrade.ccm.datalake.failed"),
+    ENVIRONMENT_UPGRADE_CCM_ON_DATAHUB_STARTED("environment.upgrade.ccm.datahub.started"),
+    ENVIRONMENT_UPGRADE_CCM_ON_DATAHUB_FAILED("environment.upgrade.ccm.datahub.failed"),
+    ENVIRONMENT_UPGRADE_CCM_ROLLING_BACK("environment.upgrade.ccm.rollback"),
+    ENVIRONMENT_UPGRADE_CCM_FINISHED("environment.upgrade.ccm.finished"),
+    ENVIRONMENT_UPGRADE_CCM_FAILED("environment.upgrade.ccm.failed"),
+
     CREDENTIAL_AZURE_INTERACTIVE_CREATED("credential.azure.interactive.created"),
     CREDENTIAL_AZURE_INTERACTIVE_STATUS("credential.azure.interactive.status"),
     CREDENTIAL_AZURE_INTERACTIVE_FAILED("credential.azure.interactive.failed"),
