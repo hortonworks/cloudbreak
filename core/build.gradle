@@ -178,6 +178,8 @@ dependencyManagement {
     dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
     dependency group: 'org.apache.commons',                 name: 'commons-lang3',               version: apacheCommonsLangVersion
     dependency group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java',                version: cdpSdkVersion
+    dependency group: 'org.apache.hadoop',                  name: 'hadoop-yarn-api',           version: hadoopVersion
+    dependency group: 'com.sequenceiq',                     name: 'consul-api',                version: '1.10'
   }
 }
 
@@ -267,6 +269,7 @@ dependencies {
   implementation project(':environment-api')
   implementation project(':environment-common')
   implementation project(':authorization-common')
+  implementation project(':autoscale-api')
   implementation project(':freeipa-api')
   implementation project(':redbeams-api')
   implementation project(':datalake-api')
@@ -287,6 +290,7 @@ dependencies {
   implementation project(':auth-connector')
   implementation project(':secret-engine')
   implementation project(':template-manager-core')
+  implementation project(':autoscale')
 
   runtimeOnly project(':orchestrator-salt')
   runtimeOnly project(':orchestrator-yarn')

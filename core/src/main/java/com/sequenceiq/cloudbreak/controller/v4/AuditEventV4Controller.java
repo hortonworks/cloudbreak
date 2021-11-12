@@ -18,16 +18,23 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.responses.AuditEventV4Re
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.audit.AuditEventService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.periscope.api.model.AutoscaleClusterHistoryResponse;
+import com.sequenceiq.periscope.controller.HistoryController;
 
 @Controller
 @DisableCheckPermissions
 public class AuditEventV4Controller implements AuditEventV4Endpoint {
+
+    private static final int MAX_AUTOSCALING_EVENTS = 2000;
 
     @Inject
     private AuditEventService auditEventService;
 
     @Inject
     private CloudbreakRestRequestThreadLocalService threadLocalService;
+
+    @Inject
+    private HistoryController historyController;
 
     @Override
     public AuditEventV4Response getAuditEventById(Long workspaceId, Long auditId) {
@@ -42,18 +49,25 @@ public class AuditEventV4Controller implements AuditEventV4Endpoint {
 
     }
 
+    public List<AutoscaleClusterHistoryResponse> getAutoscalingEvents(String resourceCrn) {
+        return historyController.getHistoryByCrn(resourceCrn, MAX_AUTOSCALING_EVENTS);
+    }
+
     @Override
     public Response getAuditEventsZip(Long workspaceId, String resourceType, Long resourceId, String resourceCrn) {
         Collection<AuditEventV4Response> auditEvents = getAuditEvents(threadLocalService.getRequestedWorkspaceId(),
                 resourceType, resourceId, resourceCrn).getResponses();
-        return getAuditEventsZipResponse(auditEvents, resourceType);
+        List<AutoscaleClusterHistoryResponse> autoscalingEvents = getAutoscalingEvents(resourceCrn);
+        return getAuditEventsZipResponse(auditEvents, autoscalingEvents, resourceType);
     }
 
-    private Response getAuditEventsZipResponse(Collection<AuditEventV4Response> auditEventV4Responses, String resourceType) {
+    private Response getAuditEventsZipResponse(
+            Collection<AuditEventV4Response> auditEventV4Responses, List<AutoscaleClusterHistoryResponse> autoscalingEvents, String resourceType) {
         StreamingOutput streamingOutput = output -> {
             try (ZipOutputStream zipOutputStream = new ZipOutputStream(output)) {
                 zipOutputStream.putNextEntry(new ZipEntry("struct-events.json"));
                 zipOutputStream.write(JsonUtil.writeValueAsString(auditEventV4Responses).getBytes());
+                zipOutputStream.write(JsonUtil.writeValueAsString(autoscalingEvents).getBytes());
                 zipOutputStream.closeEntry();
             }
         };
