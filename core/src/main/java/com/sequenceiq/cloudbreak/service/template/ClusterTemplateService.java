@@ -24,6 +24,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -343,7 +344,14 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
             LOGGER.debug("Modifying clusterDefinitions based on the defaults for the '{} ({})' workspace.", workspace.getName(), workspace.getId());
             Collection<ClusterTemplate> outdatedTemplates = clusterTemplateLoaderService.collectOutdatedTemplatesInDb(clusterTemplates);
             LOGGER.debug("Outdated clusterDefinitions collected: '{}'.", outdatedTemplates.size());
-            delete(new HashSet<>(outdatedTemplates));
+            int optimisticError = 0;
+            try {
+                delete(new HashSet<>(outdatedTemplates));
+            } catch (OptimisticLockingFailureException e) {
+                optimisticError++;
+            }
+            LOGGER.debug("{} Outdated clusterDefinitions tried to delete. Deleted: '{}', optimistic locking error: {}.", outdatedTemplates.size(),
+                    outdatedTemplates.size() - optimisticError, optimisticError);
             LOGGER.debug("Outdated clusterDefinitions deleted: '{}'.", outdatedTemplates.size());
             clusterTemplates = clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
             LOGGER.debug("None deleted clusterDefinitions collected: '{}'.", clusterTemplates.size());
