@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.RECOVERY_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILDING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILT;
@@ -19,7 +18,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -29,7 +27,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.ProvisionType;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;
 
 @Component
@@ -41,9 +38,6 @@ public class ClusterCreationService {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
@@ -94,14 +88,12 @@ public class ClusterCreationService {
     }
 
     public void startingClusterManager(long stackId) {
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "cluster manager cluster is now starting.");
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES, "cluster manager cluster is now starting.");
     }
 
     public void clusterInstallationFinished(StackView stackView, ProvisionType provisionType) {
         try {
             transactionService.required(() -> {
-                clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
                 if (provisionType.isRecovery()) {
                     stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.CLUSTER_RECOVERY_FINISHED, "Cluster recovery finished.");
                     flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), RECOVERY_FINISHED);
@@ -118,11 +110,9 @@ public class ClusterCreationService {
     public void handleClusterCreationFailure(StackView stackView, Exception exception, ProvisionType provisionType) {
         if (stackView.getClusterView() != null) {
             String errorMessage = getErrorMessageFromException(exception);
-            Status failureStatus = provisionType.isRecovery() ? RECOVERY_FAILED : CREATE_FAILED;
             DetailedStackStatus failureDetailedStatus = provisionType.isRecovery()
-                    ? DetailedStackStatus.CLUSTER_RECOVERY_FAILED : DetailedStackStatus.AVAILABLE;
-            clusterService.updateClusterStatusByStackId(stackView.getId(), failureStatus, errorMessage);
-            stackUpdater.updateStackStatus(stackView.getId(), failureDetailedStatus);
+                    ? DetailedStackStatus.CLUSTER_RECOVERY_FAILED : DetailedStackStatus.CLUSTER_CREATE_FAILED;
+            stackUpdater.updateStackStatus(stackView.getId(), failureDetailedStatus, errorMessage);
             flowMessageService.fireEventAndLog(stackView.getId(), CREATE_FAILED.name(), CLUSTER_CREATE_FAILED, errorMessage);
         } else {
             LOGGER.info("Cluster was null. Flow action was not required.");

@@ -32,7 +32,7 @@ public class FillInMemoryStateStoreRestartAction extends DefaultRestartAction {
     protected void restart(FlowParameters flowParameters, String flowChainId, String event, Object payload, Stack stack) {
         InMemoryStateStore.putStack(stack.getId(), statusToPollGroupConverter.convert(stack.getStatus()));
         if (stack.getCluster() != null) {
-            InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getCluster().getStatus()));
+            InMemoryStateStore.putCluster(stack.getCluster().getId(), statusToPollGroupConverter.convert(stack.getStatus()));
         }
         MDCBuilder.buildMdcContext(stack);
         super.restart(flowParameters, flowChainId, event, payload);

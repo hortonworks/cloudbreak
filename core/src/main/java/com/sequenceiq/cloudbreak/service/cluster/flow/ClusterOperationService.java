@@ -3,8 +3,6 @@ package com.sequenceiq.cloudbreak.service.cluster.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOP_REQUESTED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
@@ -245,7 +243,6 @@ public class ClusterOperationService {
         }
         boolean downscaleRequest = updateHostsValidator.validateRequest(stack, hostGroupAdjustment);
         if (downscaleRequest) {
-            clusterService.updateClusterStatusByStackId(stackId, UPDATE_REQUESTED);
             stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_REQUESTED,
                     "Requested node count for downscaling: " + abs(hostGroupAdjustment.getScalingAdjustment()));
             return flowManager.triggerClusterDownscale(stackId, hostGroupAdjustment);
@@ -498,25 +495,19 @@ public class ClusterOperationService {
     private FlowIdentifier stop(Stack stack, Cluster cluster) {
         StopRestrictionReason reason = stackStopRestrictionService.isInfrastructureStoppable(stack);
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
-        if (cluster.isStopped()) {
+        if (stack.isStopped()) {
             eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_STOP_IGNORED);
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
                     String.format("Cannot stop a cluster '%s'. Reason: %s", cluster.getId(), reason.getReason()));
-        } else if (!cluster.isClusterReadyForStop() && !cluster.isStopFailed()) {
+        } else if (!stack.isReadyForStop() && !stack.isStopFailed()) {
             throw NotAllowedStatusUpdate
                     .cluster(stack)
                     .to(STOPPED)
                     .expectedIn(AVAILABLE)
                     .badRequest();
-        } else if (!stack.isStackReadyForStop() && !stack.isStopFailed()) {
-            throw NotAllowedStatusUpdate
-                    .cluster(stack)
-                    .to(STOPPED)
-                    .expectedIn(AVAILABLE)
-                    .badRequest();
-        } else if (cluster.isAvailable() || cluster.isStopFailed()) {
-            clusterService.updateClusterStatusByStackId(stack.getId(), STOP_REQUESTED);
+        } else {
+            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
             flowIdentifier = flowManager.triggerClusterStop(stack.getId());
         }
         return flowIdentifier;
@@ -526,24 +517,18 @@ public class ClusterOperationService {
         FlowIdentifier flowIdentifier = FlowIdentifier.notTriggered();
         if (stack.isStartInProgress()) {
             eventService.fireCloudbreakEvent(stack.getId(), START_REQUESTED.name(), CLUSTER_START_REQUESTED);
-            clusterService.updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
+            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.START_REQUESTED);
         } else {
-            if (cluster.isAvailable()) {
+            if (stack.isAvailable()) {
                 eventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_START_IGNORED);
-            } else if (!cluster.isClusterReadyForStart() && !cluster.isStartFailed()) {
+            } else if (!stack.isReadyForStart() && !stack.isStartFailed()) {
                 throw NotAllowedStatusUpdate
                         .cluster(stack)
                         .to(START_REQUESTED)
                         .expectedIn(STOPPED)
                         .badRequest();
-            } else if (!stack.isAvailable() && !cluster.isStartFailed()) {
-                throw NotAllowedStatusUpdate
-                        .cluster(stack)
-                        .to(START_REQUESTED)
-                        .expectedIn(AVAILABLE)
-                        .badRequest();
             } else {
-                clusterService.updateClusterStatusByStackId(stack.getId(), START_REQUESTED);
+                clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.START_REQUESTED);
                 flowIdentifier = flowManager.triggerClusterStart(stack.getId());
             }
         }
@@ -569,6 +554,7 @@ public class ClusterOperationService {
             blueprintValidator.validate(blueprint, hostGroups, stackWithLists.getInstanceGroups(), validateBlueprint);
 
             clusterService.prepareCluster(hostGroups, blueprint, stackWithLists, cluster);
+            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.CLUSTER_RECREATE_REQUESTED);
             return triggerClusterInstall(stackWithLists);
         });
     }

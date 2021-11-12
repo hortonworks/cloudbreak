@@ -123,7 +123,7 @@ public class BaseLegacyStructuredFlowEventFactory implements LegacyStructuredFlo
             if (cluster != null) {
                 notificationDetails.setClusterId(cluster.getId());
                 notificationDetails.setClusterName(cluster.getName());
-                notificationDetails.setClusterStatus(cluster.getStatus().name());
+                notificationDetails.setClusterStatus(stack.getStatus().name());
                 Blueprint blueprint = cluster.getBlueprint();
                 if (blueprint != null) {
                     notificationDetails.setBlueprintId(blueprint.getId());

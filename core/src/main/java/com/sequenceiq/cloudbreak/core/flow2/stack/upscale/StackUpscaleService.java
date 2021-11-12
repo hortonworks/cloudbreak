@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
@@ -106,7 +105,8 @@ public class StackUpscaleService {
     }
 
     void reRegisterWithClusterProxy(long stackId) {
-        stackUpdater.updateStackStatus(stackId, REGISTERING_TO_CLUSTER_PROXY, "Re-registering with Cluster Proxy service.");
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.REGISTERING_TO_CLUSTER_PROXY,
+                "Re-registering with Cluster Proxy service.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY);
     }
 
@@ -117,7 +117,7 @@ public class StackUpscaleService {
             Set<String> upscaleCandidateAddresses = coreInstanceMetaData.stream().filter(im -> im.getMetaData().getPrivateIp() != null)
                     .map(im -> im.getMetaData().getPrivateIp()).collect(Collectors.toSet());
             try {
-                clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), AVAILABLE);
+                clusterService.updateClusterStatusByStackIdOutOfTransaction(stack.getId(), DetailedStackStatus.EXTENDING_METADATA_FINISHED);
             } catch (TransactionExecutionException e) {
                 throw e.getCause();
             }
@@ -147,7 +147,7 @@ public class StackUpscaleService {
     }
 
     public void finishExtendHostMetadata(Stack stack) {
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_UPSCALE_COMPLETED, "Stack upscale has been finished successfully.");
     }
 
     public void handleStackUpscaleFailure(Boolean upscaleForRepair, Set<String> hostNames, Exception exception, Long stackId, String instanceGroupName) {

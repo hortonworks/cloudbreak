@@ -197,7 +197,7 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerSdxStopFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger Datalake start for: {}", cluster);
+        LOGGER.info("Trigger Datalake stop for: {}", cluster);
         String selector = SDX_STOP_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         return notify(selector, new SdxStartStopEvent(selector, cluster.getId(), userId));

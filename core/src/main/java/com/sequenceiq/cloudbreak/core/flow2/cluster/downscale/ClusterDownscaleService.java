@@ -59,7 +59,7 @@ public class ClusterDownscaleService {
 
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds, ClusterDownscaleDetails details) {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_DOWN, hostGroupName);
-        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
         if (scalingAdjustment != null) {
             LOGGER.info("Decommissioning {} hosts from host group '{}'", Math.abs(scalingAdjustment), hostGroupName);
             flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName, CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
@@ -76,7 +76,7 @@ public class ClusterDownscaleService {
 
     public void finalizeClusterScaleDown(Long stackId, @Nullable String hostGroupName) {
         StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
-        clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
+        clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.AVAILABLE);
         if (hostGroupName != null) {
             flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALED_DOWN, hostGroupName);
         } else {
@@ -111,12 +111,11 @@ public class ClusterDownscaleService {
     public void handleClusterDownscaleFailure(long stackId, Exception error) {
         String errorDetails = error.getMessage();
         LOGGER.warn("Error during Cluster downscale flow: ", error);
-        Status status = UPDATE_FAILED;
+        DetailedStackStatus detailedStackStatus = DetailedStackStatus.DOWNSCALE_FAILED;
         if (error instanceof NotEnoughNodeException) {
-            status = AVAILABLE;
+            detailedStackStatus = DetailedStackStatus.AVAILABLE;
         }
-        clusterService.updateClusterStatusByStackId(stackId, status, errorDetails);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Node(s) could not be removed from the cluster: " + errorDetails);
+        stackUpdater.updateStackStatus(stackId, detailedStackStatus, "Node(s) could not be removed from the cluster: " + errorDetails);
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed from", errorDetails);
     }
 

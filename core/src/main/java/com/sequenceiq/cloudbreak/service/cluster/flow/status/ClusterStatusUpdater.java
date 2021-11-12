@@ -14,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
@@ -38,21 +39,17 @@ public class ClusterStatusUpdater {
     private ClusterApiConnectors clusterApiConnectors;
 
     public void updateClusterStatus(Stack stack, Cluster cluster) {
+        Long stackId = stack.getId();
         if (isStackOrClusterStatusInvalid(stack, cluster)) {
-            if ((stack.isStackInStopPhase() || stack.isDeleteCompleted()) && cluster != null) {
-                updateClusterStatus(stack.getId(), cluster, stack.getStatus());
-                cluster.setStatus(stack.getStatus());
-            }
-            List<String> eventMessageArgs = Arrays.asList(stack.getStatus().name(), cluster == null ? "" : cluster.getStatus().name());
-            cloudbreakEventService.fireCloudbreakEvent(stack.getId(), stack.getStatus().name(), CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC, eventMessageArgs);
+            List<String> eventMessageArgs = Arrays.asList(stack.getStatus().name());
+            cloudbreakEventService.fireCloudbreakEvent(stackId, stack.getStatus().name(), CLUSTER_AMBARI_CLUSTER_COULD_NOT_SYNC, eventMessageArgs);
         } else if (cluster != null && cluster.getClusterManagerIp() != null) {
-            Long stackId = stack.getId();
             clusterService.updateClusterMetadata(stackId);
             String blueprintName = cluster.getBlueprint().getStackName();
             ClusterStatusResult clusterStatusResult =
                     clusterApiConnectors.getConnector(stack).clusterStatusService().getStatus(StringUtils.isNotBlank(blueprintName));
             LOGGER.debug("Cluster status: [{}] Status reason: [{}]", clusterStatusResult.getClusterStatus(), clusterStatusResult.getStatusReason());
-            updateClusterStatus(stackId, stack.getStatus(), cluster, clusterStatusResult);
+            updateClusterStatus(stack, clusterStatusResult);
         }
     }
 
@@ -60,40 +57,44 @@ public class ClusterStatusUpdater {
         return stack.isStackInDeletionPhase()
                 || stack.isStackInStopPhase()
                 || stack.isModificationInProgress()
-                || cluster == null
-                || cluster.isModificationInProgress();
+                || cluster == null;
     }
 
-    private void updateClusterStatus(Long stackId, Status stackStatus, Cluster cluster, ClusterStatusResult clusterStatusResult) {
-        Status statusInEvent = stackStatus;
+    private void updateClusterStatus(Stack stack, ClusterStatusResult clusterStatusResult) {
+        Status statusInEvent = stack.getStatus();
         ClusterStatus clusterStatus = clusterStatusResult.getClusterStatus();
         String statusReason = clusterStatusResult.getStatusReason();
         if (isUpdateEnabled(clusterStatus)) {
-            if (updateClusterStatus(stackId, cluster, clusterStatus.getClusterStatus())) {
-                statusInEvent = clusterStatus.getStackStatus();
+            if (updateClusterStatus(stack, clusterStatus)) {
+                statusInEvent = clusterStatus.getDetailedStackStatus().getStatus();
+                statusReason = clusterStatus.getStatusReason();
             } else {
                 statusReason = "The cluster's state is up to date.";
             }
         }
-        cloudbreakEventService.fireCloudbreakEvent(stackId, statusInEvent.name(), CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED, Collections.singletonList(statusReason));
+        cloudbreakEventService.fireCloudbreakEvent(stack.getId(), statusInEvent.name(), CLUSTER_AMBARI_CLUSTER_SYNCHRONIZED,
+                Collections.singletonList(statusReason));
     }
 
     private boolean isUpdateEnabled(ClusterStatus clusterStatus) {
         return clusterStatus == ClusterStatus.STARTED || clusterStatus == ClusterStatus.INSTALLED || clusterStatus == ClusterStatus.AMBIGUOUS;
     }
 
-    private boolean updateClusterStatus(Long stackId, Cluster cluster, Status newClusterStatus) {
+    private boolean updateClusterStatus(Stack stack, ClusterStatus clusterStatus) {
         boolean result = false;
 
-        Status status = cluster.getStatus();
-        if (status != newClusterStatus) {
-            if (!status.equals(Status.MAINTENANCE_MODE_ENABLED) || !newClusterStatus.equals(Status.AVAILABLE)) {
-                LOGGER.debug("Cluster {} status is updated from {} to {}", cluster.getId(), status, newClusterStatus);
-                clusterService.updateClusterStatusByStackId(stackId, newClusterStatus);
+        Cluster cluster = stack.getCluster();
+        Status actualStatus = stack.getStatus();
+        DetailedStackStatus newDetailedStackStatus = clusterStatus.getDetailedStackStatus();
+        Status newStatus = newDetailedStackStatus.getStatus();
+        if (actualStatus != newStatus) {
+            if (!actualStatus.equals(Status.MAINTENANCE_MODE_ENABLED) || !newStatus.equals(Status.AVAILABLE)) {
+                LOGGER.debug("Cluster {} status is updated from {} to {}/{}", cluster.getId(), actualStatus, newStatus, newDetailedStackStatus);
+                clusterService.updateClusterStatusByStackId(stack.getId(), newDetailedStackStatus, clusterStatus.getStatusReason());
                 result = true;
             }
         } else {
-            LOGGER.debug("Cluster {} status hasn't changed: {}", cluster.getId(), status);
+            LOGGER.debug("Cluster {} status hasn't changed: {}", cluster.getId(), actualStatus);
         }
         return result;
     }

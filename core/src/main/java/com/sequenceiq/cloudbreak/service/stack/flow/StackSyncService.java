@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UNREACHABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.WAIT_FOR_SYNC;
@@ -38,28 +38,20 @@ import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 
 @Service
 public class StackSyncService {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(StackSyncService.class);
 
     private static final String SYNC_STATUS_REASON = "Synced instance states with the cloud provider.";
 
     private static final String CM_SERVER_NOT_RESPONDING = "Cloudera Manager server not responding.";
-
-    @Inject
-    private StackService stackService;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -71,16 +63,7 @@ public class StackSyncService {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
-    private ServiceProviderMetadataAdapter metadata;
-
-    @Inject
     private ImageService imageService;
-
-    @Inject
-    private ClusterService clusterService;
-
-    @Inject
-    private EnvironmentClientService environmentClientService;
 
     public void updateInstances(Stack stack, Iterable<InstanceMetaData> instanceMetaDataList, Collection<CloudVmInstanceStatus> instanceStatuses,
             SyncConfig syncConfig) {
@@ -113,37 +96,6 @@ public class StackSyncService {
             LOGGER.info("Error during stack sync:", ex);
             throw new CloudbreakServiceException("Stack sync failed", ex);
         }
-    }
-
-    public void sync(Long stackId, SyncConfig syncConfig) {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        // TODO: is it a good condition?
-        if (stack.isStackInDeletionPhase() || stack.isModificationInProgress()) {
-            LOGGER.debug("Stack could not be synchronized in {} state!", stack.getStatus());
-        } else {
-            sync(stack, syncConfig);
-        }
-    }
-
-    private void sync(Stack stack, SyncConfig syncConfig) {
-        Long stackId = stack.getId();
-        Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStack(stackId);
-        Map<InstanceSyncState, Integer> instanceStateCounts = initInstanceStateCounts();
-        DetailedEnvironmentResponse environment = environmentClientService.getByCrnAsInternal(stack.getEnvironmentCrn());
-        for (InstanceMetaData instance : instances) {
-            InstanceGroup instanceGroup = instance.getInstanceGroup();
-            try {
-                InstanceSyncState state = metadata.getState(stack, instanceGroup, instance.getInstanceId(), environment);
-                syncInstanceStatusByState(stack, instanceStateCounts, instance, state);
-            } catch (CloudConnectorException e) {
-                LOGGER.warn(e.getMessage(), e);
-                eventService.fireCloudbreakEvent(stackId, AVAILABLE.name(),
-                        STACK_SYNC_INSTANCE_STATUS_RETRIEVAL_FAILED,
-                        Collections.singletonList(instance.getInstanceId()));
-                incrementInstanceStateCount(instanceStateCounts, InstanceSyncState.UNKNOWN);
-            }
-        }
-        handleSyncResult(stack, instanceStateCounts, syncConfig);
     }
 
     public void autoSync(Stack stack, Collection<InstanceMetaData> instances, List<CloudVmInstanceStatus> instanceStatuses,
@@ -256,21 +208,25 @@ public class StackSyncService {
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig) {
         if (syncConfig.isStackStatusUpdateEnabled()) {
             Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(stack.getId());
-            if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
-                if (syncConfig.isCmServerRunning()) {
-                    if (stack.getStatus() != AVAILABLE) {
-                        updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON);
-                    }
-                } else if (stack.getStatus() != UNREACHABLE) {
-                    updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING);
+            handleSyncResult(stack, instanceStateCounts, syncConfig, instances);
+        }
+    }
+
+    private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
+            Set<InstanceMetaData> instances) {
+        Status status = stack.getStatus();
+        if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
+            if (syncConfig.isCmServerRunning()) {
+                if (status != AVAILABLE && status != NODE_FAILURE) {
+                    updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON);
                 }
-            } else if (isAllStopped(instanceStateCounts, instances.size()) && stack.getStatus() != STOPPED) {
-                updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON);
-                updateClusterStatus(stack.getId(), STOPPED);
-            } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && stack.getStatus() != DELETE_FAILED) {
-                updateStackStatus(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON);
-                updateClusterStatus(stack.getId(), DELETED_ON_PROVIDER_SIDE);
+            } else if (status != UNREACHABLE) {
+                updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING);
             }
+        } else if (isAllStopped(instanceStateCounts, instances.size()) && status != STOPPED) {
+            updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON);
+        } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && status != DELETE_FAILED) {
+            updateStackStatus(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON);
         }
     }
 
@@ -297,10 +253,6 @@ public class StackSyncService {
 
     private void updateStackStatus(Long stackId, DetailedStackStatus status, String statusReason) {
         stackUpdater.updateStackStatus(stackId, status, statusReason);
-    }
-
-    private void updateClusterStatus(Long stackId, Status status) {
-        clusterService.updateClusterStatusByStackId(stackId, status);
     }
 
     private void updateMetaDataToDeletedOnProviderSide(Stack stack, InstanceMetaData instanceMetaData) {

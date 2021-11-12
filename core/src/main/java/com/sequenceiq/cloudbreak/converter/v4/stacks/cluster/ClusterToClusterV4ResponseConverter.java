@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.converter.v4.database.RDSConfigToDatabaseV4Resp
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.ClusterToClouderaManagerV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.gateway.GatewayToGatewayV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.workspaces.WorkspaceToWorkspaceResourceV4ResponseConverter;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.service.ServiceEndpointCollector;
@@ -84,11 +85,12 @@ public class ClusterToClusterV4ResponseConverter {
         ClusterV4Response clusterResponse = new ClusterV4Response();
         clusterResponse.setId(source.getId());
         clusterResponse.setName(source.getName());
-        clusterResponse.setStatus(source.getStatus());
-        clusterResponse.setStatusReason(source.getStatusReason());
+        Stack stack = source.getStack();
+        clusterResponse.setStatus(stack.getStatus());
+        clusterResponse.setStatusReason(stack.getStatusReason());
         setUptime(source, clusterResponse);
         clusterResponse.setDescription(source.getDescription() == null ? "" : source.getDescription());
-        String managerAddress = stackUtil.extractClusterManagerAddress(source.getStack());
+        String managerAddress = stackUtil.extractClusterManagerAddress(stack);
         Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServicesForTopologies =
                     serviceEndpointCollector.prepareClusterExposedServices(source, managerAddress);
         clusterResponse.setExposedServices(clusterExposedServicesForTopologies);
@@ -110,7 +112,7 @@ public class ClusterToClusterV4ResponseConverter {
         clusterResponse.setBlueprint(getIfNotNull(source.getBlueprint(), blueprintToBlueprintV4ResponseConverter::convert));
         clusterResponse.setExtendedBlueprintText(getExtendedBlueprintText(source));
         convertDpSecrets(source, clusterResponse);
-        clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(source.getStack()));
+        clusterResponse.setServerIp(stackUtil.extractClusterManagerIp(stack));
         clusterResponse.setServerFqdn(source.getFqdn());
         clusterResponse.setServerUrl(serviceEndpointCollector.getManagerServerUrl(source, managerAddress));
         clusterResponse.setCustomConfigurationsName(getIfNotNull(source.getCustomConfigurations(), configurations -> configurations.getName()));
@@ -122,7 +124,7 @@ public class ClusterToClusterV4ResponseConverter {
     }
 
     private void setUptime(Cluster source, ClusterV4Response clusterResponse) {
-        long uptime = stackUtil.getUptimeForCluster(source, source.isAvailable());
+        long uptime = stackUtil.getUptimeForCluster(source, source.getStack().isAvailable());
         int minutes = (int) ((uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE)) % SECONDS_PER_MINUTE);
         int hours = (int) (uptime / (MILLIS_PER_SECOND * SECONDS_PER_MINUTE * SECONDS_PER_MINUTE));
         clusterResponse.setUptime(uptime);

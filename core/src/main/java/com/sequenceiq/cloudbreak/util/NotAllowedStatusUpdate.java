@@ -6,9 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 public class NotAllowedStatusUpdate {
 
@@ -55,10 +54,6 @@ public class NotAllowedStatusUpdate {
         String stackStatus = Optional.ofNullable(stack.getStatus())
                 .map(Status::name)
                 .orElse("N/A");
-        String clusterStatus = Optional.ofNullable(stack.getCluster())
-                .map(Cluster::getStatus)
-                .map(Status::name)
-                .orElse("N/A");
         String message = new StringBuilder()
                 .append("Cannot update the status of the ")
                 .append(type)
@@ -66,8 +61,6 @@ public class NotAllowedStatusUpdate {
                 .append(targetStatus)
                 .append(" when stack is in ")
                 .append(stackStatus)
-                .append(" and cluster is in ")
-                .append(clusterStatus)
                 .append(" state.")
                 .append(expectedStatus.map(e -> format(" The %s should be in %s status.", type, e)).orElse(""))
                 .toString();

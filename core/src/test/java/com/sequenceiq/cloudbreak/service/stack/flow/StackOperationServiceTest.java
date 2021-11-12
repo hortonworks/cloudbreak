@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static org.mockito.ArgumentMatchers.any;
@@ -102,7 +103,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenStackStopped() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
+        stack.setStackStatus(new StackStatus(stack, STOPPED));
         stack.setId(1L);
 
         underTest.start(stack, null, false);
@@ -140,9 +141,8 @@ public class StackOperationServiceTest {
     public void testStartWhenClusterStopFailed() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus(stack, Status.STOPPED, "", STOPPED));
         Cluster cluster = new Cluster();
-        cluster.setStatus(Status.STOPPED);
         stack.setCluster(cluster);
         underTest.start(stack, cluster, false);
         verify(flowManager, times(1)).triggerStackStart(stack.getId());
@@ -184,10 +184,9 @@ public class StackOperationServiceTest {
     public void testStartWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus(stack, STOPPED));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
-        cluster.setStatus(Status.STOPPED);
         underTest.start(stack, cluster, false);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.startable());
     }
@@ -199,10 +198,9 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, AVAILABLE));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
-        cluster.setStatus(Status.STOPPED);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
-        underTest.triggerStackStopIfNeeded(stack, cluster, false);
+        underTest.triggerStackStopIfNeeded(stack, cluster, true);
         verify(environmentService).checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
     }
 

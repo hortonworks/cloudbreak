@@ -99,9 +99,9 @@ public class UpdateNodeCountValidator {
 
     public void validateClusterStatus(Stack stack) {
         Cluster cluster = stack.getCluster();
-        if (cluster != null && !cluster.isAvailable()) {
-            throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's not available.",
-                    cluster.getName(), cluster.getStatus()));
+        if (cluster != null && !stack.isAvailable()) {
+            throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's available.",
+                    cluster.getName(), stack.getStatus()));
         }
     }
 
@@ -241,7 +241,7 @@ public class UpdateNodeCountValidator {
         InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId)
                 .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
-        downscaleValidatorService.checkClusterInValidStatus(stack.getCluster());
+        downscaleValidatorService.checkClusterInValidStatus(stack);
         return metaData;
     }
 }

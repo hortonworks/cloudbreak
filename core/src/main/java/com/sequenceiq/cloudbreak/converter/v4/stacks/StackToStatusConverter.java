@@ -17,8 +17,8 @@ public class StackToStatusConverter {
         response.setStatus(source.getStatus());
         response.setStatusReason(source.getStatusReason());
         Optional<Cluster> cluster = Optional.ofNullable(source.getCluster());
-        cluster.ifPresent(c -> response.setClusterStatus(c.getStatus()));
-        cluster.ifPresent(c -> response.setClusterStatusReason(c.getStatusReason()));
+        cluster.ifPresent(c -> response.setClusterStatus(source.getStatus()));
+        cluster.ifPresent(c -> response.setClusterStatusReason(source.getStatusReason()));
         response.setCrn(source.getResourceCrn());
         return response;
     }

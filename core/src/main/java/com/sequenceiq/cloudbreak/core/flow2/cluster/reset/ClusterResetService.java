@@ -37,7 +37,7 @@ public class ClusterResetService {
     public void handleResetClusterFailure(StackView stackView, Exception exception) {
         String errorMessage = exception instanceof CloudbreakException && exception.getCause() != null
                 ? exception.getCause().getMessage() : exception.getMessage();
-        clusterService.updateClusterStatusByStackId(stackView.getId(), Status.CREATE_FAILED, errorMessage);
+        clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.CLUSTER_RESET_FAILED, errorMessage);
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE);
         flowMessageService.fireEventAndLog(stackView.getId(), Status.CREATE_FAILED.name(), CLUSTER_CREATE_FAILED, errorMessage);
     }

@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 
 @Component
 public class StackDownscaleValidatorService {
@@ -35,8 +35,8 @@ public class StackDownscaleValidatorService {
         }
     }
 
-    public void checkClusterInValidStatus(Cluster cluster) {
-        if (cluster.getStatus() == Status.STOPPED) {
+    public void checkClusterInValidStatus(Stack stack) {
+        if (stack.getStatus() == Status.STOPPED) {
             throw new BadRequestException("Cluster is in Stopped status. Please start the cluster for downscale.");
         }
     }

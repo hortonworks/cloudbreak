@@ -2,31 +2,30 @@ package com.sequenceiq.cloudbreak.cluster.status;
 
 import java.util.Arrays;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 
 public enum ClusterStatus {
-    UNKNOWN(null, null, "Error happened during the communication with the Cluster Manager"),
-    CLUSTERMANAGER_NOT_RUNNING(null, null, "The Cluster Manager server is not running."),
-    CLUSTERMANAGER_RUNNING(Status.AVAILABLE, null, "The Cluster Manager server is running."),
-    INSTALLING(Status.AVAILABLE, null, "The Cluster Manager server is running, services are being installed... [%s]"),
-    INSTALLED(Status.AVAILABLE, Status.STOPPED, "Services are installed but not running."),
-    INSTALL_FAILED(Status.AVAILABLE, null, "The Cluster Manager server is running, but service installation has failed. [%s]"),
-    STARTING(Status.AVAILABLE, Status.START_IN_PROGRESS, "Services are installed, starting... [%s]"),
-    STARTED(Status.AVAILABLE, Status.AVAILABLE, "Services are installed and running."),
-    STOPPING(Status.AVAILABLE, Status.STOP_IN_PROGRESS, "Services are installed, stopping... [%s]"),
-    PENDING(Status.AVAILABLE, null, "There are in progress or pending operations in the Cluster Manager. Wait them to be finished and try syncing later."),
-    AMBIGUOUS(Status.AVAILABLE, Status.AVAILABLE,
+    UNKNOWN(DetailedStackStatus.UNKNOWN, "Error happened during the communication with the Cluster Manager"),
+    CLUSTERMANAGER_NOT_RUNNING(DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, "The Cluster Manager server is not running."),
+    CLUSTERMANAGER_RUNNING(DetailedStackStatus.AVAILABLE, "The Cluster Manager server is running."),
+    INSTALLING(DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES,
+            "The Cluster Manager server is running, services are being installed... [%s]"),
+    INSTALLED(DetailedStackStatus.STOPPED, "Services are installed but not running."),
+    INSTALL_FAILED(DetailedStackStatus.AVAILABLE, "The Cluster Manager server is running, but service installation has failed. [%s]"),
+    STARTING(DetailedStackStatus.START_IN_PROGRESS, "Services are installed, starting... [%s]"),
+    STARTED(DetailedStackStatus.AVAILABLE, "Services are installed and running."),
+    STOPPING(DetailedStackStatus.STOP_IN_PROGRESS, "Services are installed, stopping... [%s]"),
+    PENDING(DetailedStackStatus.AVAILABLE,
+            "There are in progress or pending operations in the Cluster Manager. Wait them to be finished and try syncing later."),
+    AMBIGUOUS(DetailedStackStatus.AVAILABLE,
             "There are both stopped and running services. [%s] Restart or stop all of them and try syncing later.");
 
     private final String statusReason;
 
-    private final Status stackStatus;
+    private final DetailedStackStatus detailedStackStatus;
 
-    private final Status clusterStatus;
-
-    ClusterStatus(Status stackStatus, Status clusterStatus, String statusReason) {
-        this.stackStatus = stackStatus;
-        this.clusterStatus = clusterStatus;
+    ClusterStatus(DetailedStackStatus detailedStackStatus, String statusReason) {
+        this.detailedStackStatus = detailedStackStatus;
         this.statusReason = statusReason;
     }
 
@@ -34,12 +33,8 @@ public enum ClusterStatus {
         return statusReason;
     }
 
-    public Status getStackStatus() {
-        return stackStatus;
-    }
-
-    public Status getClusterStatus() {
-        return clusterStatus;
+    public DetailedStackStatus getDetailedStackStatus() {
+        return detailedStackStatus;
     }
 
     public static boolean supported(String status) {

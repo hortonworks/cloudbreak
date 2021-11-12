@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 
@@ -55,9 +54,6 @@ public class StackStartStopService {
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private MetadataSetupService metadatSetupService;
@@ -85,7 +81,7 @@ public class StackStartStopService {
                     coreInstanceMetaData.size(), stack.getFullNodeCount());
         }
         metadatSetupService.saveInstanceMetaData(stack, coreInstanceMetaData, SERVICES_RUNNING);
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Cluster infrastructure started successfully.");
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STACK_STARTED, "Cluster infrastructure started successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_INFRASTRUCTURE_STARTED);
     }
 
@@ -139,7 +135,7 @@ public class StackStartStopService {
     }
 
     public boolean isStopPossible(StackView stack) {
-        if (stack != null && (stack.isStopRequested() || stack.isExternalDatabaseStopped())) {
+        if (stack != null && (stack.isStopInProgress() || stack.isExternalDatabaseStopped())) {
             return true;
         } else {
             LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
@@ -148,7 +144,7 @@ public class StackStartStopService {
     }
 
     public boolean isStopPossible(Stack stack) {
-        if (stack != null && (stack.isStopRequested() || stack.isExternalDatabaseStopped())) {
+        if (stack != null && (stack.isStopInProgress() || stack.isExternalDatabaseStopped())) {
             return true;
         } else {
             LOGGER.debug("Stack stop has not been requested because stack isn't in stop requested state, stop stack later.");
@@ -177,8 +173,5 @@ public class StackStartStopService {
         Status stackStatus = detailedStackStatus.getStatus();
         stackUpdater.updateStackStatus(stackView.getId(), detailedStackStatus, logMessage + exception.getMessage());
         flowMessageService.fireEventAndLog(stackView.getId(), stackStatus.name(), resourceEvent, exception.getMessage());
-        if (stackView.getClusterView() != null) {
-            clusterService.updateClusterStatusByStackId(stackView.getId(), STOPPED);
-        }
     }
 }

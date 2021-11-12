@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.maintenance;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.MAINTENANCE_MODE_VALIDATION_FAILED;
@@ -85,7 +84,6 @@ public class MaintenanceModeValidationService {
     }
 
     public void setUpValidationFlow(Long stackId) {
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Validating repos and images...");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), MAINTENANCE_MODE_VALIDATION_STARTED);
     }
@@ -145,8 +143,7 @@ public class MaintenanceModeValidationService {
 
     public void handleValidationSuccess(Long stackId, List<Warning> warnings) {
         LOGGER.debug("Maintenance mode validation flow has been finished successfully");
-        clusterService.updateClusterStatusByStackId(stackId, MAINTENANCE_MODE_ENABLED);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Validation has been finished");
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.MAINTENANCE_MODE_ENABLED, "Validation has been finished");
 
         try {
             if (!warnings.isEmpty()) {
@@ -164,8 +161,7 @@ public class MaintenanceModeValidationService {
     public void handleValidationFailure(Long stackId, Exception error) {
         String errorDetailes = error.getMessage();
         LOGGER.warn("Error during Maintenance mode validation flow: ", error);
-        clusterService.updateClusterStatusByStackId(stackId, MAINTENANCE_MODE_ENABLED);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE,
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.MAINTENANCE_MODE_ENABLED,
                 String.format("Validation has been finished with error: %s", error));
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), MAINTENANCE_MODE_VALIDATION_FAILED, errorDetailes);
     }

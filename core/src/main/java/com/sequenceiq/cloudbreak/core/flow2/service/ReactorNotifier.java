@@ -18,7 +18,6 @@ import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
@@ -87,7 +86,7 @@ public class ReactorNotifier {
     public FlowIdentifier notify(Long stackId, String selector, Acceptable acceptable, Function<Long, Stack> getStackFn) {
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(eventParameterFactory.createEventParameters(stackId), acceptable);
         Stack stack = getStackFn.apply(event.getData().getResourceId());
-        Optional.ofNullable(stack).map(Stack::getCluster).map(Cluster::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
+        Optional.ofNullable(stack).map(Stack::getStatus).ifPresent(isTriggerAllowedInMaintenance(selector));
         reactorReporter.logInfoReport();
         reactor.notify(selector, event);
         return checkFlowStatus(event, stack.getName());

@@ -3,10 +3,6 @@ package com.sequenceiq.cloudbreak.service.blueprint;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.DEFAULT;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.SERVICE_MANAGED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus.USER_MANAGED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.PRE_DELETE_IN_PROGRESS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
@@ -46,9 +42,9 @@ import org.powermock.reflect.Whitebox;
 import org.springframework.validation.Errors;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -238,7 +234,7 @@ public class BlueprintServiceTest {
     @Test
     public void testDeletionWithNonTerminatedClusterAndStack() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
-        Cluster cluster = getCluster("c1", 1L, blueprint, AVAILABLE, AVAILABLE);
+        Cluster cluster = getCluster("c1", 1L, blueprint, DetailedStackStatus.AVAILABLE);
         ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
         clusterTemplateView.setName("ClusterDefinition");
 
@@ -255,9 +251,9 @@ public class BlueprintServiceTest {
     public void testDeletionWithTerminatedClustersNonTerminatedStacks() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Set<Cluster> clusters = new HashSet<>();
-        clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
-        clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_IN_PROGRESS));
-        clusters.add(getCluster("c3", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));
+        clusters.add(getCluster("c1", 1L, blueprint, DetailedStackStatus.PRE_DELETE_IN_PROGRESS));
+        clusters.add(getCluster("c2", 1L, blueprint, DetailedStackStatus.DELETE_IN_PROGRESS));
+        clusters.add(getCluster("c3", 1L, blueprint, DetailedStackStatus.DELETE_COMPLETED));
         ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
         clusterTemplateView.setName("ClusterDefinition");
 
@@ -274,8 +270,8 @@ public class BlueprintServiceTest {
     public void testDeletionWithTerminatedAndNonTerminatedClusters() {
         Blueprint blueprint = getBlueprint("name", USER_MANAGED);
         Set<Cluster> clusters = new HashSet<>();
-        clusters.add(getCluster("c1", 1L, blueprint, PRE_DELETE_IN_PROGRESS, AVAILABLE));
-        clusters.add(getCluster("c2", 1L, blueprint, DELETE_COMPLETED, DELETE_COMPLETED));
+        clusters.add(getCluster("c1", 1L, blueprint, DetailedStackStatus.PRE_DELETE_IN_PROGRESS));
+        clusters.add(getCluster("c2", 1L, blueprint, DetailedStackStatus.DELETE_COMPLETED));
         ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
         clusterTemplateView.setName("ClusterDefinition1");
         ClusterTemplateView clusterTemplateView2 = new ClusterTemplateView();
@@ -509,12 +505,12 @@ public class BlueprintServiceTest {
     public void testPrepareDeletionWhenHasOneClusterDefinitionAndOneCluster() {
         Blueprint blueprint = new Blueprint();
         blueprint.setName("TemplateName");
-        Cluster templateCluster = getCluster("Stack Template Name", 0L, blueprint, AVAILABLE, AVAILABLE);
+        Cluster templateCluster = getCluster("Stack Template Name", 0L, blueprint, DetailedStackStatus.AVAILABLE);
         templateCluster.getStack().setType(StackType.TEMPLATE);
         ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
         clusterTemplateView.setName("ClusterDefinition");
 
-        Cluster workloadCluster = getCluster("Workload Name", 1L, blueprint, AVAILABLE, AVAILABLE);
+        Cluster workloadCluster = getCluster("Workload Name", 1L, blueprint, DetailedStackStatus.AVAILABLE);
 
         when(clusterTemplateViewService.findAllByStackIds(List.of(0L))).thenReturn(Set.of(clusterTemplateView));
         when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(workloadCluster, templateCluster));
@@ -528,7 +524,7 @@ public class BlueprintServiceTest {
     public void testPrepareDeletionWhenHasOneClusterDefinition() {
         Blueprint blueprint = new Blueprint();
         blueprint.setName("TemplateName");
-        Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, AVAILABLE, AVAILABLE);
+        Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, DetailedStackStatus.AVAILABLE);
         templateCluster.getStack().setType(StackType.TEMPLATE);
         ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
         clusterTemplateView.setName("ClusterDefinition");
@@ -543,7 +539,7 @@ public class BlueprintServiceTest {
     public void testPrepareDeletionWhenHasOneCluster() {
         Blueprint blueprint = new Blueprint();
         blueprint.setName("TemplateName");
-        Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, AVAILABLE, AVAILABLE);
+        Cluster templateCluster = getCluster("Cluster Name", 0L, blueprint, DetailedStackStatus.AVAILABLE);
         ClusterTemplateView clusterTemplateView = new ClusterTemplateView();
         clusterTemplateView.setName("ClusterDefinition");
         when(clusterService.findByBlueprint(blueprint)).thenReturn(Set.of(templateCluster));
@@ -553,21 +549,18 @@ public class BlueprintServiceTest {
                 + "Please remove this cluster before deleting the cluster template.", actual.getMessage());
     }
 
-    private Cluster getCluster(String name, Long id, Blueprint blueprint, Status clusterStatus, Status stackStatus) {
+    private Cluster getCluster(String name, Long id, Blueprint blueprint, DetailedStackStatus detailedStackStatus) {
         Cluster cluster1 = new Cluster();
         cluster1.setName(name);
         cluster1.setId(id);
         cluster1.setBlueprint(blueprint);
-        cluster1.setStatus(clusterStatus);
-        patchWithStackStatus(cluster1, stackStatus);
+        patchWithStackStatus(cluster1, detailedStackStatus);
         return cluster1;
     }
 
-    private void patchWithStackStatus(Cluster cluster1, Status status) {
+    private void patchWithStackStatus(Cluster cluster1, DetailedStackStatus detailedStackStatus) {
         Stack stack = new Stack();
-        StackStatus ss = new StackStatus();
-        ss.setStatus(status);
-        stack.setStackStatus(ss);
+        stack.setStackStatus(new StackStatus(stack, detailedStackStatus));
         stack.setType(StackType.WORKLOAD);
         stack.setName(cluster1.getName());
         stack.setId(cluster1.getId());

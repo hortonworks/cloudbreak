@@ -67,7 +67,6 @@ public class ChangePrimaryGatewayService {
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     public void changePrimaryGatewayStarted(long stackId) {
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.CLUSTER_OPERATION, "Changing gateway.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_GATEWAY_CHANGE);
     }
@@ -107,14 +106,13 @@ public class ChangePrimaryGatewayService {
     }
 
     public void ambariServerStarted(StackView stack) {
-        clusterService.updateClusterStatusByStackId(stack.getId(), AVAILABLE);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Gateway successfully changed.");
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_GATEWAY_CHANGED_SUCCESSFULLY, stackUtil.extractClusterManagerIp(stack));
     }
 
     public void changePrimaryGatewayFailed(long stackId, Exception exception) {
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Cluster could not be started: " + exception.getMessage());
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.PRIMARY_GATEWAY_CHANGE_FAILED,
+                "Cluster could not be started: " + exception.getMessage());
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_GATEWAY_CHANGE_FAILED, exception.getMessage());
     }
 }

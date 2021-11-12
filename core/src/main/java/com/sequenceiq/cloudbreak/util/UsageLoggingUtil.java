@@ -68,10 +68,11 @@ public class UsageLoggingUtil {
     /**
      * Log datalake/datahub status change usage event.
      * @param oldClusterStatus the old cluster status. Nullable. If null, no usage events will be logged.
+     * @param newClusterStatus the new cluster status. Nullable. If null, no usage events will be logged.
      * @param cluster the cluster object. Nullable. If null, no usage events will be logged.
      */
-    public void logClusterStatusChangeUsageEvent(@Nullable Status oldClusterStatus, @Nullable Cluster cluster) {
-        if (oldClusterStatus == null || cluster == null || cluster.getId() == null || cluster.getStatus() == null) {
+    public void logClusterStatusChangeUsageEvent(@Nullable Status oldClusterStatus, @Nullable Status newClusterStatus, @Nullable Cluster cluster) {
+        if (oldClusterStatus == null || newClusterStatus == null || cluster == null || cluster.getId() == null || cluster.getStack() == null) {
             return;
         }
         Stack stack = cluster.getStack();
@@ -84,7 +85,7 @@ public class UsageLoggingUtil {
             oldStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(
                     oldClusterStatus.name().toUpperCase());
             newStatusEnum = UsageProto.CDPCloudbreakClusterStatus.Value.valueOf(
-                    cluster.getStatus().name().toUpperCase());
+                    newClusterStatus.name().toUpperCase());
         } catch (IllegalArgumentException e) {
             return;
         }

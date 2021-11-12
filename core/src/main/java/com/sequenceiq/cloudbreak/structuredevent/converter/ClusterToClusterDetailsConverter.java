@@ -7,6 +7,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
@@ -22,8 +23,13 @@ public class ClusterToClusterDetailsConverter {
         clusterDetails.setId(source.getId());
         clusterDetails.setName(source.getName());
         clusterDetails.setDescription(source.getDescription());
-        clusterDetails.setStatus(source.getStatus().toString());
-        clusterDetails.setStatusReason(source.getStatusReason());
+        Stack stack = source.getStack();
+        if (stack != null && stack.getStatus() != null) {
+            clusterDetails.setStatus(stack.getStatus().toString());
+        }
+        if (stack != null) {
+            clusterDetails.setStatusReason(stack.getStatusReason());
+        }
         clusterDetails.setCreationStarted(source.getCreationStarted());
         clusterDetails.setCreationFinished(source.getCreationFinished());
         clusterDetails.setUpSince(source.getUpSince());

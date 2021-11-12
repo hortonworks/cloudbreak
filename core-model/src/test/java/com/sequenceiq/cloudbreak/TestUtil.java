@@ -370,6 +370,10 @@ public class TestUtil {
         return stack(AVAILABLE, gcpCredential());
     }
 
+    public static Stack stack(Status status) {
+        return stack(status, gcpCredential());
+    }
+
     public static Stack stack(Cluster cluster) {
         Stack stack = stack(AVAILABLE, gcpCredential());
         stack.setCluster(cluster);
@@ -401,8 +405,6 @@ public class TestUtil {
         cluster.setClusterManagerIp("10.0.0.1");
         cluster.setBlueprint(blueprint);
         cluster.setUpSince(new Date().getTime());
-        cluster.setStatus(AVAILABLE);
-        cluster.setStatusReason("statusReason");
         cluster.setUserName("admin");
         cluster.setPassword("admin");
         Gateway gateway = new Gateway();

@@ -48,7 +48,7 @@ public class ClusterSyncHandler implements EventHandler<ClusterSyncRequest> {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Cluster cluster = clusterService.retrieveClusterByStackIdWithoutAuth(request.getResourceId()).orElse(null);
             clusterStatusUpdater.updateClusterStatus(stack, cluster);
-            if (cluster != null && (cluster.isAvailable() || cluster.isMaintenanceModeEnabled())) {
+            if (cluster != null && (stack.isAvailable() || stack.isMaintenanceModeEnabled())) {
                 instanceMetadataUpdater.updatePackageVersionsOnAllInstances(stack.getId());
             }
             result = new ClusterSyncResult(request);

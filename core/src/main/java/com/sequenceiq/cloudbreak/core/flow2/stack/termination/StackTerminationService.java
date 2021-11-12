@@ -49,9 +49,9 @@ public class StackTerminationService {
     public void finishStackTermination(StackTerminationContext context, TerminateStackResult payload) {
         LOGGER.debug("Terminate stack result: {}", payload);
         Stack stack = context.getStack();
+        clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.CLUSTER_DELETE_COMPLETED);
         terminationService.finalizeTermination(stack.getId(), context.getTerminationType().isForced());
         flowMessageService.fireEventAndLog(stack.getId(), DELETE_COMPLETED.name(), STACK_DELETE_COMPLETED);
-        clusterService.updateClusterStatusByStackId(stack.getId(), DELETE_COMPLETED);
         metricService.incrementMetricCounter(MetricType.STACK_TERMINATION_SUCCESSFUL, stack);
     }
 
@@ -67,8 +67,8 @@ public class StackTerminationService {
             stackUpdater.updateStackStatus(stackId, status, stackUpdateMessage);
             LOGGER.debug("Error during stack termination flow: ", errorDetails);
         } else {
+            clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.CLUSTER_DELETE_COMPLETED);
             terminationService.finalizeTermination(stackId, true);
-            clusterService.updateClusterStatusByStackId(stackId, DELETE_COMPLETED);
             stackUpdateMessage = "Stack was force terminated.";
             status = DetailedStackStatus.DELETE_COMPLETED;
             resourceEvent = STACK_FORCED_DELETE_COMPLETED;

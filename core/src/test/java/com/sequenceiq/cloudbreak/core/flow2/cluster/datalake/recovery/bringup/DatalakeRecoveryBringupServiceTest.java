@@ -59,7 +59,7 @@ public class DatalakeRecoveryBringupServiceTest {
     public void testBringupFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         underTest.handleDatalakeRecoveryBringupFailure(STACK_ID, ERROR_MESSAGE, CLUSTER_RECOVERY_FAILED);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_FAILED, ERROR_MESSAGE);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, CLUSTER_RECOVERY_FAILED, ERROR_MESSAGE);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
         assertEquals(DATALAKE_RECOVERY_BRINGUP_FAILED, captor.getValue());
     }

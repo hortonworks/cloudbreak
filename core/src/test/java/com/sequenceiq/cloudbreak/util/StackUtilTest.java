@@ -26,7 +26,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -77,7 +76,6 @@ public class StackUtilTest {
     @Test
     public void testGetUptimeForClusterZero() {
         Cluster cluster = new Cluster();
-        cluster.setStatus(Status.CREATE_IN_PROGRESS);
         long uptime = stackUtil.getUptimeForCluster(cluster, true);
         assertEquals(0L, uptime);
     }
@@ -96,7 +94,6 @@ public class StackUtilTest {
         Cluster cluster = new Cluster();
         int minutes = 10;
         cluster.setUptime(Duration.ofMinutes(minutes).toString());
-        cluster.setStatus(Status.AVAILABLE);
         cluster.setUpSince(new Date().getTime());
         long uptime = stackUtil.getUptimeForCluster(cluster, true);
         assertTrue(uptime >= Duration.ofMinutes(minutes).toMillis());

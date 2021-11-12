@@ -24,7 +24,6 @@ import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.BackupRestoreSta
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 
 public class BackupRestoreStatusServiceTest {
 
@@ -36,9 +35,6 @@ public class BackupRestoreStatusServiceTest {
 
     @Mock
     private CloudbreakFlowMessageService flowMessageService;
-
-    @Mock
-    private ClusterService clusterService;
 
     @Mock
     private StackUpdater stackUpdater;
@@ -55,7 +51,8 @@ public class BackupRestoreStatusServiceTest {
     public void testBackupStarted() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.backupDatabase(STACK_ID, BACKUP_ID);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.BACKUP_IN_PROGRESS);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_IN_PROGRESS,
+                "Initiating database backup backup1");
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_IN_PROGRESS.name()), captor.capture());
         assertEquals(DATALAKE_DATABASE_BACKUP, captor.getValue());
     }
@@ -64,7 +61,8 @@ public class BackupRestoreStatusServiceTest {
     public void testBackupFinished() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.backupDatabaseFinished(STACK_ID);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.AVAILABLE);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_FINISHED,
+                "Database was successfully backed up.");
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.AVAILABLE.name()), captor.capture());
         assertEquals(DATALAKE_DATABASE_BACKUP_FINISHED, captor.getValue());
     }
@@ -73,7 +71,7 @@ public class BackupRestoreStatusServiceTest {
     public void testBackupFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseBackupFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.DATABASE_BACKUP_FAILED);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.AVAILABLE, ERROR_MESSAGE);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_BACKUP_FAILED, ERROR_MESSAGE);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
         assertEquals(DATALAKE_DATABASE_BACKUP_FAILED, captor.getValue());
     }
@@ -82,7 +80,8 @@ public class BackupRestoreStatusServiceTest {
     public void testRestoreStarted() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.restoreDatabase(STACK_ID, BACKUP_ID);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.RESTORE_IN_PROGRESS);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_IN_PROGRESS,
+                "Initiating database restore backup1");
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_IN_PROGRESS.name()), captor.capture());
         assertEquals(DATALAKE_DATABASE_RESTORE, captor.getValue());
     }
@@ -91,7 +90,8 @@ public class BackupRestoreStatusServiceTest {
     public void testRestoreFinished() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.restoreDatabaseFinished(STACK_ID);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.AVAILABLE);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_FINISHED,
+                "Database was successfully restored.");
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.AVAILABLE.name()), captor.capture());
         assertEquals(DATALAKE_DATABASE_RESTORE_FINISHED, captor.getValue());
     }
@@ -100,7 +100,7 @@ public class BackupRestoreStatusServiceTest {
     public void testRestoreFailure() {
         ArgumentCaptor<ResourceEvent> captor = ArgumentCaptor.forClass(ResourceEvent.class);
         service.handleDatabaseRestoreFailure(STACK_ID, ERROR_MESSAGE, DetailedStackStatus.DATABASE_RESTORE_FAILED);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.AVAILABLE, ERROR_MESSAGE);
+        verify(stackUpdater, times(1)).updateStackStatus(STACK_ID, DetailedStackStatus.DATABASE_RESTORE_FAILED, ERROR_MESSAGE);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
         assertEquals(DATALAKE_DATABASE_RESTORE_FAILED, captor.getValue());
     }

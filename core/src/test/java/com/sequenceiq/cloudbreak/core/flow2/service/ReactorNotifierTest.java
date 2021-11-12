@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.service;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -23,10 +24,11 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.TestUtil;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.cloudbreak.exception.FlowNotAcceptedException;
 import com.sequenceiq.cloudbreak.exception.FlowsAlreadyRunningException;
@@ -75,7 +77,7 @@ public class ReactorNotifierTest {
     public void testNonAllowedFlowInMaintenanceMode() {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setStatus(Status.MAINTENANCE_MODE_ENABLED);
+        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.MAINTENANCE_MODE_ENABLED));
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
         BaseFlowEvent baseFlowEvent = new BaseFlowEvent("dontcare", 1L, "crn");
         when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
@@ -90,7 +92,7 @@ public class ReactorNotifierTest {
     public void testAccepted() throws InterruptedException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setStatus(Status.AVAILABLE);
+        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
         Acceptable data = mock(Acceptable.class);
         Promise<AcceptResult> accepted = (Promise<AcceptResult>) mock(Promise.class);
@@ -113,7 +115,6 @@ public class ReactorNotifierTest {
     public void testAcceptedReturnNull() throws InterruptedException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setStatus(Status.AVAILABLE);
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
         Acceptable data = mock(Acceptable.class);
         Promise<AcceptResult> accepted = (Promise<AcceptResult>) mock(Promise.class);
@@ -136,7 +137,6 @@ public class ReactorNotifierTest {
     public void testAcceptedReturnFalse() throws InterruptedException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.getCluster().setStatus(Status.AVAILABLE);
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
         Acceptable data = mock(Acceptable.class);
         Promise<AcceptResult> accepted = (Promise<AcceptResult>) mock(Promise.class);
