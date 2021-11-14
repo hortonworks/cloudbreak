@@ -18,15 +18,21 @@ public class EmbeddedDatabaseConfigProvider {
 
     public static final String POSTGRES_LOG_DIRECTORY_KEY = "postgres_log_directory";
 
+    public static final String POSTGRES_SCRIPTS_EXECUTED_DIRECTORY_KEY = "postgres_scripts_executed_directory";
+
     public static final String POSTGRES_DATA_ON_ATTACHED_DISK_KEY = "postgres_data_on_attached_disk";
 
     public static final String POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql";
 
     public static final String POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql/log";
 
+    public static final String POSTGRES_SCRIPTS_EXECUTED_SUBDIRECTORY_ON_ATTACHED_DISK = "pgsql/scripts";
+
     public static final String POSTGRES_DEFAULT_DIRECTORY = "/var/lib/pgsql";
 
     public static final String POSTGRES_DEFAULT_LOG_DIRECTORY = "/var/log";
+
+    public static final String POSTGRES_DEFAULT_SCRIPTS_EXECUTED_DIRECTORY = "/opt/salt/scripts";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EmbeddedDatabaseConfigProvider.class);
 
@@ -43,6 +49,7 @@ public class EmbeddedDatabaseConfigProvider {
             result = Map.of(
                     POSTGRES_DIRECTORY_KEY, POSTGRES_DEFAULT_DIRECTORY,
                     POSTGRES_LOG_DIRECTORY_KEY, POSTGRES_DEFAULT_LOG_DIRECTORY,
+                    POSTGRES_SCRIPTS_EXECUTED_DIRECTORY_KEY, POSTGRES_DEFAULT_SCRIPTS_EXECUTED_DIRECTORY,
                     POSTGRES_DATA_ON_ATTACHED_DISK_KEY, false);
         }
         LOGGER.debug("Embedded Postgres sql server pillar parameters: {}", result);
@@ -51,8 +58,9 @@ public class EmbeddedDatabaseConfigProvider {
 
     private Map<String, Object> createEmbeddedDbOnAttachedDiskConfig() {
         return Map.of(
-            POSTGRES_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK,
-            POSTGRES_LOG_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK,
-            POSTGRES_DATA_ON_ATTACHED_DISK_KEY, true);
+                POSTGRES_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_SUBDIRECTORY_ON_ATTACHED_DISK,
+                POSTGRES_LOG_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_LOG_SUBDIRECTORY_ON_ATTACHED_DISK,
+                POSTGRES_SCRIPTS_EXECUTED_DIRECTORY_KEY, VolumeUtils.DATABASE_VOLUME + "/" + POSTGRES_SCRIPTS_EXECUTED_SUBDIRECTORY_ON_ATTACHED_DISK,
+                POSTGRES_DATA_ON_ATTACHED_DISK_KEY, true);
     }
 }
