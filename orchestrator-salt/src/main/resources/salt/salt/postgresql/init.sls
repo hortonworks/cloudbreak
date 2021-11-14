@@ -4,6 +4,7 @@
 {% set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
 {% set postgres_directory = salt['pillar.get']('postgres:postgres_directory') %}
 {% set postgres_log_directory = salt['pillar.get']('postgres:postgres_log_directory') %}
+{% set postgres_scripts_executed_directory = salt['pillar.get']('postgres:postgres_scripts_executed_directory') %}
 {% set postgres_data_on_attached_disk = salt['pillar.get']('postgres:postgres_data_on_attached_disk', 'False') %}
 {% set command = 'systemctl show -p FragmentPath postgresql' %}
 {% set unitFile = salt['cmd.run'](command) | replace("FragmentPath=","") %}
@@ -22,10 +23,16 @@ include:
     - source: salt://postgresql/scripts/init_db_remote.sh
     - template: jinja
 
+/opt/salt/scripts/init-services-db-remote-executed:
+  file.rename:
+    - makedirs: True
+    - source: /var/log/init-services-db-remote-executed
+    - unless: test -f opt/salt/scripts/init-services-db-remote-executed
+
 init-services-db-remote:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/init_db_remote.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/init-services-db-remote-executed
-    - unless: test -f /var/log/init-services-db-remote-executed
+    - name: runuser -l postgres -c '/opt/salt/scripts/init_db_remote.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /opt/salt/scripts/init-services-db-remote-executed
+    - unless: test -f /opt/salt/scripts/init-services-db-remote-executed
     - require:
       - file: /opt/salt/scripts/init_db_remote.sh
 {% if postgresql.ssl_enabled == True %}
@@ -43,6 +50,12 @@ init-services-db-remote:
     - mode: 700
 
 {{ postgres_log_directory }}:
+  file.directory:
+    - user: root
+    - group: root
+    - mode: 755
+
+{{ postgres_scripts_executed_directory }}:
   file.directory:
     - user: root
     - group: root
@@ -85,13 +98,19 @@ start-postgresql:
     - mode: 750
     - source: salt://postgresql/scripts/conf_pgsql_listen_address.sh
 
+{{ postgres_scripts_executed_directory }}/pgsql_listen_address_configured:
+  file.rename:
+    - makedirs: True
+    - source: {{ postgres_log_directory }}/pgsql_listen_address_configured
+    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_listen_address_configured
+
 configure-listen-address:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_listen_address.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_log_directory }}/pgsql_listen_address_configured
+    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_listen_address.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_listen_address_configured
     - require:
       - file: /opt/salt/scripts/conf_pgsql_listen_address.sh
       - service: start-postgresql
-    - unless: test -f {{ postgres_log_directory }}/pgsql_listen_address_configured
+    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_listen_address_configured
 
 /opt/salt/scripts/conf_pgsql_max_connections.sh:
   file.managed:
@@ -101,13 +120,19 @@ configure-listen-address:
     - mode: 750
     - source: salt://postgresql/scripts/conf_pgsql_max_connections.sh
 
+{{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured:
+  file.rename:
+    - makedirs: True
+    - source: {{ postgres_log_directory }}/pgsql_max_connections_configured
+    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured
+
 configure-max-connections:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_max_connections.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_log_directory }}/pgsql_max_connections_configured
+    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_max_connections.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured
     - require:
       - file: /opt/salt/scripts/conf_pgsql_max_connections.sh
       - service: start-postgresql
-    - unless: test -f {{ postgres_log_directory }}/pgsql_max_connections_configured
+    - unless: test -f {{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured
 
 /opt/salt/scripts/init_db.sh:
   file.managed:
@@ -121,10 +146,16 @@ configure-max-connections:
     - source: salt://postgresql/scripts/init_db.sh
     - template: jinja
 
+{{ postgres_scripts_executed_directory }}/init-services-db-executed:
+  file.rename:
+    - makedirs: True
+    - source: {{ postgres_log_directory }}/init-services-db-executed
+    - unless: test -f {{ postgres_scripts_executed_directory }}/init-services-db-executed
+
 init-services-db:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/init_db.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_log_directory }}/init-services-db-executed
-    - unless: test -f {{ postgres_log_directory }}/init-services-db-executed
+    - name: runuser -l postgres -c '/opt/salt/scripts/init_db.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/init-services-db-executed
+    - unless: test -f {{ postgres_scripts_executed_directory }}/init-services-db-executed
     - require:
       - file: /opt/salt/scripts/init_db.sh
       - cmd: configure-listen-address
