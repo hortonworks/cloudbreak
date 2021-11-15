@@ -65,6 +65,21 @@ public class AzureTemplateBuilder {
     private AzureAcceleratedNetworkValidator azureAcceleratedNetworkValidator;
 
     //CHECKSTYLE:OFF
+    /**
+     * Build an Azure Resource Manager template from a freemarker template, using the provided arguments.
+     *
+     * The ARM template is a JSON string that conforms with the ARM template syntax.
+     *
+     * @param stackName name of the stack, used as a prefix for a number of fields in the ARM template
+     * @param customImageId the id of a custom image to use for storage on an azure Virtual Machine
+     * @param armCredentialView provides information about the Azure subscription we're interacting with
+     * @param armStack provides group and instance group information when provisioning virtual machines
+     * @param cloudContext provides information about the Azure environment we're deploying to, used to lookup region and environment information
+     * @param cloudStack provides user tags, storage image name, network information, and Azure environment information
+     * @param azureInstanceTemplateOperation provides information about whether this template is part of an upscale operation
+     * @param azureMarketplaceImage provides a partner center image for creating VMs
+     * @return an ARM template, formatted as JSON
+     */
     public String build(String stackName, String customImageId, AzureCredentialView armCredentialView, AzureStackView armStack, CloudContext cloudContext,
             CloudStack cloudStack, AzureInstanceTemplateOperation azureInstanceTemplateOperation, AzureMarketplaceImage azureMarketplaceImage) {
         try {
