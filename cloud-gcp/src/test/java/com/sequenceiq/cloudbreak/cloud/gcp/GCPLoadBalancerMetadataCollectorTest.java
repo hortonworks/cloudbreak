@@ -133,6 +133,8 @@ public class GCPLoadBalancerMetadataCollectorTest {
 
         assertEquals(1, result.size());
         assertEquals(PUBLIC_IP, result.get(0).getIp());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getName());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
         assertEquals(BACKEND_SERVICE_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
         assertEquals(INSTANCE_GROUP_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
@@ -155,6 +157,12 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(2, result.size());
         assertEquals(PUBLIC_IP, result.get(0).getIp());
         assertEquals(PUBLIC_IP2, result.get(1).getIp());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getName());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
+
+        assertEquals(FORWARDING_RULE_NAME_2, result.get(1).getName());
+        assertEquals(FORWARDING_RULE_NAME_2, result.get(1).getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
+
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
         assertEquals(BACKEND_SERVICE_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
         assertEquals(INSTANCE_GROUP_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
@@ -181,6 +189,10 @@ public class GCPLoadBalancerMetadataCollectorTest {
 
         Optional<CloudLoadBalancerMetadata> publicResult = result.stream().filter(p -> p.getType().equals(LoadBalancerType.PUBLIC)).findFirst();
         assertTrue(publicResult.isPresent());
+        assertEquals(FORWARDING_RULE_NAME_1, publicResult.get().getName());
+        assertEquals(FORWARDING_RULE_NAME_1, publicResult.get().getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
+
+
         assertEquals(PUBLIC_IP, publicResult.get().getIp());
         assertEquals(BACKEND_SERVICE_NAME, publicResult.get().getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
         assertEquals(INSTANCE_GROUP_NAME, publicResult.get().getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
@@ -188,6 +200,8 @@ public class GCPLoadBalancerMetadataCollectorTest {
 
         Optional<CloudLoadBalancerMetadata> privateResult = result.stream().filter(p -> p.getType().equals(LoadBalancerType.PRIVATE)).findFirst();
         assertTrue(privateResult.isPresent());
+        assertEquals(FORWARDING_RULE_NAME_2, privateResult.get().getName());
+        assertEquals(FORWARDING_RULE_NAME_2, privateResult.get().getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
         assertEquals(PRIVATE_IP, privateResult.get().getIp());
         assertEquals(BACKEND_SERVICE_NAME, privateResult.get().getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(443)));
         assertEquals(INSTANCE_GROUP_NAME, privateResult.get().getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(443)));
@@ -208,6 +222,9 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(1, result.size());
         assertEquals(PRIVATE_IP, result.get(0).getIp());
         assertEquals(LoadBalancerType.PRIVATE, result.get(0).getType());
+        assertEquals(FORWARDING_RULE_NAME_2, result.get(0).getName());
+        assertEquals(FORWARDING_RULE_NAME_2, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
+
 
         assertEquals(BACKEND_SERVICE_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(443)));
         assertEquals(INSTANCE_GROUP_NAME, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(443)));
@@ -240,6 +257,9 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(1, result.size());
         assertEquals(null, result.get(0).getIp());
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getName());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
+
         assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
         assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
 
@@ -258,6 +278,8 @@ public class GCPLoadBalancerMetadataCollectorTest {
         assertEquals(1, result.size());
         assertEquals(PUBLIC_IP, result.get(0).getIp());
         assertEquals(LoadBalancerType.PUBLIC, result.get(0).getType());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getName());
+        assertEquals(FORWARDING_RULE_NAME_1, result.get(0).getStringParameter(GcpLoadBalancerMetadataView.LOADBALANCER_NAME));
         assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getBackendServiceParam(8080)));
         assertNull(result.get(0).getStringParameter(GcpLoadBalancerMetadataView.getInstanceGroupParam(8080)));
 
