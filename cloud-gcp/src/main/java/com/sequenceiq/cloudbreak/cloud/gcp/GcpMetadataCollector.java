@@ -182,6 +182,7 @@ public class GcpMetadataCollector implements MetadataCollector {
     private Map<String, Object> getParams(Compute compute, String projectId, ForwardingRule item) {
         Map<String, Object> params = new HashMap<>();
         List<String> ports = item.getPorts();
+        params.put(GcpLoadBalancerMetadataView.LOADBALANCER_NAME, item.getName());
         if (ports == null || ports.size() != 1) {
             LOGGER.warn("Unexpected port count on {}, {}", item.getName(), ports);
         }
