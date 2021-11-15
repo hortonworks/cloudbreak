@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.processor.BlueprintTextProcessor;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @Component
 public class HostAttributeDecorator {
@@ -27,11 +28,15 @@ public class HostAttributeDecorator {
 
     private final CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
-    public HostAttributeDecorator(CmTemplateProcessorFactory cmTemplateProcessorFactory) {
+    private final StackUtil stackUtil;
+
+    public HostAttributeDecorator(CmTemplateProcessorFactory cmTemplateProcessorFactory, StackUtil stackUtil) {
         this.cmTemplateProcessorFactory = cmTemplateProcessorFactory;
+        this.stackUtil = stackUtil;
     }
 
-    public Map<String, SaltPillarProperties> createHostAttributePillars(Stack stack, Set<Node> nodes) {
+    public Map<String, SaltPillarProperties> createHostAttributePillars(Stack stack) {
+        Set<Node> allNodes = stackUtil.collectNodes(stack);
         stack.getCluster().getBlueprint().getBlueprintText();
         BlueprintTextProcessor blueprintTextProcessor = cmTemplateProcessorFactory.get(stack.getCluster().getBlueprint().getBlueprintText());
         Versioned blueprintVersion = () -> blueprintTextProcessor.getVersion().get();
@@ -39,7 +44,7 @@ public class HostAttributeDecorator {
         Map<String, Map<String, ServiceAttributes>> serviceAttributes = blueprintTextProcessor.getHostGroupBasedServiceAttributes(blueprintVersion);
 
         Map<String, Map<String, Object>> attributes = new HashMap<>();
-        for (Node node : nodes) {
+        for (Node node : allNodes) {
             Map<String, Map<String, String>> hgAttributes = getAttributesForHostGroup(node.getHostGroup(), serviceAttributes);
             Map<String, Object> hostAttributes = new HashMap<>();
 

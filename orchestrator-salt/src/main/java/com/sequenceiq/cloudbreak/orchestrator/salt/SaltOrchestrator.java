@@ -1174,6 +1174,12 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
+    @Override
+    public boolean unboundClusterConfigPresentOnAnyNodes(GatewayConfig primaryGateway, Set<String> nodes) {
+        SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway);
+        return SaltStates.unboundClusterConfigPresentOnAnyNodes(saltConnector, new HostList(nodes));
+    }
+
     private StateRunner createStateRunner(OrchestratorStateParams stateParams) {
         if (stateParams.isParameterized()) {
             if (stateParams.isConcurrent()) {
