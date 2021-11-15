@@ -1,6 +1,8 @@
 package com.sequenceiq.freeipa.service.image;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
 
 import java.util.Collections;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.stream.Collectors;
 
 import org.assertj.core.util.Lists;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -28,6 +31,12 @@ public class ImageCatalogProviderTest {
 
     private static final String IMAGE_CATALOG_JSON = "freeipa-catalog-1.json";
 
+    private static final String IMAGE_CATALOG_WITHOUT_VERSIONS = "freeipa-catalog-without-versions-but-with-advertised-flag.json";
+
+    private static final String NULL_IMAGE_CATALOG = "null-freeipa-catalog.json";
+
+    private static final String SECRET_FILE = "file_with_secret.whatever";
+
     private static final String IMAGE_CATALOG_INVALID_FIELD_JSON = "freeipa-catalog-invalid-field.json";
 
     private static final String IMAGE_CATALOG_NULL_FIELD_JSON = "freeipa-catalog-null-field.json";
@@ -40,6 +49,8 @@ public class ImageCatalogProviderTest {
 
     private static final List<String> CB_CENTOS_7_FILTER = Lists.newArrayList("centos7");
 
+    private static final String DEFAULT_VERSION = "2.20.0-dev.1";
+
     @Rule
     public final ExpectedException thrown = ExpectedException.none();
 
@@ -48,6 +59,11 @@ public class ImageCatalogProviderTest {
 
     @Spy
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    @Before
+    public void initTests() {
+        ReflectionTestUtils.setField(underTest, ImageCatalogProvider.class, "freeIpaVersion", DEFAULT_VERSION, null);
+    }
 
     @Test
     public void testReadImageCatalogFromFile() {
@@ -67,6 +83,22 @@ public class ImageCatalogProviderTest {
         assertEquals(1, freeIpaVersions.getDefaults().size());
         assertEquals(List.of("71851893-8340-411d-afb7-e1b55107fb10"), freeIpaVersions.getDefaults());
         assertEquals(4, freeIpaVersions.getVersions().size());
+    }
+
+    @Test
+    public void testReadImageCatalogFromFileWithoutVersionsButWithAdvertisedFlag() {
+
+        String path = getPath(IMAGE_CATALOG_WITHOUT_VERSIONS);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        ReflectionTestUtils.setField(underTest, "enabledLinuxTypes", CB_CENTOS_7_FILTER);
+
+        ImageCatalog catalog = underTest.getImageCatalog(IMAGE_CATALOG_WITHOUT_VERSIONS);
+        List<com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image> images = catalog.getImages().getFreeipaImages();
+        assertEquals(2, images.size());
+
+        FreeIpaVersions freeIpaVersions = catalog.getVersions().getFreeIpaVersions().get(0);
+        assertEquals(1, freeIpaVersions.getImageIds().size());
+        assertEquals("91851893-8340-411d-afb7-e1b55107fb10", freeIpaVersions.getImageIds().get(0));
     }
 
     @Test
@@ -150,6 +182,36 @@ public class ImageCatalogProviderTest {
         assertEquals(Collections.emptyList(), actualOsTypes);
         assertEquals(Collections.emptyList(), mapToUuid(actualCatalog.getImages().getFreeipaImages()));
         assertEquals(0, actualCatalog.getImages().getFreeipaImages().size());
+    }
+
+    @Test
+    public void shouldThrowImageCatalogExceptionInCaseOfNullCatalogUrl() {
+        Exception ex = assertThrows(ImageCatalogException.class, () -> underTest.getImageCatalog(null));
+        assertEquals("Unable to fetch image catalog. The catalogUrl is null.", ex.getMessage());
+    }
+
+    @Test
+    public void shouldThrowImageCatalogExceptionInCaseOfNullCatalog() {
+        String path = getPath(NULL_IMAGE_CATALOG);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        Exception ex = assertThrows(ImageCatalogException.class, () -> underTest.getImageCatalog(NULL_IMAGE_CATALOG));
+        assertEquals("Failed to read the content of 'null-freeipa-catalog.json' as an image catalog.", ex.getMessage());
+    }
+
+    @Test
+    public void shouldThrowImageCatalogExceptionWithoutHavingSecretContent() {
+        String path = getPath(SECRET_FILE);
+        ReflectionTestUtils.setField(underTest, "etcConfigDir", path);
+        Throwable ex = assertThrows(ImageCatalogException.class, () -> underTest.getImageCatalog(SECRET_FILE));
+        noSecretInExcepionMessage(ex);
+    }
+
+    private void noSecretInExcepionMessage(Throwable ex) {
+        if (ex.getCause() != null) {
+            noSecretInExcepionMessage(ex.getCause());
+        }
+        assertFalse(ex.getMessage().contains("topsecret"));
+        assertFalse(ex.toString().contains("topsecret"));
     }
 
     private String getErrorMessage(String catalogUrl) {
