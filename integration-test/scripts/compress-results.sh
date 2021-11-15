@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-status_code=0
-
 compress_if_exists () {
   sourceDir=$1
   targetArchive=$2
@@ -11,12 +9,19 @@ compress_if_exists () {
   else
     du -h $sourceDir
     echo "Compressing $sourceDir directory"
-    GZIP=-9 tar -cvzf "$targetArchive" "$sourceDir" #&& rm -R "$sourceDir"
+    #special error handling is needed since logs might still be flushed even after docker container stop is issued
+    #tar gz file changed as we read it ignore
+    set +e
+    GZIP=-9 tar -cvzf "$targetArchive" "$sourceDir"
+    exitcode=$?
+    if [ "$exitcode" != "1" ] && [ "$exitcode" != "0" ]; then
+        exit $exitcode
+    fi
+    rm -R "$sourceDir"
+    set -e
     du -h "$targetArchive"
   fi
 }
-
-set -ex
 
 start=`date +%s`
 echo -e "\n\033[0;92m+++ INTEGRATION TEST RESULTS COMPRESS STARTED +++\n";
