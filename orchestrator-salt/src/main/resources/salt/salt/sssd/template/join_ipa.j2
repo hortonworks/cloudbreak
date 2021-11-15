@@ -10,6 +10,8 @@ ipa-client-install --unattended --uninstall
 
 set -e
 ipa-client-install \
+  --debug \
+  --no-dns-sshfp \
   --realm={{ pillar['sssd-ipa']['realm'] }} \
   --domain={{ pillar['sssd-ipa']['domain'] }} \
   --mkhomedir \

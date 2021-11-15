@@ -72,3 +72,15 @@ unbound:
     - watch:
       - file: enable_auto_interface
       - file: /etc/unbound/access.conf
+
+/etc/dhcp/dhclient-enter-hooks:
+  file.managed:
+    - contents: 'echo "that was fun!"'
+
+/etc/resolv.conf:
+  file.managed:
+    - makedirs: True
+    - source: salt://unbound/config/resolv.conf
+    - template: jinja
+    - context:
+      private_address: {{ host.private_address }}
