@@ -81,6 +81,12 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
+    public PollingResult startPollingCmHostStatus(Stack stack, ApiClient apiClient, List<String> targets) {
+        LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}]", stack.getClusterManagerIp());
+        return pollCommandWithTimeListener(stack, apiClient, null, POLL_FOR_ONE_HOUR,
+                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, targets));
+    }
+
     public PollingResult startPollingCmTemplateInstallation(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to install template. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, commandId, POLL_FOR_ONE_HOUR,

@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -13,19 +15,23 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
@@ -48,9 +54,12 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.ldap.LdapConfigService;
+import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
@@ -286,7 +295,7 @@ public class ClusterHostServiceRunnerTest {
     }
 
     @Test
-    public void testDecoratePillarWithMountInfo() {
+    public void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException, NodesUnreachableException {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
@@ -307,36 +316,54 @@ public class ClusterHostServiceRunnerTest {
         when(cmExposedService.getServiceName()).thenReturn("CM");
         when(exposedServiceCollector.getClouderaManagerService()).thenReturn(cmExposedService);
 
-        Set<InstanceGroup> instanceGroups = new HashSet<>();
-        InstanceGroup workerInstanceGroup = new InstanceGroup();
         Template template = new Template();
         template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
-        workerInstanceGroup.setTemplate(template);
 
-        Set<InstanceMetaData> workerInstanceMetaDatas = new HashSet<>();
-        InstanceMetaData worker1 = new InstanceMetaData();
-        worker1.setDiscoveryFQDN("fqdn1");
-        workerInstanceMetaDatas.add(worker1);
-        InstanceMetaData worker2 = new InstanceMetaData();
-        worker2.setDiscoveryFQDN(null);
-        workerInstanceMetaDatas.add(worker2);
-        workerInstanceGroup.setInstanceMetaData(workerInstanceMetaDatas);
-        instanceGroups.add(workerInstanceGroup);
+        Set<InstanceGroup> instanceGroups = new HashSet<>();
+        createInstanceGroup(template, instanceGroups, "fqdn1", null, "1.1.1.1", "1.1.1.2");
+        createInstanceGroup(template, instanceGroups, "fqdn2", null, "1.1.2.1", "1.1.2.2");
+        InstanceGroup gwIg = createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
 
-        InstanceGroup computeInstanceGroup = new InstanceGroup();
-        computeInstanceGroup.setTemplate(template);
-
-        Set<InstanceMetaData> computeInstanceMetaDatas = new HashSet<>();
-        InstanceMetaData compute1 = new InstanceMetaData();
-        compute1.setDiscoveryFQDN("fqdn2");
-        computeInstanceMetaDatas.add(compute1);
-        InstanceMetaData compute2 = new InstanceMetaData();
-        compute2.setDiscoveryFQDN(null);
-        computeInstanceMetaDatas.add(compute2);
-        computeInstanceGroup.setInstanceMetaData(computeInstanceMetaDatas);
-        instanceGroups.add(computeInstanceGroup);
+        when(stack.getPrimaryGatewayInstance()).thenReturn(
+                gwIg.getInstanceMetaDataSet().stream().filter(imd -> StringUtils.equals(imd.getDiscoveryFQDN(), "gateway1")).findFirst().get());
+        when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("gateway3")));
 
         when(stack.getInstanceGroups()).thenReturn(instanceGroups);
-        underTest.runClusterServices(stack, cluster, Map.of());
+        underTest.runTargetedClusterServices(stack, cluster, Map.of("fqdn3", "1.1.1.1"));
+
+        ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
+        ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
+        verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
+        assertFalse(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
+        assertFalse(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
+        assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
+    }
+
+    private InstanceGroup createInstanceGroup(Template template, Set<InstanceGroup> instanceGroups, String fqdn1, String fqdn2,
+            String privateIp1, String privateIp2) {
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setTemplate(template);
+        instanceGroup.setGroupName("group");
+        Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
+        instanceMetaDataSet.add(createInstanceMetadata(fqdn1, instanceGroup, privateIp1));
+        instanceMetaDataSet.add(createInstanceMetadata(fqdn2, instanceGroup, privateIp2));
+        instanceGroup.setInstanceMetaData(instanceMetaDataSet);
+        instanceGroups.add(instanceGroup);
+        return instanceGroup;
+    }
+
+    private InstanceMetaData createInstanceMetadata(String fqdn, InstanceGroup instanceGroup, String privateIp) {
+        InstanceMetaData imd1 = new InstanceMetaData();
+        imd1.setDiscoveryFQDN(fqdn);
+        imd1.setInstanceGroup(instanceGroup);
+        imd1.setPrivateIp(privateIp);
+        return imd1;
+    }
+
+    private Node node(String fqdn) {
+        return new Node(null, null, null, null, fqdn, null);
     }
 }

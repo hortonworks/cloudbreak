@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
@@ -50,6 +51,8 @@ public class UpdateNodeCountValidator {
         if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
             List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
             List<InstanceMetaData> unhealthyInstanceMetadataList = instanceMetaDataAsList.stream()
+                    .filter(instanceMetaData -> StringUtils.equals(instanceMetaData.getInstanceGroupName(),
+                            instanceGroupAdjustmentJson.getInstanceGroup()))
                     .filter(instanceMetaData -> InstanceStatus.SERVICES_UNHEALTHY.equals(instanceMetaData.getInstanceStatus()))
                     .collect(Collectors.toList());
             if (!unhealthyInstanceMetadataList.isEmpty()) {
@@ -231,7 +234,10 @@ public class UpdateNodeCountValidator {
     public void validateInstanceStatuses(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         if (upscaleEvent(instanceGroupAdjustmentJson.getScalingAdjustment())) {
             List<InstanceMetaData> instanceMetaDataList =
-                    stack.getInstanceMetaDataAsList().stream().filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
+                    stack.getInstanceMetaDataAsList().stream()
+                            .filter(instanceMetaData -> StringUtils.equals(instanceMetaData.getInstanceGroupName(),
+                                    instanceGroupAdjustmentJson.getInstanceGroup()))
+                            .filter(im -> !im.isTerminated() && !im.isRunning() && !im.isCreated())
                             .collect(Collectors.toList());
             if (!instanceMetaDataList.isEmpty()) {
                 String ims = instanceMetaDataList.stream()

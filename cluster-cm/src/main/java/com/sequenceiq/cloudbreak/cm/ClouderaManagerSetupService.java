@@ -360,7 +360,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, client);
+        clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, client,
+                hostsInCluster.stream().map(md -> md.getPrivateIp()).collect(Collectors.toList()));
     }
 
     @Override
