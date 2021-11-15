@@ -6,6 +6,7 @@ MOUNT_PATH="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['mount_
 TEMPORARY_STORAGE="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['temporary_storage'] }}"
 CLOUD_PLATFORM="{{ (salt['pillar.get']('mount')[salt['grains.get']('fqdn')])['cloud_platform'] }}"
 LOG_FILE="/var/log/mount-instance-storage.log"
+SEMAPHORE_FILE="/var/cb-mount-instance-storage-dryrun"
 FS_TYPE=ext4
 
 format_disks_if_unformatted() {
@@ -184,6 +185,20 @@ find_format_and_mount_ephemeral_storage_aws() {
     return $((return_code))
 }
 
+is_there_a_volume_to_mount() {
+    not_mounted_volume_names=$(lsblk_command | grep -v / | grep ^[a-z] | cut -f1 -d' ')
+    root_disk=$(get_root_disk)
+    for volume in $not_mounted_volume_names; do
+      uuid=$(get_disk_uuid "/dev/$volume")
+      if [[ $root_disk != "/dev/$volume" && "$uuid" = ""  ]]; then
+        log $LOG_FILE "Found at least one volume which is not mounted."
+        return
+      fi
+    done
+    log $LOG_FILE "All volumes are mounted. Exiting"
+    exit_with_code $LOG_FILE 0 "script 'mount-instance-storage' ended"
+}
+
 main () {
     log $LOG_FILE "script 'instance-storage-format-and-mount' starts"
     sleep 1
@@ -194,8 +209,9 @@ main () {
         return_code=$?
         log $LOG_FILE result of remounting Azure temporary storage device: $return_code
         [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error remounting Azure temporary storage device"
-    elif [[ "$CLOUD_PLATFORM" == "AWS" ]]; then
+    elif [[ "$CLOUD_PLATFORM" == "AWS" && "$TEMPORARY_STORAGE" != "EPHEMERAL_VOLUMES_ONLY"]]; then
         log $LOG_FILE "Starting to remount AWS ephemeral devices"
+        is_there_a_volume_to_mount
         find_format_and_mount_ephemeral_storage_aws
         return_code=$?
         log $LOG_FILE result of remounting AWS ephemeral devices: $return_code
