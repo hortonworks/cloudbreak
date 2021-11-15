@@ -15,11 +15,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Images;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Versions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.converter.image.ImageToImageEntityConverter;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
@@ -179,10 +177,9 @@ public class ImageService {
 
     public ImageCatalog generateImageCatalogForStack(Stack stack) {
         final Image image = getImageForStack(stack);
-        final Images images = new Images(List.of(image));
-        final FreeIpaVersions freeIpaVersions = new FreeIpaVersions(List.of(freeIpaVersion), List.of(image.getUuid()), List.of(image.getUuid()));
+        final Images images = new Images(List.of(copyImageWithAdvertisedFlag(image)));
 
-        return new ImageCatalog(images, new Versions(List.of(freeIpaVersions)));
+        return new ImageCatalog(images, null);
     }
 
     private Image getImageForStack(Stack stack) {
@@ -198,5 +195,19 @@ public class ImageService {
         imageSettings.setCatalog(Objects.requireNonNullElse(imageEntity.getImageCatalogName(), imageEntity.getImageCatalogUrl()));
         imageSettings.setId(imageEntity.getImageId());
         return imageSettings;
+    }
+
+    private Image copyImageWithAdvertisedFlag(Image source) {
+        return new Image(
+                source.getCreated(),
+                source.getDate(),
+                source.getDescription(),
+                source.getOs(),
+                source.getUuid(),
+                source.getImageSetsByProvider(),
+                source.getOsType(),
+                source.getPackageVersions(),
+                true
+        );
     }
 }

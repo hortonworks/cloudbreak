@@ -47,48 +47,58 @@ public class ImageCatalogProvider {
     @Value("#{'${cb.enabled.linux.types}'.split(',')}")
     private List<String> enabledLinuxTypes;
 
+    @Value("${info.app.version:}")
+    private String freeIpaVersion;
+
     @Inject
     private ObjectMapper objectMapper;
 
     @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
     public ImageCatalog getImageCatalog(String catalogUrl)  {
-        ImageCatalog catalog;
-        if (catalogUrl == null) {
-            LOGGER.info("No image catalog was defined!");
-            return null;
-        }
-
         try {
-            long started = System.currentTimeMillis();
-            String content;
-            if (catalogUrl.startsWith("http")) {
-                Client client = RestClientUtil.get();
-                WebTarget target = client.target(catalogUrl);
-                Response response = target.request().get();
-                content = readResponse(target, response);
-            } else {
-                content = readCatalogFromFile(catalogUrl);
+            if (Objects.nonNull(catalogUrl)) {
+                long started = System.currentTimeMillis();
+                String content = readCatalogContent(catalogUrl);
+                ImageCatalog catalog = objectMapper.readValue(content, ImageCatalog.class);
+                if (Objects.nonNull(catalog)) {
+                    ImageCatalog filteredCatalog = filterImagesByOsType(catalog);
+                    long timeOfParse = System.currentTimeMillis() - started;
+                    LOGGER.debug("ImageCatalog was fetched and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
+                    return filteredCatalog;
+                }
+                throw new ImageCatalogException(String.format("Failed to read the content of '%s' as an image catalog.", catalogUrl));
             }
-            catalog = filterImagesByOsType(objectMapper.readValue(content, ImageCatalog.class));
-            long timeOfParse = System.currentTimeMillis() - started;
-            LOGGER.debug("ImageCatalog was fetched and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
+            throw new ImageCatalogException("Unable to fetch image catalog. The catalogUrl is null.");
+        } catch (ImageCatalogException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new ImageCatalogException(String.format("Failed to get image catalog: %s from %s", e.getCause(), catalogUrl), e);
         } catch (JsonMappingException e) {
             throw new ImageCatalogException(String.format("Invalid json format for image catalog with error: %s", e.getMessage()), e);
         } catch (IOException e) {
-            throw new ImageCatalogException(String.format("Failed to read image catalog from file: '%s'", catalogUrl), e);
+            throw new ImageCatalogException(String.format("Failed to read image catalog from file: '%s'", catalogUrl));
         }
-        return catalog;
     }
 
     @CacheEvict(value = "imageCatalogCache", key = "#catalogUrl")
     public void evictImageCatalogCache(String catalogUrl) {
     }
 
+    private String readCatalogContent(String catalogUrl) throws IOException {
+        if (catalogUrl.startsWith("http")) {
+            Client client = RestClientUtil.get();
+            WebTarget target = client.target(catalogUrl);
+            Response response = target.request().get();
+            return readResponse(target, response);
+        } else {
+            return readCatalogFromFile(catalogUrl);
+        }
+    }
+
     private ImageCatalog filterImagesByOsType(ImageCatalog catalog) {
         LOGGER.debug("Filtering images by OS type {}", getEnabledLinuxTypes());
-        if (CollectionUtils.isEmpty(getEnabledLinuxTypes()) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
+        if ((CollectionUtils.isEmpty(getEnabledLinuxTypes()) || Objects.isNull(catalog.getImages()))
+                && Objects.nonNull(catalog.getVersions())) {
             return catalog;
         }
         List<Image> catalogImages = catalog.getImages().getFreeipaImages();
@@ -100,7 +110,7 @@ public class ImageCatalogProvider {
     private List<FreeIpaVersions> filterVersions(ImageCatalog catalog, List<Image> filterImages) {
         List<String> filteredUuids = filterImages.stream().map(Image::getUuid).collect(Collectors.toList());
         LOGGER.debug("The following uuids will be removed from defaults and image ids fields: [{}]", filteredUuids);
-        return catalog.getVersions().getFreeIpaVersions().stream()
+        return getVersions(catalog).getFreeIpaVersions().stream()
                 .map(versions -> filterDefaultsAndImageIds(filteredUuids, versions)).collect(Collectors.toList());
     }
 
@@ -150,5 +160,21 @@ public class ImageCatalogProvider {
     private String readCatalogFromFile(String catalogUrl) throws IOException {
         File customCatalogFile = new File(etcConfigDir, catalogUrl);
         return FileReaderUtils.readFileFromPath(customCatalogFile.toPath());
+    }
+
+    private Versions getVersions(ImageCatalog catalog) {
+        if (catalog.getVersions() == null || catalog.getVersions().getFreeIpaVersions() == null) {
+            LOGGER.debug("FreeIPA versions are missing from the image catalog, generating it based on the current svc version and on advertised flags.");
+            List<String> advertisedImageUuids = catalog.getImages().getFreeipaImages().stream()
+                    .filter(Image::isAdvertised)
+                    .map(Image::getUuid)
+                    .collect(Collectors.toList());
+            List<FreeIpaVersions> versionList = List.of(new FreeIpaVersions(List.of(freeIpaVersion), List.of(), advertisedImageUuids));
+            Versions versions = new Versions(versionList);
+            LOGGER.debug("Generated versions: '{}'", versions);
+            return versions;
+        } else {
+            return catalog.getVersions();
+        }
     }
 }

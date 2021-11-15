@@ -70,6 +70,9 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
     @JsonProperty("sourceImageId")
     private String sourceImageId;
 
+    @JsonProperty("advertised")
+    private boolean advertised;
+
     public String getDate() {
         return date;
     }
@@ -198,6 +201,14 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
         this.sourceImageId = sourceImageId;
     }
 
+    public boolean isAdvertised() {
+        return advertised;
+    }
+
+    public void setAdvertised(boolean advertised) {
+        this.advertised = advertised;
+    }
+
     @Override
     public String toString() {
         return "ImageV4Response{" +
@@ -217,6 +228,7 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
                 ", packageVersions=" + packageVersions +
                 ", baseParcelUrl='" + baseParcelUrl + '\'' +
                 ", sourceImageId='" + sourceImageId + '\'' +
+                ", advertised='" + advertised + '\'' +
                 "} " + super.toString();
     }
 }

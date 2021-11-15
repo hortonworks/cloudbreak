@@ -249,6 +249,6 @@ class UpgradeImageServiceTest {
     }
 
     private Image createImage(String date) {
-        return new Image(123L, date, "desc", "linux", "1234-456", Map.of(), "magicOs", Map.of());
+        return new Image(123L, date, "desc", "linux", "1234-456", Map.of(), "magicOs", Map.of(), false);
     }
 }

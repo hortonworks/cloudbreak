@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -27,7 +26,6 @@ import org.springframework.data.util.ReflectionUtils;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.FreeIpaVersions;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.Image;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.image.ImageCatalog;
 import com.sequenceiq.freeipa.dto.ImageWrapper;
@@ -172,7 +170,7 @@ public class ImageServiceTest {
         when(imageRepository.getByStack(stack)).thenReturn(imageEntity);
 
         when(imageProviderFactory.getImageProvider(IMAGE_CATALOG)).thenReturn(imageProvider);
-        Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of());
+        Image image = new Image(123L, "now", "desc", DEFAULT_OS, IMAGE_UUID, Map.of(), "os", Map.of(), true);
         ImageWrapper imageWrapper = new ImageWrapper(image, IMAGE_CATALOG_URL, IMAGE_CATALOG);
         when(imageProvider.getImage(any(), any(), any())).thenReturn(Optional.of(imageWrapper));
 
@@ -185,10 +183,6 @@ public class ImageServiceTest {
 
         assertThat(result.getImages().getFreeipaImages())
                 .containsExactly(image);
-        assertThat(result.getVersions().getFreeIpaVersions())
-                .singleElement()
-                .returns(List.of(FREEIPA_VERSION), FreeIpaVersions::getVersions)
-                .returns(List.of(IMAGE_UUID), FreeIpaVersions::getImageIds)
-                .returns(List.of(IMAGE_UUID), FreeIpaVersions::getDefaults);
+        assertThat(result.getVersions()).isNull();
     }
 }

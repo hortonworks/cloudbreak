@@ -26,6 +26,7 @@ public class ImageToImageV4ResponseConverter {
         result.setCmBuildNumber(source.getCmBuildNumber());
         result.setPreWarmCsd(source.getPreWarmCsd());
         result.setPreWarmParcels(source.getPreWarmParcels());
+        result.setAdvertised(source.isAdvertised());
 
         ImageStackDetails stackDetails = source.getStackDetails();
         if (stackDetails != null) {

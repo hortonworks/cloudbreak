@@ -96,6 +96,7 @@ public class ImagesToImagesV4ResponseConverter {
         json.setVersion(source.getVersion());
         json.setDefaultImage(source.isDefaultImage());
         json.setPackageVersions(source.getPackageVersions());
+        json.setAdvertised(source.isAdvertised());
         if (source.getRepo() != null) {
             json.setRepository(new HashMap<>(source.getRepo()));
         } else {
