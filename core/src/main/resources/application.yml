@@ -162,9 +162,9 @@ cb:
     embedded.volume:
       size: 100
       platformVolumeTypeMap:
-        AWS: standard
+        AWS: gp2
         AZURE: StandardSSD_LRS
-        GCP: pd-standard
+        GCP: pd-ssd
         MOCK: magnetic
 
   externaldatabase.ssl.rootcerts.path: /hadoopfs/fs1/database-cacerts/certs.pem
