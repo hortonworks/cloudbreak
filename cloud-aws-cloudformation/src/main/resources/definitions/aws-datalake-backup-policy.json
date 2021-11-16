@@ -10,7 +10,7 @@
         "s3:DeleteObject"
       ],
       "Resource": [
-        "arn:aws:s3:::<BACKUP_BUCKET>/*"
+        "arn:aws:s3:::<BACKUP_LOCATION_BASE>/*"
       ]
     }
   ]
