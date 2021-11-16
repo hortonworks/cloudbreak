@@ -48,7 +48,7 @@ public class DatabaseConfig {
     @Value("${freeipa.db.env.db:}")
     private String dbName;
 
-    @Value("${freeipa.db.env.poolsize:10}")
+    @Value("${freeipa.db.env.poolsize:30}")
     private int poolSize;
 
     @Value("${freeipa.db.env.connectiontimeout:30}")
