@@ -24,6 +24,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
@@ -41,6 +42,7 @@ import com.sequenceiq.cloudbreak.cloud.response.AwsCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.AzureCredentialPrerequisites;
 import com.sequenceiq.cloudbreak.cloud.response.CredentialPrerequisitesResponse;
 import com.sequenceiq.cloudbreak.cloud.response.GcpCredentialPrerequisites;
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.service.TransactionMetricsService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -303,9 +305,16 @@ public class CredentialExperienceTest {
         private FlowOperationStatisticsService flowOperationStatisticsService;
 
         @Bean
+        @Primary
+        MetricService metricService() {
+            return new EnvironmentMetricService();
+        }
+
+        @Bean
         public Dispatcher dispatcher(MDCCleanerThreadPoolExecutor threadPoolExecutor) {
             return new SynchronousDispatcher();
         }
 
     }
+
 }
