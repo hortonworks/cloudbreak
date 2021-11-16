@@ -133,20 +133,21 @@ dependencies {
   implementation project(':cluster-proxy')
   implementation project(':status-checker')
   implementation project(':template-manager-tag')
+  implementation project(':cloud-aws-cloudformation')
+  implementation project(':cloud-aws-native')
 
-  testImplementation project(path: ':secret-engine', configuration: 'tests')
-  testImplementation project(path: ':common', configuration: 'tests')
   runtimeOnly project(':orchestrator-salt')
   runtimeOnly project(':cloud-mock')
   runtimeOnly project(':cloud-azure')
   runtimeOnly project(':cloud-gcp')
-  implementation project(':cloud-aws-cloudformation')
-  implementation project(':cloud-aws-native')
 
-  testImplementation group: 'com.hubspot.jinjava', name: 'jinjava',    version: jinjavaVersion
-  testImplementation group: 'net.sf.json-lib',     name: 'json-lib',   version: '2.4',  classifier: 'jdk15'
-  testImplementation group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                     version: jacksonVersion
   testImplementation project(path: ':authorization-common', configuration: 'tests')
+  testImplementation project(path: ':common', configuration: 'tests')
+  testImplementation project(path: ':secret-engine', configuration: 'tests')
+
+  testImplementation group: 'com.hubspot.jinjava',         name: 'jinjava',                        version: jinjavaVersion
+  testImplementation group: 'net.sf.json-lib',             name: 'json-lib',                       version: '2.4',              classifier: 'jdk15'
+  testImplementation group: 'com.fasterxml.jackson.core',  name: 'jackson-databind',               version: jacksonVersion
 }
 
 bootRun {
