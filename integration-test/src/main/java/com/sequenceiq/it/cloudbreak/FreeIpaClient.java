@@ -58,7 +58,7 @@ public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api
 
     @Override
     public <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext) {
+            TestContext testContext, Set<E> ignoredFailedStatuses) {
         if (entity instanceof FreeIpaUserSyncTestDto) {
             FreeIpaUserSyncTestDto freeIpaSyncTestDto = (FreeIpaUserSyncTestDto) entity;
             if (freeIpaSyncTestDto.getOperationId() == null) {

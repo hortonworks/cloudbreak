@@ -6,6 +6,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -72,7 +73,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 })
                 .awaitForDeletedInstancesOnProvider()
                 .when(sdxTestClient.repair(MASTER.getName(), IDBROKER.getName()), key(sdx))
-                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx).withWaitForFlow(false))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE),
+                        key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
@@ -154,7 +156,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 })
                 .awaitForHostGroups(List.of("gateway", "idbroker"), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
                 .when(sdxTestClient.repair("gateway", "idbroker"), key(sdx))
-                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx).withWaitForFlow(false))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE),
+                        key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
@@ -181,7 +184,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 })
                 .awaitForHostGroups(List.of(hostgroupName), InstanceStatus.STOPPED)
                 .when(sdxTestClient.repair(hostgroupName), key(sdx))
-                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE),
+                        key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {

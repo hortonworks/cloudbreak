@@ -7,11 +7,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -947,6 +949,11 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
             Duration pollingInterval) {
+        return await(entity, desiredStatuses, new HashSet<>(), runningParameter, pollingInterval);
+    }
+
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, Set<E> ignoredFailedStatuses,
+            RunningParameter runningParameter, Duration pollingInterval) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
@@ -968,7 +975,7 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Resource Crn is not available for: {}", awaitEntity.getName());
         }
 
-        resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        resourceAwait.await(awaitEntity, desiredStatuses, ignoredFailedStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
         return entity;
     }
 

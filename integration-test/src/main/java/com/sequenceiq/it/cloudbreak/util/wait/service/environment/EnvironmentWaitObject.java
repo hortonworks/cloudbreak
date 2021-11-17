@@ -83,6 +83,11 @@ public class EnvironmentWaitObject implements WaitObject {
     }
 
     @Override
+    public boolean isFailedButIgnored() {
+        return false;
+    }
+
+    @Override
     public boolean isFailed() {
         return environment.getEnvironmentStatus().isFailed();
     }

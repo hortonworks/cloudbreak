@@ -86,6 +86,11 @@ public class FreeIpaInstanceWaitObject implements WaitObject {
     }
 
     @Override
+    public boolean isFailedButIgnored() {
+        return false;
+    }
+
+    @Override
     public boolean isDeleteFailed() {
         return getInstanceStatuses().values().stream().anyMatch(FAILED::equals);
     }

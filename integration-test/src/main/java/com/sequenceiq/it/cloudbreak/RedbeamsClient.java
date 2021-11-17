@@ -49,7 +49,7 @@ public class RedbeamsClient extends MicroserviceClient<com.sequenceiq.redbeams.c
 
     @Override
     public <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext) {
+            TestContext testContext, Set<E> ignoredFailedStatuses) {
         return (W) new RedbeamsWaitObject(this, entity.getCrn(), (Status) desiredStatuses.get("status"));
     }
 

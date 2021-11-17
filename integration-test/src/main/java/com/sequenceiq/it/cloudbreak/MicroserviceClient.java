@@ -46,7 +46,7 @@ public abstract class MicroserviceClient<C, I> extends Entity {
     }
 
     public abstract <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext);
+            TestContext testContext, Set<E> ignoredFailedStatuses);
 
     public abstract C getDefaultClient();
 

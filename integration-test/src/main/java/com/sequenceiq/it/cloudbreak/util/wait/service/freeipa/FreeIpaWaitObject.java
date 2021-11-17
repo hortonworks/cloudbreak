@@ -87,6 +87,11 @@ public class FreeIpaWaitObject implements WaitObject {
     }
 
     @Override
+    public boolean isFailedButIgnored() {
+        return false;
+    }
+
+    @Override
     public boolean isFailed() {
         return freeIpa.getStatus().isFailed();
     }

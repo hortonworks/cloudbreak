@@ -91,6 +91,11 @@ public class InstanceWaitObject implements WaitObject {
     }
 
     @Override
+    public boolean isFailedButIgnored() {
+        return false;
+    }
+
+    @Override
     public boolean isDeleteFailed() {
         return getInstanceStatuses().values().stream().anyMatch(DECOMMISSION_FAILED::equals);
     }
