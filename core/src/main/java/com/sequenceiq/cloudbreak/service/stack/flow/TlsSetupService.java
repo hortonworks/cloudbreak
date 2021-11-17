@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.polling.nginx.NginxPollerObject;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @Component
 public class TlsSetupService {
@@ -52,6 +53,9 @@ public class TlsSetupService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
+    @Inject
+    private StackService stackService;
+
     public void setupTls(Stack stack, InstanceMetaData gwInstance) throws CloudbreakException {
         try {
             SavingX509TrustManager x509TrustManager = new SavingX509TrustManager();
@@ -63,7 +67,8 @@ public class TlsSetupService {
             String ip = gatewayConfigService.getGatewayIp(stack, gwInstance);
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
             nginxPollerService.pollWithAbsoluteTimeout(
-                    nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
+                    nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager,
+                            () -> stackService.stackExistsAndNotDeleting(stack.getId())),
                     POLLING_INTERVAL, TEN_MIN, MAX_FAILURE);
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
             nginxTarget.path("/").request().get().close();

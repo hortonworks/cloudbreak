@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Suppliers;
 import com.google.common.io.BaseEncoding;
 import com.sequenceiq.cloudbreak.certificate.PkiUtil;
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager.SavingX509TrustManager;
@@ -65,7 +66,7 @@ public class TlsSetupService {
             Integer gatewayPort = stack.getGatewayport();
             LOGGER.debug("Trying to fetch the server's certificate: {}:{}", ip, gatewayPort);
             nginxPollerService.pollWithAbsoluteTimeout(
-                nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager),
+                nginxCertListenerTask, new NginxPollerObject(client, ip, gatewayPort, x509TrustManager, Suppliers.ofInstance(false)),
                 POLLING_INTERVAL, FIVE_MIN, MAX_FAILURE);
             WebTarget nginxTarget = client.target(String.format("https://%s:%d", ip, gatewayPort));
             nginxTarget.path("/").request().get().close();

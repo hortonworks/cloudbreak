@@ -51,7 +51,7 @@ public class NginxCertListenerTask implements StatusCheckerTask<NginxPollerObjec
 
     @Override
     public boolean exitPolling(NginxPollerObject nginxPollerObject) {
-        return false;
+        return nginxPollerObject.getIsDeletingProvider().get();
     }
 
     @Override

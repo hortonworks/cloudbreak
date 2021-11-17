@@ -31,7 +31,6 @@ import org.springframework.statemachine.transition.Transition;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -283,11 +282,6 @@ public class OfflineStateGenerator {
     static class CustomStackRepository implements StackRepository {
 
         @Override
-        public Optional<StackIdView> findByAmbari(String clusterManagerIp) {
-            return Optional.empty();
-        }
-
-        @Override
         public Set<Stack> findAllByWorkspace(Workspace workspace) {
             return null;
         }
@@ -325,11 +319,6 @@ public class OfflineStateGenerator {
         @Override
         public List<StackStatusView> findByEnvironmentCrnAndStackType(String environmentCrn, StackType type) {
             return null;
-        }
-
-        @Override
-        public Long countByEnvironmentCrnAndStackType(String environmentCrn, StackType type) {
-            return 1L;
         }
 
         @Override
@@ -378,22 +367,17 @@ public class OfflineStateGenerator {
         }
 
         @Override
-        public Set<Stack> findAllAliveWithInstanceGroups() {
-            return null;
-        }
-
-        @Override
         public List<StackImageView> findImagesOfAliveStacks(long thresholdTimestamp) {
             return null;
         }
 
         @Override
-        public List<StackStatusView> findByStatuses(List<Status> statuses) {
-            return null;
+        public Optional<StackClusterStatusView> getStatusByCrn(String crn) {
+            return Optional.empty();
         }
 
         @Override
-        public Optional<StackClusterStatusView> getStatusByCrn(String crn) {
+        public Optional<StackClusterStatusView> getStatusById(Long id) {
             return Optional.empty();
         }
 
@@ -415,16 +399,6 @@ public class OfflineStateGenerator {
         @Override
         public Set<StackIdView> findByNetwork(Network network) {
             return null;
-        }
-
-        @Override
-        public Long findWorkspaceIdByCrn(String crn) {
-            return null;
-        }
-
-        @Override
-        public Optional<Workspace> findWorkspaceByCrn(String crn) {
-            return Optional.empty();
         }
 
         @Override
@@ -455,11 +429,6 @@ public class OfflineStateGenerator {
         @Override
         public String findTimeToLiveValueForSTack(Long stackId, String ttl) {
             return null;
-        }
-
-        @Override
-        public Boolean anyStackInWorkspace(Long workspaceId) {
-            return Boolean.TRUE;
         }
 
         @Override
