@@ -52,7 +52,7 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
 
     @Override
     public <E extends Enum<E>, T extends WaitObject> T waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext) {
+            TestContext testContext, Set<E> ignoredFailedStatuses) {
         return (T) new EnvironmentWaitObject(this, entity.getName(), entity.getCrn(), (EnvironmentStatus) desiredStatuses.get("status"));
     }
 

@@ -153,6 +153,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
+    public SdxTestDto await(SdxClusterStatusResponse status, Set<SdxClusterStatusResponse> ignoredFailedStatuses, RunningParameter runningParameter) {
+        TestContext testContext = getTestContext();
+        return getTestContext().await(this, Map.of("status", status), ignoredFailedStatuses, runningParameter, testContext.getPollingDurationInMills());
+    }
+
     public SdxTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Duration pollingInterval) {
         return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
     }

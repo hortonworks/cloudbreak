@@ -78,7 +78,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
 
     @Override
     public <E extends Enum<E>, T extends WaitObject> T waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext) {
+            TestContext testContext, Set<E> ignoredFailedStatuses) {
         Map<String, Status> map = new HashMap<>();
         desiredStatuses.forEach((key, v) -> map.put(key, (Status) v));
         return (T) new CloudbreakWaitObject(this, name, map, testContext.getActingUserCrn().getAccountId());

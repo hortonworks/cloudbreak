@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.wait.service;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,8 +20,8 @@ public class ResourceAwait {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceAwait.class);
 
-    public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<String, E> desiredStatuses, TestContext testContext,
-            RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
+    public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<String, E> desiredStatuses, Set<E> ignoredFailedStatuses,
+            TestContext testContext, RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
         try {
             if (entity == null) {
                 throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
@@ -29,7 +30,7 @@ public class ResourceAwait {
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter)
                     .getAccessKey());
             String name = entity.getName();
-            WaitObject waitObject = client.waitObject(entity, name, desiredStatuses, testContext);
+            WaitObject waitObject = client.waitObject(entity, name, desiredStatuses, testContext, ignoredFailedStatuses);
             if (waitObject.isDeletionCheck()) {
                 client.waiterService().waitObject(new WaitTerminationChecker<>(), waitObject, testContext, pollingInterval, maxRetry, 1);
             } else if (waitObject.isFailedCheck()) {

@@ -83,6 +83,11 @@ public class CloudbreakWaitObject implements WaitObject {
     }
 
     @Override
+    public boolean isFailedButIgnored() {
+        return false;
+    }
+
+    @Override
     public boolean isDeletionInProgress() {
         List<Status> deleteInProgressStatuses = List.of(PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS, EXTERNAL_DATABASE_DELETION_IN_PROGRESS);
         return !ListUtils.retainAll(deleteInProgressStatuses, actualStatusesEnumValues()).isEmpty();

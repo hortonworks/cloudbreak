@@ -30,13 +30,21 @@ public class WaitOperationChecker<T extends WaitObject> extends ExceptionChecker
             return true;
         }
         if (waitObject.isFailed()) {
+            handleFailedState(waitObject, name, actualStatuses);
+        }
+
+        return waitObject.isInDesiredStatus();
+    }
+
+    private void handleFailedState(T waitObject, String name, Map<String, String> actualStatuses) {
+        if (waitObject.isFailedButIgnored()) {
+            LOGGER.info("Cluster '{}' is in a failed state but the test will ignore it (status:'{}').", name, actualStatuses);
+        } else {
             Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
             LOGGER.error("Cluster '{}' is in failed state (status:'{}'), waiting is cancelled.", name, actualStatuses);
             throw new TestFailException(String.format("Cluster '%s' is in failed state. Status: '%s' statusReason: '%s'",
                     name, actualStatuses, actualStatusReasons));
         }
-
-        return waitObject.isInDesiredStatus();
     }
 
     @Override

@@ -84,6 +84,11 @@ public class RedbeamsWaitObject implements WaitObject {
     }
 
     @Override
+    public boolean isFailedButIgnored() {
+        return false;
+    }
+
+    @Override
     public boolean isFailed() {
         Set<Status> failedStatuses = Set.of(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED);
         return failedStatuses.contains(redbeams.getStatus());

@@ -26,6 +26,8 @@ public interface WaitObject {
 
     boolean isDeleted();
 
+    boolean isFailedButIgnored();
+
     boolean isFailed();
 
     boolean isDeletionInProgress();

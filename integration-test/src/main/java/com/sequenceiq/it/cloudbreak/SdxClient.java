@@ -38,8 +38,9 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Voi
 
     @Override
     public <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext) {
-        return (W) new DatalakeWaitObject(this, entity.getName(), (SdxClusterStatusResponse) desiredStatuses.get("status"));
+            TestContext testContext, Set<E> ignoredFailedStatuses) {
+        return (W) new DatalakeWaitObject(this, entity.getName(), (SdxClusterStatusResponse) desiredStatuses.get("status"),
+                (Set<SdxClusterStatusResponse>) ignoredFailedStatuses);
     }
 
     @Override

@@ -35,12 +35,15 @@ public class DatalakeWaitObject implements WaitObject {
 
     private final SdxClusterStatusResponse desiredStatus;
 
+    private final Set<SdxClusterStatusResponse> ignoredFailedStatuses;
+
     private SdxClusterResponse sdxResponse;
 
-    public DatalakeWaitObject(SdxClient client, String name, SdxClusterStatusResponse desiredStatus) {
+    public DatalakeWaitObject(SdxClient client, String name, SdxClusterStatusResponse desiredStatus, Set<SdxClusterStatusResponse> ignoredFailedStatuses) {
         this.client = client;
         this.name = name;
         this.desiredStatus = desiredStatus;
+        this.ignoredFailedStatuses = ignoredFailedStatuses;
     }
 
     public SdxEndpoint getEndpoint() {
@@ -84,6 +87,11 @@ public class DatalakeWaitObject implements WaitObject {
     @Override
     public boolean isDeleted() {
         return sdxResponse.getStatus().equals(DELETED);
+    }
+
+    @Override
+    public boolean isFailedButIgnored() {
+        return ignoredFailedStatuses.contains(sdxResponse.getStatus());
     }
 
     @Override
