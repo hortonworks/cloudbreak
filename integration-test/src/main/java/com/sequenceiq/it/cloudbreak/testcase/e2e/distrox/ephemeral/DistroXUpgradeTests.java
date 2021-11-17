@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -56,6 +57,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         createEnvironmentWithFreeIpa(testContext);
     }
 
+    @Ignore("Yarn config verification is not working, because CM responds with a server error")
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",

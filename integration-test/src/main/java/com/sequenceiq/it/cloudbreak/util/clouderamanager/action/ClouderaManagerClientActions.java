@@ -63,8 +63,10 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
                 throw new TestFailException("IDBroker mappings are NOT exist!");
             }
         } catch (ApiException e) {
-            LOGGER.error("Exception when calling UsersResourceApi#readUsers2", e);
-            throw new TestFailException("Exception when calling UsersResourceApi#readUsers2 at " + apiClient.getBasePath(), e);
+            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig. Response: {}", e.getResponseBody(), e);
+            String message = format("Exception when calling RoleConfigGroupsResourceApi#readConfig at %s. Response: %s",
+                    apiClient.getBasePath(), e.getResponseBody());
+            throw new TestFailException(message, e);
         } catch (Exception e) {
             LOGGER.error("Can't get users' list at: '{}'!", apiClient.getBasePath());
             throw new TestFailException("Can't get users' list at: " + apiClient.getBasePath(), e);
@@ -99,11 +101,13 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
                 throw new TestFailException("Nodemanager mappings are NOT exist!");
             }
         } catch (ApiException e) {
-            LOGGER.error("Exception when calling UsersResourceApi#readUsers2", e);
-            throw new TestFailException("Exception when calling UsersResourceApi#readUsers2 at " + apiClient.getBasePath(), e);
+            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig. Response: {}", e.getResponseBody(), e);
+            String message = format("Exception when calling RoleConfigGroupsResourceApi#readConfig at %s. Response: %s",
+                    apiClient.getBasePath(), e.getResponseBody());
+            throw new TestFailException(message, e);
         } catch (Exception e) {
-            LOGGER.error("Can't get users' list at: '{}'!", apiClient.getBasePath());
-            throw new TestFailException("Can't get users' list at: " + apiClient.getBasePath(), e);
+            LOGGER.error("Can't get role configs at: '{}'!", apiClient.getBasePath());
+            throw new TestFailException("Can't get role configs at: " + apiClient.getBasePath(), e);
         }
         return testDto;
     }
@@ -137,8 +141,10 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
                 throw new TestFailException("Namenode mappings are NOT exist!");
             }
         } catch (ApiException e) {
-            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig", e);
-            throw new TestFailException("Exception when calling RoleConfigGroupsResourceApi#readConfig at " + apiClient.getBasePath(), e);
+            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig. Response: {}", e.getResponseBody(), e);
+            String message = format("Exception when calling RoleConfigGroupsResourceApi#readConfig at %s. Response: %s",
+                    apiClient.getBasePath(), e.getResponseBody());
+            throw new TestFailException(message, e);
         } catch (Exception e) {
             LOGGER.error("Can't read config at: '{}'!", apiClient.getBasePath());
             throw new TestFailException("Can't read config at: " + apiClient.getBasePath(), e);
@@ -175,8 +181,10 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
                 throw new TestFailException("Datanode mappings are NOT exist!");
             }
         } catch (ApiException e) {
-            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig", e);
-            throw new TestFailException("Exception when calling RoleConfigGroupsResourceApi#readConfig at " + apiClient.getBasePath(), e);
+            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig. Response: {}", e.getResponseBody(), e);
+            String message = format("Exception when calling RoleConfigGroupsResourceApi#readConfig at %s. Response: %s",
+                    apiClient.getBasePath(), e.getResponseBody());
+            throw new TestFailException(message, e);
         } catch (Exception e) {
             LOGGER.error("Can't read config at: '{}'!", apiClient.getBasePath());
             throw new TestFailException("Can't read config at: " + apiClient.getBasePath(), e);
