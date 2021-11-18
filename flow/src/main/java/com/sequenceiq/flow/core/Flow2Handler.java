@@ -352,6 +352,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 throw e;
             }
             if (!flowCancelled.booleanValue()) {
+                LOGGER.debug("Send event: key: {}, flowid: {}, usercrn: {}, payload: {}", key, flowId, flowParameters.getFlowTriggerUserCrn(), payload);
                 flow.sendEvent(key, flowParameters.getFlowTriggerUserCrn(), payload, flowParameters.getSpanContext(), flowParameters.getFlowOperationType());
             }
         } else {
@@ -363,8 +364,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             MutableBoolean flowCancelled) throws TransactionExecutionException {
         transactionService.required(() -> {
             Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flow.getFlowId());
-            lastFlowLog.ifPresent(flowLog -> {
+            if (lastFlowLog.isPresent()) {
                 String nodeId = nodeConfig.getId();
+                FlowLog flowLog = lastFlowLog.get();
                 if (flowLog.getFinalized() || flowLog.getCloudbreakNodeId() == null || flowLog.getCloudbreakNodeId().equals(nodeId)) {
                     updateFlowLogStatus(key, payload, flowChainId, flow, flowLog, flowParameters);
                 } else {
@@ -373,15 +375,20 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     inMemoryCleanup.cancelFlowWithoutDbUpdate(flow.getFlowId());
                     flowCancelled.setTrue();
                 }
-            });
+            } else {
+                LOGGER.debug("Cannot find LastFlowLog with flowId: {}", flow.getFlowId());
+            }
         });
     }
 
     private void updateFlowLogStatus(String key, Payload payload, String flowChainId, Flow flow, FlowLog lastFlowLog, FlowParameters flowParameters) {
         if (flowLogService.repeatedFlowState(lastFlowLog, key)) {
+            LOGGER.debug("Repeated flow state: {}, key: {}", lastFlowLog, key);
             flowLogService.updateLastFlowLogPayload(lastFlowLog, payload, flow.getVariables());
         } else {
-            flowLogService.updateLastFlowLogStatus(lastFlowLog, failHandledEvents.contains(key));
+            boolean failureEvent = failHandledEvents.contains(key);
+            LOGGER.debug("New flow state: {}, key: {}, failure event: {}", lastFlowLog, key, failureEvent);
+            flowLogService.updateLastFlowLogStatus(lastFlowLog, failureEvent);
             flowLogService.save(flowParameters, flowChainId, key, payload, flow.getVariables(), flow.getFlowConfigClass(), flow.getCurrentState());
         }
     }

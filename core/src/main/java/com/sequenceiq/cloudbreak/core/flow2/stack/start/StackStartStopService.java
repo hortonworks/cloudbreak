@@ -107,6 +107,7 @@ public class StackStartStopService {
         try {
             transactionService.required(() -> updateInstancesToStopped(stack, stopInstancesResult.getResults().getResults()));
         } catch (TransactionExecutionException e) {
+            LOGGER.error("Error occurred during the finish stack stop: {}", e.getMessage(), e);
             throw new TransactionRuntimeExecutionException(e);
         }
         validateResourceResults(context.getCloudContext(), stopInstancesResult.getErrorDetails(), stopInstancesResult.getResults(), false);
@@ -165,7 +166,7 @@ public class StackStartStopService {
                 results.getResults().stream().filter(r -> r.getStatus() == InstanceStatus.FAILED).collect(Collectors.toList());
         if (!failedInstances.isEmpty()) {
             String statusReason = failedInstances.stream().map(
-                    fi -> "Instance " + fi.getCloudInstance().getInstanceId() + ": " + fi.getStatus() + '(' + fi.getStatusReason() + ')')
+                            fi -> "Instance " + fi.getCloudInstance().getInstanceId() + ": " + fi.getStatus() + '(' + fi.getStatusReason() + ')')
                     .collect(Collectors.joining(","));
             throw new OperationException(format("Failed to %s the stack for %s due to: %s", action, cloudContext.getName(), statusReason));
         }
