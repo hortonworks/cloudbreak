@@ -44,7 +44,8 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.CleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
-import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCacheService;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
 import com.sequenceiq.freeipa.ldap.LdapConfigService;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
@@ -66,7 +67,7 @@ public class CleanupService {
     private StackService stackService;
 
     @Inject
-    private KerberosMgmtV1Service kerberosMgmtV1Service;
+    private KeytabCleanupService keytabCleanupService;
 
     @Inject
     private FreeIpaFlowManager flowManager;
@@ -94,6 +95,9 @@ public class CleanupService {
 
     @Inject
     private PollingService<FreeIpaServerDeletionPollerObject> freeIpaDeletionPollerService;
+
+    @Inject
+    private KeytabCacheService keytabCacheService;
 
     @Value("${freeipa.server.deletion.check.maxWaitSeconds}")
     private int serverDeletionCheckMaxWaitSeconds;
@@ -209,9 +213,11 @@ public class CleanupService {
     }
 
     public Pair<Set<String>, Map<String, String>> removeHosts(Long stackId, Set<String> hosts) throws FreeIpaClientException {
-        FreeIpaClient client = getFreeIpaClient(stackId);
+        Stack stack = stackService.getStackById(stackId);
+        FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
         Pair<Set<String>, Map<String, String>> hostDeleteResult = hostDeletionService.removeHosts(client, hosts);
         removeHostRelatedServices(client, hosts);
+        hosts.forEach(fqdn -> keytabCacheService.deleteByEnvironmentCrnAndHostname(stack.getEnvironmentCrn(), fqdn));
         return hostDeleteResult;
     }
 
@@ -323,7 +329,7 @@ public class CleanupService {
                 HostRequest hostRequest = new HostRequest();
                 hostRequest.setEnvironmentCrn(stack.getEnvironmentCrn());
                 hostRequest.setServerHostName(host);
-                kerberosMgmtV1Service.removeHostRelatedKerberosConfiguration(hostRequest, stack.getAccountId(), freeIpaClient);
+                keytabCleanupService.removeHostRelatedKerberosConfiguration(hostRequest, stack.getAccountId(), freeIpaClient);
                 vaultCleanupSuccess.add(host);
             } catch (DeleteException | FreeIpaClientException e) {
                 LOGGER.info("Vault secret cleanup failed for host: {}", host, e);

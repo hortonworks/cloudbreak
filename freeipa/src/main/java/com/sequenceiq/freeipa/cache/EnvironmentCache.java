@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.cache.common.AbstractCacheDefinition;
 
 @Component
 public class EnvironmentCache extends AbstractCacheDefinition {
+    public static final String FREEIPA_ENVIRONMENT_CACHE = "freeipaEnvironmentCache";
 
     private static final long MAX_ENTRIES = 1000L;
 
@@ -17,7 +18,7 @@ public class EnvironmentCache extends AbstractCacheDefinition {
 
     @Override
     protected String getName() {
-        return "freeipaEnvironmentCache";
+        return FREEIPA_ENVIRONMENT_CACHE;
     }
 
     @Override

@@ -18,7 +18,7 @@ import com.sequenceiq.freeipa.kerberosmgmt.exception.KeytabCreationException;
 @Component
 public class KerberosMgmtVaultComponent {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtVaultComponent.class);
 
     private static final String VAULT_UPDATE_FAILED = "Failed to update Vault.";
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.api.v1.kerberosmgmt.model;
 
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -21,11 +22,11 @@ public class ServiceKeytabRequest {
     private String environmentCrn;
 
     @ApiModelProperty(value = KeytabModelDescription.SERVICE_NAME, required = true)
-    @NotNull
+    @NotEmpty
     private String serviceName;
 
     @ApiModelProperty(value = KeytabModelDescription.SERVICE_HOST, required = true)
-    @NotNull
+    @NotEmpty
     private String serverHostName;
 
     @ApiModelProperty(value = KeytabModelDescription.SERVICE_HOST_ALIAS)

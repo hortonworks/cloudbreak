@@ -14,6 +14,8 @@ import java.util.stream.Stream;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
@@ -33,6 +36,8 @@ import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
 public class StackService implements ResourcePropertyProvider {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
     @VisibleForTesting
     Supplier<LocalDateTime> nowSupplier = LocalDateTime::now;
@@ -197,5 +202,13 @@ public class StackService implements ResourcePropertyProvider {
                 .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
         final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
         return stackRepository.findImagesOfAliveStacks(thresholdTimestamp);
+    }
+
+    public Stack getFreeIpaStackWithMdcContext(String envCrn, String accountId) {
+        LOGGER.debug("Looking for stack using env:{} and accountId:{}", envCrn, accountId);
+        Stack stack = getByEnvironmentCrnAndAccountId(envCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        LOGGER.debug("Stack is fetched for env:{} and accountId:{} ", envCrn, accountId);
+        return stack;
     }
 }

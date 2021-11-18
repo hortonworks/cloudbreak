@@ -44,7 +44,7 @@ public class SecretAspectService {
                             String accountId = findAccountId(entity);
                             String path = String.format("%s/%s/%s/%s-%s", accountId,
                                     entity.getClass().getSimpleName().toLowerCase(), field.getName().toLowerCase(),
-                                    UUID.randomUUID().toString(), Long.toHexString(System.currentTimeMillis()));
+                                    UUID.randomUUID(), Long.toHexString(System.currentTimeMillis()));
                             String secret = secretService.put(path, value.getRaw());
                             LOGGER.debug("Field: '{}' is saved at path: {}", field.getName(), path);
                             field.set(entity, new SecretProxy(secretService, secret));

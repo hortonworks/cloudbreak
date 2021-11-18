@@ -42,9 +42,9 @@ import io.opentracing.Tracer;
 @Service
 public class FreeIpaClientFactory {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClientFactory.class);
+    public static final String ADMIN_USER = "admin";
 
-    private static final String ADMIN_USER = "admin";
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaClientFactory.class);
 
     private static final Map<String, String> ADDITIONAL_CLUSTER_PROXY_HEADERS = Map.of(
             "Proxy-Ignore-Auth", "true",

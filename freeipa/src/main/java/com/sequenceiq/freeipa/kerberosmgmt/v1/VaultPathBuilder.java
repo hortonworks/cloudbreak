@@ -43,7 +43,7 @@ public class VaultPathBuilder {
         }
     }
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(KerberosMgmtV1Service.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeytabCleanupService.class);
 
     private Optional<SecretType> secretType = Optional.empty();
 

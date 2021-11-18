@@ -14,7 +14,7 @@ public class Service {
 
     private String dn;
 
-    private List<String> krbprincipalname;
+    private List<String> krbprincipalname = new ArrayList<>();
 
     @JsonDeserialize(using = ListFlatteningDeserializer.class)
     private String krbcanonicalname;
