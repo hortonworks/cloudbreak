@@ -114,6 +114,15 @@ public class BlueprintUtilV4Controller extends NotificationController implements
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_DATAHUB)
+    public ScaleRecommendationV4Response createRecommendationByDatahubCrn(Long workspaceId, @ResourceCrn String datahubCrn) {
+        ScaleRecommendation recommendation = blueprintService.getScaleRecommendationByDatahubCrn(
+                threadLocalService.getRequestedWorkspaceId(),
+                datahubCrn);
+        return scaleRecommendationToScaleRecommendationV4ResponseConverter.convert(recommendation);
+    }
+
+    @Override
     @DisableCheckPermissions
     public ServiceDependencyMatrixV4Response getServiceAndDependencies(Long workspaceId, Set<String> services,
             String platform) {

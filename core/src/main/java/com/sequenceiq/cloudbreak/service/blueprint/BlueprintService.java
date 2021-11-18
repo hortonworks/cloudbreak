@@ -225,6 +225,12 @@ public class BlueprintService extends AbstractWorkspaceAwareResourceService<Blue
         return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprintName);
     }
 
+    public ScaleRecommendation getScaleRecommendationByDatahubCrn(Long workspaceId, String datahubCrn) {
+        Blueprint blueprint = blueprintRepository.findByDatahubCrn(datahubCrn)
+                .orElseThrow(NotFoundException.notFound("Blueprint by datahub crn", datahubCrn));
+        return cloudResourceAdvisor.createForBlueprint(workspaceId, blueprint);
+    }
+
     @Override
     public Set<Blueprint> findAllByWorkspace(Workspace workspace) {
         return getAllAvailableInWorkspace(workspace);

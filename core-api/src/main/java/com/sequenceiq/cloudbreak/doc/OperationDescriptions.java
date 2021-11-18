@@ -185,6 +185,8 @@ public class OperationDescriptions {
     public static class ConnectorOpDescription {
         public static final String GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME = "retrive services and versions";
         public static final String GET_RECOMMENDATION = "creates a recommendation that advises cloud resources for the given blueprint";
+        public static final String GET_RECOMMENDATION_BY_DATAHUB_CRN = "creates a recommendation that advises cloud resources for the given blueprint" +
+                " based on the given datahub crn.";
         public static final String GET_RECOMMENDATION_BY_CRED_CRN = "creates a recommendation that advises cloud resources for the given" +
                 " blueprint based on the given credential crn.";
     }

@@ -93,6 +93,15 @@ public interface BlueprintUtilV4Endpoint {
             @QueryParam("blueprintName") @NotEmpty String blueprintName);
 
     @GET
+    @Path("scalerecommendation_by_datahub_crn")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ConnectorOpDescription.GET_RECOMMENDATION_BY_DATAHUB_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
+            nickname = "createScaleRecommendationForWorkspaceByDatahubCrn")
+    ScaleRecommendationV4Response createRecommendationByDatahubCrn(
+            @PathParam("workspaceId") @Valid Long workspaceId,
+            @QueryParam("datahubCrn") @NotEmpty String datahubCrn);
+
+    @GET
     @Path("service_versions")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = ConnectorOpDescription.GET_SERVICE_VERSIONS_BY_BLUEPRINT_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.CONNECTOR_NOTES,
