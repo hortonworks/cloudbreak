@@ -168,9 +168,13 @@ public class CloudResourceAdvisor {
     }
 
     public ScaleRecommendation createForBlueprint(Long workspaceId, String blueprintName) {
-        LOGGER.debug("Scale advice for blueprintName: {}.", blueprintName);
         Blueprint blueprint = getBlueprint(blueprintName, workspaceId);
-        BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(workspaceId, blueprintName);
+        return createForBlueprint(workspaceId, blueprint);
+    }
+
+    public ScaleRecommendation createForBlueprint(Long workspaceId, Blueprint blueprint) {
+        LOGGER.debug("Scale advice for blueprintName: {}.", blueprint.getName());
+        BlueprintTextProcessor blueprintTextProcessor = getBlueprintTextProcessor(blueprint);
         AutoscaleRecommendation autoscale = recommendAutoscale(blueprintTextProcessor);
         List<String> entitlements = entitlementService.getEntitlements(blueprint.getWorkspace().getTenant().getName());
         ResizeRecommendation resize = recommendResize(blueprintTextProcessor, entitlements);
