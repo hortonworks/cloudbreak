@@ -775,9 +775,9 @@ cb:
       sdx.enabled: false
     validation:
       distrox:
-        enabled: false
+        enabled: true
       sdx:
-        enabled: false
+        enabled: true
     permittedServicesForUpgrade: >
         CORE_SETTINGS: 7.2.9,
         CRUISE_CONTROL: 7.2.9,
