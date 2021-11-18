@@ -107,8 +107,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances();
 
-        repair(sdxTestDto, sdx, MASTER.getName());
-        repair(sdxTestDto, sdx, IDBROKER.getName());
+        repair(sdxTestDto, sdx, MASTER.getName(), Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE));
+        repair(sdxTestDto, sdx, IDBROKER.getName(), Set.of(SdxClusterStatusResponse.NODE_FAILURE));
 
         sdxTestDto
                 .then((tc, testDto, client) -> {
@@ -171,7 +171,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
 
     }
 
-    private void repair(SdxTestDto sdxTestDto, String sdx, String hostgroupName) {
+    private void repair(SdxTestDto sdxTestDto, String sdx, String hostgroupName, Set<SdxClusterStatusResponse> ignoredFailedStatuses) {
         List<String> expectedVolumeIds = new ArrayList<>();
         List<String> actualVolumeIds = new ArrayList<>();
 
@@ -184,8 +184,7 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                 })
                 .awaitForHostGroups(List.of(hostgroupName), InstanceStatus.STOPPED)
                 .when(sdxTestClient.repair(hostgroupName), key(sdx))
-                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE),
-                        key(sdx).withWaitForFlow(Boolean.FALSE))
+                .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, ignoredFailedStatuses, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
