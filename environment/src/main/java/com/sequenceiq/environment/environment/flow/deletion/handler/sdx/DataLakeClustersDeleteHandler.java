@@ -31,7 +31,7 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
 
     private static final int SLEEP_TIME = 10;
 
-    private static final int TIMEOUT = 1;
+    private static final int TIMEOUT = 90;
 
     private final EnvironmentService environmentService;
 
@@ -95,7 +95,7 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
                 .withSleepTime(SLEEP_TIME)
                 .withSleepTimeUnit(TimeUnit.SECONDS)
                 .withTimeout(TIMEOUT)
-                .withTimeoutTimeUnit(TimeUnit.HOURS)
+                .withTimeoutTimeUnit(TimeUnit.MINUTES)
                 .build();
     }
 
