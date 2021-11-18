@@ -28,43 +28,37 @@ public class KerberosMgmtRoleComponent {
 
     public boolean privilegesExist(RoleRequest roleRequest, FreeIpaClient ipaClient) throws FreeIpaClientException {
         try {
-            return roleRequest == null ||
-                    roleRequest.getPrivileges().stream().allMatch(privilegeName -> {
-                        try {
-                            ipaClient.showPrivilege(privilegeName);
-                            return true;
-                        } catch (FreeIpaClientException e) {
-                            if (!FreeIpaClientExceptionUtil.isNotFoundException(e)) {
-                                LOGGER.error("Privilege [{}] show error", privilegeName, e);
-                                throw new FreeIpaClientExceptionWrapper(e);
-                            }
-                            LOGGER.debug("Privilege [{}] does not exist", privilegeName);
-                            return false;
-                        }
-                    });
+            return roleRequest == null || doAllPrivilegeExist(roleRequest.getPrivileges(), ipaClient);
         } catch (FreeIpaClientExceptionWrapper e) {
             throw e.getWrappedException();
         }
     }
 
-    public void addRoleAndPrivileges(Optional<Service> service, Optional<Host> host, RoleRequest roleRequest,
-            FreeIpaClient ipaClient)
+    private boolean doAllPrivilegeExist(Set<String> privileges, FreeIpaClient ipaClient) {
+        return privileges.stream().allMatch(privilegeName -> doesPrivilegeExist(ipaClient, privilegeName));
+    }
+
+    private boolean doesPrivilegeExist(FreeIpaClient ipaClient, String privilegeName) {
+        try {
+            ipaClient.showPrivilege(privilegeName);
+            LOGGER.debug("Privilege [{}] exists", privilegeName);
+            return true;
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
+                LOGGER.debug("Privilege [{}] does not exist", privilegeName);
+                return false;
+            } else {
+                LOGGER.error("Privilege [{}] show error", privilegeName, e);
+                throw new FreeIpaClientExceptionWrapper(e);
+            }
+        }
+    }
+
+    public void addRoleAndPrivileges(Optional<Service> service, Optional<Host> host, RoleRequest roleRequest, FreeIpaClient ipaClient)
             throws FreeIpaClientException {
         if (roleRequest != null && StringUtils.isNotBlank(roleRequest.getRoleName())) {
-            Role role;
-            try {
-                Optional<Role> optionalRole = findRole(roleRequest.getRoleName(), ipaClient);
-                role = optionalRole.isPresent() ? optionalRole.get() : ipaClient.addRole(roleRequest.getRoleName());
-            } catch (FreeIpaClientException e) {
-                if (!FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
-                    LOGGER.error("Failed to add the role [{}]", roleRequest.getRoleName(), e);
-                    throw e;
-                }
-                LOGGER.debug("The role [{}] was recently created in a different thread, retrieve it", roleRequest.getRoleName(), e);
-                role = findRole(roleRequest.getRoleName(), ipaClient).get();
-            }
+            Role role = fetchOrCreateRole(roleRequest, ipaClient);
             addPrivilegesToRole(roleRequest.getPrivileges(), ipaClient, role);
-            role = ipaClient.showRole(role.getCn());
             Set<String> servicesToAssignRole = service.stream()
                     .filter(s -> s.getMemberOfRole().stream().noneMatch(member -> member.contains(roleRequest.getRoleName())))
                     .map(Service::getKrbcanonicalname)
@@ -73,59 +67,82 @@ public class KerberosMgmtRoleComponent {
                     .filter(h -> h.getMemberOfRole().stream().noneMatch(member -> member.contains(roleRequest.getRoleName())))
                     .map(Host::getFqdn)
                     .collect(Collectors.toSet());
+            LOGGER.debug("Adding role [{}] to host {} and service {}", role.getCn(), hostsToAssignRole, servicesToAssignRole);
             ipaClient.addRoleMember(role.getCn(), null, null, hostsToAssignRole, null, servicesToAssignRole);
+        } else {
+            LOGGER.debug("RoleRequest or role name is empty, skipping adding privileges. {}", roleRequest);
         }
     }
 
-    private Optional<Role> findRole(String roleName, FreeIpaClient ipaClient) throws FreeIpaClientException {
-        Set<Role> allRole = ipaClient.findAllRole();
-        return allRole.stream().filter(role -> role.getCn().equals(roleName)).findFirst();
+    private Role fetchOrCreateRole(RoleRequest roleRequest, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        try {
+            Optional<Role> optionalRole = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(() -> ipaClient.showRole(roleRequest.getRoleName()),
+                    "Role [{}} not found", roleRequest.getRoleName());
+            LOGGER.debug("Fetched role: {}", optionalRole);
+            return optionalRole.isPresent() ? optionalRole.get() : ipaClient.addRole(roleRequest.getRoleName());
+        } catch (FreeIpaClientException e) {
+            if (FreeIpaClientExceptionUtil.isDuplicateEntryException(e)) {
+                LOGGER.debug("The role [{}] was recently created in a different thread, retrieve it", roleRequest.getRoleName(), e);
+                return ipaClient.showRole(roleRequest.getRoleName());
+            } else {
+                LOGGER.error("Failed to add the role [{}]", roleRequest.getRoleName(), e);
+                throw e;
+            }
+        }
     }
 
     private void addPrivilegesToRole(Set<String> privileges, FreeIpaClient ipaClient, Role role) throws FreeIpaClientException {
         try {
             if (privileges != null) {
-                Set<String> privilegesToAdd = privileges.stream().filter(privilegeName -> {
-                    try {
-                        Privilege privilege = ipaClient.showPrivilege(privilegeName);
-                        return privilege.getMember().stream().noneMatch(member -> member.equals(role.getCn()));
-                    } catch (FreeIpaClientException e) {
-                        LOGGER.error("Privilege [{}] show error", privilegeName, e);
-                        throw new FreeIpaClientExceptionWrapper(e);
-                    }
-                }).collect(Collectors.toSet());
-                if (!privilegesToAdd.isEmpty()) {
-                    ipaClient.addRolePrivileges(role.getCn(), privilegesToAdd);
-                }
+                addMissingPrivileges(privileges, ipaClient, role);
+            } else {
+                LOGGER.debug("Privileges is null for [{}] role", role.getCn());
             }
         } catch (FreeIpaClientExceptionWrapper e) {
             throw e.getWrappedException();
         }
     }
 
-    public void deleteRoleIfItIsNoLongerUsed(String role, FreeIpaClient ipaClient) throws FreeIpaClientException {
-        if (role == null) {
-            return;
+    private void addMissingPrivileges(Set<String> privileges, FreeIpaClient ipaClient, Role role) throws FreeIpaClientException {
+        Set<String> privilegesToAdd = privileges.stream()
+                .filter(privilegeName -> isPrivilegeMissingForRole(ipaClient, role, privilegeName))
+                .collect(Collectors.toSet());
+        if (!privilegesToAdd.isEmpty()) {
+            LOGGER.debug("Privileges missing {} from {} for [{}] role", privilegesToAdd, privileges, role.getCn());
+            ipaClient.addRolePrivileges(role.getCn(), privilegesToAdd);
+        } else {
+            LOGGER.debug("All of {} are set for [{}] role", privileges, role.getCn());
         }
+    }
 
+    private boolean isPrivilegeMissingForRole(FreeIpaClient ipaClient, Role role, String privilegeName) {
         try {
-            Role ipaRole = ipaClient.showRole(role);
-            List<String> usesOfRole = new ArrayList<>();
-            usesOfRole.addAll(ipaRole.getMemberUser());
-            usesOfRole.addAll(ipaRole.getMemberGroup());
-            usesOfRole.addAll(ipaRole.getMemberHost());
-            usesOfRole.addAll(ipaRole.getMemberHostGroup());
-            usesOfRole.addAll(ipaRole.getMemberService());
-            if (usesOfRole.isEmpty()) {
-                ipaClient.deleteRole(role);
-            } else {
-                LOGGER.debug("The role {} is still in use, so it was not deleted.", role);
-            }
+            Privilege privilege = ipaClient.showPrivilege(privilegeName);
+            return privilege.getMember().stream().noneMatch(member -> member.equals(role.getCn()));
         } catch (FreeIpaClientException e) {
-            if (FreeIpaClientExceptionUtil.isNotFoundException(e)) {
-                LOGGER.debug("The role {} does not exist, so it was not deleted.", role);
-            } else {
-                throw e;
+            LOGGER.error("Privilege [{}] show error", privilegeName, e);
+            throw new FreeIpaClientExceptionWrapper(e);
+        }
+    }
+
+    public void deleteRoleIfItIsNoLongerUsed(String role, FreeIpaClient ipaClient) throws FreeIpaClientException {
+        if (role != null) {
+            Optional<Role> optionalRole = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(() -> ipaClient.showRole(role),
+                    "Role [{}} not found", role);
+            if (optionalRole.isPresent()) {
+                Role ipaRole = optionalRole.get();
+                List<String> usesOfRole = new ArrayList<>();
+                usesOfRole.addAll(ipaRole.getMemberUser());
+                usesOfRole.addAll(ipaRole.getMemberGroup());
+                usesOfRole.addAll(ipaRole.getMemberHost());
+                usesOfRole.addAll(ipaRole.getMemberHostGroup());
+                usesOfRole.addAll(ipaRole.getMemberService());
+                if (usesOfRole.isEmpty()) {
+                    FreeIpaClientExceptionUtil.ignoreNotFoundException(() -> ipaClient.deleteRole(role),
+                            "The role [{}] does not exist, so it was not deleted.", role);
+                } else {
+                    LOGGER.debug("The role {} is still in use, so it was not deleted.", role);
+                }
             }
         }
     }

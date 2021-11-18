@@ -51,7 +51,13 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     private static final String DELETION_FAILED = "Deletion failed. Reason: ";
 
     @Inject
-    private KerberosMgmtV1Service kerberosMgmtV1Service;
+    private KeytabCleanupService keytabCleanupService;
+
+    @Inject
+    private ServiceKeytabService serviceKeytab;
+
+    @Inject
+    private HostKeytabService hostKeytab;
 
     @Inject
     private CrnService crnService;
@@ -69,7 +75,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     public ServiceKeytabResponse generateServiceKeytab(@RequestObject @Valid ServiceKeytabRequest request, @AccountId String accountIdForInternalUsage) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
-            return kerberosMgmtV1Service.generateServiceKeytab(request, accountId);
+            return serviceKeytab.generateServiceKeytab(request, accountId);
         });
     }
 
@@ -77,7 +83,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     public ServiceKeytabResponse getServiceKeytab(@RequestObject @Valid ServiceKeytabRequest request) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
-            return kerberosMgmtV1Service.getExistingServiceKeytab(request, accountId);
+            return serviceKeytab.getExistingServiceKeytab(request, accountId);
         });
     }
 
@@ -85,7 +91,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     public HostKeytabResponse generateHostKeytab(@RequestObject @Valid HostKeytabRequest request) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
-            return kerberosMgmtV1Service.generateHostKeytab(request, accountId);
+            return hostKeytab.generateHostKeytab(request, accountId);
         });
     }
 
@@ -93,7 +99,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     public HostKeytabResponse getHostKeytab(@RequestObject @Valid HostKeytabRequest request) {
         return retryableWithKeytabCreationException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
-            return kerberosMgmtV1Service.getExistingHostKeytab(request, accountId);
+            return hostKeytab.getExistingHostKeytab(request, accountId);
         });
     }
 
@@ -101,7 +107,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     public void deleteServicePrincipal(@RequestObject @Valid ServicePrincipalRequest request) {
         retryableWithDeletionException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
-            kerberosMgmtV1Service.deleteServicePrincipal(request, accountId);
+            keytabCleanupService.deleteServicePrincipal(request, accountId);
             return null;
         });
     }
@@ -110,7 +116,7 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     public void deleteHost(@RequestObject @Valid HostRequest request) {
         retryableWithDeletionException((Void v) -> {
             String accountId = crnService.getCurrentAccountId();
-            kerberosMgmtV1Service.deleteHost(request, accountId);
+            keytabCleanupService.deleteHost(request, accountId);
             return null;
         });
     }
@@ -118,13 +124,13 @@ public class KerberosMgmtV1Controller implements KerberosMgmtV1Endpoint {
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
     public void cleanupClusterSecrets(@RequestObject @Valid VaultCleanupRequest request) {
         String accountId = crnService.getCurrentAccountId();
-        kerberosMgmtV1Service.cleanupByCluster(request, accountId);
+        keytabCleanupService.cleanupByCluster(request, accountId);
     }
 
     @CheckPermissionByResourceCrn(action = EDIT_ENVIRONMENT)
     public void cleanupEnvironmentSecrets(@ResourceCrn String environmentCrn) {
         String accountId = crnService.getCurrentAccountId();
-        kerberosMgmtV1Service.cleanupByEnvironment(environmentCrn, accountId);
+        keytabCleanupService.cleanupByEnvironment(environmentCrn, accountId);
     }
 
     @CustomPermissionCheck

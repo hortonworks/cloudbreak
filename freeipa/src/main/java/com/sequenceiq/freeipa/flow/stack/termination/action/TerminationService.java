@@ -22,7 +22,7 @@ import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
 import com.sequenceiq.freeipa.kerberosmgmt.exception.DeleteException;
-import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KeytabCleanupService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceGroupService;
@@ -54,7 +54,7 @@ public class TerminationService {
     private Clock clock;
 
     @Inject
-    private KerberosMgmtV1Service kerberosMgmtV1Service;
+    private KeytabCleanupService keytabCleanupService;
 
     public void finalizeTermination(Long stackId) {
         long currentTimeMillis = clock.getCurrentTimeMillis();
@@ -154,7 +154,7 @@ public class TerminationService {
     }
 
     private void cleanupVault(Stack stack) throws DeleteException {
-        kerberosMgmtV1Service.cleanupByEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
+        keytabCleanupService.cleanupByEnvironment(stack.getEnvironmentCrn(), stack.getAccountId());
     }
 
 }

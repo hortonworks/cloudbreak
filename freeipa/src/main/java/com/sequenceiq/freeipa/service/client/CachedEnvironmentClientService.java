@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.client;
 
+import static com.sequenceiq.freeipa.cache.EnvironmentCache.FREEIPA_ENVIRONMENT_CACHE;
+
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
@@ -20,7 +22,7 @@ public class CachedEnvironmentClientService {
     @Inject
     private WebApplicationExceptionHandler webApplicationExceptionHandler;
 
-    @Cacheable(cacheNames = "freeipaEnvironmentCache", key = "#environment")
+    @Cacheable(cacheNames = FREEIPA_ENVIRONMENT_CACHE, key = "#environment")
     public DetailedEnvironmentResponse getByName(String environment) {
         try {
             return environmentEndpoint.getByName(environment);
@@ -29,7 +31,7 @@ public class CachedEnvironmentClientService {
         }
     }
 
-    @Cacheable(cacheNames = "freeipaEnvironmentCache", key = "#environmentCrn")
+    @Cacheable(cacheNames = FREEIPA_ENVIRONMENT_CACHE, key = "#environmentCrn")
     public DetailedEnvironmentResponse getByCrn(String environmentCrn) {
         try {
             return environmentEndpoint.getByCrn(environmentCrn);
@@ -38,7 +40,7 @@ public class CachedEnvironmentClientService {
         }
     }
 
-    @CacheEvict(value = "freeipaEnvironmentCache", key = "#environmentCrn")
+    @CacheEvict(value = FREEIPA_ENVIRONMENT_CACHE, key = "#environmentCrn")
     public void evictCache(String environmentCrn) {
     }
 }

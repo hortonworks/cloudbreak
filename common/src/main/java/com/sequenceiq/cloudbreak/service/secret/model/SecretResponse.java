@@ -42,4 +42,12 @@ public class SecretResponse implements Serializable {
     public void setSecretPath(String secretPath) {
         this.secretPath = secretPath;
     }
+
+    @Override
+    public String toString() {
+        return "SecretResponse{" +
+                "enginePath='" + enginePath + '\'' +
+                ", secretPath='" + secretPath + '\'' +
+                '}';
+    }
 }

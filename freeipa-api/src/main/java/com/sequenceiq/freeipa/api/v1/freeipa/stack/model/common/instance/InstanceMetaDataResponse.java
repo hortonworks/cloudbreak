@@ -144,4 +144,22 @@ public class InstanceMetaDataResponse {
     public void setAvailabilityZone(String availabilityZone) {
         this.availabilityZone = availabilityZone;
     }
+
+    @Override
+    public String toString() {
+        return "InstanceMetaDataResponse{" +
+                "privateIp='" + privateIp + '\'' +
+                ", publicIp='" + publicIp + '\'' +
+                ", sshPort=" + sshPort +
+                ", instanceId='" + instanceId + '\'' +
+                ", discoveryFQDN='" + discoveryFQDN + '\'' +
+                ", instanceGroup='" + instanceGroup + '\'' +
+                ", instanceStatus=" + instanceStatus +
+                ", instanceType=" + instanceType +
+                ", state='" + state + '\'' +
+                ", lifeCycle=" + lifeCycle +
+                ", subnetId='" + subnetId + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                '}';
+    }
 }
