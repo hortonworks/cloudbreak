@@ -38,7 +38,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
 import com.sequenceiq.cloudbreak.service.Retry;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
@@ -72,7 +71,7 @@ public class AzureUpscaleService {
     private AzureCloudResourceService azureCloudResourceService;
 
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
-            AzureClient client, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+            AzureClient client) {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
@@ -104,15 +103,9 @@ public class AzureUpscaleService {
             List<CloudResource> reattachableVolumeSets = getReattachableVolumeSets(resources, newInstances);
             List<CloudResource> networkResources = azureCloudResourceService.getNetworkResources(resources);
 
-            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources,
-                    adjustmentTypeWithThreshold);
+            azureComputeResourceService.buildComputeResourcesForUpscale(ac, stack, scaledGroups, newInstances, reattachableVolumeSets, networkResources);
 
-            List<CloudResourceStatus> successfulInstances = newInstances.stream()
-                    .map(cloudResource ->
-                            new CloudResourceStatus(cloudResource, ResourceStatus.CREATED, cloudResource.getParameter(CloudResource.PRIVATE_ID, Long.class)))
-                    .collect(Collectors.toList());
-            return ListUtils.union(Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS)),
-                    successfulInstances);
+            return Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS));
         } catch (Retry.ActionFailedException e) {
             rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw azureUtils.convertToCloudConnectorException(e.getCause(), "Stack upscale");

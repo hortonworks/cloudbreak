@@ -37,8 +37,6 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowCont
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
-import com.sequenceiq.common.api.type.AdjustmentType;
 import com.sequenceiq.flow.core.AbstractActionTestSupport;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowRegister;
@@ -52,9 +50,9 @@ class StackUpscaleActionsTest {
 
     private static final String INSTANCE_GROUP_NAME = "worker";
 
-    private static final Integer ADJUSTMENT = 3;
+    private static final int ADJUSTMENT = 3;
 
-    private static final Integer ADJUSTMENT_ZERO = 0;
+    private static final int ADJUSTMENT_ZERO = 0;
 
     private static final String SELECTOR = "selector";
 
@@ -116,7 +114,7 @@ class StackUpscaleActionsTest {
     @BeforeEach
     void setUp() {
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME, Set.of(), ADJUSTMENT,
-                false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
+                false);
     }
 
     private AbstractStackUpscaleAction<StackScaleTriggerEvent> getPrevalidateAction() {
@@ -135,9 +133,7 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestDoExecuteWhenScalingNeededAndAllowed() throws Exception {
         when(cloudContext.getId()).thenReturn(STACK_ID);
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
-                adjustmentTypeWithThreshold);
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT);
 
         when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(true);
 
@@ -152,7 +148,7 @@ class StackUpscaleActionsTest {
 
         new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
 
-        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT, INSTANCE_GROUP_NAME, adjustmentTypeWithThreshold);
+        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT, INSTANCE_GROUP_NAME);
         verify(stackUpscaleService).startAddInstances(stack, ADJUSTMENT, INSTANCE_GROUP_NAME);
 
         verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
@@ -171,9 +167,7 @@ class StackUpscaleActionsTest {
 
     @Test
     void prevalidateTestDoExecuteWhenScalingNeededAndNotAllowed() throws Exception {
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
-                adjustmentTypeWithThreshold);
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT);
 
         when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(false);
 
@@ -184,7 +178,7 @@ class StackUpscaleActionsTest {
 
         new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
 
-        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT, INSTANCE_GROUP_NAME, adjustmentTypeWithThreshold);
+        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT, INSTANCE_GROUP_NAME);
         verifyEventForUpscaleStackResult(resourceStatuses);
     }
 
@@ -206,11 +200,9 @@ class StackUpscaleActionsTest {
 
     @Test
     void prevalidateTestDoExecuteWhenScalingNotNeeded() throws Exception {
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME, Set.of(), ADJUSTMENT_ZERO,
-                false, adjustmentTypeWithThreshold);
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO,
-                adjustmentTypeWithThreshold);
+                false);
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO);
 
         when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(true);
 
@@ -221,7 +213,7 @@ class StackUpscaleActionsTest {
 
         new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
 
-        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT_ZERO, INSTANCE_GROUP_NAME, adjustmentTypeWithThreshold);
+        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT_ZERO, INSTANCE_GROUP_NAME);
         verifyEventForUpscaleStackResult(resourceStatuses);
     }
 

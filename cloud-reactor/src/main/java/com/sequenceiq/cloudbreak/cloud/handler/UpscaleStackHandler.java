@@ -15,8 +15,14 @@ import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.cloud.scheduler.SyncPollingScheduler;
+import com.sequenceiq.cloudbreak.cloud.task.PollTask;
+import com.sequenceiq.cloudbreak.cloud.task.PollTaskFactory;
+import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourceLists;
+import com.sequenceiq.cloudbreak.cloud.transform.ResourcesStatePollerResults;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -28,6 +34,12 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
+
+    @Inject
+    private SyncPollingScheduler<ResourcesStatePollerResult> syncPollingScheduler;
+
+    @Inject
+    private PollTaskFactory statusCheckFactory;
 
     @Inject
     private EventBus eventBus;
@@ -45,13 +57,18 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
         try {
             CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
-            List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList(),
-                    request.getAdjustmentWithThreshold());
+            List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList());
             LOGGER.info("Upscaled resource statuses: {}", resourceStatus);
-            UpscaleStackResult result = new UpscaleStackResult(request.getResourceId(), ResourceStatus.UPDATED, resourceStatus);
+            List<CloudResource> resources = ResourceLists.transform(resourceStatus);
+            PollTask<ResourcesStatePollerResult> task = statusCheckFactory.newPollResourcesStateTask(ac, resources, true);
+            ResourcesStatePollerResult statePollerResult = ResourcesStatePollerResults.build(cloudContext, resourceStatus);
+            if (!task.completed(statePollerResult)) {
+                statePollerResult = syncPollingScheduler.schedule(task);
+            }
+            UpscaleStackResult result = ResourcesStatePollerResults.transformToUpscaleStackResult(statePollerResult, request);
             request.getResult().onNext(result);
             eventBus.notify(result.selector(), new Event<>(upscaleStackRequestEvent.getHeaders(), result));
-            LOGGER.debug("Upscale successfully finished for {}, and the result is: {}", cloudContext, result);
+            LOGGER.debug("Upscale successfully finished for {}", cloudContext);
         } catch (Exception e) {
             LOGGER.error("Upscaling stack failed", e);
             UpscaleStackResult result = new UpscaleStackResult(e.getMessage(), e, request.getResourceId());

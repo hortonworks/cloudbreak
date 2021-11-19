@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.flow.core.FlowParameters;
 
 abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractStackAction<StackUpscaleState, StackUpscaleEvent, StackScalingFlowContext, P> {
@@ -44,8 +43,6 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     static final String REPAIR = "REPAIR";
 
     static final String NETWORK_SCALE_DETAILS = "NETWORK_SCALE_DETAILS";
-
-    static final String ADJUSTMENT_WITH_THRESHOLD = "ADJUSTMENT_WITH_THRESHOLD";
 
     @Inject
     private StackService stackService;
@@ -84,8 +81,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
         CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
         CloudStack cloudStack = cloudStackConverter.convert(stack);
         return new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, getInstanceGroupName(variables),
-                Collections.emptySet(), getAdjustment(variables), getHostNames(variables), isRepair(variables), getStackNetworkScaleDetails(variables),
-                getAdjustmentWithThreshold(variables));
+                Collections.emptySet(), getAdjustment(variables), getHostNames(variables), isRepair(variables), getStackNetworkScaleDetails(variables));
     }
 
     @Override
@@ -112,9 +108,4 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     private NetworkScaleDetails getStackNetworkScaleDetails(Map<Object, Object> variables) {
         return (NetworkScaleDetails) variables.get(NETWORK_SCALE_DETAILS);
     }
-
-    private AdjustmentTypeWithThreshold getAdjustmentWithThreshold(Map<Object, Object> variables) {
-        return (AdjustmentTypeWithThreshold) variables.get(ADJUSTMENT_WITH_THRESHOLD);
-    }
-
 }

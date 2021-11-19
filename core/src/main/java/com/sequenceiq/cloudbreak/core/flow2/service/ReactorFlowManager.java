@@ -67,7 +67,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.service.FlowCancelService;
 
@@ -112,14 +111,10 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerStackUpscale(Long stackId, InstanceGroupAdjustmentV4Request instanceGroupAdjustment, boolean withClusterEvent) {
         String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(instanceGroupAdjustment.getAdjustmentType(),
-                instanceGroupAdjustment.getThreshold());
         Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
                 withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK,
-                getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold);
-        LOGGER.info("Triggering stack upscale with {} adjustment, {} adjustment type, {} threshold",
-                instanceGroupAdjustment.getScalingAdjustment(), adjustmentTypeWithThreshold.getAdjustmentType(), adjustmentTypeWithThreshold.getThreshold());
+                getStackNetworkScaleDetails(instanceGroupAdjustment));
         return reactorNotifier.notify(stackId, selector, stackAndClusterUpscaleTriggerEvent);
     }
 
