@@ -82,4 +82,16 @@ class TunnelTest {
         assertThat(underTest.useClusterProxy()).isTrue();
     }
 
+    @ParameterizedTest
+    @EnumSource(value = Tunnel.class, names = { "CCM", "CCMV2"}, mode = Mode.INCLUDE)
+    void testUpgradeableTunnel(Tunnel underTest) {
+        assertThat(Tunnel.getUpgradables()).contains(underTest);
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = Tunnel.class, names = { "CCM", "CCMV2"}, mode = Mode.EXCLUDE)
+    void testNonUpgradeableTunnel(Tunnel underTest) {
+        assertThat(Tunnel.getUpgradables()).doesNotContain(underTest);
+    }
+
 }
