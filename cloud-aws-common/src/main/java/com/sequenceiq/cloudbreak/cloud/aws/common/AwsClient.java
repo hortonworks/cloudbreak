@@ -7,8 +7,6 @@ import java.util.Objects;
 
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.aop.aspectj.annotation.AspectJProxyFactory;
 
 import com.amazonaws.AmazonServiceException;
@@ -61,12 +59,10 @@ import io.opentracing.Tracer;
 
 public abstract class AwsClient {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(AwsClient.class);
-
     // Default retries is 3. This allows more time for backoff during throttling
-    private static final int MAX_CLIENT_RETRIES = 30;
+    public static final int MAX_CLIENT_RETRIES = 30;
 
-    private static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
+    public static final int MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING = 200;
 
     @Inject
     private AwsSessionCredentialClient credentialClient;
@@ -152,6 +148,7 @@ public abstract class AwsClient {
     public AmazonSecurityTokenServiceClient createSecurityTokenService(AwsCredentialView awsCredential, String region) {
         AWSSecurityTokenService client = proxy(com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
+                .withClientConfiguration(getDefaultClientConfiguration())
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withRegion(region)
                 .build(), awsCredential, region);
@@ -162,6 +159,7 @@ public abstract class AwsClient {
         String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         AWSSecurityTokenService client = proxy(com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                .withClientConfiguration(getDefaultClientConfiguration())
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withRegion(region)
                 .build(), awsCredential, region);
@@ -322,9 +320,5 @@ public abstract class AwsClient {
         AspectJProxyFactory proxyFactory = new AspectJProxyFactory(client);
         proxyFactory.addAspect(new AmazonClientExceptionHandler(awsCredentialView, region, sdkClientExceptionMapper));
         return proxyFactory.getProxy();
-    }
-
-    public void setAwsSessionCredentialClient(AwsSessionCredentialClient awsSessionCredentialClient) {
-        this.credentialClient = awsSessionCredentialClient;
     }
 }

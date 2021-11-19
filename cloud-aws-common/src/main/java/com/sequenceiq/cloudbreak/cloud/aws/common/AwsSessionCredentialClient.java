@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsClient.MAX_CLIENT_RETRIES;
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsClient.MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING;
+
 import java.util.Date;
 
 import javax.inject.Inject;
@@ -11,9 +14,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.ClientConfiguration;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
+import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenService;
 import com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClientBuilder;
 import com.amazonaws.services.securitytoken.model.AssumeRoleRequest;
@@ -21,7 +26,10 @@ import com.amazonaws.services.securitytoken.model.AssumeRoleResult;
 import com.amazonaws.services.securitytoken.model.Credentials;
 import com.fasterxml.jackson.databind.util.StdDateFormat;
 import com.sequenceiq.cloudbreak.cloud.aws.common.cache.AwsCachingConfig;
+import com.sequenceiq.cloudbreak.cloud.aws.common.tracing.AwsTracingRequestHandler;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
+
+import io.opentracing.Tracer;
 
 @Component
 public class AwsSessionCredentialClient {
@@ -38,6 +46,9 @@ public class AwsSessionCredentialClient {
 
     @Inject
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
+
+    @Inject
+    private Tracer tracer;
 
     @Cacheable(value = AwsCachingConfig.TEMPORARY_AWS_CREDENTIAL_CACHE, unless = "#awsCredential.getId() == null")
     public AwsSessionCredentials retrieveCachedSessionCredentials(AwsCredentialView awsCredential) {
@@ -92,8 +103,17 @@ public class AwsSessionCredentialClient {
         String defaultZone = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         return AWSSecurityTokenServiceClientBuilder.standard()
                 .withEndpointConfiguration(getEndpointConfiguration(defaultZone))
+                .withClientConfiguration(getDefaultClientConfiguration())
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .build();
+    }
+
+    private ClientConfiguration getDefaultClientConfiguration() {
+        return new ClientConfiguration()
+                .withThrottledRetries(true)
+                .withMaxConsecutiveRetriesBeforeThrottling(MAX_CONSECUTIVE_RETRIES_BEFORE_THROTTLING)
+                .withRetryPolicy(PredefinedRetryPolicies.getDefaultRetryPolicyWithCustomMaxRetries(MAX_CLIENT_RETRIES));
     }
 
     private AwsClientBuilder.EndpointConfiguration getEndpointConfiguration(String defaultZone) {
