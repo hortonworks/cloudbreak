@@ -116,9 +116,9 @@ public class AzureStackViewProviderTest {
 
         AzureStackView actual = underTest.getAzureStack(azureCredentialView, cloudStack, client, ac);
 
-        assertEquals("i1", actual.getGroups().get(InstanceGroupType.CORE.name()).get(0).getInstanceId());
+        assertEquals("i1", actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getInstanceId());
         assertEquals(GROUP_NAME, actual.getInstanceGroups().get(0).getName());
-        assertEquals(imageId, actual.getGroups().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
+        assertEquals(imageId, actual.getInstancesByGroupType().get(InstanceGroupType.CORE.name()).get(0).getCustomImageId());
 
     }
 

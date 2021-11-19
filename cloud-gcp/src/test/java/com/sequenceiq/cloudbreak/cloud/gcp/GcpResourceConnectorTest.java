@@ -34,6 +34,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -187,7 +188,7 @@ public class GcpResourceConnectorTest {
     }
 
     @Test
-    public void testUpscaleWhenEverythingIsFine() {
+    public void testUpscaleWhenEverythingIsFine() throws QuotaExceededException {
         AuthenticatedContext authenticatedContext = mock(AuthenticatedContext.class);
         CloudStack cloudStack = mock(CloudStack.class);
         Network network = mock(Network.class);

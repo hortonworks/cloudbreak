@@ -5,9 +5,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
-import com.google.common.collect.ImmutableList;
 import com.sequenceiq.cloudbreak.cloud.model.filesystem.CloudFileSystemView;
 import com.sequenceiq.cloudbreak.cloud.model.generic.DynamicModel;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -107,7 +107,8 @@ public class Group extends DynamicModel {
         super(parameters);
         this.name = name;
         this.type = type;
-        this.instances = ImmutableList.copyOf(instances);
+        instances.forEach(Objects::requireNonNull);
+        this.instances = new ArrayList<>(instances);
         this.security = security;
         this.skeleton = Optional.ofNullable(skeleton);
         this.instanceAuthentication = instanceAuthentication;

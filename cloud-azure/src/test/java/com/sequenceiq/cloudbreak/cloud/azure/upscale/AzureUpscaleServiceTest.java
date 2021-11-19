@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -110,7 +112,7 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleThenThereAreNewInstancesRequired() {
+    public void testUpscaleThenThereAreNewInstancesRequired() throws QuotaExceededException {
         CloudContext cloudContext = createCloudContext();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
@@ -149,7 +151,44 @@ public class AzureUpscaleServiceTest {
     }
 
     @Test
-    public void testUpscaleWhenThereAreReattachableVolumeSets() {
+    public void testUpscaleButQuotaIssueHappen() {
+        CloudContext cloudContext = createCloudContext();
+        AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
+        CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
+        List<CloudResource> resources = List.of(createCloudResource("volumes", ResourceType.AZURE_VOLUMESET), template);
+        List<Group> scaledGroups = createScaledGroups();
+
+        when(cloudResourceHelper.getScaledGroups(stack)).thenReturn(scaledGroups);
+        CloudException cloudException = mock(CloudException.class);
+        CloudError cloudError = mock(CloudError.class);
+        when(cloudException.body()).thenReturn(cloudError);
+        CloudError quotaError = mock(CloudError.class);
+        when(quotaError.code()).thenReturn("QuotaExceeded");
+        when(quotaError.message()).thenReturn("Operation could not be completed as it results in exceeding approved standardNCPromoFamily Cores quota. " +
+                "Additional details - Deployment Model: Resource Manager, Location: westus2, Current Limit: 200, Current Usage: 24, Additional Required: 600," +
+                " (Minimum) New Limit Required: 624. Submit a request for Quota increase at https://aka" +
+                ".ms/ProdportalCRP/#blade/Microsoft_Azure_Capacity/UsageAndQuota.ReactView/Parameters/%7B%22subscriptionId%22:" +
+                "%223ddda1c7-d1f5-4e7b-ac81-0523f483b3b3%22,%22command%22:%22openQuotaApprovalBlade%22,%22quotas%22:[%7B%22location%22:%22westus2%22,%22" +
+                "providerId%22:%22Microsoft.Compute%22,%22resourceName%22:%22standardNCPromoFamily%22,%22quotaRequest%22:%7B%22properties%22:%7B%22limit%22:" +
+                "624,%22unit%22:%22Count%22,%22name%22:%7B%22value%22:%22standardNCPromoFamily%22%7D%7D%7D%7D]%7D by specifying parameters listed in the " +
+                "‘Details’ section for deployment to succeed. Please read more about quota limits at https://docs.microsoft.com/en-us/azure/" +
+                "azure-supportability/per-vm-quota-requests");
+        when(cloudError.details()).thenReturn(Collections.singletonList(quotaError));
+        when(azureTemplateDeploymentService.getTemplateDeployment(client, stack, ac, azureStackView, AzureInstanceTemplateOperation.UPSCALE))
+                .thenThrow(cloudException);
+
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, 0L);
+        QuotaExceededException quotaExceededException = Assertions.assertThrows(QuotaExceededException.class, () -> {
+            underTest.upscale(ac, stack, resources, azureStackView, client,
+                    adjustmentTypeWithThreshold);
+        });
+        assertEquals(200, quotaExceededException.getCurrentLimit());
+        assertEquals(24, quotaExceededException.getCurrentUsage());
+        assertEquals(600, quotaExceededException.getAdditionalRequired());
+    }
+
+    @Test
+    public void testUpscaleWhenThereAreReattachableVolumeSets() throws QuotaExceededException {
         CloudContext cloudContext = createCloudContext();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, null);
         CloudResource template = createCloudResource(TEMPLATE, ResourceType.ARM_TEMPLATE);
