@@ -1788,4 +1788,10 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
         saltJobRunBootstrapRunner.call();
     }
+
+    public boolean unboundRunningOnCluster(GatewayConfig primaryGateway, Set<Node> nodes) {
+        SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway);
+        return saltStateService.unboundRunningOnCluster(saltConnector,
+                new HostList(nodes.stream().map(Node::getHostname).collect(Collectors.toSet())));
+    }
 }

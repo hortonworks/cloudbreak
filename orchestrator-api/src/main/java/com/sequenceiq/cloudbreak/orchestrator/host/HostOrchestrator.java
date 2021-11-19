@@ -177,4 +177,6 @@ public interface HostOrchestrator extends HostRecipeExecutor {
             Optional<Integer> maxRetry, Optional<Integer> maxRetryOnError) throws CloudbreakOrchestratorFailedException;
 
     void ping(Set<String> target, GatewayConfig gatewayConfig) throws CloudbreakOrchestratorFailedException;
+
+    boolean unboundRunningOnCluster(GatewayConfig primaryGateway, Set<Node> nodes);
 }

@@ -512,6 +512,12 @@ public class SaltStateService {
         return applyState(sc, service, Glob.ALL);
     }
 
+    public boolean unboundRunningOnCluster(SaltConnector sc, Target<String> target) {
+        return measure(() -> sc.run(target, "service.status", LOCAL, PingResponse.class, "unbound"), LOGGER, "Getting status of unbound service took {}ms").getResult().stream()
+                .map(map -> map.values().stream().anyMatch(Boolean::booleanValue))
+                .anyMatch(Boolean::booleanValue);
+    }
+
     private ApplyResponse applyStateAllSync(SaltConnector sc, String service) {
         return measure(() -> sc.run(Glob.ALL, "state.apply", LOCAL, ApplyResponse.class, service), LOGGER,
                 "ApplyState in sync for ALL took {}ms for service [{}]", service);
