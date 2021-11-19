@@ -108,7 +108,7 @@ public class AwsMetadataCollector implements MetadataCollector {
         Multimap<String, Instance> instancesOnAWSForGroup = ArrayListMultimap.create();
         for (String group : instanceGroupMap.keySet()) {
             List<Instance> instancesForGroup = collectInstancesForGroup(ac, amazonASClient, amazonEC2Client, amazonCFClient, group);
-            LOGGER.info("Collected instances for group: {}", instancesForGroup.stream().map(Instance::getInstanceId));
+            LOGGER.info("Collected instances for group: {}", instancesForGroup.stream().map(Instance::getInstanceId).collect(Collectors.joining(",")));
             instancesOnAWSForGroup.putAll(group, instancesForGroup);
             subnetIds.addAll(getSubnetIdsForInstances(instancesForGroup));
         }
@@ -150,7 +150,8 @@ public class AwsMetadataCollector implements MetadataCollector {
                     .collect(Collectors.toList());
             unknownInstancesForGroup.putAll(group, unknownInstances);
         }
-        LOGGER.info("Collected unknown instances from AWS: {}", unknownInstancesForGroup.values().stream().map(Instance::getInstanceId));
+        LOGGER.info("Collected unknown instances from AWS: {}",
+                unknownInstancesForGroup.values().stream().map(Instance::getInstanceId).collect(Collectors.joining(",")));
         return unknownInstancesForGroup;
     }
 
@@ -160,7 +161,8 @@ public class AwsMetadataCollector implements MetadataCollector {
         LOGGER.info("CloudInstance group: {}", groupName);
         Collection<Instance> unknownInstancesForGroup = unknownMap.get(groupName);
         if (!unknownInstancesForGroup.isEmpty()) {
-            LOGGER.info("Unknown instances from AWS for group {}: {}", groupName, unknownInstancesForGroup.stream().map(Instance::getInstanceId));
+            LOGGER.info("Unknown instances from AWS for group {}: {}", groupName,
+                    unknownInstancesForGroup.stream().map(Instance::getInstanceId).collect(Collectors.joining(",")));
             Instance selectedInstance = findInstance(cloudInstance, resources, unknownInstancesForGroup);
             CloudInstance newCloudInstance = new CloudInstance(selectedInstance.getInstanceId(),
                     cloudInstance.getTemplate(),

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.handler;
+package com.sequenceiq.cloudbreak.reactor;
 
 import java.util.List;
 
@@ -14,9 +14,11 @@ import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
+import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleService;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -32,6 +34,9 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
     @Inject
     private EventBus eventBus;
 
+    @Inject
+    private StackUpscaleService stackUpscaleService;
+
     @Override
     public Class<UpscaleStackRequest> type() {
         return UpscaleStackRequest.class;
@@ -45,8 +50,7 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
         try {
             CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
-            List<CloudResourceStatus> resourceStatus = connector.resources().upscale(ac, request.getCloudStack(), request.getResourceList(),
-                    request.getAdjustmentWithThreshold());
+            List<CloudResourceStatus> resourceStatus = stackUpscaleService.upscale(ac, request, connector);
             LOGGER.info("Upscaled resource statuses: {}", resourceStatus);
             UpscaleStackResult result = new UpscaleStackResult(request.getResourceId(), ResourceStatus.UPDATED, resourceStatus);
             request.getResult().onNext(result);

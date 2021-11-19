@@ -61,7 +61,7 @@ public class AzureVirtualMachineTypeProviderTest {
 
     private AzureStackView createAzureStackView(Map<String, List<AzureInstanceView>> instanceGroups) {
         AzureStackView azureStackView = mock(AzureStackView.class);
-        when(azureStackView.getGroups()).thenReturn(instanceGroups);
+        when(azureStackView.getInstancesByGroupType()).thenReturn(instanceGroups);
         return azureStackView;
     }
 
