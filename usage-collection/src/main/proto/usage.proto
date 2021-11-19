@@ -1078,6 +1078,10 @@ message CDPImageDetails {
   string imageId = 1;
   // Image catalog name
   string imageCatalog = 2;
+  // Image catalog url
+  string imageCatalogUrl = 3;
+  // OS type
+  string osType = 4;
 }
 
 message CDPClusterShape {
