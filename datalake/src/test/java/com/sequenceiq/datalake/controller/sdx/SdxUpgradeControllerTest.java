@@ -1,8 +1,9 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import static com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider.doAs;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -26,22 +27,30 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
+import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeShowAvailableImages;
 
 @ExtendWith(MockitoExtension.class)
-public class SdxUpgradeControllerTest {
+class SdxUpgradeControllerTest {
 
     private static final String ACCOUNT_ID = "6f53f8a0-d5e8-45e6-ab11-cce9b53f7aad";
 
-    private static final String USER_CRN = "crn:cdp:iam:us-west-1:"
-            + ACCOUNT_ID + ":user:" + UUID.randomUUID();
+    private static final String USER_CRN = "crn:cdp:iam:us-west-1:" + ACCOUNT_ID + ":user:" + UUID.randomUUID();
+
+    private static final String ENV_CRN = "crn:cdp:environments:us-west-1:" + ACCOUNT_ID + ":environment:" + UUID.randomUUID();
 
     private static final String CLUSTER_NAME = "clusterName";
 
     @Mock
     private SdxRuntimeUpgradeService sdxRuntimeUpgradeService;
+
+    @Mock
+    private SdxCcmUpgradeService sdxCcmUpgradeService;
 
     @InjectMocks
     private SdxUpgradeController underTest;
@@ -50,7 +59,7 @@ public class SdxUpgradeControllerTest {
     private ArgumentCaptor<SdxUpgradeRequest> upgradeRequestArgumentCaptor;
 
     @Test
-    public void testUpgradeClusterByNameWhenRequestIsEmptyAndRuntimeIsDisabled() {
+    void testUpgradeClusterByNameWhenRequestIsEmptyAndRuntimeIsDisabled() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
@@ -59,7 +68,7 @@ public class SdxUpgradeControllerTest {
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenRequestIsEmptyAndRuntimeIsEnabled() {
+    void testUpgradeClusterByNameWhenRequestIsEmptyAndRuntimeIsEnabled() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         doAs(USER_CRN, () -> underTest.upgradeClusterByName(CLUSTER_NAME, request));
 
@@ -67,7 +76,7 @@ public class SdxUpgradeControllerTest {
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenRequestIsDryRunAndRuntimeIsDisabled() {
+    void testUpgradeClusterByNameWhenRequestIsDryRunAndRuntimeIsDisabled() {
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
 
@@ -83,7 +92,7 @@ public class SdxUpgradeControllerTest {
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenRequestIsDryRunAndLockComponents() {
+    void testUpgradeClusterByNameWhenRequestIsDryRunAndLockComponents() {
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
         sdxUpgradeResponse.setReason("No image available to upgrade");
 
@@ -100,7 +109,7 @@ public class SdxUpgradeControllerTest {
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenRequestIsDryRunAndRuntimeAndRuntimeIsDisabled() {
+    void testUpgradeClusterByNameWhenRequestIsDryRunAndRuntimeAndRuntimeIsDisabled() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setDryRun(true);
         request.setRuntime("7.1.0");
@@ -110,11 +119,11 @@ public class SdxUpgradeControllerTest {
         BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
 
-        Assertions.assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
+        assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenLockComponentsIsSet() {
+    void testUpgradeClusterByNameWhenLockComponentsIsSet() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setLockComponents(true);
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
@@ -130,7 +139,7 @@ public class SdxUpgradeControllerTest {
     }
 
     @Test
-    public void testUpgradeClusterByNameRuntimeIsSetAndDisabled() {
+    void testUpgradeClusterByNameRuntimeIsSetAndDisabled() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime("7.1.0");
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
@@ -139,11 +148,11 @@ public class SdxUpgradeControllerTest {
         BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
 
-        Assertions.assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
+        assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenRuntimeIsSetAndEnabled() {
+    void testUpgradeClusterByNameWhenRuntimeIsSetAndEnabled() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setRuntime("7.1.0");
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
@@ -159,7 +168,7 @@ public class SdxUpgradeControllerTest {
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenImageIsSetAndRuntimeIsDisabled() {
+    void testUpgradeClusterByNameWhenImageIsSetAndRuntimeIsDisabled() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setImageId("imageId");
         doThrow(new BadRequestException("Runtime upgrade feature is not enabled"))
@@ -168,11 +177,11 @@ public class SdxUpgradeControllerTest {
         BadRequestException exception = doAs(USER_CRN, () -> Assertions.assertThrows(BadRequestException.class,
                 () -> underTest.upgradeClusterByName(CLUSTER_NAME, request)));
 
-        Assertions.assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
+        assertEquals("Runtime upgrade feature is not enabled", exception.getMessage());
     }
 
     @Test
-    public void testUpgradeClusterByNameWhenImageIsSetAndRuntimeIsEnabled() {
+    void testUpgradeClusterByNameWhenImageIsSetAndRuntimeIsEnabled() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setImageId("imageId");
         SdxUpgradeResponse sdxUpgradeResponse = new SdxUpgradeResponse();
@@ -189,7 +198,7 @@ public class SdxUpgradeControllerTest {
 
     @Test
     @DisplayName("when show images is requested and runtime upgrade is disabled it should set the lock components flag")
-    public void testUpgradeClusterByNameWhenRequestIsShowImagesAndRuntimeIsDisabledShouldSetLockComponent() {
+    void testUpgradeClusterByNameWhenRequestIsShowImagesAndRuntimeIsDisabledShouldSetLockComponent() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setShowAvailableImages(SdxUpgradeShowAvailableImages.SHOW);
 
@@ -208,7 +217,7 @@ public class SdxUpgradeControllerTest {
 
     @Test
     @DisplayName("when show latest images is requested and runtime upgrade is disabled it should set the lock components flag")
-    public void testUpgradeClusterByNameWhenRequestIsShowLatestImagesAndRuntimeIsDisabledShouldSetLockComponent() {
+    void testUpgradeClusterByNameWhenRequestIsShowLatestImagesAndRuntimeIsDisabledShouldSetLockComponent() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setShowAvailableImages(SdxUpgradeShowAvailableImages.LATEST_ONLY);
 
@@ -227,7 +236,7 @@ public class SdxUpgradeControllerTest {
 
     @Test
     @DisplayName("when show images is requested and runtime upgrade is enabled it should not set the lock components flag")
-    public void testUpgradeClusterByNameWhenRequestIsShowImagesAndRuntimeIsDisabledShouldNotSetLockComponent() {
+    void testUpgradeClusterByNameWhenRequestIsShowImagesAndRuntimeIsDisabledShouldNotSetLockComponent() {
         SdxUpgradeRequest request = new SdxUpgradeRequest();
         request.setShowAvailableImages(SdxUpgradeShowAvailableImages.SHOW);
 
@@ -242,5 +251,13 @@ public class SdxUpgradeControllerTest {
         SdxUpgradeRequest capturedRequest = upgradeRequestArgumentCaptor.getValue();
         assertNull(capturedRequest.getLockComponents());
         assertEquals("No image available to upgrade", response.getReason());
+    }
+
+    @Test
+    void testUpgradeCcm() {
+        SdxCcmUpgradeResponse response = new SdxCcmUpgradeResponse("OK", new FlowIdentifier(FlowType.FLOW, "FlowId"));
+        when(sdxCcmUpgradeService.upgradeCcm(ENV_CRN)).thenReturn(response);
+        SdxCcmUpgradeResponse sdxCcmUpgradeResponse = underTest.upgradeCcm(ENV_CRN);
+        assertThat(sdxCcmUpgradeResponse).isEqualTo(response);
     }
 }

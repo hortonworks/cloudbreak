@@ -6,6 +6,7 @@ import org.springframework.stereotype.Controller;
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
+import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -14,7 +15,9 @@ import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
+import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.sdx.api.endpoint.SdxUpgradeEndpoint;
+import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
 
@@ -24,6 +27,9 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     @Inject
     private SdxRuntimeUpgradeService sdxRuntimeUpgradeService;
+
+    @Inject
+    private SdxCcmUpgradeService sdxCcmUpgradeService;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATALAKE)
@@ -45,6 +51,12 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
         } else {
             return sdxRuntimeUpgradeService.triggerUpgradeByCrn(userCrn, clusterCrn, request, ThreadBasedUserCrnProvider.getAccountId());
         }
+    }
+
+    @Override
+    @InternalOnly
+    public SdxCcmUpgradeResponse upgradeCcm(@TenantAwareParam String environmentCrn) {
+        return sdxCcmUpgradeService.upgradeCcm(environmentCrn);
     }
 
 }

@@ -240,6 +240,12 @@ public class SdxReactorFlowManager {
         return notify(event.selector(), event);
     }
 
+    public FlowIdentifier triggerCcmUpgradeFlow(SdxCluster cluster) {
+        LOGGER.info("Trigger CCM Upgrade on Datalake repair for: {}", cluster);
+        // TODO: add CCM upgrade flow and start it
+        return FlowIdentifier.notTriggered();
+    }
+
     private FlowIdentifier notify(String selector, SdxEvent acceptable) {
         Map<String, Object> flowTriggerUserCrnHeader = Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, acceptable.getUserId());
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(flowTriggerUserCrnHeader, acceptable);
