@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.periscope.aspects.RequestLogging;
 import com.sequenceiq.periscope.domain.Cluster;
 import com.sequenceiq.periscope.service.AutoscaleRestRequestThreadLocalService;
@@ -52,6 +53,19 @@ public class CloudbreakCommunicator {
 
     public StackStatusV4Response getStackStatusByCrn(String stackCrn) {
         return cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint().getStatusByCrn(stackCrn);
+    }
+
+    public List<RetryableFlowResponse> listRetryableFlows(String name, String accountId) {
+        return requestLogging.logResponseTime(
+                () -> cloudbreakInternalCrnClient.withInternalCrn().distroXV1Endpoint().internalListRetryableFlows(name, accountId),
+                String.format("ListRetryableFlows for cluster name %s", name));
+    }
+
+    public void retryLastFailedScale(String name, String accountId) {
+        requestLogging.logResponseTime(() -> {
+            cloudbreakInternalCrnClient.withInternalCrn().distroXV1Endpoint().internalRetryByNameAndAccountId(name, accountId);
+            return Optional.empty();
+        }, String.format("Retrying last failed scale operation for cluster name %s", name));
     }
 
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {

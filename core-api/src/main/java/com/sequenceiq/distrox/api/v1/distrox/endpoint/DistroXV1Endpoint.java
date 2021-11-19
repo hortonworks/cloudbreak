@@ -80,6 +80,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
@@ -183,6 +184,19 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
             nickname = "retryDistroXV1ByName")
     void retryByName(@PathParam("name") String name);
+
+    @GET
+    @Path("name/{name}/retry/internal")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.LIST_RETRYABLE_FLOWS_INTERNAL, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.LIST_RETRYABLE_NOTES, nickname = "internalListRetryableFlowsDistroXV1")
+    List<RetryableFlowResponse> internalListRetryableFlows(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
+
+    @POST
+    @Path("name/{name}/retry/internal")
+    @ApiOperation(value = RETRY_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
+            nickname = "internalRetryDistroXV1ByNameAndAccountId")
+    void internalRetryByNameAndAccountId(@PathParam("name") String name, @AccountId @QueryParam("accountId") String accountId);
 
     @GET
     @Path("name/{name}/retry")

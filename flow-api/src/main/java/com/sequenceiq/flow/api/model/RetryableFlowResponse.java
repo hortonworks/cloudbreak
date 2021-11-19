@@ -21,6 +21,9 @@ public class RetryableFlowResponse implements JsonEntity {
         this.failDate = failDate;
     }
 
+    public RetryableFlowResponse() {
+    }
+
     public String getName() {
         return name;
     }

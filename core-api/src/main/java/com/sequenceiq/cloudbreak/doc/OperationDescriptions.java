@@ -82,6 +82,7 @@ public class OperationDescriptions {
         public static final String STACK_UPGRADE = "Upgrades a cluster to the latest CM or CDH version";
         public static final String STACK_UPGRADE_INTERNAL = "Upgrades a cluster to the latest CM or CDH version, internal only";
         public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
+        public static final String LIST_RETRYABLE_FLOWS_INTERNAL = "List retryable failed flows (for internal user)";
         public static final String DATABASE_BACKUP = "Performs a backup of the database to a provided location";
         public static final String DATABASE_BACKUP_INTERNAL = "Performs a backup of the database to a provided location, internal only";
         public static final String DATABASE_RESTORE = "Performs a restore of the database from a provided location";

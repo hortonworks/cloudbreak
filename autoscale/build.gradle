@@ -206,6 +206,7 @@ dependencies {
 
     implementation project(':core-api')
     implementation project(':autoscale-api')
+    implementation project(':flow-api')
     implementation project(':common')
     implementation project(':workspace')
     implementation project(':secret-engine')

@@ -88,6 +88,9 @@ public class Cluster implements Monitored, Clustered {
     @Column(name = "lastevaulated")
     private long lastEvaluated;
 
+    @Column(name = "lastretried")
+    private long lastRetried;
+
     @Column(name = "cb_stack_id")
     private long stackId;
 
@@ -262,6 +265,14 @@ public class Cluster implements Monitored, Clustered {
         return lastEvaluated;
     }
 
+    public long getLastRetried() {
+        return lastRetried;
+    }
+
+    public void setLastRetried(long lastRetried) {
+        this.lastRetried = lastRetried;
+    }
+
     public String getStackName() {
         return stackName;
     }
@@ -314,6 +325,33 @@ public class Cluster implements Monitored, Clustered {
 
     public Boolean getAutoscalingEnabled() {
         return autoscalingEnabled;
+    }
+
+    @Override
+    public String toString() {
+        return "Cluster{" +
+                "id=" + id +
+                ", clusterPertain=" + clusterPertain +
+                ", clusterManager=" + clusterManager +
+                ", securityConfig=" + securityConfig +
+                ", state=" + state +
+                ", timeAlerts=" + timeAlerts +
+                ", loadAlerts=" + loadAlerts +
+                ", minSize=" + minSize +
+                ", maxSize=" + maxSize +
+                ", coolDown=" + coolDown +
+                ", stackCrn='" + stackCrn + '\'' +
+                ", stackName='" + stackName + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
+                ", stackType=" + stackType +
+                ", lastScalingActivity=" + lastScalingActivity +
+                ", autoscalingEnabled=" + autoscalingEnabled +
+                ", periscopeNodeId='" + periscopeNodeId + '\'' +
+                ", lastEvaluated=" + lastEvaluated +
+                ", lastRetried=" + lastRetried +
+                ", stackId=" + stackId +
+                ", tunnel=" + tunnel +
+                '}';
     }
 }
 

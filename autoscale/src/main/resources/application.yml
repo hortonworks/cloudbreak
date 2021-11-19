@@ -60,6 +60,8 @@ periscope:
       enabled: true
     cluster-status-monitor:
       enabled: true
+    cluster-scale-status-monitor:
+      enabled: true
 
 cb:
   server:

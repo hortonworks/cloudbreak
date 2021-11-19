@@ -65,6 +65,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
+import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
@@ -271,8 +272,25 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
+    @InternalOnly
+    public void internalRetryByNameAndAccountId(@ResourceName String name, @AccountId String accountId) {
+        stackOperations.retry(
+                NameOrCrn.ofName(name),
+                getWorkspaceIdForCurrentUser());
+    }
+
+    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.DESCRIBE_RETRYABLE_DATAHUB_OPERATION)
     public List<RetryableFlowResponse> listRetryableFlows(@ResourceName String name) {
+        List<RetryableFlow> retryableFlows = stackOperations.getRetryableFlows(name, getWorkspaceIdForCurrentUser());
+        return retryableFlows.stream()
+                .map(retryable -> Builder.builder().setName(retryable.getName()).setFailDate(retryable.getFailDate()).build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @InternalOnly
+    public List<RetryableFlowResponse> internalListRetryableFlows(@ResourceName String name, @AccountId String accountId) {
         List<RetryableFlow> retryableFlows = stackOperations.getRetryableFlows(name, getWorkspaceIdForCurrentUser());
         return retryableFlows.stream()
                 .map(retryable -> Builder.builder().setName(retryable.getName()).setFailDate(retryable.getFailDate()).build())

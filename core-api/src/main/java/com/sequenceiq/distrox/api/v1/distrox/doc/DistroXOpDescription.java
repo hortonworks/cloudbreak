@@ -20,6 +20,7 @@ public class DistroXOpDescription {
     public static final String SYNC_BY_NAME = "syncs the stack by name";
     public static final String SYNC_BY_CRN = "syncs the stack by crn";
     public static final String RETRY_BY_NAME = "retries the stack by name";
+    public static final String RETRY_BY_NAME_INTERNAL = "retries the stack by name (for internal user)";
     public static final String RETRY_BY_CRN = "retries the stack by crn";
     public static final String STOP_BY_NAME = "stops the stack by name";
     public static final String STOP_BY_CRN = "stops the stack by crn";
