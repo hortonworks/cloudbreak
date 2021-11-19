@@ -20,7 +20,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
 import com.sequenceiq.cloudbreak.cloud.template.context.ResourceBuilderContext;
-import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
+import com.sequenceiq.common.api.type.AdjustmentType;
 
 @Service
 public class AzureComputeResourceService {
@@ -35,37 +35,28 @@ public class AzureComputeResourceService {
     @Inject
     private AzureContextService azureContextService;
 
-    public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, List<CloudResource> instances, List<CloudResource> networkResources) {
-        LOGGER.info("Build Azure compute resources for launch with adjustment type and threshold: {}", adjustmentTypeWithThreshold);
+    public List<CloudResourceStatus> buildComputeResourcesForLaunch(AuthenticatedContext ac, CloudStack stack, AdjustmentType adjustmentType, Long threshold,
+            List<CloudResource> instances, List<CloudResource> networkResources) {
         ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
-        LOGGER.info("Added Azure network resources to resource builder context for launch: {}", networkResources);
 
         azureContextService.addInstancesToContext(instances, context, stack.getGroups());
-        LOGGER.info("Added Azure instances to Azure context for launch: {}", instances);
-        return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentTypeWithThreshold);
+        return computeResourceService.buildResourcesForLaunch(context, ac, stack, adjustmentType, threshold);
     }
 
     public List<CloudResourceStatus> buildComputeResourcesForUpscale(AuthenticatedContext ac, CloudStack stack, List<Group> groupsWithNewInstances,
-            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
-        LOGGER.info("Build Azure compute resources for upscale with adjustment type and threshold: {}. Groups with new instances: {}",
-                adjustmentTypeWithThreshold, groupsWithNewInstances);
+            List<CloudResource> newInstances, List<CloudResource> reattachableVolumeSets, List<CloudResource> networkResources) {
         ResourceBuilderContext context = initContext(ac, stack);
         context.addNetworkResources(networkResources);
-        LOGGER.info("Added Azure network resources to resource builder context for upscale: {}", networkResources);
 
         if (reattachableVolumeSets.isEmpty()) {
             azureContextService.addInstancesToContext(newInstances, context, groupsWithNewInstances);
-            LOGGER.info("Reattachable volume sets is empty. Added instances to Azure context for launch: {}", newInstances);
         } else {
             List<CloudResource> contextResources = new ArrayList<>(newInstances);
             contextResources.addAll(reattachableVolumeSets);
             azureContextService.addResourcesToContext(contextResources, context, groupsWithNewInstances);
-            LOGGER.info("Reattachable volume sets are added to Azure context: {}", contextResources);
         }
-        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances, adjustmentTypeWithThreshold);
+        return computeResourceService.buildResourcesForUpscale(context, ac, stack, groupsWithNewInstances);
     }
 
     public List<CloudResourceStatus> deleteComputeResources(AuthenticatedContext ac, CloudStack stack, List<CloudResource> cloudResources,
