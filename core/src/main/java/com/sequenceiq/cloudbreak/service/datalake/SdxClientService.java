@@ -37,7 +37,7 @@ public class SdxClientService {
 
     public List<SdxClusterResponse> list() {
         try {
-            return sdxEndpoint.list(null, false);
+            return sdxEndpoint.list(null);
         } catch (WebApplicationException | ProcessingException | IllegalStateException e) {
             LOGGER.error("Failed to list datalake clusters.", e);
             return new ArrayList<>();

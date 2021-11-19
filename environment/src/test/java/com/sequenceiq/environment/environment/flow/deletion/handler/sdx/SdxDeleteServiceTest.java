@@ -79,7 +79,7 @@ class SdxDeleteServiceTest {
         SdxClusterResponse sdx1 = new SdxClusterResponse();
         sdx1.setCrn("crn1");
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of("crn1", "crn2"));
-        when(sdxEndpoint.list(environment.getName(), true)).thenReturn(List.of(sdx1)).thenReturn(List.of());
+        when(sdxEndpoint.listDetached(environment.getName())).thenReturn(List.of(sdx1)).thenReturn(List.of());
         underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
         verify(sdxEndpoint).deleteByCrn(eq("crn1"), eq(true));
         verify(sdxEndpoint).deleteByCrn(eq("crn2"), eq(true));
@@ -100,7 +100,7 @@ class SdxDeleteServiceTest {
         sdx2.setCrn("crn2");
         sdx2.setStatus(SdxClusterStatusResponse.DELETE_FAILED);
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of("crn1", "crn2"));
-        when(sdxEndpoint.list(environment.getName(), true)).thenReturn(List.of(sdx2));
+        when(sdxEndpoint.listDetached(environment.getName())).thenReturn(List.of(sdx2));
         assertThatThrownBy(() -> underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true))
                 .isInstanceOf(UserBreakException.class)
                 .hasCauseInstanceOf(IllegalStateException.class);

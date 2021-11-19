@@ -20,8 +20,8 @@ public class SdxListAction implements Action<SdxTestDto, SdxClient> {
         Log.whenJson(LOGGER, " SDX list request: ", testDto.getRequest());
         client.getDefaultClient()
                 .sdxEndpoint()
-                .list(testDto.getName(), false);
-        Log.whenJson(LOGGER, " SDX list response: ", client.getDefaultClient().sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName(), false));
+                .list(testDto.getName());
+        Log.whenJson(LOGGER, " SDX list response: ", client.getDefaultClient().sdxEndpoint().list(testContext.get(EnvironmentTestDto.class).getName()));
         return testDto;
     }
 }

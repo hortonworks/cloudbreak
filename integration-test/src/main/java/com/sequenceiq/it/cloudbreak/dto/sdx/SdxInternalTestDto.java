@@ -408,7 +408,7 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
         SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
-        return sdxEndpoint.list(null, false).stream()
+        return sdxEndpoint.list(null).stream()
                 .filter(s -> s.getName() != null)
                 .map(s -> {
                     SdxClusterResponse sdxClusterResponse = new SdxClusterResponse();

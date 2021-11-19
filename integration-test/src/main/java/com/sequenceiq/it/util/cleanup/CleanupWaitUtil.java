@@ -304,7 +304,7 @@ public class CleanupWaitUtil {
     private boolean checkSdxesAreAvailable(SdxClient sdx, Map<String, String> environments) {
         try {
             return environments.entrySet().stream().anyMatch(env ->
-                    !(sdx.sdxEndpoint().list(env.getValue(), false).stream()
+                    !(sdx.sdxEndpoint().list(env.getValue()).stream()
                             .map(SdxClusterResponse::getName).count() == 0)
             );
         } catch (Exception e) {
@@ -432,7 +432,7 @@ public class CleanupWaitUtil {
     private boolean checkSdxesDeleteFailedStatus(SdxClient sdx, Map<String, String> environments) {
         try {
             return environments.entrySet().stream().anyMatch(env ->
-                    sdx.sdxEndpoint().list(env.getValue(), false).stream()
+                    sdx.sdxEndpoint().list(env.getValue()).stream()
                             .anyMatch(response -> response.getStatus().equals(SdxClusterStatusResponse.DELETE_FAILED))
             );
         } catch (Exception e) {

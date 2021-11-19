@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.controller.sdx;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -11,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
@@ -25,6 +27,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.datalake.authorization.DataLakeFiltering;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
@@ -62,6 +65,9 @@ class SdxControllerTest {
 
     @Mock
     private SdxImageCatalogService sdxImageCatalogService;
+
+    @Mock
+    private DataLakeFiltering dataLakeFiltering;
 
     @InjectMocks
     private SdxController sdxController;
@@ -126,6 +132,47 @@ class SdxControllerTest {
         sdxController.changeImageCatalog(sdxCluster.getName(), request);
 
         verify(sdxImageCatalogService).changeImageCatalog(sdxCluster, request.getImageCatalog());
+    }
+
+    @Test
+    void listSdxTest() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(dataLakeFiltering.filterDataLakesByEnvNameOrAll(any(), anyString())).thenReturn(List.of(sdxCluster));
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.RUNNING);
+        sdxStatusEntity.setStatusReason("statusreason");
+        sdxStatusEntity.setCreated(1L);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        List<SdxClusterResponse> list = sdxController.list(sdxCluster.getEnvName());
+
+        assertEquals(sdxCluster.getCrn(), list.get(0).getCrn());
+
+    }
+
+    @Test
+    void listSdxUndetatchedTest() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        when(dataLakeFiltering.filterDataLakesByEnvNameOrAll(any(), anyString())).thenReturn(List.of(sdxCluster));
+        SdxStatusEntity sdxStatusEntity = new SdxStatusEntity();
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.DATALAKE_DETACHED);
+        sdxStatusEntity.setStatusReason("statusreason");
+        sdxStatusEntity.setCreated(1L);
+        when(sdxStatusService.getActualStatusForSdx(sdxCluster)).thenReturn(sdxStatusEntity);
+        ReflectionTestUtils.setField(sdxClusterConverter, "sdxStatusService", sdxStatusService);
+        List<SdxClusterResponse> list = sdxController.listDetached(sdxCluster.getEnvName());
+        assertEquals(sdxCluster.getCrn(), list.get(0).getCrn());
+
+    }
+
+    @Test
+    void listSdxDetatchedTest() {
+        SdxCluster sdxCluster = getValidSdxCluster();
+        sdxCluster.setDetached(true);
+        when(dataLakeFiltering.filterDataLakesByEnvNameOrAll(any(), anyString())).thenReturn(List.of(sdxCluster));
+        List<SdxClusterResponse> list = sdxController.list(sdxCluster.getEnvName());
+        assertTrue(list.isEmpty());
+
     }
 
     @Test

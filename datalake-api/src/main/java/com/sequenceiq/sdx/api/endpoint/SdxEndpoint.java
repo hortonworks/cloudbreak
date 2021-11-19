@@ -70,7 +70,13 @@ public interface SdxEndpoint {
     @Path("list")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "list SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdx")
-    List<SdxClusterResponse> list(@QueryParam("envName") String envName, @DefaultValue("false") @QueryParam("includeDetached") boolean includeDetached);
+    List<SdxClusterResponse> list(@QueryParam("envName") String envName);
+
+    @GET
+    @Path("listDetached")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "list all(including detached) SDX clusters", produces = MediaType.APPLICATION_JSON, nickname = "listSdxDetach")
+    List<SdxClusterResponse> listDetached(@QueryParam("envName") String envName);
 
     @GET
     @Path("list/internal")
