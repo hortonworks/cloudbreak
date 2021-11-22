@@ -2,11 +2,10 @@ package com.sequenceiq.datalake.job;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.repository.CrudRepository;
 
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 public class SdxClusterJobAdapter extends JobResourceAdapter<SdxCluster> {
 
@@ -34,7 +33,7 @@ public class SdxClusterJobAdapter extends JobResourceAdapter<SdxCluster> {
     }
 
     @Override
-    public Class<? extends CrudRepository> getRepositoryClassForResource() {
+    public Class<SdxClusterRepository> getRepositoryClassForResource() {
         return SdxClusterRepository.class;
     }
 }

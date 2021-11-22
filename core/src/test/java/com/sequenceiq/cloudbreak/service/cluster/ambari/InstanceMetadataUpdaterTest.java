@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.cluster.ambari;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyCollection;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -74,7 +73,7 @@ public class InstanceMetadataUpdaterTest {
     @Before
     public void setUp() throws CloudbreakException, JsonProcessingException, CloudbreakOrchestratorFailedException {
         MockitoAnnotations.initMocks(this);
-        when(gatewayConfigService.getGatewayConfig(any(Stack.class), any(InstanceMetaData.class), anyBoolean())).thenReturn(gatewayConfig);
+        when(gatewayConfigService.getPrimaryGatewayConfig(any(Stack.class))).thenReturn(gatewayConfig);
 
         InstanceMetadataUpdater.Package packageByName = new InstanceMetadataUpdater.Package();
         packageByName.setName("packageByName");

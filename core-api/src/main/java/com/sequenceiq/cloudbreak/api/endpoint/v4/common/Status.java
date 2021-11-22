@@ -207,4 +207,20 @@ public enum Status {
         return Sets.immutableEnumSet(STOPPED, DELETE_COMPLETED,
                 CREATE_FAILED, DELETE_FAILED, DELETED_ON_PROVIDER_SIDE);
     }
+
+    public static EnumSet<Status> getUnschedulableStatuses() {
+        return EnumSet.of(
+                Status.CREATE_FAILED,
+                Status.PRE_DELETE_IN_PROGRESS,
+                Status.DELETE_IN_PROGRESS,
+                Status.DELETE_FAILED,
+                Status.DELETE_COMPLETED,
+                Status.EXTERNAL_DATABASE_CREATION_FAILED,
+                Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
+                Status.EXTERNAL_DATABASE_DELETION_FINISHED,
+                Status.EXTERNAL_DATABASE_DELETION_FAILED,
+                Status.LOAD_BALANCER_UPDATE_FINISHED,
+                Status.LOAD_BALANCER_UPDATE_FAILED
+        );
+    }
 }
