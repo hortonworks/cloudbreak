@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerCloudStorageServiceConfigProvider.DEFAULT_BACKUP_DIR;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -151,6 +152,29 @@ public class RangerCloudStorageServiceConfigProviderTest {
         assertEquals("hdfs://g", serviceConfigs.get(0).getValue());
     }
 
+    @Test
+    public void testGetRangerCloudStorageServiceConfigsWithBackup() {
+        CmTemplateProcessor templateProcessor = mock(CmTemplateProcessor.class);
+        TemplatePreparationObject preparationObject = getTemplatePreparationObjectForAws(true, true, true)
+                .withBlueprintView(mock(BlueprintView.class))
+                .withCloudPlatform(CloudPlatform.AWS)
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.2.2"), List.of())
+                .build();
+
+        List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(templateProcessor, preparationObject);
+
+        assertEquals(2, serviceConfigs.size());
+        assertEquals("ranger_plugin_hdfs_audit_url", serviceConfigs.get(0).getName());
+        assertEquals("s3a://bucket/ranger/audit", serviceConfigs.get(0).getValue());
+        assertEquals("cloud_storage_paths", serviceConfigs.get(1).getName());
+        assertEquals("HIVE_METASTORE_WAREHOUSE=s3a://bucket/warehouse/tablespace/managed/hive," +
+                "HIVE_REPLICA_WAREHOUSE=s3a://bucket/hive_replica_functions_dir," +
+                "HIVE_METASTORE_EXTERNAL_WAREHOUSE=s3a://bucket/warehouse/tablespace/external/hive," +
+                "RANGER_AUDIT=s3a://bucket/ranger/audit," +
+                "HBASE_ROOT=s3a://bucket/hbase," +
+                "BACKUP_LOCATION=s3a://bucket/backup/location", serviceConfigs.get(1).getValue());
+    }
+
     private TemplatePreparationObject.Builder getTemplatePreparationObjectForAzure(boolean above721) {
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, Set.of("g"));
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.CORE, Set.of("m1", "m2"));
@@ -182,6 +206,10 @@ public class RangerCloudStorageServiceConfigProviderTest {
     }
 
     private TemplatePreparationObject.Builder getTemplatePreparationObjectForAws(boolean includeLocations, boolean above721) {
+        return getTemplatePreparationObjectForAws(includeLocations, above721, false);
+    }
+
+    private TemplatePreparationObject.Builder getTemplatePreparationObjectForAws(boolean includeLocations, boolean above721, boolean includeBackup) {
         HostgroupView gateway = new HostgroupView("gateway", 1, InstanceGroupType.GATEWAY, Set.of("g"));
         HostgroupView master = new HostgroupView("master", 1, InstanceGroupType.CORE, Set.of("m1", "m2"));
         HostgroupView worker = new HostgroupView("worker", 2, InstanceGroupType.CORE, Set.of("w1", "w2", "w3"));
@@ -199,6 +227,10 @@ public class RangerCloudStorageServiceConfigProviderTest {
                         "s3a://bucket/warehouse/tablespace/external/hive")));
                 locations.add(new StorageLocationView(buildStorageLocation("hbase.rootdir",
                         "s3a://bucket/hbase")));
+                if (includeBackup) {
+                    locations.add(new StorageLocationView(buildStorageLocation(DEFAULT_BACKUP_DIR,
+                            "s3a://bucket/backup/location")));
+                }
             }
         }
         S3FileSystemConfigurationsView fileSystemConfigurationsView =

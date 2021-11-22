@@ -11,7 +11,6 @@ import static com.sequenceiq.common.model.CloudStorageCdpService.RANGER_AUDIT;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Component;
 
@@ -28,6 +27,8 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class RangerCloudStorageServiceConfigProvider implements CmTemplateComponentConfigProvider {
 
+    public static final String DEFAULT_BACKUP_DIR = "default.backup.location";
+
     private static final String RANGER_HDFS_AUDIT_URL = "ranger_plugin_hdfs_audit_url";
 
     private static final String HIVE_METASTORE_DIR =  "hive.metastore.warehouse.dir";
@@ -39,6 +40,8 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
     private static final String CLOUD_STORAGE_PATHS = "cloud_storage_paths";
 
     private static final String HBASE_ROOT_DIR = "hbase.rootdir";
+
+    private static final String BACKUP_LOCATION = "BACKUP_LOCATION";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject templatePreparationObject) {
@@ -63,7 +66,10 @@ public class RangerCloudStorageServiceConfigProvider implements CmTemplateCompon
             ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, HBASE_ROOT_DIR)
                     .ifPresent(location -> cloudPaths.add(HBASE_ROOT.name() + "=" + location.getValue()));
 
-            String cloudPath = cloudPaths.stream().collect(Collectors.joining(","));
+            ConfigUtils.getStorageLocationForServiceProperty(templatePreparationObject, DEFAULT_BACKUP_DIR)
+                    .ifPresent(location -> cloudPaths.add(BACKUP_LOCATION + "=" + location.getValue()));
+
+            String cloudPath = String.join(",", cloudPaths);
             return List.of(getRangerAuditConfig(templateProcessor, templatePreparationObject), config(CLOUD_STORAGE_PATHS, cloudPath));
         } else {
             return List.of(getRangerAuditConfig(templateProcessor, templatePreparationObject));
