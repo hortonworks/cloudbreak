@@ -11,7 +11,6 @@ import java.util.Random;
 
 import javax.inject.Inject;
 
-import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -40,10 +39,6 @@ public class StatusCheckerJobService {
 
     private static final String TRIGGER_GROUP = "status-checker-triggers";
 
-    private static final String LOCAL_ID = "localId";
-
-    private static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
-
     private static final Logger LOGGER = LoggerFactory.getLogger(StatusCheckerJobService.class);
 
     private static final Random RANDOM = new SecureRandom();
@@ -58,13 +53,13 @@ public class StatusCheckerJobService {
     private ApplicationContext applicationContext;
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+        JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(statusCheckerConfig.getIntervalInSeconds()), statusCheckerConfig.getIntervalInSeconds());
         schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     public <T> void schedule(JobResourceAdapter<T> resource, int delayInSeconds) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+        JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail, delayInSeconds, statusCheckerConfig.getIntervalInSeconds());
         schedule(jobDetail, trigger, resource.getLocalId());
     }
@@ -80,8 +75,7 @@ public class StatusCheckerJobService {
     }
 
     public <T> void scheduleLongIntervalCheck(JobResourceAdapter<T> resource) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource(),
-                Map.of(SYNC_JOB_TYPE, LONG_SYNC_JOB_TYPE));
+        JobDetail jobDetail = buildJobDetail(resource, Map.of(SYNC_JOB_TYPE, LONG_SYNC_JOB_TYPE));
         Trigger trigger = buildJobTrigger(jobDetail, statusCheckerConfig.getIntervalInSeconds(), statusCheckerConfig.getLongIntervalInSeconds());
         schedule(jobDetail, trigger, resource.getLocalId());
     }
@@ -113,18 +107,16 @@ public class StatusCheckerJobService {
         }
     }
 
-    private JobDetail buildJobDetail(String localId, String crn, Class<? extends Job> clazz) {
-        return buildJobDetail(localId, crn, clazz, Map.of());
+    private <T> JobDetail buildJobDetail(JobResourceAdapter<T> resource) {
+        return buildJobDetail(resource, Map.of());
     }
 
-    private JobDetail buildJobDetail(String localId, String crn, Class<? extends Job> clazz, Map<String, String>  dataMap) {
-        JobDataMap jobDataMap = new JobDataMap();
-        jobDataMap.put(LOCAL_ID, localId);
-        jobDataMap.put(REMOTE_RESOURCE_CRN, crn);
-        dataMap.forEach(jobDataMap::put);
+    private <T> JobDetail buildJobDetail(JobResourceAdapter<T> resource, Map<String, String> dataMap) {
+        JobDataMap jobDataMap = resource.toJobDataMap();
+        jobDataMap.putAll(dataMap);
 
-        return JobBuilder.newJob(clazz)
-                .withIdentity(localId, JOB_GROUP)
+        return JobBuilder.newJob(resource.getJobClassForResource())
+                .withIdentity(resource.getLocalId(), JOB_GROUP)
                 .withDescription("Checking datalake status Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()

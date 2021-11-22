@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.quartz.statuschecker;
 
+import static com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter.REMOTE_RESOURCE_CRN;
+
 import org.quartz.JobDataMap;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -12,8 +14,6 @@ import org.springframework.stereotype.Component;
 public class ResourceCheckerJobListener extends JobListenerSupport {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceCheckerJobListener.class);
-
-    private static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
 
     @Override
     public void jobWasExecuted(JobExecutionContext context, JobExecutionException jobException) {

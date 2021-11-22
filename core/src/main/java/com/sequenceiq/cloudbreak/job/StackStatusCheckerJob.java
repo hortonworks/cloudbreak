@@ -120,7 +120,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             measure(() -> {
                 Stack stack = stackService.get(getStackId());
                 Status stackStatus = stack.getStatus();
-                if (unschedulableStates().contains(stackStatus)) {
+                if (Status.getUnschedulableStatuses().contains(stackStatus)) {
                     LOGGER.debug("Stack sync will be unscheduled, stack state is {}", stackStatus);
                     jobService.unschedule(getLocalId());
                 } else if (shouldSwitchToLongSyncJob(stackStatus, context)) {
@@ -161,23 +161,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private Set<Status> longSyncableStates() {
         return EnumSet.of(Status.DELETED_ON_PROVIDER_SIDE);
-    }
-
-    @VisibleForTesting
-    Set<Status> unschedulableStates() {
-        return EnumSet.of(
-                Status.CREATE_FAILED,
-                Status.PRE_DELETE_IN_PROGRESS,
-                Status.DELETE_IN_PROGRESS,
-                Status.DELETE_FAILED,
-                Status.DELETE_COMPLETED,
-                Status.EXTERNAL_DATABASE_CREATION_FAILED,
-                Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
-                Status.EXTERNAL_DATABASE_DELETION_FINISHED,
-                Status.EXTERNAL_DATABASE_DELETION_FAILED,
-                Status.LOAD_BALANCER_UPDATE_FINISHED,
-                Status.LOAD_BALANCER_UPDATE_FAILED
-        );
     }
 
     @VisibleForTesting
