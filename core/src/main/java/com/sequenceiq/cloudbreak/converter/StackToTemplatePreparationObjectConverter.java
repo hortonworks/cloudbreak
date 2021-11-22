@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -43,6 +44,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -78,6 +80,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
@@ -85,6 +88,8 @@ import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
 import com.sequenceiq.cloudbreak.template.views.PlacementView;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
+import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -205,6 +210,7 @@ public class StackToTemplatePreparationObjectConverter {
             ClouderaManagerRepo cm = clusterComponentConfigProvider.getClouderaManagerRepoDetails(cluster.getId());
             List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(cluster.getId());
             BaseFileSystemConfigurationsView fileSystemConfigurationView = getFileSystemConfigurationView(credential, source, fileSystem);
+            updateFileSystemViewWithBackupLocation(environment, fileSystemConfigurationView);
             StackInputs stackInputs = getStackInputs(source);
             Map<String, Object> fixInputs = stackInputs.getFixInputs() == null ? new HashMap<>() : stackInputs.getFixInputs();
             fixInputs.putAll(stackInputs.getDatalakeInputs() == null ? new HashMap<>() : stackInputs.getDatalakeInputs());
@@ -432,6 +438,28 @@ public class StackToTemplatePreparationObjectConverter {
         } else {
             String azureObjectId = Iterables.getOnlyElement(azureCloudIdentities).getCloudIdentityName().getAzureCloudIdentityName().getObjectId();
             return Optional.of(azureObjectId);
+        }
+    }
+
+    private void updateFileSystemViewWithBackupLocation(DetailedEnvironmentResponse detailedEnvironmentResponse,
+            BaseFileSystemConfigurationsView fileSystemConfigurationView) {
+        if (fileSystemConfigurationView != null) {
+            BackupResponse backupResponse = detailedEnvironmentResponse.getBackup();
+            TelemetryResponse telemetryResponse = detailedEnvironmentResponse.getTelemetry();
+            Optional<String> backupLocation = Optional.empty();
+            if (backupResponse != null && backupResponse.getStorageLocation() != null) {
+                backupLocation = Optional.of(backupResponse.getStorageLocation());
+            } else if (telemetryResponse != null && telemetryResponse.getLogging() != null) {
+                backupLocation = Optional.of(telemetryResponse.getLogging().getStorageLocation());
+            }
+
+            if (backupLocation.isPresent()) {
+                StorageLocation storageLocation = new StorageLocation();
+                storageLocation.setValue(backupLocation.get());
+                storageLocation.setProperty(RangerCloudStorageServiceConfigProvider.DEFAULT_BACKUP_DIR);
+                StorageLocationView backupLocationView = new StorageLocationView(storageLocation);
+                fileSystemConfigurationView.getLocations().add(backupLocationView);
+            }
         }
     }
 }

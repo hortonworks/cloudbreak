@@ -46,6 +46,7 @@ import com.sequenceiq.cloudbreak.cloud.model.StackInputs;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.cloudstorage.CmCloudStorageConfigProvider;
+import com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerCloudStorageServiceConfigProvider;
 import com.sequenceiq.cloudbreak.cmtemplate.general.GeneralClusterConfigsProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
@@ -59,6 +60,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.FileSystem;
+import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.AccountMapping;
 import com.sequenceiq.cloudbreak.domain.cloudstorage.CloudStorage;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -93,6 +95,7 @@ import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.BaseFileSystemConfigurationsView;
 import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProvider;
+import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
@@ -102,6 +105,7 @@ import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.TestConstants;
 import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.User;
+import com.sequenceiq.common.api.backup.response.BackupResponse;
 import com.sequenceiq.common.api.cloudstorage.query.ConfigQueryEntries;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.environment.api.v1.environment.model.base.IdBrokerMappingSource;
@@ -414,6 +418,45 @@ public class StackToTemplatePreparationObjectConverterTest {
 
         CloudbreakServiceException cloudbreakServiceException = assertThrows(CloudbreakServiceException.class, () -> underTest.convert(stackMock));
         assertThat(cloudbreakServiceException).hasMessage(ioExceptionMessage).hasCause(invokedException);
+    }
+
+    @Test
+    public void testConvertWhenEnvironmentBackupLocationDefinedThenBaseFileSystemConfigurationsViewShouldAddIt() throws IOException {
+        String backupLocation = "s3a://test";
+        FileSystem sourceFileSystem = new FileSystem();
+        FileSystem clusterServiceFileSystem = new FileSystem();
+        ConfigQueryEntries configQueryEntries = new ConfigQueryEntries();
+        BaseFileSystemConfigurationsView expected = mock(BaseFileSystemConfigurationsView.class);
+        List<StorageLocationView> storageLocationViews = mock(List.class);
+        BackupResponse backupResponse = new BackupResponse();
+        backupResponse.setStorageLocation(backupLocation);
+        DetailedEnvironmentResponse environmentResponse = DetailedEnvironmentResponse.builder()
+                .withIdBrokerMappingSource(IdBrokerMappingSource.MOCK)
+                .withCredential(new CredentialResponse())
+                .withAdminGroupName(ADMIN_GROUP_NAME)
+                .withCrn(TestConstants.CRN)
+                .withBackup(backupResponse)
+                .build();
+        StorageLocation storageLocation = new StorageLocation();
+        storageLocation.setValue(backupLocation);
+        storageLocation.setProperty(RangerCloudStorageServiceConfigProvider.DEFAULT_BACKUP_DIR);
+        StorageLocationView backupLocationView = new StorageLocationView(storageLocation);
+        when(sourceCluster.getFileSystem()).thenReturn(sourceFileSystem);
+        when(cluster.getFileSystem()).thenReturn(clusterServiceFileSystem);
+        when(fileSystemConfigurationProvider.fileSystemConfiguration(eq(clusterServiceFileSystem), eq(stackMock), any(),
+                eq(new Json("")), eq(configQueryEntries))).thenReturn(expected);
+        when(cmCloudStorageConfigProvider.getConfigQueryEntries()).thenReturn(configQueryEntries);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        when(expected.getLocations()).thenReturn(storageLocationViews);
+
+        TemplatePreparationObject result = underTest.convert(stackMock);
+
+        assertThat(result.getFileSystemConfigurationView().isPresent()).isTrue();
+        assertThat(result.getFileSystemConfigurationView().get()).isEqualTo(expected);
+        verify(fileSystemConfigurationProvider, times(1)).fileSystemConfiguration(eq(clusterServiceFileSystem),
+                eq(stackMock), any(), eq(new Json("")), eq(configQueryEntries));
+        verify(expected, times(1)).getLocations();
+        verify(storageLocationViews, times(1)).add(eq(backupLocationView));
     }
 
     @Test
