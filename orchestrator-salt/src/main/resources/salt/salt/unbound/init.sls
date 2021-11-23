@@ -1,6 +1,13 @@
 {%- from 'metadata/settings.sls' import metadata with context %}
 {%- from 'nodes/settings.sls' import host with context %}
 
+faulty_7_2_11_images_unbound_restart_patch:
+  file.replace:
+    - name: "/etc/dhcp/dhclient-enter-hooks"
+    - pattern: "systemctl restart unbound"
+    - repl: "pkill -u unbound -SIGHUP unbound"
+    - ignore_if_missing: True
+
 /etc/unbound/conf.d/00-cluster.conf:
   file.managed:
     - makedirs: True

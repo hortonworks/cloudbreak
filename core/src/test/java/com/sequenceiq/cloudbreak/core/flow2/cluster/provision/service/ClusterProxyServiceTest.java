@@ -283,7 +283,7 @@ class ClusterProxyServiceTest {
         assertFalse(proxyRegistrationReq.isUseCcmV2(), "CCMV2 should not be enabled.");
         assertNull(proxyRegistrationReq.getCcmV2Configs(), "CCMV2 config should not be initialized.");
 
-        assertEquals("https://10.10.10.10:9443/knox/test-cluster", proxyRegistrationReq.getUriOfKnox(), "CCMV1 Knox URI should match");
+        assertEquals("https://10.10.10.10/test-cluster", proxyRegistrationReq.getUriOfKnox(), "CCMV1 Knox URI should match");
 
         assertTrue(proxyRegistrationReq.isUseTunnel(), "CCMV1 tunnel should be enabled");
         assertThat(proxyRegistrationReq.getTunnels()).withFailMessage("CCMV1 tunnel should be configured.").hasSameElementsAs(tunnelEntries());
@@ -304,11 +304,24 @@ class ClusterProxyServiceTest {
         verify(clusterProxyRegistrationClient).updateConfig(captor.capture());
         ConfigUpdateRequest gatewayUpdateRequest = captor.getValue();
         assertThat(gatewayUpdateRequest.getClusterCrn()).isEqualTo(STACK_CRN);
-        assertEquals("https://1.2.3.4:9443/knox/test-cluster", gatewayUpdateRequest.getUriOfKnox(), "Gateway Knox URI should match");
+        assertEquals("https://1.2.3.4/test-cluster", gatewayUpdateRequest.getUriOfKnox(), "Gateway Knox URI should match");
+    }
+
+    @Test
+    void testRegisterGatewayConfigurationWithCcmV1Enabled() throws JsonProcessingException {
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackUsingCCMAndKnox());
+
+        underTest.registerGatewayConfiguration(STACK_ID);
+
+        ArgumentCaptor<ConfigUpdateRequest> captor = ArgumentCaptor.forClass(ConfigUpdateRequest.class);
+        verify(clusterProxyRegistrationClient).updateConfig(captor.capture());
+        ConfigUpdateRequest gatewayUpdateRequest = captor.getValue();
+        assertThat(gatewayUpdateRequest.getClusterCrn()).isEqualTo(STACK_CRN);
+        assertEquals("https://10.10.10.10/test-cluster", gatewayUpdateRequest.getUriOfKnox(), "CCMV1 Knox URI should match");
     }
 
     @ParameterizedTest
-    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE", "CCM"}, mode = EnumSource.Mode.INCLUDE)
+    @EnumSource(value = Tunnel.class, names = {"CCMV2", "CCMV2_JUMPGATE"}, mode = EnumSource.Mode.INCLUDE)
     void testRegisterGatewayConfigurationWithOneOfCcmOptionsEnabled(Tunnel tunnel) throws JsonProcessingException {
         Stack testStack = testStackUsingCCMAndKnox();
         testStack.setTunnel(tunnel);
@@ -355,7 +368,7 @@ class ClusterProxyServiceTest {
     void shouldUpdateKnoxUrlWithClusterProxy() throws ClusterProxyException, JsonProcessingException {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(testStackWithKnox());
 
-        ConfigUpdateRequest request = configUpdateRequest(STACK_CRN);
+        ConfigUpdateRequest request = new ConfigUpdateRequest(STACK_CRN, "https://1.2.3.4/test-cluster");
 
         underTest.registerGatewayConfiguration(STACK_ID);
         verify(clusterProxyRegistrationClient).updateConfig(request);
@@ -410,10 +423,6 @@ class ClusterProxyServiceTest {
         return new ClusterServiceConfig("cb-internal",
                 List.of(withPrivateIp ? "https://10.10.10.10:9443" : "https://1.2.3.4:9443"), null, false, asList(cloudbreakUser, dpUser), clientCertificate,
                 null);
-    }
-
-    private ConfigUpdateRequest configUpdateRequest(String clusterIdentifier) {
-        return new ConfigUpdateRequest(clusterIdentifier, "https://1.2.3.4:9443/knox/test-cluster");
     }
 
     private SecurityConfig gatewaySecurityConfig() {

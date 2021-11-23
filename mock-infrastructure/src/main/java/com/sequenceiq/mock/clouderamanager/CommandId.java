@@ -31,6 +31,12 @@ public class CommandId {
 
     public static final BigDecimal ACTIVATE_PARCEL = new BigDecimal(14);
 
+    public static final BigDecimal DEACTIVATE_PARCEL = new BigDecimal(15);
+
+    public static final BigDecimal UNDISTRIBUTE_PARCEL = new BigDecimal(16);
+
+    public static final BigDecimal REMOVE_PARCEL = new BigDecimal(17);
+
     public static final BigDecimal UPGRADE_CDH_COMMAND = new BigDecimal(15);
 
     private CommandId() {

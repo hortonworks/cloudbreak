@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -33,7 +35,7 @@ public class KeytabProvider {
     public ServiceKeytabResponse getServiceKeytabResponse(Stack stack, GatewayConfig primaryGatewayConfig) {
         ServiceKeytabRequest request = cmServiceKeytabRequestFactory.create(stack, primaryGatewayConfig);
         try {
-            String accountId = ThreadBasedUserCrnProvider.getAccountId();
+            String accountId = getAccountId(stack);
             return ThreadBasedUserCrnProvider.doAsInternalActor(() -> kerberosMgmtV1Endpoint.generateServiceKeytab(request, accountId));
         } catch (WebApplicationException e) {
             String errorMessage = exceptionMessageExtractor.getErrorMessage(e);
@@ -41,5 +43,17 @@ public class KeytabProvider {
             LOGGER.warn(message, e);
             throw new CloudbreakServiceException(message, e);
         }
+    }
+
+    private String getAccountId(Stack stack) {
+        String accountId;
+        if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+            LOGGER.debug("Current user is internal, getting account id from requested stack crn");
+            accountId = Crn.fromString(stack.getResourceCrn()).getAccountId();
+        } else {
+            LOGGER.debug("Current user is not internal, getting account id from user crn");
+            accountId = ThreadBasedUserCrnProvider.getAccountId();
+        }
+        return accountId;
     }
 }

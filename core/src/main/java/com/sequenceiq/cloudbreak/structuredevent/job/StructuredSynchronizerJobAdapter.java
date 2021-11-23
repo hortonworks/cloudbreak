@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.structuredevent.job;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
-import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
@@ -34,7 +33,7 @@ public class StructuredSynchronizerJobAdapter extends JobResourceAdapter<Stack> 
     }
 
     @Override
-    public Class<? extends CrudRepository> getRepositoryClassForResource() {
+    public Class<StackRepository> getRepositoryClassForResource() {
         return StackRepository.class;
     }
 }
