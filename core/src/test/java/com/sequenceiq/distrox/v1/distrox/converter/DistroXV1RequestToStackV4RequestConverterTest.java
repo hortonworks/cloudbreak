@@ -11,15 +11,18 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,6 +41,11 @@ import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.CompactRegionResponse;
@@ -185,6 +193,221 @@ class DistroXV1RequestToStackV4RequestConverterTest {
         assertThat(result.getExternalDatabase()).isNotNull();
         assertThat(result.getExternalDatabase().getAvailabilityType()).isEqualTo(DistroXDatabaseAvailabilityType.HA);
         checkTagsV4WithV1(tags, result.getTags());
+    }
+
+    @Test
+    public void testGetNetworkWhenNetworkIsNullInInstanceGroups() {
+        NetworkV1Request networkRequest = new NetworkV1Request();
+        AwsNetworkV1Parameters aws = new AwsNetworkV1Parameters();
+        aws.setSubnetId("sub1");
+        networkRequest.setAws(aws);
+
+        Set<InstanceGroupV1Request> instanceGroups = new HashSet<>();
+        instanceGroups.add(new InstanceGroupV1Request());
+        instanceGroups.add(new InstanceGroupV1Request());
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("ANY");
+
+        NetworkV4Request networkV4Request = new NetworkV4Request();
+        ArgumentCaptor<Pair<NetworkV1Request, DetailedEnvironmentResponse>> networkConverterCaptor = ArgumentCaptor.forClass(Pair.class);
+
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(networkV4Request);
+
+        NetworkV4Request actual = underTest.getNetwork(networkRequest, environment, instanceGroups);
+
+        verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
+
+        Assertions.assertEquals(networkV4Request, actual);
+        Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
+        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
+    }
+
+    @Test
+    public void testGetNetworkWhenAwsIsNullInInstanceGroupsNetwork() {
+        NetworkV1Request networkRequest = new NetworkV1Request();
+        AwsNetworkV1Parameters aws = new AwsNetworkV1Parameters();
+        aws.setSubnetId("sub1");
+        networkRequest.setAws(aws);
+
+        Set<InstanceGroupV1Request> instanceGroups = new HashSet<>();
+        InstanceGroupV1Request ig1 = new InstanceGroupV1Request();
+        ig1.setNetwork(new InstanceGroupNetworkV1Request());
+        InstanceGroupV1Request ig2 = new InstanceGroupV1Request();
+        ig2.setNetwork(new InstanceGroupNetworkV1Request());
+        instanceGroups.add(ig1);
+        instanceGroups.add(ig2);
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("ANY");
+
+        NetworkV4Request networkV4Request = new NetworkV4Request();
+        ArgumentCaptor<Pair<NetworkV1Request, DetailedEnvironmentResponse>> networkConverterCaptor = ArgumentCaptor.forClass(Pair.class);
+
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(networkV4Request);
+
+        NetworkV4Request actual = underTest.getNetwork(networkRequest, environment, instanceGroups);
+
+        verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
+
+        Assertions.assertEquals(networkV4Request, actual);
+        Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
+        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
+    }
+
+    @Test
+    public void testGetNetworkWhenSubnetIdsIsNullInInstanceGroupsNetworkAws() {
+        NetworkV1Request networkRequest = new NetworkV1Request();
+        AwsNetworkV1Parameters aws = new AwsNetworkV1Parameters();
+        aws.setSubnetId("sub1");
+        networkRequest.setAws(aws);
+
+        Set<InstanceGroupV1Request> instanceGroups = new HashSet<>();
+        InstanceGroupV1Request ig1 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network = new InstanceGroupNetworkV1Request();
+        network.setAws(new InstanceGroupAwsNetworkV1Parameters());
+        ig1.setNetwork(network);
+        InstanceGroupV1Request ig2 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network1 = new InstanceGroupNetworkV1Request();
+        network1.setAws(new InstanceGroupAwsNetworkV1Parameters());
+        ig2.setNetwork(network1);
+        instanceGroups.add(ig1);
+        instanceGroups.add(ig2);
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("ANY");
+
+        NetworkV4Request networkV4Request = new NetworkV4Request();
+        ArgumentCaptor<Pair<NetworkV1Request, DetailedEnvironmentResponse>> networkConverterCaptor = ArgumentCaptor.forClass(Pair.class);
+
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(networkV4Request);
+
+        NetworkV4Request actual = underTest.getNetwork(networkRequest, environment, instanceGroups);
+
+        verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
+
+        Assertions.assertEquals(networkV4Request, actual);
+        Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
+        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
+    }
+
+    @Test
+    public void testGetNetworkWhenHasOneSubnetIdInInstanceGroupsNetworkAws() {
+        NetworkV1Request networkRequest = new NetworkV1Request();
+        AwsNetworkV1Parameters aws = new AwsNetworkV1Parameters();
+        aws.setSubnetId("sub1");
+        networkRequest.setAws(aws);
+
+        Set<InstanceGroupV1Request> instanceGroups = new HashSet<>();
+        InstanceGroupV1Request ig1 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network = new InstanceGroupNetworkV1Request();
+        InstanceGroupAwsNetworkV1Parameters awsNetworkV1Parameters = new InstanceGroupAwsNetworkV1Parameters();
+        awsNetworkV1Parameters.setSubnetIds(List.of("subnet1"));
+        network.setAws(awsNetworkV1Parameters);
+        ig1.setNetwork(network);
+        InstanceGroupV1Request ig2 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network1 = new InstanceGroupNetworkV1Request();
+        InstanceGroupAwsNetworkV1Parameters awsNetworkV1Parameters1 = new InstanceGroupAwsNetworkV1Parameters();
+        network1.setAws(awsNetworkV1Parameters1);
+        ig2.setNetwork(network1);
+        instanceGroups.add(ig1);
+        instanceGroups.add(ig2);
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("ANY");
+
+        NetworkV4Request networkV4Request = new NetworkV4Request();
+        ArgumentCaptor<Pair<NetworkV1Request, DetailedEnvironmentResponse>> networkConverterCaptor = ArgumentCaptor.forClass(Pair.class);
+
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(networkV4Request);
+
+        NetworkV4Request actual = underTest.getNetwork(networkRequest, environment, instanceGroups);
+
+        verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
+
+        Assertions.assertEquals(networkV4Request, actual);
+        Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
+        Assertions.assertEquals("subnet1", captured.getKey().getAws().getSubnetId());
+    }
+
+    @Test
+    public void testGetNetworkWhenHasSameSubnetIdInInstanceGroupsNetworkAws() {
+        NetworkV1Request networkRequest = new NetworkV1Request();
+        AwsNetworkV1Parameters aws = new AwsNetworkV1Parameters();
+        aws.setSubnetId("sub1");
+        networkRequest.setAws(aws);
+
+        Set<InstanceGroupV1Request> instanceGroups = new HashSet<>();
+        InstanceGroupV1Request ig1 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network = new InstanceGroupNetworkV1Request();
+        InstanceGroupAwsNetworkV1Parameters awsNetworkV1Parameters = new InstanceGroupAwsNetworkV1Parameters();
+        awsNetworkV1Parameters.setSubnetIds(List.of("subnet1"));
+        network.setAws(awsNetworkV1Parameters);
+        ig1.setNetwork(network);
+        InstanceGroupV1Request ig2 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network1 = new InstanceGroupNetworkV1Request();
+        InstanceGroupAwsNetworkV1Parameters awsNetworkV1Parameters1 = new InstanceGroupAwsNetworkV1Parameters();
+        awsNetworkV1Parameters1.setSubnetIds(List.of("subnet1"));
+        network1.setAws(awsNetworkV1Parameters1);
+        ig2.setNetwork(network1);
+        instanceGroups.add(ig1);
+        instanceGroups.add(ig2);
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("ANY");
+
+        NetworkV4Request networkV4Request = new NetworkV4Request();
+        ArgumentCaptor<Pair<NetworkV1Request, DetailedEnvironmentResponse>> networkConverterCaptor = ArgumentCaptor.forClass(Pair.class);
+
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(networkV4Request);
+
+        NetworkV4Request actual = underTest.getNetwork(networkRequest, environment, instanceGroups);
+
+        verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
+
+        Assertions.assertEquals(networkV4Request, actual);
+        Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
+        Assertions.assertEquals("subnet1", captured.getKey().getAws().getSubnetId());
+    }
+
+    @Test
+    public void testGetNetworkWhenHasDiffSubnetIdInInstanceGroupsNetworkAws() {
+        NetworkV1Request networkRequest = new NetworkV1Request();
+        AwsNetworkV1Parameters aws = new AwsNetworkV1Parameters();
+        aws.setSubnetId("sub1");
+        networkRequest.setAws(aws);
+
+        Set<InstanceGroupV1Request> instanceGroups = new HashSet<>();
+        InstanceGroupV1Request ig1 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network = new InstanceGroupNetworkV1Request();
+        InstanceGroupAwsNetworkV1Parameters awsNetworkV1Parameters = new InstanceGroupAwsNetworkV1Parameters();
+        awsNetworkV1Parameters.setSubnetIds(List.of("subnet1"));
+        network.setAws(awsNetworkV1Parameters);
+        ig1.setNetwork(network);
+        InstanceGroupV1Request ig2 = new InstanceGroupV1Request();
+        InstanceGroupNetworkV1Request network1 = new InstanceGroupNetworkV1Request();
+        InstanceGroupAwsNetworkV1Parameters awsNetworkV1Parameters1 = new InstanceGroupAwsNetworkV1Parameters();
+        awsNetworkV1Parameters1.setSubnetIds(List.of("subnet2"));
+        network1.setAws(awsNetworkV1Parameters1);
+        ig2.setNetwork(network1);
+        instanceGroups.add(ig1);
+        instanceGroups.add(ig2);
+
+        DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
+        environment.setCloudPlatform("ANY");
+
+        NetworkV4Request networkV4Request = new NetworkV4Request();
+        ArgumentCaptor<Pair<NetworkV1Request, DetailedEnvironmentResponse>> networkConverterCaptor = ArgumentCaptor.forClass(Pair.class);
+
+        when(networkConverter.convertToNetworkV4Request(any())).thenReturn(networkV4Request);
+
+        NetworkV4Request actual = underTest.getNetwork(networkRequest, environment, instanceGroups);
+
+        verify(networkConverter).convertToNetworkV4Request(networkConverterCaptor.capture());
+
+        Assertions.assertEquals(networkV4Request, actual);
+        Pair<NetworkV1Request, DetailedEnvironmentResponse> captured = networkConverterCaptor.getValue();
+        Assertions.assertEquals("sub1", captured.getKey().getAws().getSubnetId());
     }
 
     private void checkTagsV4WithV1(TagsV4Request input, TagsV1Request result) {

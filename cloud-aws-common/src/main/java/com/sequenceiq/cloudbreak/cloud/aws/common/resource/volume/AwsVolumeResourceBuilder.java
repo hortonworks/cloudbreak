@@ -111,11 +111,11 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     @Override
     public List<CloudResource> create(AwsContext context, CloudInstance instance, long privateId, AuthenticatedContext auth, Group group, Image image) {
-        LOGGER.debug("Create volume resources");
+        LOGGER.debug("Create volume resources for {} in group: {}", instance.getInstanceId(), group.getName());
 
         InstanceTemplate template = group.getReferenceInstanceTemplate();
         if (CollectionUtils.isEmpty(template.getVolumes())) {
-            LOGGER.debug("No volume requested");
+            LOGGER.debug("No volume requested in group: {}", group.getName());
             return List.of();
         }
 
@@ -126,6 +126,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
         String subnetId = getSubnetId(context, instance);
         Optional<String> availabilityZone = getAvailabilityZone(context, instance);
+        if (reattachableVolumeSet.isPresent()) {
+            LOGGER.debug("Reattachable volumeset found: {}", reattachableVolumeSet.get());
+        }
         return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnetId, availabilityZone)));
     }
 
@@ -139,7 +142,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     }
 
     private Supplier<CloudResource> createVolumeSet(long privateId, AuthenticatedContext auth, Group group,
-        String subnetId, Optional<String> availabilityZone) {
+            String subnetId, Optional<String> availabilityZone) {
         return () -> {
             AwsResourceNameService resourceNameService = getResourceNameService();
 
@@ -149,7 +152,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             String stackName = cloudContext.getName();
 
             String targetAvailabilityZone = getAvailabilityZoneFromSubnet(auth, subnetId, availabilityZone);
-
+            LOGGER.info("Selected availability zone for volumeset: {}, group: {}", targetAvailabilityZone, groupName);
             return new Builder()
                     .persistent(true)
                     .type(resourceType())
@@ -171,6 +174,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
 
     private String getAvailabilityZoneFromSubnet(AuthenticatedContext auth, String subnetId, Optional<String> availabilityZone) {
         if (availabilityZone.isPresent()) {
+            LOGGER.debug("AZ is present: {}", availabilityZone.get());
             return availabilityZone.get();
         } else {
             String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
@@ -180,6 +184,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                     .execute(() -> amazonEC2Client.describeSubnets(describeSubnetsRequest), null);
 
             if (describeSubnetsResult == null) {
+                LOGGER.debug("Describe subnet is null, fallback to default: {}", defaultAvailabilityZone);
                 return defaultAvailabilityZone;
             } else {
                 return describeSubnetsResult.getSubnets()
@@ -187,7 +192,10 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                         .filter(subnet -> subnetId.equals(subnet.getSubnetId()))
                         .map(Subnet::getAvailabilityZone)
                         .findFirst()
-                        .orElse(defaultAvailabilityZone);
+                        .orElseGet(() -> {
+                            LOGGER.debug("Cannot find subnet in describe subnet result, fallback to default: {}", defaultAvailabilityZone);
+                            return defaultAvailabilityZone;
+                        });
             }
         }
     }
