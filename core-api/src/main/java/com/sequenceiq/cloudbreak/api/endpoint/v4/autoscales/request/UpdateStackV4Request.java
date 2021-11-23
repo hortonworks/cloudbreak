@@ -24,6 +24,10 @@ public class UpdateStackV4Request implements JsonEntity {
     @ApiModelProperty(StackModelDescription.INSTANCE_GROUP_ADJUSTMENT)
     private InstanceGroupAdjustmentV4Request instanceGroupAdjustment;
 
+    // TODO CB-14929: Cleanup as part of API definition
+    @ApiModelProperty("TODO New propery")
+    private Boolean useStopStartScalingMechanism = Boolean.FALSE;
+
     public StatusRequest getStatus() {
         return status;
     }
@@ -44,7 +48,25 @@ public class UpdateStackV4Request implements JsonEntity {
         this.withClusterEvent = withClusterEvent;
     }
 
+    public Boolean getUseStopStartScalingMechanism() {
+        return useStopStartScalingMechanism;
+    }
+
+    public void setUseStopStartScalingMechanism(Boolean useStopStartScalingMechanism) {
+        this.useStopStartScalingMechanism = useStopStartScalingMechanism;
+    }
+
     public Boolean getWithClusterEvent() {
         return withClusterEvent;
+    }
+
+    @Override
+    public String toString() {
+        return "UpdateStackV4Request{" +
+                "status=" + status +
+                ", withClusterEvent=" + withClusterEvent +
+                ", instanceGroupAdjustment=" + instanceGroupAdjustment +
+                ", useStopStartScalingMechanism=" + useStopStartScalingMechanism +
+                '}';
     }
 }

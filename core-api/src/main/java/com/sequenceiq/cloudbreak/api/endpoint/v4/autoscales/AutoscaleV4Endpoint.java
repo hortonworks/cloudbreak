@@ -52,11 +52,25 @@ public interface AutoscaleV4Endpoint {
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
     void putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
 
+    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
+    @GET
+    @Path("/stack/startNodees/crn/{crn}/{userId}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "start_nodes_by_count", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStartNodes")
+    String tmpStartNodes(@PathParam("crn") String crn, @PathParam("userId") String userId, @QueryParam("hostGroup") String hostGroup, @QueryParam("numNodes") Integer numNodes);
+
     @PUT
     @Path("/stack/crn/{crn}/{userId}/cluster")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
     void putCluster(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
+
+    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
+    @GET
+    @Path("/stack/stopNodes/crn/{crn}/{userId}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "stop_nodes_by_count", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStopNodes")
+    String tmpStopNodes(@PathParam("crn") String crn, @PathParam("userId") String userId, @QueryParam("hostGroup") String hostGroup, @QueryParam("numNodes") Integer numNodes);
 
     @GET
     @Path("stack/all")
@@ -128,6 +142,23 @@ public interface AutoscaleV4Endpoint {
     void decommissionInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
+    @GET
+    @Path("/stack/stopNodes2/crn/{crn}/{userId}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "stop_nodes_by_id", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStopNodes2")
+    String tmpStopNodes2(@PathParam("crn") String crn, @PathParam("userId") String userId, @QueryParam("hostGroup") String hostGroup, @QueryParam("nodeIds") String nodeIds);
+
+    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
+    @DELETE
+    @Path("/stack/crn/{crn}/instances/internalv2")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = "deletes multiple instances from the stack's cluster in workspace v2", produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "decommissionInternalInstancesForClusterCrn2")
+    void decommissionInternalInstancesForClusterCrnV2(@PathParam("crn") String clusterCrn,
+            @RequestBody @NotEmpty List<String> instanceIds,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced, @QueryParam("usealtscaling") @DefaultValue("false") Boolean useAltScaling);
 
     @GET
     @Path("clusterproxy")

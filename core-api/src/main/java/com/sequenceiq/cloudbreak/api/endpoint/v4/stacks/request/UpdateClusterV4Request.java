@@ -81,4 +81,16 @@ public class UpdateClusterV4Request implements JsonEntity {
     public void setHostgroups(Set<HostGroupV4Request> hostgroups) {
         this.hostgroups = hostgroups;
     }
+
+    @Override
+    public String toString() {
+        return "UpdateClusterV4Request{" +
+                "hostGroupAdjustment=" + hostGroupAdjustment +
+                ", status=" + status +
+                ", userNamePassword=" + userNamePassword +
+                ", blueprintName='" + blueprintName + '\'' +
+                ", validateBlueprint=" + validateBlueprint +
+                ", hostgroups=" + hostgroups +
+                '}';
+    }
 }
