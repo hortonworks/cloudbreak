@@ -201,13 +201,18 @@ public class StackCommonService {
         return syncComponentVersionsFromCm(stack, candidateImageUuids);
     }
 
-    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
+    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced, boolean useAlt) {
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
         validateStackIsNotDataLake(stack.get(), instanceIds);
         return stackOperationService.removeInstances(stack.get(), instanceIds, forced);
+    }
+
+    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
+        return deleteMultipleInstancesInWorkspace(nameOrCrn, workspaceId, instanceIds, forced, false);
     }
 
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -350,12 +355,23 @@ public class StackCommonService {
 
     private FlowIdentifier put(Stack stack, UpdateStackV4Request updateRequest) {
         MDCBuilder.buildMdcContext(stack);
-        if (updateRequest.getStatus() != null) {
+        if (updatCommeRequest.getStatus() != null) {
+            LOGGER.info("ZZZ: Using stackOperationService.updateStatus");
             return stackOperationService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent());
         } else {
-            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-            validateHardLimits(scalingAdjustment);
-            return stackOperationService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
+            LOGGER.info("ZZZ: Using scalingAdjustMent stackOperationService.updateNodeCount");
+
+            if (updateRequest.getUseStopStartScalingMechanism()) {
+                LOGGER.info("ZZZ: Using updateNodeCountStopStart");
+                Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+                validateHardLimits(scalingAdjustment);
+                return stackOperationService.updateNodeCountStopStart(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
+            } else {
+                LOGGER.info("ZZZ: Using defaultUpdateNodeCount");
+                Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+                validateHardLimits(scalingAdjustment);
+                return stackOperationService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
+            }
         }
     }
 

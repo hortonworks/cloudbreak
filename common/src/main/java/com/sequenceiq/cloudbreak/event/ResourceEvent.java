@@ -323,6 +323,25 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_VALIDATION_FAILED("cluster.upgrade.validation.failed"),
     CLUSTER_PROVISION_CLOUD_STORAGE_VALIDATION_ON_IDBROKER_FAILED("cluster.provision.idbrokerhost.cloudstorage.vmvalidation.failed"),
 
+    // TODO CB-14929: Add additional messsages here, especially for the partial operations.
+    // TODO CB-14929: hostnames vs instanceIds when logging requests
+    // TODO CB-14929: Requests must include instanceCounts (Ideally change this for the current scaling operations as well)
+    CLUSTER_SCALING_STOPSTART_UPSCALE_INIT("cluster.scaling.stopstart.upscale.init"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED("cluster.scaling.stopstart.upscale.nodes.started"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING("cluster.scaling.stopstart.upscale.commissioning"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART("cluster.scaling.stopstart.upscale.waiting.hoststart"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED("cluster.scaling.stopstart.upscale.cmhostsstarted"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED("cluster.scaling.stopstart.upscale.finished"),
+
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT("cluster.scaling.stopstart.downscale.init"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING("cluster.scaling.stopstart.downscale.starting"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING2("cluster.scaling.stopstart.downscale.starting2"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE("cluster.scaling.stopstart.downscale.enteringcmmaintmode"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE("cluster.scaling.stopstart.downscale.enteredcmmaintmode"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING("cluster.scaling.stopstart.downscale.nodes.stopping"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED("cluster.scaling.stopstart.downscale.finished"),
+
+
     CLUSTER_SALT_UPDATE_STARTED("cluster.salt.update.started"),
     CLUSTER_SALT_UPDATE_FAILED("cluster.salt.update.failed"),
     CLUSTER_SALT_UPDATE_FINISHED("cluster.salt.update.finished"),
@@ -360,6 +379,9 @@ public enum ResourceEvent {
     CLUSTER_MANAGER_CLUSTER_SERVICES_STARTING("cluster.ambari.cluster.services.starting"),
     CLUSTER_MANAGER_CLUSTER_SERVICES_STARTED("cluster.ambari.cluster.services.started"),
     CLUSTER_REMOVING_NODE_FROM_HOSTGROUP("cluster.removing.node.from.hostgroup"),
+
+
+
     CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP("cluster.force.removing.node.from.hostgroup"),
     CLUSTER_LOST_NODE_DECOMMISSION_ABORTED_TWICE("cluster.removing.node.lost.node.decommission.aborted"),
     CLUSTER_CERTIFICATE_REISSUE("cluster.certificate.reissue"),
