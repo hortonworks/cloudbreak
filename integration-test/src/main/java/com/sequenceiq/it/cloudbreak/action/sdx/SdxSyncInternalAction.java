@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.action.sdx;
 
 import static java.lang.String.format;
 
+import java.time.Duration;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +23,7 @@ public class SdxSyncInternalAction implements Action<SdxInternalTestDto, SdxClie
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
-        sleep(1, sdxName);
+        testContext.waitingFor(Duration.ofMinutes(4), "Waiting for CM services to be synchronized has been interrupted");
 
         Log.when(LOGGER, format(" Internal SDX '%s' sync has been started... ", sdxName));
         Log.whenJson(LOGGER, " Internal SDX sync request: ", testDto.getRequest());
@@ -38,13 +38,5 @@ public class SdxSyncInternalAction implements Action<SdxInternalTestDto, SdxClie
         Log.whenJson(LOGGER, " Internal SDX response after sync: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
 
         return testDto;
-    }
-
-    private void sleep(long sleepMinutes, String sdxName) {
-        try {
-            TimeUnit.MINUTES.sleep(sleepMinutes);
-        } catch (InterruptedException ignored) {
-            LOGGER.warn("Waiting for CM services to be synchronized has been interrupted, cause:", ignored);
-        }
     }
 }
