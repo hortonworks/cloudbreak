@@ -820,6 +820,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         });
     }
 
+    // TODO CB-14929:  This method is named incorrectly. It returns instanceIds instead of hostNames
     public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         return getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(instanceMetaDataList, privateIds).stream()
                 .map(InstanceMetaData::getInstanceId)
