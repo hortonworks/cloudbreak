@@ -33,6 +33,8 @@ public class StackResponseUtils {
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
                 .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                // TODO CB-14929: the computation of host group counts depends on the scaling mechanism being used. Even for STOPPED instances, this may require additional checks on status of the nodes.
+                .filter(instanceMetaData -> instanceMetaData.getInstanceStatus() != InstanceStatus.STOPPED)
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getDiscoveryFQDN,
                         InstanceMetaDataV4Response::getInstanceId));
     }
