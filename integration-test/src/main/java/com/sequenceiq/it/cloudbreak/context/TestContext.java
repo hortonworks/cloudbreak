@@ -1210,6 +1210,17 @@ public abstract class TestContext implements ApplicationContextAware {
         return cloudProvider;
     }
 
+    public void waitingFor(Duration duration, String interruptedMessage) {
+        Duration waitDuration = duration == null ? Duration.ofMinutes(0) : duration;
+        String intrMessage = interruptedMessage == null ? "Waiting has been interrupted:" : interruptedMessage;
+        try {
+            Thread.sleep(waitDuration.toMillis());
+            LOGGER.info("Wait '{}' duration has been done.", duration.toString());
+        } catch (InterruptedException e) {
+            LOGGER.warn(StringUtils.join(intrMessage, e));
+        }
+    }
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "{clients: " + clients + ", entities: " + resourceNames + "}";

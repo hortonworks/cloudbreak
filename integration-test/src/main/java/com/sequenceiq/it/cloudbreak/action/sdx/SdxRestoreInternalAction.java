@@ -2,8 +2,8 @@ package com.sequenceiq.it.cloudbreak.action.sdx;
 
 import static java.lang.String.format;
 
+import java.time.Duration;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ public class SdxRestoreInternalAction implements Action<SdxInternalTestDto, SdxC
     public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
         String sdxName = testDto.getName();
 
-        sleep(2, sdxName);
+        testContext.waitingFor(Duration.ofMinutes(5), "Waiting for CM services to be synchronized has been interrupted");
 
         Log.when(LOGGER, format(" Internal SDX '%s' restore has been started to '%s' ", sdxName, backupLocation));
         Log.whenJson(LOGGER, " Internal SDX restore request: ", testDto.getRequest());
@@ -48,13 +48,5 @@ public class SdxRestoreInternalAction implements Action<SdxInternalTestDto, SdxC
         testDto.setResponse(detailedResponse);
         Log.whenJson(LOGGER, " Internal SDX response after restore: ", client.getDefaultClient().sdxEndpoint().get(sdxName));
         return testDto;
-    }
-
-    private void sleep(long sleepMinutes, String sdxName) {
-        try {
-            TimeUnit.MINUTES.sleep(sleepMinutes);
-        } catch (InterruptedException ignored) {
-            LOGGER.warn("Waiting for CM services to be synchronized has been interrupted, cause:", ignored);
-        }
     }
 }
