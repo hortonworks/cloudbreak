@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.job.nodestatus;
 
 import org.quartz.Job;
-import org.springframework.data.repository.CrudRepository;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
@@ -29,7 +28,7 @@ public class NodeStatusJobAdapter extends JobResourceAdapter<Stack> {
     }
 
     @Override
-    public Class<? extends CrudRepository> getRepositoryClassForResource() {
+    public Class<StackRepository> getRepositoryClassForResource() {
         return StackRepository.class;
     }
 }

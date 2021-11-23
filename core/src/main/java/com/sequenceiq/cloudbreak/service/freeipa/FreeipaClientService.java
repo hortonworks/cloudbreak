@@ -13,6 +13,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
@@ -49,6 +51,10 @@ public class FreeipaClientService {
 
     public Optional<DescribeFreeIpaResponse> findByEnvironmentCrn(String environmentCrn) {
         try {
+            if (InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn())) {
+                String accountId = Crn.fromString(environmentCrn).getAccountId();
+                return Optional.ofNullable(freeIpaV1Endpoint.describeInternal(environmentCrn, accountId));
+            }
             return Optional.ofNullable(freeIpaV1Endpoint.describe(environmentCrn));
         } catch (NotFoundException e) {
             LOGGER.info("FreeIPA is not found for env: {}", environmentCrn, e);

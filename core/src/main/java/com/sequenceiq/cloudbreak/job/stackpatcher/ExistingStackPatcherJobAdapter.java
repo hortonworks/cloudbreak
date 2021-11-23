@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.structuredevent.job;
+package com.sequenceiq.cloudbreak.job.stackpatcher;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
@@ -7,13 +7,13 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
-public class StructuredSynchronizerJobAdapter extends JobResourceAdapter<Stack> {
+public class ExistingStackPatcherJobAdapter extends JobResourceAdapter<Stack> {
 
-    public StructuredSynchronizerJobAdapter(Long id, ApplicationContext context) {
+    public ExistingStackPatcherJobAdapter(Long id, ApplicationContext context) {
         super(id, context);
     }
 
-    public StructuredSynchronizerJobAdapter(Stack resource) {
+    public ExistingStackPatcherJobAdapter(Stack resource) {
         super(resource);
     }
 
@@ -29,7 +29,7 @@ public class StructuredSynchronizerJobAdapter extends JobResourceAdapter<Stack> 
 
     @Override
     public Class<? extends Job> getJobClassForResource() {
-        return StructuredSynchronizerJob.class;
+        return ExistingStackPatcherJob.class;
     }
 
     @Override

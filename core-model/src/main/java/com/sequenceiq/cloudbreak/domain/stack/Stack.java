@@ -600,6 +600,12 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return metaData.orElse(null);
     }
 
+    public Optional<InstanceMetaData> getClusterManagerServer() {
+        return getInstanceMetaDataAsList().stream()
+                .filter(InstanceMetaData::getClusterManagerServer)
+                .findFirst();
+    }
+
     public Optional<InstanceGroup> getGatewayHostGroup() {
         return instanceGroups.stream()
                 .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
