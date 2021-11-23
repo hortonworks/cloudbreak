@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @Service
 public class StackOperationService {
@@ -95,6 +96,9 @@ public class StackOperationService {
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
+    @Inject
+    private FlowCancelService flowCancelService;
+
     public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
         String instanceGroupName = metaData.getInstanceGroupName();
@@ -107,12 +111,16 @@ public class StackOperationService {
         return flowManager.triggerStackRemoveInstance(stack.getId(), instanceGroupName, metaData.getPrivateId(), forced);
     }
 
-    public FlowIdentifier removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
+    public FlowIdentifier removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user, boolean useStopStart) {
+        LOGGER.info("ZZZ: Received delete request for rawInstanceIds: {}", instanceIds);
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
+        LOGGER.info("ZZZ: removeInstances: instanceIds/hostnames received: {}", instanceIds);
+        LOGGER.info("ZZZ: removeInstances: computedInstanceIds: {}", instanceIdsByHostgroupMap);
+        // TODO CB-14929: Validations for start-stop
         if (!forced) {
             for (Map.Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
                 String instanceGroupName = entry.getKey();
@@ -122,7 +130,12 @@ public class StackOperationService {
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
             }
         }
-        return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
+        if (useStopStart) {
+            LOGGER.info("ZZZ: Triggering stopstart-downscale");
+            return flowManager.triggerStopStartStackDownscale(stack.getId(), instanceIdsByHostgroupMap, forced);
+        } else {
+            return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
+        }
     }
 
     public FlowIdentifier updateImage(ImageChangeDto imageChangeDto) {
@@ -213,7 +226,70 @@ public class StackOperationService {
         }
     }
 
+    public FlowIdentifier updateNodeCountStopStart(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent) {
+        LOGGER.info("ZZZ: updateNodeCountStopStart");
+
+        if (instanceGroupAdjustmentJson.getScalingAdjustment() == 0) {
+            LOGGER.info("ZZZ: Scaling Adjustment 0. Cancalling existing flows... and continuing");
+            flowCancelService.cancelRunningFlows(stack.getId());
+        }
+
+        environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+        try {
+            return transactionService.required(() -> {
+                Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
+
+                if (!stack.isAvailable()) {
+                    LOGGER.info("ZZZ: Stack status is not AVAILABLE. Resetting, and cancelling existing flows... it is at: {}", stackWithLists.getStatus());
+                    flowCancelService.cancelRunningFlows(stack.getId());
+                    stackWithLists.getStackStatus().setStatus(AVAILABLE);
+                    clusterService.updateClusterStatusByStackId(stackWithLists.getId(), AVAILABLE, "fake update");
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.PROVISIONED,
+                            String.format("fake update"));
+                }
+
+                updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateStackStatus(stackWithLists);
+                updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
+                // TODO CB-14929: Instead of validating not in RUNNIG state, this validation needs to change to disallow everything except if instances are in STOPPED state.
+                // TODO CB-14929: Overall cleanup of code changes made in this class
+                //updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                LOGGER.info("ZZZ: cluster.isAvailable: {}, clusterStatus: {}", stackWithLists.getCluster().isAvailable(), stackWithLists.getCluster().getStatus());
+                if (withClusterEvent) {
+                    // TODO CB-14929: Figure out valid states for start/stop operations.
+//                    updateNodeCountValidator.validateClusterStatus(stackWithLists);
+                    updateNodeCountValidator.validateHostGroupAdjustment(
+                            instanceGroupAdjustmentJson,
+                            stackWithLists,
+                            instanceGroupAdjustmentJson.getScalingAdjustment());
+                    updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                }
+                if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+                    // TODO CB-14929: When is the DB update performed? Should this be before or after a flow is accepted. The next step sends a trigger.
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
+                            "Requested node count for upscaling (stopstart): " + instanceGroupAdjustmentJson.getScalingAdjustment());
+                    return flowManager.triggerStopStartStackUpscale(
+                            stackWithLists.getId(),
+                            instanceGroupAdjustmentJson,
+                            withClusterEvent);
+                } else {
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.DOWNSCALE_REQUESTED,
+                            "Requested node count for downscaling: " + abs(instanceGroupAdjustmentJson.getScalingAdjustment()));
+                    return flowManager.triggerStackDownscale(stackWithLists.getId(), instanceGroupAdjustmentJson);
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof BadRequestException) {
+                throw e.getCause();
+            }
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public FlowIdentifier updateNodeCount(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, boolean withClusterEvent) {
+        LOGGER.info("ZZZ: UpdateNodeCount");
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
@@ -233,6 +309,8 @@ public class StackOperationService {
                     updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+                    // TODO CB-14929: When should DB status be updated. Should the DetailStackStatus be something other than UPSCALE_REQUESTED. i.e. differentiate between
+                    //  an actual upscale and a 'VM pool / start-stop'
                     stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
                             "Requested node count for upscaling: " + instanceGroupAdjustmentJson.getScalingAdjustment());
                     return flowManager.triggerStackUpscale(
