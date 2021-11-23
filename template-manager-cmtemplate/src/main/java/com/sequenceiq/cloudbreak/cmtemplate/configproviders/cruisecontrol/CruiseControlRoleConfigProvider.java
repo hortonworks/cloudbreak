@@ -2,15 +2,21 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol;
 
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_11;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_ANOMALY_DETECTION_GOALS;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_DEFAULT_GOALS;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_HARD_GOALS;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
+import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cmtemplate.CmHostGroupRoleConfigProvider;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
@@ -71,11 +77,13 @@ public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigPro
 
     @Override
     public List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, HostgroupView hostGroupView, TemplatePreparationObject source) {
+        ArrayList<ApiClusterTemplateConfig> configs = Lists.newArrayList();
         String cdpVersion = source.getBlueprintView().getProcessor().getStackVersion() == null ?
                 "" : source.getBlueprintView().getProcessor().getStackVersion();
 
         if (isVersionNewerOrEqualThanLimited(cdpVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
-            return List.of(config(SELF_HEALING_ENABLED, "true"),
+            // Thresholds
+            configs.addAll(List.of(config(SELF_HEALING_ENABLED, "true"),
                     config(ANOMALY_NOTIFIER_CLASS, "com.linkedin.kafka.cruisecontrol.detector.notifier.SelfHealingNotifier"),
                     config(METRIC_ANOMALY_FINDER_CLASS, "com.cloudera.kafka.cruisecontrol.detector.EmptyBrokerAnomalyFinder"),
                     config(CPU_BALANCE_THRESHOLD, "1.5"),
@@ -87,31 +95,28 @@ public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigPro
                     config(CPU_CAPACITY_THRESHOLD, "0.75"),
                     config(NETWORK_INBOUND_CAPACITY_THRESHOLD, "0.85"),
                     config(NETWORK_OUTBOUND_CAPACITY_THRESHOLD, "0.85"),
-                    config(LEADER_REPLICA_COUNT_BALANCE_THRESHOLD, "1.5"),
-                    config(ANOMALY_DETECTION_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal"),
-                    config(DEFAULT_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaDistributionGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskUsageDistributionGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuUsageDistributionGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.TopicReplicaDistributionGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.LeaderReplicaDistributionGoal"),
-                    config(HARD_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.ReplicaCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.DiskCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkInboundCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.NetworkOutboundCapacityGoal," +
-                            "com.linkedin.kafka.cruisecontrol.analyzer.goals.CpuCapacityGoal"),
-                    config(AUTHENTICATION_METHOD, "Trusted Proxy"),
-                    config(TRUSTED_PROXY_SPNEGO_FALLBACK_ENABLED, "true")
-            );
+                    config(LEADER_REPLICA_COUNT_BALANCE_THRESHOLD, "1.5")));
+            // Authentication
+            configs.add(config(AUTHENTICATION_METHOD, "Trusted Proxy"));
+            configs.add(config(TRUSTED_PROXY_SPNEGO_FALLBACK_ENABLED, "true"));
         }
-        return List.of();
+
+        if (isVersionNewerOrEqualThanLimited(cdpVersion, CLOUDERA_STACK_VERSION_7_2_14)) {
+            configs.add(config(ANOMALY_DETECTION_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," +
+                    COMMON_ANOMALY_DETECTION_GOALS));
+            configs.add(config(DEFAULT_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," + COMMON_DEFAULT_GOALS));
+            configs.add(config(HARD_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," + COMMON_HARD_GOALS));
+
+        } else if (isVersionNewerOrEqualThanLimited(cdpVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
+            configs.add(config(ANOMALY_DETECTION_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
+                    COMMON_ANOMALY_DETECTION_GOALS));
+            configs.add(config(DEFAULT_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," + COMMON_DEFAULT_GOALS));
+            configs.add(config(HARD_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," + COMMON_HARD_GOALS));
+
+        } else {
+            return List.of();
+        }
+
+        return configs;
     }
 }
