@@ -99,6 +99,16 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
     }
 
     @Override
+    public Set<String> recommissionClusterNodes(Map<String, InstanceMetaData> hostsToRecommission) {
+        return clouderaManagerDecomissioner.recommissionNodes(stack, hostsToRecommission, client);
+    }
+
+    @Override
+    public void enterMaintenanceMode(Stack stack, Map<String, InstanceMetaData> hostList) {
+        clouderaManagerDecomissioner.enterMaintenanceMode(stack, hostList, client);
+    }
+
+    @Override
     public void removeManagementServices() {
         clouderaManagerDecomissioner.stopAndRemoveMgmtService(stack, v31Client);
     }
