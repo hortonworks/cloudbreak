@@ -26,6 +26,10 @@ public class HostGroupAdjustmentV4Request implements JsonEntity {
     @ApiModelProperty(HostGroupAdjustmentModelDescription.VALIDATE_NODE_COUNT)
     private Boolean validateNodeCount = Boolean.TRUE;
 
+    // TODO CB-14929: Cleanup as part of API definition
+    @ApiModelProperty("TODO New propery")
+    private Boolean useStopStartScalingMechanism = Boolean.FALSE;
+
     @ApiModelProperty(HostGroupAdjustmentModelDescription.FORCED)
     private Boolean forced;
 
@@ -59,6 +63,14 @@ public class HostGroupAdjustmentV4Request implements JsonEntity {
 
     public void setValidateNodeCount(Boolean validateNodeCount) {
         this.validateNodeCount = validateNodeCount;
+    }
+
+    public Boolean getUseStopStartScalingMechanism() {
+        return useStopStartScalingMechanism;
+    }
+
+    public void setUserStartStopScalingMechanism(Boolean useStopStartScalingMechanism) {
+        this.useStopStartScalingMechanism = useStopStartScalingMechanism;
     }
 
     public void setForced(Boolean forced) {

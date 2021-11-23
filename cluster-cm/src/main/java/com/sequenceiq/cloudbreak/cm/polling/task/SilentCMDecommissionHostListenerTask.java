@@ -6,11 +6,10 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 
 public class SilentCMDecommissionHostListenerTask extends ClouderaManagerDefaultListenerTask {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerPollingServiceProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SilentCMDecommissionHostListenerTask.class);
 
     public SilentCMDecommissionHostListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
             ClusterEventService clusterEventService) {
