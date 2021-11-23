@@ -38,6 +38,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvi
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponses;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 
 import io.swagger.annotations.Api;
@@ -198,14 +199,15 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.START_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "startEnvironmentByNameV1")
-    void postStartByName(@PathParam("name") String name, @QueryParam("dataHubStartAction") @DefaultValue("START_ALL") DataHubStartAction dataHubStartAction);
+    FlowIdentifier postStartByName(@PathParam("name") String name,
+            @QueryParam("dataHubStartAction") @DefaultValue("START_ALL") DataHubStartAction dataHubStartAction);
 
     @POST
     @Path("/crn/{crn}/start")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.START_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "startEnvironmentByCrnV1")
-    void postStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+    FlowIdentifier postStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @QueryParam("dataHubStartAction") @DefaultValue("START_ALL") DataHubStartAction dataHubStartAction);
 
     @POST
@@ -213,14 +215,14 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.STOP_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "stopEnvironmentByNameV1")
-    void postStopByName(@PathParam("name") String name);
+    FlowIdentifier postStopByName(@PathParam("name") String name);
 
     @POST
     @Path("/crn/{crn}/stop")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.STOP_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "stopEnvironmentByCrnV1")
-    void postStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+    FlowIdentifier postStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @GET
     @Path("/crn/{crn}/verify_credential")
@@ -248,21 +250,21 @@ public interface EnvironmentEndpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_CONFIG_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
         nickname = "updateConfigsInEnvironmentByCrnV1")
-    void updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+    FlowIdentifier updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
 
     @PUT
     @Path("/name/{name}/update_load_balancers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_LOAD_BALANCERS_BY_ENV_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
         nickname = "updateEnvironmentLoadBalancersByNameV11")
-    void updateEnvironmentLoadBalancersByName(@PathParam("name") String envName, @NotNull EnvironmentLoadBalancerUpdateRequest request);
+    FlowIdentifier updateEnvironmentLoadBalancersByName(@PathParam("name") String envName, @NotNull EnvironmentLoadBalancerUpdateRequest request);
 
     @PUT
     @Path("/crn/{crn}/update_load_balancers")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.UPDATE_LOAD_BALANCERS_BY_ENV_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
         nickname = "updateEnvironmentLoadBalancersByCrnV1")
-    void updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
+    FlowIdentifier updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn,
             @NotNull EnvironmentLoadBalancerUpdateRequest request);
 
     @GET

@@ -7,6 +7,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class EnvironmentUpgradeCcmService {
@@ -21,21 +22,21 @@ public class EnvironmentUpgradeCcmService {
         this.environmentService = environmentService;
     }
 
-    public void upgradeCcmByName(String name) {
+    public FlowIdentifier upgradeCcmByName(String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByNameAndAccountId(name, accountId);
-        upgradeCcm(environment);
+        return upgradeCcm(environment);
     }
 
-    public void upgradeCcmByCrn(String crn) {
+    public FlowIdentifier upgradeCcmByCrn(String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByCrnAndAccountId(crn, accountId);
-        upgradeCcm(environment);
+        return upgradeCcm(environment);
     }
 
-    private void upgradeCcm(EnvironmentDto environment) {
+    private FlowIdentifier upgradeCcm(EnvironmentDto environment) {
         validateUpgrade(environment);
-        reactorFlowManager.triggerCcmUpgradeFlow(environment);
+        return reactorFlowManager.triggerCcmUpgradeFlow(environment);
     }
 
     private void validateUpgrade(EnvironmentDto environment) {

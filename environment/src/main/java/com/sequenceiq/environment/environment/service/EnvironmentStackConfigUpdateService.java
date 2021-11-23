@@ -5,6 +5,8 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,7 +22,7 @@ public class EnvironmentStackConfigUpdateService {
         this.reactorFlowManager = reactorFlowManager;
     }
 
-    public void updateAllStackConfigsByCrn(String envCrn) {
+    public FlowIdentifier updateAllStackConfigsByCrn(String envCrn) {
         String accountId = Crn.safeFromString(envCrn).getAccountId();
         Environment environment = environmentService
             .findByResourceCrnAndAccountIdAndArchivedIsFalse(envCrn, accountId).
@@ -28,7 +30,7 @@ public class EnvironmentStackConfigUpdateService {
                     String.format("No environment found with crn '%s'", envCrn)));
 
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        reactorFlowManager
+        return reactorFlowManager
             .triggerStackConfigUpdatesFlow(environment, userCrn);
     }
 }

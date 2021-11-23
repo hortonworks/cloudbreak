@@ -39,6 +39,8 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEn
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
@@ -489,5 +491,13 @@ public class EnvironmentTestDto
             return null;
         }
         return new Clue("Environment", null, getResponse(), false);
+    }
+
+    public void setLastKnownFlow(FlowIdentifier flowIdentifier) {
+        if (flowIdentifier.getType() == FlowType.FLOW) {
+            setLastKnownFlowId(flowIdentifier.getPollableId());
+        } else if (flowIdentifier.getType() == FlowType.FLOW_CHAIN) {
+            setLastKnownFlowChainId(flowIdentifier.getPollableId());
+        }
     }
 }
