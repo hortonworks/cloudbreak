@@ -10,7 +10,6 @@ import java.util.Random;
 
 import javax.inject.Inject;
 
-import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -36,10 +35,6 @@ public class NodeStatusCheckerJobService {
 
     private static final String TRIGGER_GROUP = "nodestatus-checker-triggers";
 
-    private static final String LOCAL_ID = "localId";
-
-    private static final String REMOTE_RESOURCE_CRN = "remoteResourceCrn";
-
     private static final Random RANDOM = new SecureRandom();
 
     @Inject
@@ -52,13 +47,13 @@ public class NodeStatusCheckerJobService {
     private ApplicationContext applicationContext;
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+        JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(properties.getIntervalInSeconds()));
         schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     public <T> void schedule(JobResourceAdapter<T> resource, int delayInSeconds) {
-        JobDetail jobDetail = buildJobDetail(resource.getLocalId(), resource.getRemoteResourceId(), resource.getJobClassForResource());
+        JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail, delayInSeconds);
         schedule(jobDetail, trigger, resource.getLocalId());
     }
@@ -100,14 +95,11 @@ public class NodeStatusCheckerJobService {
         }
     }
 
-    private <T> JobDetail buildJobDetail(String sdxId, String crn, Class<? extends Job> clazz) {
-        JobDataMap jobDataMap = new JobDataMap();
+    private <T> JobDetail buildJobDetail(JobResourceAdapter<T> resource) {
+        JobDataMap jobDataMap = resource.toJobDataMap();
 
-        jobDataMap.put(LOCAL_ID, sdxId);
-        jobDataMap.put(REMOTE_RESOURCE_CRN, crn);
-
-        return JobBuilder.newJob(clazz)
-                .withIdentity(sdxId, JOB_GROUP)
+        return JobBuilder.newJob(resource.getJobClassForResource())
+                .withIdentity(resource.getLocalId(), JOB_GROUP)
                 .withDescription("Checking stack nodestatus Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()

@@ -125,8 +125,6 @@ public enum DetailedStackStatus {
         return List.of(
                 DetailedStackStatus.CLUSTER_UPGRADE_FAILED,
                 DetailedStackStatus.CLUSTER_MANAGER_UPGRADE_FAILED,
-                DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING,
-                DetailedStackStatus.NODE_FAILURE,
                 DetailedStackStatus.CLUSTER_UPGRADE_INIT_FAILED);
     }
 }
