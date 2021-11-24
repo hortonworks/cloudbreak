@@ -2,8 +2,13 @@ package com.sequenceiq.distrox.v1.distrox.converter;
 
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -28,7 +33,11 @@ import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.telemetry.response.TelemetryResponse;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Base;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.NetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.AwsNetworkV1Parameters;
+import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.tags.TagsV1Request;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentNetworkResponse;
@@ -84,7 +93,7 @@ public class DistroXV1RequestToStackV4RequestConverter {
         request.setAuthentication(getIfNotNull(environment.getAuthentication(), authenticationConverter::convert));
         request.setImage(getIfNotNull(source.getImage(), imageConverter::convert));
         request.setCluster(getIfNotNull(source, environment, clusterConverter::convert));
-        NetworkV4Request network = getNetwork(source.getNetwork(), environment);
+        NetworkV4Request network = getNetwork(source.getNetwork(), environment, source.getInstanceGroups());
         request.setNetwork(network);
         request.setInstanceGroups(getIfNotNull(source.getInstanceGroups(), igs ->
                 instanceGroupConverter.convertTo(network, igs, environment)));
@@ -132,7 +141,29 @@ public class DistroXV1RequestToStackV4RequestConverter {
         return telemetryConverter.convert(envTelemetryResp, sdxClusterResponse);
     }
 
-    private NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment) {
+    NetworkV4Request getNetwork(NetworkV1Request networkRequest, DetailedEnvironmentResponse environment,
+            Set<InstanceGroupV1Request> instanceGroupRequests) {
+        Set<String> subnetIds = new HashSet<>();
+        if (instanceGroupRequests != null) {
+            subnetIds.addAll(instanceGroupRequests.stream()
+                    .map(ig -> Optional.ofNullable(ig.getNetwork())
+                            .map(InstanceGroupNetworkV1Base::getAws)
+                            .map(InstanceGroupAwsNetworkV1Parameters::getSubnetIds)
+                            .orElseGet(ArrayList::new)
+                    )
+                    .flatMap(Collection::stream)
+                    .collect(Collectors.toSet()));
+        }
+        if (subnetIds.size() == 1) {
+            String subnetId = subnetIds.stream().findFirst().get();
+            LOGGER.info("Update the global subnet id to {}, because it is configured in instance group level as the new way", subnetId);
+            if (networkRequest.getAws() == null) {
+                networkRequest.setAws(new AwsNetworkV1Parameters());
+            }
+            networkRequest.getAws().setSubnetId(subnetId);
+        } else {
+            LOGGER.info("Use the legacy way to configure the global network.");
+        }
         NetworkV4Request network = getIfNotNull(new ImmutablePair<>(networkRequest, environment), networkConverter::convertToNetworkV4Request);
         validateSubnetIds(network, environment);
         return network;
