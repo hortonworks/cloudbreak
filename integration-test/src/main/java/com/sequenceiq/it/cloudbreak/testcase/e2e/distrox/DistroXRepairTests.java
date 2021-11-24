@@ -55,7 +55,7 @@ public class DistroXRepairTests extends AbstractE2ETest {
 
         testContext
                 .given(distrox, DistroXTestDto.class)
-                .when(distroXTestClient.fetchPreferredSubnetForInstanceNetworkIfMultiAzEnabled())
+                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
                 .when(distroXTestClient.create(), key(distrox))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
