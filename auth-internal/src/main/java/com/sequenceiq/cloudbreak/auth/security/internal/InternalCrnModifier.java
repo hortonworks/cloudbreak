@@ -28,6 +28,10 @@ public class InternalCrnModifier {
     @Inject
     private ReflectionUtil reflectionUtil;
 
+    public String getInternalCrnWithAccountId(String accountId) {
+        return getAccountIdModifiedCrn(ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN, accountId);
+    }
+
     public Object changeInternalCrn(ProceedingJoinPoint proceedingJoinPoint) {
         String userCrnString = ThreadBasedUserCrnProvider.getUserCrn();
         MethodSignature methodSignature = (MethodSignature) proceedingJoinPoint.getSignature();
@@ -44,7 +48,6 @@ public class InternalCrnModifier {
             String userCrnString) {
         Optional<Object> accountId = reflectionUtil.getParameter(proceedingJoinPoint, methodSignature, AccountId.class);
         if (accountId.isPresent() && accountId.get() instanceof String) {
-            MDCBuilder.addTenant((String) accountId.get());
             String newUserCrn = getAccountIdModifiedCrn(userCrnString, (String) accountId.get());
             return Optional.of(newUserCrn);
         }
@@ -57,7 +60,6 @@ public class InternalCrnModifier {
         if (tenantAwareCrn.isPresent() && tenantAwareCrn.get() instanceof String
                 && Crn.isCrn((String) tenantAwareCrn.get())) {
             String accountId = Crn.fromString((String) tenantAwareCrn.get()).getAccountId();
-            MDCBuilder.addTenant(accountId);
             String newUserCrn = getAccountIdModifiedCrn(userCrnString, accountId);
             return Optional.of(newUserCrn);
         }
@@ -65,6 +67,7 @@ public class InternalCrnModifier {
     }
 
     private String getAccountIdModifiedCrn(String userCrnString, String accountId) {
+        MDCBuilder.addTenant(accountId);
         Crn userCrn = Crn.fromString(userCrnString);
         Crn newUserCrn = Crn.copyWithDifferentAccountId(userCrn, accountId);
         LOGGER.debug("Changing internal CRN to {}", newUserCrn);
