@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_BRINGUP_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_BRINGUP_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_BRINGUP_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_BRINGUP_FINISHED;
 
 import javax.inject.Inject;
 
@@ -31,14 +31,14 @@ public class DatalakeRecoveryBringupService {
 
     public void handleDatalakeRecoveryBringupSuccess(Long stackId) {
         LOGGER.info("Datalake stack bringup has been finished successfully.");
-        flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), DATALAKE_RECOVERY_BRINGUP_FINISHED);
+        flowMessageService.fireEventAndLog(stackId, Status.AVAILABLE.name(), SDX_RECOVERY_BRINGUP_FINISHED);
     }
 
     public void handleDatalakeRecoveryBringupFailure(Long stackId, String errorReason, DetailedStackStatus detailedStatus) {
         LOGGER.warn("Datalake stack bringup has failed with {}.", errorReason);
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_FAILED, errorReason);
         stackUpdater.updateStackStatus(stackId, detailedStatus);
-        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), DATALAKE_RECOVERY_BRINGUP_FAILED, errorReason);
+        flowMessageService.fireEventAndLog(stackId, Status.UPDATE_FAILED.name(), SDX_RECOVERY_BRINGUP_FAILED, errorReason);
     }
 
 }

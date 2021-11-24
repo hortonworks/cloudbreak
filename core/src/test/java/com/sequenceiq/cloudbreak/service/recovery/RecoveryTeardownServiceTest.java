@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.recovery;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_RECOVERY_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_TEARDOWN_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_TEARDOWN_FINISHED;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
@@ -72,7 +72,7 @@ public class RecoveryTeardownServiceTest {
         verify(terminationService).finalizeRecoveryTeardown(STACK_ID);
         verify(metricService).incrementMetricCounter(MetricType.STACK_RECOVERY_TEARDOWN_SUCCESSFUL, stack);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.DELETE_COMPLETED.name()), captor.capture());
-        assertEquals(DATALAKE_RECOVERY_TEARDOWN_FINISHED, captor.getValue());
+        assertEquals(SDX_RECOVERY_TEARDOWN_FINISHED, captor.getValue());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class RecoveryTeardownServiceTest {
         verify(stackUpdater).updateStackStatus(STACK_ID, CLUSTER_RECOVERY_FAILED, stackUpdateMessage);
         verify(metricService).incrementMetricCounter(MetricType.STACK_RECOVERY_TEARDOWN_FAILED, stackView, exception);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(CLUSTER_RECOVERY_FAILED.name()), captor.capture(), eq(stackUpdateMessage));
-        assertEquals(DATALAKE_RECOVERY_FAILED, captor.getValue());
+        assertEquals(SDX_RECOVERY_FAILED, captor.getValue());
     }
 
     private StackView getStackView() {

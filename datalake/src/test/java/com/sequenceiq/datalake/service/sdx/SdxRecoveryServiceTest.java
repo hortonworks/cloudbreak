@@ -1,6 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_REQUESTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_REQUESTED;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -77,7 +77,7 @@ public class SdxRecoveryServiceTest {
 
         verify(stackV4Endpoint).recoverClusterByNameInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RECOVERY_IN_PROGRESS, DATALAKE_RECOVERY_REQUESTED,
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RECOVERY_IN_PROGRESS, SDX_RECOVERY_REQUESTED,
                         "Recovering datalake stack", cluster);
     }
 

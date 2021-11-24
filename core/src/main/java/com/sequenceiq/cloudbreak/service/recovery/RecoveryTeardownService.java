@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.service.recovery;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_TEARDOWN_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_TEARDOWN_FINISHED;
 
 import javax.inject.Inject;
 
@@ -43,7 +43,7 @@ public class RecoveryTeardownService {
         Stack stack = context.getStack();
         terminationService.finalizeRecoveryTeardown(stack.getId());
         metricService.incrementMetricCounter(MetricType.STACK_RECOVERY_TEARDOWN_SUCCESSFUL, stack);
-        flowMessageService.fireEventAndLog(stack.getId(), DELETE_COMPLETED.name(), DATALAKE_RECOVERY_TEARDOWN_FINISHED);
+        flowMessageService.fireEventAndLog(stack.getId(), DELETE_COMPLETED.name(), SDX_RECOVERY_TEARDOWN_FINISHED);
     }
 
     public void handleRecoveryTeardownError(StackView stack, Exception errorDetails) {
@@ -53,7 +53,7 @@ public class RecoveryTeardownService {
         stackUpdater.updateStackStatus(stackId, status, stackUpdateMessage);
         LOGGER.info("Error during stack recovery flow: ", errorDetails);
         metricService.incrementMetricCounter(MetricType.STACK_RECOVERY_TEARDOWN_FAILED, stack, errorDetails);
-        flowMessageService.fireEventAndLog(stackId, status.name(), DATALAKE_RECOVERY_FAILED, stackUpdateMessage);
+        flowMessageService.fireEventAndLog(stackId, status.name(), SDX_RECOVERY_FAILED, stackUpdateMessage);
     }
 
 }

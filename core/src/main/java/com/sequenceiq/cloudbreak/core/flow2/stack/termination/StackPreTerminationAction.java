@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.termination;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_DELETE_IN_PROGRESS;
 
 import java.util.Map;
@@ -68,7 +68,7 @@ public class StackPreTerminationAction extends AbstractStackTerminationAction<Te
 
     private void fireCloudbreakEvent(TerminationType terminationType, Long stackId) {
         if (terminationType.isRecovery()) {
-            cloudbreakEventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), DATALAKE_RECOVERY_IN_PROGRESS);
+            cloudbreakEventService.fireCloudbreakEvent(stackId, UPDATE_IN_PROGRESS.name(), SDX_RECOVERY_IN_PROGRESS);
         } else {
             cloudbreakEventService.fireCloudbreakEvent(stackId, DELETE_IN_PROGRESS.name(), STACK_DELETE_IN_PROGRESS);
         }

@@ -396,13 +396,13 @@ public enum ResourceEvent {
     SDX_CERT_ROTATION_FAILED("resource.sdx.cert.rotation.failed"),
     SDX_CERT_ROTATION_FINISHED("resource.sdx.cert.rotation.finished"),
 
-    DATALAKE_RECOVERY_REQUESTED("datalake.recovery.requested"),
-    DATALAKE_RECOVERY_IN_PROGRESS("datalake.recovery.in.progress"),
-    DATALAKE_RECOVERY_BRINGUP_FINISHED("datalake.recovery.bringup.finished"),
-    DATALAKE_RECOVERY_BRINGUP_FAILED("datalake.recovery.bringup.failed"),
-    DATALAKE_RECOVERY_TEARDOWN_FINISHED("datalake.recovery.teardown.finished"),
-    DATALAKE_RECOVERY_FAILED("datalake.recovery.failed"),
-    DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished");
+    SDX_RECOVERY_REQUESTED("datalake.recovery.requested"),
+    SDX_RECOVERY_IN_PROGRESS("datalake.recovery.in.progress"),
+    SDX_RECOVERY_BRINGUP_FINISHED("datalake.recovery.bringup.finished"),
+    SDX_RECOVERY_BRINGUP_FAILED("datalake.recovery.bringup.failed"),
+    SDX_RECOVERY_TEARDOWN_FINISHED("datalake.recovery.teardown.finished"),
+    SDX_RECOVERY_FAILED("datalake.recovery.failed"),
+    SDX_RECOVERY_FINISHED("datalake.recovery.finished");
 
     private final String message;
 

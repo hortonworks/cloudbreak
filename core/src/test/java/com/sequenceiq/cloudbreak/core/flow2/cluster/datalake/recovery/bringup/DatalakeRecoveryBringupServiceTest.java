@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bringup;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_RECOVERY_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_BRINGUP_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.DATALAKE_RECOVERY_BRINGUP_FINISHED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_BRINGUP_FAILED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.SDX_RECOVERY_BRINGUP_FINISHED;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
@@ -52,7 +52,7 @@ public class DatalakeRecoveryBringupServiceTest {
         verifyNoInteractions(clusterService);
         verifyNoInteractions(stackUpdater);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.AVAILABLE.name()), captor.capture());
-        assertEquals(DATALAKE_RECOVERY_BRINGUP_FINISHED, captor.getValue());
+        assertEquals(SDX_RECOVERY_BRINGUP_FINISHED, captor.getValue());
     }
 
     @Test
@@ -61,6 +61,6 @@ public class DatalakeRecoveryBringupServiceTest {
         underTest.handleDatalakeRecoveryBringupFailure(STACK_ID, ERROR_MESSAGE, CLUSTER_RECOVERY_FAILED);
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, Status.UPDATE_FAILED, ERROR_MESSAGE);
         verify(flowMessageService).fireEventAndLog(eq(STACK_ID), eq(Status.UPDATE_FAILED.name()), captor.capture(), eq(ERROR_MESSAGE));
-        assertEquals(DATALAKE_RECOVERY_BRINGUP_FAILED, captor.getValue());
+        assertEquals(SDX_RECOVERY_BRINGUP_FAILED, captor.getValue());
     }
 }

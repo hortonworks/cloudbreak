@@ -103,7 +103,7 @@ public class DatalakeUpgradeRecoveryActions {
                 LOGGER.info("Sdx recovery was finalized with sdx id: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
                         DatalakeStatusEnum.RUNNING,
-                        ResourceEvent.DATALAKE_RECOVERY_FINISHED,
+                        ResourceEvent.SDX_RECOVERY_FINISHED,
                         "Recovery finished",
                         payload.getResourceId());
                 sendEvent(context, DATALAKE_RECOVERY_FINALIZED_EVENT.event(), payload);
