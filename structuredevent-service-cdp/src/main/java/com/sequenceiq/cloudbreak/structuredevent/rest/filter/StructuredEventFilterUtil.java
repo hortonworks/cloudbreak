@@ -86,6 +86,8 @@ public class StructuredEventFilterUtil {
             CDPOperationDetails cdpOperationDetails = restEventFilterRelatedObjectFactory.createCDPOperationDetails(restParams, requestTime);
             CDPStructuredRestCallEvent structuredEvent = new CDPStructuredRestCallEvent(cdpOperationDetails, restCall, null, null);
             structuredEventClient.sendStructuredEvent(structuredEvent);
+        } catch (UnsupportedOperationException e) {
+            LOGGER.debug("Audit log is unnecessary: {}", e.getMessage());
         } catch (Exception ex) {
             LOGGER.warn("Failed to send structured event: " + ex.getMessage(), ex);
         }
