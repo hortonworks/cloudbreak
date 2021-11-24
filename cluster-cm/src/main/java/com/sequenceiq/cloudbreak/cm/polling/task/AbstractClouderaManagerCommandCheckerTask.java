@@ -58,13 +58,17 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
 
     @Override
     public void sendFailureEvent(T pollerObject) {
-        getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
-                ResourceEvent.CLUSTER_CM_COMMAND_FAILED, getCommandName(), Optional.ofNullable(pollerObject.getId()));
+        if (pollerObject.getId() != null) {
+            getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
+                    ResourceEvent.CLUSTER_CM_COMMAND_FAILED, getCommandName(), Optional.of(pollerObject.getId()));
+        }
     }
 
     @Override
     public void sendTimeoutEvent(T pollerObject) {
-        getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
-                ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, getCommandName(), Optional.ofNullable(pollerObject.getId()));
+        if (pollerObject.getId() != null) {
+            getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
+                    ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, getCommandName(), Optional.of(pollerObject.getId()));
+        }
     }
 }
