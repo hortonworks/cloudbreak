@@ -96,6 +96,8 @@ public class ClusterRepairServiceTest {
 
     private static final String STACK_CRN = "STACK_CRN";
 
+    private static final String ENV_CRN = "ENV_CRN";
+
     private static final long CLUSTER_ID = 1;
 
     @Mock
@@ -163,6 +165,7 @@ public class ClusterRepairServiceTest {
         stack.setResourceCrn(STACK_CRN);
         stack.setCluster(cluster);
         stack.setPlatformVariant("AWS");
+        stack.setEnvironmentCrn(ENV_CRN);
         StackStatus stackStatus = new StackStatus();
         stackStatus.setStatus(Status.AVAILABLE);
         stack.setStackStatus(stackStatus);
@@ -184,7 +187,7 @@ public class ClusterRepairServiceTest {
         when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -208,7 +211,7 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
         when(stack.getInstanceGroups()).thenReturn(Set.of(host1.getInstanceGroup()));
         when(stack.getTunnel()).thenReturn(Tunnel.CLUSTER_PROXY);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -230,7 +233,7 @@ public class ClusterRepairServiceTest {
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
@@ -258,7 +261,7 @@ public class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -283,7 +286,7 @@ public class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(false);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(true);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -308,7 +311,7 @@ public class ClusterRepairServiceTest {
         when(image.isPrewarmed()).thenReturn(true);
         when(imageCatalogService.getImage(any(), any(), any())).thenReturn(StatedImage.statedImage(image, "catalogUrl", "catalogName"));
         when(clusterDBValidationService.isGatewayRepairEnabled(cluster)).thenReturn(false);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -329,7 +332,7 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(instanceGroup);
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -372,7 +375,7 @@ public class ClusterRepairServiceTest {
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -393,7 +396,7 @@ public class ClusterRepairServiceTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(STOPPED);
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -422,7 +425,7 @@ public class ClusterRepairServiceTest {
 
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1, host2));
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -444,7 +447,7 @@ public class ClusterRepairServiceTest {
     @Test
     public void testValidateRepairWhenFreeIpaNotAvailable() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(false);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
@@ -458,7 +461,7 @@ public class ClusterRepairServiceTest {
     @Test
     public void testValidateRepairWhenEnvNotAvailable() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(false);
 
@@ -473,7 +476,7 @@ public class ClusterRepairServiceTest {
     @Test
     public void testValidateRepairWhenOneGWUnhealthyAndNotSelected() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -505,7 +508,7 @@ public class ClusterRepairServiceTest {
     @Test
     public void testValidateRepairWhenTwoGWUnhealthyAndNotSelected() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -537,7 +540,7 @@ public class ClusterRepairServiceTest {
     @Test
     public void testValidateRepairWhenNoUnhealthyGWAndNotSelected() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
         HostGroup hostGroup1 = new HostGroup();
@@ -573,7 +576,7 @@ public class ClusterRepairServiceTest {
     @Test
     public void testValidateRepairWhenReattachSupported() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
@@ -597,7 +600,7 @@ public class ClusterRepairServiceTest {
     @Test
     public void testValidateRepairWhenReattachNotSupported() {
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
-        when(freeipaService.freeipaStatusInDesiredState(stack, Set.of(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)))
+        when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 

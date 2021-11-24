@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -26,7 +25,6 @@ import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 
 @RunWith(Parameterized.class)
 public class ClusterRecoveryServiceTest {
@@ -72,7 +70,7 @@ public class ClusterRecoveryServiceTest {
 
         when(stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, WORKSPACE_ID)).thenReturn(STACK);
         when(stackStatusService.findAllStackStatusesById(STACK.getId())).thenReturn(stackStatusList);
-        when(freeipaService.freeipaStatusInDesiredState(STACK, Set.of(Status.AVAILABLE))).thenReturn(freeIpaStatus);
+        when(freeipaService.checkFreeipaRunning(STACK.getEnvironmentCrn())).thenReturn(freeIpaStatus);
 
         RecoveryValidationV4Response response = underTest.validateRecovery(WORKSPACE_ID, stackNameOrCrn);
 

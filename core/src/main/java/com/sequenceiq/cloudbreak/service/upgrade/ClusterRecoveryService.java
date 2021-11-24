@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -29,7 +28,6 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackstatus.StackStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 
 @Service
 public class ClusterRecoveryService {
@@ -57,7 +55,7 @@ public class ClusterRecoveryService {
 
     public RecoveryValidationV4Response validateRecovery(Long workspaceId, NameOrCrn stackNameOrCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(stackNameOrCrn, workspaceId);
-        return validateFreeIpaStatus(stack).merge(validateStackStatus(stack));
+        return validateFreeIpaStatus(stack.getEnvironmentCrn()).merge(validateStackStatus(stack));
     }
 
     private RecoveryValidationV4Response validateStackStatus(Stack stack) {
@@ -100,8 +98,8 @@ public class ClusterRecoveryService {
         return new RecoveryValidationV4Response(reason, status);
     }
 
-    private RecoveryValidationV4Response validateFreeIpaStatus(Stack stack) {
-        boolean freeIpaAvailable = freeipaService.freeipaStatusInDesiredState(stack, Set.of(Status.AVAILABLE));
+    private RecoveryValidationV4Response validateFreeIpaStatus(String envCrn) {
+        boolean freeIpaAvailable = freeipaService.checkFreeipaRunning(envCrn);
         String reason = "";
         RecoveryStatus status;
         if (!freeIpaAvailable) {

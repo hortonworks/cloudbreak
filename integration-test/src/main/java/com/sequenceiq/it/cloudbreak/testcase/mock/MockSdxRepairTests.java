@@ -17,6 +17,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.customdomain.CustomDomainSettingsV4Request;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
@@ -24,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
@@ -44,6 +46,9 @@ public class MockSdxRepairTests extends AbstractMockTest {
 
     @Inject
     private SdxUtil sdxUtil;
+
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -99,10 +104,13 @@ public class MockSdxRepairTests extends AbstractMockTest {
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
+                .withCreateFreeIpa(Boolean.TRUE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
                 .withCustomDomain(customDomain)
@@ -163,10 +171,13 @@ public class MockSdxRepairTests extends AbstractMockTest {
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
+                .withCreateFreeIpa(Boolean.TRUE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(sdxInternal, SdxInternalTestDto.class)
                 .withDatabase(sdxDatabaseRequest)
                 .withCustomDomain(customDomain)

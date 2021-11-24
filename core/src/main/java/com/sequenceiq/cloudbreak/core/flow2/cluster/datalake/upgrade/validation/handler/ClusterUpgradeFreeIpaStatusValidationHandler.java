@@ -2,8 +2,6 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation
 
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationHandlerSelectors.VALIDATE_FREEIPA_STATUS_EVENT;
 
-import java.util.Set;
-
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -20,7 +18,6 @@ import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 
 import reactor.bus.Event;
 
@@ -41,7 +38,7 @@ public class ClusterUpgradeFreeIpaStatusValidationHandler extends ExceptionCatch
         ClusterUpgradeFreeIpaStatusValidationEvent request = event.getData();
         Long stackId = request.getResourceId();
         String environmentCrn = getStack(stackId).getEnvironmentCrn();
-        if (!freeipaService.freeipaStatusInDesiredState(environmentCrn, Set.of(Status.AVAILABLE))) {
+        if (!freeipaService.checkFreeipaRunning(environmentCrn)) {
             String message = "Upgrade cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state and try again.";
             LOGGER.info("FreeIPA status validation failed with: {}", message);
             return new ClusterUpgradeValidationFailureEvent(stackId, new UpgradeValidationFailedException(message));

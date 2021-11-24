@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.auth.crn.TestCrnGenerator;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkMockParams;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.it.cloudbreak.assertion.datalake.SdxUpgradeTestAssertion;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.client.RedbeamsDatabaseServerTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -28,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.dto.VolumeV4TestDto;
 import com.sequenceiq.it.cloudbreak.dto.database.RedbeamsDatabaseServerTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
@@ -44,6 +46,9 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
 
     @Inject
     private SdxTestClient sdxTestClient;
+
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
 
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
@@ -70,10 +75,13 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
+                .withCreateFreeIpa(Boolean.TRUE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(cluster, ClusterTestDto.class)
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
@@ -117,10 +125,13 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
+                .withCreateFreeIpa(Boolean.TRUE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(RedbeamsDatabaseServerTestDto.class)
                 .withEnvironmentCrn(testContext.get(EnvironmentTestDto.class).getResponse().getCrn())
                 .withClusterCrn(clusterCrn)
@@ -164,11 +175,14 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
                 .withMock(new EnvironmentNetworkMockParams())
                 .given(EnvironmentTestDto.class)
                 .withNetwork(networkKey)
-                .withCreateFreeIpa(Boolean.FALSE)
+                .withCreateFreeIpa(Boolean.TRUE)
                 .withName(resourcePropertyProvider().getEnvironmentName())
                 .withBackup("location/of/the/backup")
                 .when(getEnvironmentTestClient().create())
                 .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(cluster, ClusterTestDto.class)
                 .given(imageSettings, ImageSettingsTestDto.class)
                 .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
@@ -204,11 +218,14 @@ public class MockSdxUpgradeTests extends AbstractMockTest {
 //                .withMock(new EnvironmentNetworkMockParams())
 //                .given(EnvironmentTestDto.class)
 //                .withNetwork(networkKey)
-//                .withCreateFreeIpa(Boolean.FALSE)
+//                .withCreateFreeIpa(Boolean.TRUE)
 //                .withName(resourcePropertyProvider().getEnvironmentName())
 //                .withBackup("location/of/the/backup")
 //                .when(getEnvironmentTestClient().create())
 //                .await(EnvironmentStatus.AVAILABLE)
+//                .given(FreeIpaTestDto.class)
+//                .when(freeIpaTestClient.create())
+//                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
 //                .given(cluster, ClusterTestDto.class)
 //                .given(imageSettings, ImageSettingsTestDto.class)
 //                .withImageId("aaa778fc-7f17-4535-9021-515351df3691")
