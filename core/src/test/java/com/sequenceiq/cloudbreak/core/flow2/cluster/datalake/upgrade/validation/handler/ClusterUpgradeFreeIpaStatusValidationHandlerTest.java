@@ -7,8 +7,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Set;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,7 +20,6 @@ import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
@@ -52,24 +49,24 @@ public class ClusterUpgradeFreeIpaStatusValidationHandlerTest {
     @Test
     public void testFreeIpaValidationReturnsNotAvailableThenThrowError() {
 
-        when(freeipaService.freeipaStatusInDesiredState(ENV_CRN, Set.of(Status.AVAILABLE))).thenReturn(false);
+        when(freeipaService.checkFreeipaRunning(ENV_CRN)).thenReturn(false);
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
         assertEquals(FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
-        verify(freeipaService).freeipaStatusInDesiredState(ENV_CRN, Set.of(Status.AVAILABLE));
+        verify(freeipaService).checkFreeipaRunning(ENV_CRN);
         verify(stackService).getViewByIdWithoutAuth(STACK_ID);
     }
 
     @Test
     public void testFreeIpaValidationReturnsAvailableThenPass() {
 
-        when(freeipaService.freeipaStatusInDesiredState(ENV_CRN, Set.of(Status.AVAILABLE))).thenReturn(true);
+        when(freeipaService.checkFreeipaRunning(ENV_CRN)).thenReturn(true);
 
         Selectable nextFlowStepSelector = underTest.doAccept(getHandlerEvent());
 
         assertEquals(FINISH_CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_EVENT.selector(), nextFlowStepSelector.selector());
-        verify(freeipaService).freeipaStatusInDesiredState(ENV_CRN, Set.of(Status.AVAILABLE));
+        verify(freeipaService).checkFreeipaRunning(ENV_CRN);
         verify(stackService).getViewByIdWithoutAuth(STACK_ID);
     }
 

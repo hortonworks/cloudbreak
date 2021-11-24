@@ -65,7 +65,6 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 
 @Service
@@ -164,7 +163,7 @@ public class ClusterRepairService {
         boolean reattach = !deleteVolumes;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
         List<String> stoppedInstanceIds = getStoppedNotSelectedInstanceIds(stack, repairMode, selectedParts);
-        if (!freeipaService.freeipaStatusInDesiredState(stack, Set.of(Status.AVAILABLE))) {
+        if (!freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn())) {
             repairStartResult = Result.error(RepairValidation
                     .of("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state."));
         } else if (!environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))) {
