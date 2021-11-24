@@ -53,7 +53,7 @@ public class SdxRecoveryTests extends PreconditionSdxE2ETest {
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak and an SDX cluster in available state, "
-                    + "upgrade is called on the SDX cluster then failure point inserted to make the upgrade fail",
+                    + "failure point inserted to make the upgrade fail then upgrade is called on the SDX cluster",
             when = "recovery called on the SDX cluster",
             then = "SDX recovery should be successful, the cluster should be up and running, the image should be the same, stack CRN should be retained"
     )
@@ -70,9 +70,8 @@ public class SdxRecoveryTests extends PreconditionSdxE2ETest {
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> getOriginalImageIdAndStackCrn(originalImageId, originalCrn, testDto, client))
-                .when(sdxTestClient.upgrade(), key(sdx))
-                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
                 .then((tc, testDto, client) -> executeCommandToCauseUpgradeFailure(testDto, client))
+                .when(sdxTestClient.upgrade(), key(sdx))
                 .awaitForFlowFail()
                 .when(sdxTestClient.recover(), key(sdx))
                 .awaitForFlow(emptyRunningParameter().withWaitForFlowSuccess())
