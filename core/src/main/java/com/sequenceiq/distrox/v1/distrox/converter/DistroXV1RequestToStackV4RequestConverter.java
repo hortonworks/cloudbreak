@@ -157,6 +157,9 @@ public class DistroXV1RequestToStackV4RequestConverter {
         if (subnetIds.size() == 1) {
             String subnetId = subnetIds.stream().findFirst().get();
             LOGGER.info("Update the global subnet id to {}, because it is configured in instance group level as the new way", subnetId);
+            if (networkRequest == null) {
+                networkRequest = new NetworkV1Request();
+            }
             if (networkRequest.getAws() == null) {
                 networkRequest.setAws(new AwsNetworkV1Parameters());
             }
