@@ -36,6 +36,8 @@ public class YarnLoadBalancerComponentFactoryService {
      */
     private final String loadBalancerImageName = "docker-sandbox.infra.cloudera.com/cloudbreak/yarn-loadbalancer:2021-03-23-12-02-09";
 
+    private final String loadBalancerImageNameForDEHA = "docker-sandbox.infra.cloudera.com/cloudbreak/yarn-loadbalancer:2021-11-24-16-14-09";
+
     private final int loadBalancerNumCPUs = 1;
 
     /**
@@ -57,6 +59,9 @@ public class YarnLoadBalancerComponentFactoryService {
     public List<YarnComponent> create(CloudStack cloudStack, List<String> gatewayIPs, String applicationName) {
         LOGGER.debug("Creating the loadbalancer components for application " + applicationName + " with gatewayIPs: " + gatewayIPs.toString() + ".");
         Artifact artifact = createLoadBalancerArtifact();
+        if (checkDeHa(cloudStack)) {
+            artifact.setId(loadBalancerImageNameForDEHA);
+        }
         Resource resource = createLoadBalancerResource();
         String launchCommand = createLoadBalancerLaunchCommand(cloudStack);
         Configuration configuration = createLoadBalancerConfiguration(gatewayIPs);
@@ -70,6 +75,10 @@ public class YarnLoadBalancerComponentFactoryService {
 
         LOGGER.debug("Finished creating the Yarn load balancer components for application " + applicationName + ".");
         return loadBalancerComponents;
+    }
+
+    public boolean checkDeHa(CloudStack cloudStack) {
+        return cloudStack.getGroups().stream().anyMatch(x -> "masterx".equalsIgnoreCase(x.getName()));
     }
 
     /**

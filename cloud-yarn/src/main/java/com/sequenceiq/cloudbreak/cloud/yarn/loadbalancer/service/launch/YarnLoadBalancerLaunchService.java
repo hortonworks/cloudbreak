@@ -100,9 +100,14 @@ public class YarnLoadBalancerLaunchService {
         Set<String> gatewayGroupNames = getGatewayGroupNames(cloudStack);
 
         List<String> gatewayIPs = Lists.newArrayList();
+        boolean deHaCluster = componentFactory.checkDeHa(cloudStack);
         foundContainers.forEach(container -> {
             if (gatewayGroupNames.contains(container.getComponentName())) {
-                gatewayIPs.add(container.getIp() + ":443");
+                if (deHaCluster) {
+                    gatewayIPs.add(container.getIp());
+                } else {
+                    gatewayIPs.add(container.getIp() + ":443");
+                }
             }
         });
         LOGGER.info("Successfully found the following gateway IPs for the load balancer: " + gatewayIPs + ".");
