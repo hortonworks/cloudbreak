@@ -96,9 +96,6 @@ public class StackUpscaleActions {
     private StackService stackService;
 
     @Inject
-    private StackScalabilityCondition stackScalabilityCondition;
-
-    @Inject
     private ClusterPublicEndpointManagementService clusterPublicEndpointManagementService;
 
     @Inject
@@ -119,7 +116,8 @@ public class StackUpscaleActions {
 
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
-                int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), payload.getInstanceGroup(), payload.getAdjustment());
+                int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(context.getStack(), payload.getInstanceGroup(),
+                        payload.getAdjustment(), context.isRepair());
                 stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), payload.getAdjustment(), payload.getInstanceGroup(),
                         payload.getAdjustmentTypeWithThreshold());
                 if (instanceCountToCreate > 0) {
@@ -135,7 +133,8 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
-                int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment());
+                int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(),
+                        context.getAdjustment(), context.isRepair());
                 Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
                         context.getInstanceGroupName(), false, context.getHostNames(), context.isRepair(), context.getStackNetworkScaleDetails());
                 CloudStack cloudStack = cloudStackConverter.convert(updatedStack);
@@ -155,7 +154,8 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
-                int instanceCountToCreate = getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(), context.getAdjustment());
+                int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(),
+                        context.getAdjustment(), context.isRepair());
                 Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
                         context.getInstanceGroupName(), true, context.getHostNames(), context.isRepair(), context.getStackNetworkScaleDetails());
                 List<CloudResource> resources = context.getStack().getResources().stream()
@@ -171,11 +171,6 @@ public class StackUpscaleActions {
                         adjustmentTypeWithThreshold);
             }
         };
-    }
-
-    private int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjustment) {
-        Set<InstanceMetaData> instanceMetadata = instanceMetaDataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
-        return stackScalabilityCondition.isScalable(stack, instanceGroupName) ? adjustment - instanceMetadata.size() : 0;
     }
 
     @Bean(name = "ADD_INSTANCES_FINISHED_STATE")
