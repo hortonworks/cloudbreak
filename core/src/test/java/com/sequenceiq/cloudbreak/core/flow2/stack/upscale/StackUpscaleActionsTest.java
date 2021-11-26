@@ -64,9 +64,6 @@ class StackUpscaleActionsTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
-    private StackScalabilityCondition stackScalabilityCondition;
-
-    @Mock
     private StackUpscaleService stackUpscaleService;
 
     @Mock
@@ -139,7 +136,7 @@ class StackUpscaleActionsTest {
         StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
                 adjustmentTypeWithThreshold);
 
-        when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(true);
+        when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT);
 
         Stack updatedStack = mock(Stack.class);
         when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, 3, INSTANCE_GROUP_NAME, false, context.getHostNames(), false,
@@ -175,7 +172,7 @@ class StackUpscaleActionsTest {
         StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
                 adjustmentTypeWithThreshold);
 
-        when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(false);
+        when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
 
         List<CloudResourceStatus> resourceStatuses = List.of(cloudResourceStatus);
         when(resourceService.getAllAsCloudResourceStatus(STACK_ID)).thenReturn(resourceStatuses);
@@ -212,7 +209,7 @@ class StackUpscaleActionsTest {
         StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO,
                 adjustmentTypeWithThreshold);
 
-        when(stackScalabilityCondition.isScalable(stack, INSTANCE_GROUP_NAME)).thenReturn(true);
+        when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
 
         List<CloudResourceStatus> resourceStatuses = List.of(cloudResourceStatus);
         when(resourceService.getAllAsCloudResourceStatus(STACK_ID)).thenReturn(resourceStatuses);

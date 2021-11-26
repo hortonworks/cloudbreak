@@ -42,6 +42,7 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.OperationException;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
@@ -69,6 +70,12 @@ public class StackUpscaleService {
 
     @Inject
     private TransactionService transactionService;
+
+    @Inject
+    private StackScalabilityCondition stackScalabilityCondition;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
 
     public void startAddInstances(Stack stack, Integer scalingAdjustment, String hostGroupName) {
         String statusReason = format("Adding %s new instance(s) to instance group %s", scalingAdjustment, hostGroupName);
@@ -191,5 +198,11 @@ public class StackUpscaleService {
             throw new OperationException(format("Failed to upscale the stack for %s due to: %s",
                     context.getCloudContext(), templates.get(0).getStatusReason()));
         }
+    }
+
+    public int getInstanceCountToCreate(Stack stack, String instanceGroupName, int adjustment, boolean repair) {
+        Set<InstanceMetaData> unusedInstanceMetadata = instanceMetaDataService.unusedInstancesInInstanceGroupByName(stack.getId(), instanceGroupName);
+        int reusableInstanceCount = repair ? 0 : unusedInstanceMetadata.size();
+        return stackScalabilityCondition.isScalable(stack, instanceGroupName) ? adjustment - reusableInstanceCount : 0;
     }
 }
