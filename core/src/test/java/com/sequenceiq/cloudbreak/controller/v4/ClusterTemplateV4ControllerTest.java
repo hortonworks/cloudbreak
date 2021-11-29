@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -22,6 +23,10 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 class ClusterTemplateV4ControllerTest {
 
     private static final Long WORKSPACE_ID = 123L;
+
+    private static final String UUID = java.util.UUID.randomUUID().toString();
+
+    private static final String USER_CRN = "crn:altus:iam:us-west-1:" + UUID + ":user:" + UUID;
 
     @Mock
     private BlueprintService blueprintService;
@@ -38,13 +43,16 @@ class ClusterTemplateV4ControllerTest {
     @Test
     void testList() {
         Set<ClusterTemplateViewV4Response> responses = Set.of();
-        when(clusterTemplateService.listInWorkspaceAndCleanUpInvalids(WORKSPACE_ID)).thenReturn(responses);
+        when(clusterTemplateService.listInWorkspaceAndCleanUpInvalids(WORKSPACE_ID, UUID)).thenReturn(responses);
         when(threadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
 
-        ClusterTemplateViewV4Responses result = underTest.list(WORKSPACE_ID);
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
+            ClusterTemplateViewV4Responses result = underTest.list(WORKSPACE_ID);
+            assertThat(result).isNotNull();
+            assertThat(result.getResponses()).isSameAs(responses);
+        });
 
-        assertThat(result).isNotNull();
-        assertThat(result.getResponses()).isSameAs(responses);
+
         verify(blueprintService).updateDefaultBlueprintCollection(WORKSPACE_ID);
         verify(clusterTemplateService).updateDefaultClusterTemplates(WORKSPACE_ID);
     }

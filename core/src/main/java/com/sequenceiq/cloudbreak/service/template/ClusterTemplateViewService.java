@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.template;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,12 +13,16 @@ import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
 import com.sequenceiq.cloudbreak.service.AbstractWorkspaceAwareResourceService;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
+import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 @Service
 public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceService<ClusterTemplateView> {
 
     @Inject
     private ClusterTemplateViewRepository repository;
+
+    @Inject
+    private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
     @Override
     protected WorkspaceResourceRepository<ClusterTemplateView, Long> repository() {
@@ -34,8 +39,11 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
         throw new BadRequestException("Cluster template creation is not supported from ClusterTemplateViewService");
     }
 
-    public Set<ClusterTemplateView> findAllActive(Long workspaceId) {
-        return repository.findAllActive(workspaceId);
+    public Set<ClusterTemplateView> findAllActive(Long workspaceId, boolean internalTenant) {
+        Set<ClusterTemplateView> allActive = repository.findAllActive(workspaceId);
+        return allActive.stream()
+                        .filter(e -> internalClusterTemplateValidator.shouldPopulate(e, internalTenant))
+                        .collect(Collectors.toSet());
     }
 
     public Set<ClusterTemplateView> findAllByStackIds(List<Long> stackIds) {
@@ -43,7 +51,10 @@ public class ClusterTemplateViewService extends AbstractWorkspaceAwareResourceSe
     }
 
     public Set<ClusterTemplateView> findAllUserManagedAndDefaultByEnvironmentCrn(Long workspaceId, String environmentCrn,
-        String cloudPlatform, String runtime) {
-        return repository.findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime);
+        String cloudPlatform, String runtime, boolean internalTenant) {
+        Set<ClusterTemplateView> allActive = repository.findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime);
+        return allActive.stream()
+                .filter(e -> internalClusterTemplateValidator.shouldPopulate(e, internalTenant))
+                .collect(Collectors.toSet());
     }
 }

@@ -38,6 +38,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.CompactViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
@@ -73,6 +74,7 @@ import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
+import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 @Service
 public class ClusterTemplateService extends AbstractWorkspaceAwareResourceService<ClusterTemplate> implements ResourcePropertyProvider {
@@ -136,6 +138,12 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
     @Inject
     private ClusterTemplateViewToClusterTemplateViewV4ResponseConverter clusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private InternalClusterTemplateValidator internalClusterTemplateValidator;
+
     @Override
     protected WorkspaceResourceRepository<ClusterTemplate, Long> repository() {
         return clusterTemplateRepository;
@@ -146,9 +154,16 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         if (resource.getStatus() == ResourceStatus.DEFAULT || resource.getStatus() == ResourceStatus.DEFAULT_DELETED) {
             throw new AccessDeniedException("Default cluster definition deletion is forbidden");
         }
+        String accountId = resource.getWorkspace().getTenant().getName();
+        if (internalClusterTemplateValidator.isInternalTemplateInNotInternalTenant(entitlementService.internalTenant(accountId), resource.getFeatureState())) {
+            throw new AccessDeniedException("Internal Cluster definition deletion is forbidden");
+        }
     }
 
     public ClusterTemplate createForLoggedInUser(ClusterTemplate resource, Long workspaceId, String accountId, String creator) {
+        if (internalClusterTemplateValidator.isInternalTemplateInNotInternalTenant(entitlementService.internalTenant(accountId), resource.getFeatureState())) {
+            throw new AccessDeniedException("You can not create Internal Template for an outsider organization");
+        }
         resource.setResourceCrn(createCRN(accountId));
         try {
             return transactionService.required(() -> {
@@ -236,10 +251,12 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplateRepository.findAllByNotDeletedInWorkspace(workspace.getId());
     }
 
-    public Set<ClusterTemplateView> findAllByEnvironment(Long workspaceId, String environmentCrn, String cloudPlatform, String runtime) {
+    public Set<ClusterTemplateView> findAllByEnvironment(Long workspaceId, String environmentCrn, String cloudPlatform, String runtime,
+        boolean internalTenant) {
         LOGGER.debug("About to collect cluster definitions by environment: [crn: {}, cloudPlatform: {}, runtime: {}]",
                 environmentCrn, cloudPlatform, runtime);
-        return clusterTemplateViewService.findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime);
+        return clusterTemplateViewService
+                .findAllUserManagedAndDefaultByEnvironmentCrn(workspaceId, environmentCrn, cloudPlatform, runtime, internalTenant);
     }
 
     @Override
@@ -316,9 +333,10 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return new String(BaseEncoding.base64().decode(clusterTemplate.getTemplateContent()));
     }
 
-    public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId) {
+    public Set<ClusterTemplateViewV4Response> listInWorkspaceAndCleanUpInvalids(Long workspaceId, String accountId) {
         try {
-            Set<ClusterTemplateView> views = transactionService.required(() -> clusterTemplateViewService.findAllActive(workspaceId));
+            boolean internalTenant = entitlementService.internalTenant(accountId);
+            Set<ClusterTemplateView> views = transactionService.required(() -> clusterTemplateViewService.findAllActive(workspaceId, internalTenant));
             Set<ClusterTemplateViewV4Response> responses = transactionService.required(() -> views.stream()
                     .map(v -> clusterTemplateViewToClusterTemplateViewV4ResponseConverter.convert(v))
                     .collect(toSet())
@@ -391,16 +409,19 @@ public class ClusterTemplateService extends AbstractWorkspaceAwareResourceServic
         return clusterTemplate;
     }
 
-    public ClusterTemplate getByCrn(String crn, Long workspaceId) {
+    public ClusterTemplate getByCrn(String crn, Long workspaceId, boolean internalTenant) {
         Optional<ClusterTemplate> clusterTemplateOptional = clusterTemplateRepository.getByCrnForWorkspaceId(crn, workspaceId);
         if (clusterTemplateOptional.isEmpty()) {
+            throw new BadRequestException(format("Cluster definition does not exist with crn '%s'", crn));
+        }
+        if (!internalClusterTemplateValidator.shouldPopulate(clusterTemplateOptional.get(), internalTenant)) {
             throw new BadRequestException(format("Cluster definition does not exist with crn '%s'", crn));
         }
         return clusterTemplateOptional.get();
     }
 
-    public ClusterTemplate deleteByCrn(String crn, Long workspaceId) {
-        ClusterTemplate clusterTemplate = getByCrn(crn, workspaceId);
+    public ClusterTemplate deleteByCrn(String crn, Long workspaceId, boolean internalTenant) {
+        ClusterTemplate clusterTemplate = getByCrn(crn, workspaceId, internalTenant);
         clusterTemplate = delete(clusterTemplate);
         stackTemplateService.delete(clusterTemplate.getStackTemplate());
         return clusterTemplate;

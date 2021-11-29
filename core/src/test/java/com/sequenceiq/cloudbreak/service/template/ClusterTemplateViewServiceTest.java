@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterTemplateViewRepository;
+import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 public class ClusterTemplateViewServiceTest {
 
@@ -39,6 +40,9 @@ public class ClusterTemplateViewServiceTest {
 
     @Mock
     private ClusterTemplateViewRepository repository;
+
+    @Mock
+    private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
     @InjectMocks
     private ClusterTemplateViewService underTest;
@@ -67,8 +71,9 @@ public class ClusterTemplateViewServiceTest {
         ClusterTemplateView repositoryResult = new ClusterTemplateView();
         Set<ClusterTemplateView> resultSetFromRepository = Set.of(repositoryResult);
         when(repository.findAllActive(WORKSPACE_ID)).thenReturn(resultSetFromRepository);
+        when(internalClusterTemplateValidator.shouldPopulate(repositoryResult, false)).thenReturn(true);
 
-        Set<ClusterTemplateView> result = underTest.findAllActive(WORKSPACE_ID);
+        Set<ClusterTemplateView> result = underTest.findAllActive(WORKSPACE_ID, false);
 
         assertNotNull(result);
         assertEquals(resultSetFromRepository.size(), result.size());
@@ -78,6 +83,19 @@ public class ClusterTemplateViewServiceTest {
         verify(repository, times(1)).findAllActive(WORKSPACE_ID);
     }
 
+    @Test
+    public void testWhenFindAllAvailableViewInWorkspaceIsCalledThenItsResultSetShouldBeNotReturned() {
+        ClusterTemplateView repositoryResult = new ClusterTemplateView();
+        Set<ClusterTemplateView> resultSetFromRepository = Set.of(repositoryResult);
+        when(repository.findAllActive(WORKSPACE_ID)).thenReturn(resultSetFromRepository);
+        when(internalClusterTemplateValidator.shouldPopulate(repositoryResult, false)).thenReturn(false);
+
+        Set<ClusterTemplateView> result = underTest.findAllActive(WORKSPACE_ID, false);
+
+        assertNotNull(result);
+        assertEquals(0, result.size());
+    }
+
     @ParameterizedTest
     @EnumSource(CloudPlatform.class)
     public void testFindAllUserManagedAndDefaultByEnvironmentCrnWhenRepositoryCantFindAnyThenEmptySetShouldReturn(CloudPlatform cloudPlatform) {
@@ -85,7 +103,7 @@ public class ClusterTemplateViewServiceTest {
         when(repository.findAllUserManagedAndDefaultByEnvironmentCrn(any(), any(), any(), any())).thenReturn(expectedEmptyResultSet);
 
         Set<ClusterTemplateView> result = underTest.findAllUserManagedAndDefaultByEnvironmentCrn(WORKSPACE_ID, TEST_ENV_CRN, cloudPlatform.name(),
-                TEST_RUNTIME);
+                TEST_RUNTIME, false);
 
         assertEquals(expectedEmptyResultSet, result);
 
@@ -99,9 +117,10 @@ public class ClusterTemplateViewServiceTest {
         ClusterTemplateView match = new ClusterTemplateView();
         Set<ClusterTemplateView> expectedNonEmptyResultSet = Set.of(match);
         when(repository.findAllUserManagedAndDefaultByEnvironmentCrn(any(), any(), any(), any())).thenReturn(expectedNonEmptyResultSet);
+        when(internalClusterTemplateValidator.shouldPopulate(match, false)).thenReturn(true);
 
         Set<ClusterTemplateView> result = underTest.findAllUserManagedAndDefaultByEnvironmentCrn(WORKSPACE_ID, TEST_ENV_CRN, cloudPlatform.name(),
-                TEST_RUNTIME);
+                TEST_RUNTIME, false);
 
         assertEquals(expectedNonEmptyResultSet, result);
         assertEquals(expectedNonEmptyResultSet.size(), result.size());
