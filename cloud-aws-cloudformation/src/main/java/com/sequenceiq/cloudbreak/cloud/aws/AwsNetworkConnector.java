@@ -15,6 +15,7 @@ import javax.ws.rs.BadRequestException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -56,6 +57,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkCreationRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.NetworkDeletionRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @Service
 public class AwsNetworkConnector implements DefaultNetworkConnector {
@@ -95,6 +97,10 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
 
     @Inject
     private Map<SubnetFilterStrategyType, SubnetFilterStrategy> subnetFilterStrategyMap;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     @Override
     public CreatedCloudNetwork createNetworkWithSubnets(NetworkCreationRequest networkRequest) {
@@ -162,7 +168,7 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
 
         SubnetFilterStrategyType subnetSelectorStrategyType = preferPrivate ?
                 SubnetFilterStrategyType.MULTIPLE_PREFER_PRIVATE : SubnetFilterStrategyType.MULTIPLE_PREFER_PUBLIC;
-        int maxAzCount = subnetSelectionParameters.isHa() ?  getAzCount(subnetMetas) : 1;
+        int maxAzCount = subnetSelectionParameters.isHa() ? getAzCount(subnetMetas) : 1;
         return subnetFilterStrategyMap.get(subnetSelectorStrategyType).filter(subnetMetas, maxAzCount);
     }
 
@@ -260,16 +266,19 @@ public class AwsNetworkConnector implements DefaultNetworkConnector {
             AwsCredentialView credentialView = new AwsCredentialView(networkDeletionRequest.getCloudCredential());
             String regionName = networkDeletionRequest.getRegion();
             AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-            DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
             String stackName = networkDeletionRequest.getStackName();
-            deleteStackRequest.setStackName(stackName);
-            cfClient.deleteStack(deleteStackRequest);
-            Waiter<DescribeStacksRequest> deletionWaiter = cfClient.waiters().stackDeleteComplete();
-            LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", stackName);
-            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(stackName);
-            run(deletionWaiter, describeStacksRequest, null,
-                    String.format("Network delete failed (cloudformation: %s)", stackName),
-                    () -> awsCloudFormationErrorMessageProvider.getErrorReason(credentialView, regionName, stackName, ResourceStatus.DELETE_FAILED));
+            boolean exists = retryService.testWith2SecDelayMax15Times(() -> cfStackUtil.isCfStackExists(cfClient, stackName));
+            if (exists) {
+                DeleteStackRequest deleteStackRequest = new DeleteStackRequest();
+                deleteStackRequest.setStackName(stackName);
+                cfClient.deleteStack(deleteStackRequest);
+                Waiter<DescribeStacksRequest> deletionWaiter = cfClient.waiters().stackDeleteComplete();
+                LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' ", stackName);
+                DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(stackName);
+                run(deletionWaiter, describeStacksRequest, null,
+                        String.format("Network delete failed (cloudformation: %s)", stackName),
+                        () -> awsCloudFormationErrorMessageProvider.getErrorReason(credentialView, regionName, stackName, ResourceStatus.DELETE_FAILED));
+            }
         }
     }
 

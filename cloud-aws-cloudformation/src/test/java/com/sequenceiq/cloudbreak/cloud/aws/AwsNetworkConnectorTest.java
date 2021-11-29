@@ -18,8 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.ws.rs.BadRequestException;
@@ -52,9 +50,9 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsSubnetRequestProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsTaggingService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
-import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategy;
 import com.sequenceiq.cloudbreak.cloud.aws.common.subnetselector.SubnetFilterStrategyType;
+import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
@@ -72,6 +70,7 @@ import com.sequenceiq.cloudbreak.cloud.model.network.NetworkSubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.model.network.SubnetRequest;
 import com.sequenceiq.cloudbreak.cloud.network.NetworkCidr;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -147,6 +146,9 @@ public class AwsNetworkConnectorTest {
 
     @Mock
     private SubnetFilterStrategy subnetFilterStrategy;
+
+    @Mock
+    private Retry retryService;
 
     @Before
     public void before() {
@@ -240,6 +242,7 @@ public class AwsNetworkConnectorTest {
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
                 .thenReturn(cfClient);
         when(cfClient.waiters()).thenReturn(cfWaiters);
+        when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
         when(cfWaiters.stackDeleteComplete()).thenReturn(deletionWaiter);
 
         underTest.deleteNetworkWithSubnets(networkDeletionRequest);
@@ -250,13 +253,13 @@ public class AwsNetworkConnectorTest {
     }
 
     @Test(expected = CloudConnectorException.class)
-    public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed()
-            throws InterruptedException, ExecutionException, TimeoutException {
+    public void testDeleteNetworkWithSubNetsShouldThrowAnExceptionWhenTheStackDeletionFailed() {
         NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
         AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
         when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
                 .thenReturn(cfClient);
         when(cfClient.waiters()).thenReturn(cfWaiters);
+        when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
         when(cfWaiters.stackDeleteComplete()).thenReturn(deletionWaiter);
         doThrow(new WaiterTimedOutException("fail")).when(deletionWaiter).run(any());
 
@@ -264,6 +267,19 @@ public class AwsNetworkConnectorTest {
 
         verify(cfClient).deleteStack(any(DeleteStackRequest.class));
         verify(awsClient).createCloudFormationClient(any(AwsCredentialView.class), eq(REGION.value()));
+    }
+
+    @Test
+    public void testDeleteNetworkWithSubNetsWhenCfStackDoesNotExist() {
+        NetworkDeletionRequest networkDeletionRequest = createNetworkDeletionRequest();
+        AmazonCloudFormationClient cfClient = mock(AmazonCloudFormationClient.class);
+        when(awsClient.createCloudFormationClient(any(AwsCredentialView.class), eq(networkDeletionRequest.getRegion())))
+                .thenReturn(cfClient);
+        when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(false);
+
+        underTest.deleteNetworkWithSubnets(networkDeletionRequest);
+
+        verify(cfClient, never()).deleteStack(any(DeleteStackRequest.class));
     }
 
     @Test

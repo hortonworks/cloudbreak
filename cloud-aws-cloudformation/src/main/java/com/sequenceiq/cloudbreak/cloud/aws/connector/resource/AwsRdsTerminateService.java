@@ -10,6 +10,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.amazonaws.AmazonServiceException;
@@ -17,10 +18,10 @@ import com.amazonaws.services.cloudformation.model.DeleteStackRequest;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.AwsStackRequestHelper;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.aws.scheduler.StackCancellationCheck;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.DatabaseStack;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.service.Retry;
 
 @Service
 public class AwsRdsTerminateService {
@@ -44,6 +46,10 @@ public class AwsRdsTerminateService {
 
     @Inject
     private AwsStackRequestHelper awsStackRequestHelper;
+
+    @Inject
+    @Qualifier("DefaultRetryService")
+    private Retry retryService;
 
     /**
      * Terminates a database server (stack).
@@ -117,21 +123,19 @@ public class AwsRdsTerminateService {
             AwsCredentialView credentialView,
             String regionName
     ) {
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
         AmazonCloudFormationClient cfClient = awsClient.createCloudFormationClient(credentialView, regionName);
-        cfClient.describeStacks(describeStacksRequest);
-        DeleteStackRequest deleteStackRequest = awsStackRequestHelper.createDeleteStackRequest(cFStackName);
-        cfClient.deleteStack(deleteStackRequest);
-        LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
+        boolean exists = retryService.testWith2SecDelayMax15Times(() -> cfStackUtil.isCfStackExists(cfClient, cFStackName));
+        if (exists) {
+            DeleteStackRequest deleteStackRequest = awsStackRequestHelper.createDeleteStackRequest(cFStackName);
+            cfClient.deleteStack(deleteStackRequest);
+            LOGGER.debug("CloudFormation stack deletion request sent with stack name: '{}' for stack: '{}'", cFStackName, ac.getCloudContext().getId());
 
-        Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = cfClient.waiters().stackDeleteComplete();
-        StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
-        WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
-                .withPollingStrategy(getBackoffCancellablePollingStrategy(stackCancellationCheck));
-        stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
-    }
-
-    private void wrapExceptionIfNeeded(Exception e) throws Exception {
-
+            Waiter<DescribeStacksRequest> stackDeleteCompleteWaiter = cfClient.waiters().stackDeleteComplete();
+            StackCancellationCheck stackCancellationCheck = new StackCancellationCheck(ac.getCloudContext().getId());
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+            WaiterParameters<DescribeStacksRequest> describeStacksRequestWaiterParameters = new WaiterParameters<>(describeStacksRequest)
+                    .withPollingStrategy(getBackoffCancellablePollingStrategy(stackCancellationCheck));
+            stackDeleteCompleteWaiter.run(describeStacksRequestWaiterParameters);
+        }
     }
 }

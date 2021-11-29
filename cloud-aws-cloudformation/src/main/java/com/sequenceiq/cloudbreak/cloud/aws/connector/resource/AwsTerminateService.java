@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.AmazonServiceException.ErrorType;
 import com.amazonaws.services.autoscaling.model.AutoScalingGroup;
 import com.amazonaws.services.autoscaling.model.DeleteLaunchConfigurationRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
@@ -25,10 +24,10 @@ import com.amazonaws.services.cloudformation.model.ResourceStatus;
 import com.amazonaws.services.ec2.model.DeleteKeyPairRequest;
 import com.amazonaws.waiters.Waiter;
 import com.amazonaws.waiters.WaiterParameters;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
@@ -39,7 +38,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -98,47 +96,26 @@ public class AwsTerminateService {
         }
         String cFStackName = stackResource.getName();
         LOGGER.debug("Search and wait stack with name: {}", cFStackName);
-        DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
-        try {
-            retryService.testWith2SecDelayMax15Times(() -> isStackExist(amazonCloudFormationClient, cFStackName, describeStacksRequest));
-        } catch (NotFoundException e) {
-            LOGGER.error("Couldnt get stack with name: {}, error: {}", cFStackName, e.getMessage());
-            return;
-        } catch (ActionFailedException | AmazonServiceException e) {
-            LOGGER.error("Couldnt get stack with name: {}, error: {}", cFStackName, e.getMessage());
-            throw e;
-        }
-
-        resumeAutoScalingPolicies(ac, stack);
-        LOGGER.debug("Delete cloudformation stack from resources");
-        DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
-        try {
-            retryService.testWith2SecDelayMax5Times(() -> isStackDeleted(amazonCloudFormationClient, describeStacksRequest, deleteStackRequest));
-        } catch (Exception e) {
-            String errorReason = awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.DELETE_FAILED);
-            if (!StringUtils.hasText(errorReason)) {
-                LOGGER.debug("Cannot fetch the error reason from AWS by DELETE_FAILED, fallback to exception message.");
-                errorReason = e.getMessage();
+        boolean exists = retryService.testWith2SecDelayMax15Times(() -> cfStackUtil.isCfStackExists(amazonCloudFormationClient, cFStackName));
+        if (exists) {
+            DescribeStacksRequest describeStacksRequest = new DescribeStacksRequest().withStackName(cFStackName);
+            resumeAutoScalingPolicies(ac, stack);
+            LOGGER.debug("Delete cloudformation stack from resources");
+            DeleteStackRequest deleteStackRequest = new DeleteStackRequest().withStackName(cFStackName);
+            try {
+                retryService.testWith2SecDelayMax5Times(() -> isStackDeleted(amazonCloudFormationClient, describeStacksRequest, deleteStackRequest));
+            } catch (Exception e) {
+                String errorReason = awsCloudFormationErrorMessageProvider.getErrorReason(ac, cFStackName, ResourceStatus.DELETE_FAILED);
+                if (!StringUtils.hasText(errorReason)) {
+                    LOGGER.debug("Cannot fetch the error reason from AWS by DELETE_FAILED, fallback to exception message.");
+                    errorReason = e.getMessage();
+                }
+                String message = String.format("Cloudformation stack delete failed: %s", errorReason);
+                LOGGER.debug(message, e);
+                throw new CloudConnectorException(message, e);
             }
-            String message = String.format("Cloudformation stack delete failed: %s", errorReason);
-            LOGGER.debug(message, e);
-            throw new CloudConnectorException(message, e);
+            LOGGER.debug("Cloudformation stack from resources has been deleted");
         }
-        LOGGER.debug("Cloudformation stack from resources has been deleted");
-    }
-
-    private Boolean isStackExist(AmazonCloudFormationClient cfRetryClient, String cFStackName, DescribeStacksRequest describeStacksRequest) {
-        try {
-            cfRetryClient.describeStacks(describeStacksRequest);
-        } catch (AmazonServiceException e) {
-            if (e.getErrorMessage().contains(cFStackName + " does not exist")) {
-                throw new NotFoundException(cFStackName + " does not exists");
-            } else if (ErrorType.Client.equals(e.getErrorType())) {
-                throw e;
-            }
-            throw new ActionFailedException(e.getMessage());
-        }
-        return Boolean.TRUE;
     }
 
     private Boolean isStackDeleted(AmazonCloudFormationClient cfRetryClient, DescribeStacksRequest describeStacksRequest,
