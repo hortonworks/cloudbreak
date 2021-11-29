@@ -9,12 +9,18 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.validation.ValidationResult;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
+import com.sequenceiq.freeipa.converter.stack.StackToCreateFreeIpaRequestConverter;
 import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +80,12 @@ public class RepairInstancesService {
 
     @Inject
     private StackUpdater stackUpdater;
+
+    @Inject
+    private FreeIpaCreationService freeIpaCreationService;
+
+    @Inject
+    private StackToCreateFreeIpaRequestConverter stackToCreateFreeIpaRequestConverter;
 
     private void validate(String accountId, Stack stack, Set<InstanceMetaData> remainingGoodInstances, Set<InstanceMetaData> remainingBadInstances,
             Collection<InstanceMetaData> instancesToRepair) {
@@ -254,5 +266,26 @@ public class RepairInstancesService {
                     instancesToReboot.keySet().stream().collect(Collectors.toList()), operation.getOperationId()));
         }
         return operationToOperationStatusConverter.convert(operation);
+    }
+
+    public DescribeFreeIpaResponse rebuild(String accountId, RebuildRequest rebuildRequest) {
+        ValidationResult.ValidationResultBuilder validationResultBuilder = ValidationResult.builder();
+        Optional<Stack> stack =
+                stackService.findByCrnAndAccountIdWithListsEvenIfTerminated(rebuildRequest.getEnvironmentCrn(), accountId, rebuildRequest.getSourceCrn());
+        if (stack.isEmpty()) {
+            validationResultBuilder.error("Stack not found.");
+        }
+        Optional<Stack> nonTerminatedStack = stackService.findByEnvironmentCrnAndAccountId(rebuildRequest.getEnvironmentCrn(), accountId);
+        if (nonTerminatedStack.isPresent()) {
+            validationResultBuilder.error("There is a stack which hasn't been terminated.");
+        }
+        ValidationResult validationResult = validationResultBuilder.build();
+        if (validationResult.hasError()) {
+            LOGGER.debug("RebuildRequest has validation error(s): {}.", validationResult.getFormattedErrors());
+            throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        CreateFreeIpaRequest createFreeIpaRequest = stackToCreateFreeIpaRequestConverter.convert(stack.get());
+
+        return freeIpaCreationService.launchFreeIpa(createFreeIpaRequest, accountId);
     }
 }

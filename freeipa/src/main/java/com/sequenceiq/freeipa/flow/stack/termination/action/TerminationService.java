@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
-import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
@@ -64,7 +63,9 @@ public class TerminationService {
                 String terminatedName = stack.getName() + DELIMITER + currentTimeMillis;
                 stack.setName(terminatedName);
                 stack.setTerminated(currentTimeMillis);
-                terminateInstanceGroups(stack);
+
+                // Do not remove the instance security groups or tempalates because they are needed for repairs which rebuild the instances
+
                 terminateMetaDataInstances(stack, null);
                 cleanupVault(stack);
                 stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
@@ -117,14 +118,6 @@ public class TerminationService {
                     instanceMetaDatas.add(metaData);
                 });
         instanceMetaDataService.saveAll(instanceMetaDatas);
-    }
-
-    private void terminateInstanceGroups(Stack stack) {
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            instanceGroup.setSecurityGroup(null);
-            instanceGroup.setTemplate(null);
-            instanceGroupService.save(instanceGroup);
-        }
     }
 
     private void terminateMetaDataInstances(Stack stack, List<String> instanceIds) {

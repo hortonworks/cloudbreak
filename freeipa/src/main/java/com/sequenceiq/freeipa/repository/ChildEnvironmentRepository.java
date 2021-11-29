@@ -15,8 +15,21 @@ import com.sequenceiq.freeipa.entity.Stack;
 @Transactional(Transactional.TxType.REQUIRED)
 public interface ChildEnvironmentRepository extends CrudRepository<ChildEnvironment, Long> {
 
-    @Query("SELECT c.stack FROM ChildEnvironment c WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.accountId = :accountId")
+    @Query("SELECT c.stack FROM ChildEnvironment c WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.accountId = :accountId AND c.stack.terminated = -1")
     Optional<Stack> findParentStackByChildEnvironmentCrn(@Param("childEnvironmentCrn") String childEnvironmentCrn, @Param("accountId") String accountId);
+
+    @Query("SELECT c.stack FROM ChildEnvironment c LEFT JOIN FETCH c.stack.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.accountId = :accountId")
+    List<Stack> findMultipleParentByEnvirnmentCrnWthListsEvenIfTerminated(
+            @Param("childEnvironmentCrn") String childEnvironmentCrn,
+            @Param("accountId") String accountId);
+
+    @Query("SELECT c.stack FROM ChildEnvironment c LEFT JOIN FETCH c.stack.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.accountId = :accountId AND c.stack.resourceCrn = :resourceCrn")
+    Optional<Stack> findParentByEnvirnmentCrnAndCrnWthListsEvenIfTerminated(
+            @Param("childEnvironmentCrn") String childEnvironmentCrn,
+            @Param("accountId") String accountId,
+            @Param("resourceCrn") String resourceCrn);
 
     @Query("SELECT c FROM ChildEnvironment c "
             + "WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.environmentCrn = :parentEnvironmentCrn AND c.stack.accountId = :accountId")

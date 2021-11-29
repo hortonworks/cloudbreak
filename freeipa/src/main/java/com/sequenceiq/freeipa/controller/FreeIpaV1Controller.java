@@ -48,6 +48,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImag
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.authorization.FreeIpaFiltering;
@@ -256,6 +257,13 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public OperationStatus repairInstances(@RequestObject @Valid RepairInstancesRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.repairInstances(accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = REPAIR_FREEIPA)
+    public DescribeFreeIpaResponse rebuild(@RequestObject @Valid RebuildRequest request) {
+        String accountId = crnService.getCurrentAccountId();
+        return repairInstancesService.rebuild(accountId, request);
     }
 
     @Override

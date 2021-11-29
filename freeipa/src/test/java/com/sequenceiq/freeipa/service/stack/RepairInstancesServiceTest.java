@@ -16,8 +16,13 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
+import com.sequenceiq.freeipa.converter.stack.StackToCreateFreeIpaRequestConverter;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,6 +67,8 @@ class RepairInstancesServiceTest {
 
     private static final String ENVIRONMENT_ID2 = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:98765-4321";
 
+    private static final String FREEIPA_CRN = "crn:cdp:freeipa:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:11111-2222";
+
     private static final String ACCOUNT_ID = "accountId";
 
     private static Stack stack1;
@@ -88,6 +95,12 @@ class RepairInstancesServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private FreeIpaCreationService freeIpaCreationService;
+
+    @Mock
+    private StackToCreateFreeIpaRequestConverter stackToCreateFreeIpaRequestConverter;
 
     @InjectMocks
     private RepairInstancesService underTest;
@@ -444,6 +457,49 @@ class RepairInstancesServiceTest {
         assertEquals(operationStatus, underTest.repairInstances(ACCOUNT_ID, repairInstancesRequest));
 
         verify(flowManager, times(1)).notify(eq(REPAIR_TRIGGER_EVENT), any());
+    }
+
+    @Test
+    public void testRebuildThrowsWhenSourceStackIsNotFound() throws Exception {
+        when(stackService.findByCrnAndAccountIdWithListsEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(Optional.empty());
+
+        RebuildRequest rebuildRequest = new RebuildRequest();
+        rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        rebuildRequest.setSourceCrn(FREEIPA_CRN);
+
+        assertThrows(BadRequestException.class, () -> underTest.rebuild(ACCOUNT_ID, rebuildRequest));
+    }
+
+    @Test
+    public void testRebuildThrowsWhenSourceStackIsRunning() throws Exception {
+        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.CREATED), 2);
+
+        when(stackService.findByCrnAndAccountIdWithListsEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(Optional.of(stack));
+        when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+
+        RebuildRequest rebuildRequest = new RebuildRequest();
+        rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        rebuildRequest.setSourceCrn(FREEIPA_CRN);
+
+        assertThrows(BadRequestException.class, () -> underTest.rebuild(ACCOUNT_ID, rebuildRequest));
+    }
+
+    @Test
+    public void testRebuild() throws Exception {
+        Stack stack = createStack(List.of(InstanceStatus.TERMINATED, InstanceStatus.TERMINATED), 2);
+        CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
+        DescribeFreeIpaResponse response = new DescribeFreeIpaResponse();
+
+        when(stackService.findByCrnAndAccountIdWithListsEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(Optional.of(stack));
+        when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(stackToCreateFreeIpaRequestConverter.convert(eq(stack))).thenReturn(createFreeIpaRequest);
+        when(freeIpaCreationService.launchFreeIpa(eq(createFreeIpaRequest), eq(ACCOUNT_ID))).thenReturn(response);
+
+        RebuildRequest rebuildRequest = new RebuildRequest();
+        rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        rebuildRequest.setSourceCrn(FREEIPA_CRN);
+
+        assertEquals(response, underTest.rebuild(ACCOUNT_ID, rebuildRequest));
     }
 
     private HealthDetailsFreeIpaResponse getMockDetails1() {

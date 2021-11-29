@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -236,5 +237,14 @@ class FreeIpaV1ControllerTest {
         underTest.generateImageCatalog(ENVIRONMENT_CRN);
 
         verify(imageCatalogGeneratorService).generate(ENVIRONMENT_CRN, ACCOUNT_ID);
+    }
+
+    @Test
+    void rebuild() {
+        when(crnService.getCurrentAccountId()).thenReturn(ACCOUNT_ID);
+        RebuildRequest request = new RebuildRequest();
+
+        underTest.rebuild(request);
+        verify(repairInstancesService, times(1)).rebuild(crnService.getCurrentAccountId(), request);
     }
 }
