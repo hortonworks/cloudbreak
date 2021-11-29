@@ -48,8 +48,8 @@ public enum DatalakeStatusEnum {
     DATALAKE_RESTORE_INPROGRESS(ResourceEvent.DATALAKE_RESTORE_IN_PROGRESS),
     DATALAKE_RESTORE_FAILED(ResourceEvent.DATALAKE_RESTORE_FAILED),
     DATALAKE_DETACHED(ResourceEvent.DATALAKE_DETACHED),
-    DATALAKE_RECOVERY_IN_PROGRESS(ResourceEvent.DATALAKE_RECOVERY_IN_PROGRESS),
-    DATALAKE_RECOVERY_FAILED(ResourceEvent.DATALAKE_RECOVERY_FAILED);
+    RECOVERY_IN_PROGRESS(ResourceEvent.DATALAKE_RECOVERY_IN_PROGRESS),
+    RECOVERY_FAILED(ResourceEvent.DATALAKE_RECOVERY_FAILED);
 
     private ResourceEvent resourceEvent;
 
@@ -90,8 +90,8 @@ public enum DatalakeStatusEnum {
                 return DATALAKE_UPGRADE_FAILED;
             case CERT_ROTATION_IN_PROGRESS:
                 return CERT_ROTATION_FAILED;
-            case DATALAKE_RECOVERY_IN_PROGRESS:
-                return DATALAKE_RECOVERY_FAILED;
+            case RECOVERY_IN_PROGRESS:
+                return RECOVERY_FAILED;
             default:
                 return this;
         }

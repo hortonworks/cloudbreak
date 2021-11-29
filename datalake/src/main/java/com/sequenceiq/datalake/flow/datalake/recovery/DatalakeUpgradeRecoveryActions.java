@@ -154,7 +154,7 @@ public class DatalakeUpgradeRecoveryActions {
             protected void doExecute(SdxContext context, DatalakeRecoveryFailedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Sdx recovery failed for sdxId: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(
-                        DatalakeStatusEnum.DATALAKE_RECOVERY_FAILED,
+                        DatalakeStatusEnum.RECOVERY_FAILED,
                         "Recovery failed",
                         payload.getResourceId());
                 sendEvent(context, DATALAKE_RECOVERY_FAILED_HANDLED_EVENT.event(), payload);
