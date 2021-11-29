@@ -17,7 +17,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
-import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.stack.termination.TerminationFailedException;
@@ -57,24 +56,27 @@ public class TerminationService {
     private KeytabCleanupService keytabCleanupService;
 
     public void finalizeTermination(Long stackId) {
-        long currentTimeMillis = clock.getCurrentTimeMillis();
         try {
             transactionService.required(() -> {
-                Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                String terminatedName = stack.getName() + DELIMITER + currentTimeMillis;
-                stack.setName(terminatedName);
-                stack.setTerminated(currentTimeMillis);
-                terminateInstanceGroups(stack);
-                terminateMetaDataInstances(stack, null);
-                cleanupVault(stack);
-                stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
-                stackService.save(stack);
+                finalizeTerminationTransaction(stackId);
                 return null;
             });
         } catch (TransactionExecutionException ex) {
             LOGGER.info("Failed to terminate cluster infrastructure.");
             throw new TerminationFailedException(ex);
         }
+    }
+
+    void finalizeTerminationTransaction(Long stackId) {
+        long currentTimeMillis = clock.getCurrentTimeMillis();
+        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
+        String terminatedName = stack.getName() + DELIMITER + currentTimeMillis;
+        stack.setName(terminatedName);
+        stack.setTerminated(currentTimeMillis);
+        terminateMetaDataInstances(stack, null);
+        cleanupVault(stack);
+        stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
+        stackService.save(stack);
     }
 
     public void finalizeTermination(Long stackId, List<String> instanceIds) {
@@ -117,14 +119,6 @@ public class TerminationService {
                     instanceMetaDatas.add(metaData);
                 });
         instanceMetaDataService.saveAll(instanceMetaDatas);
-    }
-
-    private void terminateInstanceGroups(Stack stack) {
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            instanceGroup.setSecurityGroup(null);
-            instanceGroup.setTemplate(null);
-            instanceGroupService.save(instanceGroup);
-        }
     }
 
     private void terminateMetaDataInstances(Stack stack, List<String> instanceIds) {

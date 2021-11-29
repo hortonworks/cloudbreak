@@ -32,6 +32,15 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
 
+    @Query("SELECT s FROM Stack s "
+            + "LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.resourceCrn = :resourceCrn ")
+    Optional<Stack> findByAccountIdEnvironmentCrnAndCrnWithListsEvenIfTerminated(
+            @Param("environmentCrn") String environmentCrn,
+            @Param("accountId") String accountId,
+            @Param("resourceCrn") String resourceCrn);
+
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn AND s.name = :name AND s.terminated = -1")
     Optional<Stack> findByAccountIdEnvironmentCrnAndName(
             @Param("accountId") String accountId,
@@ -48,7 +57,7 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     Optional<Stack> findByEnvironmentCrnAndAccountId(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn")
-    Optional<Stack> findByEnvironmentCrnAndAccountIdEvenIfTerminated(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
+    List<Stack> findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
     @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
             + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")

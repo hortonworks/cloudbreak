@@ -1,6 +1,7 @@
 package com.sequenceiq.common.api.telemetry.model;
 
 import java.io.Serializable;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.common.api.cloudstorage.old.GcsCloudStorageV1Parameters;
@@ -58,5 +59,16 @@ public class Logging implements Serializable {
 
     public void setCloudwatch(CloudwatchParams cloudwatch) {
         this.cloudwatch = cloudwatch;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Logging.class.getSimpleName() + "[", "]")
+                .add("storageLocation='" + storageLocation + '\'')
+                .add("s3='" + s3 + '\'')
+                .add("adlsGen2='" + adlsGen2 + '\'')
+                .add("gcs='" + gcs + '\'')
+                .add("cloudwatch='" + cloudwatch + '\'')
+                .toString();
     }
 }

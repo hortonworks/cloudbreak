@@ -3,6 +3,7 @@ package com.sequenceiq.common.api.telemetry.model;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -32,5 +33,13 @@ public class WorkloadAnalytics implements Serializable {
 
     public void setAttributes(Map<String, Object> attributes) {
         this.attributes = attributes;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", WorkloadAnalytics.class.getSimpleName() + "[", "]")
+                .add("databusEndpoint='" + databusEndpoint + '\'')
+                .add("attributes='" + attributes + "'")
+                .toString();
     }
 }

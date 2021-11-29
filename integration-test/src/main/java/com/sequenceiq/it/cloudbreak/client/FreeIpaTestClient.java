@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import java.util.Set;
 
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -87,6 +88,10 @@ public class FreeIpaTestClient {
 
     public Action<FreeIpaTestDto, FreeIpaClient> repair(InstanceMetadataType instanceMetadataType) {
         return new FreeIpaRepairAction(instanceMetadataType);
+    }
+
+    public Action<FreeIpaTestDto, FreeIpaClient> rebuild() {
+        return new FreeIpaRebuildAction();
     }
 
     public Action<FreeIpaDiagnosticsTestDto, FreeIpaClient> collectDiagnostics() {

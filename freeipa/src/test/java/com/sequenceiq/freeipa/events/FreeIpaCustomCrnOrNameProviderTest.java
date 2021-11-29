@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUr
 import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Assertions;
@@ -70,7 +71,7 @@ public class FreeIpaCustomCrnOrNameProviderTest {
         stack.setResourceCrn("stackCrn");
         stack.setId(2922L);
 
-        when(stackService.getByEnvironmentCrnAndAccountIdEvenIfTerminated("env-crn", "acc")).thenReturn(stack);
+        when(stackService.getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated("env-crn", "acc")).thenReturn(List.of(stack));
 
         Map<String, String> restParams = new HashMap<>();
         Map<String, String> expected = ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.provide(restCallDetails, null, restParams, "name", "crn"));

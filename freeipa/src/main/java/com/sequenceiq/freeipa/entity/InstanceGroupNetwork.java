@@ -12,6 +12,8 @@ import javax.persistence.Table;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 
+import java.util.StringJoiner;
+
 @Entity
 @Table
 public class InstanceGroupNetwork {
@@ -53,6 +55,15 @@ public class InstanceGroupNetwork {
 
     public String getCloudPlatform() {
         return cloudPlatform;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", InstanceGroupNetwork.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("cloudPlatform='" + cloudPlatform + '\'')
+                .add("attributes='" + attributes + "'")
+                .toString();
     }
 }
 
