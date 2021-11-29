@@ -53,6 +53,8 @@ public final class Notes {
                 "Gets information on a database server by cluster CRN";
         public static final String CREATE =
             "Creates a new database server. The database server starts out with only default databases.";
+        public static final String UPDATE_CLUSTER_CRN =
+                "Updates the cluster crn associated with the database";
         public static final String RELEASE =
             "Releases management of a service-managed database server. Resource tracking information is discarded, "
             + " but the server remains registered as user-managed.";
