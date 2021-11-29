@@ -79,7 +79,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterHostServiceRunnerTest {
 
-    private static final Long CLUSTER_ID = 1L;
+    private static final String TEST_CLUSTER_CRN = "crn:cdp:datahub:us-west-1:datahub:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -290,6 +290,7 @@ public class ClusterHostServiceRunnerTest {
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
+        when(stack.getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         when(cluster.getName()).thenReturn("clustername");
         when(cluster.getStack()).thenReturn(stack);
         when(componentLocator.getComponentLocation(any(), any())).thenReturn(new HashMap<>());
