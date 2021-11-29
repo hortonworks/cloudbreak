@@ -338,6 +338,7 @@ public class ClusterHostServiceRunner {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         KerberosConfig kerberosConfig = kerberosConfigService.get(stack.getEnvironmentCrn(), stack.getName()).orElse(null);
         saveCustomNameservers(stack, kerberosConfig, servicePillar);
+        servicePillar.putAll(createUnboundEliminationPillar(Crn.safeFromString(stack.getResourceCrn()).getAccountId()));
         addKerberosConfig(servicePillar, kerberosConfig);
         servicePillar.putAll(hostAttributeDecorator.createHostAttributePillars(stack, allNodes));
         servicePillar.put("discovery", new SaltPillarProperties("/discovery/init.sls", singletonMap("platform", stack.cloudPlatform())));
@@ -593,6 +594,11 @@ public class ClusterHostServiceRunner {
                 LOGGER.debug("Exception during reading default tags.", e);
             }
         }
+    }
+
+    private Map<String, SaltPillarProperties> createUnboundEliminationPillar(String accountId) {
+        return Map.of("elimination", new SaltPillarProperties("/unbound/elimination.sls", singletonMap("supported",
+                entitlementService.isUnboundEliminationSupported(accountId))));
     }
 
     private void saveCustomNameservers(Stack stack, KerberosConfig kerberosConfig, Map<String, SaltPillarProperties> servicePillar) {

@@ -8,6 +8,11 @@ faulty_7_2_11_images_unbound_restart_patch:
     - repl: "pkill -u unbound -SIGHUP unbound"
     - ignore_if_missing: True
 
+{% if salt['pillar.get']('unbound:elimination:supported',False) == True %}
+remove_cluster_conf_from_unbound:
+  file.absent:
+    - name: /etc/unbound/conf.d/00-cluster.conf
+{% else %}
 /etc/unbound/conf.d/00-cluster.conf:
   file.managed:
     - makedirs: True
@@ -15,6 +20,7 @@ faulty_7_2_11_images_unbound_restart_patch:
     - template: jinja
     - context:
         server_address: {{ metadata.server_address }}
+{% endif %}
 
 /etc/dhcp/dhclient.d/google_hostname.sh:
   file.managed:

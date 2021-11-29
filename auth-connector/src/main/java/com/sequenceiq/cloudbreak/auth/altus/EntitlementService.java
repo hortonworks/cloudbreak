@@ -58,6 +58,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DATABUS_CNAME_ENDPOINT;
@@ -389,6 +390,10 @@ public class EntitlementService {
 
     public boolean isDatalakeMediumDutyWithProfilerEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER);
+    }
+
+    public boolean isUnboundEliminationSupported(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_UNBOUND_ELIMINATION);
     }
 
     public List<String> getEntitlements(String accountId) {

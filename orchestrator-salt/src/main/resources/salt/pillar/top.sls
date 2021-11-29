@@ -7,6 +7,7 @@ base:
     - discovery.init
     - recipes.init
     - unbound.forwarders
+    - unbound.elimination
     - datalake.init
     - docker
     - metadata.init
