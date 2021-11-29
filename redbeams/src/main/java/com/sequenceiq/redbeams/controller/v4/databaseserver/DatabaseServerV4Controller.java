@@ -48,6 +48,7 @@ import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerConfigT
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerV4RequestToDatabaseServerConfigConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
@@ -125,6 +126,16 @@ public class DatabaseServerV4Controller implements DatabaseServerV4Endpoint {
         DBStack dbStack = dbStackConverter.convert(request, ThreadBasedUserCrnProvider.getUserCrn());
         DBStack savedDBStack = redbeamsCreationService.launchDatabaseServer(dbStack, request.getClusterCrn());
         return dbStackToDatabaseServerStatusV4ResponseConverter.convert(savedDBStack);
+    }
+
+    @Override
+    @InternalOnly
+    public void updateClusterCrn(String environmentCrn, String currentClusterCrn, String newClusterCrn, @InitiatorUserCrn String initiatorUserCrn) {
+        DatabaseServerConfig databaseServerConfig = databaseServerConfigService.findByEnvironmentCrnAndClusterCrn(environmentCrn, currentClusterCrn)
+                .orElseThrow(() -> new NotFoundException(String.format("No %s found with cluster CRN '%s' in environment '%s'",
+                        DatabaseServerConfig.class.getSimpleName(), currentClusterCrn, environmentCrn)));
+        databaseServerConfig.setClusterCrn(newClusterCrn);
+        databaseServerConfigService.update(databaseServerConfig);
     }
 
     @Override

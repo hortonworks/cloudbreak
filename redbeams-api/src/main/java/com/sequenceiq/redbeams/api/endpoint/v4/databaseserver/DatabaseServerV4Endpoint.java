@@ -101,6 +101,14 @@ public interface DatabaseServerV4Endpoint {
     );
 
     @POST
+    @Path("updateclustercrn")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = DatabaseServerOpDescription.UPDATE_CLUSTER_CRN,  notes = DatabaseServerNotes.UPDATE_CLUSTER_CRN,
+            consumes = MediaType.APPLICATION_JSON, nickname = "updateClusterCrn")
+    void updateClusterCrn(@QueryParam("environmentCrn") String environmentCrn, @QueryParam("currentClusterCrn") String currentClusterCrn,
+            @QueryParam("newClusterCrn") String newClusterCrn, @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @POST
     @Path("internal/managed")
     @Consumes(MediaType.APPLICATION_JSON)
     @ApiOperation(value = DatabaseServerOpDescription.CREATE_INTERNAL, notes = DatabaseServerNotes.CREATE,

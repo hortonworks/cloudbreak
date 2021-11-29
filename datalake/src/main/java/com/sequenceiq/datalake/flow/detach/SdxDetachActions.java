@@ -38,15 +38,16 @@ import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 
 @Configuration
 public class SdxDetachActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxDetachActions.class);
 
-    private static final String NEW_SDX = "NEW_SDX";
+    private static final String RESIZED_SDX = "RESIZED_SDX";
 
-    private static final String EXISTING_SDX = "EXISTING_SDX";
+    private static final String DETACHING_SDX = "DETACHING_SDX";
 
     private static final String SDX_NAME = "SDX_NAME";
 
@@ -68,6 +69,9 @@ public class SdxDetachActions {
     @Inject
     private StackV4Endpoint stackV4Endpoint;
 
+    @Inject
+    private DatabaseServerV4Endpoint redbeamsServerEndpoint;
+
     @Bean(name = "SDX_DETACH_START_STATE")
     public Action<?, ?> sdxDetach() {
         return new AbstractSdxAction<>(SdxStartDetachEvent.class) {
@@ -80,8 +84,8 @@ public class SdxDetachActions {
             @Override
             protected void doExecute(SdxContext context, SdxStartDetachEvent payload, Map<Object, Object> variables) throws Exception {
                 variables.put(SDX_NAME, payload.getSdxCluster().getName());
-                variables.put(NEW_SDX, payload.getSdxCluster());
-                variables.put(EXISTING_SDX, sdxDetachService.detach(payload.getResourceId()));
+                variables.put(RESIZED_SDX, payload.getSdxCluster());
+                variables.put(DETACHING_SDX, sdxDetachService.detach(payload.getResourceId()));
                 sendEvent(context, SDX_DETACH_IN_PROGRESS_EVENT.event(), payload);
             }
 
@@ -104,13 +108,21 @@ public class SdxDetachActions {
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX detaching in progress: {}", payload.getResourceId());
-                SdxCluster sdxCluster = (SdxCluster) variables.get(EXISTING_SDX);
+                SdxCluster detachingSdxCluster = (SdxCluster) variables.get(DETACHING_SDX);
                 String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-                LOGGER.info("Execute detach flow for SDX: {} Name: {}", payload.getResourceId(), sdxCluster.getName());
+                LOGGER.info("Execute detach flow for SDX: {} Name: {}", payload.getResourceId(), detachingSdxCluster.getName());
                 ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                         stackV4Endpoint.updateNameAndCrn(0L,  (String) variables.get(SDX_NAME), initiatorUserCrn,
-                                sdxCluster.getClusterName(), sdxCluster.getCrn()));
+                                detachingSdxCluster.getClusterName(), detachingSdxCluster.getCrn()));
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Data lake detaching in progress", payload.getResourceId());
+                if (variables.containsKey(RESIZED_SDX)) {
+                    SdxCluster resizedSdxCluster = (SdxCluster) variables.get(RESIZED_SDX);
+                    LOGGER.info("Updating the cluster CRN from {} to {}", resizedSdxCluster.getCrn(), detachingSdxCluster.getCrn());
+                    // By now, CRN of the data lake being detached is updated to a new one and the new resized data lake object has the original CRN.
+                    // We need to find the DatabaseServerConfig entry using the original CRN and update it to use the new CRN used by the detached data lake.
+                    ThreadBasedUserCrnProvider.doAsInternalActor(() -> redbeamsServerEndpoint.updateClusterCrn(resizedSdxCluster.getEnvCrn(),
+                            resizedSdxCluster.getCrn(), detachingSdxCluster.getCrn(), initiatorUserCrn));
+                }
                 sendEvent(context, new SdxDetachSuccessEvent(SDX_DETACH_SUCCESS_EVENT.event(), payload.getResourceId(), payload.getUserId()));
             }
 
@@ -134,8 +146,8 @@ public class SdxDetachActions {
             protected void doExecute(SdxContext context, SdxDetachSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX detach finalized: {}", payload.getResourceId());
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake is detached", payload.getResourceId());
-                if (variables.containsKey(NEW_SDX)) {
-                    SdxCluster sdxCluster = (SdxCluster) variables.get(NEW_SDX);
+                if (variables.containsKey(RESIZED_SDX)) {
+                    SdxCluster sdxCluster = (SdxCluster) variables.get(RESIZED_SDX);
                     MDCBuilder.buildMdcContext(sdxCluster);
                     try {
                         transactionService.required(() -> {

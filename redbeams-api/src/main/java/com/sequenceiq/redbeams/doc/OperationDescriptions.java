@@ -27,6 +27,7 @@ public final class OperationDescriptions {
         public static final String GET_BY_CLUSTER_CRN = "get a database server by cluster CRN";
         public static final String CREATE = "create and register a database server in a cloud provider";
         public static final String CREATE_INTERNAL = "create and register a database server in a cloud provider with internal actor";
+        public static final String UPDATE_CLUSTER_CRN = "Update the cluster crn associated with the database";
         public static final String RELEASE = "release management of a service-managed database server";
         public static final String REGISTER = "register a database server";
         public static final String DELETE_BY_CRN = "terminate and/or deregister a database server by CRN";

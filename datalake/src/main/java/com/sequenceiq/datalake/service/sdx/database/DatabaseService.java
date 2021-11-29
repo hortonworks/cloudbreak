@@ -50,6 +50,7 @@ import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.Database
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.responses.DatabaseServerV4Response;
 import com.sequenceiq.redbeams.api.endpoint.v4.operation.OperationV4Endpoint;
 import com.sequenceiq.redbeams.api.endpoint.v4.stacks.DatabaseServerV4StackRequest;
+import com.sequenceiq.redbeams.api.model.common.Status;
 
 @Service
 public class DatabaseService {
@@ -99,6 +100,7 @@ public class DatabaseService {
     public DatabaseServerStatusV4Response create(SdxCluster sdxCluster, DetailedEnvironmentResponse env) {
         LOGGER.info("Create databaseServer in environment {} for SDX {}", env.getName(), sdxCluster.getClusterName());
         String dbResourceCrn;
+        DatabaseServerStatusV4Response serverStatusV4Response = null;
         if (dbHasBeenCreatedPreviously(sdxCluster)) {
             dbResourceCrn = sdxCluster.getDatabaseCrn();
         } else {
@@ -107,8 +109,10 @@ public class DatabaseService {
                 if (sdxStatusService.getActualStatusForSdx(sdxCluster).getStatus().isDeleteInProgressOrCompleted()) {
                     throw new CloudbreakServiceException("Datalake deletion in progress! Do not provision database, create flow cancelled");
                 }
-                dbResourceCrn = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                        databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env), initiatorUserCrn)).getResourceCrn();
+                serverStatusV4Response =
+                ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                        databaseServerV4Endpoint.createInternal(getDatabaseRequest(sdxCluster, env), initiatorUserCrn));
+                dbResourceCrn = serverStatusV4Response.getResourceCrn();
                 sdxCluster.setDatabaseCrn(dbResourceCrn);
                 sdxClusterRepository.save(sdxCluster);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
@@ -117,6 +121,10 @@ public class DatabaseService {
                 LOGGER.error("Redbeams create request failed, bad request", badRequestException);
                 throw badRequestException;
             }
+        }
+        if (serverStatusV4Response != null && serverStatusV4Response.getStatus().equals(Status.STOPPED)) {
+            throw new CloudbreakServiceException(String.format("Database already in %s state. Provisioning new database failed",
+                    serverStatusV4Response.getStatus()));
         }
         return waitAndGetDatabase(sdxCluster, dbResourceCrn, SdxDatabaseOperation.CREATION, true);
     }

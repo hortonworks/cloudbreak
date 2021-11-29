@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -32,6 +33,7 @@ import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerConfigT
 import com.sequenceiq.redbeams.converter.v4.databaseserver.DatabaseServerV4RequestToDatabaseServerConfigConverter;
 import com.sequenceiq.redbeams.domain.DatabaseServerConfig;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
+import com.sequenceiq.redbeams.exception.NotFoundException;
 import com.sequenceiq.redbeams.service.dbserverconfig.DatabaseServerConfigService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsCreationService;
 import com.sequenceiq.redbeams.service.stack.RedbeamsStartService;
@@ -52,15 +54,22 @@ public class DatabaseServerV4ControllerTest {
             .setResource("resource2")
             .build();
 
+    private static final Crn USERCRN = CrnTestUtil.getDatabaseServerCrnBuilder()
+            .setAccountId("account")
+            .setResource("user")
+            .build();
+
+    private static final String USER_CRN = USERCRN.toString();
+
     private static final String SERVER_CRN_2 = CRN_2.toString();
 
     private static final String SERVER_NAME = "myserver";
 
     private static final String ENVIRONMENT_CRN = "myenv";
 
-    private static final String USER_CRN = "userCrn";
-
     private static final String CLUSTER_CRN = "clusterCrn";
+
+    private static final String CLUSTER_CRN1 = "clusterCrn1";
 
     @InjectMocks
     private DatabaseServerV4Controller underTest;
@@ -162,6 +171,20 @@ public class DatabaseServerV4ControllerTest {
         DatabaseServerV4Response response = underTest.getByName(ENVIRONMENT_CRN, SERVER_NAME);
 
         assertEquals(serverResponse.getId().longValue(), response.getId().longValue());
+    }
+
+    @Test
+    public void testUpdateClusterCrn() {
+        when(service.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenReturn(Optional.of(server));
+        underTest.updateClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN, CLUSTER_CRN1, USER_CRN);
+
+        when(service.findByEnvironmentCrnAndClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN)).thenThrow(new NotFoundException("Not found"));
+        try {
+            underTest.updateClusterCrn(ENVIRONMENT_CRN, CLUSTER_CRN, CLUSTER_CRN1, USER_CRN);
+            Assert.fail("NotFoundException should have been thrown");
+        } catch (NotFoundException notFoundException) {
+
+        }
     }
 
     @Test
