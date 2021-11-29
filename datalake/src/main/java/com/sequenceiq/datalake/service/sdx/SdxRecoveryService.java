@@ -60,7 +60,7 @@ public class SdxRecoveryService {
 
     public void recoverCluster(Long clusterId) {
         SdxCluster sdxCluster = sdxService.getById(clusterId);
-        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RECOVERY_IN_PROGRESS, DATALAKE_RECOVERY_REQUESTED,
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RECOVERY_IN_PROGRESS, DATALAKE_RECOVERY_REQUESTED,
                 "Recovering datalake stack", sdxCluster);
         try {
             String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();

@@ -3,7 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.wait.service.datalake;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.CERT_RENEWAL_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.CERT_ROTATION_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.CLUSTER_UNREACHABLE;
-import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_RECOVERY_FAILED;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.RECOVERY_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_RESTORE_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DATALAKE_UPGRADE_FAILED;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
@@ -97,7 +97,7 @@ public class DatalakeWaitObject implements WaitObject {
     @Override
     public boolean isFailed() {
         Set<SdxClusterStatusResponse> failedStatuses = Set.of(PROVISIONING_FAILED, REPAIR_FAILED, DATALAKE_UPGRADE_FAILED,
-                DATALAKE_RECOVERY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED, CLUSTER_UNREACHABLE, NODE_FAILURE, SYNC_FAILED,
+                RECOVERY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED, CLUSTER_UNREACHABLE, NODE_FAILURE, SYNC_FAILED,
                 CERT_ROTATION_FAILED, CERT_RENEWAL_FAILED, DATALAKE_RESTORE_FAILED);
         return failedStatuses.contains(sdxResponse.getStatus());
     }

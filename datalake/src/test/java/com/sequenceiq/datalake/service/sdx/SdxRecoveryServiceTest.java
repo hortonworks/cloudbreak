@@ -77,7 +77,7 @@ public class SdxRecoveryServiceTest {
 
         verify(stackV4Endpoint).recoverClusterByNameInternal(eq(0L), eq(CLUSTER_NAME), nullable(String.class));
         verify(sdxStatusService, times(1))
-                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_RECOVERY_IN_PROGRESS, DATALAKE_RECOVERY_REQUESTED,
+                .setStatusForDatalakeAndNotify(DatalakeStatusEnum.RECOVERY_IN_PROGRESS, DATALAKE_RECOVERY_REQUESTED,
                         "Recovering datalake stack", cluster);
     }
 
