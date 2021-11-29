@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -159,7 +158,7 @@ public class StackOperationServiceTest {
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
 
-        Assertions.assertThatThrownBy(() -> underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true, new User()))
+        Assertions.assertThatThrownBy(() -> underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         verify(stackUpdater, never()).updateStackStatus(any(), any());
@@ -175,7 +174,7 @@ public class StackOperationServiceTest {
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
 
-        underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true, new User());
+        underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true);
 
         verify(stackUpdater).updateStackStatus(stack.getId(), STOP_REQUESTED);
     }

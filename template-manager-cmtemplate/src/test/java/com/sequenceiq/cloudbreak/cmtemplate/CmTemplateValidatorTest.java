@@ -10,7 +10,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collection;
-import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import org.junit.Test;
@@ -21,10 +21,10 @@ import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.template.validation.BlueprintValidationException;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
@@ -48,8 +48,7 @@ public class CmTemplateValidatorTest {
 
     @Test
     public void validWithZeroComputeNodesWhenCardinalityUnspecified() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart-no-cardinality.bp"));
+        Blueprint blueprint = readBlueprint("input/cdp-data-mart-no-cardinality.bp");
         Set<HostGroup> hostGroups = Set.of(
                 hostGroup("master", 1),
                 hostGroup("worker", 3),
@@ -63,8 +62,7 @@ public class CmTemplateValidatorTest {
 
     @Test
     public void validWithZeroComputeNodes() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+        Blueprint blueprint = readBlueprint("input/cdp-data-mart.bp");
         Set<HostGroup> hostGroups = Set.of(
                 hostGroup("master", 1),
                 hostGroup("worker", 3),
@@ -78,8 +76,7 @@ public class CmTemplateValidatorTest {
 
     @Test
     public void invalidWithoutComputeHostGroup() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+        Blueprint blueprint = readBlueprint("input/cdp-data-mart.bp");
         Set<HostGroup> hostGroups = Set.of(
                 hostGroup("master", 1),
                 hostGroup("worker", 3)
@@ -93,193 +90,163 @@ public class CmTemplateValidatorTest {
 
     @Test
     public void testDownscaleValidationIfKafkaPresentedThenShouldThrowBadRequest() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("broker");
+        String hostGroup = "broker";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1, Collections.emptyList()));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1, List.of()));
     }
 
     @Test
     public void testDownscaleValidationIfKafkaPresentedAndEntitledForScalingThenValidationShouldReturnTrue() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("broker");
+        String hostGroup = "broker";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1, Collections.emptyList()));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -1, List.of()));
     }
 
     @Test
     public void testUpscaleValidationIfKafkaPresentedThenValidationShouldThrowBadRequest() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("broker");
+        String hostGroup = "broker";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, List.of()));
     }
 
     @Test
     public void testUpscaleValidationIfKafkaPresentedAndEntitledForScalingThenValidationShouldReturnTrue() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka.bp"));
+        Blueprint blueprint = readBlueprint("input/kafka.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("broker");
+        String hostGroup = "broker";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, List.of()));
     }
 
     @Test
     public void testValidationIfNifiPresentedAndDownScaleThenValidationShouldThrowException() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, List.of()));
     }
 
     @Test
     public void testValidationIfNifi728PresentedAndUpScaleThenValidationShouldNotThrowBecauseTheBPVersionIsHigher() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_8.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi_7_2_8.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, List.of()));
     }
 
     @Test
     public void testValidationIfNifi727PresentedAndUpScaleThenValidationShouldThrowBecauseTheBPVersionIsLower() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_7.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi_7_2_7.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, List.of()));
     }
 
     @Test
     public void testValidationIfNifi726PresentedAndUpScaleThenValidationShouldNotThrowBecauseTheBPVersionIsHigher() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_6.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi_7_2_6.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, List.of()));
     }
 
     @Test
     public void testValidationIfNifi728PresentedAndDownScaleThenValidationShouldThrowException() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi_7_2_8.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi_7_2_8.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, List.of()));
     }
 
     @Test
     public void testValidationIfNifiPresentedAndDownScaleAndEntitledForScalingThenValidationShouldReturnTrue() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, List.of()));
     }
 
     @Test
     public void testValidationIfNifiPresentedAndUpScaleThenValidationShouldThrowException() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, List.of()));
     }
 
     @Test
     public void testValidationIfNifiPresentedAndUpScaleAndEntitledForScalingThenValidationShouldReturnTrue() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/nifi.bp"));
+        Blueprint blueprint = readBlueprint("input/nifi.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("master");
+        String hostGroup = "master";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, Collections.emptyList()));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, 2, List.of()));
     }
 
     @Test
     public void testValidationIfKafka7212PresentedAndDownScaleThenValidationShouldNOTThrowError() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka-cc_7_2_12.bp"));
+        Blueprint blueprint = readBlueprint("input/kafka-cc_7_2_12.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("broker");
+        String hostGroup = "broker";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(true);
 
-        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
+        assertDoesNotThrow(() -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, List.of()));
     }
 
     @Test
     public void testValidationIfKafka7212WithoutCruiseControlPresentedAndDownScaleThenValidationShouldThrowError() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/kafka-no-cc_7_2_12.bp"));
+        Blueprint blueprint = readBlueprint("input/kafka-no-cc_7_2_12.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("broker");
+        String hostGroup = "broker";
 
         when(entitlementService.isEntitledFor(anyString(), any())).thenReturn(false);
 
-        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, Collections.emptyList()));
+        assertThrows(BadRequestException.class, () -> subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -2, List.of()));
     }
 
     @Test
     public void testValidationIfNodeManagerCountWillBeHigherThanZeroInOtherGroup() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+        Blueprint blueprint = readBlueprint("input/cdp-data-mart.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("compute");
+        String hostGroup = "compute";
 
         InstanceGroup compute = new InstanceGroup();
         compute.setGroupName("compute");
@@ -293,11 +260,9 @@ public class CmTemplateValidatorTest {
 
     @Test
     public void testValidationIfNodeManagerCountWillBeHigherThanZeroInTheSameGroup() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+        Blueprint blueprint = readBlueprint("input/cdp-data-mart.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("compute");
+        String hostGroup = "compute";
 
         InstanceGroup compute = new InstanceGroup();
         compute.setGroupName("compute");
@@ -311,11 +276,9 @@ public class CmTemplateValidatorTest {
 
     @Test
     public void testValidationIfNodeManagerCountWillBeZero() {
-        Blueprint blueprint = new Blueprint();
-        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly("input/cdp-data-mart.bp"));
+        Blueprint blueprint = readBlueprint("input/cdp-data-mart.bp");
 
-        HostGroup hostGroup = new HostGroup();
-        hostGroup.setName("compute");
+        String hostGroup = "compute";
 
         InstanceGroup compute = new InstanceGroup();
         compute.setGroupName("compute");
@@ -328,5 +291,11 @@ public class CmTemplateValidatorTest {
                 subject.validateHostGroupScalingRequest(ACCOUNT_ID, blueprint, hostGroup, -3, Set.of(compute, worker)));
         assertEquals("Scaling adjustment is not allowed, based on the template it would eliminate all the instances with " +
                 "NODEMANAGER role which is not supported.", badRequestException.getMessage());
+    }
+
+    private Blueprint readBlueprint(String file) {
+        Blueprint blueprint = new Blueprint();
+        blueprint.setBlueprintText(FileReaderUtils.readFileFromClasspathQuietly(file));
+        return blueprint;
     }
 }

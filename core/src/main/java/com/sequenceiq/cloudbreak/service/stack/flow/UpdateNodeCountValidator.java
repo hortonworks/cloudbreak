@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static java.lang.String.format;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -15,13 +16,13 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
@@ -61,7 +62,7 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validateHostGroupAdjustment(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack, Integer adjustment) {
+    public void validateHostGroupIsPresent(InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson, Stack stack) {
         Optional<HostGroup> hostGroup = stack.getCluster().getHostGroups().stream()
                 .filter(input -> input.getInstanceGroup().getGroupName().equals(instanceGroupAdjustmentJson.getInstanceGroup())).findFirst();
         if (!hostGroup.isPresent()) {
@@ -72,7 +73,7 @@ public class UpdateNodeCountValidator {
 
     public void validateStackStatus(Stack stack) {
         if (!stack.isAvailable()) {
-            throw new BadRequestException(format("Group '%s' is currently in '%s' state. Node count can only be updated if it's running.",
+            throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's running.",
                     stack.getName(), stack.getStatus()));
         }
     }
@@ -81,17 +82,22 @@ public class UpdateNodeCountValidator {
         validateServiceRoles(stack, instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
     }
 
+    public void validateServiceRoles(Stack stack, Map<String, Integer> instanceGroupAdjustments) {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        cmTemplateValidator.validateHostGroupScalingRequest(
+                accountId,
+                stack.getCluster().getBlueprint(),
+                instanceGroupAdjustments,
+                instanceGroupService.findNotTerminatedByStackId(stack.getId()));
+    }
+
     public void validateServiceRoles(Stack stack, String instanceGroup, int scalingAdjustment) {
-        Optional<HostGroup> hostGroup = hostGroupService.findHostGroupsInCluster(stack.getCluster().getId())
-                .stream()
-                .filter(e -> e.getName().equals(instanceGroup))
-                .findFirst();
-        if (hostGroup.isPresent()) {
+        if (hostGroupService.hasHostGroupInCluster(stack.getCluster().getId(), instanceGroup)) {
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     stack.getCluster().getBlueprint(),
-                    hostGroup.get(),
+                    instanceGroup,
                     scalingAdjustment,
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
         }
@@ -136,8 +142,8 @@ public class UpdateNodeCountValidator {
         if (upscaleEvent(scalingAdjustment)) {
             if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
                 throw new BadRequestException(format("Requested scaling up is forbidden on %s Data Hub %s group because the " +
-                        "the current node count is %s node the node count after the upscale action will be %s node and the minimal " +
-                        "node count in the %s group is %s node. You can not go under the minimal node count.",
+                                "the current node count is %s node the node count after the upscale action will be %s node and the minimal " +
+                                "node count in the %s group is %s node. You can not go under the minimal node count.",
                         stack.getName(),
                         instanceGroup.getGroupName(),
                         instanceGroup.getNodeCount(),
@@ -153,8 +159,8 @@ public class UpdateNodeCountValidator {
         } else if (downScaleEvent(scalingAdjustment)) {
             if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
                 throw new BadRequestException(format("Requested scaling down is forbidden on %s Data Hub %s group because the " +
-                        "the current node count is %s node the node count after the downscale action will be %s node and the minimal " +
-                        "node count in the %s group is %s node. You can not go under the minimal node count.",
+                                "the current node count is %s node the node count after the downscale action will be %s node and the minimal " +
+                                "node count in the %s group is %s node. You can not go under the minimal node count.",
                         stack.getName(),
                         instanceGroup.getGroupName(),
                         instanceGroup.getNodeCount(),
@@ -175,7 +181,7 @@ public class UpdateNodeCountValidator {
     }
 
     private boolean nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(InstanceGroup instanceGroup,
-        Integer scalingAdjustment) {
+            Integer scalingAdjustment) {
         int minimumNodeCount = instanceGroup.getMinimumNodeCount();
         return getNodeCountAfterScaling(instanceGroup, scalingAdjustment) < minimumNodeCount;
     }

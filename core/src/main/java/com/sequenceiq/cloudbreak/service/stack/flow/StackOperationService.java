@@ -13,7 +13,9 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -46,7 +48,6 @@ import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -95,29 +96,31 @@ public class StackOperationService {
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
-    public FlowIdentifier removeInstance(Stack stack, Long workspaceId, String instanceId, boolean forced, User user) {
+    public FlowIdentifier removeInstance(Stack stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
         String instanceGroupName = metaData.getInstanceGroupName();
+        int scalingAdjustment = -1;
+        updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
         if (!forced) {
-            int scalingAdjustment = -1;
-            updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
             updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
             updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
         }
         return flowManager.triggerStackRemoveInstance(stack.getId(), instanceGroupName, metaData.getPrivateId(), forced);
     }
 
-    public FlowIdentifier removeInstances(Stack stack, Long workspaceId, Collection<String> instanceIds, boolean forced, User user) {
+    public FlowIdentifier removeInstances(Stack stack, Collection<String> instanceIds, boolean forced) {
         Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
         for (String instanceId : instanceIds) {
             InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
             instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
+        updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
         if (!forced) {
             for (Map.Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
                 String instanceGroupName = entry.getKey();
                 int scalingAdjustment = entry.getValue().size() * -1;
-                updateNodeCountValidator.validateServiceRoles(stack, instanceGroupName, scalingAdjustment);
                 updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
             }
@@ -129,7 +132,7 @@ public class StackOperationService {
         return flowManager.triggerStackImageUpdate(imageChangeDto);
     }
 
-    public FlowIdentifier updateStatus(Long stackId, StatusRequest status, boolean updateCluster, User user) {
+    public FlowIdentifier updateStatus(Long stackId, StatusRequest status, boolean updateCluster) {
         Stack stack = stackService.getByIdWithLists(stackId);
         Cluster cluster = null;
         if (stack.getCluster() != null) {
@@ -137,13 +140,13 @@ public class StackOperationService {
         }
         switch (status) {
             case SYNC:
-                return sync(stack, false, user);
+                return sync(stack, false);
             case FULL_SYNC:
-                return sync(stack, true, user);
+                return sync(stack, true);
             case REPAIR_FAILED_NODES:
-                return repairFailedNodes(stack, user);
+                return repairFailedNodes(stack);
             case STOPPED:
-                return stop(stack, cluster, updateCluster, user);
+                return stop(stack, cluster, updateCluster);
             case STARTED:
                 return start(stack, cluster, updateCluster);
             default:
@@ -181,12 +184,12 @@ public class StackOperationService {
         }
     }
 
-    private FlowIdentifier repairFailedNodes(Stack stack, User user) {
+    private FlowIdentifier repairFailedNodes(Stack stack) {
         LOGGER.debug("Received request to replace failed nodes: {}", stack.getId());
         return flowManager.triggerManualRepairFlow(stack.getId());
     }
 
-    private FlowIdentifier sync(Stack stack, boolean full, User user) {
+    private FlowIdentifier sync(Stack stack, boolean full) {
         // TODO: is it a good condition?
         if (!stack.isDeleteInProgress() && !stack.isStackInDeletionPhase() && !stack.isModificationInProgress()) {
             if (full) {
@@ -204,7 +207,7 @@ public class StackOperationService {
         return flowManager.triggerSyncComponentVersionsFromCm(stack.getId(), candidateImageUuids);
     }
 
-    private FlowIdentifier stop(Stack stack, Cluster cluster, boolean updateCluster, User user) {
+    private FlowIdentifier stop(Stack stack, Cluster cluster, boolean updateCluster) {
         if (cluster != null && stack.isStopInProgress()) {
             setStackStatusToStopRequested(stack);
             return FlowIdentifier.notTriggered();
@@ -226,10 +229,7 @@ public class StackOperationService {
                 updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 if (withClusterEvent) {
                     updateNodeCountValidator.validateClusterStatus(stackWithLists);
-                    updateNodeCountValidator.validateHostGroupAdjustment(
-                            instanceGroupAdjustmentJson,
-                            stackWithLists,
-                            instanceGroupAdjustmentJson.getScalingAdjustment());
+                    updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
                     updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {

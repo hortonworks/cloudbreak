@@ -27,6 +27,10 @@ public class HostGroupService {
         return hostGroupRepository.findHostGroupInClusterByNameWithInstanceMetadas(clusterId, hostGroupName);
     }
 
+    public boolean hasHostGroupInCluster(Long clusterId, String hostGroupName) {
+        return hostGroupRepository.hasHostGroupInCluster(clusterId, hostGroupName);
+    }
+
     public HostGroup save(HostGroup hostGroup) {
         return hostGroupRepository.save(hostGroup);
     }
@@ -49,10 +53,6 @@ public class HostGroupService {
 
     public Set<HostGroup> findAllHostGroupsByRecipe(Long recipeId) {
         return hostGroupRepository.findAllHostGroupsByRecipe(recipeId);
-    }
-
-    public Set<Recipe> getRecipesByCluster(Long clusterId) {
-        return getByClusterWithRecipes(clusterId).stream().flatMap(hostGroup -> hostGroup.getRecipes().stream()).collect(Collectors.toSet());
     }
 
     public Set<Recipe> getRecipesByHostGroups(Set<HostGroup> hostGroups) {
