@@ -122,31 +122,19 @@ mount_one() {
       return $((return_value))
 }
 
-mount_tempstorage_azure() {
+demount_tempstorage_azure() {
       local return_value=0
-      local success=0
       local waagent_conf="/etc/waagent.conf"
       local original_path="/mnt/resource"
-      local path="/hadoopfs/ephfs1"
       local device=$(df | grep $original_path | awk '{print $1}')
 
-      log $LOG_FILE unmounting $device temporary storage device from path $original_path
+      log $LOG_FILE demounting $device temporary storage device from path $original_path
       umount $original_path >> $LOG_FILE 2>&1
       if [ ! $? -eq 0 ]; then
-        log $LOG_FILE error unmounting temporary storage device on $original_path
+        log $LOG_FILE error demounting temporary storage device on $original_path
         return_value=1
       fi
-      log $LOG_FILE result of unmounting $original_path: $?
-      log $LOG_FILE mounting $device temporary storage device on path $path
-      mkdir $path >> $LOG_FILE 2>&1
-      log $LOG_FILE result of creating mount directory $path: $?
-      mount -t $FS_TYPE -o defaults,noatime,nofail $device $path >> $LOG_FILE 2>&1
-      if [ ! $? -eq 0 ]; then
-        log $LOG_FILE error mounting temporary storage device on $path
-        return_value=1
-      fi
-      log $LOG_FILE result of mounting $path: $?
-      chmod 777 $path >> $LOG_FILE 2>&1
+      log $LOG_FILE result of demounting $original_path: $?
       sed -i 's/ResourceDisk\.Format=y/ResourceDisk\.Format=n/' $waagent_conf >> $LOG_FILE 2>&1
       if [ ! $? -eq 0 ]; then
         log $LOG_FILE error changing temporary disk mounting in $waagent_conf
@@ -241,9 +229,9 @@ main() {
     [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error creating directories on /hadoopfs/fs1"
 
     if [[ "$CLOUD_PLATFORM" == "AZURE" && "$TEMPORARY_STORAGE" == "EPHEMERAL_VOLUMES" ]]; then
-        mount_tempstorage_azure
+        demount_tempstorage_azure
         return_code=$?
-        [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error remounting Azure temporary storage"
+        [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error demounting Azure temporary storage"
     fi
 
     exit_with_code $LOG_FILE 0 "Script $script_name ended"
