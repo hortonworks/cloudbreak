@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.aws;
 
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.INSTANCE_TYPE;
 import static com.sequenceiq.cloudbreak.cloud.model.CloudResource.PRIVATE_ID;
+import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,11 +17,13 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsRequest;
 import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
@@ -61,11 +64,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.TargetGroupPortPair;
+import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
 
 @Service
 public class CloudFormationStackUtil {
+
+    private static final Logger LOGGER = getLogger(CloudFormationStackUtil.class);
 
     private static final String INSTANCE_LIFECYCLE_IN_SERVICE = "InService";
 
@@ -131,8 +137,8 @@ public class CloudFormationStackUtil {
                             .collect(Collectors.toList())
                             .iterator();
                     List<String> knownInstanceIds = group.getInstances().stream().map(CloudInstance::getInstanceId)
-                                    .filter(Objects::nonNull)
-                                    .collect(Collectors.toList());
+                            .filter(Objects::nonNull)
+                            .collect(Collectors.toList());
                     List<String> newInstanceIds = entry.getValue().stream().filter(s -> !knownInstanceIds.contains(s)).collect(Collectors.toList());
                     for (String instanceId : newInstanceIds) {
                         CloudResource cloudResource = CloudResource.builder()
@@ -292,20 +298,37 @@ public class CloudFormationStackUtil {
         return efsResult.getFileSystems().get(0);
     }
 
+    public boolean isCfStackExists(AmazonCloudFormationClient cfClient, String stackName) {
+        try {
+            cfClient.describeStacks(new DescribeStacksRequest().withStackName(stackName));
+            LOGGER.debug("CF stack exists with name: {}", stackName);
+            return true;
+        } catch (AmazonServiceException e) {
+            if (e.getErrorMessage().contains(stackName + " does not exist")) {
+                LOGGER.debug("CF stack does not exist with name: {}", stackName);
+                return false;
+            } else if (AmazonServiceException.ErrorType.Client.equals(e.getErrorType())) {
+                LOGGER.error("Cannot describe the CF stack. {}", e.getErrorMessage(), e);
+                throw e;
+            }
+            throw new Retry.ActionFailedException(e.getMessage());
+        }
+    }
+
     private Set<String> getInstanceIdsForGroups(List<CloudResource> resources, Set<Group> groups) {
         return resources.stream()
-            .filter(instance -> instance.getInstanceId() != null)
-            .map(CloudResource::getInstanceId)
-            .collect(Collectors.toSet());
+                .filter(instance -> instance.getInstanceId() != null)
+                .map(CloudResource::getInstanceId)
+                .collect(Collectors.toSet());
     }
 
     private String getResourceArnByLogicalId(AuthenticatedContext ac, String logicalId, String region) {
         String cFStackName = getCfStackName(ac);
         AmazonCloudFormationClient amazonCfClient =
-            awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
+                awsClient.createCloudFormationClient(new AwsCredentialView(ac.getCloudCredential()), region);
         DescribeStackResourceResult result = amazonCfClient.describeStackResource(new DescribeStackResourceRequest()
-            .withStackName(cFStackName)
-            .withLogicalResourceId(logicalId));
+                .withStackName(cFStackName)
+                .withLogicalResourceId(logicalId));
         return result.getStackResourceDetail().getPhysicalResourceId();
     }
 }

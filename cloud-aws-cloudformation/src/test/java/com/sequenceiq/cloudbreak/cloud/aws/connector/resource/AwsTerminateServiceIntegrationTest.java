@@ -29,10 +29,10 @@ import com.amazonaws.services.autoscaling.model.DescribeAutoScalingGroupsResult;
 import com.amazonaws.services.cloudformation.model.DescribeStacksRequest;
 import com.amazonaws.services.cloudformation.waiters.AmazonCloudFormationWaiters;
 import com.amazonaws.waiters.Waiter;
+import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.CloudFormationStackUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonAutoScalingClient;
 import com.sequenceiq.cloudbreak.cloud.aws.client.AmazonCloudFormationClient;
-import com.sequenceiq.cloudbreak.cloud.aws.AwsCloudFormationClient;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
 import com.sequenceiq.cloudbreak.cloud.aws.common.context.AwsContextBuilder;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.cloud.model.GroupNetwork;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.template.compute.ComputeResourceService;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.service.Retry;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.OutboundInternetTraffic;
@@ -114,6 +113,7 @@ public class AwsTerminateServiceIntegrationTest {
         when(cfStackResource.getName()).thenReturn("stackName");
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cfStackResource);
         when(retryService.testWith2SecDelayMax5Times(any(Supplier.class))).thenReturn(Boolean.TRUE);
+        when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
 
         List<CloudResource> resources = List.of(new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(),
                 new Builder().name("snap-1234567812345678").type(ResourceType.AWS_SNAPSHOT).build(),
@@ -167,7 +167,7 @@ public class AwsTerminateServiceIntegrationTest {
 
         when(cloudStack.getGroups()).thenReturn(List.of(group));
         when(cfStackUtil.getCloudFormationStackResource(any())).thenReturn(cf);
-        when(retryService.testWith2SecDelayMax15Times(any())).thenThrow(new NotFoundException("Stack not found"));
+        when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
         when(awsClient.createAutoScalingClient(any(), any())).thenReturn(amazonAutoScalingClient);
 
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of(
@@ -198,6 +198,7 @@ public class AwsTerminateServiceIntegrationTest {
         when(awsClient.createAutoScalingClient(any(), any())).thenReturn(amazonAutoScalingClient);
         when(amazonAutoScalingClient.describeAutoScalingGroups(any())).thenReturn(describeAutoScalingGroupsResult);
         when(retryService.testWith2SecDelayMax5Times(any(Supplier.class))).thenReturn(Boolean.TRUE);
+        when(retryService.testWith2SecDelayMax15Times(any())).thenReturn(true);
 
         List<CloudResourceStatus> result = underTest.terminate(authenticatedContext(), cloudStack, List.of(
                 new Builder().name("ami-87654321").type(ResourceType.AWS_ENCRYPTED_AMI).build(), cf, lc

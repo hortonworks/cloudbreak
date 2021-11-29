@@ -34,6 +34,7 @@ public class AwsCloudFormationClient extends AwsClient {
     AmazonCloudFormation createCloudFormation(AwsCredentialView awsCredential, String regionName) {
         return com.amazonaws.services.cloudformation.AmazonCloudFormationClient.builder()
                 .withCredentials(getCredentialProvider(awsCredential))
+                .withClientConfiguration(getDefaultClientConfiguration())
                 .withRegion(regionName)
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .withClientConfiguration(getDefaultClientConfiguration())
