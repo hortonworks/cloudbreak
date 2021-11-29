@@ -202,13 +202,12 @@ public class StackCommonService {
     }
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
-        validateStackIsNotDataLake(stack.orElse(null), instanceIds);
-        return stackOperationService.removeInstances(stack.orElse(null), workspaceId, instanceIds, forced, user);
+        validateStackIsNotDataLake(stack.get(), instanceIds);
+        return stackOperationService.removeInstances(stack.get(), instanceIds, forced);
     }
 
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -310,13 +309,12 @@ public class StackCommonService {
     }
 
     public FlowIdentifier deleteInstanceInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, String instanceId, boolean forced) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
-        validateStackIsNotDataLake(stack.orElse(null), Set.of(instanceId));
-        return stackOperationService.removeInstance(stack.orElse(null), workspaceId, instanceId, forced, user);
+        validateStackIsNotDataLake(stack.get(), Set.of(instanceId));
+        return stackOperationService.removeInstance(stack.get(), instanceId, forced);
     }
 
     private void validateStackIsNotDataLake(Stack stack, Set<String> instanceIds) {
@@ -352,9 +350,8 @@ public class StackCommonService {
 
     private FlowIdentifier put(Stack stack, UpdateStackV4Request updateRequest) {
         MDCBuilder.buildMdcContext(stack);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (updateRequest.getStatus() != null) {
-            return stackOperationService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent(), user);
+            return stackOperationService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent());
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
             validateHardLimits(scalingAdjustment);

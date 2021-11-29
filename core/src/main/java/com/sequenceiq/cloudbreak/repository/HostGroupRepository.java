@@ -28,6 +28,9 @@ public interface HostGroupRepository extends CrudRepository<HostGroup, Long> {
     @Query("SELECT h FROM HostGroup h WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
     Optional<HostGroup> findHostGroupInClusterByNameWithInstanceMetadas(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
 
+    @Query("SELECT COUNT(h) > 0 FROM HostGroup h WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
+    boolean hasHostGroupInCluster(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);
+
     @Query("SELECT h.name as name, h.recoveryMode as recoveryMode from HostGroup h "
             + "WHERE h.cluster.id= :clusterId AND h.name= :hostGroupName")
     Optional<HostGroupRepairView> findHostGroupRepairViewInClusterByName(@Param("clusterId") Long clusterId, @Param("hostGroupName") String hostGroupName);

@@ -44,7 +44,6 @@ import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
-import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 
@@ -154,13 +153,11 @@ class StackCommonServiceTest {
     public void testDeleteInstanceFromDataHub() {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
-        User user = new User();
-        when(userService.getOrCreate(any())).thenReturn(user);
         when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         underTest.deleteInstanceInWorkspace(STACK_NAME, WORKSPACE_ID, "node1", true);
 
-        verify(stackOperationService).removeInstance(stack, WORKSPACE_ID, "node1", true, user);
+        verify(stackOperationService).removeInstance(stack, "node1", true);
     }
 
     @Test
@@ -184,8 +181,6 @@ class StackCommonServiceTest {
     public void testDeleteInstancesFromDataHub() {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
-        User user = new User();
-        when(userService.getOrCreate(any())).thenReturn(user);
         when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         Set<String> nodes = new LinkedHashSet<>();
@@ -194,7 +189,7 @@ class StackCommonServiceTest {
 
         underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true);
 
-        verify(stackOperationService).removeInstances(stack, WORKSPACE_ID, nodes, true, user);
+        verify(stackOperationService).removeInstances(stack, nodes, true);
     }
 
     @Test

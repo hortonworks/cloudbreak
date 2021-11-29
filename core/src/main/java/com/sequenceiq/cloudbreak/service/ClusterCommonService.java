@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANC
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -142,11 +141,9 @@ public class ClusterCommonService {
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
         Blueprint blueprint = stack.getCluster().getBlueprint();
-        Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(),
-                updateJson.getHostGroupAdjustment().getHostGroup());
-        if (hostGroup.isEmpty()) {
-            throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
-                    updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
+        String hostGroupName = updateJson.getHostGroupAdjustment().getHostGroup();
+        if (!hostGroupService.hasHostGroupInCluster(stack.getCluster().getId(), hostGroupName)) {
+            throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'", hostGroupName, stack.getName()));
         }
         updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, updateJson.getHostGroupAdjustment());
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
@@ -154,7 +151,7 @@ public class ClusterCommonService {
             cmTemplateValidator.validateHostGroupScalingRequest(
                     accountId,
                     blueprint,
-                    hostGroup.get(),
+                    hostGroupName,
                     updateJson.getHostGroupAdjustment().getScalingAdjustment(),
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
         }
