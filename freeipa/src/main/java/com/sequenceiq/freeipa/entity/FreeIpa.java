@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 
+import java.util.StringJoiner;
+
 @Entity
 public class FreeIpa implements AccountIdAwareResource {
 
@@ -91,5 +93,16 @@ public class FreeIpa implements AccountIdAwareResource {
     @Override
     public String getAccountId() {
         return stack.getAccountId();
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", FreeIpa.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("stack='" + stack + '\'')
+                .add("hostname='" + hostname + "'")
+                .add("domain='" + domain + "'")
+                .add("adminGroupName='" + adminGroupName + "'")
+                .toString();
     }
 }

@@ -55,6 +55,7 @@ public abstract class FreeIpaServerBase {
         return "FreeIpaServerBase{"
                 + "domain='" + domain + '\''
                 + ", hostname='" + hostname + '\''
+                + ", adminGroupName='" + adminGroupName + " '\'"
                 + '}';
     }
 }

@@ -7,6 +7,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sequenceiq.common.api.telemetry.base.FeaturesBase;
 import com.sequenceiq.common.api.type.FeatureSetting;
 
+import java.util.StringJoiner;
+
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Features extends FeaturesBase {
@@ -60,5 +62,14 @@ public class Features extends FeaturesBase {
     public void addUseSharedAltusCredential(boolean enabled) {
         useSharedAltusCredential = new FeatureSetting();
         useSharedAltusCredential.setEnabled(enabled);
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Features.class.getSimpleName() + "[", "]")
+                .add("metering='" + metering + '\'')
+                .add("monitoring='" + monitoring + '\'')
+                .add("useSharedAltusCredential='" + useSharedAltusCredential + '\'')
+                .toString();
     }
 }

@@ -39,6 +39,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.ChangeImag
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.imagecatalog.GenerateImageCatalogResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
@@ -123,6 +124,13 @@ public interface FreeIpaV1Endpoint {
     @ApiOperation(value = FreeIpaOperationDescriptions.REPAIR, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
             nickname = "repairV1")
     OperationStatus repairInstances(@Valid RepairInstancesRequest request) throws Exception;
+
+    @POST
+    @Path("rebuild")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.REBUILD, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "rebuildV1")
+    DescribeFreeIpaResponse rebuild(@Valid RebuildRequest request) throws Exception;
 
     @GET
     @Path("ca.crt")

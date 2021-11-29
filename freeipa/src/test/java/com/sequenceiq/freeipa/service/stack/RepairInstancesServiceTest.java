@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.freeipa.flow.chain.FlowChainTriggers.REPAIR_TRIGGER_EVENT;
 import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_EVENT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,6 +11,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -16,8 +19,15 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
+import com.sequenceiq.freeipa.converter.stack.StackToCreateFreeIpaRequestConverter;
+import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,6 +72,8 @@ class RepairInstancesServiceTest {
 
     private static final String ENVIRONMENT_ID2 = "crn:cdp:environments:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:98765-4321";
 
+    private static final String FREEIPA_CRN = "crn:cdp:freeipa:us-west-1:f39af961-e0ce-4f79-826c-45502efb9ca3:environment:11111-2222";
+
     private static final String ACCOUNT_ID = "accountId";
 
     private static Stack stack1;
@@ -88,6 +100,15 @@ class RepairInstancesServiceTest {
 
     @Mock
     private StackUpdater stackUpdater;
+
+    @Mock
+    private FreeIpaCreationService freeIpaCreationService;
+
+    @Mock
+    private StackToCreateFreeIpaRequestConverter stackToCreateFreeIpaRequestConverter;
+
+    @Mock
+    private TerminationService terminationService;
 
     @InjectMocks
     private RepairInstancesService underTest;
@@ -123,7 +144,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithBadHealthInstance() {
-        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
+        Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -151,7 +172,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithGoodInstancesShouldThrowException() {
-        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
+        Stack stack = createStack(Status.AVAILABLE, List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
         List<String> instanceIds = List.of("i-2");
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
@@ -168,7 +189,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithForce() {
-        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
+        Stack stack = createStack(Status.AVAILABLE, List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -194,7 +215,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairInstancesWithNoneSpecified() {
-        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
+        Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -220,7 +241,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairThrowsWhenOnlyBadInstancesRemain() {
-        Stack stack = createStack(List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE, InstanceStatus.CREATED));
+        Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE, InstanceStatus.CREATED));
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
 
@@ -235,7 +256,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairThrowsWhenOneBadInstancesRemain() {
-        Stack stack = createStack(List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
+        Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
@@ -250,7 +271,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairWithForceThrowsWhenNoInstanceIdsAreProvided() {
-        Stack stack = createStack(List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
+        Stack stack = createStack(Status.AVAILABLE, List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
 
@@ -264,7 +285,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairForceWhenOnlyBadInstarncesRemain() {
-        Stack stack = createStack(List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
+        Stack stack = createStack(Status.UNREACHABLE, List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
@@ -290,7 +311,7 @@ class RepairInstancesServiceTest {
 
     @Test
     void testRepairThrowsWhenOnlyDeletedInstancesAndForceIsCalledRemain() {
-        Stack stack = createStack(List.of(InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.DELETED_BY_PROVIDER));
+        Stack stack = createStack(Status.DELETED_ON_PROVIDER_SIDE, List.of(InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.DELETED_BY_PROVIDER));
 
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
@@ -408,7 +429,7 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testRepairAndAutodetectBadInstances() throws Exception {
-        Stack stack = createStack(List.of(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
+        Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
         OperationStatus operationStatus = new OperationStatus();
         RepairInstancesRequest repairInstancesRequest = new RepairInstancesRequest();
         repairInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
@@ -428,7 +449,7 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testRepairAndAutodetectWith2InstancesWithNoInstanceIds() throws Exception {
-        Stack stack = createStack(List.of(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED), 2);
+        Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED), 2);
         OperationStatus operationStatus = new OperationStatus();
         RepairInstancesRequest repairInstancesRequest = new RepairInstancesRequest();
         repairInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
@@ -444,6 +465,73 @@ class RepairInstancesServiceTest {
         assertEquals(operationStatus, underTest.repairInstances(ACCOUNT_ID, repairInstancesRequest));
 
         verify(flowManager, times(1)).notify(eq(REPAIR_TRIGGER_EVENT), any());
+    }
+
+    @Test
+    public void testRebuildThrowsWhenSourceStackIsRunning() throws Exception {
+        Stack stack = createStack(Status.AVAILABLE, List.of(InstanceStatus.CREATED, InstanceStatus.CREATED), 2);
+
+        when(stackService.getByCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(stack);
+        when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+
+        RebuildRequest rebuildRequest = new RebuildRequest();
+        rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        rebuildRequest.setSourceCrn(FREEIPA_CRN);
+
+        assertThrows(BadRequestException.class, () -> underTest.rebuild(ACCOUNT_ID, rebuildRequest));
+    }
+
+    @Test
+    public void testRebuild() throws Exception {
+        Stack stack = createStack(Status.DELETE_COMPLETED, List.of(InstanceStatus.TERMINATED, InstanceStatus.TERMINATED), 2);
+        CreateFreeIpaRequest createFreeIpaRequest = new CreateFreeIpaRequest();
+        DescribeFreeIpaResponse response = new DescribeFreeIpaResponse();
+
+        when(stackService.getByCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(stack);
+        when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.empty());
+        when(stackToCreateFreeIpaRequestConverter.convert(eq(stack))).thenReturn(createFreeIpaRequest);
+        when(freeIpaCreationService.launchFreeIpa(eq(createFreeIpaRequest), eq(ACCOUNT_ID))).thenReturn(response);
+
+        RebuildRequest rebuildRequest = new RebuildRequest();
+        rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        rebuildRequest.setSourceCrn(FREEIPA_CRN);
+
+        assertEquals(response, underTest.rebuild(ACCOUNT_ID, rebuildRequest));
+    }
+
+    @Test
+    public void testRenameStackIfNeededWhenNotTerminated() {
+        Stack stack = createStack(AVAILABLE, List.of(InstanceStatus.TERMINATED, InstanceStatus.TERMINATED), 2);
+
+        assertThrows(BadRequestException.class, () -> underTest.renameStackIfNeeded(stack));
+    }
+
+    @Test
+    public void testRenameStackIfNeededWhenAlreadyRenamed() {
+        Stack stack = createStack(DELETE_COMPLETED, List.of(InstanceStatus.TERMINATED, InstanceStatus.TERMINATED), 2);
+        Long terminationTime = 1638311233640L;
+        String stackName = "freeipa_" + terminationTime;
+
+        stack.setName(stackName);
+        stack.setTerminated(terminationTime);
+
+        underTest.renameStackIfNeeded(stack);
+
+        verify(terminationService, never()).finalizeTermination(any());
+    }
+
+    @Test
+    public void testRenameStackIfNeededWhenNotAlreadyRenamed() {
+        Stack stack = createStack(DELETE_COMPLETED, List.of(InstanceStatus.TERMINATED, InstanceStatus.TERMINATED), 2);
+        Long terminationTime = 1638311233640L;
+        String stackName = "freeipa";
+
+        stack.setName(stackName);
+        stack.setTerminated(terminationTime);
+
+        underTest.renameStackIfNeeded(stack);
+
+        verify(terminationService).finalizeTermination(STACK_ID);
     }
 
     private HealthDetailsFreeIpaResponse getMockDetails1() {
@@ -474,14 +562,17 @@ class RepairInstancesServiceTest {
         return healthDetailsFreeIpaResponse;
     }
 
-    private Stack createStack(List<InstanceStatus> instanceStatuses) {
-        return createStack(instanceStatuses, 0);
+    private Stack createStack(Status stackStatus, List<InstanceStatus> instanceStatuses) {
+        return createStack(stackStatus, instanceStatuses, 0);
     }
 
-    private Stack createStack(List<InstanceStatus> instanceStatuses, int requestedInstancesWithoutInstanceIds) {
+    private Stack createStack(Status stackStatus, List<InstanceStatus> instanceStatuses, int requestedInstancesWithoutInstanceIds) {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setEnvironmentCrn(ENVIRONMENT_ID1);
+        StackStatus s = new StackStatus();
+        s.setStatus(stackStatus);
+        stack.setStackStatus(s);
         int i = 1;
         Set<InstanceMetaData> instanceMetaDataSet = new HashSet<>();
         for (InstanceStatus instanceStatus : instanceStatuses) {

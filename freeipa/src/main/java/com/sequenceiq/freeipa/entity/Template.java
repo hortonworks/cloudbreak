@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.service.secret.domain.SecretToString;
 import com.sequenceiq.freeipa.api.model.ResourceStatus;
 import com.sequenceiq.freeipa.entity.util.ResourceStatusConverter;
 
+import java.util.StringJoiner;
+
 @Entity
 public class Template implements AccountIdAwareResource {
 
@@ -162,5 +164,24 @@ public class Template implements AccountIdAwareResource {
 
     public void setAccountId(String accountId) {
         this.accountId = accountId;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", Template.class.getSimpleName() + "[", "]")
+                .add("id=" + id)
+                .add("name='" + name + '\'')
+                .add("description='" + description + "'")
+                .add("instanceType='" + instanceType + "'")
+                .add("volumeCount=" + volumeCount)
+                .add("volumeSize=" + volumeSize)
+                .add("rootVolumeSize=" + rootVolumeSize)
+                .add("volumeType='" + volumeType + "'")
+                .add("deleted=" + deleted)
+                .add("status='" + status + "'")
+                .add("attributes='" + attributes + "'")
+                .add("secretAttributes='***'")
+                .add("accountId=" + accountId)
+                .toString();
     }
 }

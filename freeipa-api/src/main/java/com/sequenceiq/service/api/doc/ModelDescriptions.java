@@ -23,6 +23,7 @@ public class ModelDescriptions {
     public static final String USERS = "Users to check for.";
     public static final String GROUP = "Group to check for.";
     public static final String RESULT = "Result of the check.";
+    public static final String REBUILD_SOURCE_CRN = "CRN of the FreeIPA to use as the source for rebuilding.";
 
     private ModelDescriptions() {
     }

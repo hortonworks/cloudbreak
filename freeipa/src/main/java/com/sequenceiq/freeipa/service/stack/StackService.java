@@ -81,19 +81,35 @@ public class StackService implements ResourcePropertyProvider {
                 .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn)));
     }
 
+    public Stack getByCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId, String crn) {
+        return findByCrnAndAccountIdWithListsEvenIfTerminated(environmentCrn, accountId, crn)
+                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] with CRN [%s] not found", environmentCrn, crn)));
+    }
+
     public Optional<Stack> findByEnvironmentCrnAndAccountId(String environmentCrn, String accountId) {
         return stackRepository.findByEnvironmentCrnAndAccountId(environmentCrn, accountId)
                 .or(() -> childEnvironmentService.findParentByEnvironmentCrnAndAccountId(environmentCrn, accountId));
     }
 
-    public Stack getByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
-        return findByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId)
-                .orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack by environment [%s] has never existed", environmentCrn)));
+    public Optional<Stack> findByCrnAndAccountIdWithListsEvenIfTerminated(String environmentCrn, String accountId, String crn) {
+        return stackRepository.findByAccountIdEnvironmentCrnAndCrnWithListsEvenIfTerminated(environmentCrn, accountId, crn)
+                .or(() -> childEnvironmentService.findParentStackByChildEnvironmentCrnAndCrnWithListsEvenIfTerminated(environmentCrn, accountId, crn));
     }
 
-    public Optional<Stack> findByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
-        return stackRepository.findByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId)
-                .or(() -> childEnvironmentService.findParentByEnvironmentCrnAndAccountId(environmentCrn, accountId));
+    public List<Stack> getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
+        List<Stack> stacks = findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId);
+        if (stacks.isEmpty()) {
+                throw new NotFoundException(String.format("FreeIPA stack by environment [%s] not found", environmentCrn));
+        }
+        return stacks;
+    }
+
+    public List<Stack> findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(String environmentCrn, String accountId) {
+        List<Stack> stacks = stackRepository.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId);
+        if (stacks.isEmpty()) {
+            stacks = childEnvironmentService.findMultipleParentStackByChildEnvironmentCrnEvenIfTerminated(environmentCrn, accountId);
+        }
+        return stacks;
     }
 
     public List<Stack> getMultipleByEnvironmentCrnOrChildEnvironmantCrnAndAccountId(Collection<String> environmentCrns, String accountId) {

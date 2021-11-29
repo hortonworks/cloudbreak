@@ -2,9 +2,11 @@ package com.sequenceiq.freeipa.service.stack;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.assertj.core.api.Assertions;
@@ -28,6 +30,8 @@ class ChildEnvironmentServiceTest {
     private static final String ENVIRONMENT_CRN = "test:environment:crn";
 
     private static final String CHILD_ENVIRONMENT_CRN = "test:childenv:crn";
+
+    private static final String FREEIPA_CRN = "test:freeipa:crn";
 
     private static final String ACCOUNT_ID = "account:id";
 
@@ -56,6 +60,26 @@ class ChildEnvironmentServiceTest {
         boolean result = underTest.isChildEnvironment(ENVIRONMENT_CRN, ACCOUNT_ID);
 
         assertTrue(result);
+    }
+
+    @Test
+    void findMultipleParentStackByChildEnvironmentCrnWithListsEvenIfTerminated() {
+        List<Stack> stackList = List.of(new Stack());
+        when(repository.findMultipleParentByEnvironmentCrnEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stackList);
+
+        List<Stack> result = underTest.findMultipleParentStackByChildEnvironmentCrnEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID);
+
+        assertEquals(stackList, result);
+    }
+
+    @Test
+    void findParentStackByChildEnvironmentCrnAndCrnWithListsEvenIfTerminated() {
+        Optional<Stack> stack = Optional.of(new Stack());
+        when(repository.findParentByEnvironmentCrnAndCrnWthListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(stack);
+
+        Optional<Stack> result = underTest.findParentStackByChildEnvironmentCrnAndCrnWithListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN);
+
+        assertEquals(stack, result);
     }
 
     @Test

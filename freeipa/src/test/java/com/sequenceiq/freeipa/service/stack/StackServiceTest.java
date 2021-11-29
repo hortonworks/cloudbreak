@@ -31,6 +31,8 @@ class StackServiceTest {
 
     private static final String CHILD_ENVIRONMENT_CRN = "test:environment:child-crn";
 
+    private static final String FREEIPA_CRN = "test:freeipa:crn";
+
     private static final Long STACK_ID = 1L;
 
     private static final String STACK_NAME = "stack-name";
@@ -172,6 +174,59 @@ class StackServiceTest {
     void findAllWithDetailedStackStatuses() {
         when(stackRepository.findAllWithDetailedStackStatuses(Mockito.eq(List.of(DetailedStackStatus.AVAILABLE)))).thenReturn(List.of(stack));
         List<Stack> results = underTest.findAllWithDetailedStackStatuses(List.of(DetailedStackStatus.AVAILABLE));
+
+        assertEquals(List.of(stack), results);
+    }
+
+    @Test
+    void findByCrnAndAccountIdWithListsEvenIfTerminated() {
+        when(stackRepository.findByAccountIdEnvironmentCrnAndCrnWithListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN))
+                .thenReturn(Optional.of(stack));
+        Optional<Stack> results = underTest.findByCrnAndAccountIdWithListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN);
+
+        assertEquals(Optional.of(stack), results);
+    }
+
+    @Test
+    void getByCrnAndAccountIdEvenIfTerminated() {
+        when(stackRepository.findByAccountIdEnvironmentCrnAndCrnWithListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN))
+                .thenReturn(Optional.of(stack));
+        Stack results = underTest.getByCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN);
+
+        assertEquals(stack, results);
+    }
+
+    @Test
+    void getByCrnAndAccountIdEvenIfTerminatedThrowsWhenNotPresent() {
+        when(stackRepository.findByAccountIdEnvironmentCrnAndCrnWithListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN))
+                .thenReturn(Optional.empty());
+        when(childEnvironmentService.findParentStackByChildEnvironmentCrnAndCrnWithListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN))
+                .thenReturn(Optional.empty());
+        NotFoundException notFoundException = assertThrows(NotFoundException.class,
+                () -> underTest.getByCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN));
+        assertEquals("FreeIPA stack by environment [" + ENVIRONMENT_CRN + "] with CRN [" + FREEIPA_CRN + "] not found", notFoundException.getMessage());
+    }
+
+    @Test
+    void getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated() {
+        when(stackRepository.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of(stack));
+        List<Stack> results = underTest.getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID);
+
+        assertEquals(List.of(stack), results);
+    }
+
+    @Test
+    void getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedThrowsWhenCrnDoesNotExist() {
+        when(stackRepository.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of());
+        NotFoundException notFoundException =
+                assertThrows(NotFoundException.class, () -> underTest.getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID));
+        assertEquals("FreeIPA stack by environment [" + ENVIRONMENT_CRN + "] not found", notFoundException.getMessage());
+    }
+
+    @Test
+    void findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated() {
+        when(stackRepository.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of(stack));
+        List<Stack> results = underTest.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID);
 
         assertEquals(List.of(stack), results);
     }

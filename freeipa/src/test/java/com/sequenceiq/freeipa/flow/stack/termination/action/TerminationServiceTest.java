@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.stack.termination.action;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
@@ -9,6 +10,10 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
+import com.sequenceiq.freeipa.kerberosmgmt.v1.KerberosMgmtV1Service;
+import com.sequenceiq.freeipa.service.stack.StackUpdater;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,6 +30,8 @@ import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 @ExtendWith(MockitoExtension.class)
 class TerminationServiceTest {
 
+    private static final String STACK_NAME = "freeipa-cluster";
+
     @Mock
     private StackService stackService;
 
@@ -33,6 +40,15 @@ class TerminationServiceTest {
 
     @Mock
     private Clock clock;
+
+    @Mock
+    private TransactionService transactionService;
+
+    @Mock
+    private KerberosMgmtV1Service kerberosMgmtV1Service;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @InjectMocks
     private TerminationService underTest;
@@ -89,5 +105,24 @@ class TerminationServiceTest {
         verify(im3).setInstanceStatus(eq(InstanceStatus.DELETE_REQUESTED));
         verify(im4, never()).setInstanceStatus(any());
         verify(instanceMetaDataService).saveAll(any());
+    }
+
+    @Test
+    void testfinalizeTerminationTransaction() throws Exception {
+        Stack stack = mock(Stack.class);
+
+        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stack.getName()).thenReturn(STACK_NAME);
+
+        underTest.finalizeTerminationTransaction(1L);
+
+        verify(stack).setName(anyString());
+        verify(stack).setTerminated(any());
+        verify(kerberosMgmtV1Service).cleanupByEnvironment(any(), any());
+        verify(stackUpdater).updateStackStatus(eq(stack),
+                eq(DetailedStackStatus.DELETE_COMPLETED),
+                eq("Stack was terminated successfully."));
+        verify(stackService).save(eq(stack));
+        verify(instanceMetaDataService, never()).save(any());
     }
 }
