@@ -20,6 +20,7 @@ import org.springframework.context.annotation.PropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.config.ConversionConfig;
 import com.sequenceiq.cloudbreak.converter.StackToTemplatePreparationObjectConverter;
@@ -30,6 +31,7 @@ import com.sequenceiq.cloudbreak.service.template.ClusterTemplateService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AllowedInstanceTypeTest.TestAppContext.class)
@@ -104,6 +106,12 @@ public class AllowedInstanceTypeTest {
 
         @MockBean
         private BlueprintService blueprintService;
+
+        @MockBean
+        private EntitlementService entitlementService;
+
+        @MockBean
+        private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
     }
 }

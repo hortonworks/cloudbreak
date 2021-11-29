@@ -27,6 +27,7 @@ import org.springframework.core.io.support.ResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 @Service
 public class DefaultClusterTemplateCache {
@@ -59,6 +61,12 @@ public class DefaultClusterTemplateCache {
 
     @Inject
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
+    private InternalClusterTemplateValidator internalClusterTemplateValidator;
 
     @Inject
     private DefaultClusterTemplateV4RequestToClusterTemplateConverter defaultClusterTemplateV4RequestToClusterTemplateConverter;
@@ -142,19 +150,22 @@ public class DefaultClusterTemplateCache {
         CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         Workspace workspace = workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
+        boolean internalTenant = entitlementService.internalTenant(workspace.getTenant().getName());
         defaultClusterTemplateRequests().forEach((key, value) -> {
             if (templateNamesMissingFromDb.contains(key)) {
                 String defaultTemplateJson = new String(Base64.getDecoder().decode(value));
                 DefaultClusterTemplateV4Request defaultClusterTemplate = getDefaultClusterTemplate(defaultTemplateJson);
-                ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
-                clusterTemplate.setWorkspace(workspace);
-                Optional<Blueprint> blueprint = blueprints.stream()
-                        .filter(e -> e.getName().equals(defaultClusterTemplate.getDistroXTemplate().getCluster().getBlueprintName()))
-                        .findFirst();
-                if (blueprint.isPresent()) {
-                    clusterTemplate.setClouderaRuntimeVersion(blueprint.get().getStackVersion());
+                if (internalClusterTemplateValidator.shouldPopulate(defaultClusterTemplate, internalTenant)) {
+                    ClusterTemplate clusterTemplate = defaultClusterTemplateV4RequestToClusterTemplateConverter.convert(defaultClusterTemplate);
+                    clusterTemplate.setWorkspace(workspace);
+                    Optional<Blueprint> blueprint = blueprints.stream()
+                            .filter(e -> e.getName().equals(defaultClusterTemplate.getDistroXTemplate().getCluster().getBlueprintName()))
+                            .findFirst();
+                    if (blueprint.isPresent()) {
+                        clusterTemplate.setClouderaRuntimeVersion(blueprint.get().getStackVersion());
+                    }
+                    defaultTemplates.add(clusterTemplate);
                 }
-                defaultTemplates.add(clusterTemplate);
             }
         });
         return defaultTemplates;

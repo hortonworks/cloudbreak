@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.Clust
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -76,6 +77,9 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     private EnvironmentServiceDecorator environmentServiceDecorator;
 
     @Inject
+    private EntitlementService entitlementService;
+
+    @Inject
     private ClusterTemplateViewService clusterTemplateViewService;
 
     @Inject
@@ -110,18 +114,20 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @DisableCheckPermissions
     public ClusterTemplateViewV4Responses list(Long workspaceId) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
         measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Blueprints fetched in {}ms");
         measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Cluster definitions fetched in {}ms");
         Set<ClusterTemplateViewV4Response> result = measure(() -> clusterTemplateService.listInWorkspaceAndCleanUpInvalids(
-                threadLocalService.getRequestedWorkspaceId()), LOGGER, "cluster definitions cleaned in {}ms");
+                threadLocalService.getRequestedWorkspaceId(), accountId), LOGGER, "cluster definitions cleaned in {}ms");
         return new ClusterTemplateViewV4Responses(result);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
     public ClusterTemplateViewV4Responses listByEnv(Long workspaceId, @TenantAwareParam @ResourceCrn String environmentCrn) {
+        boolean internalTenant = isInternalTenant();
         measure(() -> blueprintService.updateDefaultBlueprintCollection(threadLocalService.getRequestedWorkspaceId()),
                 LOGGER, "Blueprints fetched in {}ms");
         measure(() -> clusterTemplateService.updateDefaultClusterTemplates(threadLocalService.getRequestedWorkspaceId()),
@@ -133,7 +139,11 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
                 .filter(e -> !Strings.isNullOrEmpty(e))
                 .findFirst();
         Set<ClusterTemplateView> clusterTemplateViews = clusterTemplateViewService.findAllUserManagedAndDefaultByEnvironmentCrn(
-                threadLocalService.getRequestedWorkspaceId(), environmentCrn, cloudPlatformByCrn.orElse(null), runtimeVersion.orElse(null));
+                threadLocalService.getRequestedWorkspaceId(),
+                environmentCrn,
+                cloudPlatformByCrn.orElse(null),
+                runtimeVersion.orElse(null),
+                internalTenant);
         Set<ClusterTemplateViewV4Response> result = clusterTemplateViews.stream()
                 .map(s -> clusterTemplateViewToClusterTemplateViewV4ResponseConverter.convert(s))
                 .collect(Collectors.toSet());
@@ -166,9 +176,10 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response getByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
+        boolean internalTenant = isInternalTenant();
         try {
             ClusterTemplate clusterTemplate = transactionService.required(() ->
-                    clusterTemplateService.getByCrn(crn, threadLocalService.getRequestedWorkspaceId()));
+                    clusterTemplateService.getByCrn(crn, threadLocalService.getRequestedWorkspaceId(), internalTenant));
             ClusterTemplateV4Response response = transactionService.required(() ->
                     clusterTemplateToClusterTemplateV4ResponseConverter.convert(clusterTemplate));
             if (!StringUtils.isEmpty(response.getEnvironmentCrn())) {
@@ -186,7 +197,8 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DELETE_CLUSTER_DEFINITION)
     public ClusterTemplateV4Response deleteByCrn(Long workspaceId, @TenantAwareParam @ResourceCrn String crn) {
-        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, threadLocalService.getRequestedWorkspaceId());
+        boolean internalTenant = isInternalTenant();
+        ClusterTemplate clusterTemplate = clusterTemplateService.deleteByCrn(crn, threadLocalService.getRequestedWorkspaceId(), internalTenant);
         return clusterTemplateToClusterTemplateV4ResponseConverter.convert(clusterTemplate);
     }
 
@@ -200,7 +212,7 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
             Optional<String> cloudPlatformByCrn = environmentClientService.getCloudPlatformByCrn(environmentCrn);
             Set<String> namesByEnv = clusterTemplateService
                     .findAllByEnvironment(threadLocalService.getRequestedWorkspaceId(), environmentCrn,
-                            cloudPlatformByCrn.orElse(null), null)
+                            cloudPlatformByCrn.orElse(null), null, true)
                     .stream()
                     .filter(e -> !ResourceStatus.DEFAULT.equals(e.getStatus()))
                     .map(ClusterTemplateView::getName)
@@ -211,6 +223,11 @@ public class ClusterTemplateV4Controller extends NotificationController implemen
                 clusterTemplates.stream()
                 .map(c -> clusterTemplateToClusterTemplateV4ResponseConverter.convert(c))
                 .collect(toSet()));
+    }
+
+    private boolean isInternalTenant() {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        return entitlementService.internalTenant(accountId);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.service.template;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
@@ -15,7 +17,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.FeatureState;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
@@ -31,6 +35,7 @@ import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
 
 class ClusterTemplateServiceCreationValidationTest {
 
@@ -64,6 +69,12 @@ class ClusterTemplateServiceCreationValidationTest {
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Mock
+    private InternalClusterTemplateValidator internalClusterTemplateValidator;
+
+    @Mock
+    private EntitlementService entitlementService;
+
     @InjectMocks
     private ClusterTemplateService underTest;
 
@@ -89,6 +100,9 @@ class ClusterTemplateServiceCreationValidationTest {
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
+        when(entitlementService.internalTenant(anyString())).thenReturn(true);
+        when(internalClusterTemplateValidator
+                .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
@@ -108,6 +122,9 @@ class ClusterTemplateServiceCreationValidationTest {
         clusterTemplate.setStackTemplate(stack);
         clusterTemplate.setStatus(ResourceStatus.USER_MANAGED);
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
+        when(entitlementService.internalTenant(anyString())).thenReturn(true);
+        when(internalClusterTemplateValidator
+                .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
@@ -129,6 +146,9 @@ class ClusterTemplateServiceCreationValidationTest {
         clusterTemplate.setWorkspace(workspace);
         when(clusterTemplateRepository.findByNameAndWorkspace(any(), any())).thenReturn(Optional.empty());
         when(blueprintService.getAllAvailableInWorkspace(workspace)).thenReturn(Collections.emptySet());
+        when(entitlementService.internalTenant(anyString())).thenReturn(true);
+        when(internalClusterTemplateValidator
+                .isInternalTemplateInNotInternalTenant(anyBoolean(), any(FeatureState.class))).thenReturn(true);
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.createForLoggedInUser(clusterTemplate,
                 WORKSPACE_ID, ACCOUNT_ID, CREATOR_ID));
