@@ -257,6 +257,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             restartMgmtServices();
             if (patchUpgrade) {
                 downloadAndActivateParcels(products, parcelResourceApi, true);
+                startServices();
                 callPostClouderaRuntimeUpgradeCommandIfCMIsNewerThan751(clustersResourceApi);
                 restartServices(clustersResourceApi);
             } else {
