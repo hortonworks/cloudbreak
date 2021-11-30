@@ -155,6 +155,10 @@
                  <name>{{ aclsauthz_prefix ~ "cruise-control.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
+            <param>
+                 <name>{{ aclsauthz_prefix ~ "kafka_connect.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
         </provider>
 {%- endif %}
 
@@ -297,6 +301,12 @@
             {% if 'CRUISE-CONTROL' in exposed and 'CRUISE_CONTROL_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
                 <name>CRUISE-CONTROL</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
+            {%- endif %}
+            {% if 'KAFKA_CONNECT' in exposed and 'KAFKA_CONNECT' in salt['pillar.get']('gateway:location') -%}
+            <param>
+                <name>KAFKA_CONNECT</name>
                 <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
@@ -576,6 +586,16 @@
     {%- endif %}
     {%- endif %}
 
+    {% if 'KAFKA_CONNECT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'KAFKA_CONNECT' in exposed -%}
+    <service>
+        <role>KAFKA_CONNECT</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['KAFKA_CONNECT'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['KAFKA_CONNECT'] }}</url>
+        {%- endfor %}
+    </service>
+    {%- endif %}
+    {%- endif %}
 
     {% if 'PHOENIX_QUERY_SERVER' in salt['pillar.get']('gateway:location') -%}
     {% if 'AVATICA' in exposed -%}

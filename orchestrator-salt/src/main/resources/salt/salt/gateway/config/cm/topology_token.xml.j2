@@ -139,6 +139,10 @@
                  <name>{{ aclsauthz_prefix ~ "ssb-mve-api.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
+            <param>
+                 <name>{{ aclsauthz_prefix ~ "kafka_connect.acl" }}</name>
+                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
+            </param>
         </provider>
 {%- endif %}
 
@@ -259,6 +263,12 @@
                <name>LIVYFORSPARK3API</name>
                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
+            {%- endif %}
+            {% if 'KAFKA_CONNECT' in exposed and 'KAFKA_CONNECT' in salt['pillar.get']('gateway:location') -%}
+            <param>
+                <name>KAFKA_CONNECT</name>
+                <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
+            </param>
             {%- endif %}
         </provider>
     </gateway>
@@ -509,6 +519,17 @@
             <name>replayBufferSize</name>
             <value>512</value>
         </param>
+    </service>
+    {%- endif %}
+    {%- endif %}
+
+    {% if 'KAFKA_CONNECT' in salt['pillar.get']('gateway:location') -%}
+    {% if 'KAFKA_CONNECT' in exposed -%}
+    <service>
+        <role>KAFKA_CONNECT</role>
+        {% for hostloc in salt['pillar.get']('gateway:location')['KAFKA_CONNECT'] -%}
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['KAFKA_CONNECT'] }}</url>
+        {%- endfor %}
     </service>
     {%- endif %}
     {%- endif %}

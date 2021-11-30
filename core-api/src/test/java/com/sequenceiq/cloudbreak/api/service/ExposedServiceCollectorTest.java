@@ -31,6 +31,8 @@ class ExposedServiceCollectorTest {
 
     private static final Optional<String> CDH_7_2_11 = Optional.of("7.2.11");
 
+    private static final Optional<String> CDH_7_2_14 = Optional.of("7.2.14");
+
     @InjectMocks
     private ExposedServiceCollector underTest;
 
@@ -103,6 +105,7 @@ class ExposedServiceCollectorTest {
                 "IMPALAD",
                 "IMPALA_DEBUG_UI",
                 "JOBHISTORY",
+                "KAFKA_CONNECT",
                 "KUDU_MASTER",
                 "LIVY_SERVER",
                 "LIVY_SERVER_FOR_SPARK3",
@@ -153,6 +156,7 @@ class ExposedServiceCollectorTest {
                 "JOBHISTORYUI",
                 "JOBTRACKER",
                 "RESOURCEMANAGERAPI",
+                "KAFKA_CONNECT",
                 "KUDUUI",
                 "LIVYSERVER1",
                 "LIVYSERVER_API",
@@ -241,7 +245,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_11, false)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_14, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
@@ -260,6 +264,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("JOBHISTORYUI", 19888),
                 Map.entry("JOBTRACKER", 8032),
                 Map.entry("RESOURCEMANAGERAPI", 8032),
+                Map.entry("KAFKA_CONNECT", 28083),
                 Map.entry("KUDUUI", 8051),
                 Map.entry("LIVYSERVER1", 8998),
                 Map.entry("LIVYSERVER_API", 8998),
@@ -347,7 +352,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePorts() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_11, true)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_14, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -366,6 +371,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("JOBHISTORYUI", 19890),
                 Map.entry("JOBTRACKER", 8032),
                 Map.entry("RESOURCEMANAGERAPI", 8032),
+                Map.entry("KAFKA_CONNECT", 28085),
                 Map.entry("KUDUUI", 8051),
                 Map.entry("LIVYSERVER1", 8998),
                 Map.entry("LIVYSERVER_API", 8998),
