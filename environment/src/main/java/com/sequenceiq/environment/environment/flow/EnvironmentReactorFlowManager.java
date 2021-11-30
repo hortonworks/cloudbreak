@@ -27,6 +27,7 @@ import com.sequenceiq.environment.environment.flow.start.event.EnvStartStateSele
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopEvent;
 import com.sequenceiq.environment.environment.flow.stop.event.EnvStopStateSelectors;
 import com.sequenceiq.environment.environment.service.stack.StackService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -46,13 +47,13 @@ public class EnvironmentReactorFlowManager {
     private final StackService stackService;
 
     public EnvironmentReactorFlowManager(EventSender eventSender,
-        FlowCancelService flowCancelService, StackService stackService) {
+            FlowCancelService flowCancelService, StackService stackService) {
         this.eventSender = eventSender;
         this.flowCancelService = flowCancelService;
         this.stackService = stackService;
     }
 
-    public void triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
+    public FlowIdentifier triggerCreationFlow(long envId, String envName, String userCrn, String envCrn) {
         LOGGER.info("Environment creation flow triggered.");
         EnvCreationEvent envCreationEvent = EnvCreationEvent.builder()
                 .withAccepted(new Promise<>())
@@ -62,14 +63,14 @@ public class EnvironmentReactorFlowManager {
                 .withResourceCrn(envCrn)
                 .build();
 
-        eventSender.sendEvent(envCreationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(envCreationEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
     private Map<String, Object> getFlowTriggerUsercrn(String userCrn) {
         return Map.of(FlowConstants.FLOW_TRIGGER_USERCRN, userCrn);
     }
 
-    public void triggerDeleteFlow(Environment environment, String userCrn, boolean forced) {
+    public FlowIdentifier triggerDeleteFlow(Environment environment, String userCrn, boolean forced) {
         LOGGER.info("Environment deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
@@ -80,10 +81,10 @@ public class EnvironmentReactorFlowManager {
                 .withForceDelete(forced)
                 .build();
 
-        eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerCascadingDeleteFlow(Environment environment, String userCrn, boolean forced) {
+    public FlowIdentifier triggerCascadingDeleteFlow(Environment environment, String userCrn, boolean forced) {
         LOGGER.info("Environment forced deletion flow triggered for '{}'.", environment.getName());
         flowCancelService.cancelRunningFlows(environment.getId());
         EnvDeleteEvent envDeleteEvent = EnvDeleteEvent.builder()
@@ -94,10 +95,10 @@ public class EnvironmentReactorFlowManager {
                 .withForceDelete(forced)
                 .build();
 
-        eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(envDeleteEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerStopFlow(long envId, String envName, String userCrn) {
+    public FlowIdentifier triggerStopFlow(long envId, String envName, String userCrn) {
         LOGGER.info("Environment stop flow triggered.");
         EnvStopEvent envStopEvent = EnvStopEvent.EnvStopEventBuilder.anEnvStopEvent()
                 .withAccepted(new Promise<>())
@@ -106,10 +107,10 @@ public class EnvironmentReactorFlowManager {
                 .withResourceName(envName)
                 .build();
 
-        eventSender.sendEvent(envStopEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(envStopEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerStartFlow(long envId, String envName, String userCrn, DataHubStartAction dataHubStartAction) {
+    public FlowIdentifier triggerStartFlow(long envId, String envName, String userCrn, DataHubStartAction dataHubStartAction) {
         LOGGER.info("Environment start flow triggered.");
         EnvStartEvent envSrartEvent = EnvStartEvent.EnvStartEventBuilder.anEnvStartEvent()
                 .withAccepted(new Promise<>())
@@ -119,28 +120,28 @@ public class EnvironmentReactorFlowManager {
                 .withDataHubStart(dataHubStartAction)
                 .build();
 
-        eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(envSrartEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerStackConfigUpdatesFlow(Environment environment, String userCrn) {
+    public FlowIdentifier triggerStackConfigUpdatesFlow(Environment environment, String userCrn) {
         stackService.cancelRunningStackConfigUpdates(environment);
 
         LOGGER.info("Environment stack configurations update flow triggered.");
         EnvStackConfigUpdatesEvent envStackConfigUpdatesEvent = EnvStackConfigUpdatesEventBuilder
-            .anEnvStackConfigUpdatesEvent()
-            .withAccepted(new Promise<>())
-            .withSelector(
-                EnvStackConfigUpdatesStateSelectors.ENV_STACK_CONFIG_UPDATES_START_EVENT.selector())
-            .withResourceId(environment.getId())
-            .withResourceName(environment.getName())
-            .withResourceCrn(environment.getResourceCrn())
-            .build();
+                .anEnvStackConfigUpdatesEvent()
+                .withAccepted(new Promise<>())
+                .withSelector(
+                        EnvStackConfigUpdatesStateSelectors.ENV_STACK_CONFIG_UPDATES_START_EVENT.selector())
+                .withResourceId(environment.getId())
+                .withResourceName(environment.getName())
+                .withResourceCrn(environment.getResourceCrn())
+                .build();
 
-        eventSender.sendEvent(envStackConfigUpdatesEvent,
-            new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(envStackConfigUpdatesEvent,
+                new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,
+    public FlowIdentifier triggerLoadBalancerUpdateFlow(EnvironmentDto environmentDto, Long envId, String envName, String envCrn,
             PublicEndpointAccessGateway endpointAccessGateway, Set<String> subnetIds, String userCrn) {
         LOGGER.info("Load balancer update flow triggered.");
         if (PublicEndpointAccessGateway.ENABLED.equals(endpointAccessGateway)) {
@@ -151,21 +152,22 @@ public class EnvironmentReactorFlowManager {
             }
         }
         LoadBalancerUpdateEvent loadBalancerUpdateEvent = LoadBalancerUpdateEvent.LoadBalancerUpdateEventBuilder.aLoadBalancerUpdateEvent()
-            .withAccepted(new Promise<>())
-            .withSelector(LoadBalancerUpdateStateSelectors.LOAD_BALANCER_UPDATE_START_EVENT.selector())
-            .withResourceId(envId)
-            .withResourceName(envName)
-            .withResourceCrn(envCrn)
-            .withEnvironmentDto(environmentDto)
-            .withPublicEndpointAccessGateway(endpointAccessGateway)
-            .withSubnetIds(subnetIds)
-            .build();
+                .withAccepted(new Promise<>())
+                .withSelector(LoadBalancerUpdateStateSelectors.LOAD_BALANCER_UPDATE_START_EVENT.selector())
+                .withResourceId(envId)
+                .withResourceName(envName)
+                .withResourceCrn(envCrn)
+                .withEnvironmentDto(environmentDto)
+                .withPublicEndpointAccessGateway(endpointAccessGateway)
+                .withSubnetIds(subnetIds)
+                .build();
 
-        eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
+        return eventSender.sendEvent(loadBalancerUpdateEvent, new Event.Headers(getFlowTriggerUsercrn(userCrn)));
     }
 
-    public void triggerCcmUpgradeFlow(EnvironmentDto environment) {
+    public FlowIdentifier triggerCcmUpgradeFlow(EnvironmentDto environment) {
         LOGGER.info("Environment CCM upgrade flow triggered for environment {}", environment.getName());
         // TODO in CB-14568
+        return null;
     }
 }

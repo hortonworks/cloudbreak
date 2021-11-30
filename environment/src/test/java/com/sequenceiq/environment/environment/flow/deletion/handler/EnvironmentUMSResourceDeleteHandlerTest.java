@@ -74,7 +74,6 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
         doNothing().when(ownerAssignmentService).notifyResourceDeleted(eq(TEST_CRN), any());
-        doNothing().when(eventSender).sendEvent(any(EnvDeleteEvent.class), any());
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
@@ -94,7 +93,6 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDto.getResourceCrn()).willReturn(null);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(env));
         doNothing().when(ownerAssignmentService).notifyResourceDeleted(eq(crnFromQuery), any());
-        doNothing().when(eventSender).sendEvent(any(EnvDeleteEvent.class), any());
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN
@@ -112,7 +110,6 @@ public class EnvironmentUMSResourceDeleteHandlerTest {
         given(environmentDto.getResourceCrn()).willReturn(TEST_CRN);
         given(environmentService.findEnvironmentById(any())).willReturn(Optional.of(new Environment()));
         doThrow(new UmsOperationException("ums exception")).when(ownerAssignmentService).notifyResourceDeleted(eq(TEST_CRN), any());
-        doNothing().when(eventSender).sendEvent(any(EnvDeleteEvent.class), any());
         // WHEN
         underTest.accept(environmentDtoEvent);
         // THEN

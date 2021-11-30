@@ -80,6 +80,7 @@ import com.sequenceiq.environment.environment.service.EnvironmentUpgradeCcmServi
 import com.sequenceiq.environment.environment.service.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentApiConverter;
 import com.sequenceiq.environment.environment.v1.converter.EnvironmentResponseConverter;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 
 @Controller
@@ -343,27 +344,27 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.START_ENVIRONMENT)
-    public void postStartByName(@ResourceName String name, DataHubStartAction dataHubStartAction) {
-        environmentStartService.startByName(name, dataHubStartAction);
+    public FlowIdentifier postStartByName(@ResourceName String name, DataHubStartAction dataHubStartAction) {
+        return environmentStartService.startByName(name, dataHubStartAction);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.START_ENVIRONMENT)
-    public void postStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn,
+    public FlowIdentifier postStartByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn,
             DataHubStartAction dataHubStartAction) {
-        environmentStartService.startByCrn(crn, dataHubStartAction);
+        return environmentStartService.startByCrn(crn, dataHubStartAction);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.STOP_ENVIRONMENT)
-    public void postStopByName(@ResourceName String name) {
-        environmentStopService.stopByName(name);
+    public FlowIdentifier postStopByName(@ResourceName String name) {
+        return environmentStopService.stopByName(name);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.STOP_ENVIRONMENT)
-    public void postStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
-        environmentStopService.stopByCrn(crn);
+    public FlowIdentifier postStopByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
+        return environmentStopService.stopByCrn(crn);
     }
 
     @Override
@@ -395,27 +396,27 @@ public class EnvironmentController implements EnvironmentEndpoint {
 
     @Override
     @InternalOnly
-    public void updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
-        stackConfigUpdateService.updateAllStackConfigsByCrn(crn);
+    public FlowIdentifier updateConfigsInEnvironmentByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn) {
+        return stackConfigUpdateService.updateAllStackConfigsByCrn(crn);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public void updateEnvironmentLoadBalancersByName(@ResourceName String envName, @NotNull EnvironmentLoadBalancerUpdateRequest request) {
+    public FlowIdentifier updateEnvironmentLoadBalancersByName(@ResourceName String envName, @NotNull EnvironmentLoadBalancerUpdateRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByNameAndAccountId(envName, accountId);
         EnvironmentLoadBalancerDto environmentLoadBalancerDto = environmentApiConverter.initLoadBalancerDto(request);
-        environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
+        return environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
     }
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT)
-    public void updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn,
+    public FlowIdentifier updateEnvironmentLoadBalancersByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn @TenantAwareParam String crn,
             @NotNull EnvironmentLoadBalancerUpdateRequest request) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environmentDto = environmentService.getByCrnAndAccountId(crn, accountId);
         EnvironmentLoadBalancerDto environmentLoadBalancerDto = environmentApiConverter.initLoadBalancerDto(request);
-        environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
+        return environmentLoadBalancerService.updateLoadBalancerInEnvironmentAndStacks(environmentDto, environmentLoadBalancerDto);
     }
 
     @Override

@@ -1,10 +1,9 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENV_STOPPED;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_FREEIPA_FAILED;
-import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.STOP_FREEIPA_FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlowFail;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -189,7 +188,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .mockSpi().stopInstances().post().thenReturn("error", 400, 1)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
-                .await(STOP_FREEIPA_FAILED)
+                .awaitForFlow(waitForFlowFail())
                 .when(environmentTestClient.start())
                 .await(EnvironmentStatus.AVAILABLE)
                 //do the same with start
@@ -199,7 +198,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .when(environmentTestClient.stop())
                 .await(ENV_STOPPED)
                 .when(environmentTestClient.start())
-                .await(START_FREEIPA_FAILED)
+                .awaitForFlow(waitForFlowFail())
                 .when(environmentTestClient.stop())
                 .await(ENV_STOPPED)
                 .validate();

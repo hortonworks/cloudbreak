@@ -18,6 +18,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class EnvironmentLoadBalancerService {
@@ -43,7 +44,7 @@ public class EnvironmentLoadBalancerService {
         this.loadBalancerEntitlementService = loadBalancerEntitlementService;
     }
 
-    public void updateLoadBalancerInEnvironmentAndStacks(EnvironmentDto environmentDto, EnvironmentLoadBalancerDto environmentLbDto) {
+    public FlowIdentifier updateLoadBalancerInEnvironmentAndStacks(EnvironmentDto environmentDto, EnvironmentLoadBalancerDto environmentLbDto) {
         requireNonNull(environmentDto);
         requireNonNull(environmentLbDto);
 
@@ -64,7 +65,7 @@ public class EnvironmentLoadBalancerService {
                         environmentDto.getResourceCrn())));
 
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        reactorFlowManager
+        return reactorFlowManager
             .triggerLoadBalancerUpdateFlow(environmentDto, environment.getId(), environment.getName(), environment.getResourceCrn(),
                 environmentLbDto.getEndpointAccessGateway(), environmentLbDto.getEndpointGatewaySubnetIds(), userCrn);
     }

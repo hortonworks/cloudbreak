@@ -15,6 +15,7 @@ import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDt
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class EnvironmentStopService {
@@ -29,23 +30,23 @@ public class EnvironmentStopService {
         this.environmentService = environmentService;
     }
 
-    public void stopByCrn(String crn) {
+    public FlowIdentifier stopByCrn(String crn) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByCrnAndAccountId(crn, accountId);
-        stop(environment, accountId);
+        return stop(environment, accountId);
     }
 
-    public void stopByName(String name) {
+    public FlowIdentifier stopByName(String name) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByNameAndAccountId(name, accountId);
-        stop(environment, accountId);
+        return stop(environment, accountId);
     }
 
-    private void stop(EnvironmentDto environment, String accountId) {
+    private FlowIdentifier stop(EnvironmentDto environment, String accountId) {
         validateStoppable(environment, accountId);
 
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        reactorFlowManager.triggerStopFlow(environment.getId(), environment.getName(), userCrn);
+        return reactorFlowManager.triggerStopFlow(environment.getId(), environment.getName(), userCrn);
     }
 
     private void validateStoppable(EnvironmentDto environment, String accountId) {

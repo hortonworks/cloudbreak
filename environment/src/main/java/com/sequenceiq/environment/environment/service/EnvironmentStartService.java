@@ -11,6 +11,7 @@ import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.common.api.type.DataHubStartAction;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Service
 public class EnvironmentStartService {
@@ -25,23 +26,23 @@ public class EnvironmentStartService {
         this.environmentService = environmentService;
     }
 
-    public void startByCrn(String crn, DataHubStartAction dataHubStartAction) {
+    public FlowIdentifier startByCrn(String crn, DataHubStartAction dataHubStartAction) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByCrnAndAccountId(crn, accountId);
-        start(environment, accountId, dataHubStartAction);
+        return start(environment, accountId, dataHubStartAction);
     }
 
-    public void startByName(String name, DataHubStartAction dataHubStartAction) {
+    public FlowIdentifier startByName(String name, DataHubStartAction dataHubStartAction) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         EnvironmentDto environment = environmentService.getByNameAndAccountId(name, accountId);
-        start(environment, accountId, dataHubStartAction);
+        return start(environment, accountId, dataHubStartAction);
     }
 
-    private void start(EnvironmentDto environment, String accountId, DataHubStartAction dataHubStartAction) {
+    private FlowIdentifier start(EnvironmentDto environment, String accountId, DataHubStartAction dataHubStartAction) {
         validateStartable(environment, accountId);
         dataHubStartAction = (dataHubStartAction == null) ? START_ALL : dataHubStartAction;
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        reactorFlowManager.triggerStartFlow(environment.getId(), environment.getName(), userCrn, dataHubStartAction);
+        return reactorFlowManager.triggerStartFlow(environment.getId(), environment.getName(), userCrn, dataHubStartAction);
     }
 
     private void validateStartable(EnvironmentDto environment, String accountId) {
