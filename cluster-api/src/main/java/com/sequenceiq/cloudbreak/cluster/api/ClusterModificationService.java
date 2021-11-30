@@ -45,7 +45,8 @@ public interface ClusterModificationService {
 
     Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName);
 
-    ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException;
+    ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents, Set<String> parcelNamesFromImage)
+            throws CloudbreakException;
 
     boolean isServicePresent(String clusterName, String serviceType);
 
