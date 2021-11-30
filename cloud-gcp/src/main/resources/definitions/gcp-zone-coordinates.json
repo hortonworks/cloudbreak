@@ -155,6 +155,30 @@
       "displayName": "Jakarta, Indonesia",
       "latitude": "-6.12",
       "longitude": "106.77"
+    },
+    {
+      "name": "asia-south2",
+      "displayName": "Delhi, India",
+      "latitude": "28.64",
+      "longitude": "77.21"
+    },
+    {
+      "name": "australia-southeast2",
+      "displayName": "Melbourne, Australia",
+      "latitude": "-37.84",
+      "longitude": "144.94"
+    },
+    {
+      "name": "northamerica-northeast2",
+      "displayName": "Toronto, Canada",
+      "latitude": "43.65",
+      "longitude": "-79.34"
+    },
+    {
+      "name": "southamerica-west1",
+      "displayName": "Santiago, Chile",
+      "latitude": "-33.44",
+      "longitude": "-70.67"
     }
   ]
 }
