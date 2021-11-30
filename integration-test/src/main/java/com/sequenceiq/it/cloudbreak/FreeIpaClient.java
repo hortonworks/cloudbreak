@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -14,6 +15,7 @@ import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnClientBuilder;
 import com.sequenceiq.freeipa.api.client.FreeIpaApiUserCrnEndpoint;
 import com.sequenceiq.freeipa.api.client.FreeipaInternalCrnClient;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -35,6 +37,8 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaOperationWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaUserSyncWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.freeipa.FreeIpaInstanceWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
 public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api.client.FreeIpaClient, FreeIpaApiUserCrnEndpoint> {
     public static final String FREEIPA_CLIENT = "FREEIPA_CLIENT";
@@ -124,4 +128,12 @@ public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api
         checkIfInternalClientAllowed(testContext);
         return freeipaInternalCrnClient.withInternalCrn();
     }
+
+    @Override
+    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, E instanceStatus) {
+        return new FreeIpaInstanceWaitObject(testContext, ((FreeIpaTestDto) entity).getResponse().getEnvironmentCrn(), instanceIds,
+                (InstanceStatus) instanceStatus);
+    }
+
 }

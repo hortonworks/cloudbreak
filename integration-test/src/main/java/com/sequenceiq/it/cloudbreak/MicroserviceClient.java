@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -11,6 +12,7 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
 public abstract class MicroserviceClient<C, I> extends Entity {
 
@@ -47,6 +49,11 @@ public abstract class MicroserviceClient<C, I> extends Entity {
 
     public abstract <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
             TestContext testContext, Set<E> ignoredFailedStatuses);
+
+    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, E instanceStatus) {
+        throw new TestFailException("Can't create waitInstanceWaitObject instances object");
+    }
 
     public abstract C getDefaultClient();
 
