@@ -8,41 +8,40 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
 
 @Component
 public class InstanceAwait {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceAwait.class);
 
-    public CloudbreakTestDto await(CloudbreakTestDto entity, Map<List<String>, InstanceStatus> desiredStatuses, TestContext testContext,
+    public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<List<String>, E> desiredStatuses, TestContext testContext,
             RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
         try {
             if (entity == null) {
                 throw new RuntimeException("Sdx key has been provided but no result in resource map!");
             }
-            String name = entity.getName();
-            Log.await(LOGGER, String.format("%s for %s", name, desiredStatuses));
+            Log.await(LOGGER, String.format("%s for %s", entity.getName(), desiredStatuses));
             MicroserviceClient client = testContext.getMicroserviceClient(entity.getClass(), testContext.setActingUser(runningParameter).getAccessKey());
 
             desiredStatuses.forEach((instanceIds, instanceStatus) -> {
-                InstanceWaitObject waitObject = new InstanceWaitObject(testContext, name, instanceIds, instanceStatus);
+                InstanceWaitObject instanceWaitObject = client.waitInstancesObject(entity, testContext, instanceIds, instanceStatus);
 
-                if (waitObject.isDeletionCheck()) {
-                    client.<InstanceWaitObject>waiterService().waitObject(new InstanceTerminationChecker<>(), waitObject, testContext, pollingInterval,
-                            maxRetry, 1);
-                } else if (waitObject.isFailedCheck()) {
-                    client.<InstanceWaitObject>waiterService().waitObject(new InstanceFailedChecker<>(), waitObject, testContext, pollingInterval,
-                            maxRetry, 1);
+                if (instanceWaitObject.isDeletionCheck()) {
+                    client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceTerminationChecker<>(), instanceWaitObject, testContext,
+                            pollingInterval, maxRetry, 1);
+                } else if (instanceWaitObject.isFailedCheck()) {
+                    client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceFailedChecker<>(), instanceWaitObject, testContext,
+                            pollingInterval, maxRetry, 1);
                 } else {
-                    client.<InstanceWaitObject>waiterService().waitObject(new InstanceOperationChecker<>(), waitObject, testContext, pollingInterval,
-                            maxRetry, 1);
+                    client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceOperationChecker<>(), instanceWaitObject, testContext,
+                            pollingInterval, maxRetry, 1);
                 }
             });
         } catch (Exception e) {

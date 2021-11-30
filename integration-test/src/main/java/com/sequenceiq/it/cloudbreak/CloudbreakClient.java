@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -10,6 +11,7 @@ import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.cloudbreak.api.CoreApi;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.client.ApiKeyRequestFilter;
@@ -47,6 +49,8 @@ import com.sequenceiq.it.cloudbreak.dto.util.UsedImagesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
 
 public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbreak.client.CloudbreakClient, CloudbreakServiceCrnEndpoints> {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
@@ -191,6 +195,12 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     public CloudbreakServiceCrnEndpoints getInternalClient(TestContext testContext) {
         checkIfInternalClientAllowed(testContext);
         return cloudbreakInternalCrnClient.withInternalCrn();
+    }
+
+    @Override
+    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, E instanceStatus) {
+        return new CloudbreakInstanceWaitObject(testContext, entity.getName(), instanceIds, (InstanceStatus) instanceStatus);
     }
 }
 

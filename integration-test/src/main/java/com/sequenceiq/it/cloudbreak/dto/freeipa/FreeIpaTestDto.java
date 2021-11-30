@@ -347,17 +347,17 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
 
     public FreeIpaTestDto awaitForFreeIpaInstance(FreeIpaTestDto entity, Map<List<String>,
             com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().awaitForFreeIpaInstance(entity, statuses, runningParameter);
+        return getTestContext().awaitForInstance(entity, statuses, runningParameter);
     }
 
     public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
             RunningParameter runningParameter) {
-        return getTestContext().awaitForFreeIpaInstance(this, statuses, runningParameter);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
 
     public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
             RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().awaitForFreeIpaInstance(this, statuses, runningParameter, pollingInterval);
+        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
     }
 
     public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,

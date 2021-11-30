@@ -6,7 +6,6 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.util.wait.service.ExceptionChecker;
 
@@ -57,15 +56,15 @@ public class InstanceFailedChecker<T extends InstanceWaitObject> extends Excepti
     public boolean exitWaiting(T waitObject) {
         Map<String, String> actualStatuses = waitObject.actualStatuses();
         Map<String, String> actualStatusReasons = waitObject.actualStatusReason();
-        List<InstanceMetaDataV4Response> instanceMetaDatas = waitObject.getInstanceMetaDatas();
+        Map<String, String> instanceStatuses = waitObject.getFetchedInstanceStatuses();
         if (failed) {
-            LOGGER.error("Instance '{}' refresh has been failed. Exit waiting!", instanceMetaDatas);
-            throw new TestFailException(String.format("Instance '%s' refresh has been failed! Instance status: '%s' statusReason: '%s'", instanceMetaDatas,
+            LOGGER.error("Instance '{}' refresh has been failed. Exit waiting!", instanceStatuses);
+            throw new TestFailException(String.format("Instance '%s' refresh has been failed! Instance status: '%s' statusReason: '%s'", instanceStatuses,
                     actualStatuses, actualStatusReasons));
         }
-        if (instanceMetaDatas.isEmpty()) {
-            LOGGER.error("Instance '{}' was not found. Exit waiting!", instanceMetaDatas);
-            throw new TestFailException(String.format("Instance '%s' was not found!", instanceMetaDatas));
+        if (instanceStatuses.isEmpty()) {
+            LOGGER.error("Instance '{}' was not found. Exit waiting!", instanceStatuses);
+            throw new TestFailException(String.format("Instance '%s' was not found!", instanceStatuses));
         }
         return waitObject.isInDesiredStatus();
     }

@@ -1,4 +1,4 @@
-package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.instance;
+package com.sequenceiq.it.cloudbreak.util.wait.service.instance.freeipa;
 
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.DECOMMISSIONED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.DELETED_BY_PROVIDER;
@@ -15,16 +15,16 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceFailedChecker;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
-public class FreeIpaInstanceWaitObject implements WaitObject {
+public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(InstanceFailedChecker.class);
 
@@ -125,6 +125,12 @@ public class FreeIpaInstanceWaitObject implements WaitObject {
 
     public List<String> getInstanceIds() {
         return instanceIds;
+    }
+
+    @Override
+    public Map<String, String> getFetchedInstanceStatuses() {
+        return getInstanceMetaDatas().stream().collect(Collectors.toMap(InstanceMetaDataResponse::getInstanceId,
+                instanceMetaDataResponse -> instanceMetaDataResponse.getInstanceStatus().name()));
     }
 
     public Map<String, InstanceStatus> getInstanceStatuses() {

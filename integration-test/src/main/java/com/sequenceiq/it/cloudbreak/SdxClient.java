@@ -1,9 +1,11 @@
 package com.sequenceiq.it.cloudbreak;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.client.ConfigKey;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
 import com.sequenceiq.it.IntegrationTestContext;
@@ -18,6 +20,8 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyClient;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyEndpoints;
@@ -69,6 +73,12 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Voi
                 SdxInternalTestDto.class.getSimpleName(),
                 SdxCustomTestDto.class.getSimpleName(),
                 SdxChangeImageCatalogTestDto.class.getSimpleName());
+    }
+
+    @Override
+    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, E instanceStatus) {
+        return new CloudbreakInstanceWaitObject(testContext, entity.getName(), instanceIds, (InstanceStatus) instanceStatus);
     }
 }
 
