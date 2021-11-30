@@ -450,6 +450,21 @@
       "minVersion": "7.2.11"
     },
     {
+      "name": "KAFKA_CONNECT_API",
+      "displayName": "Kafka Connect",
+      "serviceName": "KAFKA_CONNECT",
+      "knoxService": "KAFKA_CONNECT",
+      "knoxUrl": "/kafka-connect/",
+      "ssoSupported": true,
+      "port": 28083,
+      "tlsPort": 28085,
+      "apiOnly": true,
+      "apiIncluded": true,
+      "visibleForDatalake": true,
+      "visibleForDatahub": true,
+      "minVersion": "7.2.14"
+    },
+    {
       "name": "IMPALA",
       "displayName": "Impala",
       "serviceName": "IMPALAD",
