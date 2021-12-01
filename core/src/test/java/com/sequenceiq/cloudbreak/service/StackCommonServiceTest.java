@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -24,16 +25,21 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackImageChangeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
+import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -57,6 +63,8 @@ class StackCommonServiceTest {
     private static final long STACK_ID = 2L;
 
     private static final NameOrCrn STACK_NAME = NameOrCrn.ofName("stackName");
+
+    private static final NameOrCrn STACK_CRN = NameOrCrn.ofCrn("crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:6b5a9aa7-223a-4d6a-93ca-27627be773b5");
 
     private static final String SUBNET_ID = "aSubnetId";
 
@@ -194,7 +202,44 @@ class StackCommonServiceTest {
 
         underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true);
 
-        verify(stackOperationService).removeInstances(stack, nodes, true);
+        verify(stackOperationService).removeInstances(stack, nodes, true, null);
+    }
+
+    @Test
+    public void testStartInstancesInDefaultWorkspace() {
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+
+        User user = new User();
+        when(userService.getOrCreate(any())).thenReturn(user);
+        when(stackService.getByCrn(STACK_CRN.getCrn())).thenReturn(stack);
+
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
+        when(cloudbreakUser.getUserCrn()).thenReturn("crn:cdp:" + Crn.Service.AUTOSCALE.getName() + ":us-west-1:altus:user:__internal__actor__");
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
+
+        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
+        updateStackV4Request.setWithClusterEvent(true);
+        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentV4Request = new InstanceGroupAdjustmentV4Request();
+        instanceGroupAdjustmentV4Request.setInstanceGroup("instanceGroup");
+        instanceGroupAdjustmentV4Request.setScalingAdjustment(5);
+        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
+
+        // Regular flow
+        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
+        verify(stackOperationService).updateNodeCountStartInstances(stack, updateStackV4Request.getInstanceGroupAdjustment(),
+                true, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
+
+        // Null scaling strategy
+        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request, null);
+        verify(stackOperationService).updateNodeCountStartInstances(stack, updateStackV4Request.getInstanceGroupAdjustment(),
+                true, ScalingStrategy.STOPSTART);
+
+        // Status is set - Bad Request
+        updateStackV4Request.setStatus(StatusRequest.FULL_SYNC);
+        assertThrows(BadRequestException.class, () -> underTest.putStartInstancesInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request, null));
+
+        // TODO CB-14929: CB-15154 Add validation tests for upscale/downscale limits after the validations are adjusted.
     }
 
     @Test
