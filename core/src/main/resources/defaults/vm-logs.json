@@ -310,5 +310,9 @@
   {
     "path": "/var/log/jumpgate/out.log",
     "label": "jumpgate_agent_out"
+  },
+  {
+    "path": "/var/log/mount-instance-storage.log",
+    "label": "mount_instance_storage"
   }
 ]
