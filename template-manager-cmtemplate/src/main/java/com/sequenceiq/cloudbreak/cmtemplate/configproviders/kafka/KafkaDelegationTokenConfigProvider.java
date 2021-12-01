@@ -14,13 +14,11 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class KafkaDelegationTokenConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String CONFIG_NAME = "delegation.token.enable";
-
     private static final String CONFIG_VALUE = "true";
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        return List.of(config(CONFIG_NAME, CONFIG_VALUE));
+        return List.of(config(KafkaConfigs.DELEGATION_TOKEN_ENABLE, CONFIG_VALUE));
     }
 
     @Override

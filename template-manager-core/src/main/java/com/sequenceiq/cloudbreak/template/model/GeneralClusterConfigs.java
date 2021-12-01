@@ -47,6 +47,8 @@ public class GeneralClusterConfigs {
 
     private boolean enableRangerRaz;
 
+    private boolean multiAzEnabled;
+
     private Optional<String> loadBalancerGatewayFqdn = Optional.empty();
 
     private Optional<String> accountId = Optional.empty();
@@ -225,5 +227,13 @@ public class GeneralClusterConfigs {
 
     public void setAccountId(Optional<String> accountId) {
         this.accountId = accountId;
+    }
+
+    public boolean isMultiAzEnabled() {
+        return multiAzEnabled;
+    }
+
+    public void setMultiAzEnabled(boolean multiAzEnabled) {
+        this.multiAzEnabled = multiAzEnabled;
     }
 }

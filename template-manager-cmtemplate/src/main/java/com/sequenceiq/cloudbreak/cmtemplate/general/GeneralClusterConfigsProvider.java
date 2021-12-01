@@ -19,8 +19,6 @@ public class GeneralClusterConfigsProvider {
 
     public static final String KAFKA_BROKER = "KAFKA_BROKER";
 
-    private static final int DEFAULT_REPLICATION_FACTOR = 3;
-
     private static final String PENDING_DEFAULT_VALUE = "pending...";
 
     public GeneralClusterConfigs generalClusterConfigs(Stack stack, Cluster cluster) {
