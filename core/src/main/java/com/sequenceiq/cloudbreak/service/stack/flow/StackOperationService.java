@@ -26,6 +26,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
@@ -36,6 +38,7 @@ import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
@@ -43,6 +46,7 @@ import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
+import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
@@ -95,6 +99,9 @@ public class StackOperationService {
 
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
+
+    @Inject
+    private StackApiViewService stackApiViewService;
 
     public FlowIdentifier removeInstance(Stack stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
@@ -278,11 +285,21 @@ public class StackOperationService {
     public FlowIdentifier renewCertificate(String stackName) {
         Workspace workspace = workspaceService.getForCurrentUser();
         Stack stack = stackService.getByNameInWorkspace(stackName, workspace.getId());
-        return renewCertificate(stack);
+        return renewCertificate(stack.getId());
     }
 
-    public FlowIdentifier renewCertificate(Stack stack) {
-        return flowManager.triggerClusterCertificationRenewal(stack.getId());
+    public FlowIdentifier renewInternalCertificate(String stackCrn) {
+        Stack stack = stackService.getByCrn(stackCrn);
+        return renewCertificate(stack.getId());
+    }
+
+    public FlowIdentifier renewInternalCertificate(NameOrCrn nameOrCrn, StackType stackType) {
+        StackApiView stackApiView = stackApiViewService.retrieveStackByCrnAndType(nameOrCrn.getCrn(), stackType);
+        return renewCertificate(stackApiView.getId());
+    }
+
+    public FlowIdentifier renewCertificate(Long stackId) {
+        return flowManager.triggerClusterCertificationRenewal(stackId);
     }
 
     private boolean isStopNeeded(Stack stack) {

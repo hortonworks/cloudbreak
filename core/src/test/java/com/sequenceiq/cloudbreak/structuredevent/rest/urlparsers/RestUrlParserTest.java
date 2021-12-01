@@ -91,7 +91,10 @@ public class RestUrlParserTest {
     private List<LegacyRestUrlParser> restUrlParsers;
 
     private String[] excludes = {"/v1/distrox", "/v1/internal/distrox", "/flow-public", "/autoscale",
-            "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress", "/v4/operation", "/v4/custom_configurations"};
+            "cluster_templates", "/v4/events", "/v4/diagnostics", "/v4/progress", "/v4/operation",
+            "/v4/custom_configurations"};
+
+    private String[] excludePaths = {"/stacks/internal/crn"};
 
     @Test
     public void testEventUrlParser() {
@@ -145,22 +148,36 @@ public class RestUrlParserTest {
                                 }
                             }
                             LOGGER.info("Matched URL: " + methodPath + "\nslurped params: " + params);
-                            if (matchedParsers.isEmpty()) {
-                                fail("Can not find RestUrlParser for this endpoint: " + endpointClass.get().getSimpleName()
-                                        + "\nmethod: " + method.getName()
-                                        + "\nurl: " + methodPath);
-                            } else {
-                                checkIfMoreThanOneParserDetected(methodPath, matchedParsers);
-                                checkWorkspaceId(methodPath, params);
-                                checkResourceIdOrName(methodPath, params);
-                                checkResourceType(methodPath, params);
-                                checkResourceEvent(methodPath, params);
+                            boolean doWeWantToExcludeThePath = doWeWantToExcludeThePath(methodPath);
+                            if (!doWeWantToExcludeThePath) {
+                                if (matchedParsers.isEmpty()) {
+                                    fail("Can not find RestUrlParser for this endpoint: " + endpointClass.get().getSimpleName()
+                                            + "\nmethod: " + method.getName()
+                                            + "\nurl: " + methodPath);
+                                } else {
+                                    checkIfMoreThanOneParserDetected(methodPath, matchedParsers);
+                                    checkWorkspaceId(methodPath, params);
+                                    checkResourceIdOrName(methodPath, params);
+                                    checkResourceType(methodPath, params);
+                                    checkResourceEvent(methodPath, params);
+                                }
                             }
                         }
                     }
                 }
             }
         }
+    }
+
+    private boolean doWeWantToExcludeThePath(String methodPath) {
+        boolean exclude = false;
+        for (String excludePath : excludePaths) {
+            if (methodPath.contains(excludePath)) {
+                exclude = true;
+                break;
+            }
+        }
+        return exclude;
     }
 
     private void setupMocks(String methodPath, String requestMethod) {

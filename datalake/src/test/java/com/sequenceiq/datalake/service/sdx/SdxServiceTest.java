@@ -360,6 +360,16 @@ class SdxServiceTest {
     }
 
     @Test
+    void testGetSdxClusterOnlyWithCrnWhenClusterCrnProvidedShouldReturnSdxClusterWithTheSameCrnAsTheRequest() {
+        SdxCluster sdxCluser = new SdxCluster();
+        sdxCluser.setEnvName("env");
+        sdxCluser.setCrn(CLUSTER_NAME);
+        when(sdxClusterRepository.findByCrnAndDeletedIsNull(eq(ENVIRONMENT_CRN))).thenReturn(Optional.of(sdxCluser));
+        SdxCluster returnedSdxCluster = underTest.getByCrn(ENVIRONMENT_CRN);
+        assertEquals(sdxCluser, returnedSdxCluster);
+    }
+
+    @Test
     void testGetSdxClusterByNameOrCrnWhenClusterCrnProvidedShouldReturnSdxClusterWithTheSameCrnAsTheRequest() {
         SdxCluster sdxCluser = new SdxCluster();
         sdxCluser.setEnvName("env");

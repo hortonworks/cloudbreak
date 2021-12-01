@@ -527,6 +527,13 @@ public interface StackV4Endpoint {
     FlowIdentifier renewCertificate(@PathParam("workspaceId") Long workspaceId, @PathParam("name") String name,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
+    @POST
+    @Path("internal/crn/{crn}/renew_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = OperationDescriptions.StackOpDescription.RENEW_CERTIFICATE, produces = MediaType.APPLICATION_JSON,
+            notes = Notes.RENEW_CERTIFICATE_NOTES, nickname = "renewInternalStackCertificate")
+    FlowIdentifier renewInternalCertificate(@PathParam("workspaceId") Long workspaceId, @PathParam("crn") String crn);
+
     @PUT
     @Path("internal/{name}/update_load_balancers")
     @Produces(MediaType.APPLICATION_JSON)

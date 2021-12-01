@@ -570,7 +570,7 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.REPAIR_DATAHUB)
     public FlowIdentifier renewCertificate(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
         Stack stack = stackOperations.getStackByCrn(crn);
-        return stackOperationService.renewCertificate(stack);
+        return stackOperationService.renewCertificate(stack.getId());
     }
 
     @Override

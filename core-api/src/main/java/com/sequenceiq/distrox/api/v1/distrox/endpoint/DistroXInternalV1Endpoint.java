@@ -1,9 +1,11 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.GET_BY_CRN_INTERNAL;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.RENEW_CERTIFICATE_INTERNAL;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -12,6 +14,7 @@ import javax.ws.rs.core.MediaType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.doc.Notes;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -29,4 +32,11 @@ public interface DistroXInternalV1Endpoint {
     @ApiOperation(value = GET_BY_CRN_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.STACK_NOTES,
             nickname = "getDistroXInternalV1ByCrn")
     StackViewV4Response getByCrn(@PathParam("crn") String crn);
+
+    @POST
+    @Path("crn/{crn}/renew_certificate")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = RENEW_CERTIFICATE_INTERNAL, produces = MediaType.APPLICATION_JSON, notes = Notes.RENEW_CERTIFICATE_NOTES,
+            nickname = "renewInternalDistroXCertificate")
+    FlowIdentifier renewCertificate(@PathParam("crn") String crn);
 }

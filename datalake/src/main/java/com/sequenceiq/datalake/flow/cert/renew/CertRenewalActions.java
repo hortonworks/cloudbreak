@@ -50,7 +50,11 @@ public class CertRenewalActions {
             protected void doExecute(SdxContext context, SdxStartCertRenewalEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("Start cert renewal.");
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
-                certRenewalService.renewCertificate(sdxCluster, payload.getUserId());
+                if (payload.isInternal()) {
+                    certRenewalService.renewInternalCertificate(sdxCluster);
+                } else {
+                    certRenewalService.renewCertificate(sdxCluster, payload.getUserId());
+                }
                 SdxEvent sdxEvent = new SdxEvent(SdxCertRenewalEvent.CERT_RENEWAL_STARTED_EVENT.event(), payload.getResourceId(), payload.getUserId());
                 sendEvent(context, sdxEvent);
             }

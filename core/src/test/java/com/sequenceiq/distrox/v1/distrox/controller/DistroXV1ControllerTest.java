@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -20,11 +21,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Responses;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXGenerateImageCatalogV1Response;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
 import com.sequenceiq.distrox.v1.distrox.authorization.DataHubFiltering;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @ExtendWith(MockitoExtension.class)
 class DistroXV1ControllerTest {
@@ -48,6 +52,9 @@ class DistroXV1ControllerTest {
 
     @Mock
     private Workspace workspace;
+
+    @Mock
+    private StackOperationService stackOperationService;
 
     @Captor
     private ArgumentCaptor<NameOrCrn> nameOrCrnArgumentCaptor;
@@ -91,5 +98,18 @@ class DistroXV1ControllerTest {
 
         assertEquals(NAME, nameOrCrnArgumentCaptor.getValue().getName());
         assertEquals(imageCatalog, actual.getImageCatalog());
+    }
+
+    @Test
+    void testRenewInternalCertificate() {
+        FlowIdentifier flowIdentifier = Mockito.mock(FlowIdentifier.class);
+        Stack stack = Mockito.mock(Stack.class);
+
+        when(stackOperations.getStackByCrn(anyString())).thenReturn(stack);
+        when(stackOperationService.renewCertificate(anyLong())).thenReturn(flowIdentifier);
+
+        FlowIdentifier actual = distroXV1Controller.renewCertificate(CRN);
+
+        assertEquals(actual, flowIdentifier);
     }
 }
