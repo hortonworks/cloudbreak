@@ -245,16 +245,6 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, event);
     }
 
-    public FlowIdentifier triggerStopStartClusterDownscale(Long stackId, HostGroupAdjustmentV4Request hostGroupAdjustment) {
-
-        String selector = FlowChainTriggers.STOPSTART_DOWNSCALE_CHAIN_TRIGGER_EVENT;
-
-        ClusterDownscaleDetails details = new ClusterDownscaleDetails(hostGroupAdjustment.getForced(), false);
-        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId,
-                hostGroupAdjustment.getHostGroup(), hostGroupAdjustment.getScalingAdjustment(), ScalingType.DOWNSCALE_TOGETHER);
-        return reactorNotifier.notify(stackId, selector, event);
-    }
-
     public FlowIdentifier triggerClusterStart(Long stackId) {
         String selector = CLUSTER_START_EVENT.event();
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
