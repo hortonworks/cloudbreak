@@ -547,6 +547,7 @@ public class ModelDescriptions {
         public static final String ADJUSTMENT_TYPE = "scaling adjustment type";
         public static final String THRESHOLD = "scaling threshold";
         public static final String FORCE = "Force remove instance";
+        public static final String SCALING_STRATEGY = "scaling strategy to use while applying the scaling adjustment";
     }
 
     public static class InstanceGroupNetworkScaleModelDescription {
