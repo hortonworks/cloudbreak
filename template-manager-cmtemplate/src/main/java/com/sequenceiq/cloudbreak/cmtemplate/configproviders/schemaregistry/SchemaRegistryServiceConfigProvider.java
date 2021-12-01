@@ -3,7 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.GENERATED_RANGER_SERVICE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.GENERATED_RANGER_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.StreamingAppRdsRoleConfigProviderUtil.dataBaseTypeForCM;
 import static java.util.Collections.emptyList;
 

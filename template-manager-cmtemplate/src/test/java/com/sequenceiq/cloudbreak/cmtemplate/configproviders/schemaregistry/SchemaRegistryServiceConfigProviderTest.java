@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
-import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaDatahubConfigProvider.GENERATED_RANGER_SERVICE_NAME;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaConfigs.GENERATED_RANGER_SERVICE_NAME;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.schemaregistry.SchemaRegistryServiceConfigProvider.RANGER_PLUGIN_SR_SERVICE_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
 

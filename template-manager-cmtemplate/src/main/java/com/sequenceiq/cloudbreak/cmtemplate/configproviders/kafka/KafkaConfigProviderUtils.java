@@ -53,6 +53,11 @@ public class KafkaConfigProviderUtils {
         }
     }
 
+    static String getCdhVersion(TemplatePreparationObject source) {
+        return source.getBlueprintView().getProcessor().getStackVersion() == null ?
+                "" : source.getBlueprintView().getProcessor().getStackVersion();
+    }
+
     @VisibleForTesting
     static Optional<Integer> getCdhPatchVersion(TemplatePreparationObject source) {
         if (null != source.getProductDetailsView() && null != source.getProductDetailsView().getProducts()) {

@@ -17,14 +17,6 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class KafkaAuthConfigProvider implements CmTemplateComponentConfigProvider {
 
-    private static final String LDAP_AUTH_URL = "ldap.auth.url";
-
-    private static final String LDAP_AUTH_USER_DN_TEMPLATE = "ldap.auth.user.dn.template";
-
-    private static final String LDAP_AUTH_ENABLE = "ldap.auth.enable";
-
-    private static final String SASL_AUTH_METHOD = "sasl.plain.auth";
-
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         KafkaConfigProviderUtils.KafkaAuthConfigType authType = KafkaConfigProviderUtils.getCdhVersionForStreaming(source).authType();
@@ -43,20 +35,20 @@ public class KafkaAuthConfigProvider implements CmTemplateComponentConfigProvide
 
     private List<ApiClusterTemplateConfig> ldapConfig(LdapView ldapView) {
         List<ApiClusterTemplateConfig> config = generalAuthConfig(ldapView);
-        config.add(config(LDAP_AUTH_ENABLE, "true"));
+        config.add(config(KafkaConfigs.LDAP_AUTH_ENABLE, "true"));
         return config;
     }
 
     private List<ApiClusterTemplateConfig> ldapAndPamConfig(LdapView ldapView) {
         List<ApiClusterTemplateConfig> config = generalAuthConfig(ldapView);
-        config.add(config(SASL_AUTH_METHOD, "PAM"));
+        config.add(config(KafkaConfigs.SASL_AUTH_METHOD, "PAM"));
         return config;
     }
 
     private List<ApiClusterTemplateConfig> generalAuthConfig(LdapView ldapView) {
         return Lists.newArrayList(
-                config(LDAP_AUTH_URL, ldapView.getConnectionURL()),
-                config(LDAP_AUTH_USER_DN_TEMPLATE, ldapView.getUserDnPattern()));
+                config(KafkaConfigs.LDAP_AUTH_URL, ldapView.getConnectionURL()),
+                config(KafkaConfigs.LDAP_AUTH_USER_DN_TEMPLATE, ldapView.getUserDnPattern()));
     }
 
     @Override
