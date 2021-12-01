@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -160,9 +161,17 @@ public class StackCommonService {
     }
 
     public void putInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest) {
+        LOGGER.info("Received putStack on crn: {}, updateRequest: {}", crn, updateRequest);
         Stack stack = stackService.getByCrn(crn);
         MDCBuilder.buildMdcContext(stack);
         put(stack, updateRequest);
+    }
+
+    public void putStartInstancesInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest, ScalingStrategy scalingStrategy) {
+        LOGGER.info("Received putStack on crn: {}, with scalingStrategy: {}, updateRequest: {}", crn, scalingStrategy, updateRequest);
+        Stack stack = stackService.getByCrn(crn);
+        MDCBuilder.buildMdcContext(stack);
+        putStartInstances(stack, updateRequest, scalingStrategy);
     }
 
     public FlowIdentifier putStopInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -201,18 +210,19 @@ public class StackCommonService {
         return syncComponentVersionsFromCm(stack, candidateImageUuids);
     }
 
-    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced, boolean useAlt) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced,
+            ScalingStrategy scalingStrategy) {
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
         validateStackIsNotDataLake(stack.get(), instanceIds);
+        return stackOperationService.removeInstances(stack.get(), instanceIds, forced, scalingStrategy);
         return stackOperationService.removeInstances(stack.get(), instanceIds, forced);
     }
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
-        return deleteMultipleInstancesInWorkspace(nameOrCrn, workspaceId, instanceIds, forced, false);
+        return deleteMultipleInstancesInWorkspace(nameOrCrn, workspaceId, instanceIds, forced, null);
     }
 
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -356,23 +366,31 @@ public class StackCommonService {
     private FlowIdentifier put(Stack stack, UpdateStackV4Request updateRequest) {
         MDCBuilder.buildMdcContext(stack);
         if (updatCommeRequest.getStatus() != null) {
-            LOGGER.info("ZZZ: Using stackOperationService.updateStatus");
             return stackOperationService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent());
         } else {
-            LOGGER.info("ZZZ: Using scalingAdjustMent stackOperationService.updateNodeCount");
-
-            if (updateRequest.getUseStopStartScalingMechanism()) {
-                LOGGER.info("ZZZ: Using updateNodeCountStopStart");
-                Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-                validateHardLimits(scalingAdjustment);
-                return stackOperationService.updateNodeCountStopStart(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
-            } else {
-                LOGGER.info("ZZZ: Using defaultUpdateNodeCount");
-                Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
-                validateHardLimits(scalingAdjustment);
-                return stackOperationService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
-            }
+            Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+            validateHardLimits(scalingAdjustment);
+            return stackOperationService.updateNodeCount(stack, updateRequest.getInstanceGroupAdjustment(), updateRequest.getWithClusterEvent());
         }
+    }
+
+    private FlowIdentifier putStartInstances(Stack stack, UpdateStackV4Request updateRequest, ScalingStrategy scalingStrategy) {
+        MDCBuilder.buildMdcContext(stack);
+        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
+        if (updateRequest.getStatus() != null) {
+            throw new BadRequestException(String.format("Stack status update is not supported while" +
+                            " attempting to scale-up via instance start. Requested status: '%s' (File a bug)",
+                    updateRequest.getStatus()));
+        }
+        if (scalingStrategy == null) {
+            scalingStrategy = ScalingStrategy.STOPSTART;
+            LOGGER.debug("Scaling strategy is null, and has been set to the default: {}", scalingStrategy);
+        }
+        Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
+        // TODO CB-14929: This validation needs adjusting since it validates total node count by adding the adjustment.
+        validateHardLimits(scalingAdjustment);
+        return stackOperationService.updateNodeCountStartInstances(stack, updateRequest.getInstanceGroupAdjustment(),
+                updateRequest.getWithClusterEvent(), scalingStrategy);
     }
 
     private void validateHardLimits(Integer scalingAdjustment) {

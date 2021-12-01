@@ -148,6 +148,8 @@ public class ReactorFlowManagerTest {
         underTest.triggerStackLoadBalancerUpdate(STACK_ID);
         underTest.triggerSyncComponentVersionsFromCm(STACK_ID, Set.of());
         underTest.triggerDatalakeClusterRecovery(STACK_ID);
+        underTest.triggerStopStartStackUpscale(STACK_ID, instanceGroupAdjustment, true);
+        underTest.triggerStopStartStackDownscale(STACK_ID, instanceIdsByHostgroup, false);
 
         int count = 0;
         for (Method method : underTest.getClass().getDeclaredMethods()) {
