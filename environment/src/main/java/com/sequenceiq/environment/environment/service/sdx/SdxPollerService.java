@@ -1,10 +1,13 @@
 package com.sequenceiq.environment.environment.service.sdx;
 
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.RUNNING;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.START_IN_PROGRESS;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.STOPPED;
+import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.STOP_IN_PROGRESS;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
@@ -32,6 +35,10 @@ public class SdxPollerService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxPollerService.class);
 
+    private static final Set<SdxClusterStatusResponse> SKIP_STOP_OPERATION = Set.of(STOPPED, STOP_IN_PROGRESS);
+
+    private static final Set<SdxClusterStatusResponse> SKIP_START_OPERATION = Set.of(RUNNING, START_IN_PROGRESS);
+
     @Value("${env.stop.polling.attempt:360}")
     private Integer attempt;
 
@@ -52,17 +59,17 @@ public class SdxPollerService {
     }
 
     public void startAttachedDatalake(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, RUNNING, sdxService::startByCrn, sdxPollerProvider::startSdxClustersPoller);
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_START_OPERATION, sdxService::startByCrn, sdxPollerProvider::startSdxClustersPoller);
     }
 
     public void stopAttachedDatalakeClusters(Long envId, String environmentName) {
-        executeSdxOperationAndStartPolling(envId, environmentName, STOPPED, sdxService::stopByCrn, sdxPollerProvider::stopSdxClustersPoller);
+        executeSdxOperationAndStartPolling(envId, environmentName, SKIP_STOP_OPERATION, sdxService::stopByCrn, sdxPollerProvider::stopSdxClustersPoller);
     }
 
-    private void executeSdxOperationAndStartPolling(Long envId, String environmentName, SdxClusterStatusResponse skipStatus, Consumer<String> sdxOperation,
-            BiFunction<Long, List<String>, AttemptMaker<Void>> attemptMakerFactory) {
+    private void executeSdxOperationAndStartPolling(Long envId, String environmentName, Set<SdxClusterStatusResponse> skipStatuses,
+            Consumer<String> sdxOperation, BiFunction<Long, List<String>, AttemptMaker<Void>> attemptMakerFactory) {
         try {
-            List<String> sdxCrns = getExecuteSdxOperationsAndGetCrns(environmentName, sdxOperation, skipStatus);
+            List<String> sdxCrns = getExecuteSdxOperationsAndGetCrns(environmentName, sdxOperation, skipStatuses);
             if (CollectionUtils.isNotEmpty(sdxCrns)) {
                 Polling.stopAfterAttempt(attempt)
                         .stopIfException(true)
@@ -82,16 +89,16 @@ public class SdxPollerService {
         }
     }
 
-    private List<String> getExecuteSdxOperationsAndGetCrns(String environmentName, Consumer<String> sdxOperation, SdxClusterStatusResponse skipStatus) {
+    List<String> getExecuteSdxOperationsAndGetCrns(String environmentName, Consumer<String> sdxOperation, Set<SdxClusterStatusResponse> skipStatuses) {
         Collection<SdxClusterResponse> attachedSdxClusters = getAttachedDatalakeClusters(environmentName);
         return attachedSdxClusters.stream()
                 .map(response -> {
                     String crn = response.getCrn();
-                    if (response.getStatus() != skipStatus) {
-                        LOGGER.info("The env operation is executed, the status of sdx is {} but the skip status is {}", response.getStatus(), skipStatus);
-                        sdxOperation.accept(crn);
+                    if (skipStatuses.contains(response.getStatus())) {
+                        LOGGER.info("The env operation is skipped because of the status of sdx in the proper state: {}", skipStatuses);
                     } else {
-                        LOGGER.info("The env operation is skipped because of the status of sdx in the proper state: {}", skipStatus);
+                        LOGGER.info("The env operation is executed, the status of sdx is {} but the skip status is {}", response.getStatus(), skipStatuses);
+                        sdxOperation.accept(crn);
                     }
                     return crn;
                 })
