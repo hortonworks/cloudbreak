@@ -39,6 +39,8 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
 
     Optional<SdxCluster> findByAccountIdAndCrnAndDeletedIsNull(String accountId, String crn);
 
+    Optional<SdxCluster> findByCrnAndDeletedIsNull(String crn);
+
     Optional<SdxCluster> findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(@Param("accountId") String accountId, @Param("crn") String crn);
 
     @Query("SELECT s.envCrn FROM SdxCluster s WHERE s.accountId = :accountId AND s.crn = :crn AND s.deleted is null AND s.detached = false")

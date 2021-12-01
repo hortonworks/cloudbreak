@@ -53,18 +53,39 @@ public class CertRenewalService {
         return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(), userCrn));
     }
 
+    public FlowIdentifier triggerInternalRenewCertificate(SdxCluster sdxCluster) {
+        MDCBuilder.buildMdcContext(sdxCluster);
+        return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(), sdxCluster.getInitiatorUserCrn(), true));
+    }
+
     public void renewCertificate(SdxCluster sdxCluster, String userCrn) {
         try {
             transactionService.required(() -> {
                 FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
                         () -> stackV4Endpoint.renewCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getClusterName(), userCrn));
-                cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
-                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_IN_PROGRESS, "Certificate renewal started",
-                        sdxCluster.getId());
+                saveChainIdAndStatus(sdxCluster, flowIdentifier);
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
         }
+    }
+
+    public void renewInternalCertificate(SdxCluster sdxCluster) {
+        try {
+            transactionService.required(() -> {
+                FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                        () -> stackV4Endpoint.renewInternalCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getStackCrn()));
+                saveChainIdAndStatus(sdxCluster, flowIdentifier);
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    private void saveChainIdAndStatus(SdxCluster sdxCluster, FlowIdentifier flowIdentifier) {
+        cloudbreakFlowService.saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_IN_PROGRESS, "Certificate renewal started",
+                sdxCluster.getId());
     }
 
     public void waitForCloudbreakClusterCertRenewal(Long id, PollingConfig pollingConfig) {

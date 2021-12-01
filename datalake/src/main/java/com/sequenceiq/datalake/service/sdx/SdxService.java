@@ -260,6 +260,16 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
+    public SdxCluster getByCrn(String clusterCrn) {
+        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
+        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByCrnAndDeletedIsNull(clusterCrn);
+        if (sdxCluster.isPresent()) {
+            return sdxCluster.get();
+        } else {
+            throw notFound("SDX cluster", clusterCrn).get();
+        }
+    }
+
     public String getRuntimeVersionFromImageResponse(ImageV4Response imageV4Response) {
         if (imageV4Response != null && imageV4Response.getStackDetails() != null) {
             return imageV4Response.getStackDetails() != null ? imageV4Response.getStackDetails().getVersion() : null;

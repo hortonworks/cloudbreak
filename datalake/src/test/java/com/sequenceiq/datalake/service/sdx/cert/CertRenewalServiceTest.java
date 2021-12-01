@@ -139,6 +139,27 @@ public class CertRenewalServiceTest {
     }
 
     @Test
+    public void testInternalRenewCertificate() throws TransactionExecutionException {
+        when(sdxCluster.getId()).thenReturn(1L);
+        when(sdxCluster.getStackCrn()).thenReturn("crn");
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+        doAnswer(invocation -> {
+            assertTrue(InternalCrnBuilder.isInternalCrn(ThreadBasedUserCrnProvider.getUserCrn()));
+            return flowIdentifier;
+        }).when(stackV4Endpoint).renewInternalCertificate(anyLong(), anyString());
+
+        underTest.renewInternalCertificate(sdxCluster);
+
+        verify(stackV4Endpoint).renewInternalCertificate(WORKSPACE_ID_DEFAULT, "crn");
+        verify(cloudbreakFlowService).saveLastCloudbreakFlowChainId(sdxCluster, flowIdentifier);
+        verify(sdxStatusService).setStatusForDatalakeAndNotify(DatalakeStatusEnum.CERT_RENEWAL_IN_PROGRESS, "Certificate renewal started",
+                1L);
+    }
+
+    @Test
     public void testRenewCertificateNotSetStatusWhenExceptionThrown() throws TransactionExecutionException {
         when(sdxCluster.getClusterName()).thenReturn("cluster");
         doAnswer(invocation -> {
@@ -155,10 +176,41 @@ public class CertRenewalServiceTest {
     }
 
     @Test
+    public void testInternalRenewCertificateNotSetStatusWhenExceptionThrown() throws TransactionExecutionException {
+        when(sdxCluster.getStackCrn()).thenReturn("crn");
+        doAnswer(invocation -> {
+            invocation.getArgument(0, Runnable.class).run();
+            return null;
+        }).when(transactionService).required(any(Runnable.class));
+        doThrow(new BadRequestException("Can't start."))
+                .when(stackV4Endpoint).renewInternalCertificate(anyLong(), anyString());
+
+        assertThrows(BadRequestException.class, () -> underTest.renewInternalCertificate(sdxCluster));
+
+        verify(stackV4Endpoint).renewInternalCertificate(WORKSPACE_ID_DEFAULT, "crn");
+        verifyNoInteractions(cloudbreakFlowService, sdxStatusService);
+    }
+
+    @Test
     public void testCertRenewalTriggering() {
         when(sdxCluster.getId()).thenReturn(1L);
 
         underTest.triggerRenewCertificate(sdxCluster, "userCrn");
+
+        verify(sdxReactorFlowManager).triggerCertRenewal(captor.capture());
+
+        SdxStartCertRenewalEvent renewalEvent = captor.getValue();
+
+        assertEquals("userCrn", renewalEvent.getUserId());
+        assertEquals(1L, renewalEvent.getResourceId());
+    }
+
+    @Test
+    public void testInternalCertRenewalTriggering() {
+        when(sdxCluster.getId()).thenReturn(1L);
+        when(sdxCluster.getInitiatorUserCrn()).thenReturn("userCrn");
+
+        underTest.triggerInternalRenewCertificate(sdxCluster);
 
         verify(sdxReactorFlowManager).triggerCertRenewal(captor.capture());
 
