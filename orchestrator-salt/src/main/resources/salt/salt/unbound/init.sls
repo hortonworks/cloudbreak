@@ -8,7 +8,7 @@ faulty_7_2_11_images_unbound_restart_patch:
     - repl: "pkill -u unbound -SIGHUP unbound"
     - ignore_if_missing: True
 
-{% if salt['pillar.get']('unbound:elimination:supported',False) == True %}
+{% if salt['pillar.get']('unbound_elimination_supported',False) == True %}
 remove_cluster_conf_from_unbound:
   file.absent:
     - name: /etc/unbound/conf.d/00-cluster.conf

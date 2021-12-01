@@ -597,7 +597,7 @@ public class ClusterHostServiceRunner {
     }
 
     private Map<String, SaltPillarProperties> createUnboundEliminationPillar(String accountId) {
-        return Map.of("elimination", new SaltPillarProperties("/unbound/elimination.sls", singletonMap("supported",
+        return Map.of("unbound-elimination", new SaltPillarProperties("/unbound/elimination.sls", singletonMap("unbound_elimination_supported",
                 entitlementService.isUnboundEliminationSupported(accountId))));
     }
 
