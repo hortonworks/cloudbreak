@@ -19,12 +19,13 @@ import javax.ws.rs.QueryParam;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.cloudera.cdp.shaded.javax.ws.rs.core.MediaType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
@@ -52,25 +53,27 @@ public interface AutoscaleV4Endpoint {
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
     void putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
 
-    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
+    // Not overloading the regular scaling API since 1) that is public, and 2) stopstart may move into a separate InstancePoolManagementController at some point
+    @PUT
+    @Path("/stack/startNodes/crn/{crn}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartStop")
+    void putStackStartInstances(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
+
+    // TODO CB-14929: Remove this API once done with testing, or publish a quick document somewhere on how the put API can be used
     @GET
     @Path("/stack/startNodees/crn/{crn}/{userId}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "start_nodes_by_count", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStartNodes")
-    String tmpStartNodes(@PathParam("crn") String crn, @PathParam("userId") String userId, @QueryParam("hostGroup") String hostGroup, @QueryParam("numNodes") Integer numNodes);
+    String tmpStartNodes(@PathParam("crn") String crn, @PathParam("userId") String userId,
+            @QueryParam("hostGroup") String hostGroup, @QueryParam("numNodes") Integer numNodes);
 
     @PUT
     @Path("/stack/crn/{crn}/{userId}/cluster")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putClusterForAutoscale")
     void putCluster(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateClusterV4Request updateRequest);
-
-    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
-    @GET
-    @Path("/stack/stopNodes/crn/{crn}/{userId}")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "stop_nodes_by_count", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStopNodes")
-    String tmpStopNodes(@PathParam("crn") String crn, @PathParam("userId") String userId, @QueryParam("hostGroup") String hostGroup, @QueryParam("numNodes") Integer numNodes);
 
     @GET
     @Path("stack/all")
@@ -143,22 +146,23 @@ public interface AutoscaleV4Endpoint {
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
-    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
+    @DELETE
+    @Path("/stack/stopNodes/crn/{crn}/internal")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "stopInternalInstancesForClusterCrn")
+    void stopInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+            @RequestBody @NotEmpty List<String> instanceIds,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("scalingStrategy") ScalingStrategy scalingStrategy);
+
+    // TODO CB-14929: Remove this API once done with testing, or publish a quick document somewhere on how the put API can be used
     @GET
     @Path("/stack/stopNodes2/crn/{crn}/{userId}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = "stop_nodes_by_id", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStopNodes2")
-    String tmpStopNodes2(@PathParam("crn") String crn, @PathParam("userId") String userId, @QueryParam("hostGroup") String hostGroup, @QueryParam("nodeIds") String nodeIds);
-
-    // TODO CB-14929: Define this API correctly, or remove it. Primarily used for testing. Will likely be required for the CLI.
-    @DELETE
-    @Path("/stack/crn/{crn}/instances/internalv2")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "deletes multiple instances from the stack's cluster in workspace v2", produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "decommissionInternalInstancesForClusterCrn2")
-    void decommissionInternalInstancesForClusterCrnV2(@PathParam("crn") String clusterCrn,
-            @RequestBody @NotEmpty List<String> instanceIds,
-            @QueryParam("forced") @DefaultValue("false") Boolean forced, @QueryParam("usealtscaling") @DefaultValue("false") Boolean useAltScaling);
+    String tmpStopNodes2(@PathParam("crn") String crn, @PathParam("userId") String userId,
+            @QueryParam("hostGroup") String hostGroup, @QueryParam("nodeIds") String nodeIds);
 
     @GET
     @Path("clusterproxy")
