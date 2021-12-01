@@ -141,7 +141,6 @@ public class ClusterCommonService {
                     stack.getStatus()));
         }
         LOGGER.debug("Cluster host adjustment request received. Stack id: {} ", stackId);
-        LOGGER.debug("ZZZ: Cluster host adjustment request received. Stack id: {}, updateJson: {}", stackId, updateJson);
         Blueprint blueprint = stack.getCluster().getBlueprint();
         Optional<HostGroup> hostGroup = hostGroupService.findHostGroupInClusterByName(stack.getCluster().getId(),
                 updateJson.getHostGroupAdjustment().getHostGroup());
@@ -149,8 +148,7 @@ public class ClusterCommonService {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'",
                     updateJson.getHostGroupAdjustment().getHostGroup(), stack.getName()));
         }
-        // TODO CB-14929: Adjust validations for stop-scale. Should be allowed in several different states of the cluster.
-        // TODO CB-14929: Clean up this set of changes
+        // TODO CB-14929: CB-15153 May need changes if we need to support downscale without specifying a list of nodes.
         updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, updateJson.getHostGroupAdjustment());
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
@@ -161,12 +159,7 @@ public class ClusterCommonService {
                     updateJson.getHostGroupAdjustment().getScalingAdjustment(),
                     instanceGroupService.findNotTerminatedByStackId(stack.getId()));
         }
-        if (updateJson.getHostGroupAdjustment().getUseStopStartScalingMechanism()) {
-            return clusterOperationService.updateHostsStopStart(stackId, updateJson.getHostGroupAdjustment());
-        } else {
-            return clusterOperationService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
-        }
-
+        return clusterOperationService.updateHosts(stackId, updateJson.getHostGroupAdjustment());
     }
 
     private FlowIdentifier recreateCluster(Stack stack, UpdateClusterV4Request updateCluster) throws TransactionExecutionException {

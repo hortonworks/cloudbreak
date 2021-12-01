@@ -138,13 +138,12 @@ public class ScalingRequest implements Runnable {
             LOGGER.info("ZZZ: with alternate mechanism");
             UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
             updateStackJson.setWithClusterEvent(true);
-            updateStackJson.setUseStopStartScalingMechanism(true);
             InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
             instanceGroupAdjustmentJson.setScalingAdjustment(scalingAdjustment);
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
-            cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
+            cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstances(stackCrn, updateStackJson);
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
@@ -175,8 +174,8 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setWithStackUpdate(true);
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             hostGroupAdjustmentJson.setValidateNodeCount(false);
-            hostGroupAdjustmentJson.setUserStartStopScalingMechanism(true);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+            // TODO CB-14929: CB-15153 List of nodes not provided. Do we really need to support this? Can Periscope always specify the list of nodes?
             cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint()
                     .putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;
