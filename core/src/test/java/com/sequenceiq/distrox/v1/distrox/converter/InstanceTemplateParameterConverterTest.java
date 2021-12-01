@@ -199,6 +199,18 @@ class InstanceTemplateParameterConverterTest {
     }
 
     @Test
+    void testWhenDatahubEncryptionTypeSetToNull() {
+        AwsInstanceTemplateV1Parameters source = new AwsInstanceTemplateV1Parameters();
+        source.setEncryption(encryption(null, null));
+        DetailedEnvironmentResponse environment = createDetailedEnvironmentResponseForAwsEncryption(true, false, null);
+        AwsInstanceTemplateV4Parameters awsInstanceTemplateV4Parameters = underTest.convert(source, environment);
+        assertThat(awsInstanceTemplateV4Parameters).isNotNull();
+        AwsEncryptionV4Parameters encryption = awsInstanceTemplateV4Parameters.getEncryption();
+        assertThat(encryption).isNotNull();
+        assertThat(encryption.getType()).isNull();
+        assertThat(encryption.getKey()).isNull();
+    }
+    @Test
     void convertTestAwsInstanceTemplateV1ParametersToAwsInstanceTemplateV4ParametersWhenBasicFields() {
         AwsInstanceTemplateV1Parameters source = new AwsInstanceTemplateV1Parameters();
 
