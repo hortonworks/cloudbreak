@@ -320,11 +320,12 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
 
     public void updateRangerRazEnabled(SdxCluster sdxCluster) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        DetailedEnvironmentResponse environment = environmentClientService.getByName(sdxCluster.getEnvName());
         ThreadBasedUserCrnProvider.doAsInternalActor(() -> {
             RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
             if (response.isRangerRazEnabled()) {
                 if (!sdxCluster.isRangerRazEnabled()) {
-                    validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(), environmentClientService.getByName(sdxCluster.getEnvName()));
+                    validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(), environment);
                     sdxCluster.setRangerRazEnabled(true);
                     save(sdxCluster);
                 }
