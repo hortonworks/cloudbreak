@@ -17,6 +17,7 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
@@ -27,12 +28,18 @@ import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @EntityType(entityClass = Stack.class)
 @Transactional(TxType.REQUIRED)
 public interface StackRepository extends WorkspaceResourceRepository<Stack, Long> {
+
+    @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn from Stack s "
+            + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated = null "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Optional<StackIdView> findByAmbari(@Param("clusterManagerIp") String clusterManagerIp);
 
     @Query("SELECT s FROM Stack s WHERE s.name= :name AND s.workspace.id= :workspaceId AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
@@ -53,6 +60,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s "
             + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
     List<StackStatusView> findByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
+
+    @Query("SELECT COUNT(s.id) FROM Stack s "
+            + "WHERE s.environmentCrn= :environmentCrn AND s.type = :type AND s.terminated=null")
+    Long countByEnvironmentCrnAndStackType(@Param("environmentCrn") String environmentCrn, @Param("type") StackType type);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData LEFT JOIN FETCH ig.template "
             + "LEFT JOIN FETCH ig.securityGroup LEFT JOIN FETCH ig.instanceGroupNetwork WHERE s.name= :name " +
@@ -104,10 +115,18 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     List<StackTtlView> findAllAlive();
 
+    @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig "
+            + "WHERE s.terminated = null AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Set<Stack> findAllAliveWithInstanceGroups();
+
     @Query("SELECT DISTINCT s.id as id, im.image as image FROM Stack s JOIN s.instanceGroups ig JOIN ig.instanceMetaData im "
             + "WHERE (s.terminated = null OR s.terminated >= :thresholdTimestamp) " +
             "AND (s.type is not 'TEMPLATE' OR s.type is null) AND im.image is not null")
     List<StackImageView> findImagesOfAliveStacks(@Param("thresholdTimestamp") long thresholdTimestamp);
+
+    @Query("SELECT s.id as id, s.name as name, s.stackStatus as status FROM Stack s "
+            + "WHERE s.stackStatus.status IN :statuses AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    List<StackStatusView> findByStatuses(@Param("statuses") List<Status> statuses);
 
     @Query("SELECT s.id as id, "
             + "s.resourceCrn as crn, "
@@ -121,19 +140,6 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             + "LEFT JOIN s.stackStatus ss "
             + "WHERE s.resourceCrn = :crn")
     Optional<StackClusterStatusView> getStatusByCrn(@Param("crn") String crn);
-
-    @Query("SELECT s.id as id, "
-            + "s.resourceCrn as crn, "
-            + "ss.status as status, "
-            + "ss.statusReason as statusReason, "
-            + "c.status as clusterStatus, "
-            + "c.statusReason as clusterStatusReason, "
-            + "c.certExpirationState as certExpirationState "
-            + "FROM Stack s "
-            + "LEFT JOIN s.cluster c "
-            + "LEFT JOIN s.stackStatus ss "
-            + "WHERE s.id = :id")
-    Optional<StackClusterStatusView> getStatusById(@Param("id") Long id);
 
     @Query("SELECT s.id as id, "
             + "s.resourceCrn as crn, "
@@ -202,6 +208,12 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     @Query("SELECT s.id as id, s.name as name FROM Stack s WHERE s.network = :network")
     Set<StackIdView> findByNetwork(@Param("network") Network network);
 
+    @Query("SELECT s.workspace.id FROM Stack s where s.resourceCrn = :crn")
+    Long findWorkspaceIdByCrn(@Param("crn") String crn);
+
+    @Query("SELECT s.workspace FROM Stack s where s.resourceCrn = :crn")
+    Optional<Workspace> findWorkspaceByCrn(@Param("crn") String crn);
+
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id "
             + "AND s.type is 'TEMPLATE'")
     Optional<Stack> findTemplateWithLists(@Param("id") Long id);
@@ -220,6 +232,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @Query("SELECT VALUE(s.parameters) FROM Stack s WHERE s.id = :stackId AND KEY(s.parameters) = :ttlKey")
     String findTimeToLiveValueForSTack(@Param("stackId") Long stackId, @Param("ttlKey") String ttl);
+
+    @Query("SELECT new java.lang.Boolean(count(*) > 0) FROM Stack s WHERE s.terminated = null AND s.workspace.id= :workspaceId")
+    Boolean anyStackInWorkspace(@Param("workspaceId") Long workspaceId);
 
     @Query("SELECT new java.lang.Boolean(count(*) > 0) "
             + "FROM Stack c LEFT JOIN c.instanceGroups ig WHERE ig.template.id= :templateId AND c.stackStatus.status <> 'DELETE_COMPLETED'")
