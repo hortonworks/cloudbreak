@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -38,6 +40,7 @@ import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCluster;
 import com.cloudera.api.swagger.model.ApiClusterTemplate;
 import com.cloudera.api.swagger.model.ApiCommand;
+import com.cloudera.api.swagger.model.ApiConfig;
 import com.cloudera.api.swagger.model.ApiConfigList;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
@@ -75,6 +78,18 @@ import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerSetupServiceTest {
+
+    private static final String PROXY_PROTOCOL = "tcp";
+
+    private static final String PROXY_HOST = "10.0.0.0";
+
+    private static final int PROXY_PORT = 88;
+
+    private static final String PROXY_USER = "user";
+
+    private static final String PROXY_PASSWORD = "pw";
+
+    private static final String PROXY_NO_PROXY_HOSTS = "noproxy.com";
 
     @Mock
     private ClouderaManagerApiClientProvider clouderaManagerApiClientProvider;
@@ -769,7 +784,7 @@ public class ClouderaManagerSetupServiceTest {
     }
 
     @Test
-    public void testSetupProxyWhenProxyPresentedShouldEverythingWorksFine() throws ApiException {
+    public void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineButNoProxyHostBecauseOfVersion() throws ApiException {
         ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
 
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
@@ -777,11 +792,69 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
                 .thenReturn(new ApiConfigList());
 
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.1.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
+                .thenReturn(clouderaManagerRepo);
+
         underTest.setupProxy(testProxyConfig());
 
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<ApiConfigList> configsCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
+
         verify(clouderaManagerResourceApi, times(1)).updateConfig(
-                anyString(),
-                any(ApiConfigList.class)
+                messageCaptor.capture(),
+                configsCaptor.capture()
+        );
+
+        String capturedMessage = messageCaptor.getValue();
+        ApiConfigList capturedConfigs = configsCaptor.getValue();
+
+        assertThat(capturedMessage).isEqualTo("Update proxy settings");
+        assertThat(capturedConfigs.getItems()).containsExactlyInAnyOrder(
+                new ApiConfig().name("parcel_proxy_server").value(PROXY_HOST),
+                new ApiConfig().name("parcel_proxy_port").value(Integer.toString(PROXY_PORT)),
+                new ApiConfig().name("parcel_proxy_protocol").value(PROXY_PROTOCOL.toUpperCase()),
+                new ApiConfig().name("parcel_proxy_user").value(PROXY_USER),
+                new ApiConfig().name("parcel_proxy_password").value(PROXY_PASSWORD)
+        );
+    }
+
+    @Test
+    public void testSetupProxyWhenProxyPresentedShouldEverythingWorksFineWithNoProxyHost() throws ApiException {
+        ClouderaManagerResourceApi clouderaManagerResourceApi = mock(ClouderaManagerResourceApi.class);
+
+        when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
+                .thenReturn(clouderaManagerResourceApi);
+        when(clouderaManagerResourceApi.updateConfig(anyString(), any(ApiConfigList.class)))
+                .thenReturn(new ApiConfigList());
+
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.6.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
+                .thenReturn(clouderaManagerRepo);
+
+        underTest.setupProxy(testProxyConfig());
+
+        ArgumentCaptor<String> messageCaptor = ArgumentCaptor.forClass(String.class);
+        ArgumentCaptor<ApiConfigList> configsCaptor = ArgumentCaptor.forClass(ApiConfigList.class);
+
+        verify(clouderaManagerResourceApi, times(1)).updateConfig(
+                messageCaptor.capture(),
+                configsCaptor.capture()
+        );
+
+        String capturedMessage = messageCaptor.getValue();
+        ApiConfigList capturedConfigs = configsCaptor.getValue();
+
+        assertThat(capturedMessage).isEqualTo("Update proxy settings");
+        assertThat(capturedConfigs.getItems()).containsExactlyInAnyOrder(
+                new ApiConfig().name("parcel_proxy_server").value(PROXY_HOST),
+                new ApiConfig().name("parcel_proxy_port").value(Integer.toString(PROXY_PORT)),
+                new ApiConfig().name("parcel_proxy_protocol").value(PROXY_PROTOCOL.toUpperCase()),
+                new ApiConfig().name("parcel_proxy_user").value(PROXY_USER),
+                new ApiConfig().name("parcel_proxy_password").value(PROXY_PASSWORD),
+                new ApiConfig().name("parcel_no_proxy_list").value(PROXY_NO_PROXY_HOSTS)
         );
     }
 
@@ -793,6 +866,11 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(any(ApiClient.class)))
                 .thenReturn(clouderaManagerResourceApi);
         doThrow(error).when(clouderaManagerResourceApi).updateConfig(anyString(), any(ApiConfigList.class));
+
+        ClouderaManagerRepo clouderaManagerRepo = new ClouderaManagerRepo();
+        clouderaManagerRepo.setVersion("7.1.0");
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(anyLong()))
+                .thenReturn(clouderaManagerRepo);
 
         ClouderaManagerOperationFailedException actual = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.setupProxy(testProxyConfig()));
@@ -860,14 +938,14 @@ public class ClouderaManagerSetupServiceTest {
     private ProxyConfig testProxyConfig() {
         return ProxyConfig.builder().withCrn("crn")
                 .withName("proxy")
-                .withProtocol("tcp")
-                .withServerHost("10.0.0.0")
-                .withServerPort(88)
+                .withProtocol(PROXY_PROTOCOL)
+                .withServerHost(PROXY_HOST)
+                .withServerPort(PROXY_PORT)
                 .withProxyAuthentication(ProxyAuthentication.builder()
-                        .withUserName("user")
-                        .withPassword("pw")
+                        .withUserName(PROXY_USER)
+                        .withPassword(PROXY_PASSWORD)
                         .build())
-                .withNoProxyHosts("noproxy.com")
+                .withNoProxyHosts(PROXY_NO_PROXY_HOSTS)
                 .build();
     }
 

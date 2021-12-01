@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_0;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
@@ -399,7 +400,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_user").value(auth.getUserName()));
             proxyConfigList.addItemsItem(new ApiConfig().name("parcel_proxy_password").value(auth.getPassword()));
         });
-        // TODO when CM implements the no_proxy parameter for parcel installation, that parameter has to be passed
+        addNoProxyHosts(proxyConfig, proxyConfigList);
         try {
             LOGGER.info("Update settings with: " + proxyConfigList);
             clouderaManagerResourceApi.updateConfig("Update proxy settings", proxyConfigList);
@@ -407,6 +408,16 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             String failMessage = "Update proxy settings failed";
             LOGGER.error(failMessage, e);
             throw new ClouderaManagerOperationFailedException(failMessage, e);
+        }
+    }
+
+    private void addNoProxyHosts(ProxyConfig proxyConfig, ApiConfigList proxyConfigList) {
+        if (StringUtils.isNotBlank(proxyConfig.getNoProxyHosts())) {
+            Cluster cluster = stack.getCluster();
+            ClouderaManagerRepo clouderaManagerRepoDetails = clusterComponentProvider.getClouderaManagerRepoDetails(cluster.getId());
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_6_0)) {
+                proxyConfigList.addItemsItem(new ApiConfig().name("parcel_no_proxy_list").value(proxyConfig.getNoProxyHosts()));
+            }
         }
     }
 
