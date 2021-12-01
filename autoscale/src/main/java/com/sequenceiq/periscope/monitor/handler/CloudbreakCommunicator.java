@@ -9,6 +9,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
@@ -55,13 +56,14 @@ public class CloudbreakCommunicator {
     }
 
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
+        ScalingStrategy scalingStrategy = ScalingStrategy.STOPSTART;
         requestLogging.logResponseTime(() -> {
             cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint()
-                    .decommissionInternalInstancesForClusterCrnV2(cluster.getStackCrn(), decommissionNodeIds, false, true);
+                    .stopInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
             // TODO CB-14929: Make Periscope scaling mechanism aware
             return Optional.empty();
-        }, String.format("DecommissionInstancesForCluster query for cluster crn %s, NodeIds %s",
-                cluster.getStackCrn(), decommissionNodeIds));
+        }, String.format("DecommissionInstancesForCluster query for cluster crn %s, Scaling strategy %s, NodeIds %s, Scaling Strategy %s",
+                scalingStrategy, cluster.getStackCrn(), scalingStrategy, decommissionNodeIds));
     }
 
     @Retryable(value = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 10000))
