@@ -1,6 +1,5 @@
 package com.sequenceiq.cloudbreak.service.stack;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 import static com.sequenceiq.cloudbreak.common.type.ComponentType.CDH_PRODUCT_DETAILS;
@@ -39,6 +38,7 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
@@ -66,7 +66,9 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
+import com.sequenceiq.cloudbreak.controller.validation.network.NetworkConfigurationValidator;
 import com.sequenceiq.cloudbreak.converter.stack.AutoscaleStackToAutoscaleStackResponseJsonConverter;
+import com.sequenceiq.cloudbreak.converter.stack.StackIdViewToStackResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackToStackV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.StackToStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -84,6 +86,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -146,6 +149,9 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     private ComponentConfigProviderService componentConfigProviderService;
 
     @Inject
+    private NetworkConfigurationValidator networkConfigurationValidator;
+
+    @Inject
     private ContainerOrchestratorResolver containerOrchestratorResolver;
 
     @Inject
@@ -189,6 +195,9 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     @Inject
     private CloudStorageFolderResolverService cloudStorageFolderResolverService;
+
+    @Inject
+    private StackIdViewToStackResponseConverter stackIdViewToStackResponseConverter;
 
     @Inject
     private EntitlementService entitlementService;
@@ -317,16 +326,6 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return stackRepository.getStatusByCrn(crn).orElseThrow(notFound("stack", crn));
     }
 
-    public Boolean stackExistsAndNotDeleting(Long id) {
-        return findStatusById(id)
-                .map(stack -> !DELETE_IN_PROGRESS.equals(stack.getStatus()) && !DELETE_COMPLETED.equals(stack.getStatus()))
-                .orElse(false);
-    }
-
-    public Optional<StackClusterStatusView> findStatusById(Long id) {
-        return stackRepository.getStatusById(id);
-    }
-
     public StackClusterStatusView getStatusByNameOrCrn(NameOrCrn nameOrCrn, Long workspaceId) {
         Optional<StackClusterStatusView> foundStack = nameOrCrn.hasName()
                 ? stackRepository.getStatusByNameAndWorkspace(nameOrCrn.getName(), workspaceId)
@@ -434,6 +433,15 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return stackStatusService.findFirstByStackIdOrderByCreatedDesc(stackId).orElseThrow(notFound("stackStatus", stackId));
     }
 
+    public StackV4Response getByAmbariAddress(String ambariAddress) {
+        try {
+            return transactionService.required(() -> stackIdViewToStackResponseConverter.convert(stackRepository.findByAmbari(ambariAddress)
+                    .orElseThrow(notFound("stack", ambariAddress))));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public List<StackStatusView> getByEnvironmentCrnAndStackType(String environmentCrn, StackType stackType) {
         return stackRepository.findByEnvironmentCrnAndStackType(environmentCrn, stackType);
     }
@@ -512,6 +520,11 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     public StackView getViewByNameInWorkspace(String name, Long workspaceId) {
         return stackViewService.findNotTerminatedByName(name, workspaceId)
                 .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_NAME_EXCEPTION_MESSAGE, name)));
+    }
+
+    public StackView getViewByCrnInWorkspace(String crn, Long workspaceId) {
+        return stackViewService.findNotTerminatedByCrn(crn, workspaceId)
+                .orElseThrow(() -> new NotFoundException(format(STACK_NOT_FOUND_BY_CRN_EXCEPTION_MESSAGE, crn)));
     }
 
     public String getResourceCrnInTenant(String name, String tenantName) {
@@ -678,6 +691,13 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
                 .findFirst();
     }
 
+    @Measure(StackService.class)
+    public void validateStack(StackValidation stackValidation) {
+        if (stackValidation.getNetwork() != null) {
+            networkConfigurationValidator.validateNetworkForStack(stackValidation.getNetwork(), stackValidation.getInstanceGroups());
+        }
+    }
+
     public void validateOrchestrator(Orchestrator orchestrator) {
         try {
             ContainerOrchestrator containerOrchestrator = containerOrchestratorResolver.get(orchestrator.getType());
@@ -697,22 +717,30 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return stackRepository.findAllAlive();
     }
 
+    public Set<Stack> getAllAliveWithInstanceGroups() {
+        return stackRepository.findAllAliveWithInstanceGroups();
+    }
+
     public List<Image> getImagesOfAliveStacks(Integer thresholdInDays) {
-        LocalDateTime thresholdDate = nowSupplier.get()
+        final LocalDateTime thresholdDate = nowSupplier.get()
                 .minusDays(Optional.ofNullable(thresholdInDays).orElse(0));
-        long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
+        final long thresholdTimestamp = Timestamp.valueOf(thresholdDate).getTime();
         return stackRepository.findImagesOfAliveStacks(thresholdTimestamp).stream()
                 .map(stackImageView -> {
                     try {
                         return stackImageView.getImage().get(Image.class);
                     } catch (IOException e) {
-                        String message =
+                        final String message =
                                 String.format("Could not deserialize image for stack %d from %s", stackImageView.getId(), stackImageView.getImage());
                         LOGGER.error(message, e);
                         throw new IllegalStateException(message, e);
                     }
                 })
                 .collect(Collectors.toList());
+    }
+
+    public List<StackStatusView> getByStatuses(List<Status> statuses) {
+        return stackRepository.findByStatuses(statuses);
     }
 
     public List<StackStatusView> getStatuses(Set<Long> stackIds) {
@@ -879,6 +907,14 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return Optional.ofNullable(stackRepository.findTimeToLiveValueForSTack(stackId, PlatformParametersConsts.TTL_MILLIS))
                 .map(Long::valueOf)
                 .map(Duration::ofMillis);
+    }
+
+    public Boolean anyStackInWorkspace(Long workspaceId) {
+        try {
+            return transactionService.required(() -> stackRepository.anyStackInWorkspace(workspaceId));
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
     }
 
     public Boolean templateInUse(Long id) {
