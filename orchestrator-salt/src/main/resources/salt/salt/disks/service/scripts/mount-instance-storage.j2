@@ -90,7 +90,48 @@ clean_up_fstab() {
 
 find_format_and_mount_tempstorage_azure() {
       local return_value=0
-      local path="/hadoopfs/ephfs1"
+
+      declare -a inst_storage_devices_arr
+      declare -a device_uuids_arr
+
+      clean_up_fstab
+
+      log $LOG_FILE "collecting NVMe temporary disks"
+      readarray -t inst_storage_devices_arr < <(sudo nvme list -o json | jq -r  '.Devices[] | select(.ModelNumber == "Microsoft NVMe Direct Disk") | .DevicePath')
+
+      format_disks_if_unformatted "${inst_storage_devices_arr[@]}"
+      return_code=$?
+      if [ ! $return_code -eq 0 ]; then
+          log $LOG_FILE "could not format all NVMe temporary disks"
+          return $((return_code))
+      fi
+
+      for device in "${inst_storage_devices_arr[@]}"; do
+        local dev_uuid=$(blkid $device -s UUID -o value)
+        log $LOG_FILE "NVMe temporary disks to be mounted: $device UUID: $dev_uuid"
+        device_uuids_arr+=($dev_uuid)
+      done
+
+      local hadoop_ephfs_dir_counter=1
+
+      if [ ${{ '{#' }}device_uuids_arr[@]} -eq 0 ]; then
+        log $LOG_FILE "No NVMe temporary disks to mount"
+      else
+        for uuid in "${device_uuids_arr[@]}"; do
+          mount_one "UUID=$uuid /hadoopfs/ephfs${hadoop_ephfs_dir_counter} $FS_TYPE defaults,noatime,nofail 0 2"
+          ((hadoop_ephfs_dir_counter++))
+          return_code=$?
+          if [ ! $return_code -eq 0 ]; then
+            log $LOG_FILE "Error mounting NVMe temporary disk"
+            return $((return_code))
+          fi
+        done
+        log $LOG_FILE "result of mounting NVMe temporary disks: $return_value"
+      fi
+
+      local path="/hadoopfs/ephfs${hadoop_ephfs_dir_counter}"
+
+      log $LOG_FILE "Start mounting of regular temporary disk to path: $path"
 
       local device=""
       all_devices=$(blkid | awk '{print $1}' | sed 's/.$//')
@@ -101,7 +142,7 @@ find_format_and_mount_tempstorage_azure() {
           fi
       done
       if [[ $device == "" ]]; then
-        log $LOG_FILE No unmounted temporary device found
+        log $LOG_FILE No unmounted temporary disk found
         return_value=0
         return $((return_value))
       fi
@@ -114,12 +155,12 @@ find_format_and_mount_tempstorage_azure() {
         return $((return_value))
       fi
 
-      log $LOG_FILE mounting $device temporary storage device on path $path
+      log $LOG_FILE mounting $device temporary storage disk on path $path
       mkdir $path >> $LOG_FILE 2>&1
       log $LOG_FILE result of creating mount directory $path: $?
       mount -t $FS_TYPE -o defaults,noatime,nofail $device $path >> $LOG_FILE 2>&1
       if [ ! $? -eq 0 ]; then
-        log $LOG_FILE error mounting temporary storage device on $path
+        log $LOG_FILE error mounting temporary storage disk on $path
         return_value=1
         return $((return_value))
       fi
