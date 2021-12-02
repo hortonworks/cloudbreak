@@ -13,7 +13,6 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -747,10 +746,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         startAgents();
     }
 
-    @Override
     /**
      * Deploy the client configuration and then start the cluster services.
      */
+    @Override
     public int deployConfigAndStartClusterServices() throws CloudbreakException {
         try {
             LOGGER.info("Deploying configuration and starting services");
@@ -791,20 +790,18 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) {
+    public ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents, Set<String> parcelNamesFromImage) {
         ParcelsResourceApi parcelsResourceApi = clouderaManagerApiFactory.getParcelsResourceApi(apiClient);
         ParcelResourceApi parcelResourceApi = clouderaManagerApiFactory.getParcelResourceApi(apiClient);
-        Map<String, ClouderaManagerProduct> cmProducts = new HashMap<>();
-        for (ClusterComponent clusterComponent : usedParcelComponents) {
-            ClouderaManagerProduct product = clusterComponent.getAttributes().getSilent(ClouderaManagerProduct.class);
-            cmProducts.put(product.getName(), product);
-        }
+        Set<String> usedParcelComponentNames = usedParcelComponents.stream()
+                .map(component -> component.getAttributes().getSilent(ClouderaManagerProduct.class).getName())
+                .collect(Collectors.toSet());
         ParcelOperationStatus deactivateStatus = clouderaManagerParcelDecommissionService
-                .deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), cmProducts);
+                .deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(), usedParcelComponentNames, parcelNamesFromImage);
         ParcelOperationStatus undistributeStatus = clouderaManagerParcelDecommissionService
-                .undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
+                .undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames, parcelNamesFromImage);
         ParcelOperationStatus removalStatus = clouderaManagerParcelDecommissionService
-                .removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, cmProducts);
+                .removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames, parcelNamesFromImage);
         ParcelOperationStatus result = removalStatus.merge(deactivateStatus).merge(undistributeStatus);
         LOGGER.info("Result of the parcel removal: {}", result);
         return result;

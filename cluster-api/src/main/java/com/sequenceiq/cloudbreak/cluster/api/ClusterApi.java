@@ -93,8 +93,9 @@ public interface ClusterApi {
         clusterModificationService().downloadAndDistributeParcels(components, patchUpgrade);
     }
 
-    default ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents) throws CloudbreakException {
-        return clusterModificationService().removeUnusedParcels(usedParcelComponents);
+    default ParcelOperationStatus removeUnusedParcels(Set<ClusterComponent> usedParcelComponents, Set<String> parcelNamesFromImage)
+            throws CloudbreakException {
+        return clusterModificationService().removeUnusedParcels(usedParcelComponents, parcelNamesFromImage);
     }
 
     default void ensureComponentsAreStopped(Map<String, String> components, String hostname) throws CloudbreakException {
