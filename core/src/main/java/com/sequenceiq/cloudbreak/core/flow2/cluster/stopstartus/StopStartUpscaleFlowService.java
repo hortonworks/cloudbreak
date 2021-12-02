@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
@@ -70,24 +70,26 @@ class StopStartUpscaleFlowService {
 
     void instancesStarted(StopStartUpscaleContext context, long stackId, List<InstanceMetaData> instancesStarted) {
         Stack stack = context.getStack();
-        // TODO CB-14929: Introduce a new state when STARTING. CREATED is not very useful in the context of START/STOP. Likely a mirror of the CREATED state in terms of functionality.
+        // TODO CB-14929: Introduce a new state when STARTING. CREATED is not very useful in the context of START/STOP.
+        //  Likely a mirror of the CREATED state in terms of functionality.
         instancesStarted.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.CREATED));
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTED, "Instances: " + instancesStarted.size() + " started successfully.");
-        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED, String.valueOf(instancesStarted.size()), instancesStarted.stream().map(x -> x.getInstanceId()).collect(Collectors.toList()).toString());
+        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED,
+                String.valueOf(instancesStarted.size()), instancesStarted.stream().map(x -> x.getInstanceId()).collect(Collectors.toList()).toString());
     }
 
     void upscaleCommissionNewNodes(long stackId, String hostGroupName, List<String> instanceIds) {
         // TODO CB-14929: Update instance state to SERVICES_RUNNING? (or introduce a new state) at this point, rather than when the instances start up
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS,
                 String.format("Commissioning via CM: %s", hostGroupName));
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING, hostGroupName, String.valueOf(instanceIds.size()), instanceIds.toString());
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING,
+                hostGroupName, String.valueOf(instanceIds.size()), instanceIds.toString());
     }
 
     void reRegisterWithClusterProxy(long stackId) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, "Re-registering with Cluster Proxy service.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_RE_REGISTER_WITH_CLUSTER_PROXY);
     }
-
 
     private void sendMessage(long stackId, ResourceEvent resourceEvent, String statusReason) {
         clusterService.updateClusterStatusByStackId(stackId, UPDATE_IN_PROGRESS, statusReason);

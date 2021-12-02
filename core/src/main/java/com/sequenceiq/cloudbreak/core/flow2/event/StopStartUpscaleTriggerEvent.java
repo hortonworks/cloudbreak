@@ -31,7 +31,6 @@ public class StopStartUpscaleTriggerEvent extends StackEvent implements HostGrou
         this.clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
-
     @Override
     public String getHostGroupName() {
         return hostGroup;

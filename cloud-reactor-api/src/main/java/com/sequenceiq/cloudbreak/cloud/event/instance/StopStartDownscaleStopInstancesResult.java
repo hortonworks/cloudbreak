@@ -12,7 +12,8 @@ public class StopStartDownscaleStopInstancesResult extends CloudPlatformResult {
 
     private final List<CloudVmInstanceStatus> cloudVmInstanceStatusesNoCheck;
 
-    public StopStartDownscaleStopInstancesResult(Long resourceId, List<CloudInstance> cloudInstancesToStop, List<CloudVmInstanceStatus> cloudVmInstanceStatusesNoCheck) {
+    public StopStartDownscaleStopInstancesResult(Long resourceId, List<CloudInstance> cloudInstancesToStop,
+            List<CloudVmInstanceStatus> cloudVmInstanceStatusesNoCheck) {
         super(resourceId);
         this.cloudInstancesToStop = cloudInstancesToStop;
         this.cloudVmInstanceStatusesNoCheck = cloudVmInstanceStatusesNoCheck;
@@ -22,7 +23,8 @@ public class StopStartDownscaleStopInstancesResult extends CloudPlatformResult {
         return cloudInstancesToStop;
     }
 
-    // TODO CB-14929: This should include information about the actual instances that were STOPPED. The result needs to be filtered somewhewre for the actual status. Will evolve based on error handling.
+    // TODO CB-14929: This should include information about the actual instances that were STOPPED.
+    //  The result needs to be filtered somewhewre for the actual status. Will evolve based on error handling.
     public List<CloudVmInstanceStatus> getCloudVmInstanceStatusesNoCheck() {
         return cloudVmInstanceStatusesNoCheck;
     }

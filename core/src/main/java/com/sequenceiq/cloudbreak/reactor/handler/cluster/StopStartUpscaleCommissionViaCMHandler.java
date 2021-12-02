@@ -76,16 +76,19 @@ public class StopStartUpscaleCommissionViaCMHandler implements EventHandler<Stop
             Stack stack = request.getStack();
             Cluster cluster = stack.getCluster();
 
-            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART, String.valueOf(request.getInstancesToCommission().size()));
+            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART,
+                    String.valueOf(request.getInstancesToCommission().size()));
 
             ClusterSetupService clusterSetupService = clusterApiConnectors.getConnector(stack).clusterSetupService();
             clusterSetupService.waitForHosts2(new HashSet(request.getInstancesToCommission()));
 
-            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED, String.valueOf(request.getInstancesToCommission().size()));
+            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED,
+                    String.valueOf(request.getInstancesToCommission().size()));
 
             ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
 
-            // TODO CB-14929:  No null fqdn etc checking in place. Rant:  Java Streams are terrible to easily get things wrong, and not think through what could potetntially braek. Not to mention the syntax..
+            // TODO CB-14929:  No null fqdn etc checking in place. Rant:  Java Streams are terrible to easily get things wrong,
+            // and not think through what could potetntially braek. Not to mention the syntax..
             Set<String> hostNames = request.getInstancesToCommission().stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toSet());
             LOGGER.info("ZZZ: hostNamesToRecommission: count={}, hostNames={}", hostNames.size(), hostNames);
 
@@ -97,8 +100,9 @@ public class StopStartUpscaleCommissionViaCMHandler implements EventHandler<Stop
 
             // TODO CB-14929: Ensure CM, relevant services (YARN RM) are in a functional state - or fail/delay the operation
 
-            // TODO CB-14929: Potentially poll nodes for success. Don't fail the entire operation if a single node fails to commission. What would need to happen to
-            //  the CM command in this case? (Can only work in the presence of a co-operative CM API call. Alternately this could go straight to the service)
+            // TODO CB-14929: Potentially poll nodes for success. Don't fail the entire operation if a single node fails to commission.
+            //  What would need to happen to the CM command in this case? (Can only work in the presence of a co-operative CM API call.
+            //  Alternately this could go straight to the service)
 
             Set<String> recommissionedHostnames = Collections.emptySet();
             if (hostsToRecommission.size() > 0) {

@@ -219,7 +219,8 @@ public class ClouderaManagerDecomissioner {
     // TODO CB-14929: Move this out into a RecommissionedService
     public Set<String> recommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRecommission, ApiClient client) {
 
-        // TODO CB-14929: Check status of target nodes / previously issued commands - in case of pod restarts etc. Ideally without needing to persist anything (commandId etc)
+        // TODO CB-14929: Check status of target nodes / previously issued commands - in case of pod restarts etc.
+        //  Ideally without needing to persist anything (commandId etc)
         // TODO CB-14929: Deal with situations where CM itself is unavailable. Go back and STOP resources on the cloud-provider.
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
