@@ -176,6 +176,9 @@ public class Flow2HandlerTest {
     @Mock
     private FlowStatCache flowStatCache;
 
+    @Mock
+    private List<FlowConfiguration<?>> flowConfigs;
+
     private FlowState flowState;
 
     private Event<? extends Payload> dummyEvent;
@@ -406,7 +409,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, never()).removeFlowChain(anyString(), anyBoolean());
-        verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any());
+        verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any(), any());
     }
 
     @Test
@@ -421,7 +424,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, never()).removeFlowChain(anyString(), anyBoolean());
-        verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID), eq(FLOW_TRIGGER_USERCRN), any(Map.class), any());
+        verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID), eq(FLOW_TRIGGER_USERCRN), any(Map.class), any(), any());
     }
 
     @Test
@@ -436,7 +439,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, never()).removeFullFlowChain(anyString(), anyBoolean());
-        verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any());
+        verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any(), any());
     }
 
     @Test
@@ -452,7 +455,7 @@ public class Flow2HandlerTest {
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, times(1)).removeFullFlowChain(anyString(), anyBoolean());
-        verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any());
+        verify(flowChains, never()).triggerNextFlow(anyString(), anyString(), any(Map.class), any(), any());
     }
 
     @Test

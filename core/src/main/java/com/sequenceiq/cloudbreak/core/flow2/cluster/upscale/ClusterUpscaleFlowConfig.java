@@ -61,10 +61,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.upscale.ClusterUpscal
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -135,6 +139,9 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     private static final FlowEdgeConfig<ClusterUpscaleState, ClusterUpscaleEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_UPSCALE_FAILED_STATE, FAIL_HANDLED_EVENT);
 
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
+
     public ClusterUpscaleFlowConfig() {
         super(ClusterUpscaleState.class, ClusterUpscaleEvent.class);
     }
@@ -167,5 +174,10 @@ public class ClusterUpscaleFlowConfig extends AbstractFlowConfiguration<ClusterU
     @Override
     public ClusterUpscaleEvent getRetryableEvent() {
         return FAIL_HANDLED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

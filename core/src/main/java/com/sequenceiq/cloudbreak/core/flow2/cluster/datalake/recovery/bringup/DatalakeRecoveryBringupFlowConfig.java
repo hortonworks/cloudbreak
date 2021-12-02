@@ -15,9 +15,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.recovery.bri
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -48,6 +52,9 @@ public class DatalakeRecoveryBringupFlowConfig extends AbstractFlowConfiguration
 
     private static final FlowEdgeConfig<DatalakeRecoveryBringupState, DatalakeRecoveryBringupEvent> EDGE_CONFIG =
         new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, RECOVERY_BRINGUP_FAILED_STATE, RECOVERY_BRINGUP_FAIL_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public DatalakeRecoveryBringupFlowConfig() {
         super(DatalakeRecoveryBringupState.class, DatalakeRecoveryBringupEvent.class);
@@ -83,5 +90,10 @@ public class DatalakeRecoveryBringupFlowConfig extends AbstractFlowConfiguration
     @Override
     public DatalakeRecoveryBringupEvent getRetryableEvent() {
         return RECOVERY_BRINGUP_FAILED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

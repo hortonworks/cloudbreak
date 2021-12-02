@@ -40,11 +40,15 @@ public class StackUpdater {
     private UsageLoggingUtil usageLoggingUtil;
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus) {
-        return doUpdateStackStatus(stackId, detailedStatus, "");
+        return doUpdateStackStatus(stackId, detailedStatus.getStatus(), detailedStatus, "");
     }
 
     public Stack updateStackStatus(Long stackId, DetailedStackStatus detailedStatus, String statusReason) {
-        return doUpdateStackStatus(stackId, detailedStatus, statusReason);
+        return doUpdateStackStatus(stackId, detailedStatus.getStatus(), detailedStatus, statusReason);
+    }
+
+    public Stack updateStackStatusAndSetDetailedStatusToUnknown(Long stackId, Status status) {
+        return doUpdateStackStatus(stackId, status, DetailedStackStatus.UNKNOWN, "");
     }
 
     public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {
@@ -64,12 +68,11 @@ public class StackUpdater {
         return stackService.save(stack);
     }
 
-    private Stack doUpdateStackStatus(Long stackId, DetailedStackStatus newDetailedStatus, String statusReason) {
+    private Stack doUpdateStackStatus(Long stackId, Status newStatus, DetailedStackStatus newDetailedStatus, String statusReason) {
         Stack stack = stackService.getByIdWithTransaction(stackId);
         StackStatus actualStackStatus = stack.getStackStatus();
         LOGGER.info("Update stack status from: {}/{} to: {}/{} stack: {} reason: {}", actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus(),
-                newDetailedStatus.getStatus(), newDetailedStatus, stackId, statusReason);
-        Status newStatus = newDetailedStatus.getStatus();
+                newStatus, newDetailedStatus, stackId, statusReason);
         if (actualStackStatus.getStatus().equals(newStatus)) {
             LOGGER.debug("New status is the same as previous status {}/{}, skip status update.",
                     actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus());

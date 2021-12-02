@@ -131,7 +131,8 @@ public class FlowChains {
         }
     }
 
-    public void triggerNextFlow(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams, String operationType) {
+    public void triggerNextFlow(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams, String operationType,
+            Optional<Runnable> finalizerCallback) {
         FlowTriggerEventQueue flowTriggerEventQueue = flowChainMap.get(flowChainId);
         if (flowTriggerEventQueue != null) {
             Queue<Selectable> queue = flowTriggerEventQueue.getQueue();
@@ -146,7 +147,7 @@ public class FlowChains {
                         flowLogService.saveChain(parentFlowChainId, getParentFlowChainId(parentFlowChainId), flowChainMap.get(parentFlowChainId),
                                 flowTriggerUserCrn);
                     }
-                    triggerParentFlowChain(flowChainId, flowTriggerUserCrn, contextParams, operationType);
+                    triggerParentFlowChain(flowChainId, flowTriggerUserCrn, contextParams, operationType, finalizerCallback);
                 }
             }
         }
@@ -166,11 +167,14 @@ public class FlowChains {
         eventBus.notify(selectable.selector(), eventFactory.createEvent(headers, selectable));
     }
 
-    private void triggerParentFlowChain(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams, String operationType) {
+    private void triggerParentFlowChain(String flowChainId, String flowTriggerUserCrn, Map<Object, Object> contextParams, String operationType,
+            Optional<Runnable> finalizerCallback) {
         String parentFlowChainId = getParentFlowChainId(flowChainId);
         removeFlowChain(flowChainId, true);
         if (parentFlowChainId != null) {
-            triggerNextFlow(parentFlowChainId, flowTriggerUserCrn, contextParams, operationType);
+            triggerNextFlow(parentFlowChainId, flowTriggerUserCrn, contextParams, operationType, finalizerCallback);
+        } else {
+            finalizerCallback.ifPresent(Runnable::run);
         }
     }
 

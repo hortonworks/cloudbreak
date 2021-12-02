@@ -17,10 +17,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.reset.ClusterResetSta
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
 public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterResetState, ClusterResetEvent> {
@@ -46,6 +50,9 @@ public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterRes
 
     private static final FlowEdgeConfig<ClusterResetState, ClusterResetEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_RESET_FAILED_STATE, FAIL_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterResetFlowConfig() {
         super(ClusterResetState.class, ClusterResetEvent.class);
@@ -76,5 +83,10 @@ public class ClusterResetFlowConfig extends AbstractFlowConfiguration<ClusterRes
     @Override
     public String getDisplayName() {
         return "Cluster reset";
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

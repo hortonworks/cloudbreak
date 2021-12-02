@@ -1,25 +1,21 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-
-import java.util.EnumSet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import org.junit.jupiter.api.Test;
-
-import com.google.common.collect.Sets;
 
 class StatusTest {
 
     @Test
     void mapToFailedIfInProgressTest() {
-        assertTrue(Sets.intersection(Status.mappableToFailed(), Status.notMappableToFailed()).isEmpty());
-        assertEquals(EnumSet.allOf(Status.class), Sets.union(Status.mappableToFailed(), Status.notMappableToFailed()));
-
-        for (Status s : Status.mappableToFailed()) {
-            Status mapped = s.mapToFailedIfInProgress();
-            assertNotEquals(s, mapped);
+        for (Status status : Status.values()) {
+            Status result = status.mapToFailedIfInProgress();
+            if (status.isInProgress()) {
+                assertFalse(result.isInProgress(), status + " status was mapped to " + result + " which still has PROGRESS status kind.");
+            } else {
+                assertEquals(status, result);
+            }
         }
     }
 }

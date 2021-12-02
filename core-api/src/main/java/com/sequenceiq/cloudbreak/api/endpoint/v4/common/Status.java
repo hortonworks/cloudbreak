@@ -2,11 +2,11 @@ package com.sequenceiq.cloudbreak.api.endpoint.v4.common;
 
 import static java.lang.String.format;
 
-import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.model.StatusKind;
 
@@ -60,6 +60,32 @@ public enum Status {
     LOAD_BALANCER_UPDATE_FINISHED(StatusKind.FINAL),
     LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL);
 
+    private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
+            .put(REQUESTED, CREATE_FAILED)
+            .put(CREATE_IN_PROGRESS, CREATE_FAILED)
+            .put(UPDATE_IN_PROGRESS, UPDATE_FAILED)
+            .put(UPDATE_REQUESTED, UPDATE_FAILED)
+            .put(BACKUP_IN_PROGRESS, BACKUP_FAILED)
+            .put(RESTORE_IN_PROGRESS, RESTORE_FAILED)
+            .put(RECOVERY_IN_PROGRESS, RECOVERY_FAILED)
+            .put(RECOVERY_REQUESTED, RECOVERY_FAILED)
+            .put(PRE_DELETE_IN_PROGRESS, DELETE_FAILED)
+            .put(DELETE_IN_PROGRESS, DELETE_FAILED)
+            .put(STOP_REQUESTED, STOP_FAILED)
+            .put(STOP_IN_PROGRESS, STOP_FAILED)
+            .put(START_REQUESTED, START_FAILED)
+            .put(START_IN_PROGRESS, START_FAILED)
+            .put(WAIT_FOR_SYNC, AVAILABLE)
+            .put(EXTERNAL_DATABASE_CREATION_IN_PROGRESS, CREATE_FAILED)
+            .put(EXTERNAL_DATABASE_DELETION_IN_PROGRESS, DELETE_FAILED)
+            .put(EXTERNAL_DATABASE_DELETION_FINISHED, DELETE_FAILED)
+            .put(EXTERNAL_DATABASE_START_IN_PROGRESS, START_FAILED)
+            .put(EXTERNAL_DATABASE_START_FINISHED, START_FAILED)
+            .put(EXTERNAL_DATABASE_STOP_IN_PROGRESS, STOP_FAILED)
+            .put(EXTERNAL_DATABASE_STOP_FINISHED, STOP_FAILED)
+            .put(LOAD_BALANCER_UPDATE_IN_PROGRESS, UPDATE_FAILED)
+            .build();
+
     private final StatusKind statusKind;
 
     Status(StatusKind statusKind) {
@@ -71,8 +97,8 @@ public enum Status {
     }
 
     public boolean isRemovableStatus() {
-        return Arrays.asList(AVAILABLE, UPDATE_FAILED, RECOVERY_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED).contains(valueOf(name()));
+        return EnumSet.of(AVAILABLE, UPDATE_FAILED, RECOVERY_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
+                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED).contains(this);
     }
 
     public boolean isAvailable() {
@@ -88,114 +114,29 @@ public enum Status {
     }
 
     public boolean isStartState() {
-        return Status.AVAILABLE.equals(this)
+        return AVAILABLE.equals(this)
                 || UPDATE_IN_PROGRESS.equals(this)
-                || Status.START_FAILED.equals(this)
-                || Status.START_REQUESTED.equals(this)
-                || Status.START_IN_PROGRESS.equals(this);
+                || START_FAILED.equals(this)
+                || START_REQUESTED.equals(this)
+                || START_IN_PROGRESS.equals(this);
     }
 
     public boolean isStopState() {
-        return Status.STOPPED.equals(this)
-                || Status.STOP_IN_PROGRESS.equals(this)
-                || Status.STOP_REQUESTED.equals(this);
-    }
-
-    @VisibleForTesting
-    static EnumSet<Status> mappableToFailed() {
-        return EnumSet.of(
-                REQUESTED,
-                CREATE_IN_PROGRESS,
-                UPDATE_IN_PROGRESS,
-                RECOVERY_IN_PROGRESS,
-                DELETE_IN_PROGRESS,
-                PRE_DELETE_IN_PROGRESS,
-                START_IN_PROGRESS,
-                STOP_IN_PROGRESS,
-                BACKUP_IN_PROGRESS,
-                RESTORE_IN_PROGRESS
-        );
-    }
-
-    @VisibleForTesting
-    static EnumSet<Status> notMappableToFailed() {
-        return EnumSet.of(
-                AVAILABLE,
-                UPDATE_REQUESTED,
-                UPDATE_FAILED,
-                RECOVERY_REQUESTED,
-                RECOVERY_FAILED,
-                BACKUP_FAILED,
-                RESTORE_FAILED,
-                CREATE_FAILED,
-                ENABLE_SECURITY_FAILED,
-                DELETE_FAILED,
-                DELETED_ON_PROVIDER_SIDE,
-                DELETE_COMPLETED,
-                STOPPED,
-                STOP_REQUESTED,
-                START_REQUESTED,
-                START_FAILED,
-                STOP_FAILED,
-                WAIT_FOR_SYNC,
-                MAINTENANCE_MODE_ENABLED,
-                AMBIGUOUS,
-                UNREACHABLE,
-                NODE_FAILURE,
-                EXTERNAL_DATABASE_CREATION_IN_PROGRESS,
-                EXTERNAL_DATABASE_CREATION_FAILED,
-                EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
-                EXTERNAL_DATABASE_DELETION_FINISHED,
-                EXTERNAL_DATABASE_DELETION_FAILED,
-                EXTERNAL_DATABASE_START_IN_PROGRESS,
-                EXTERNAL_DATABASE_START_FINISHED,
-                EXTERNAL_DATABASE_START_FAILED,
-                EXTERNAL_DATABASE_STOP_IN_PROGRESS,
-                EXTERNAL_DATABASE_STOP_FINISHED,
-                EXTERNAL_DATABASE_STOP_FAILED,
-                BACKUP_FAILED,
-                BACKUP_FINISHED,
-                RESTORE_FAILED,
-                RESTORE_FINISHED,
-                LOAD_BALANCER_UPDATE_IN_PROGRESS,
-                LOAD_BALANCER_UPDATE_FAILED,
-                LOAD_BALANCER_UPDATE_FINISHED);
+        return STOPPED.equals(this)
+                || STOP_IN_PROGRESS.equals(this)
+                || STOP_REQUESTED.equals(this);
     }
 
     public Status mapToFailedIfInProgress() {
-        if (mappableToFailed().contains(this)) {
-            return convertStatus();
-        }
-        return this;
-    }
-
-    @SuppressWarnings("checkstyle:CyclomaticComplexity")
-    private Status convertStatus() {
-        switch (this) {
-            case REQUESTED:
-            case CREATE_IN_PROGRESS:
-                return CREATE_FAILED;
-            case UPDATE_REQUESTED:
-            case UPDATE_IN_PROGRESS:
-                return UPDATE_FAILED;
-            case RECOVERY_REQUESTED:
-            case RECOVERY_IN_PROGRESS:
-                return RECOVERY_FAILED;
-            case DELETE_IN_PROGRESS:
-            case PRE_DELETE_IN_PROGRESS:
-                return DELETE_FAILED;
-            case START_REQUESTED:
-            case START_IN_PROGRESS:
-                return START_FAILED;
-            case STOP_REQUESTED:
-            case STOP_IN_PROGRESS:
-                return STOP_FAILED;
-            case BACKUP_IN_PROGRESS:
-                return BACKUP_FAILED;
-            case RESTORE_IN_PROGRESS:
-                return RESTORE_FAILED;
-            default:
-                throw new IllegalArgumentException(format("State '%s' is declared to mappable to failed state but not handled.", this));
+        if (isInProgress()) {
+            Status result = IN_PROGRESS_TO_FINAL_STATUS_MAPPING.get(this);
+            if (result == null) {
+                throw new IllegalArgumentException(format("Status '%s' is not mappable to failed state.", this));
+            } else {
+                return result;
+            }
+        } else {
+            return this;
         }
     }
 
@@ -210,17 +151,17 @@ public enum Status {
 
     public static EnumSet<Status> getUnschedulableStatuses() {
         return EnumSet.of(
-                Status.CREATE_FAILED,
-                Status.PRE_DELETE_IN_PROGRESS,
-                Status.DELETE_IN_PROGRESS,
-                Status.DELETE_FAILED,
-                Status.DELETE_COMPLETED,
-                Status.EXTERNAL_DATABASE_CREATION_FAILED,
-                Status.EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
-                Status.EXTERNAL_DATABASE_DELETION_FINISHED,
-                Status.EXTERNAL_DATABASE_DELETION_FAILED,
-                Status.LOAD_BALANCER_UPDATE_FINISHED,
-                Status.LOAD_BALANCER_UPDATE_FAILED
+                CREATE_FAILED,
+                PRE_DELETE_IN_PROGRESS,
+                DELETE_IN_PROGRESS,
+                DELETE_FAILED,
+                DELETE_COMPLETED,
+                EXTERNAL_DATABASE_CREATION_FAILED,
+                EXTERNAL_DATABASE_DELETION_IN_PROGRESS,
+                EXTERNAL_DATABASE_DELETION_FINISHED,
+                EXTERNAL_DATABASE_DELETION_FAILED,
+                LOAD_BALANCER_UPDATE_FINISHED,
+                LOAD_BALANCER_UPDATE_FAILED
         );
     }
 }

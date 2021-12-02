@@ -13,10 +13,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.co
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -39,6 +43,9 @@ public class ExternalDatabaseTerminationFlowConfig extends AbstractFlowConfigura
 
     private static final FlowEdgeConfig<ExternalDatabaseTerminationState, ExternalDatabaseTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, EXTERNAL_DATABASE_TERMINATION_FAILED_STATE, EXTERNAL_DATABASE_TERMINATION_FAILURE_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public ExternalDatabaseTerminationFlowConfig() {
         super(ExternalDatabaseTerminationState.class, ExternalDatabaseTerminationEvent.class);
@@ -74,5 +81,10 @@ public class ExternalDatabaseTerminationFlowConfig extends AbstractFlowConfigura
     @Override
     public ExternalDatabaseTerminationEvent getRetryableEvent() {
         return EXTERNAL_DATABASE_TERMINATION_FAILURE_HANDLED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

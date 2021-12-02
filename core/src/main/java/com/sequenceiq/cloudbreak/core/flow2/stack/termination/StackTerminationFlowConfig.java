@@ -22,10 +22,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTermin
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
 public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackTerminationState, StackTerminationEvent> {
@@ -62,6 +66,9 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     private static final FlowEdgeConfig<StackTerminationState, StackTerminationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, TERMINATION_FAILED_STATE, STACK_TERMINATION_FAIL_HANDLED_EVENT);
 
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
+
     public StackTerminationFlowConfig() {
         super(StackTerminationState.class, StackTerminationEvent.class);
     }
@@ -89,5 +96,10 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     @Override
     public String getDisplayName() {
         return "Stack termination";
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

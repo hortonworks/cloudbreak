@@ -21,11 +21,15 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.start.ClusterStartSta
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -62,6 +66,9 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
 
     private static final FlowEdgeConfig<ClusterStartState, ClusterStartEvent> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE,
             CLUSTER_START_FAILED_STATE, FAIL_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterStartFlowConfig() {
         super(ClusterStartState.class, ClusterStartEvent.class);
@@ -102,5 +109,10 @@ public class ClusterStartFlowConfig extends AbstractFlowConfiguration<ClusterSta
     @Override
     public ClusterStartEvent getRetryableEvent() {
         return FAIL_HANDLED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

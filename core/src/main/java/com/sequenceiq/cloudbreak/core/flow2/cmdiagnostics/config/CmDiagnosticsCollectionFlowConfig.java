@@ -19,11 +19,15 @@ import static com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnos
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.CmDiagnosticsCollectionState;
 import com.sequenceiq.cloudbreak.core.flow2.cmdiagnostics.event.CmDiagnosticsCollectionStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -69,6 +73,9 @@ public class CmDiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration
     private static final FlowEdgeConfig<CmDiagnosticsCollectionState, CmDiagnosticsCollectionStateSelectors> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CM_DIAGNOSTICS_COLLECTION_FAILED_STATE, HANDLED_FAILED_CM_DIAGNOSTICS_COLLECTION_EVENT);
 
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
+
     protected CmDiagnosticsCollectionFlowConfig() {
         super(CmDiagnosticsCollectionState.class, CmDiagnosticsCollectionStateSelectors.class);
     }
@@ -103,5 +110,10 @@ public class CmDiagnosticsCollectionFlowConfig extends AbstractFlowConfiguration
     @Override
     public CmDiagnosticsCollectionStateSelectors getRetryableEvent() {
         return HANDLED_FAILED_CM_DIAGNOSTICS_COLLECTION_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

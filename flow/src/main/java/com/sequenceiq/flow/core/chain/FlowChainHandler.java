@@ -10,8 +10,6 @@ import java.util.UUID;
 import javax.annotation.Resource;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cedarsoftware.util.io.JsonReader;
@@ -30,8 +28,6 @@ import reactor.fn.Consumer;
 
 @Component
 public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(FlowChainHandler.class);
 
     @Resource
     private Map<String, FlowEventChainFactory<Payload>> flowChainConfigMap;
@@ -59,7 +55,7 @@ public class FlowChainHandler implements Consumer<Event<? extends Payload>> {
         flowChains.putFlowChain(flowChainId, parentFlowChainId, flowEventChainFactory.createFlowTriggerEventQueue(event.getData()));
         flowChains.addNotSavedFlowChainLog(flowChainId);
         flowStatCache.putByFlowChainId(flowChainId, event.getData().getResourceId(), flowOperationType, false);
-        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, Map.of(), flowOperationType);
+        flowChains.triggerNextFlow(flowChainId, flowTriggerUserCrn, Map.of(), flowOperationType, Optional.empty());
     }
 
     public void restoreFlowChain(String flowChainId) {

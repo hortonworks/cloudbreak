@@ -15,10 +15,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrenew.ClusterCert
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -39,6 +43,9 @@ public class ClusterCertificateRenewFlowConfig extends AbstractFlowConfiguration
 
     private static final FlowEdgeConfig<ClusterCertificateRenewState, ClusterCertificateRenewEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_CERTIFICATE_RENEW_FAILED_STATE, CLUSTER_CERTIFICATE_RENEW_FAILURE_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterCertificateRenewFlowConfig() {
         super(ClusterCertificateRenewState.class, ClusterCertificateRenewEvent.class);
@@ -79,5 +86,10 @@ public class ClusterCertificateRenewFlowConfig extends AbstractFlowConfiguration
     @Override
     public FlowTriggerCondition getFlowTriggerCondition() {
         return getApplicationContext().getBean(ClusterCertificateRenewTriggerCondition.class);
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

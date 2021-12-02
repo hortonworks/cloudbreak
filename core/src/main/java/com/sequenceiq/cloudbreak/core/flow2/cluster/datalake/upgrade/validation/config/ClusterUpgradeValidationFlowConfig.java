@@ -23,11 +23,15 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.vali
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.ClusterUpgradeValidationState;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeValidationStateSelectors;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -75,6 +79,9 @@ public class ClusterUpgradeValidationFlowConfig extends AbstractFlowConfiguratio
     private static final FlowEdgeConfig<ClusterUpgradeValidationState, ClusterUpgradeValidationStateSelectors> EDGE_CONFIG = new FlowEdgeConfig<>(INIT_STATE,
             FINAL_STATE, CLUSTER_UPGRADE_VALIDATION_FAILED_STATE, HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT);
 
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
+
     protected ClusterUpgradeValidationFlowConfig() {
         super(ClusterUpgradeValidationState.class, ClusterUpgradeValidationStateSelectors.class);
     }
@@ -109,5 +116,10 @@ public class ClusterUpgradeValidationFlowConfig extends AbstractFlowConfiguratio
     @Override
     public ClusterUpgradeValidationStateSelectors getRetryableEvent() {
         return ClusterUpgradeValidationStateSelectors.HANDLED_FAILED_CLUSTER_UPGRADE_VALIDATION_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

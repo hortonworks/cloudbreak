@@ -102,25 +102,25 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public FlowLog close(Long stackId, String flowId) throws TransactionExecutionException {
-        return finalize(stackId, flowId, FlowConstants.FINISHED_STATE);
+    public FlowLog close(Long resourceId, String flowId) throws TransactionExecutionException {
+        return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE);
     }
 
     @Override
-    public FlowLog cancel(Long stackId, String flowId) throws TransactionExecutionException {
-        return finalize(stackId, flowId, FlowConstants.CANCELLED_STATE);
+    public FlowLog cancel(Long resourceId, String flowId) throws TransactionExecutionException {
+        return finalize(resourceId, flowId, FlowConstants.CANCELLED_STATE);
     }
 
     @Override
-    public FlowLog terminate(Long stackId, String flowId) throws TransactionExecutionException {
-        return finalize(stackId, flowId, FlowConstants.TERMINATED_STATE);
+    public FlowLog terminate(Long resourceId, String flowId) throws TransactionExecutionException {
+        return finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE);
     }
 
     public void finalize(String flowId) {
         flowLogRepository.finalizeByFlowId(flowId);
     }
 
-    private FlowLog finalize(Long stackId, String flowId, String state) throws TransactionExecutionException {
+    private FlowLog finalize(Long resourceId, String flowId, String state) throws TransactionExecutionException {
         return transactionService.required(() -> {
             flowLogRepository.finalizeByFlowId(flowId);
             Optional<FlowLog> lastFlowLogOpt = getLastFlowLog(flowId);
@@ -130,7 +130,7 @@ public class FlowLogDBService implements FlowLogService {
                 updateLastFlowLogStatus(lastFlowLog, false);
                 operationType = lastFlowLog.getOperationType();
             }
-            FlowLog flowLog = new FlowLog(stackId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL, operationType);
+            FlowLog flowLog = new FlowLog(resourceId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL, operationType);
             flowLog.setCloudbreakNodeId(nodeConfig.getId());
             return flowLogRepository.save(flowLog);
         });

@@ -43,6 +43,7 @@ import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.exception.FlowNotFoundException;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
@@ -185,20 +186,32 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         }
     }
 
-    private void finalizeFlow(FlowParameters flowParameters, String flowChainId, Long stackId, Map<Object, Object> contextParams)
+    private void finalizeFlow(FlowParameters flowParameters, String flowChainId, Long resourceId, Map<Object, Object> contextParams)
             throws TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
-        flowLogService.close(stackId, flowId);
+        flowLogService.close(resourceId, flowId);
         Flow flow = runningFlows.remove(flowId);
+        Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
         flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
         if (flowChainId != null) {
             if (flow.isFlowFailed()) {
                 flowChains.removeFullFlowChain(flowChainId, false);
+                finalizerCallback.ifPresent(callback -> callback.onFinalize(resourceId));
             } else {
-                flowChains.triggerNextFlow(flowChainId, flowParameters.getFlowTriggerUserCrn(), contextParams, flowParameters.getFlowOperationType());
+                flowChains.triggerNextFlow(flowChainId, flowParameters.getFlowTriggerUserCrn(), contextParams, flowParameters.getFlowOperationType(),
+                        finalizerCallback.map(callback -> () -> callback.onFinalize(resourceId)));
             }
+        } else {
+            finalizerCallback.ifPresent(callback -> callback.onFinalize(resourceId));
         }
+    }
+
+    private Optional<FlowFinalizerCallback> createFinalizerCallback(Flow flow) {
+        return flowConfigs.stream()
+                .filter(flowConfiguration -> flow.getFlowConfigClass().equals(flowConfiguration.getClass()))
+                .findFirst()
+                .map(FlowConfiguration::getFinalizerCallBack);
     }
 
     private AcceptResult handleNewFlowRequest(String key, Payload payload, FlowParameters flowParameters, String flowChainId, String flowChainType,
