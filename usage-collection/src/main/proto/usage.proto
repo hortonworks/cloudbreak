@@ -1095,6 +1095,8 @@ message CDPClusterShape {
   string definitionDetails = 4;
   // Indicating whether Temporary Storage is used in the cluster
   bool temporaryStorageUsed = 5;
+  // Cluster template details in JSON format
+  string clusterTemplateDetails = 6;
 }
 
 message CDPVersionDetails {
