@@ -24,13 +24,12 @@ public class StopStartDownscaleTriggerEvent extends StackEvent implements HostGr
             boolean restartServices, ClusterManagerType clusterManagerType) {
         super(selector, stackId);
         this.hostGroup = hostGroup;
-        this.adjustment = adjustment == null ? 0 : adjustment;
+        this.adjustment = adjustment == null ? Integer.valueOf(0) : adjustment;
         this.hostIds = hostIds;
         this.singlePrimaryGateway = singlePrimaryGateway;
         this.restartServices = restartServices;
         this.clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
-
 
     @Override
     public String getHostGroupName() {

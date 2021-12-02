@@ -5,7 +5,6 @@ import java.util.Set;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleRequest;
 
-
 public class StopStartDownscaleDecommissionViaCMRequest extends AbstractClusterScaleRequest {
 
     private final Stack stack;
