@@ -14,4 +14,10 @@ public class SdxDeleteStartEvent extends SdxEvent {
     public boolean isForced() {
         return forced;
     }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(SdxDeleteStartEvent.class, other,
+                event -> forced == event.forced);
+    }
 }

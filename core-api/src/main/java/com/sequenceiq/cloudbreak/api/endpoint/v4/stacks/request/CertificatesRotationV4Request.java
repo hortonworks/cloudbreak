@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request;
 
+import java.util.Objects;
 import java.util.StringJoiner;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -22,6 +23,23 @@ public class CertificatesRotationV4Request implements JsonEntity {
 
     public void setRotateCertificatesType(CertificateRotationType certificateRotationType) {
         this.certificateRotationType = certificateRotationType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        CertificatesRotationV4Request that = (CertificatesRotationV4Request) o;
+        return certificateRotationType == that.certificateRotationType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(certificateRotationType);
     }
 
     @Override

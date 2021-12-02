@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.upgrade.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
@@ -34,5 +36,13 @@ public class DatalakeUpgradeFlowChainStartEvent extends SdxEvent {
     @Override
     public String selector() {
         return DATALAKE_UPGRADE_FLOW_CHAIN_EVENT;
+    }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(DatalakeUpgradeFlowChainStartEvent.class, other,
+                event -> Objects.equals(imageId, event.imageId)
+                        && replaceVms == event.replaceVms
+                        && Objects.equals(backupLocation, event.backupLocation));
     }
 }

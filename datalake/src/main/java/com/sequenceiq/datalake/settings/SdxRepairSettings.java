@@ -1,6 +1,8 @@
 package com.sequenceiq.datalake.settings;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -13,9 +15,9 @@ import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 
 public class SdxRepairSettings {
 
-    private List<String> hostGroupNames = List.of();
+    private List<String> hostGroupNames = new ArrayList<>();
 
-    private List<String> nodeIds = List.of();
+    private List<String> nodeIds = new ArrayList<>();
 
     private SdxRepairSettings() {
     }
@@ -35,11 +37,11 @@ public class SdxRepairSettings {
         }
         SdxRepairSettings settings = new SdxRepairSettings();
         if (Strings.isNotEmpty(request.getHostGroupName())) {
-            settings.hostGroupNames = List.of(request.getHostGroupName());
+            settings.hostGroupNames.add(request.getHostGroupName());
         } else if (CollectionUtils.isNotEmpty(request.getHostGroupNames())) {
-            settings.hostGroupNames = request.getHostGroupNames();
+            settings.hostGroupNames.addAll(request.getHostGroupNames());
         } else {
-            settings.nodeIds = request.getNodesIds();
+            settings.nodeIds.addAll(request.getNodesIds());
         }
         return settings;
     }
@@ -50,5 +52,22 @@ public class SdxRepairSettings {
 
     public List<String> getNodeIds() {
         return nodeIds;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        SdxRepairSettings that = (SdxRepairSettings) o;
+        return hostGroupNames.equals(that.hostGroupNames) && nodeIds.equals(that.nodeIds);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(hostGroupNames, nodeIds);
     }
 }

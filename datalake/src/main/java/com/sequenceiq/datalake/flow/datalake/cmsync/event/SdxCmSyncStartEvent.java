@@ -6,4 +6,9 @@ public class SdxCmSyncStartEvent extends SdxEvent {
     public SdxCmSyncStartEvent(Long sdxId, String userId) {
         super(sdxId, userId);
     }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(SdxCmSyncStartEvent.class, other);
+    }
 }

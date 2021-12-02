@@ -1,7 +1,10 @@
 package com.sequenceiq.datalake.flow.dr.backup.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
+import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFailureReason;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
 
@@ -41,5 +44,13 @@ public class DatalakeTriggerBackupEvent extends DatalakeDatabaseDrStartBaseEvent
 
     public DatalakeBackupFailureReason getReason() {
         return reason;
+    }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(DatalakeTriggerBackupEvent.class, other,
+                event -> Objects.equals(backupLocation, event.backupLocation)
+                        && Objects.equals(backupName, event.backupName)
+                        && Objects.equals(reason, event.reason));
     }
 }

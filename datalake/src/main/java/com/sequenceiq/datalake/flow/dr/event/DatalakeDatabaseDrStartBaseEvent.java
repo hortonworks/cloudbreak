@@ -7,6 +7,7 @@ import com.sequenceiq.datalake.flow.SdxEvent;
 import reactor.rx.Promise;
 
 public class DatalakeDatabaseDrStartBaseEvent extends SdxEvent  {
+
     private SdxOperation drStatus;
 
     public DatalakeDatabaseDrStartBaseEvent(String selector, Long sdxId, String userId,

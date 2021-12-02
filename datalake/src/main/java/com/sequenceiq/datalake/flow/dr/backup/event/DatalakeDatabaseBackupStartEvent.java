@@ -2,8 +2,11 @@ package com.sequenceiq.datalake.flow.dr.backup.event;
 
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_EVENT;
 
+import java.util.Objects;
+
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
+import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
 import com.sequenceiq.sdx.api.model.SdxDatabaseBackupRequest;
 
@@ -36,5 +39,11 @@ public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBas
 
     public SdxDatabaseBackupRequest getBackupRequest() {
         return backupRequest;
+    }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(DatalakeDatabaseBackupStartEvent.class, other,
+                event -> Objects.equals(backupRequest, event.backupRequest));
     }
 }
