@@ -1,17 +1,18 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartdownscale;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
 import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
 
-enum StopStartDownscaleState implements FlowState {
+enum StopStartUpscaleState implements FlowState {
 
     INIT_STATE,
-    STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE,
-    STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE,
-    STOPSTART_DOWNSCALE_FINALIZE_STATE,
-    STOPSTART_DOWNSCALE_FAILED_STATE,
+    STOPSTART_UPSCALE_START_INSTANCE_STATE,
+    STOPSTART_UPSCALE_HOSTS_COMMISSION_STATE,
+    STOPSTART_UPSCALE_FINALIZE_STATE,
+    STOPSTART_UPSCALE_FAILED_STATE,
     FINAL_STATE;
+
 
     private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 

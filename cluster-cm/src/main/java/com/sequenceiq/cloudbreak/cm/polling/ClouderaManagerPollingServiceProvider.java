@@ -78,7 +78,8 @@ public class ClouderaManagerPollingServiceProvider {
     }
 
     public PollingResult startPollingCmHostStatusGood(Stack stack, ApiClient apiClient, Set<String> hostnamesToWaitFor) {
-        LOGGER.debug("ZZZ: Waiting for Cloudera Manager hosts to connect and become health. NodeCount={} [Server address: {}]", hostnamesToWaitFor, stack.getClusterManagerIp());
+        LOGGER.debug("ZZZ: Waiting for Cloudera Manager hosts to connect and become health. NodeCount={} [Server address: {}]",
+                hostnamesToWaitFor, stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, null, POLL_FOR_5_MINUTES,
                 new ClouderaManagerHostStatusChecker2(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToWaitFor));
     }
