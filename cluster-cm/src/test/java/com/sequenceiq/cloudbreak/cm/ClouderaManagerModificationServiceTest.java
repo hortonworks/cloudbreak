@@ -23,6 +23,7 @@ import static org.mockito.Mockito.when;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -467,10 +468,10 @@ class ClouderaManagerModificationServiceTest {
     static Object[][] upscaleClusterTestWhenRackIdBatchExecutionFailureDataProvider() {
         return new Object[][] {
                 // testCaseName batchResponseFactory
-                {"response=null", (Supplier<ApiBatchResponse>) () -> null},
-                {"success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of())},
-                {"items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null)},
-                {"success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of())},
+                { "response=null", (Supplier<ApiBatchResponse>) () -> null },
+                { "success=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(null).items(List.of()) },
+                { "items=null", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(true).items(null) },
+                { "success=false", (Supplier<ApiBatchResponse>) () -> new ApiBatchResponse().success(false).items(List.of()) },
         };
     }
 
@@ -1097,29 +1098,30 @@ class ClouderaManagerModificationServiceTest {
     @Test
     public void removeUnusedParcels() {
         // GIVEN
+        Set<String> parcelNamesFromImage = new HashSet<>();
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
         ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
         Set<ClusterComponent> usedComponents = Set.of(createClusterComponent(cmProduct1), createClusterComponent(cmProduct2));
-        Map<String, ClouderaManagerProduct> productMap = Map.of(cmProduct1.getName(), cmProduct1, cmProduct2.getName(), cmProduct2);
+        Set<String> usedParcelComponentNames = Set.of(cmProduct1.getName(), cmProduct2.getName());
         when(clouderaManagerApiFactory.getParcelsResourceApi(apiClientMock)).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getParcelResourceApi(apiClientMock)).thenReturn(parcelResourceApi);
-        when(clouderaManagerParcelDecommissionService.deactivateUnusedParcels(any(), any(), any(), any()))
-                .thenReturn(new ParcelOperationStatus(Map.of("product3", "version3"), Map.of()));
-        when(clouderaManagerParcelDecommissionService.undistributeUnusedParcels(any(), any(), any(), any(), any()))
-                .thenReturn(new ParcelOperationStatus(Map.of("product3", "version3"), Map.of()));
-        when(clouderaManagerParcelDecommissionService.removeUnusedParcels(any(), any(), any(), any(), any()))
-                .thenReturn(new ParcelOperationStatus(Map.of("product3", "version3"), Map.of()));
+        when(clouderaManagerParcelDecommissionService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, STACK_NAME, usedParcelComponentNames,
+                parcelNamesFromImage)).thenReturn(new ParcelOperationStatus(Map.of("product3", "version3"), Map.of()));
+        when(clouderaManagerParcelDecommissionService.undistributeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
+                usedParcelComponentNames, parcelNamesFromImage)).thenReturn(new ParcelOperationStatus(Map.of("product3", "version3"), Map.of()));
+        when(clouderaManagerParcelDecommissionService.removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames,
+                parcelNamesFromImage)).thenReturn(new ParcelOperationStatus(Map.of("product3", "version3"), Map.of()));
 
         // WHEN
-        ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(usedComponents);
+        ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(usedComponents, parcelNamesFromImage);
 
         // THEN
-        verify(clouderaManagerParcelDecommissionService, times(1)).deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(),
-                productMap);
-        verify(clouderaManagerParcelDecommissionService, times(1)).undistributeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
-                productMap);
-        verify(clouderaManagerParcelDecommissionService, times(1)).removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi,
-                stack, productMap);
+        verify(clouderaManagerParcelDecommissionService).deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(),
+                usedParcelComponentNames, parcelNamesFromImage);
+        verify(clouderaManagerParcelDecommissionService).undistributeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
+                usedParcelComponentNames, parcelNamesFromImage);
+        verify(clouderaManagerParcelDecommissionService).removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
+                usedParcelComponentNames, parcelNamesFromImage);
         assertEquals(1, operationStatus.getSuccessful().size());
         assertEquals(0, operationStatus.getFailed().size());
     }
@@ -1127,29 +1129,32 @@ class ClouderaManagerModificationServiceTest {
     @Test
     public void removeUnusedParcelsWhenSomeParcelOperationsFail() {
         // GIVEN
+        Set<String> parcelNamesFromImage = new HashSet<>();
         ClouderaManagerProduct cmProduct1 = createClouderaManagerProduct("product1", "version1");
         ClouderaManagerProduct cmProduct2 = createClouderaManagerProduct("product2", "version2");
         Set<ClusterComponent> usedComponents = Set.of(createClusterComponent(cmProduct1), createClusterComponent(cmProduct2));
-        Map<String, ClouderaManagerProduct> productMap = Map.of(cmProduct1.getName(), cmProduct1, cmProduct2.getName(), cmProduct2);
+        Set<String> usedParcelComponentNames = Set.of(cmProduct1.getName(), cmProduct2.getName());
         when(clouderaManagerApiFactory.getParcelsResourceApi(apiClientMock)).thenReturn(parcelsResourceApi);
         when(clouderaManagerApiFactory.getParcelResourceApi(apiClientMock)).thenReturn(parcelResourceApi);
-        when(clouderaManagerParcelDecommissionService.deactivateUnusedParcels(any(), any(), any(), any()))
-                .thenReturn(new ParcelOperationStatus(Map.of("spark3", "version3", "product5", "version5"), Map.of("product4", "version4")));
-        when(clouderaManagerParcelDecommissionService.undistributeUnusedParcels(any(), any(), any(), any(), any()))
-                .thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of("spark3", "version3")));
-        when(clouderaManagerParcelDecommissionService.removeUnusedParcels(any(), any(), any(), any(), any()))
-                .thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of()));
+        when(clouderaManagerParcelDecommissionService.deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, STACK_NAME, usedParcelComponentNames,
+                parcelNamesFromImage))
+                        .thenReturn(new ParcelOperationStatus(Map.of("spark3", "version3", "product5", "version5"), Map.of("product4", "version4")));
+        when(clouderaManagerParcelDecommissionService.undistributeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
+                usedParcelComponentNames, parcelNamesFromImage))
+                        .thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of("spark3", "version3")));
+        when(clouderaManagerParcelDecommissionService.removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack, usedParcelComponentNames,
+                parcelNamesFromImage)).thenReturn(new ParcelOperationStatus(Map.of("product5", "version5"), Map.of()));
 
         // WHEN
-        ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(usedComponents);
+        ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(usedComponents, parcelNamesFromImage);
 
         // THEN
         verify(clouderaManagerParcelDecommissionService, times(1)).deactivateUnusedParcels(parcelsResourceApi, parcelResourceApi, stack.getName(),
-                productMap);
+                usedParcelComponentNames, parcelNamesFromImage);
         verify(clouderaManagerParcelDecommissionService, times(1)).undistributeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
-                productMap);
-        verify(clouderaManagerParcelDecommissionService, times(1)).removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi,
-                stack, productMap);
+                usedParcelComponentNames, parcelNamesFromImage);
+        verify(clouderaManagerParcelDecommissionService, times(1)).removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
+                usedParcelComponentNames, parcelNamesFromImage);
         assertEquals(1, operationStatus.getSuccessful().size());
         assertEquals("version5", operationStatus.getSuccessful().get("product5"));
         assertEquals(2, operationStatus.getFailed().size());
