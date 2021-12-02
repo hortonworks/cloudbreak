@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_ANOMALY_DETECTION_GOALS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_DEFAULT_GOALS;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_SUPPORTED_GOALS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_HARD_GOALS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -134,7 +135,8 @@ public class CruiseControlRoleConfigProviderTest {
                 config("anomaly.detection.goals", "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," +
                         COMMON_ANOMALY_DETECTION_GOALS),
                 config("default.goals", "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," + COMMON_DEFAULT_GOALS),
-                config("hard.goals", "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," + COMMON_HARD_GOALS)
+                config("hard.goals", "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," + COMMON_HARD_GOALS),
+                config("goals", COMMON_SUPPORTED_GOALS)
         );
     }
 }

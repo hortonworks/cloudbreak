@@ -8,6 +8,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_ANOMALY_DETECTION_GOALS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_DEFAULT_GOALS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_HARD_GOALS;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.cruisecontrol.CruiseControlGoalConfigs.COMMON_SUPPORTED_GOALS;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,6 +24,8 @@ import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 
 @Component
 public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigProvider {
+
+    private static final String SUPPORTED_GOALS = "goals";
 
     private static final String DEFAULT_GOALS = "default.goals";
 
@@ -106,6 +109,7 @@ public class CruiseControlRoleConfigProvider implements CmHostGroupRoleConfigPro
                     COMMON_ANOMALY_DETECTION_GOALS));
             configs.add(config(DEFAULT_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," + COMMON_DEFAULT_GOALS));
             configs.add(config(HARD_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareDistributionGoal," + COMMON_HARD_GOALS));
+            configs.add(config(SUPPORTED_GOALS, COMMON_SUPPORTED_GOALS));
 
         } else if (isVersionNewerOrEqualThanLimited(cdpVersion, CLOUDERA_STACK_VERSION_7_2_11)) {
             configs.add(config(ANOMALY_DETECTION_GOALS, "com.linkedin.kafka.cruisecontrol.analyzer.goals.RackAwareGoal," +
