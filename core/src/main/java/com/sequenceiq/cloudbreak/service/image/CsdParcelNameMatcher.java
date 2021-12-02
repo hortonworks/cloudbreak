@@ -25,7 +25,7 @@ public class CsdParcelNameMatcher {
         boolean nameMatchingWithParcel;
         Optional<CsdSegments> matchingSegments = getMatchingSegments(parcelName);
         if (matchingSegments.isPresent()) {
-            LOGGER.debug("{} parcel name was found in the mapping and now searching the component name in the csd url '{}'",
+            LOGGER.trace("{} parcel name was found in the mapping and now searching the component name in the csd url '{}'",
                     parcelName, csdUrl);
             Optional<String> firstComponentWhichIsMatching = matchingSegments.get().getComponentList()
                     .stream()
@@ -33,7 +33,7 @@ public class CsdParcelNameMatcher {
                     .findFirst();
             nameMatchingWithParcel = firstComponentWhichIsMatching.isPresent();
         } else {
-            LOGGER.debug("{} parcel name was NOT found in the mapping and now searching the parcel name in the csd url '{}'",
+            LOGGER.trace("{} parcel name was NOT found in the mapping and now searching the parcel name in the csd url '{}'",
                     parcelName, csdUrl);
             nameMatchingWithParcel = matchingString(csdUrl, parcelName);
         }
