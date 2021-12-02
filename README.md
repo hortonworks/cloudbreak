@@ -79,6 +79,11 @@ export VAULT_AUTO_UNSEAL=true
 export DPS_VERSION=2.0.0.0-142
 ```
 
+If you want to use the `mock-infrastructure`, you need to add to the `Profile` the following:
+```
+export MOCK_INFRASTRUCTURE_HOST=localhost
+```
+
 If you want to save some memory then some of the service can be skipped in local runs like:
 ```
 export CB_LOCAL_DEV_LIST=periscope,distrox-api,jaeger,environments2-api,datalake-api
