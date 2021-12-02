@@ -1,10 +1,9 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartdownscale;
-
+package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
 import static java.util.stream.Collectors.toList;
 
 import java.util.HashSet;
@@ -89,7 +88,8 @@ public class StopStartDownscaleActions {
 
             @Override
             protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleTriggerEvent payload, Map<Object, Object> variables) throws Exception {
-                clusterDownscaleFlowService.clusterDownscaleStarted(context.getStack().getId(), payload.getHostGroupName(), payload.getAdjustment(), payload.getHostIds());
+                clusterDownscaleFlowService.clusterDownscaleStarted(context.getStack().getId(), payload.getHostGroupName(),
+                        payload.getAdjustment(), payload.getHostIds());
                 sendEvent(context);
             }
 
@@ -105,16 +105,19 @@ public class StopStartDownscaleActions {
         return new AbstractStopStartDownscaleActions<>(StopStartDownscaleDecommissionViaCMResult.class) {
 
             @Override
-            protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleDecommissionViaCMResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleDecommissionViaCMResult payload,
+                    Map<Object, Object> variables) throws Exception {
                 Stack stack = context.getStack();
-                // TODO CB-14929: The list of instances here needs to come from the previous step, depending on which instances were successfully decommissioned, or already decommissioned instances.
+                // TODO CB-14929: The list of instances here needs to come from the previous step, depending on which instances were successfully
+                //  decommissioned, or already decommissioned instances.
                 clusterDownscaleFlowService.clusterDownscalingStoppingInstances(stack.getId(), context.getHostGroupName(), context.getHostIdsToRemove());
 
                 Set<Long> instancesToRemove = stackService.getPrivateIdsForHostNames(stack.getInstanceMetaDataAsList(), payload.getDecommissionedHostFqdns());
 
                 List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedInstanceMetaDataList();
                 LOGGER.info("ZZZ: AllInstances: count={}, instances={}", instanceMetaDataList.size(), instanceMetaDataList);
-                List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
+                List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(
+                        x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
                 LOGGER.info("ZZZ: The following instnaces were found in the required hostGroup: {}", instanceMetaDataForHg);
 
 
@@ -126,9 +129,11 @@ public class StopStartDownscaleActions {
                 }
                 LOGGER.info("ZZZ: toStopInstanceMetadata: count={}, md={}", toStopInstanceMetadataList.size(), toStopInstanceMetadataList);
 
-                List<CloudInstance> cloudInstancesToStop = instanceMetaDataToCloudInstanceConverter.convert(toStopInstanceMetadataList, context.getStack().getEnvironmentCrn(), context.getStack().getStackAuthentication());
+                List<CloudInstance> cloudInstancesToStop = instanceMetaDataToCloudInstanceConverter.convert(toStopInstanceMetadataList,
+                        context.getStack().getEnvironmentCrn(), context.getStack().getStackAuthentication());
 
-                StopStartDownscaleStopInstancesRequest request = new StopStartDownscaleStopInstancesRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), cloudInstancesToStop);
+                StopStartDownscaleStopInstancesRequest request = new StopStartDownscaleStopInstancesRequest(context.getCloudContext(),
+                        context.getCloudCredential(), context.getCloudStack(), cloudInstancesToStop);
                 sendEvent(context, request);
             }
         };
@@ -139,21 +144,22 @@ public class StopStartDownscaleActions {
         return new AbstractStopStartDownscaleActions<>(StopStartDownscaleStopInstancesResult.class) {
 
             @Override
-            protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleStopInstancesResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleStopInstancesResult payload,
+                    Map<Object, Object> variables) throws Exception {
                 LOGGER.info("ZZZ: Marking stopstart Downscale as finished");
 
                 // TODO CB-14929: See notes in the actual downscale handler about handling failures, instance state in CB vs cloud-provider etc.
                 List<CloudVmInstanceStatus> cloudVmInstanceStatusList = payload.getCloudVmInstanceStatusesNoCheck();
-                Set<String> cloudInstanceIds = cloudVmInstanceStatusList.stream().map(x -> x.getCloudInstance().getInstanceId()).collect(Collectors.toUnmodifiableSet());
+                Set<String> cloudInstanceIds = cloudVmInstanceStatusList.stream().map(
+                        x -> x.getCloudInstance().getInstanceId()).collect(Collectors.toUnmodifiableSet());
 
-
-                // TODO CB-14929: Move this into a utility function. | Translation because 'stack' handlers, when living in 'cloud-reactor' don't have access to InstanceMetadata.
+                // TODO CB-14929: Move this into a utility function. | Translation because 'stack' handlers, when living in
+                //  'cloud-reactor' don't have access to InstanceMetadata.
                 List<InstanceMetaData> instanceMetaDatas = context.getStack().getInstanceGroups()
                         .stream().filter(ig -> ig.getGroupName().equals(context.getHostGroupName()))
                         .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
                         .filter(im -> cloudInstanceIds.contains(im.getInstanceId()))
                         .collect(toList());
-
 
                 clusterDownscaleFlowService.clusterDownscaleFinished(context.getStack().getId(), context.getHostGroupName(), new HashSet<>(instanceMetaDatas));
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
@@ -166,7 +172,6 @@ public class StopStartDownscaleActions {
             }
         };
     }
-
 
     @Bean(name = "STOPSTART_DOWNSCALE_FAILED_STATE")
     public Action<?, ?> clusterDownscaleFailedAction() {
@@ -182,15 +187,6 @@ public class StopStartDownscaleActions {
             }
         };
     }
-
-
-
-
-
-
-
-
-
 
     private abstract static class AbstractStopStartDownscaleActions<P extends Payload>
             extends AbstractStackAction<StopStartDownscaleState, StopStartDownscaleEvent, StopStartDownscaleContext, P> {
@@ -223,7 +219,7 @@ public class StopStartDownscaleActions {
         @Inject
         private StackToCloudStackConverter cloudStackConverter;
 
-        public AbstractStopStartDownscaleActions(Class<P> payloadClass) {
+        AbstractStopStartDownscaleActions(Class<P> payloadClass) {
             super(payloadClass);
         }
 
@@ -239,7 +235,9 @@ public class StopStartDownscaleActions {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
-            MDCBuilder.buildMdcContext(stack.getCluster()); // TODO CB-14929:  Is this OK to do? In a stack operation.
+
+            // TODO CB-14929:  Is this OK to do? In a stack operation.
+            MDCBuilder.buildMdcContext(stack.getCluster());
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
 
 
@@ -256,7 +254,8 @@ public class StopStartDownscaleActions {
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             CloudStack cloudStack = cloudStackConverter.convert(stack);
 
-            return new StopStartDownscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()), cloudContext, cloudCredential, cloudStack,
+            return new StopStartDownscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
+                    cloudContext, cloudCredential, cloudStack,
                     getHostgroupName(variables), getHostsToRemove(variables), getAdjustment(variables),
                     isSinglePrimaryGateway(variables), getClusterManagerType(variables), isRestartServices(variables));
         }

@@ -52,11 +52,7 @@ public class ClouderaManagerHostStatusChecker2 extends AbstractClouderaManagerCo
         int post = hostnamesToCheckFor.size();
         LOGGER.info("ZZZ: hostsToCheckFor presize={}, postSize={}", pre, post);
 
-        if (hostnamesToCheckFor.size() == 0) {
-            return true;
-        } else {
-            return false;
-        }
+        return hostnamesToCheckFor.size() == 0;
     }
 
     private List<InstanceMetaData> collectNotKnownInstancesByManager(ClouderaManagerCommandPollerObject pollerObject, List<String> hostIpsFromManager) {
@@ -70,8 +66,7 @@ public class ClouderaManagerHostStatusChecker2 extends AbstractClouderaManagerCo
     private Set<String> fetchGoodHostsFromManager(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
         HostsResourceApi hostsResourceApi = clouderaManagerApiPojoFactory.getHostsResourceApi(pollerObject.getApiClient());
         ApiHostList hostList = hostsResourceApi.readHosts(null, null, VIEW_TYPE);
-        Set<String> goodHostnameSet = filterForHealthy(hostList);
-        return goodHostnameSet;
+        return filterForHealthy(hostList);
     }
 
     private Set<String> filterForHealthy(ApiHostList hostList) {
