@@ -64,7 +64,8 @@ class StackCommonServiceTest {
 
     private static final NameOrCrn STACK_NAME = NameOrCrn.ofName("stackName");
 
-    private static final NameOrCrn STACK_CRN = NameOrCrn.ofCrn("crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:6b5a9aa7-223a-4d6a-93ca-27627be773b5");
+    private static final NameOrCrn STACK_CRN =
+            NameOrCrn.ofCrn("crn:cdp:datahub:us-west-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:cluster:6b5a9aa7-223a-4d6a-93ca-27627be773b5");
 
     private static final String SUBNET_ID = "aSubnetId";
 
@@ -210,8 +211,6 @@ class StackCommonServiceTest {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
 
-        User user = new User();
-        when(userService.getOrCreate(any())).thenReturn(user);
         when(stackService.getByCrn(STACK_CRN.getCrn())).thenReturn(stack);
 
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
