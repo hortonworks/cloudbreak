@@ -36,13 +36,11 @@ public class PreWarmParcelParser {
         } else {
             ClouderaManagerProduct product = new ClouderaManagerProduct();
             String name = substringBefore(nameAndVersion.get(), "-");
-            LOGGER.info("The parsed product name for parcel is: '{}'.", name);
             product.setName(name);
             product.setDisplayName(nameAndVersion.get());
             String version = substringAfter(substringBeforeLast(nameAndVersion.get(), "-"), "-");
-            LOGGER.info("The parsed product version for parcel is: '{}'.", version);
             product.setVersion(version);
-            LOGGER.info("The URL of the parcel is: '{}'", url.get());
+            LOGGER.debug("The parsed product name for parcel: '{}', version: '{}'. URL: '{}'",  name, version, url.get());
             product.setParcel(url.get());
             product.setCsd(collectCsdParcels(csdList, name));
             return Optional.of(product);
