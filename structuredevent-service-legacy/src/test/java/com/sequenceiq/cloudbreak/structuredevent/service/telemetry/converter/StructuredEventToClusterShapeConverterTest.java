@@ -94,6 +94,95 @@ class StructuredEventToClusterShapeConverterTest {
     }
 
     @Test
+    public void testConversionWithBlueprintDetails() {
+        String blueprintJson = "{ \"cdhVersion\": \"7.2.13\", \"displayName\": \"dataengineering ha\", \"services\": [{ \"refName\": \"zookeeper\", " +
+                "\"serviceType\": \"ZOOKEEPER\", \"roleConfigGroups\": [{ \"refName\": \"zookeeper-SERVER-BASE\", \"roleType\": \"SERVER\", \"base\": true " +
+                "}]},{ \"refName\": \"hdfs\", \"serviceType\": \"HDFS\", \"serviceConfigs\": [{ \"name\": \"zookeeper_service\", \"ref\": \"zookeeper\" }]}," +
+                "{ \"refName\": \"hms\", \"serviceType\": \"HIVE\", \"displayName\": \"Hive Metastore\", \"roleConfigGroups\": [{ \"refName\": " +
+                "\"hms-GATEWAY-BASE\", \"roleType\": \"GATEWAY\", \"base\": true }] }, { \"refName\": \"hive\", \"serviceType\": \"HIVE_ON_TEZ\", " +
+                "\"displayName\": \"Hive\", \"serviceConfigs\": [{ \"name\": \"tez_auto_reducer_parallelism\", \"value\": \"false\" }] }, " +
+                "{ \"refName\": \"hue\", \"serviceType\": \"HUE\", \"serviceConfigs\": [{ \"name\": \"hue_service_safety_valve\", \"value\": \"[desktop]" +
+                "\\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig\" }] }, { \"refName\": \"livy\", \"serviceType\": \"LIVY\", " +
+                "\"roleConfigGroups\": [{ \"refName\": \"livy-GATEWAY-BASE\", \"roleType\": \"GATEWAY\", \"base\": true }] }, { \"refName\": \"oozie\", " +
+                "\"serviceType\": \"OOZIE\", \"roleConfigGroups\": [{ \"refName\": \"oozie-OOZIE_SERVER-BASE\", \"roleType\": \"OOZIE_SERVER\", " +
+                "\"base\": true }] }, { \"refName\": \"sqoop\", \"serviceType\": \"SQOOP_CLIENT\", \"roleConfigGroups\": [{ \"refName\": " +
+                "\"sqoop-SQOOP_CLIENT-GATEWAY-BASE\", \"roleType\": \"GATEWAY\", \"configs\": [], \"base\": true }] }, { \"refName\": \"yarn\", " +
+                "\"serviceType\": \"YARN\", \"serviceConfigs\": [{ \"name\": \"yarn_admin_acl\", \"value\": \"yarn,hive,hdfs,mapred\" }] }, { \"refName\": " +
+                "\"spark_on_yarn\", \"serviceType\": \"SPARK_ON_YARN\", \"roleConfigGroups\": [{ \"refName\": " +
+                "\"spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE\", \"roleType\": \"SPARK_YARN_HISTORY_SERVER\", \"base\": true }] }, { \"refName\": \"tez\"," +
+                "\"serviceType\": \"TEZ\", \"roleConfigGroups\": [{ \"refName\": \"tez-GATEWAY-BASE\", \"roleType\": \"GATEWAY\", \"base\": true }] }, " +
+                "{ \"refName\": \"das\", \"serviceType\": \"DAS\" }] }";
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setStack(createStackDetails());
+        BlueprintDetails flowBlueprintDetails = new BlueprintDetails();
+        flowBlueprintDetails.setName("My Blueprint");
+        flowBlueprintDetails.setBlueprintJson(blueprintJson);
+        structuredFlowEvent.setBlueprintDetails(flowBlueprintDetails);
+
+        UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        Assert.assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
+        Assert.assertEquals(10, flowClusterShape.getNodes());
+        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
+        Assert.assertTrue(flowClusterShape.getTemporaryStorageUsed());
+        Assert.assertEquals("{\"services\":{\"HIVE_ON_TEZ\":1,\"HIVE\":1,\"LIVY\":1,\"DAS\":1,\"HDFS\":1," +
+                "\"OOZIE\":1,\"TEZ\":1,\"HUE\":1,\"SQOOP_CLIENT\":1,\"ZOOKEEPER\":1,\"YARN\":1,\"SPARK_ON_YARN\":1}}",
+                flowClusterShape.getClusterTemplateDetails());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(createStackDetails());
+        BlueprintDetails syncBlueprintDetails = new BlueprintDetails();
+        syncBlueprintDetails.setName("My Blueprint");
+        syncBlueprintDetails.setBlueprintJson(blueprintJson);
+        structuredSyncEvent.setBlueprintDetails(syncBlueprintDetails);
+
+        UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
+
+        Assert.assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
+        Assert.assertEquals(10, syncClusterShape.getNodes());
+        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
+        Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
+        Assert.assertEquals("{\"services\":{\"HIVE_ON_TEZ\":1,\"HIVE\":1,\"LIVY\":1,\"DAS\":1,\"HDFS\":1," +
+                        "\"OOZIE\":1,\"TEZ\":1,\"HUE\":1,\"SQOOP_CLIENT\":1,\"ZOOKEEPER\":1,\"YARN\":1,\"SPARK_ON_YARN\":1}}",
+                syncClusterShape.getClusterTemplateDetails());
+    }
+
+    @Test
+    public void testConversionWithIncorrectBlueprintDetails() {
+        String blueprintJson = "{ \"cdhVersion\": \"7.2.13\", \"displayName\": \"dataengineering ha\", \"wrongServices\": " +
+                "[{ \"refName\": \"das\", \"serviceType\": \"DAS\" }] }";
+        StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
+        structuredFlowEvent.setStack(createStackDetails());
+        BlueprintDetails flowBlueprintDetails = new BlueprintDetails();
+        flowBlueprintDetails.setName("My Blueprint");
+        flowBlueprintDetails.setBlueprintJson(blueprintJson);
+        structuredFlowEvent.setBlueprintDetails(flowBlueprintDetails);
+
+        UsageProto.CDPClusterShape flowClusterShape = underTest.convert(structuredFlowEvent);
+
+        Assert.assertEquals("My Blueprint", flowClusterShape.getClusterTemplateName());
+        Assert.assertEquals(10, flowClusterShape.getNodes());
+        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", flowClusterShape.getHostGroupNodeCount());
+        Assert.assertTrue(flowClusterShape.getTemporaryStorageUsed());
+        Assert.assertEquals("{\"services\":{}}", flowClusterShape.getClusterTemplateDetails());
+
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        structuredSyncEvent.setStack(createStackDetails());
+        BlueprintDetails syncBlueprintDetails = new BlueprintDetails();
+        syncBlueprintDetails.setName("My Blueprint");
+        syncBlueprintDetails.setBlueprintJson(blueprintJson);
+        structuredSyncEvent.setBlueprintDetails(syncBlueprintDetails);
+
+        UsageProto.CDPClusterShape syncClusterShape = underTest.convert(structuredSyncEvent);
+
+        Assert.assertEquals("My Blueprint", syncClusterShape.getClusterTemplateName());
+        Assert.assertEquals(10, syncClusterShape.getNodes());
+        Assert.assertEquals("compute=3, gw=4, master=1, worker=2", syncClusterShape.getHostGroupNodeCount());
+        Assert.assertTrue(syncClusterShape.getTemporaryStorageUsed());
+        Assert.assertEquals("{\"services\":{}}", syncClusterShape.getClusterTemplateDetails());
+    }
+
+    @Test
     public void testConversionWithoutTemporaryStorage() {
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         StackDetails stackDetails = new StackDetails();
