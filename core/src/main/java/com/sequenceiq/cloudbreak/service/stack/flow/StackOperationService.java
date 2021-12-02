@@ -275,8 +275,8 @@ public class StackOperationService {
                     LOGGER.info("ZZZ: Stack status is not AVAILABLE. Resetting, and cancelling existing flows... it is at: {}", stackWithLists.getStatus());
                     flowCancelService.cancelRunningFlows(stack.getId());
                     stackWithLists.getStackStatus().setStatus(AVAILABLE);
-                    clusterService.updateClusterStatusByStackId(stackWithLists.getId(), AVAILABLE, "fake update");
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.PROVISIONED,
+                    clusterService.updateClusterStatusByStackId(stackWithLists.getId(), DetailedStackStatus.AVAILABLE, "fake update");
+                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.AVAILABLE,
                             String.format("fake update"));
                 }
 
@@ -291,15 +291,12 @@ public class StackOperationService {
                 //  except if instances are in STOPPED state.
                 // TODO CB-14929: Overall cleanup of code changes made in this class
                 //updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
-                LOGGER.info("ZZZ: cluster.isAvailable: {}, clusterStatus: {}", stackWithLists.getCluster().isAvailable(),
-                        stackWithLists.getCluster().getStatus());
+                LOGGER.info("ZZZ: stack.isAvailable: {}, stackStatus: {}", stackWithLists.isAvailable(),
+                        stackWithLists.getStatus());
                 if (withClusterEvent) {
                     // TODO CB-14929: Figure out valid states for start/stop operations.
 //                    updateNodeCountValidator.validateClusterStatus(stackWithLists);
-                    updateNodeCountValidator.validateHostGroupAdjustment(
-                            instanceGroupAdjustmentJson,
-                            stackWithLists,
-                            instanceGroupAdjustmentJson.getScalingAdjustment());
+                    updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
                     // TODO CB-14929: This validations needs to be removed or adjusted. Checks for UNHEALTHY service status.
                     //  Needs to change to check unhealthy CM / unhealthy RM eventually.
                     updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
