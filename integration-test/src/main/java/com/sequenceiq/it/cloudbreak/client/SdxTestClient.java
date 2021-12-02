@@ -20,6 +20,7 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxDeleteInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDescribeInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxDetailedDescribeInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxEnableRangerRazAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
@@ -194,6 +195,10 @@ public class SdxTestClient {
 
     public Action<SdxChangeImageCatalogTestDto, SdxClient> changeImageCatalog() {
         return new SdxChangeImageCatalogAction();
+    }
+
+    public Action<SdxInternalTestDto, SdxClient> enableRangerRaz() {
+        return new SdxEnableRangerRazAction();
     }
 
     public Action<SdxInternalTestDto, SdxClient> restoreInternal(String backupId, String backupLocation) {

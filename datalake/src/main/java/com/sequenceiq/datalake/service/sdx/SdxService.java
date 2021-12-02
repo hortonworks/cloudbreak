@@ -333,7 +333,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             RangerRazEnabledV4Response response = stackV4Endpoint.rangerRazEnabledInternal(WORKSPACE_ID_DEFAULT, sdxCluster.getCrn(), initiatorUserCrn);
             if (response.isRangerRazEnabled()) {
                 if (!sdxCluster.isRangerRazEnabled()) {
-                    validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(), environmentClientService.getByName(sdxCluster.getEnvName()));
+                    validateRazEnablement(sdxCluster.getRuntime(), response.isRangerRazEnabled(), environmentClientService.getByCrn(sdxCluster.getEnvCrn()));
                     sdxCluster.setRangerRazEnabled(true);
                     save(sdxCluster);
                 }

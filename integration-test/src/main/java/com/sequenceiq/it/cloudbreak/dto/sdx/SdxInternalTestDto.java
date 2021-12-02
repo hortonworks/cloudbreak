@@ -140,6 +140,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
+    public SdxInternalTestDto withRangerRazEnabled(boolean rangerRazEnabled) {
+        getRequest().setEnableRangerRaz(rangerRazEnabled);
+        return this;
+    }
+
     public SdxInternalTestDto withCloudStorage(SdxCloudStorageRequest cloudStorage) {
         getRequest().setCloudStorage(cloudStorage);
         return this;
