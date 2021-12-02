@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.repair.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 
@@ -23,5 +25,11 @@ public class SdxRepairStartEvent extends SdxEvent {
 
     public void setRepairSettings(SdxRepairSettings repairSettings) {
         this.repairSettings = repairSettings;
+    }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(SdxRepairStartEvent.class, other,
+                event -> Objects.equals(repairSettings, event.repairSettings));
     }
 }

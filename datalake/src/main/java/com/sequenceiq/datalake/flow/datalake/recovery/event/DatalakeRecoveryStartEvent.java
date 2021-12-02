@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.flow.datalake.recovery.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 
@@ -16,6 +18,12 @@ public class DatalakeRecoveryStartEvent extends SdxEvent {
 
     public SdxRecoveryType getRecoveryType() {
         return recoveryType;
+    }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(DatalakeRecoveryStartEvent.class, other,
+                event -> Objects.equals(recoveryType, event.recoveryType));
     }
 
     @Override

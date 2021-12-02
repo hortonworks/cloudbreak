@@ -2,8 +2,11 @@ package com.sequenceiq.datalake.flow.dr.restore.event;
 
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_DATABASE_RESTORE_EVENT;
 
+import java.util.Objects;
+
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
 import com.sequenceiq.datalake.entity.operation.SdxOperationType;
+import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.dr.event.DatalakeDatabaseDrStartBaseEvent;
 
 public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBaseEvent {
@@ -51,4 +54,11 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
         return backupLocation;
     }
 
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(DatalakeDatabaseRestoreStartEvent.class, other,
+                event -> Objects.equals(backupId, event.backupId)
+                        && Objects.equals(restoreId, event.restoreId)
+                        && Objects.equals(backupLocation, event.backupLocation));
+    }
 }

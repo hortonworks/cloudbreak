@@ -19,4 +19,9 @@ public class SdxStartStopEvent extends SdxEvent {
     public String selector() {
         return SdxStopEvent.SDX_STOP_EVENT.event();
     }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(SdxStartStopEvent.class, other);
+    }
 }

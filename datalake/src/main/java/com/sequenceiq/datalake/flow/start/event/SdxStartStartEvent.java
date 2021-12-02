@@ -12,4 +12,9 @@ public class SdxStartStartEvent extends SdxEvent {
     public String selector() {
         return "SdxStartStartEvent";
     }
+
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(SdxStartStartEvent.class, other);
+    }
 }

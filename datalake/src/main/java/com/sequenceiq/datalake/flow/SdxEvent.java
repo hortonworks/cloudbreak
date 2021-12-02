@@ -1,15 +1,17 @@
 package com.sequenceiq.datalake.flow;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
 
-public class SdxEvent implements Selectable, Acceptable {
+public class SdxEvent implements IdempotentEvent<SdxEvent> {
     private final String selector;
 
     private final Long sdxId;
@@ -79,4 +81,21 @@ public class SdxEvent implements Selectable, Acceptable {
         return accepted;
     }
 
+    @Override
+    public boolean equalsEvent(SdxEvent other) {
+        return isClassAndEqualsEvent(SdxEvent.class, other);
+    }
+
+    protected <T extends SdxEvent> boolean isClassAndEqualsEvent(Class<T> clazz, SdxEvent other) {
+        return isClassAndEqualsEvent(clazz, other, sdxEvent -> true);
+    }
+
+    protected <T extends SdxEvent> boolean isClassAndEqualsEvent(Class<T> clazz, SdxEvent other, Predicate<T> equalsSubclass) {
+        if (!clazz.equals(getClass())) {
+            return false;
+        }
+        return Objects.equals(selector, other.selector)
+                && Objects.equals(sdxId, other.sdxId)
+                && equalsSubclass.test((T) other);
+    }
 }
