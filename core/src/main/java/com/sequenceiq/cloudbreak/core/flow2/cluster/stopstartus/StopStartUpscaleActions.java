@@ -125,7 +125,7 @@ public class StopStartUpscaleActions {
                 List<InstanceMetaData> instanceMetaDatas = context.getStack().getInstanceGroups()
                         .stream().filter(ig -> ig.getGroupName().equals(context.getHostGroupName()))
                         .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
-                        .filter(im -> cloudInstanceIds.contains(im.getInstanceId()))
+                        .filter(im -> im.getInstanceId() == null ? false : cloudInstanceIds.contains(im.getInstanceId()))
                         .collect(toList());
 
                 clusterUpscaleFlowService.instancesStarted(context, context.getStack().getId(), instanceMetaDatas);
