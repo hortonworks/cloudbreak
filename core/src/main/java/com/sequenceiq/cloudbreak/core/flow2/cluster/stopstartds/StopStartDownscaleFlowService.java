@@ -62,7 +62,8 @@ public class StopStartDownscaleFlowService {
 
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds) {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT, hostGroupName);
-        clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
+        // TODO CB-14929: This will change if we introduce a different status for STOP/START vs UPSCALE
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.UPSCALE_IN_PROGRESS);
         // TODO CB-14929: rationalize instanceIds vs hostnames. stackService.getHostNamesForPrivateIds seems to return instanceIds instead of hostnames.
 
         // TODO CB-14929: Implement the adjustment where a list of hosts is not provided in the request.
@@ -96,7 +97,6 @@ public class StopStartDownscaleFlowService {
         // TODO CB-14929: Make sure Database state updates are handled correctly.
         instancesStopped.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STOPPED));
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instances: " + instancesStopped.size() + " stopped successfully.");
-        clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
 
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED,
                 hostGroupName == null ? "null" : hostGroupName);
@@ -104,9 +104,8 @@ public class StopStartDownscaleFlowService {
 
     public void handleClusterDownscaleFailure(long stackId, Exception errorDetails) {
         LOGGER.info("Error during stopstart downscale flow: " + errorDetails.getMessage(), errorDetails);
-        clusterService.updateClusterStatusByStackId(stackId, UPDATE_FAILED, errorDetails.getMessage());
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE,
-                String.format("New node(s) (stopstart)could not be removed from the cluster: %s", errorDetails));
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_FAILED,
+                String.format("New node(s) (stopstart) could not be removed from the cluster: %s", errorDetails));
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "removed to", errorDetails.getMessage());
     }
 }
