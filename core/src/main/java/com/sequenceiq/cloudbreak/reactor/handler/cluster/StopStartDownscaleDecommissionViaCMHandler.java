@@ -97,27 +97,32 @@ public class StopStartDownscaleDecommissionViaCMHandler implements EventHandler<
             LOGGER.info("ZZZ: hostsDecommissioned: count={}, hostNames={}", decommissionedHostNames.size(), decommissionedHostNames);
 
             LOGGER.info("ZZZ: Attempting to put hosts into maintenance mode");
-            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE, String.valueOf(hostsToRemove.size()));
+            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE,
+                    String.valueOf(hostsToRemove.size()));
 
             clusterDecomissionService.enterMaintenanceMode(stack, hostsToRemove);
 
-            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE, String.valueOf(hostsToRemove.size()));
+            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE,
+                    String.valueOf(hostsToRemove.size()));
             LOGGER.info("ZZZ: Nodes moved to maintenance mode");
 
 
-            // TODO CB-14929: Maybe consider a CM API to propaget a node decommission timeout - separation between a forced downscale (random nodes), and a specified list of nodes
-            //  The main differentiation is whether the nodes are expected to be running 'old' work, or are safe to remove fast (i.e. AutoScale downscale - race could only put 20-30s odd worth of work on the new nodes).
+            // TODO CB-14929: Maybe consider a CM API to propaget a node decommission timeout -
+            //  separation between a forced downscale (random nodes), and a specified list of nodes
+            //  The main differentiation is whether the nodes are expected to be running 'old' work,
+            //  or are safe to remove fast (i.e. AutoScale downscale - race could only put 20-30s odd worth of work on the new nodes).
             // TODO CB-14929: Populate the status of the nodes which were stopped successfully, those which failed/timed out, etc.
             StopStartDownscaleDecommissionViaCMResult result = new StopStartDownscaleDecommissionViaCMResult(request, decommissionedHostNames);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } finally {
+            LOGGER.debug("ZZZ: Remove this. Added for checkstyles");
             // TODO CB-14929: Proper exception handling in a catch block
         }
-
     }
 
     private Set<String> getHostNamesForPrivateIds(Set<Long> hostIdsToRemove, Stack stack) {
-        // List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), request.getInstanceIdsToDecommission());
+        // List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(),
+        // request.getInstanceIdsToDecommission());
         return hostIdsToRemove.stream().map(privateId -> {
             Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
             return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
