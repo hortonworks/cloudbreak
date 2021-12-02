@@ -41,64 +41,68 @@ class ClouderaManagerParcelDecommissionService {
 
     public Map<String, String> getParcelsInStatus(ParcelsResourceApi parcelsResourceApi, String stackName, ParcelStatus parcelStatus) {
         try {
-            return getClouderaManagerParcelsByStatus(parcelsResourceApi, stackName, parcelStatus)
-                    .stream()
+            Map<String, String> parcelResponse = getClouderaManagerParcelsByStatus(parcelsResourceApi, stackName, parcelStatus).stream()
                     .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
+            LOGGER.debug("The following parcels are found in {} status: {}", parcelStatus, parcelResponse);
+            return parcelResponse;
         } catch (ApiException e) {
             LOGGER.info("Unable to fetch the list of activated parcels", e);
             throw new ClouderaManagerOperationFailedException("Unable to fetch the list of activated parcels", e);
         }
     }
 
-    public ParcelOperationStatus deactivateUnusedParcels(ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
-            String stackName, Map<String, ClouderaManagerProduct> cmProducts) {
-        Map<String, String> installedComponents = getParcelsInStatus(parcelsResourceApi, stackName, ParcelStatus.ACTIVATED);
-        Map<String, String> filteredParcels = installedComponents.entrySet().stream()
-                .filter(entry -> !cmProducts.containsKey(entry.getKey()))
-                .collect(toMap(Entry::getKey, Entry::getValue));
-        return deactivateParcels(parcelResourceApi, stackName, filteredParcels);
+    public ParcelOperationStatus deactivateUnusedParcels(ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi, String stackName,
+            Set<String> usedParcelComponentNames, Set<String> parcelNamesFromImage) {
+        Map<String, String> activeParcels = getParcelsInStatus(parcelsResourceApi, stackName, ParcelStatus.ACTIVATED);
+        Map<String, String> parcelsToDeactivate = getUnusedParcels(activeParcels, usedParcelComponentNames, parcelNamesFromImage);
+        LOGGER.debug("The following parcels will be deactivated: {}", parcelsToDeactivate);
+        return deactivateParcels(parcelResourceApi, stackName, parcelsToDeactivate);
     }
 
-    public ParcelOperationStatus undistributeUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi,
-            ParcelResourceApi parcelResourceApi, Stack stack, Map<String, ClouderaManagerProduct> cmProducts) {
-        Map<String, String> distributedComponents = getParcelsInStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DISTRIBUTED);
-        Map<String, String> filteredParcels = distributedComponents.entrySet().stream()
-                .filter(entry -> !cmProducts.containsKey(entry.getKey()))
-                .collect(toMap(Entry::getKey, Entry::getValue));
-        return undistributeParcels(apiClient, parcelResourceApi, stack, filteredParcels);
+    public ParcelOperationStatus undistributeUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
+            Stack stack, Set<String> usedParcelComponentNames, Set<String> parcelNamesFromImage) {
+        Map<String, String> distributedParcels = getParcelsInStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DISTRIBUTED);
+        Map<String, String> parcelsToUndistribute = getUnusedParcels(distributedParcels, usedParcelComponentNames, parcelNamesFromImage);
+        LOGGER.debug("The following parcels will be undistributed: {}", parcelsToUndistribute);
+        return undistributeParcels(apiClient, parcelResourceApi, stack, parcelsToUndistribute);
     }
 
-    public ParcelOperationStatus removeUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi,
-            ParcelResourceApi parcelResourceApi, Stack stack, Map<String, ClouderaManagerProduct> cmProducts) {
+    public ParcelOperationStatus removeUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
+            Stack stack, Set<String> usedParcelComponentNames, Set<String> parcelNamesFromImage) {
         Map<String, String> downloadedParcels = getParcelsInStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DOWNLOADED);
-        Map<String, String> filteredParcels = downloadedParcels.entrySet().stream()
-                .filter(entry -> !cmProducts.containsKey(entry.getKey()))
-                .collect(toMap(Entry::getKey, Entry::getValue));
-        return removeParcels(apiClient, parcelResourceApi, stack, filteredParcels);
+        Map<String, String> parcelsToRemove = getUnusedParcels(downloadedParcels, usedParcelComponentNames, parcelNamesFromImage);
+        LOGGER.debug("The following parcels will be removed: {}", parcelsToRemove);
+        return removeParcels(apiClient, parcelResourceApi, stack, parcelsToRemove);
     }
 
     public void removeUnusedParcelVersions(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi, Stack stack,
             ClouderaManagerProduct product) throws ApiException {
         String parcelName = product.getName();
         String parcelVersion = product.getVersion();
-        Map<String, String> unusedDistributedParcelVersions =
-                getClouderaManagerParcelsByStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DISTRIBUTED).stream()
-                        .filter(apiParcel -> apiParcel.getProduct().equals(parcelName) && !apiParcel.getVersion().equals(parcelVersion))
-                        .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
+        Map<String, String> unusedDistributedParcelVersions = getClouderaManagerParcelsByStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DISTRIBUTED)
+                .stream()
+                .filter(apiParcel -> apiParcel.getProduct().equals(parcelName) && !apiParcel.getVersion().equals(parcelVersion))
+                .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
 
         undistributeParcels(apiClient, parcelResourceApi, stack, unusedDistributedParcelVersions);
 
-        Map<String, String> unusedDownloadedParcelVersions =
-                getClouderaManagerParcelsByStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DOWNLOADED).stream()
-                        .filter(apiParcel -> apiParcel.getProduct().equals(parcelName) && !apiParcel.getVersion().equals(parcelVersion))
-                        .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
+        Map<String, String> unusedDownloadedParcelVersions = getClouderaManagerParcelsByStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DOWNLOADED)
+                .stream()
+                .filter(apiParcel -> apiParcel.getProduct().equals(parcelName) && !apiParcel.getVersion().equals(parcelVersion))
+                .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
         removeParcels(apiClient, parcelResourceApi, stack, unusedDownloadedParcelVersions);
     }
 
-    private ParcelOperationStatus deactivateParcels(ParcelResourceApi parcelResourceApi, String stackName, Map<String, String> installedParcels) {
+    private Map<String, String> getUnusedParcels(Map<String, String> activeParcels, Set<String> usedParcelComponentNames, Set<String> parcelsFromImage) {
+        return activeParcels.entrySet().stream()
+                .filter(entry -> !usedParcelComponentNames.contains(entry.getKey()) && parcelsFromImage.contains(entry.getKey()))
+                .collect(toMap(Entry::getKey, Entry::getValue));
+    }
+
+    private ParcelOperationStatus deactivateParcels(ParcelResourceApi parcelResourceApi, String stackName, Map<String, String> activeParcels) {
         ParcelOperationStatus deactivateStatus = new ParcelOperationStatus();
-        for (Entry<String, String> installedParcel : installedParcels.entrySet()) {
-            Parcel parcel = new Parcel(installedParcel.getKey(), installedParcel.getValue());
+        for (Entry<String, String> activeParcel : activeParcels.entrySet()) {
+            Parcel parcel = new Parcel(activeParcel.getKey(), activeParcel.getValue());
             try {
                 LOGGER.debug("Deactivating {} parcel", parcel);
                 parcelResourceApi.deactivateCommand(stackName, parcel.getName(), parcel.getVersion());
@@ -168,8 +172,7 @@ class ClouderaManagerParcelDecommissionService {
     private List<ApiParcel> getClouderaManagerParcelsByStatus(ParcelsResourceApi parcelsResourceApi, String stackName, ParcelStatus parcelStatus)
             throws ApiException {
         ApiParcelList parcelList = getClouderaManagerParcels(parcelsResourceApi, stackName);
-        return parcelList.getItems()
-                .stream()
+        return parcelList.getItems().stream()
                 .filter(parcel -> parcelStatus.name().equals(parcel.getStage()))
                 .peek(parcel -> LOGGER.debug("Parcel {} is found with status {}", parcel.getDisplayName(), parcelStatus))
                 .collect(toList());
