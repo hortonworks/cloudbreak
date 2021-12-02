@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartdownscale.StopStartDownscaleEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;

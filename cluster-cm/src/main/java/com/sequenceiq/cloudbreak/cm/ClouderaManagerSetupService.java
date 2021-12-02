@@ -376,7 +376,8 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
             throw new ClusterClientInitException(e);
         }
         // TODO CB-14929: Timebound this polling - in case we need to cancel the upscale.
-        clouderaManagerPollingServiceProvider.startPollingCmHostStatusGood(stack, client, hostsInCluster.stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet()));
+        clouderaManagerPollingServiceProvider.startPollingCmHostStatusGood(
+                stack, client, hostsInCluster.stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet()));
     }
 
     @Override

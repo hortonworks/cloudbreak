@@ -174,8 +174,9 @@ public class ReactorFlowManager {
             throw new RuntimeException("Expected instancesIdsToHostGroupMap to contain exactly 1 host group. Found" + instanceIdsByHostgroupMap.size());
         }
 
-        String hostGroup = instanceIdsByHostgroupMap.keySet().iterator().next();
-        Set<Long> privateIds = instanceIdsByHostgroupMap.get(hostGroup);
+        Map.Entry<String, Set<Long>> entry = instanceIdsByHostgroupMap.entrySet().iterator().next();
+        String hostGroup = entry.getKey();
+        Set<Long> privateIds = entry.getValue();
         LOGGER.info("ZZZ: ids to remove. size:{}, ids:{}", privateIds.size(), privateIds);
 
         String selector = FlowChainTriggers.STOPSTART_DOWNSCALE_CHAIN_TRIGGER_EVENT;

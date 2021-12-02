@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartdownscale;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
@@ -39,7 +39,6 @@ public class StopStartDownscaleFlowService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStartDownscaleFlowService.class);
 
-
     @Inject
     private StackService stackService;
 
@@ -61,7 +60,6 @@ public class StopStartDownscaleFlowService {
     @Inject
     private MetadataSetupService metadataSetupService;
 
-
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds) {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT, hostGroupName);
         clusterService.updateClusterStatusByStackId(stackId, Status.UPDATE_IN_PROGRESS);
@@ -70,14 +68,16 @@ public class StopStartDownscaleFlowService {
         // TODO CB-14929: Implement the adjustment where a list of hosts is not provided in the request.
         if (scalingAdjustment != null && scalingAdjustment != 0) {
             LOGGER.info("ZZZ: stopstart scaling Decommissioning {} hosts from host group '{}'", Math.abs(scalingAdjustment), hostGroupName);
-            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName, CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING,
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
+                    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING,
                     String.valueOf(Math.abs(scalingAdjustment)), hostGroupName);
         } else if (!CollectionUtils.isEmpty(privateIds)) {
             LOGGER.info("ZZZ: stopstart scaling Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
             LOGGER.info("ZZZ: Scaling down hostnames: {}", decomissionedHostNames);
-            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName, CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING2,
+            flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
+                    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING2,
                     String.valueOf(decomissionedHostNames.size()), hostGroupName, String.join(",", decomissionedHostNames));
         }
     }
@@ -86,7 +86,8 @@ public class StopStartDownscaleFlowService {
         LOGGER.info("ZZZ: Attempting to stop nodes (stopstart) {} from host group {}", privateIds, hostGroupName);
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
-        flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName, CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING,
+        flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
+                CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING,
                 String.valueOf(decomissionedHostNames.size()), hostGroupName, String.join(",", decomissionedHostNames));
     }
 
@@ -97,7 +98,8 @@ public class StopStartDownscaleFlowService {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instances: " + instancesStopped.size() + " stopped successfully.");
         clusterService.updateClusterStatusByStackId(stackView.getId(), AVAILABLE);
 
-        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED, hostGroupName == null ? "null" : hostGroupName);
+        flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED,
+                hostGroupName == null ? "null" : hostGroupName);
     }
 
     public void handleClusterDownscaleFailure(long stackId, Exception errorDetails) {

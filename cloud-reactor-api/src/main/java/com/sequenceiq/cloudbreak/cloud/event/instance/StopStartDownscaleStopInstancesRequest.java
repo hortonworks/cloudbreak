@@ -12,7 +12,8 @@ public class StopStartDownscaleStopInstancesRequest<T> extends CloudStackRequest
 
     private final List<CloudInstance> cloudInstancesToStop;
 
-    public StopStartDownscaleStopInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack, List<CloudInstance> cloudInstancesToStop) {
+    public StopStartDownscaleStopInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential,
+            CloudStack cloudStack, List<CloudInstance> cloudInstancesToStop) {
         super(cloudContext, cloudCredential, cloudStack);
         this.cloudInstancesToStop = cloudInstancesToStop;
     }

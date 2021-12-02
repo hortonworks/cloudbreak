@@ -376,7 +376,6 @@ public class StackCommonService {
 
     private FlowIdentifier putStartInstances(Stack stack, UpdateStackV4Request updateRequest, ScalingStrategy scalingStrategy) {
         MDCBuilder.buildMdcContext(stack);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
         if (updateRequest.getStatus() != null) {
             throw new BadRequestException(String.format("Stack status update is not supported while" +
                             " attempting to scale-up via instance start. Requested status: '%s' (File a bug)",

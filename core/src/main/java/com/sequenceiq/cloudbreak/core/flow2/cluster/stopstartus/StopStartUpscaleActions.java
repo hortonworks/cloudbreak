@@ -1,10 +1,10 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
 
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
 import static java.util.stream.Collectors.toList;
 
 import java.util.HashSet;
@@ -62,7 +62,7 @@ public class StopStartUpscaleActions {
     private StopStartUpscaleFlowService clusterUpscaleFlowService;
 
     @Inject
-    InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
+    private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
 
     @Bean(name = "STOPSTART_UPSCALE_START_INSTANCE_STATE")
     public Action<?, ?> startInstancesAction() {
@@ -88,16 +88,20 @@ public class StopStartUpscaleActions {
                 Stack stack = context.getStack();
                 List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedInstanceMetaDataList();
                 LOGGER.info("ZZZ: AllInstances: count={}, instances={}", instanceMetaDataList.size(), instanceMetaDataList);
-                List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
+                List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(
+                        x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
                 LOGGER.info("ZZZ: The following instnaces were found in the required hostGroup: {}", instanceMetaDataForHg);
-                // TODO CB-14929: Handle scenarios where CB / cloud-provider state is potentially different. Also for error handling, consider nodes which are not in the correct state on the CM side (e.g. decommissioned despite RUNNING)
+                // TODO CB-14929: Handle scenarios where CB / cloud-provider state is potentially different. Also for error handling,
+                //  consider nodes which are not in the correct state on the CM side (e.g. decommissioned despite RUNNING)
                 List<InstanceMetaData> stoppedInstancesInHg = instanceMetaDataForHg.stream()
                         .filter(s -> s.getInstanceStatus() == com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED)
                         .collect(Collectors.toList());
 
-                List<CloudInstance> stoppedCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(stoppedInstancesInHg, stack.getEnvironmentCrn(), stack.getStackAuthentication());
+                List<CloudInstance> stoppedCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(stoppedInstancesInHg,
+                        stack.getEnvironmentCrn(), stack.getStackAuthentication());
 
-                return new StopStartUpscaleStartInstancesRequest(context.getCloudContext(), context.getCloudCredential(), context.getCloudStack(), stoppedCloudInstancesForHg, context.getAdjustment());
+                return new StopStartUpscaleStartInstancesRequest(context.getCloudContext(), context.getCloudCredential(),
+                        context.getCloudStack(), stoppedCloudInstancesForHg, context.getAdjustment());
             }
         };
     }
@@ -107,13 +111,16 @@ public class StopStartUpscaleActions {
         return new AbstractStopStartUpscaleActions<>(StopStartUpscaleStartInstancesResult.class) {
 
             @Override
-            protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleStartInstancesResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleStartInstancesResult payload,
+                    Map<Object, Object> variables) throws Exception {
 
 
                 List<CloudVmInstanceStatus> cloudVmInstanceStatusList = payload.getStartedInstances();
-                Set<String> cloudInstanceIds = cloudVmInstanceStatusList.stream().map(x -> x.getCloudInstance().getInstanceId()).collect(Collectors.toUnmodifiableSet());
+                Set<String> cloudInstanceIds = cloudVmInstanceStatusList.stream().map(
+                        x -> x.getCloudInstance().getInstanceId()).collect(Collectors.toUnmodifiableSet());
 
-                // TODO CB-14929: Move this into a utility function. | Translation because 'stack' handlers, when living in 'cloud-reactor' don't have access to InstanceMetadata.
+                // TODO CB-14929: Move this into a utility function. | Translation because 'stack' handlers, when living in 'cloud-reactor'
+                //  don't have access to InstanceMetadata.
                 //  Also referenced in StopStartDownscaleActions
                 List<InstanceMetaData> instanceMetaDatas = context.getStack().getInstanceGroups()
                         .stream().filter(ig -> ig.getGroupName().equals(context.getHostGroupName()))
@@ -130,23 +137,25 @@ public class StopStartUpscaleActions {
 //            Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
 //                    context.getInstanceGroupName(), true, context.getHostNames(), context.isRepair());
 
-                StopStartUpscaleCommissionViaCMRequest commissionRequest = new StopStartUpscaleCommissionViaCMRequest(context.getStack(), context.getHostGroupName(), instanceMetaDatas);
+                StopStartUpscaleCommissionViaCMRequest commissionRequest = new StopStartUpscaleCommissionViaCMRequest(context.getStack(),
+                        context.getHostGroupName(), instanceMetaDatas);
                 sendEvent(context, commissionRequest);
 
             }
         };
     }
 
-
     @Bean(name = "STOPSTART_UPSCALE_FINALIZE_STATE")
     public Action<?, ?> upscaleFinishedAction() {
         return new AbstractStopStartUpscaleActions<>(StopStartUpscaleCommissionViaCMResult.class) {
 
             @Override
-            protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleCommissionViaCMResult payload, Map<Object, Object> variables) throws Exception {
+            protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleCommissionViaCMResult payload,
+                    Map<Object, Object> variables) throws Exception {
                 LOGGER.info("ZZZ: Marking upscale as finished.");
                 // TODO CB-14929: Does this need to force a CM health-sync, to make sure states show up properly on the UI. May need to force a CM sync
-                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStackView(), context.getHostGroupName(), payload.getRequest().getInstancesToCommission());
+                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStackView(), context.getHostGroupName(),
+                        payload.getRequest().getInstancesToCommission());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context, STOPSTART_UPSCALE_FINALIZED_EVENT.event(), payload);
             }
@@ -157,7 +166,6 @@ public class StopStartUpscaleActions {
             }
         };
     }
-
 
     @Bean(name = "STOPSTART_UPSCALE_FAILED_STATE")
     public Action<?, ?> clusterUpscaleFailedAction() {
@@ -173,7 +181,6 @@ public class StopStartUpscaleActions {
             }
         };
     }
-
 
     private abstract static class AbstractStopStartUpscaleActions<P extends Payload>
             extends AbstractStackAction<StopStartUpscaleState, StopStartUpscaleEvent, StopStartUpscaleContext, P> {
@@ -219,7 +226,8 @@ public class StopStartUpscaleActions {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
-            MDCBuilder.buildMdcContext(stack.getCluster()); // TODO CB-14929: Is this OK to do? In a stack operation.
+            // TODO CB-14929: Is this OK to do? In a stack operation.
+            MDCBuilder.buildMdcContext(stack.getCluster());
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
 
 
@@ -237,7 +245,8 @@ public class StopStartUpscaleActions {
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
             CloudStack cloudStack = cloudStackConverter.convert(stack);
 
-            return new StopStartUpscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()), cloudContext, cloudCredential, cloudStack,
+            return new StopStartUpscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
+                    cloudContext, cloudCredential, cloudStack,
                     getHostgroupName(variables), getAdjustment(variables),
                     isSinglePrimaryGateway(variables), getClusterManagerType(variables), isRestartServices(variables));
         }
