@@ -11,12 +11,16 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.D
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.DatabaseRestoreState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.dr.restore.DatabaseRestoreState.INIT_STATE;
 
-import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
-
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
+import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
+import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
 public class DatabaseRestoreFlowConfig extends AbstractFlowConfiguration<DatabaseRestoreState, DatabaseRestoreEvent>
@@ -42,6 +46,9 @@ public class DatabaseRestoreFlowConfig extends AbstractFlowConfiguration<Databas
 
     private static final FlowEdgeConfig<DatabaseRestoreState, DatabaseRestoreEvent> EDGE_CONFIG =
         new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, DATABASE_RESTORE_FAILED_STATE, DATABASE_RESTORE_FAIL_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public DatabaseRestoreFlowConfig() {
         super(DatabaseRestoreState.class, DatabaseRestoreEvent.class);
@@ -77,5 +84,10 @@ public class DatabaseRestoreFlowConfig extends AbstractFlowConfiguration<Databas
     @Override
     public DatabaseRestoreEvent getRetryableEvent() {
         return DATABASE_RESTORE_FAILED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

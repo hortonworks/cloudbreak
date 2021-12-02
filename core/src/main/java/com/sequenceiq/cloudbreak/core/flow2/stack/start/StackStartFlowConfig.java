@@ -16,10 +16,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartState.S
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -38,6 +42,9 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, START_FAILED_STATE, START_FAIL_HANDLED_EVENT);
 
     private static final String FLOW_DISPLAY_NAME = "Start Stack";
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public StackStartFlowConfig() {
         super(StackStartState.class, StackStartEvent.class);
@@ -73,5 +80,10 @@ public class StackStartFlowConfig extends AbstractFlowConfiguration<StackStartSt
     @Override
     public StackStartEvent getRetryableEvent() {
         return START_FAIL_HANDLED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

@@ -28,4 +28,13 @@ public interface FlowConfiguration<E extends FlowEvent> {
     default OperationType getFlowOperationType() {
         return OperationType.UNKNOWN;
     }
+
+    default FlowFinalizerCallback getFinalizerCallBack() {
+        return new FlowFinalizerCallback() {
+            @Override
+            protected void doFinalize(Long resourceId) {
+
+            }
+        };
+    }
 }

@@ -13,10 +13,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepai
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
 public class ManualStackRepairTriggerFlowConfig extends AbstractFlowConfiguration<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> {
@@ -31,6 +35,9 @@ public class ManualStackRepairTriggerFlowConfig extends AbstractFlowConfiguratio
 
     private static final FlowEdgeConfig<ManualStackRepairTriggerState, ManualStackRepairTriggerEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE, MANUAL_STACK_REPAIR_TRIGGER_FAILURE_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public ManualStackRepairTriggerFlowConfig() {
         super(ManualStackRepairTriggerState.class, ManualStackRepairTriggerEvent.class);
@@ -61,5 +68,10 @@ public class ManualStackRepairTriggerFlowConfig extends AbstractFlowConfiguratio
     @Override
     public String getDisplayName() {
         return "Manual stack repair";
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

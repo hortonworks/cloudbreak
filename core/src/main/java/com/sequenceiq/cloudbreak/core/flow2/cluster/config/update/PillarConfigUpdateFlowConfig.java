@@ -1,21 +1,27 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.config.update;
 
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.FINAL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FINISHED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_START_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_FAILURE_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_FINALIZE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigurationUpdateEvent.PILLAR_CONFIG_UPDATE_FINISHED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_FINISHED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.PILLAR_CONFIG_UPDATE_START_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.FINAL_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.config.update.PillarConfigUpdateState.INIT_STATE;
 
+import java.util.List;
+
+import javax.inject.Inject;
+
+import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
-import java.util.List;
-import org.springframework.stereotype.Component;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 
 @Component
 public class PillarConfigUpdateFlowConfig extends
@@ -33,6 +39,9 @@ public class PillarConfigUpdateFlowConfig extends
             PILLAR_CONFIG_UPDATE_FINALIZE_EVENT)
             .noFailureEvent()
             .build();
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public PillarConfigUpdateFlowConfig() {
         super(PillarConfigUpdateState.class, PillarConfigurationUpdateEvent.class);
@@ -62,5 +71,10 @@ public class PillarConfigUpdateFlowConfig extends
     @Override
     public String getDisplayName() {
         return "Pillar configuration update";
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

@@ -161,7 +161,7 @@ public class StackOperationServiceTest {
         Assertions.assertThatThrownBy(() -> underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
-        verify(stackUpdater, never()).updateStackStatus(any(), any());
+        verify(stackUpdater, never()).updateStackStatus(any(), any(DetailedStackStatus.class));
     }
 
     @Test

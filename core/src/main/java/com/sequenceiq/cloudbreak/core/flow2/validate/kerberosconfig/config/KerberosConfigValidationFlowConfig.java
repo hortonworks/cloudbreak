@@ -17,10 +17,14 @@ import static com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.confi
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -60,6 +64,9 @@ public class KerberosConfigValidationFlowConfig extends AbstractFlowConfiguratio
     private static final FlowEdgeConfig<KerberosConfigValidationState, KerberosConfigValidationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, VALIDATE_KERBEROS_CONFIG_FAILED_STATE, VALIDATE_KERBEROS_CONFIG_FAILURE_HANDLED_EVENT);
 
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
+
     public KerberosConfigValidationFlowConfig() {
         super(KerberosConfigValidationState.class, KerberosConfigValidationEvent.class);
     }
@@ -94,5 +101,10 @@ public class KerberosConfigValidationFlowConfig extends AbstractFlowConfiguratio
     @Override
     public KerberosConfigValidationEvent getRetryableEvent() {
         return VALIDATE_KERBEROS_CONFIG_FAILURE_HANDLED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

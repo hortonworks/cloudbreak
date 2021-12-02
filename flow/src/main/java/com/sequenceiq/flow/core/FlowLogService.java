@@ -18,11 +18,11 @@ public interface FlowLogService {
 
     Iterable<FlowLog> saveAll(Iterable<FlowLog> entities);
 
-    FlowLog close(Long stackId, String flowId) throws TransactionService.TransactionExecutionException;
+    FlowLog close(Long resourceId, String flowId) throws TransactionService.TransactionExecutionException;
 
-    FlowLog cancel(Long stackId, String flowId) throws TransactionService.TransactionExecutionException;
+    FlowLog cancel(Long resourceId, String flowId) throws TransactionService.TransactionExecutionException;
 
-    FlowLog terminate(Long stackId, String flowId) throws TransactionService.TransactionExecutionException;
+    FlowLog terminate(Long resourceId, String flowId) throws TransactionService.TransactionExecutionException;
 
     void saveChain(String flowChainId, String parentFlowChainId, FlowTriggerEventQueue chain, String flowTriggerUserCrn);
 
@@ -30,9 +30,9 @@ public interface FlowLogService {
 
     Set<FlowLogIdWithTypeAndTimestamp> findAllRunningNonTerminationFlowsByResourceId(Long resourceId);
 
-    boolean isOtherNonTerminationFlowRunning(Long stackId);
+    boolean isOtherNonTerminationFlowRunning(Long resourceId);
 
-    boolean isOtherFlowRunning(Long stackId);
+    boolean isOtherFlowRunning(Long resourceId);
 
     boolean repeatedFlowState(FlowLog lastFlowLog, String event);
 
@@ -44,7 +44,7 @@ public interface FlowLogService {
 
     void cancelTooOldTerminationFlowForResource(Long resourceId, long olderThan);
 
-    Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long stackId);
+    Set<String> findAllRunningNonTerminationFlowIdsByStackId(Long resourceId);
 
     Optional<FlowLog> findFirstByFlowIdOrderByCreatedDesc(String flowId);
 

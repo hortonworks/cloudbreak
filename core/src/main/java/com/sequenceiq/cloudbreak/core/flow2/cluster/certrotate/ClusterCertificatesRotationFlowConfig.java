@@ -10,8 +10,8 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCer
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationEvent.CLUSTER_HOST_CERTIFICATES_ROTATION_FINISHED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_RESTART_CLUSTER_SERVICES_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_RESTART_CM_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_ROTATION_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CERTIFICATES_ROTATION_FINISHED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_CMCA_ROTATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.CLUSTER_HOST_CERTIFICATES_ROTATION_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCertificatesRotationState.FINAL_STATE;
@@ -19,9 +19,13 @@ import static com.sequenceiq.cloudbreak.core.flow2.cluster.certrotate.ClusterCer
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -47,6 +51,9 @@ public class ClusterCertificatesRotationFlowConfig extends AbstractFlowConfigura
 
     private static final FlowEdgeConfig<ClusterCertificatesRotationState, ClusterCertificatesRotationEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, CLUSTER_CERTIFICATES_ROTATION_FAILED_STATE, CLUSTER_CERTIFICATES_ROTATION_FAILURE_HANDLED_EVENT);
+
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
 
     public ClusterCertificatesRotationFlowConfig() {
         super(ClusterCertificatesRotationState.class, ClusterCertificatesRotationEvent.class);
@@ -82,5 +89,10 @@ public class ClusterCertificatesRotationFlowConfig extends AbstractFlowConfigura
     @Override
     public ClusterCertificatesRotationEvent getRetryableEvent() {
         return CLUSTER_CERTIFICATES_ROTATION_FAILURE_HANDLED_EVENT;
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

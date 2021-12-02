@@ -32,11 +32,15 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.update.loadbalancer.Sta
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.core.flow2.StackStatusFinalizer;
 import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration.Transition.Builder;
+import com.sequenceiq.flow.core.config.FlowFinalizerCallback;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
@@ -95,6 +99,9 @@ public class StackLoadBalancerUpdateFlowConfig extends AbstractFlowConfiguration
     private static final FlowEdgeConfig<StackLoadBalancerUpdateState, StackLoadBalancerUpdateEvent> EDGE_CONFIG =
         new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, LOAD_BALANCER_UPDATE_FAILED_STATE, LOAD_BALANCER_UPDATE_FAIL_HANDLED_EVENT);
 
+    @Inject
+    private StackStatusFinalizer stackStatusFinalizer;
+
     public StackLoadBalancerUpdateFlowConfig() {
         super(StackLoadBalancerUpdateState.class, StackLoadBalancerUpdateEvent.class);
     }
@@ -134,5 +141,10 @@ public class StackLoadBalancerUpdateFlowConfig extends AbstractFlowConfiguration
     @Override
     public FlowTriggerCondition getFlowTriggerCondition() {
         return getApplicationContext().getBean(StackLoadBalancerUpdateTriggerCondition.class);
+    }
+
+    @Override
+    public FlowFinalizerCallback getFinalizerCallBack() {
+        return stackStatusFinalizer;
     }
 }

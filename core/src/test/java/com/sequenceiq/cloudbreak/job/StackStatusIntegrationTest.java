@@ -235,7 +235,7 @@ class StackStatusIntegrationTest {
         verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
 
         verify(instanceMetaDataService, never()).save(any());
-        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any());
+        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(DetailedStackStatus.class));
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(), any());
     }
 
@@ -265,7 +265,7 @@ class StackStatusIntegrationTest {
 
         assertInstancesSavedWithStatuses(Map.of(INSTANCE_2, InstanceStatus.DELETED_BY_PROVIDER));
 
-        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any());
+        verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(DetailedStackStatus.class));
         verify(stackUpdater, never()).updateStackStatus(eq(STACK_ID), any(), any());
     }
 
