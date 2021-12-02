@@ -390,6 +390,7 @@ class SdxServiceTest {
     void testUpdateRangerRazEnabledForSdxClusterWhenRangerRazIsPresent() {
         SdxCluster sdxCluster = new SdxCluster();
         sdxCluster.setEnvName("env");
+        sdxCluster.setEnvCrn(ENVIRONMENT_CRN);
         sdxCluster.setClusterName(CLUSTER_NAME);
         sdxCluster.setCrn("test-crn");
         sdxCluster.setRuntime("7.2.11");
@@ -402,7 +403,7 @@ class SdxServiceTest {
         when(stackV4Endpoint.rangerRazEnabledInternal(anyLong(), anyString(), anyString())).thenReturn(response);
         when(response.isRangerRazEnabled()).thenReturn(true);
         when(entitlementService.razEnabled(anyString())).thenReturn(true);
-        when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
+        when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
 

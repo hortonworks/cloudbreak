@@ -18,4 +18,5 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxSecurityTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecipeTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRangerRazEnabledTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.AwsEnvironmentWithCustomerManagedKeyTests
