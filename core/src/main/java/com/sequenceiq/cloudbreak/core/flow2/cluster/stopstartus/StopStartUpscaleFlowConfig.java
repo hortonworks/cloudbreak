@@ -1,11 +1,17 @@
-package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale;
+package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleEvent.*;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleState.*;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleState.FINAL_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleState.INIT_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartupscale.StopStartUpscaleState.STOPSTART_UPSCALE_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_CLUSTER_MANAGER_COMMISSIONED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FAIL_HANDLED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_INSTANCES_STARTED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.FINAL_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_FINALIZE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_HOSTS_COMMISSION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleState.STOPSTART_UPSCALE_START_INSTANCE_STATE;
 
 import java.util.List;
 
@@ -15,7 +21,8 @@ import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class StopStartUpscaleFlowConfig extends AbstractFlowConfiguration<StopStartUpscaleState, StopStartUpscaleEvent> implements RetryableFlowConfiguration<StopStartUpscaleEvent> {
+public class StopStartUpscaleFlowConfig extends AbstractFlowConfiguration<StopStartUpscaleState, StopStartUpscaleEvent>
+        implements RetryableFlowConfiguration<StopStartUpscaleEvent> {
 
     // TODO CB-14929: Additional states, transitions for error handling, reverting operations when possible, etc
 
@@ -44,8 +51,6 @@ public class StopStartUpscaleFlowConfig extends AbstractFlowConfiguration<StopSt
 
     private static final FlowEdgeConfig<StopStartUpscaleState, StopStartUpscaleEvent> EDGE_CONFIG =
             new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STOPSTART_UPSCALE_FAILED_STATE, STOPSTART_UPSCALE_FAIL_HANDLED_EVENT);
-
-
 
     protected StopStartUpscaleFlowConfig() {
         super(StopStartUpscaleState.class, StopStartUpscaleEvent.class);

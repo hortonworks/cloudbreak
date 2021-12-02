@@ -48,18 +48,21 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
 
             List<CloudInstance> stoppedInstancesInHg = request.getStoppedCloudInstancesInHg();
-            int numInstancesToStart = request.getNumInstancesToStart() < stoppedInstancesInHg.size() ? request.getNumInstancesToStart() : stoppedInstancesInHg.size();
+            int numInstancesToStart = request.getNumInstancesToStart() < stoppedInstancesInHg.size() ?
+                    request.getNumInstancesToStart() : stoppedInstancesInHg.size();
             LOGGER.info("ZZZ: Requested instances to start: {}, actual instances being started: {}", request.getNumInstancesToStart(), numInstancesToStart);
 
             // TODO CB-14929: This should ideally be randomized a bit, so that different isntances are started/stopped each time. That said, there is value in
             //  a reliable pattern. i.e. something along the lines of sort by hostname within this list.
 
             List<CloudInstance> instancesToStart = request.getStoppedCloudInstancesInHg().subList(0, numInstancesToStart);
-            // TODO CB-14929: Additional validation here to check if these instances are actually in STOPPED state (as against the current list which is an indication of what the Cloudbreak Database thinks are STOPPED instances)
+            // TODO CB-14929: Additional validation here to check if these instances are actually in STOPPED state
+            //  (as against the current list which is an indication of what the Cloudbreak Database thinks are STOPPED instances)
 
             LOGGER.info("ZZZ: Instance identified as start candidates: count={}, instances={}", instancesToStart.size(), instancesToStart);
             if (instancesToStart.size() < request.getNumInstancesToStart()) {
-                LOGGER.info("ZZZ: There are fewer instances available to start as compared to the request. Requested: {}, Available: {}", request.getNumInstancesToStart(), instancesToStart.size());
+                LOGGER.info("ZZZ: There are fewer instances available to start as compared to the request. Requested: {}, Available: {}",
+                        request.getNumInstancesToStart(), instancesToStart.size());
             }
 
             List<CloudVmInstanceStatus> instanceStatuses = Collections.emptyList();
@@ -71,14 +74,18 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
                 LOGGER.info("ZZZ: Did not find any instances to start");
             }
 
-            // TODO CB-14929: If we are not able to start adequate resources, consider going to the cloud-provider to check instance state, in case CB DB entries are out of sync.
+            // TODO CB-14929: If we are not able to start adequate resources, consider going to the cloud-provider to check instance state,
+            //  in case CB DB entries are out of sync.
             // TODO CB-14929: Timebound this operation to X minutes. Start whatever is possible within this duration.
             // TODO CB-14929: start API call in the library may need to be modified to handle errors differently, given the time duration check we want.
             // TODO CB-14929: Optionally factor in nodes which are running but have CM services in STOPPED/DECOMMISSIONED state
-            // TODO CB-14929: Error Handling: If instances fail to START - do we need to actively try STOPPING them? In case of failure, make sure the list is propagated up for activity/needs-attention.
+            // TODO CB-14929: Error Handling: If instances fail to START - do we need to actively try STOPPING them?
+            //  In case of failure, make sure the list is propagated up for activity/needs-attention.
 
-            // TODO CB-14929: Tempoarilty assuming that all isntances started successfully. Not bothering to map back from the results vs the originally computed list.
-            //  so instancesToStart is the metaData that can be sent to the next stage. Normally, this would need to be filtered and re-built for the next step.
+            // TODO CB-14929: Tempoarilty assuming that all isntances started successfully.
+            //  Not bothering to map back from the results vs the originally computed list.
+            //  so instancesToStart is the metaData that can be sent to the next stage.
+            //  Normally, this would need to be filtered and re-built for the next step.
             StopStartUpscaleStartInstancesResult result = new StopStartUpscaleStartInstancesResult(request.getResourceId(), instanceStatuses);
 
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
@@ -88,8 +95,8 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
         }
     }
 
-    private AuthenticatedContext getAuthenticatedContext(StopStartUpscaleStartInstancesRequest<StopStartUpscaleStartInstancesResult> request, CloudContext cloudContext,
-            CloudConnector<?> connector) {
+    private AuthenticatedContext getAuthenticatedContext(StopStartUpscaleStartInstancesRequest<StopStartUpscaleStartInstancesResult> request,
+            CloudContext cloudContext, CloudConnector<?> connector) {
         return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
 }

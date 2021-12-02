@@ -64,7 +64,8 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
             //  (ideally in some easily accessible alerting mechanism / cluster needs attention section)
             // TODO CB-14929: Potentially introduce a new node-state for such instances
 
-            StopStartDownscaleStopInstancesResult result = new StopStartDownscaleStopInstancesResult(request.getResourceId(), cloudInstancesToStop, cloudVmInstanceStatusList);
+            StopStartDownscaleStopInstancesResult result = new StopStartDownscaleStopInstancesResult(request.getResourceId(),
+                    cloudInstancesToStop, cloudVmInstanceStatusList);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
             // TODO CB-14929: How should exceptions from handlers be handled?
@@ -72,8 +73,8 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
         }
     }
 
-    private AuthenticatedContext getAuthenticatedContext(StopStartDownscaleStopInstancesRequest<StopStartDownscaleStopInstancesResult> request, CloudContext cloudContext,
-            CloudConnector<?> connector) {
+    private AuthenticatedContext getAuthenticatedContext(StopStartDownscaleStopInstancesRequest<StopStartDownscaleStopInstancesResult> request,
+            CloudContext cloudContext, CloudConnector<?> connector) {
         return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
 }
