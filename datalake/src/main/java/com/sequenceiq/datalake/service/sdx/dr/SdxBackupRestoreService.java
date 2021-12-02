@@ -173,7 +173,7 @@ public class SdxBackupRestoreService {
     private SdxRestoreResponse triggerDatalakeRestoreFlow(Long clusterId, String backupId, String backupLocation, String backupLocationOverride) {
         String selector = DATALAKE_TRIGGER_RESTORE_EVENT.event();
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, clusterId, userId,
+        DatalakeTriggerRestoreEvent startEvent = new DatalakeTriggerRestoreEvent(selector, clusterId, null, userId,
                 backupId, backupLocation, backupLocationOverride, DatalakeRestoreFailureReason.USER_TRIGGERED);
         FlowIdentifier flowIdentifier = sdxReactorFlowManager.triggerDatalakeRestoreFlow(startEvent);
         return new SdxRestoreResponse(startEvent.getDrStatus().getOperationId(), flowIdentifier);

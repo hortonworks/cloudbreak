@@ -86,7 +86,7 @@ public class SdxCreateActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) throws Exception {
-                // When SDX is created as part of re-size flow chain, SDX in payload will not have ID.
+                // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
                 if (!Strings.isNullOrEmpty(payload.getSdxName())) {
                     SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
                     context.setSdxId(sdxCluster.getId());

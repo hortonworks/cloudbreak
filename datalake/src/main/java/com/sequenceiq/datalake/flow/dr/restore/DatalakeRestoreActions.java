@@ -28,6 +28,7 @@ import com.sequenceiq.datalake.entity.operation.SdxOperationStatus;
 import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
+import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreCouldNotStartEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreFailedEvent;
 import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeDatabaseRestoreStartEvent;
@@ -43,8 +44,12 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
+import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 import com.sequenceiq.sdx.api.model.DatalakeDatabaseDrStatus;
 import com.sequenceiq.sdx.api.model.SdxDatabaseRestoreStatusResponse;
 
@@ -73,6 +78,12 @@ public class DatalakeRestoreActions {
     @Inject
     private EventSenderService eventSenderService;
 
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private FlowChainLogService flowChainLogService;
+
     @Bean(name = "DATALAKE_TRIGGERING_RESTORE_STATE")
     public Action<?, ?> triggerDatalakeRestore() {
         return new AbstractSdxAction<>(DatalakeTriggerRestoreEvent.class) {
@@ -89,10 +100,20 @@ public class DatalakeRestoreActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerRestoreEvent payload, Map<Object, Object> variables) {
-                LOGGER.info("Triggering datalake restore for {}", payload.getResourceId());
-
+                Long sdxId = payload.getResourceId();
+                // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
+                Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
+                if (lastFlowLog.isPresent()) {
+                    Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
+                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getName())) {
+                        SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
+                        context.setSdxId(sdxCluster.getId());
+                        sdxId = sdxCluster.getId();
+                    }
+                }
+                LOGGER.info("Triggering datalake restore for {}", sdxId);
                 DatalakeDrStatusResponse restoreStatusResponse =
-                        sdxBackupRestoreService.triggerDatalakeRestore(payload.getResourceId(),
+                        sdxBackupRestoreService.triggerDatalakeRestore(sdxId,
                                 payload.getBackupId(),
                                 payload.getBackupLocationOverride(),
                                 payload.getUserId());
@@ -102,14 +123,14 @@ public class DatalakeRestoreActions {
                 if (!restoreStatusResponse.failed()) {
                     sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, restoreStatusResponse.getDrOperationId()));
                 } else {
-                    LOGGER.error("Datalake restore has failed for {} ", payload.getResourceId());
+                    LOGGER.error("Datalake restore has failed for {} ", sdxId);
                     sendEvent(context, DATALAKE_RESTORE_FAILED_EVENT.event(), payload);
                 }
             }
 
             @Override
             protected Object getFailurePayload(DatalakeTriggerRestoreEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeRestoreFailedEvent.from(payload, ex);
+                return DatalakeRestoreFailedEvent.from(flowContext, payload, ex);
             }
         };
     }
@@ -240,7 +261,7 @@ public class DatalakeRestoreActions {
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext, Exception ex) {
-                return DatalakeRestoreFailedEvent.from(payload, ex);
+                return DatalakeRestoreFailedEvent.from(flowContext, payload, ex);
             }
         };
     }

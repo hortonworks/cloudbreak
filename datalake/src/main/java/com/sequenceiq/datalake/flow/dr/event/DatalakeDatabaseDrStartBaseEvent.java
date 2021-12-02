@@ -22,6 +22,12 @@ public class DatalakeDatabaseDrStartBaseEvent extends SdxEvent  {
         drStatus = new SdxOperation(operationType, sdxId);
     }
 
+    public DatalakeDatabaseDrStartBaseEvent(String selector, Long sdxId, String sdxName, String userId,
+            SdxOperationType operationType) {
+        super(selector, sdxId, sdxName, userId);
+        drStatus = new SdxOperation(operationType, sdxId);
+    }
+
     public DatalakeDatabaseDrStartBaseEvent(String selector, String userId,
                                             SdxOperation drStatus) {
         super(selector, drStatus.getSdxClusterId(), userId);

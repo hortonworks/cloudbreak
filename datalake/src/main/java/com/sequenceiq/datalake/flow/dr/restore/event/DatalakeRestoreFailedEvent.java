@@ -1,5 +1,8 @@
 package com.sequenceiq.datalake.flow.dr.restore.event;
 
+import java.util.Optional;
+
+import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 
 public class DatalakeRestoreFailedEvent extends SdxEvent {
@@ -11,8 +14,8 @@ public class DatalakeRestoreFailedEvent extends SdxEvent {
         this.exception = exception;
     }
 
-    public static DatalakeRestoreFailedEvent from(SdxEvent event, Exception exception) {
-        return new DatalakeRestoreFailedEvent(event.getResourceId(), event.getUserId(), exception);
+    public static DatalakeRestoreFailedEvent from(Optional<SdxContext> context, SdxEvent event, Exception exception) {
+        return new DatalakeRestoreFailedEvent(context.map(SdxContext::getSdxId).orElse(event.getResourceId()), event.getUserId(), exception);
     }
 
     public Exception getException() {
