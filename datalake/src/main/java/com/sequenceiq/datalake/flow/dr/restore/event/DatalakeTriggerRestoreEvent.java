@@ -14,9 +14,9 @@ public class DatalakeTriggerRestoreEvent extends DatalakeDatabaseDrStartBaseEven
 
     private final String backupLocationOverride;
 
-    public DatalakeTriggerRestoreEvent(String selector, Long sdxId, String userId,
+    public DatalakeTriggerRestoreEvent(String selector, Long sdxId, String sdxName, String userId,
             String backupId, String backupLocation, String backupLocationOverride, DatalakeRestoreFailureReason reason) {
-        super(selector, sdxId, userId, SdxOperationType.RESTORE);
+        super(selector, sdxId, sdxName, userId, SdxOperationType.RESTORE);
         this.backupId = backupId;
         this.backupLocation = backupLocation;
         this.backupLocationOverride = backupLocationOverride;
