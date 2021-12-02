@@ -223,7 +223,6 @@ public class StackCommonService {
         }
         validateStackIsNotDataLake(stack.get(), instanceIds);
         return stackOperationService.removeInstances(stack.get(), instanceIds, forced, scalingStrategy);
-        return stackOperationService.removeInstances(stack.get(), instanceIds, forced);
     }
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
@@ -379,7 +378,7 @@ public class StackCommonService {
 
     private FlowIdentifier put(Stack stack, UpdateStackV4Request updateRequest) {
         MDCBuilder.buildMdcContext(stack);
-        if (updatCommeRequest.getStatus() != null) {
+        if (updateRequest.getStatus() != null) {
             return stackOperationService.updateStatus(stack.getId(), updateRequest.getStatus(), updateRequest.getWithClusterEvent());
         } else {
             Integer scalingAdjustment = updateRequest.getInstanceGroupAdjustment().getScalingAdjustment();
