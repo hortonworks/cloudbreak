@@ -35,7 +35,7 @@ public class SdxSecurityTests extends PreconditionSdxE2ETest {
     @Inject
     private SshJClientActions sshJClientActions;
 
-    @Test(dataProvider = TEST_CONTEXT, enabled = false)
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running Cloudbreak, and an SDX cluster in available state",
