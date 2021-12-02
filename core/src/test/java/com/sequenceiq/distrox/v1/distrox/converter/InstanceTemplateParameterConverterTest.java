@@ -210,6 +210,7 @@ class InstanceTemplateParameterConverterTest {
         assertThat(encryption.getType()).isNull();
         assertThat(encryption.getKey()).isNull();
     }
+    
     @Test
     void convertTestAwsInstanceTemplateV1ParametersToAwsInstanceTemplateV4ParametersWhenBasicFields() {
         AwsInstanceTemplateV1Parameters source = new AwsInstanceTemplateV1Parameters();
