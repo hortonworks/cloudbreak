@@ -182,6 +182,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create())
+                .enableVerification()
                 .await(STACK_AVAILABLE)
                 .mockCm().cmImportClusterTemplate().post().bodyContains("\"product\":\"CDH\"", 1).verify()
                 .mockCm().cmImportClusterTemplate().post().bodyContains(String.format(HOST_TEMPLATE_REF_NAME_FORMAT, "compute"), 1).verify()
@@ -297,6 +298,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
                 .withImageSettings(DIX_IMG_KEY)
                 .withNetwork(DIX_NET_KEY)
                 .when(distroXClient.create(), key(DISTRO_X_STACK))
+                .enableVerification()
                 .await(STACK_AVAILABLE)
                 .mockCm().cmImportClusterTemplate().post().bodyContains(MOCK_HOSTNAME, 1).verify()
                 .validate();

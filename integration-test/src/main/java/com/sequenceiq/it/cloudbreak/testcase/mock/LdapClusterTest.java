@@ -31,6 +31,7 @@ public class LdapClusterTest extends AbstractMockTest {
                 .given(StackTestDto.class)
                 .withCluster()
                 .when(stackTestClient.createV4())
+                .enableVerification()
                 .await(STACK_AVAILABLE)
                 .mockCm().externalUserMappings().post().times(1).verify()
                 .validate();

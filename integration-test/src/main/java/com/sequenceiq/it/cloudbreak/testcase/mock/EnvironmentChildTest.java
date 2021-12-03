@@ -17,6 +17,7 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.assertion.Assertion;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
+import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -34,13 +35,15 @@ public class EnvironmentChildTest extends AbstractMockTest {
     @Inject
     private EnvironmentTestClient environmentTestClient;
 
+    @Inject
+    private FreeIpaTestClient freeIpaTestClient;
+
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
         createDefaultCredential(testContext);
         createDefaultEnvironment(testContext);
-        createDefaultFreeIpa(testContext);
     }
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
@@ -50,6 +53,10 @@ public class EnvironmentChildTest extends AbstractMockTest {
             then = "environment should be created and parent environment should be referenced in the child environment")
     public void testCreateChildEnvironment(MockedTestContext testContext) {
         testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .enableVerification()
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.list())
                 .then(this::checkEnvIsListedByNameAndParentName)
@@ -119,6 +126,10 @@ public class EnvironmentChildTest extends AbstractMockTest {
             and = "dns zone should be deleted")
     public void testDeleteChildEnvironment(MockedTestContext testContext) {
         testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .enableVerification()
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                 .withParentEnvironment()
                 .when(environmentTestClient.create())
@@ -166,6 +177,10 @@ public class EnvironmentChildTest extends AbstractMockTest {
             then = "the child environment should be deleted, but dns zone should not be removed")
     public void testDeleteChildEnvironmentThatHasSibling(MockedTestContext testContext) {
         testContext
+                .given(FreeIpaTestDto.class)
+                .when(freeIpaTestClient.create())
+                .enableVerification()
+                .await(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE)
                 .given(CHILD_ENVIRONMENT, EnvironmentTestDto.class)
                 .withParentEnvironment()
                 .when(environmentTestClient.create())

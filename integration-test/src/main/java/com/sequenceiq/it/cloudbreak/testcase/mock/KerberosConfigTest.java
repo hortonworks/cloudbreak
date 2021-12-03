@@ -42,6 +42,7 @@ public class KerberosConfigTest extends AbstractMockTest {
                 .given(StackTestDto.class)
                 .withInstanceGroupsEntity(InstanceGroupTestDto.defaultHostGroup(testContext))
                 .when(stackTestClient.createV4())
+                .enableVerification()
                 .await(STACK_AVAILABLE)
                 .mockSalt().run().post().bodyContains(SALT_HIGHSTATE, 1).atLeast(1).verify()
                 .mockCm().cmImportClusterTemplate().post().atLeast(1).verify()

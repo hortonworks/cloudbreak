@@ -76,6 +76,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
                 .given(stack, DistroXTestDto.class).withCluster(CLUSTER_KEY)
                 .withName(clusterName)
                 .when(distroXTestClient.create(), key(stack))
+                .enableVerification()
                 .mockCm().profile(PROFILE_RETURN_HTTP_500, 1)
                 .await(STACK_AVAILABLE, key(stack).withIgnoredStatues(Set.of(Status.UNREACHABLE)))
                 .when(distroXTestClient.scale("worker", desiredWorkerCount), key(stack))
