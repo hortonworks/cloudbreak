@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.imagecatalog;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.client.CloudbreakInternalCrnClient;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 
@@ -89,6 +91,16 @@ public class ImageCatalogService implements ResourcePropertyProvider {
         } catch (javax.ws.rs.NotFoundException e) {
             LOGGER.info("Sdx cluster not found on CB side", e);
             return null;
+        }
+    }
+
+    public List<String> getDefaultImageCatalogRuntimeVersions(Long workspaceId) {
+        ImageCatalogV4Endpoint imageCatalogV4Endpoint = cloudbreakInternalCrnClient.withInternalCrn().imageCatalogV4Endpoint();
+        try {
+            return imageCatalogV4Endpoint.getRuntimeVersionsFromDefault(workspaceId).getRuntimeVersions();
+        } catch (Exception ex) {
+            LOGGER.error("Failed to get runtime versions from default image catalog.", ex);
+            throw new CloudbreakServiceException(ex);
         }
     }
 }

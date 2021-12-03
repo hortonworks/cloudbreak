@@ -81,6 +81,7 @@ import com.sequenceiq.cloudbreak.service.image.catalog.AdvertisedImageProvider;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
 import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.catalog.VersionBasedImageProvider;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogMetaData;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.user.UserProfileHandler;
 import com.sequenceiq.cloudbreak.service.user.UserProfileService;
@@ -900,6 +901,19 @@ public class ImageCatalogServiceTest {
         assertEquals(4, actual.size());
         assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals("default")).findFirst().get()));
         assertTrue(actual.contains(imageCatalogs.stream().filter(catalog -> catalog.getName().equals(CUSTOM_CATALOG_NAME)).findFirst().get()));
+    }
+
+    @Test
+    public void testGetRuntimeVersionsFromDefault() throws CloudbreakImageCatalogException {
+        List<String> expected = List.of("7.2.1");
+        ImageCatalogMetaData imageCatalogMetaData = mock(ImageCatalogMetaData.class);
+
+        when(imageCatalogProvider.getImageCatalogMetaData(DEFAULT_CATALOG_URL)).thenReturn(imageCatalogMetaData);
+        when(imageCatalogMetaData.getRuntimeVersions()).thenReturn(expected);
+
+        List<String> actual = underTest.getRuntimeVersionsFromDefault();
+
+        assertEquals(expected, actual);
     }
 
     private void setupImageCatalogProvider(String catalogUrl, String catalogFile) throws IOException, CloudbreakImageCatalogException {

@@ -28,17 +28,19 @@ import org.springframework.util.CollectionUtils;
 
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sequenceiq.cloudbreak.client.RestClientUtil;
+import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.catalog.ImageCatalogServiceProxy;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogMetaData;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogWrapper;
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 
 @Component
-public class CachedImageCatalogProvider {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CachedImageCatalogProvider.class);
+public class CachedImageCatalogWrapperProvider {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CachedImageCatalogWrapperProvider.class);
 
     @Value("${cb.etc.config.dir:}")
     private String etcConfigDir;
@@ -52,31 +54,38 @@ public class CachedImageCatalogProvider {
     @Inject
     private ImageCatalogServiceProxy imageCatalogServiceProxy;
 
-    @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
-    public CloudbreakImageCatalogV3 getImageCatalogV3(String catalogUrl) throws CloudbreakImageCatalogException {
-        CloudbreakImageCatalogV3 catalog;
-        if (catalogUrl == null) {
-            LOGGER.info("No image catalog was defined!");
-            return null;
-        }
+    @Inject
+    private RestClientFactory restClientFactory;
 
+    @Cacheable(cacheNames = "imageCatalogCache", key = "#catalogUrl")
+    public ImageCatalogWrapper getImageCatalogWrapper(String catalogUrl) throws CloudbreakImageCatalogException {
         try {
-            long started = System.currentTimeMillis();
-            String content;
-            if (catalogUrl.startsWith("http")) {
-                Client client = RestClientUtil.get();
-                WebTarget target = client.target(catalogUrl);
-                Response response = target.request().get();
-                content = readResponse(target, response);
-            } else {
-                content = readCatalogFromFile(catalogUrl);
+            if (Objects.nonNull(catalogUrl)) {
+                long started = System.currentTimeMillis();
+                String content;
+                if (catalogUrl.startsWith("http")) {
+                    Client client = restClientFactory.getOrCreateDefault();
+                    WebTarget target = client.target(catalogUrl);
+                    Response response = target.request().get();
+                    content = readResponse(target, response);
+                } else {
+                    content = readCatalogFromFile(catalogUrl);
+                }
+                CloudbreakImageCatalogV3 catalog = objectMapper.readValue(content, CloudbreakImageCatalogV3.class);
+                if (Objects.nonNull(catalog)) {
+                    imageCatalogServiceProxy.validate(catalog);
+                    cleanAndValidateMaps(catalog);
+                    catalog = filterImagesByOsType(catalog);
+                    ImageCatalogMetaData metaData = imageCatalogServiceProxy.getImageCatalogMetaData(catalog);
+                    long timeOfParse = System.currentTimeMillis() - started;
+                    LOGGER.debug("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
+                    return new ImageCatalogWrapper(catalog, metaData);
+                }
+                throw new CloudbreakImageCatalogException(String.format("Failed to read the content of '%s' as an image catalog.", catalogUrl));
             }
-            catalog = objectMapper.readValue(content, CloudbreakImageCatalogV3.class);
-            imageCatalogServiceProxy.validate(catalog);
-            cleanAndValidateMaps(catalog);
-            catalog = filterImagesByOsType(catalog);
-            long timeOfParse = System.currentTimeMillis() - started;
-            LOGGER.debug("ImageCatalog has been get and parsed from '{}' and took '{}' ms.", catalogUrl, timeOfParse);
+            throw new CloudbreakImageCatalogException("Unable to fetch image catalog. The catalogUrl is null.");
+        } catch (CloudbreakImageCatalogException e) {
+            throw e;
         } catch (RuntimeException e) {
             throw new CloudbreakImageCatalogException(String.format("Failed to get image catalog: %s from %s", e.getMessage(), catalogUrl), e);
         } catch (JsonMappingException e) {
@@ -84,12 +93,11 @@ public class CachedImageCatalogProvider {
         } catch (IOException e) {
             throw new CloudbreakImageCatalogException(String.format("Failed to read image catalog from file: '%s'", catalogUrl), e);
         }
-        return catalog;
     }
 
     private CloudbreakImageCatalogV3 filterImagesByOsType(CloudbreakImageCatalogV3 catalog) {
         LOGGER.debug("Filtering images by OS type {}", getEnabledLinuxTypes());
-        if (CollectionUtils.isEmpty(getEnabledLinuxTypes()) || Objects.isNull(catalog) || Objects.isNull(catalog.getImages())) {
+        if (CollectionUtils.isEmpty(getEnabledLinuxTypes())) {
             return catalog;
         }
 
@@ -150,6 +158,10 @@ public class CachedImageCatalogProvider {
     }
 
     private void cleanAndValidateMaps(CloudbreakImageCatalogV3 catalog) throws CloudbreakImageCatalogException {
+        if (Objects.isNull(catalog.getImages())) {
+            throw new CloudbreakImageCatalogException("Images are missing from the image catalog.");
+        }
+
         boolean baseImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getBaseImages());
         boolean cdhImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getCdhImages());
         boolean freeipaImagesValidate = cleanAndAllIsEmpty(catalog.getImages().getFreeIpaImages());

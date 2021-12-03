@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +28,18 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.model.Entitlement;
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
+import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
 import com.sequenceiq.datalake.service.sdx.CDPConfigKey;
 import com.sequenceiq.sdx.api.model.AdvertisedRuntime;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -51,10 +55,14 @@ public class CDPConfigService {
 
     public static final int CLUSTERSHAPE_GROUP = 4;
 
+    public static final long DEFAULT_WORKSPACE_ID = 0;
+
     @VisibleForTesting
     static final Pattern RESOURCE_TEMPLATE_PATTERN = Pattern.compile(".*/duties/(.[^/]*)/(.[^/]*)(/.*)?/(.*?).json");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CDPConfigService.class);
+
+    private static final VersionComparator VERSION_COMPARATOR = new VersionComparator();
 
     // Defines what is the default runtime version (UI / API)
     @Value("${datalake.runtimes.default}")
@@ -72,6 +80,9 @@ public class CDPConfigService {
 
     @Inject
     private EntitlementService entitlementService;
+
+    @Inject
+    private ImageCatalogService imageCatalogService;
 
     @PostConstruct
     public void initCdpStackRequests() {
@@ -130,22 +141,39 @@ public class CDPConfigService {
     }
 
     public String getDefaultRuntime() {
-        return defaultRuntime;
+        if (Strings.isNullOrEmpty(defaultRuntime)) {
+            return getDatalakeVersions(null).stream().findFirst()
+                    .orElseThrow(() -> new CloudbreakServiceException("Runtime not found in the default image catalog"));
+        } else {
+            return defaultRuntime;
+        }
     }
 
     public List<String> getDatalakeVersions(String cloudPlatform) {
-        List<String> runtimeVersions = cdpStackRequests.keySet().stream()
-                .filter(filterByCloudPlatformIfPresent(cloudPlatform))
-                .map(CDPConfigKey::getRuntimeVersion)
-                .distinct()
-                .sorted(Comparator.reverseOrder())
-                .collect(Collectors.toList());
+        List<String> runtimeVersions = getRuntimeVersions(cloudPlatform);
+        if (Strings.isNullOrEmpty(defaultRuntime)) {
+            List<String> defaultImageCatalogRuntimeVersions = imageCatalogService.getDefaultImageCatalogRuntimeVersions(DEFAULT_WORKSPACE_ID);
+            LOGGER.debug("Generate runtime versions by checking available runtimes in the default image catalog ('{}').",
+                    String.join(",", defaultImageCatalogRuntimeVersions));
+            runtimeVersions = runtimeVersions.stream().filter(defaultImageCatalogRuntimeVersions::contains).collect(Collectors.toList());
+        }
 
         LOGGER.debug("Available runtime versions for datalake: {}", runtimeVersions);
         return runtimeVersions;
     }
 
-    public Predicate<CDPConfigKey> filterByCloudPlatformIfPresent(String cloudPlatform) {
+    private List<String> getRuntimeVersions(String cloudPlatform) {
+        return cdpStackRequests.keySet().stream()
+                .filter(filterByCloudPlatformIfPresent(cloudPlatform))
+                .map(CDPConfigKey::getRuntimeVersion)
+                .distinct()
+                .map(version -> (Versioned) () -> version)
+                .sorted(VERSION_COMPARATOR.reversed())
+                .map(Versioned::getVersion)
+                .collect(Collectors.toList());
+    }
+
+    private Predicate<CDPConfigKey> filterByCloudPlatformIfPresent(String cloudPlatform) {
         return cdpStack -> {
             if (StringUtils.isEmpty(cloudPlatform) || cdpStack.getCloudPlatform().equalsIgnoreCase(cloudPlatform)) {
                 return true;
@@ -157,12 +185,14 @@ public class CDPConfigService {
     public List<AdvertisedRuntime> getAdvertisedRuntimes(String cloudPlatform) {
         List<String> runtimeVersions = getDatalakeVersions(cloudPlatform).stream()
                 .filter(runtimeVersion -> advertisedRuntimes.isEmpty() || advertisedRuntimes.contains(runtimeVersion)).collect(Collectors.toList());
+        Optional<String> calculatedDefault
+                = Strings.isNullOrEmpty(this.defaultRuntime) ? runtimeVersions.stream().findFirst() : Optional.ofNullable(this.defaultRuntime);
 
         List<AdvertisedRuntime> advertisedRuntimes = new ArrayList<>();
         for (String runtimeVersion : runtimeVersions) {
             AdvertisedRuntime advertisedRuntime = new AdvertisedRuntime();
             advertisedRuntime.setRuntimeVersion(runtimeVersion);
-            if (runtimeVersion.equals(defaultRuntime)) {
+            if (calculatedDefault.map(r -> r.equals(runtimeVersion)).orElse(false)) {
                 advertisedRuntime.setDefaultRuntimeVersion(true);
             }
             advertisedRuntimes.add(advertisedRuntime);

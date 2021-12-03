@@ -64,6 +64,7 @@ import com.sequenceiq.cloudbreak.init.blueprint.BlueprintLoaderService;
 import com.sequenceiq.cloudbreak.repository.BlueprintRepository;
 import com.sequenceiq.cloudbreak.repository.BlueprintViewRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.cloudbreak.service.template.ClusterTemplateViewService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
@@ -127,13 +128,18 @@ public class BlueprintServiceTest {
     @Mock
     private ClusterTemplateViewService clusterTemplateViewService;
 
+    @Mock
+    private ImageCatalogService imageCatalogService;
+
     @InjectMocks
     private BlueprintService underTest;
 
     @BeforeEach
     public void setup() {
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
-        Whitebox.setInternalState(blueprintListFilters, "supportedRuntimes", new SupportedRuntimes());
+        SupportedRuntimes supportedRuntimes = new SupportedRuntimes();
+        Whitebox.setInternalState(blueprintListFilters, "supportedRuntimes", supportedRuntimes);
+        Whitebox.setInternalState(supportedRuntimes, "imageCatalogService", imageCatalogService);
         lenient().when(legacyRestRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
         lenient().when(userService.getOrCreate(cloudbreakUser)).thenReturn(user);
         lenient().when(workspaceService.get(1L, user)).thenReturn(getWorkspace());

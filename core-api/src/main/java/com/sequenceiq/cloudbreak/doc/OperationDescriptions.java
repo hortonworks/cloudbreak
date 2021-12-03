@@ -211,6 +211,7 @@ public class OperationDescriptions {
         public static final String DELETE_MULTIPLE_BY_NAME_IN_WORKSPACE = "delete multiple image catalogs by name in workspace";
         public static final String GET_IMAGE_FROM_DEFAULT = "returns an image from the default catalog based on the provided filter";
         public static final String GET_IMAGE_FROM_DEFAULT_BY_ID = "returns an image from the default catalog by id";
+        public static final String GET_DEFAULT_IMAGE_CATALOG_RUNTIME_VERSIONS = "get runtime versions from the default catalog";
     }
 
     public static class CustomImageCatalogOpDescription {
