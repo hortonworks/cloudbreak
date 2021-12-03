@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.converter.scheduler.StatusToPollGroupConverter;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
@@ -98,6 +99,17 @@ public class StackUpdater {
             LOGGER.info("Stack is in DELETE_COMPLETED status, cannot update status.");
         }
         return stack;
+    }
+
+    public void updateVariant(Long resourceId, String variant) {
+        CloudPlatformVariant stackVariant = stackService.getPlatformVariantByStackId(resourceId);
+        if (!variant.equals(stackVariant.getVariant().value())) {
+            Stack stack = stackService.get(resourceId);
+            stack.setPlatformVariant(variant);
+            stackService.save(stack);
+        } else {
+            LOGGER.info("The variant was already set to {}", variant);
+        }
     }
 
     private void saveDeprecatedClusterStatus(String statusReason, Stack stack, Status newStatus) {

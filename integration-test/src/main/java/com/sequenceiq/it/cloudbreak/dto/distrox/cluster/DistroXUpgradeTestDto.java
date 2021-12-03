@@ -44,6 +44,11 @@ public class DistroXUpgradeTestDto extends AbstractSdxTestDto<DistroXUpgradeV1Re
         return this;
     }
 
+    public DistroXUpgradeTestDto withImageId(String imageId) {
+        getRequest().setImageId(imageId);
+        return this;
+    }
+
     public DistroXUpgradeTestDto withLockComponents(Boolean lockComponents) {
         getRequest().setLockComponents(lockComponents);
         return this;

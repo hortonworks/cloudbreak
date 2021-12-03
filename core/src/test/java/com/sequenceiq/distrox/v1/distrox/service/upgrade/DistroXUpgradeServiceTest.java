@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -55,6 +56,8 @@ class DistroXUpgradeServiceTest {
 
     private static final boolean LOCK_COMPONENTS = false;
 
+    private static final String ACCOUNT_ID = "9d74eee4-1cad-45d7-b645-7ccf9edbb73d";
+
     @Mock
     private DistroXUpgradeAvailabilityService upgradeAvailabilityService;
 
@@ -91,6 +94,7 @@ class DistroXUpgradeServiceTest {
     public void setup() {
         stack = new Stack();
         stack.setId(STACK_ID);
+        stack.setPlatformVariant("variant");
     }
 
     @Test
@@ -115,7 +119,7 @@ class DistroXUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenThrow(new BadRequestException("No valid CM license is present"));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request));
@@ -128,7 +132,7 @@ class DistroXUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imgId");
@@ -141,7 +145,8 @@ class DistroXUpgradeServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
+                .thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 
@@ -159,7 +164,7 @@ class DistroXUpgradeServiceTest {
         UpgradeV4Response response = new UpgradeV4Response();
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.TRUE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.TRUE);
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imgId");
         imageInfoV4Response.setImageCatalogName("catalogName");
@@ -171,7 +176,8 @@ class DistroXUpgradeServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
+                .thenReturn(flowIdentifier);
 
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
 
@@ -191,7 +197,7 @@ class DistroXUpgradeServiceTest {
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imgId");
@@ -203,11 +209,12 @@ class DistroXUpgradeServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
+                .thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS);
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant");
         assertFalse(result.isReplaceVms());
     }
 
@@ -219,7 +226,7 @@ class DistroXUpgradeServiceTest {
         response.setReplaceVms(true);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imgId");
@@ -231,11 +238,11 @@ class DistroXUpgradeServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(true);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean())).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), anyBoolean(), anyString())).thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true);
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, true, true, "variant");
         assertTrue(result.isReplaceVms());
     }
 
@@ -267,7 +274,7 @@ class DistroXUpgradeServiceTest {
         response.setReplaceVms(false);
         response.setUpgradeCandidates(List.of(mock(ImageInfoV4Response.class)));
         when(upgradeAvailabilityService.checkForUpgrade(CLUSTER, WS_ID, request, USER_CRN)).thenReturn(response);
-        when(entitlementService.isInternalRepositoryForUpgradeAllowed("9d74eee4-1cad-45d7-b645-7ccf9edbb73d")).thenReturn(Boolean.FALSE);
+        when(entitlementService.isInternalRepositoryForUpgradeAllowed(ACCOUNT_ID)).thenReturn(Boolean.FALSE);
         when(clouderaManagerLicenseProvider.getLicense(any())).thenReturn(new JsonCMLicense());
         ImageInfoV4Response imageInfoV4Response = new ImageInfoV4Response();
         imageInfoV4Response.setImageId("imgId");
@@ -279,12 +286,37 @@ class DistroXUpgradeServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WS_ID)).thenReturn(stack);
         when(lockedComponentService.isComponentsLocked(stack, imageInfoV4Response.getImageId())).thenReturn(LOCK_COMPONENTS);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "asdf");
-        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS))).thenReturn(flowIdentifier);
+        when(reactorFlowManager.triggerDistroXUpgrade(eq(STACK_ID), eq(imageChangeDto), anyBoolean(), eq(LOCK_COMPONENTS), anyString()))
+                .thenReturn(flowIdentifier);
         // WHEN
         UpgradeV4Response result = underTest.triggerUpgrade(CLUSTER, WS_ID, USER_CRN, request);
         // THEN
-        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS);
+        verify(reactorFlowManager).triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, LOCK_COMPONENTS, "variant");
         assertFalse(result.isReplaceVms());
+    }
+
+    @Test
+    public void testCalculateUpgradeVariantWhenMigrationDisabled() {
+        stack.setPlatformVariant("AWS");
+        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(false);
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN);
+        Assertions.assertEquals("AWS", actual);
+    }
+
+    @Test
+    public void testCalculateUpgradeVariantWhenMigrationEnabledAndVariantIsAws() {
+        stack.setPlatformVariant("AWS");
+        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN);
+        Assertions.assertEquals("AWS_NATIVE", actual);
+    }
+
+    @Test
+    public void testCalculateUpgradeVariantWhenMigrationEnabledWhenVariantIsNotAWS() {
+        stack.setPlatformVariant("GCP");
+        when(entitlementService.awsVariantMigrationEnable(ACCOUNT_ID)).thenReturn(true);
+        String actual = underTest.calculateUpgradeVariant(stack, USER_CRN);
+        Assertions.assertEquals("GCP", actual);
     }
 
     private UpgradeV4Request createRequest(boolean osUpgradeEnabled) {

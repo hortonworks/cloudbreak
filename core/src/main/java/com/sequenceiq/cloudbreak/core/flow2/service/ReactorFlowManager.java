@@ -34,6 +34,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGrou
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.chain.FlowChainTriggers;
@@ -66,6 +67,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTrig
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -94,6 +96,9 @@ public class ReactorFlowManager {
     @Inject
     private AsyncTaskExecutor intermediateBuilderExecutor;
 
+    @Inject
+    private StackService stackService;
+
     public FlowIdentifier triggerProvisioning(Long stackId) {
         String selector = FlowChainTriggers.FULL_PROVISION_TRIGGER_EVENT;
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
@@ -114,10 +119,11 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(instanceGroupAdjustment.getAdjustmentType(),
                 instanceGroupAdjustment.getThreshold());
+        CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(stackId);
         Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
                 withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK,
-                getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold);
+                getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold, cloudPlatformVariant.getVariant().value());
         LOGGER.info("Triggering stack upscale with {} adjustment, {} adjustment type, {} threshold",
                 instanceGroupAdjustment.getScalingAdjustment(), adjustmentTypeWithThreshold.getAdjustmentType(), adjustmentTypeWithThreshold.getThreshold());
         return reactorNotifier.notify(stackId, selector, stackAndClusterUpscaleTriggerEvent);
@@ -125,8 +131,9 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerStackDownscale(Long stackId, InstanceGroupAdjustmentV4Request instanceGroupAdjustment) {
         String selector = STACK_DOWNSCALE_EVENT.event();
+        CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(stackId);
         Acceptable stackScaleTriggerEvent = new StackDownscaleTriggerEvent(selector, stackId, instanceGroupAdjustment.getInstanceGroup(),
-                instanceGroupAdjustment.getScalingAdjustment());
+                instanceGroupAdjustment.getScalingAdjustment(), cloudPlatformVariant.getVariant().value());
         return reactorNotifier.notify(stackId, selector, stackScaleTriggerEvent);
     }
 
@@ -176,9 +183,10 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new ClusterUpgradeTriggerEvent(selector, stackId, imageId));
     }
 
-    public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents) {
+    public FlowIdentifier triggerDistroXUpgrade(Long stackId, ImageChangeDto imageChangeDto, boolean replaceVms, boolean lockComponents, String variant) {
         String selector = FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT;
-        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms, lockComponents));
+        return reactorNotifier.notify(stackId, selector, new DistroXUpgradeTriggerEvent(selector, stackId, imageChangeDto, replaceVms, lockComponents,
+                variant));
     }
 
     public FlowIdentifier triggerDatalakeClusterRecovery(Long stackId) {

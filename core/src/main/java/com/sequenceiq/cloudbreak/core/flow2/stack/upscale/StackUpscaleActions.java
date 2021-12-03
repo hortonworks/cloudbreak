@@ -110,6 +110,9 @@ public class StackUpscaleActions {
                 variables.put(ADJUSTMENT, payload.getAdjustment());
                 variables.put(HOSTNAMES, payload.getHostNames());
                 variables.put(REPAIR, payload.isRepair());
+                if (payload.getTriggeredStackVariant() != null) {
+                    variables.put(TRIGGERED_VARIANT, payload.getTriggeredStackVariant());
+                }
                 variables.put(NETWORK_SCALE_DETAILS, payload.getNetworkScaleDetails());
                 variables.put(ADJUSTMENT_WITH_THRESHOLD, payload.getAdjustmentTypeWithThreshold());
             }

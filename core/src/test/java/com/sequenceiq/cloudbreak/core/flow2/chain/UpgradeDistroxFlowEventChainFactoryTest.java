@@ -60,7 +60,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
     public void testChainQueueForNonReplaceVms() {
         ReflectionTestUtils.setField(underTest, "upgradeValidationEnabled", true);
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                imageChangeDto, false, false);
+                imageChangeDto, false, false, "variant");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(4, flowChainQueue.getQueue().size());
         assertUpdateValidationEvent(flowChainQueue);
@@ -76,7 +76,7 @@ class UpgradeDistroxFlowEventChainFactoryTest {
         when(clusterRepairService.validateRepair(any(), any(), any(), eq(false), eq(false))).thenReturn(repairStartResult);
 
         DistroXUpgradeTriggerEvent event = new DistroXUpgradeTriggerEvent(FlowChainTriggers.DISTROX_CLUSTER_UPGRADE_CHAIN_TRIGGER_EVENT, STACK_ID,
-                imageChangeDto, true, true);
+                imageChangeDto, true, true, "variant");
         FlowTriggerEventQueue flowChainQueue = underTest.createFlowTriggerEventQueue(event);
         assertEquals(5, flowChainQueue.getQueue().size());
         assertUpdateValidationEvent(flowChainQueue);

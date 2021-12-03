@@ -4,14 +4,18 @@ import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
 
+import javax.inject.Inject;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StackRepairTriggerEvent;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;
 import com.sequenceiq.common.api.type.AdjustmentType;
@@ -20,6 +24,9 @@ import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 
 @Component
 public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<StackRepairTriggerEvent> {
+
+    @Inject
+    private StackService stackService;
 
     @Override
     public String initEvent() {
@@ -32,12 +39,13 @@ public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<S
         flowEventChain.add(new StackEvent(FlowChainTriggers.FULL_SYNC_TRIGGER_EVENT, event.getResourceId(), event.accepted()));
         UnhealthyInstances unhealthyInstances = event.getUnhealthyInstances();
         String fullUpscaleTriggerEvent = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
+        CloudPlatformVariant variant = stackService.getPlatformVariantByStackId(event.getResourceId());
         for (String hostGroupName : unhealthyInstances.getHostGroups()) {
             List<String> instances = unhealthyInstances.getInstancesForGroup(hostGroupName);
             flowEventChain.add(
                     new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getResourceId(), hostGroupName,
                             instances.size(), ScalingType.UPSCALE_TOGETHER, NetworkScaleDetails.getEmpty(),
-                            new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size())));
+                            new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size()), variant.getVariant().value()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
     }

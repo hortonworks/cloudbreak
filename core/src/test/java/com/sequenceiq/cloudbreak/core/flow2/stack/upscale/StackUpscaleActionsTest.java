@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOSTNAMES;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.INSTANCEGROUPNAME;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.NETWORK_SCALE_DETAILS;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.REPAIR;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.TRIGGERED_VARIANT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.isNotNull;
@@ -7,10 +12,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +38,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
+import com.sequenceiq.cloudbreak.core.flow2.dto.NetworkScaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -59,6 +67,8 @@ class StackUpscaleActionsTest {
     private static final String SELECTOR = "selector";
 
     private static final Long STACK_ID = 123L;
+
+    private static final String VARIANT = "VARIANT";
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -134,7 +144,7 @@ class StackUpscaleActionsTest {
         when(cloudContext.getId()).thenReturn(STACK_ID);
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
         StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
-                adjustmentTypeWithThreshold);
+                adjustmentTypeWithThreshold, VARIANT);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT);
 
@@ -170,7 +180,7 @@ class StackUpscaleActionsTest {
     void prevalidateTestDoExecuteWhenScalingNeededAndNotAllowed() throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
         StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
-                adjustmentTypeWithThreshold);
+                adjustmentTypeWithThreshold, VARIANT);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
 
@@ -207,7 +217,7 @@ class StackUpscaleActionsTest {
         context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME, Set.of(), ADJUSTMENT_ZERO,
                 false, adjustmentTypeWithThreshold);
         StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO,
-                adjustmentTypeWithThreshold);
+                adjustmentTypeWithThreshold, VARIANT);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
 
@@ -222,4 +232,33 @@ class StackUpscaleActionsTest {
         verifyEventForUpscaleStackResult(resourceStatuses);
     }
 
+    @Test
+    void prevalidateTestCreateContextWhenTriggeredVariantSet() {
+        NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, Set.of("hostname"),
+                networkScaleDetails, null, VARIANT);
+        Map<Object, Object> variables = new HashMap<>();
+        new AbstractActionTestSupport<>(getPrevalidateAction()).prepareExecution(payload, variables);
+        Assertions.assertEquals(INSTANCE_GROUP_NAME, variables.get(INSTANCEGROUPNAME));
+        Assertions.assertEquals(ADJUSTMENT_ZERO, variables.get(AbstractStackUpscaleAction.ADJUSTMENT));
+        Assertions.assertEquals(Set.of("hostname"), variables.get(HOSTNAMES));
+        Assertions.assertEquals(false, variables.get(REPAIR));
+        Assertions.assertEquals(VARIANT, variables.get(TRIGGERED_VARIANT));
+        Assertions.assertEquals(networkScaleDetails, variables.get(NETWORK_SCALE_DETAILS));
+    }
+
+    @Test
+    void prevalidateTestCreateContextWhenTriggeredVariantNotSet() {
+        NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, Set.of("hostname"),
+                networkScaleDetails, null, null);
+        Map<Object, Object> variables = new HashMap<>();
+        new AbstractActionTestSupport<>(getPrevalidateAction()).prepareExecution(payload, variables);
+        Assertions.assertEquals(INSTANCE_GROUP_NAME, variables.get(INSTANCEGROUPNAME));
+        Assertions.assertEquals(ADJUSTMENT_ZERO, variables.get(AbstractStackUpscaleAction.ADJUSTMENT));
+        Assertions.assertEquals(Set.of("hostname"), variables.get(HOSTNAMES));
+        Assertions.assertEquals(false, variables.get(REPAIR));
+        Assertions.assertNull(variables.get(TRIGGERED_VARIANT));
+        Assertions.assertEquals(networkScaleDetails, variables.get(NETWORK_SCALE_DETAILS));
+    }
 }

@@ -68,7 +68,7 @@ public class ParcelResourceOperation {
     }
 
     public ResponseEntity<ApiCommand> deactivateCommand(String mockUuid, String clusterName, String product, String version) {
-        clouderaManagerStoreService.addOrUpdateProduct(mockUuid, product, version);
+        clouderaManagerStoreService.removeProduct(mockUuid, product, version);
         return responseCreatorComponent.exec(dataProviderService.getSuccessfulApiCommand(DEACTIVATE_PARCEL));
     }
 

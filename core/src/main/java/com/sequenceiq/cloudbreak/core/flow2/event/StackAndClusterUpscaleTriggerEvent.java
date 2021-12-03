@@ -26,8 +26,8 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
     private final ClusterManagerType clusterManagerType;
 
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
-            NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
-        super(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), networkScaleDetails, adjustmentTypeWithThreshold);
+            NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
+        super(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), networkScaleDetails, adjustmentTypeWithThreshold, triggeredStackVariant);
         this.scalingType = scalingType;
         singleMasterGateway = false;
         kerberosSecured = false;
@@ -38,8 +38,9 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
             Set<String> hostNames, boolean singlePrimaryGateway, boolean kerberosSecured, Promise<AcceptResult> accepted, boolean singleNodeCluster,
-            boolean restartServices, ClusterManagerType clusterManagerType, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
-        super(selector, stackId, instanceGroup, adjustment, hostNames, adjustmentTypeWithThreshold, accepted);
+            boolean restartServices, ClusterManagerType clusterManagerType, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
+            String triggeredStackVariant) {
+        super(selector, stackId, instanceGroup, adjustment, hostNames, adjustmentTypeWithThreshold, triggeredStackVariant, accepted);
         this.scalingType = scalingType;
         singleMasterGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;

@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.Ex
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.terminate.config.ExternalDatabaseTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.instance.termination.InstanceTerminationFlowConfig;
+import com.sequenceiq.cloudbreak.core.flow2.stack.migration.AwsVariantMigrationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.provision.StackCreationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.repair.ManualStackRepairTriggerFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartFlowConfig;
@@ -67,7 +68,8 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
             ClusterStartFlowConfig.class, ClusterStopFlowConfig.class,
             ClusterUpscaleFlowConfig.class, ClusterDownscaleFlowConfig.class,
             ClusterUpgradeFlowConfig.class, ClusterResetFlowConfig.class, ChangePrimaryGatewayFlowConfig.class,
-            ClusterCertificateRenewFlowConfig.class, DatabaseBackupFlowConfig.class, DatabaseRestoreFlowConfig.class, PillarConfigUpdateFlowConfig.class
+            ClusterCertificateRenewFlowConfig.class, DatabaseBackupFlowConfig.class, DatabaseRestoreFlowConfig.class, PillarConfigUpdateFlowConfig.class,
+            AwsVariantMigrationFlowConfig.class
     );
 
     @Inject

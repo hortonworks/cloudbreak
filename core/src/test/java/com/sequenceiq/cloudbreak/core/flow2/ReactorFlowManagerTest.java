@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.CertificatesRotationV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
@@ -43,6 +45,7 @@ import com.sequenceiq.cloudbreak.core.flow2.service.ReactorNotifier;
 import com.sequenceiq.cloudbreak.core.flow2.service.TerminationTriggerService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.repair.UnhealthyInstances;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.service.FlowCancelService;
@@ -70,6 +73,12 @@ public class ReactorFlowManagerTest {
     @Mock
     private FlowCancelService flowCancelService;
 
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private CloudPlatformVariant cloudPlatformVariant;
+
     private Stack stack;
 
     @InjectMocks
@@ -88,14 +97,16 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void
-    shouldReturnTheNextFailureTransition() {
+    public void shouldReturnTheNextFailureTransition() {
         InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustment.setScalingAdjustment(5);
         HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
         instanceIdsByHostgroup.put("hostrgroup", Collections.singleton(1L));
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "imageid");
+
+        when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
+        when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
 
         underTest.triggerProvisioning(STACK_ID);
         underTest.triggerClusterInstall(STACK_ID);
@@ -128,7 +139,7 @@ public class ReactorFlowManagerTest {
         underTest.triggerMaintenanceModeValidationFlow(STACK_ID);
         underTest.triggerClusterCertificationRenewal(STACK_ID);
         underTest.triggerDatalakeClusterUpgrade(STACK_ID, "asdf");
-        underTest.triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false);
+        underTest.triggerDistroXUpgrade(STACK_ID, imageChangeDto, false, false, "variant");
         underTest.triggerSaltUpdate(STACK_ID);
         underTest.triggerPillarConfigurationUpdate(STACK_ID);
         underTest.triggerDatalakeDatabaseBackup(STACK_ID, null, null, true);
@@ -171,6 +182,9 @@ public class ReactorFlowManagerTest {
         instanceGroupAdjustment.setInstanceGroup("ig");
         instanceGroupAdjustment.setScalingAdjustment(3);
 
+        when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
+        when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
+
         underTest.triggerStackUpscale(stack.getId(), instanceGroupAdjustment, false);
 
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
@@ -189,6 +203,9 @@ public class ReactorFlowManagerTest {
         instanceGroupAdjustment.setInstanceGroup("ig");
         instanceGroupAdjustment.setScalingAdjustment(3);
 
+        when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
+        when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
+
         underTest.triggerStackUpscale(stack.getId(), instanceGroupAdjustment, true);
 
         ArgumentCaptor<Acceptable> captor = ArgumentCaptor.forClass(Acceptable.class);
@@ -202,7 +219,7 @@ public class ReactorFlowManagerTest {
     }
 
     @Test
-    public void testtriggerStackImageUpdate() {
+    public void testTriggerStackImageUpdate() {
         long stackId = 1L;
         String imageID = "imageID";
         String imageCatalogName = "imageCatalogName";

@@ -146,4 +146,11 @@ public class ClouderaManagerStoreService {
             addProduct(mockUuid, product, version);
         }
     }
+
+    public void removeProduct(String mockUuid, String product, String version) {
+        Optional<ApiProductVersion> productOpt = getClouderaManagerProduct(mockUuid, product);
+        if (productOpt.isPresent() && version.equals(productOpt.get().getVersion())) {
+            getClouderaManagerProducts(mockUuid).remove(productOpt.get());
+        }
+    }
 }

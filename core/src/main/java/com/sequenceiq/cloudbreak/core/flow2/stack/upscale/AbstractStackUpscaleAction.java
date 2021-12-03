@@ -12,6 +12,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.statemachine.StateContext;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
@@ -42,6 +43,8 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
     static final String HOSTNAMES = "HOSTNAMES";
 
     static final String REPAIR = "REPAIR";
+
+    static final String TRIGGERED_VARIANT = "TRIGGERED_VARIANT";
 
     static final String NETWORK_SCALE_DETAILS = "NETWORK_SCALE_DETAILS";
 
@@ -76,7 +79,7 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
                 .withName(stack.getName())
                 .withCrn(stack.getResourceCrn())
                 .withPlatform(stack.getCloudPlatform())
-                .withVariant(stack.getPlatformVariant())
+                .withVariant(getTriggeredVariantOrStackVariant(variables, stack))
                 .withLocation(location)
                 .withWorkspaceId(stack.getWorkspace().getId())
                 .withAccountId(stack.getTenant().getId())
@@ -103,6 +106,14 @@ abstract class AbstractStackUpscaleAction<P extends Payload> extends AbstractSta
 
     private boolean isRepair(Map<Object, Object> variables) {
         return variables.get(REPAIR) != null && (Boolean) variables.get(REPAIR);
+    }
+
+    private String getTriggeredVariantOrStackVariant(Map<Object, Object> variables, Stack stack) {
+        String variant = (String) variables.get(TRIGGERED_VARIANT);
+        if (StringUtils.isEmpty(variant)) {
+            variant = stack.getPlatformVariant();
+        }
+        return variant;
     }
 
     private Set<String> getHostNames(Map<Object, Object> variables) {
