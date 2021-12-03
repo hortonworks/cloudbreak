@@ -115,7 +115,7 @@ public class SdxDetachActions {
                         stackV4Endpoint.updateNameAndCrn(0L,  (String) variables.get(SDX_NAME), initiatorUserCrn,
                                 detachingSdxCluster.getClusterName(), detachingSdxCluster.getCrn()));
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Data lake detaching in progress", payload.getResourceId());
-                if (variables.containsKey(RESIZED_SDX)) {
+                if (variables.containsKey(RESIZED_SDX) && detachingSdxCluster.hasExternalDatabase()) {
                     SdxCluster resizedSdxCluster = (SdxCluster) variables.get(RESIZED_SDX);
                     LOGGER.info("Updating the cluster CRN from {} to {}", resizedSdxCluster.getCrn(), detachingSdxCluster.getCrn());
                     // By now, CRN of the data lake being detached is updated to a new one and the new resized data lake object has the original CRN.
