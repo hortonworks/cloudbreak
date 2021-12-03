@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBui
 import com.sequenceiq.common.api.cloudstorage.AccountMappingBase;
 import com.sequenceiq.common.api.cloudstorage.StorageLocationBase;
 
-public abstract class AwsIDBrokerMappedRolePermissionValidator {
+public abstract class AwsIDBrokerMappedRolePermissionValidator extends AbstractAwsSimulatePolicyValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsIDBrokerMappedRolePermissionValidator.class);
 
     private static final int MAX_SIZE = 5;
@@ -83,16 +83,28 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
             List<String> policyFileNames = getPolicyFileNames(s3guardEnabled);
 
             SortedSet<String> failedActions = new TreeSet<>();
+            SortedSet<String> warnings = new TreeSet<>();
             List<Policy> policies = collectPolicies(cloudFileSystem, policyFileNames);
             for (Role role : roles) {
                 try {
                     List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam, role, policies);
                     failedActions.addAll(getFailedActions(role, evaluationResults));
+                    warnings.addAll(getWarnings(role, evaluationResults));
                 } catch (AmazonIdentityManagementException e) {
                     // Only log the error and keep processing. Failed actions won't be added, but
                     // processing doesn't get stopped either. This can happen due to rate limiting.
                     LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(), e.getMessage(), e);
                 }
+            }
+            if (!warnings.isEmpty()) {
+                String validationWarningMessage = String.format("The validation of the Data Access Role (%s) was not successful" +
+                                " because there are missing context values (%s). This is not an issue in itself you might have an SCPs configured" +
+                                " in your aws account and the system couldn't guess these extra parameters.",
+                        String.join(", ", roles.stream().map(Role::getArn).collect(Collectors.toCollection(TreeSet::new))),
+                        String.join(", ", warnings)
+                );
+                LOGGER.info(validationWarningMessage);
+                validationResultBuilder.warning(validationWarningMessage);
             }
             if (!failedActions.isEmpty()) {
                 String validationErrorMessage = String.format("Data Access Role (%s) is not set up correctly. " +
@@ -177,17 +189,4 @@ public abstract class AwsIDBrokerMappedRolePermissionValidator {
         return policies;
     }
 
-    /**
-     * Finds all the denied results and generates a set of failed actions
-     *
-     * @param role              Role that was being evaluated
-     * @param evaluationResults result of simulating the policy
-     */
-    SortedSet<String> getFailedActions(Role role, List<EvaluationResult> evaluationResults) {
-        return evaluationResults.stream()
-                .filter(evaluationResult -> evaluationResult.getEvalDecision().toLowerCase().contains("deny"))
-                .map(evaluationResult -> String.format("%s:%s:%s", role.getArn(),
-                        evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName()))
-                .collect(Collectors.toCollection(TreeSet::new));
-    }
 }

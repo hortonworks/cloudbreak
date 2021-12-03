@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
-import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -25,7 +24,7 @@ import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.validation.ValidationResult.ValidationResultBuilder;
 
 @Component
-public class AwsLogRolePermissionValidator {
+public class AwsLogRolePermissionValidator extends AbstractAwsSimulatePolicyValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsLogRolePermissionValidator.class);
 
@@ -38,6 +37,7 @@ public class AwsLogRolePermissionValidator {
     public void validate(AmazonIdentityManagementClient iam, InstanceProfile instanceProfile,
             CloudS3View cloudFileSystem, String logLocationBase, ValidationResultBuilder validationResultBuilder) {
         SortedSet<String> failedActions = new TreeSet<>();
+        SortedSet<String> warnings = new TreeSet<>();
         if (logLocationBase == null) {
             return;
         }
@@ -53,12 +53,24 @@ public class AwsLogRolePermissionValidator {
                 List<EvaluationResult> evaluationResults = awsIamService.validateRolePolicies(iam,
                         role, policies);
                 failedActions.addAll(getFailedActions(role, evaluationResults));
+                warnings.addAll(getWarnings(role, evaluationResults));
             } catch (AmazonIdentityManagementException e) {
                 // Only log the error and keep processing. Failed actions won't be added, but
                 // processing doesn't get stopped either. This can happen due to rate limiting.
                 LOGGER.error("Unable to validate role policies for role {} due to {}", role.getArn(),
                         e.getMessage(), e);
             }
+        }
+
+        if (!warnings.isEmpty()) {
+            String validationWarningMessage = String.format("The validation of the Logger Instance Profile (%s) was not successful" +
+                            " because there are missing context values (%s). This is not an issue in itself you might have an SCPs configured" +
+                            " in your aws account and the system couldn't guess these extra parameters.",
+                    String.join(", ", instanceProfile.getArn()),
+                    String.join(", ", warnings)
+            );
+            LOGGER.info(validationWarningMessage);
+            validationResultBuilder.warning(validationWarningMessage);
         }
 
         if (!failedActions.isEmpty()) {
@@ -77,17 +89,4 @@ public class AwsLogRolePermissionValidator {
         return logLocationBase.replaceFirst("^s3.?://", "");
     }
 
-    /**
-     * Finds all the denied results and generates a set of failed actions
-     *
-     * @param role              Role that was being evaluated
-     * @param evaluationResults result of the simulate policy
-     */
-    SortedSet<String> getFailedActions(Role role, List<EvaluationResult> evaluationResults) {
-        return evaluationResults.stream()
-                .filter(evaluationResult -> evaluationResult.getEvalDecision().toLowerCase().contains("deny"))
-                .map(evaluationResult -> String.format("%s:%s:%s", role.getArn(),
-                        evaluationResult.getEvalActionName(), evaluationResult.getEvalResourceName()))
-                .collect(Collectors.toCollection(TreeSet::new));
-    }
 }

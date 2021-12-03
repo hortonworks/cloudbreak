@@ -2,6 +2,7 @@ package com.sequenceiq.environment.environment.flow.creation.handler;
 
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.VALIDATE_ENVIRONMENT_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.START_NETWORK_CREATION_EVENT;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 import java.util.Set;
 
@@ -123,6 +124,10 @@ public class EnvironmentValidationHandler extends EventSenderAwareHandler<Enviro
         }
         if (response != null && ResponseStatus.ERROR.equals(response.getStatus())) {
             throw new EnvironmentServiceException(response.getError());
+        }
+        if (response != null && ResponseStatus.OK.equals(response.getStatus()) && isNotBlank(response.getError())) {
+            eventSenderService.sendEventAndNotification(environmentDto, ThreadBasedUserCrnProvider.getUserCrn(),
+                    ResourceEvent.ENVIRONMENT_VALIDATION_FAILED_AND_SKIPPED, Set.of(response.getError()));
         }
     }
 
