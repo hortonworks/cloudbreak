@@ -77,7 +77,7 @@ dependencies {
   implementation     group: 'org.glassfish.jaxb',        name: 'jaxb-runtime',                    version: '2.3.1'
   implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                   version: jerseyCoreVersion
   implementation     group: 'org.glassfish.jersey.media',name: 'jersey-media-json-jackson',       version: jerseyCoreVersion
-  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: '3.2.0'
+  implementation     group: 'org.mybatis',               name: 'mybatis-migrations',              version: mybatisMigrationVersion
   implementation     group: 'org.postgresql',            name: 'postgresql',                      version: postgreSQLVersion
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',             version: springBootVersion
   implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',         version: springBootVersion

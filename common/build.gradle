@@ -29,7 +29,7 @@ dependencies {
   api group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
   api group: 'com.google.code.gson',                  name: 'gson',                           version: gsonVersion
   implementation group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
-  implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: '3.2.0'
+  implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: mybatisMigrationVersion
   implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
   implementation group: 'net.sf.json-lib',                       name: 'json-lib',                       version: '2.4',  classifier: 'jdk15'
   api group: 'net.jcip',                              name: 'jcip-annotations',               version: '1.0'

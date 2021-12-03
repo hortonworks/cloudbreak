@@ -150,7 +150,7 @@ dependencyManagement {
             exclude group: 'com.zaxxer', name: 'HikariCP-java7'
         }
         dependency group: 'org.postgresql',                     name: 'postgresql',                version: postgreSQLVersion
-        dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: '3.2.0'
+        dependency group: 'org.mybatis',                        name: 'mybatis-migrations',        version: mybatisMigrationVersion
         dependency group: 'org.mockito',                        name: 'mockito-core',              version: mockitoVersion
         dependency group: 'com.openpojo',                       name: 'openpojo',                  version: openPojoVersion
         dependency group: 'com.sequenceiq',                     name: 'consul-api',                version: '1.10'
