@@ -1,12 +1,10 @@
 package com.sequenceiq.mock.verification;
 
-import java.util.List;
-
 import javax.inject.Inject;
 
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class TestRequestTrackerController {
@@ -14,8 +12,13 @@ public class TestRequestTrackerController {
     @Inject
     private RequestResponseStorageService requestResponseStorageService;
 
-    @GetMapping("/calls/{testName}")
-    public List<Call> getCalls(@PathVariable("testName") String testName) {
-        return requestResponseStorageService.get(testName);
+    @PostMapping("/calls/disable")
+    public void disableCallStorage(@RequestParam("mockUuid") String mockUuid) {
+        requestResponseStorageService.disableCallStorage(mockUuid);
+    }
+
+    @PostMapping("/calls/enable")
+    public void enableCallStorage(@RequestParam("mockUuid") String mockUuid) {
+        requestResponseStorageService.enableCallStorage(mockUuid);
     }
 }

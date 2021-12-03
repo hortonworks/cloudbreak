@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.dto.mock.answer.DefaultResponseConfigure.ParameterCheck.HAS_THESE_PARAMETERS;
+import static com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ExperienceEndpoints.LIFTIE_API_ROOT;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -49,6 +50,8 @@ public class EnvironmentExperienceTest extends AbstractMockTest {
                 .given(EnvironmentTestDto.class)
                 .withNetwork()
                 .when(environmentTestClient.create())
+                .enableVerification(LIFTIE_API_ROOT)
+                .enableVerification()
                 .await(EnvironmentStatus.AVAILABLE);
         String envName = testContext.given(EnvironmentTestDto.class).getName();
         String crn = testContext.given(EnvironmentTestDto.class).getCrn();
