@@ -55,8 +55,10 @@ public class DownscaleFlowEventChainFactory implements FlowEventChainFactory<Clu
                     .orElseThrow(NotFoundException.notFound("hostgroup", event.getHostGroupName()));
             String instanceGroupName = Optional.ofNullable(hostGroup.getInstanceGroup()).map(InstanceGroup::getGroupName).orElse(null);
             StackScaleTriggerEvent sste = event.getPrivateIds() == null
-                    ? new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getAdjustment())
-                    : new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getPrivateIds());
+                    ? new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getAdjustment(),
+                    stackView.getPlatformVariant())
+                    : new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), instanceGroupName, event.getPrivateIds(),
+                    stackView.getPlatformVariant());
             if (event.getDetails() != null && event.getDetails().isRepair()) {
                 sste.setRepair();
             }

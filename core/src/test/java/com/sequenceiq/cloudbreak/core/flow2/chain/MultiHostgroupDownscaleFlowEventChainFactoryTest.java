@@ -5,25 +5,43 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static com.sequenceiq.flow.core.chain.finalize.config.FlowChainFinalizeEvent.FLOWCHAIN_FINALIZE_TRIGGER_EVENT;
 import static com.sequenceiq.flow.core.chain.init.config.FlowChainInitEvent.FLOWCHAIN_INIT_TRIGGER_EVENT;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.cloud.model.CloudPlatformVariant;
+import com.sequenceiq.cloudbreak.cloud.model.Variant;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 import com.sequenceiq.cloudbreak.core.flow2.event.MultiHostgroupClusterAndStackDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 import reactor.rx.Promise;
 
+@ExtendWith(MockitoExtension.class)
 public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
 
-    private final MultiHostgroupDownscaleFlowEventChainFactory underTest = new MultiHostgroupDownscaleFlowEventChainFactory();
+    private static final Long STACK_ID = 198L;
+
+    @InjectMocks
+    private MultiHostgroupDownscaleFlowEventChainFactory underTest;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
+    private CloudPlatformVariant cloudPlatformVariant;
 
     @Test
     public void testInitEvent() {
@@ -36,8 +54,12 @@ public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
         instanceIdsByHostgroupMap.put("firstGroup", Sets.newHashSet(1L, 2L));
         instanceIdsByHostgroupMap.put("secondGroup", Sets.newHashSet(3L, 4L));
         ClusterDownscaleDetails details = new ClusterDownscaleDetails();
-        MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent("selector", 1L,
+        MultiHostgroupClusterAndStackDownscaleTriggerEvent event = new MultiHostgroupClusterAndStackDownscaleTriggerEvent("selector", STACK_ID,
                 instanceIdsByHostgroupMap, details, ScalingType.DOWNSCALE_TOGETHER, new Promise<>());
+
+        when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
+        when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
+
         Queue<Selectable> queue = underTest.createFlowTriggerEventQueue(event).getQueue();
         assertEquals(6L, queue.size());
         assertEquals(FLOWCHAIN_INIT_TRIGGER_EVENT.event(), queue.poll().selector());

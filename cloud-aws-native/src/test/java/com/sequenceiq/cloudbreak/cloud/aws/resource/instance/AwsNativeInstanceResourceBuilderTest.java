@@ -379,4 +379,26 @@ public class AwsNativeInstanceResourceBuilderTest {
         Collection<BlockDeviceMapping> actual = underTest.blocks(group, cloudStack, ac);
         Assertions.assertEquals(1, actual.size());
     }
+
+    @Test
+    public void testGetSecurityGroupIdWhenHasMoreThanOneSecurityGroupButNeedToSelectTheSecond() {
+
+        CloudResource secGroupResource1 = getSecurityGroupResourceBuilder().group("groupName1").reference("ref1").build();
+        CloudResource secGroupResource2 = getSecurityGroupResourceBuilder().group("groupName2").reference("ref2").build();
+
+        when(group.getName()).thenReturn("groupName2");
+        when(awsContext.getGroupResources("groupName2")).thenReturn(List.of(secGroupResource1, secGroupResource2));
+        String actual = underTest.getSecurityGroupId(awsContext, group);
+        Assertions.assertEquals("ref2", actual);
+    }
+
+    private CloudResource.Builder getSecurityGroupResourceBuilder() {
+        return CloudResource.builder()
+                .name("name")
+                .type(ResourceType.AWS_SECURITY_GROUP)
+                .status(CommonStatus.CREATED)
+                .reference("sg-id")
+                .group("groupName")
+                .params(emptyMap());
+    }
 }

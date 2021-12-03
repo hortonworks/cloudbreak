@@ -16,6 +16,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_DATALAKE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_NATIVE_FREEIPA;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AWS_VARIANT_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_AZURE_DISK_SSE_WITH_CMK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_DATABASE_WIRE_ENCRYPTION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK;
@@ -418,6 +419,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.unbound.elimination.enable:true}")
     private boolean enableUnboundElimination;
+
+    @Value("${auth.mock.aws.native.variant.migration.enable}")
+    private boolean enableAwsVariantMigration;
 
     private String cbLicense;
 
@@ -855,6 +859,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableMultiAzFreeIpa) {
             builder.addEntitlements(createEntitlement(CDP_CB_AWS_NATIVE_FREEIPA));
+        }
+        if (enableAwsVariantMigration) {
+            builder.addEntitlements(createEntitlement(CDP_CB_AWS_VARIANT_MIGRATION));
         }
         if (edpProgressBarEnabled) {
             builder.addEntitlements(createEntitlement(UI_EDP_PROGRESS_BAR));

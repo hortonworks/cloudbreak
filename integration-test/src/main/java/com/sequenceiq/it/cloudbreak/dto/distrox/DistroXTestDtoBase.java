@@ -107,6 +107,10 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         return this;
     }
 
+    public DistroXTestDtoBase<T> withImageSettings() {
+        return withImageSettings(DistroXImageTestDto.class.getSimpleName());
+    }
+
     public DistroXTestDtoBase<T> withImageSettings(String key) {
         DistroXImageTestDto imageSettingsEntity = getTestContext().get(key);
         getRequest().setImage(imageSettingsEntity.getRequest());

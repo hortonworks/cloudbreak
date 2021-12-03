@@ -12,16 +12,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 import java.util.Set;
+import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.stream.Collectors;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.projection.StackIdView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -226,6 +230,38 @@ public class ClusterRepairFlowEventChainFactoryTest {
                 "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"), triggeredOperations);
+    }
+
+    @Test
+    public void testAddAwsNativeMigrationIfNeedWhenNotUpgrade() {
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        boolean upgrade = false;
+        String variant = "variant";
+        underTest.addAwsNativeMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        Assertions.assertTrue(flowTriggers.isEmpty());
+    }
+
+    @Test
+    public void testAddAwsNativeMigrationIfNeedWhenUpgradeButNotAwsNativeVariant() {
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        boolean upgrade = true;
+        String variant = "variant";
+        underTest.addAwsNativeMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        Assertions.assertTrue(flowTriggers.isEmpty());
+    }
+
+    @Test
+    public void testAddAwsNativeMigrationIfNeedWhenUpgradeAndAwsNativeVariant() {
+        Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
+        String groupName = "groupName";
+        boolean upgrade = true;
+        String variant = "AWS_NATIVE";
+        underTest.addAwsNativeMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        Assertions.assertFalse(flowTriggers.isEmpty());
+        AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
+        Assertions.assertEquals(groupName, actual.getHostGroupName());
     }
 
     private void setupHostGroup(boolean gatewayInstanceGroup) {

@@ -140,18 +140,21 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         return buildableResource;
     }
 
-    private String getSecurityGroupId(AwsContext context, Group group) {
+    String getSecurityGroupId(AwsContext context, Group group) {
         List<CloudResource> groupResources = context.getGroupResources(group.getName());
         String securityGroupId = null;
         if (groupResources != null) {
             securityGroupId = groupResources.stream()
-                    .filter(g -> g.getType() == ResourceType.AWS_SECURITY_GROUP)
+                    .filter(g -> g.getType() == ResourceType.AWS_SECURITY_GROUP && group.getName().equals(g.getGroup()))
                     .findFirst()
                     .map(CloudResource::getReference)
                     .orElse(null);
         }
         if (securityGroupId == null) {
             securityGroupId = group.getSecurity().getCloudSecurityId();
+        }
+        if (securityGroupId == null) {
+            LOGGER.debug("Cannot determine the security group, so it will be created in the default sec group");
         }
         return securityGroupId;
     }

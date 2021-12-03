@@ -21,13 +21,15 @@ public class AwsMethodExecutor {
     public <T> T execute(Supplier<T> awsMethod, T def) {
         T ret;
         try {
+            LOGGER.debug("Fetch data from AWS");
             ret = awsMethod.get();
+            LOGGER.debug("Data fetched: {}", ret);
         } catch (AmazonEC2Exception e) {
             if (e.getErrorCode().contains("NotFound")) {
                 LOGGER.info("Aws resource does not found: {}", e.getMessage());
                 ret = def;
             } else {
-                LOGGER.error("Cannot execute aws method: {}", e);
+                LOGGER.error("Cannot execute aws method: {}", e.getMessage(), e);
                 throw e;
             }
         }

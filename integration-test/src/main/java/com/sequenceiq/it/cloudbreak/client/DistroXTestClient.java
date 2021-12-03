@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.CheckVariant;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXBlueprintRequestAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateAction;
@@ -97,5 +98,9 @@ public class DistroXTestClient {
 
     public Action<DistroXChangeImageCatalogTestDto, CloudbreakClient> changeImageCatalog() {
         return new DistroXChangeImageCatalogAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> checkVariant(String variant) {
+        return new CheckVariant(variant);
     }
 }

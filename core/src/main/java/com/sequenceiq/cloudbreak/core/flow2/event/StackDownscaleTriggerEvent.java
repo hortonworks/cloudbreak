@@ -12,18 +12,20 @@ public class StackDownscaleTriggerEvent extends StackScaleTriggerEvent {
 
     private final Set<Long> privateIds;
 
-    public StackDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment) {
-        super(selector, stackId, hostGroup, adjustment, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, adjustment.longValue()));
+    public StackDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, String triggeredStackVariant) {
+        super(selector, stackId, hostGroup, adjustment, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, adjustment.longValue()), triggeredStackVariant);
         privateIds = null;
     }
 
-    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds) {
-        super(selector, stackId, instanceGroup, null, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) privateIds.size()));
+    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds, String triggeredStackVariant) {
+        super(selector, stackId, instanceGroup, null, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) privateIds.size()), triggeredStackVariant);
         this.privateIds = privateIds;
     }
 
-    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds, Promise<AcceptResult> accepted) {
-        super(selector, stackId, instanceGroup, null, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) privateIds.size()), accepted);
+    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds, String triggeredStackVariant,
+            Promise<AcceptResult> accepted) {
+        super(selector, stackId, instanceGroup, null, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) privateIds.size()), triggeredStackVariant,
+                accepted);
         this.privateIds = privateIds;
     }
 
