@@ -5,13 +5,14 @@ import java.util.Map;
 
 import com.sequenceiq.cloudbreak.client.RPCMessage;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
 public abstract class AbstractFreeIpaResponse<T> {
 
-    public Object handle(String body) throws Exception {
+    public Object handle(List<CloudVmMetaDataStatus> metadatas, String body) throws Exception {
         RPCResponse<T> rpcResponse = new RPCResponse<>();
         rpcResponse.setSummary("summary");
-        rpcResponse.setResult(handleInternal(body));
+        rpcResponse.setResult(handleInternal(metadatas, body));
         rpcResponse.setCount(1);
         rpcResponse.setTruncated(Boolean.FALSE);
         rpcResponse.setMessages(getMessages());
@@ -24,5 +25,5 @@ public abstract class AbstractFreeIpaResponse<T> {
         return null;
     }
 
-    protected abstract T handleInternal(String body);
+    protected abstract T handleInternal(List<CloudVmMetaDataStatus> metadatas, String body);
 }

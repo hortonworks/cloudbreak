@@ -67,6 +67,7 @@ class ValidateInstancesHealthHandlerTest {
     @Test
     public void testHealthy() throws FreeIpaClientException {
         Stack stack = new Stack();
+        stack.setId(1L);
         when(stackService.getStackById(1L)).thenReturn(stack);
         List<String> instanceIds = List.of("im1", "im2");
         InstanceMetaData im1 = new InstanceMetaData();
@@ -75,7 +76,7 @@ class ValidateInstancesHealthHandlerTest {
         InstanceMetaData im2 = new InstanceMetaData();
         im2.setInstanceId("im2");
         im2.setDiscoveryFQDN("im2Fqdn");
-        when(instanceMetaDataService.getByInstanceIds(instanceIds)).thenReturn(Set.of(im1, im2));
+        when(instanceMetaDataService.getNotTerminatedByInstanceIds(1L, instanceIds)).thenReturn(Set.of(im1, im2));
         when(healthService.getInstanceHealthDetails(stack, im1)).thenReturn(createHealthyNodeDetail(im1));
         when(healthService.getInstanceHealthDetails(stack, im2)).thenReturn(createHealthyNodeDetail(im2));
 
@@ -88,6 +89,7 @@ class ValidateInstancesHealthHandlerTest {
     @Test
     public void testUnHealthy() throws FreeIpaClientException {
         Stack stack = new Stack();
+        stack.setId(1L);
         when(stackService.getStackById(1L)).thenReturn(stack);
         List<String> instanceIds = List.of("im1", "im2");
         InstanceMetaData im1 = new InstanceMetaData();
@@ -96,7 +98,7 @@ class ValidateInstancesHealthHandlerTest {
         InstanceMetaData im2 = new InstanceMetaData();
         im2.setInstanceId("im2");
         im2.setDiscoveryFQDN("im2Fqdn");
-        when(instanceMetaDataService.getByInstanceIds(instanceIds)).thenReturn(Set.of(im1, im2));
+        when(instanceMetaDataService.getNotTerminatedByInstanceIds(1L, instanceIds)).thenReturn(Set.of(im1, im2));
         when(healthService.getInstanceHealthDetails(stack, im1)).thenReturn(createHealthyNodeDetail(im1));
         NodeHealthDetails unhealthy = createHealthyNodeDetail(im2);
         unhealthy.setStatus(InstanceStatus.UNHEALTHY);
@@ -117,6 +119,7 @@ class ValidateInstancesHealthHandlerTest {
     @Test
     public void testExceptionDuringHealthCheck() throws FreeIpaClientException {
         Stack stack = new Stack();
+        stack.setId(1L);
         when(stackService.getStackById(1L)).thenReturn(stack);
         List<String> instanceIds = List.of("im1", "im2");
         InstanceMetaData im1 = new InstanceMetaData();
@@ -125,7 +128,7 @@ class ValidateInstancesHealthHandlerTest {
         InstanceMetaData im2 = new InstanceMetaData();
         im2.setInstanceId("im2");
         im2.setDiscoveryFQDN("im2Fqdn");
-        when(instanceMetaDataService.getByInstanceIds(instanceIds)).thenReturn(Set.of(im1, im2));
+        when(instanceMetaDataService.getNotTerminatedByInstanceIds(1L, instanceIds)).thenReturn(Set.of(im1, im2));
         when(healthService.getInstanceHealthDetails(stack, im1)).thenReturn(createHealthyNodeDetail(im1));
         when(healthService.getInstanceHealthDetails(stack, im2)).thenThrow(new FreeIpaClientException("nono"));
 

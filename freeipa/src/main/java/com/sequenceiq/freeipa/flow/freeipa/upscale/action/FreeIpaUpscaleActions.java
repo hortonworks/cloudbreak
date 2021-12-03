@@ -38,8 +38,6 @@ import org.springframework.statemachine.action.Action;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -83,6 +81,8 @@ import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleState;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.ValidateInstancesHealthEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.BootstrapMachinesFailedToUpscaleFailureEventConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.failure.ClusterProxyUpdateRegistrationFailedToUpscaleFailureEventConverter;
@@ -367,7 +367,7 @@ public class FreeIpaUpscaleActions {
                 Stack stack = context.getStack();
                 stackUpdater.updateStackStatus(stack.getId(), getInProgressStatus(variables), "Update cluster proxy registration before bootstrap");
                 List<String> instanceIds = getInstanceIds(variables);
-                Set<InstanceMetaData> newInstances = instanceMetaDataService.getByInstanceIds(instanceIds);
+                Set<InstanceMetaData> newInstances = instanceMetaDataService.getByInstanceIds(stack.getId(), instanceIds);
                 boolean allNewInstanceHasFqdn = newInstances.stream().allMatch(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()));
                 Selectable event = allNewInstanceHasFqdn ? new ClusterProxyRegistrationRequest(stack.getId())
                         : new ClusterProxyRegistrationSuccess(stack.getId());

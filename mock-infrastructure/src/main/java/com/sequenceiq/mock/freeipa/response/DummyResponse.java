@@ -1,6 +1,10 @@
 package com.sequenceiq.mock.freeipa.response;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
+
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
 @Component
 public class DummyResponse extends AbstractFreeIpaResponse<Object> {
@@ -10,7 +14,7 @@ public class DummyResponse extends AbstractFreeIpaResponse<Object> {
     }
 
     @Override
-    protected Object handleInternal(String body) {
+    protected Object handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         return "";
     }
 }

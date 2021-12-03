@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.freeipa.client.model.Group;
 
 @Component
@@ -15,7 +16,7 @@ public class GroupFindResponse extends AbstractFreeIpaResponse<Set<Group>> {
     }
 
     @Override
-    protected Set<Group> handleInternal(String body) {
+    protected Set<Group> handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         Group group = new Group();
         group.setCn("admins");
         group.setMemberUser(List.of("admin"));

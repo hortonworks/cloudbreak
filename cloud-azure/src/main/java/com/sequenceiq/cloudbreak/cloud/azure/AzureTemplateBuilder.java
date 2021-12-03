@@ -108,7 +108,7 @@ public class AzureTemplateBuilder {
             model.put("stackname", stackName);
             model.put("region", cloudContext.getLocation().getRegion().value());
             model.put("subnet1Prefix", network.getSubnet().getCidr());
-            model.put("groups", armStack.getGroups());
+            model.put("groups", armStack.getInstancesByGroupType());
             model.put("igs", armStack.getInstanceGroups());
             model.put("securities", armSecurityView.getPorts());
             model.put("securityGroups", armSecurityView.getSecurityGroupIds());

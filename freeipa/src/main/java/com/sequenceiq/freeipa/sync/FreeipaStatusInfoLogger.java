@@ -1,16 +1,18 @@
 package com.sequenceiq.freeipa.sync;
 
-import com.sequenceiq.freeipa.entity.InstanceMetaData;
-import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.service.stack.StackStatusService;
-import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.sequenceiq.freeipa.entity.InstanceMetaData;
+import com.sequenceiq.freeipa.entity.StackStatus;
+import com.sequenceiq.freeipa.service.stack.StackStatusService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Component
 public class FreeipaStatusInfoLogger {
@@ -26,22 +28,22 @@ public class FreeipaStatusInfoLogger {
     public void logFreeipaStatus(Long stackId, Set<InstanceMetaData> checkableInstances) {
         StackStatus freeipaStatus = stackStatusService.findFirstByStackIdOrderByCreatedDesc(stackId);
         String freeipaStatusInfo = String.format("freeipa stack is %s.", freeipaStatus.getStatus());
-        String allInstanceStatusInfo = createInstancesStatusInfo(checkableInstances);
+        String allInstanceStatusInfo = createInstancesStatusInfo(stackId, checkableInstances);
         LOGGER.debug(":::Auto sync::: freeipa status from healtch check: {} {}", freeipaStatusInfo, allInstanceStatusInfo);
     }
 
-    private String createInstancesStatusInfo(Set<InstanceMetaData> checkableInstances) {
-        Set<InstanceMetaData> allInstanceMetaData = fetchCheckableInstancesFromDb(checkableInstances);
+    private String createInstancesStatusInfo(Long stackId, Set<InstanceMetaData> checkableInstances) {
+        Set<InstanceMetaData> allInstanceMetaData = fetchCheckableInstancesFromDb(stackId, checkableInstances);
         String allInstanceStatusInfo = allInstanceMetaData.stream()
                 .map(instance -> String.format("instance %s is %s", instance.getInstanceId(), instance.getInstanceStatus()))
                 .collect(Collectors.joining("; "));
         return allInstanceStatusInfo;
     }
 
-    private Set<InstanceMetaData> fetchCheckableInstancesFromDb(Set<InstanceMetaData> checkableInstances) {
+    private Set<InstanceMetaData> fetchCheckableInstancesFromDb(Long stackId, Set<InstanceMetaData> checkableInstances) {
         Set<String> checkableInstanceIds = collectCheckableInstanceIds(checkableInstances);
         Set<InstanceMetaData> allInstanceMetaData = instanceMetaDataService
-                .getByInstanceIds(checkableInstanceIds);
+                .getByInstanceIds(stackId, checkableInstanceIds);
         return allInstanceMetaData;
     }
 

@@ -1,7 +1,10 @@
 package com.sequenceiq.mock.freeipa.response;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.freeipa.client.model.Config;
 
 @Component
@@ -15,7 +18,7 @@ public class ConfigShowResponse extends AbstractFreeIpaResponse<Config> {
     }
 
     @Override
-    protected Config handleInternal(String body) {
+    protected Config handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         Config config = new Config();
         config.setIpamaxusernamelength(IPA_MAX_USERNAME_LENGTH);
         return config;

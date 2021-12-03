@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.freeipa.client.model.Service;
 
 @Component
@@ -15,7 +16,7 @@ public class ServiceFindResponse extends AbstractFreeIpaResponse<Set<Service>> {
     }
 
     @Override
-    protected Set<Service> handleInternal(String body) {
+    protected Set<Service> handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         Service service = new Service();
         service.setDn("admin");
         service.setKrbprincipalname(List.of("dummy"));

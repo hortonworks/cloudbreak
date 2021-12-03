@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.freeipa.client.model.Role;
 
 @Component
@@ -14,7 +15,7 @@ public class RoleAddResponse extends AbstractFreeIpaResponse<Role> {
     }
 
     @Override
-    protected Role handleInternal(String body) {
+    protected Role handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         Role role = new Role();
         role.setCn("roleName");
         role.setMemberUser(List.of());

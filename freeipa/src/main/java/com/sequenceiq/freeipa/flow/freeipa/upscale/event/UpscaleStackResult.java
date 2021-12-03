@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.event.resource;
+package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 
 import java.util.ArrayList;
 import java.util.List;

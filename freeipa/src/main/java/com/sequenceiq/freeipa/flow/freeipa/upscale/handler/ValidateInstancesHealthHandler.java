@@ -102,7 +102,7 @@ public class ValidateInstancesHealthHandler extends ExceptionCatcherEventHandler
     private List<NodeHealthDetails> fetchInstancesHealth(ValidateInstancesHealthEvent event) {
         Stack stack = stackService.getStackById(event.getResourceId());
         MDCBuilder.buildMdcContext(stack);
-        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.getByInstanceIds(event.getInstanceIds());
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDataService.getNotTerminatedByInstanceIds(stack.getId(), event.getInstanceIds());
         List<NodeHealthDetails> healthDetails = instanceMetaDatas.stream().map(im -> getInstanceHealthDetails(stack, im)).collect(Collectors.toList());
         LOGGER.info("Fetched healthdetails for instances {} - {}", event.getInstanceIds(), healthDetails);
         return healthDetails;
