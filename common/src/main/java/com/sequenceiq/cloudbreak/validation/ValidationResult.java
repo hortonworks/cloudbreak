@@ -19,19 +19,30 @@ public class ValidationResult {
 
     private final List<String> errors;
 
+    private final List<String> warnings;
+
     private String formattedErrors = "";
+
+    private String formattedWarnings = "";
 
     private final String prefix;
 
-    private ValidationResult(State state, SortedSet<String> errors, String prefix) {
+    private ValidationResult(State state, SortedSet<String> errors, SortedSet<String> warnings, String prefix) {
         this.state = state;
         this.errors = new ArrayList<>(errors);
+        this.warnings = new ArrayList<>(warnings);
         this.prefix = prefix;
         if (!StringUtils.isEmpty(prefix)) {
             formattedErrors = prefix + ": \n";
+            formattedWarnings = prefix + ": \n";
         }
-        formattedErrors += IntStream.range(0, this.errors.size())
-                .mapToObj(i -> getNumberingIfRequired(this.errors.size(), i) + this.errors.get(i))
+        formattedErrors = formatNumberedList(this.errors);
+        formattedWarnings = formatNumberedList(this.warnings);
+    }
+
+    private String formatNumberedList(List<String> issues) {
+        return IntStream.range(0, issues.size())
+                .mapToObj(i -> getNumberingIfRequired(issues.size(), i) + issues.get(i))
                 .collect(Collectors.joining("\n"));
     }
 
@@ -43,7 +54,9 @@ public class ValidationResult {
         State mergeState = state == ERROR || other.state == ERROR ? ERROR : VALID;
         SortedSet<String> mergedError = new TreeSet<>(this.errors);
         mergedError.addAll(other.errors);
-        return new ValidationResult(mergeState, mergedError, other.prefix);
+        SortedSet<String> mergedWarning = new TreeSet<>(this.warnings);
+        mergedError.addAll(other.warnings);
+        return new ValidationResult(mergeState, mergedError, mergedWarning, other.prefix);
     }
 
     public State getState() {
@@ -60,6 +73,18 @@ public class ValidationResult {
 
     public boolean hasError() {
         return state == ERROR;
+    }
+
+    public List<String> getWarnings() {
+        return new ArrayList<>(warnings);
+    }
+
+    public String getFormattedWarnings() {
+        return formattedWarnings;
+    }
+
+    public boolean hasWarning() {
+        return !warnings.isEmpty();
     }
 
     public enum State {
@@ -80,6 +105,8 @@ public class ValidationResult {
 
         private final SortedSet<String> errors = new TreeSet<>();
 
+        private final SortedSet<String> warnings = new TreeSet<>();
+
         private String prefix;
 
         public ValidationResultBuilder error(String error) {
@@ -87,6 +114,11 @@ public class ValidationResult {
                 state = ERROR;
             }
             errors.add(error);
+            return this;
+        }
+
+        public ValidationResultBuilder warning(String warning) {
+            warnings.add(warning);
             return this;
         }
 
@@ -98,6 +130,7 @@ public class ValidationResult {
         public ValidationResultBuilder merge(ValidationResult other) {
             if (other != null) {
                 other.getErrors().forEach(this::error);
+                other.getWarnings().forEach(this::warning);
             }
             return this;
         }
@@ -110,7 +143,7 @@ public class ValidationResult {
         }
 
         public ValidationResult build() {
-            return new ValidationResult(state, errors, prefix);
+            return new ValidationResult(state, errors, warnings, prefix);
         }
     }
 }

@@ -98,6 +98,7 @@ public class AwsObjectStorageConnector implements ObjectStorageConnector {
         } else {
             response = ObjectStorageValidateResponse.builder()
                     .withStatus(ResponseStatus.OK)
+                    .withError(validationResult.getFormattedWarnings())
                     .build();
         }
         return response;

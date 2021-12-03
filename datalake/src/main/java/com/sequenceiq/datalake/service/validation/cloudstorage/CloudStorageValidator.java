@@ -7,6 +7,7 @@ import static com.sequenceiq.environment.api.v1.environment.model.request.azure.
 import java.util.EnumSet;
 import java.util.Optional;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -83,6 +84,8 @@ public class CloudStorageValidator {
 
             if (ResponseStatus.ERROR.equals(response.getStatus())) {
                 validationResultBuilder.error(response.getError());
+            } else if (StringUtils.isNotBlank(response.getError())) {
+                validationResultBuilder.warning(response.getError());
             }
         }
     }

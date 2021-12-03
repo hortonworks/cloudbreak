@@ -59,6 +59,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.CloudIdentityType;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageValidator;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkYarnParams;
@@ -97,6 +98,9 @@ public class StackRequestManifester {
 
     @Inject
     private SdxNotificationService sdxNotificationService;
+
+    @Inject
+    private EventSenderService eventSenderService;
 
     @Inject
     private MultiAzDecorator multiAzDecorator;
@@ -175,11 +179,18 @@ public class StackRequestManifester {
         } catch (Exception e) {
             String message = String.format("Error occured during object storage validation, validation skipped. Error: %s", e.getMessage());
             LOGGER.warn(message);
-            sdxNotificationService.send(ResourceEvent.ENVIRONMENT_VALIDATION_FAILED_AND_SKIPPED, Set.of(e.getMessage()), sdxCluster);
+            sdxNotificationService.send(ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED, Set.of(e.getMessage()), sdxCluster);
         }
         ValidationResult validationResult = validationResultBuilder.build();
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
+        }
+        if (validationResult.hasWarning()) {
+            LOGGER.info(validationResult.getFormattedWarnings());
+            eventSenderService.sendEventAndNotification(sdxCluster, sdxCluster.getInitiatorUserCrn(),
+                    ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED, Set.of(validationResult.getFormattedWarnings()));
+            sdxNotificationService.send(ResourceEvent.SDX_VALIDATION_FAILED_AND_SKIPPED,
+                    Set.of(validationResult.getFormattedWarnings()), sdxCluster);
         }
     }
 
