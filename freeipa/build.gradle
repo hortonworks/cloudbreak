@@ -99,7 +99,7 @@ dependencies {
     implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
     implementation     group: 'javax.xml.bind',            name: 'jaxb-api',                       version: '2.3.1'
     implementation     group: 'org.glassfish.jersey.core', name: 'jersey-server',                  version: '2.28'
-    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: '3.2.0'
+    implementation     group: 'org.mybatis',               name: 'mybatis-migrations',             version: mybatisMigrationVersion
     implementation     group: 'org.postgresql',            name: 'postgresql',                     version: postgreSQLVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     implementation     group: 'org.springframework.boot',  name: 'spring-boot-starter-web',        version: springBootVersion

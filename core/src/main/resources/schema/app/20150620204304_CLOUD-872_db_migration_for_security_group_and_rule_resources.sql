@@ -2,7 +2,7 @@
 -- Migration SQL that makes the change goes here.
 
 DROP TABLE IF EXISTS subnet;
-DROP SEQUENCE  IF EXISTS  subnet_seq;
+DROP SEQUENCE IF EXISTS subnet_seq;
 
 CREATE SEQUENCE security_group_seq
 START WITH 1
@@ -53,8 +53,7 @@ CREATE TABLE securityrule
 ALTER TABLE ONLY securityrule
 ADD CONSTRAINT securityrule_pkey PRIMARY KEY (id);
 
-ALTER TABLE ONLY securityrule
-ADD CONSTRAINT fk_securitygroupidinsecurityrule FOREIGN KEY (securitygroup_id) REFERENCES securitygroup(id);
+ALTER TABLE ONLY securityrule ADD CONSTRAINT fk_securitygroupidinsecurityrule FOREIGN KEY (securitygroup_id) REFERENCES securitygroup(id);
 
 -- //@UNDO
 -- SQL to undo the change goes here.
@@ -88,8 +87,8 @@ DROP CONSTRAINT IF EXISTS fk_securitygroupidinsecurityrule;
 
 DROP TABLE IF EXISTS securityrule;
 
-DROP SEQUENCE  IF EXISTS  security_rule_seq;
+DROP SEQUENCE IF EXISTS security_rule_seq;
 
 DROP TABLE IF EXISTS securitygroup;
 
-DROP SEQUENCE  IF EXISTS  security_group_seq;
+DROP SEQUENCE IF EXISTS security_group_seq;

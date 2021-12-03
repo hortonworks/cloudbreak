@@ -173,7 +173,7 @@ dependencyManagement {
     dependency group: 'org.codehaus.jettison',              name: 'jettison',                    version: '1.3.5'
     dependency group: 'org.glassfish.jersey.media',         name: 'jersey-media-multipart',      version: jerseyCoreVersion
     dependency group: 'javax.xml.bind',                     name: 'jaxb-api',                    version: '2.3.0'
-    dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: '3.2.0'
+    dependency group: 'org.mybatis',                        name: 'mybatis-migrations',          version: mybatisMigrationVersion
     dependency group: 'org.mockito',                        name: 'mockito-core',                version: mockitoVersion
     dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
     dependency group: 'org.apache.commons',                 name: 'commons-lang3',               version: apacheCommonsLangVersion

@@ -105,6 +105,7 @@ public class CommonDatabaseMigrationConfig {
         operationOption.setFullLineDelimiter(false);
         operationOption.setSendFullScript(true);
         operationOption.setAutoCommit(false);
+        operationOption.setThrowWarning(false);
         return operationOption;
     }
 
