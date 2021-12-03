@@ -71,7 +71,7 @@ class AzureStackViewTest {
     void constructorTestWhenNoGroup() {
         AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(), armStorageView, subnetStrategy, Map.of());
 
-        Map<String, List<AzureInstanceView>> groups = underTest.getInstancesByGroupType();
+        Map<String, List<AzureInstanceView>> groups = underTest.getGroups();
         assertThat(groups).isNotNull();
         assertThat(groups).isEmpty();
 
@@ -90,7 +90,7 @@ class AzureStackViewTest {
 
         AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(group), armStorageView, subnetStrategy, Map.of());
 
-        Map<String, List<AzureInstanceView>> groups = underTest.getInstancesByGroupType();
+        Map<String, List<AzureInstanceView>> groups = underTest.getGroups();
         assertThat(groups).isNotNull();
         assertThat(groups).isEmpty();
 
@@ -106,7 +106,7 @@ class AzureStackViewTest {
         AzureStackView underTest = new AzureStackView(STACK_NAME, STACK_NAME_PREFIX_LENGTH, List.of(group), armStorageView, subnetStrategy,
                 Map.of(INSTANCE_ID, CUSTOM_IMAGE_NAME));
 
-        Map<String, List<AzureInstanceView>> groups = underTest.getInstancesByGroupType();
+        Map<String, List<AzureInstanceView>> groups = underTest.getGroups();
         assertThat(groups).isNotNull();
         assertThat(groups).hasSize(1);
 

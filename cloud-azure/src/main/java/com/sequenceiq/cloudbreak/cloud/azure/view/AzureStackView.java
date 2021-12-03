@@ -20,7 +20,7 @@ public class AzureStackView {
 
     private static final int DEFAULT_UPDATE_DOMAIN_COUNTER = 20;
 
-    private final Map<String, List<AzureInstanceView>> instancesByGroupType = new HashMap<>();
+    private final Map<String, List<AzureInstanceView>> groups = new HashMap<>();
 
     private final List<AzureInstanceGroupView> instanceGroups = new ArrayList<>();
 
@@ -29,7 +29,7 @@ public class AzureStackView {
     public AzureStackView(String stackName, int stackNamePrefixLength, Iterable<Group> groupList, AzureStorageView armStorageView,
             AzureSubnetStrategy subnetStrategy, Map<String, String> customImageNamePerInstance) {
         for (Group group : groupList) {
-            String groupType = group.getType().name();
+            String groupName = group.getType().name();
             AzureInstanceGroupView instanceGroupView;
             Map<?, ?> asMap = group.getParameter("availabilitySet", HashMap.class);
             if (asMap != null) {
@@ -45,7 +45,7 @@ public class AzureStackView {
                 instanceGroupView = new AzureInstanceGroupView(group.getName(), group.getRootVolumeSize());
             }
             if (!group.getInstances().isEmpty()) {
-                List<AzureInstanceView> existingInstancesForGroupType = instancesByGroupType.computeIfAbsent(groupType, k -> new ArrayList<>());
+                List<AzureInstanceView> existingInstances = groups.computeIfAbsent(groupName, k -> new ArrayList<>());
                 for (CloudInstance instance : group.getInstances()) {
                     InstanceTemplate template = instance.getTemplate();
                     String attachedDiskStorageName = armStorageView.getAttachedDiskStorageName(template);
@@ -65,7 +65,7 @@ public class AzureStackView {
                             .withCustomImageId(!customImageNamePerInstance.isEmpty() ? customImageNamePerInstance.get(instance.getInstanceId()) : null)
                             .withManagedIdentity(getManagedIdentity(group))
                             .build();
-                    existingInstancesForGroupType.add(azureInstance);
+                    existingInstances.add(azureInstance);
                 }
                 instanceGroupView.setManagedDisk(true);
             }
@@ -75,8 +75,8 @@ public class AzureStackView {
         }
     }
 
-    public Map<String, List<AzureInstanceView>> getInstancesByGroupType() {
-        return instancesByGroupType;
+    public Map<String, List<AzureInstanceView>> getGroups() {
+        return groups;
     }
 
     public List<AzureInstanceGroupView> getInstanceGroups() {

@@ -29,7 +29,6 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource.Builder;
@@ -320,7 +319,7 @@ public class AzureResourceConnector extends AbstractResourceConnector {
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         AzureClient client = ac.getParameter(AzureClient.class);
         AzureStackView azureStackView = azureStackViewProvider.getAzureStack(new AzureCredentialView(ac.getCloudCredential()), stack, client, ac);
         return azureUpscaleService.upscale(ac, stack, resources, azureStackView, client, adjustmentTypeWithThreshold);

@@ -8,9 +8,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_ADDING_INSTANC
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_UPDATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_METADATA_EXTEND_WITH_COUNT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REPAIR_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_UPSCALE_QUOTA_ISSUE;
 import static java.lang.String.format;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -23,23 +23,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
-import com.sequenceiq.cloudbreak.cloud.CloudConnector;
-import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
-import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
-import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
-import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
+import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
-import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.StackContext;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
+import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -57,8 +51,6 @@ import com.sequenceiq.common.api.type.CommonResourceType;
 public class StackUpscaleService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackUpscaleService.class);
-
-    private static final double ONE_HUNDRED = 100;
 
     @Inject
     private StackUpdater stackUpdater;
@@ -176,6 +168,25 @@ public class StackUpscaleService {
         }
     }
 
+    private Set<Resource> transformResults(Iterable<CloudResourceStatus> cloudResourceStatuses, Stack stack) {
+        Set<Resource> retSet = new HashSet<>();
+        for (CloudResourceStatus cloudResourceStatus : cloudResourceStatuses) {
+            if (!cloudResourceStatus.isFailed()) {
+                CloudResource cloudResource = cloudResourceStatus.getCloudResource();
+                Resource resource = new Resource(
+                        cloudResource.getType(),
+                        cloudResource.getName(),
+                        cloudResource.getReference(),
+                        cloudResource.getStatus(),
+                        stack,
+                        null,
+                        cloudResource.getAvailabilityZone());
+                retSet.add(resource);
+            }
+        }
+        return retSet;
+    }
+
     private void validateResourceResults(StackScalingFlowContext context, Exception exception, List<CloudResourceStatus> results) {
         if (exception != null) {
             LOGGER.info(format("Failed to upscale stack: %s", context.getCloudContext()), exception);
@@ -194,91 +205,4 @@ public class StackUpscaleService {
         int reusableInstanceCount = repair ? 0 : unusedInstanceMetadata.size();
         return stackScalabilityCondition.isScalable(stack, instanceGroupName) ? adjustment - reusableInstanceCount : 0;
     }
-
-    public List<CloudResourceStatus> upscale(AuthenticatedContext ac, UpscaleStackRequest<UpscaleStackResult> request, CloudConnector<?> connector)
-            throws QuotaExceededException {
-        CloudStack cloudStack = request.getCloudStack();
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = request.getAdjustmentWithThreshold();
-        try {
-            return connector.resources().upscale(ac, cloudStack, request.getResourceList(), adjustmentTypeWithThreshold);
-        } catch (QuotaExceededException quotaExceededException) {
-            return handleQuotaExceptionAndRetryUpscale(request, connector, ac, cloudStack, adjustmentTypeWithThreshold, quotaExceededException);
-        }
-    }
-
-    private List<CloudResourceStatus> handleQuotaExceptionAndRetryUpscale(UpscaleStackRequest<UpscaleStackResult> request, CloudConnector<?> connector,
-            AuthenticatedContext ac, CloudStack cloudStack, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
-            QuotaExceededException quotaExceededException) throws QuotaExceededException {
-        flowMessageService.fireEventAndLog(request.getResourceId(), UPDATE_IN_PROGRESS.name(), STACK_UPSCALE_QUOTA_ISSUE,
-                quotaExceededException.getQuotaErrorMessage());
-        List<Group> groups = cloudStack.getGroups();
-        int removableNodeCount = getRemovableNodeCount(adjustmentTypeWithThreshold, quotaExceededException, groups);
-        decreaseInstances(groups, removableNodeCount);
-        return connector.resources().upscale(ac, cloudStack, request.getResourceList(),
-                adjustmentTypeWithThreshold);
-    }
-
-    private int getRemovableNodeCount(AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, QuotaExceededException quotaExceededException,
-            List<Group> groups) {
-        int additionalRequired = quotaExceededException.getAdditionalRequired();
-        int originalRequestedNodeCount = groups.stream().flatMap(group -> group.getInstances().stream())
-                .filter(cloudInstance -> cloudInstance.getInstanceId() == null)
-                .collect(Collectors.toList())
-                .size();
-        if (originalRequestedNodeCount < 1) {
-            return 0;
-        }
-        int cpuCountPerNode = additionalRequired / originalRequestedNodeCount;
-        int removableCpuCount = additionalRequired + quotaExceededException.getCurrentUsage() - quotaExceededException.getCurrentLimit();
-        int removableNodeCount = (int) Math.ceil((double) removableCpuCount / cpuCountPerNode);
-
-        long provisionableNodeCount = originalRequestedNodeCount - removableNodeCount;
-        switch (adjustmentTypeWithThreshold.getAdjustmentType()) {
-            case EXACT:
-                if (adjustmentTypeWithThreshold.getThreshold() > provisionableNodeCount) {
-                    throw new CloudConnectorException(originalRequestedNodeCount + " nodes were requested, but the provisionable node " +
-                            "count is " + provisionableNodeCount + ". Threshold is " + adjustmentTypeWithThreshold.getThreshold() +
-                            ". Your quota limit exceeded on provider side.", quotaExceededException.getCause());
-                }
-                break;
-            case PERCENTAGE:
-                double calculatedPercentage = calculatePercentage(removableNodeCount, originalRequestedNodeCount);
-                if (adjustmentTypeWithThreshold.getThreshold() > calculatedPercentage) {
-                    throw new CloudConnectorException(originalRequestedNodeCount + " nodes were requested, but the provisionable node " +
-                            "count is " + provisionableNodeCount + ". Threshold is " + adjustmentTypeWithThreshold.getThreshold() +
-                            "%. Your quota limit exceeded on provider side.", quotaExceededException.getCause());
-                }
-                break;
-            case BEST_EFFORT:
-                if (provisionableNodeCount < 1) {
-                    throw new CloudConnectorException("We are not able to provision any node. Your quota limit exceeded on provider side.",
-                            quotaExceededException.getCause());
-                }
-                break;
-            default:
-                throw new CloudConnectorException("Unkown adjustment type: " + adjustmentTypeWithThreshold.getAdjustmentType(),
-                        quotaExceededException.getCause());
-        }
-        return removableNodeCount;
-    }
-
-    private double calculatePercentage(double removableNodeCount, double requestedNodeCount) {
-        double calculatedPercentage = (requestedNodeCount - removableNodeCount) / requestedNodeCount * ONE_HUNDRED;
-        LOGGER.info("Calculated percentage: {}", calculatedPercentage);
-        return calculatedPercentage;
-    }
-
-    private void decreaseInstances(List<Group> groups, int removableNodeCount) {
-        for (Group group : groups) {
-            List<CloudInstance> newGroupInstances = group.getInstances().stream()
-                    .filter(cloudInstance -> cloudInstance.getInstanceId() == null)
-                    .collect(Collectors.toList());
-            int removableNodeCountForGroup = Integer.min(newGroupInstances.size(), removableNodeCount);
-            int fromIndex = newGroupInstances.size() - removableNodeCountForGroup;
-            List<CloudInstance> removableInstances = newGroupInstances.subList(fromIndex, newGroupInstances.size());
-            removableNodeCount = removableNodeCount - removableInstances.size();
-            group.getInstances().removeAll(removableInstances);
-        }
-    }
-
 }
