@@ -25,7 +25,9 @@ public class OperationService {
     public OperationView getOperationProgressByResourceCrn(String resourceCrn, boolean detailed) {
         OperationView response = new OperationView();
         Optional<OperationFlowsView> operationFlowsViewOpt = flowService.getLastFlowOperationByResourceCrn(resourceCrn);
-        operationFlowsViewOpt.ifPresent(operationFlowsView -> operationDetailsPopulator.createOperationView(operationFlowsView, OperationResource.REMOTEDB));
+        if (operationFlowsViewOpt.isPresent()) {
+            return operationDetailsPopulator.createOperationView(operationFlowsViewOpt.get(), OperationResource.REMOTEDB);
+        }
         return response;
     }
 }

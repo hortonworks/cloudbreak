@@ -28,6 +28,8 @@ public class OperationDetailsPopulatorTest {
 
     private static final int MAX_PROGRESS = 100;
 
+    private static final int IN_PROGRESS_FROM_HISTORY = 65;
+
     private static final int IN_PROGRESS = 66;
 
     private static final String DUMMY_CLASS = "Sample";
@@ -74,7 +76,7 @@ public class OperationDetailsPopulatorTest {
         // WHEN
         OperationView operationView = underTest.createOperationView(operationFlowsView, OperationResource.ENVIRONMENT);
         // THEN
-        assertEquals(IN_PROGRESS, operationView.getProgress());
+        assertEquals(IN_PROGRESS_FROM_HISTORY, operationView.getProgress());
         assertEquals(OperationProgressStatus.RUNNING, operationView.getProgressStatus());
     }
 
@@ -97,6 +99,7 @@ public class OperationDetailsPopulatorTest {
         return OperationFlowsView.Builder.newBuilder()
                 .withOperationType(operationType)
                 .withFlowTypeProgressMap(flowProgressResponseMap)
+                .withProgressFromHistory(IN_PROGRESS_FROM_HISTORY)
                 .withTypeOrderList(List.of(DUMMY_CLASS))
                 .build();
     }
