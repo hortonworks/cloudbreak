@@ -19,6 +19,7 @@ import org.glassfish.jersey.SslConfigurator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.CertificateTrustManager;
@@ -56,11 +57,18 @@ public class ExecuteQueryToMockInfrastructure {
         }
     }
 
-    public <R> void executeMethod(Method method, String path, Map<String, String> parameters, Entity body, Consumer<Response> proc, Function<WebTarget,
+    public void executeMethod(Method method, String path, Map<String, String> parameters, Entity<?> body, Consumer<Response> proc, Function<WebTarget,
             WebTarget> deco) {
         WebTarget target = buildWebTarget(path, deco);
-        parameters.entrySet().stream().forEach(entry -> target.queryParam(entry.getKey(), entry.getValue()));
+        parameters.forEach(target::queryParam);
         proc.accept(target.request().method(method.getMethodName().toUpperCase(), body));
+    }
+
+    public <T> T executeMethod(HttpMethod method, String path, Map<String, String> parameters, Entity<?> body, Function<Response, T> proc, Function<WebTarget,
+            WebTarget> deco) {
+        WebTarget target = buildWebTarget(path, deco);
+        parameters.forEach(target::queryParam);
+        return proc.apply(target.request().method(method.name(), body));
     }
 
     public void executeConfigure(Map<String, String> pathVariables, MockResponse body) {

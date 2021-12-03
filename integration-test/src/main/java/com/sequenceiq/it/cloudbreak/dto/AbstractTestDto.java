@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.finder.Finders.same;
 import static java.lang.String.format;
 
 import java.time.Duration;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpMethod;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -37,6 +39,7 @@ import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.finder.Attribute;
 import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
+import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
 public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> extends Entity implements CloudbreakTestDto {
 
@@ -49,6 +52,9 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     @Inject
     private ResourcePropertyProvider resourcePropertyProvider;
+
+    @Inject
+    private ExecuteQueryToMockInfrastructure executeQuery;
 
     private String name;
 
@@ -341,6 +347,19 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
                     "Make sure you use an endpoint which triggers a flow/flow chain and gives back it's identifier.");
         }
     }
+
+    public T disableVerificationStore() {
+        String crn = getCrn();
+        executeQuery.executeMethod(HttpMethod.POST, "/calls/" + crn + "/disable", Collections.emptyMap(), null, r -> r, w -> w);
+        return (T) this;
+    }
+
+    public T enableVerificationStore() {
+        String crn = getCrn();
+        executeQuery.executeMethod(HttpMethod.POST, "/calls/" + crn + "/enable", Collections.emptyMap(), null, r -> r, w -> w);
+        return (T) this;
+    }
+
 
     public SpiEndpoints<T> mockSpi() {
         if (getTestContext() instanceof MockedTestContext) {

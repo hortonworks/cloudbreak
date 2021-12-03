@@ -45,9 +45,7 @@ public class Method {
         }
         if (obj instanceof Method) {
             Method aMethod = (Method) obj;
-            if (aMethod.getMethodName().equals(aMethod.getMethodName())) {
-                return true;
-            }
+            return aMethod.getMethodName().equals(this.getMethodName());
         }
         return false;
     }

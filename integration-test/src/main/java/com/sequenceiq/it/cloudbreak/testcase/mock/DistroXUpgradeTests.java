@@ -47,8 +47,10 @@ public class DistroXUpgradeTests extends AbstractMockTest {
         testContext
                 .given(distroXName, DistroXTestDto.class)
                 .when(distroXTestClient.create(), key(distroXName))
+                .disableVerificationStore()
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
+                .enableVerificationStore()
                 .given(DistroXUpgradeTestDto.class)
                 .withRuntime(targetRuntimeVersion)
                 .given(distroXName, DistroXTestDto.class)
