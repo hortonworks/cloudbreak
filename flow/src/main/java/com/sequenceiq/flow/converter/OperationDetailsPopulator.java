@@ -86,9 +86,9 @@ public class OperationDetailsPopulator {
                 source.setProgressStatus(calculateProgress(source.getOperations()));
             } else {
                 source.setProgressStatus(OperationProgressStatus.RUNNING);
-            }
-            if (progressFromHistory != null && progressFromHistory != DEFAULT_PROGRESS) {
-                source.setProgress(progressFromHistory);
+                if (progressFromHistory != null && progressFromHistory != DEFAULT_PROGRESS && fullProgress > progressFromHistory) {
+                    source.setProgress(progressFromHistory);
+                }
             }
         } else {
             source.setProgress(DEFAULT_PROGRESS);
