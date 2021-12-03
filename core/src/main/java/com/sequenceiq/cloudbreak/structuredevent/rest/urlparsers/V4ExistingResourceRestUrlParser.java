@@ -24,6 +24,7 @@ public class V4ExistingResourceRestUrlParser extends LegacyRestUrlParser {
             + "|blueprints/recommendation"
             + "|blueprints_util/.*"
             + "|image_catalogs/image(s\\b|\\b)"
+            + "|image_catalogs/default_runtime_versions"
             + "|connectors/[a-z_]+"
             + "|recipes/internal"
             + "|file_systems/[a-z_]+)");

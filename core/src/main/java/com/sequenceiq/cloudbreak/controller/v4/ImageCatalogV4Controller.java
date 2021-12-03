@@ -36,6 +36,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.RuntimeVersionsV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -255,5 +256,13 @@ public class ImageCatalogV4Controller extends NotificationController implements 
     public ImageV4Response getImageFromDefault(Long workspaceId, String type, String provider) throws Exception {
         StatedImage statedImage = defaultImageCatalogService.getImageFromDefaultCatalog(type, provider);
         return imageToImageV4ResponseConverter.convert(statedImage.getImage());
+    }
+
+    @Override
+    @AccountIdNotNeeded
+    @DisableCheckPermissions
+    public RuntimeVersionsV4Response getRuntimeVersionsFromDefault(Long workspaceId) throws Exception {
+        List<String> runtimeVersions =  imageCatalogService.getRuntimeVersionsFromDefault();
+        return new RuntimeVersionsV4Response(runtimeVersions);
     }
 }

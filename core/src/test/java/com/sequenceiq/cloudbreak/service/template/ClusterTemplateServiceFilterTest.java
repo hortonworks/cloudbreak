@@ -14,6 +14,7 @@ import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.powermock.reflect.Whitebox;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ResourceStatus;
@@ -29,7 +31,9 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.ClusterTemplateViewToClusterTemplateViewV4ResponseConverter;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.domain.view.ClusterTemplateView;
+import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.runtimes.SupportedRuntimes;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
 import com.sequenceiq.distrox.v1.distrox.service.InternalClusterTemplateValidator;
@@ -75,10 +79,18 @@ class ClusterTemplateServiceFilterTest {
     private SupportedRuntimes supportedRuntimes;
 
     @Mock
+    private ImageCatalogService imageCatalogService;
+
+    @Mock
     private ClusterTemplateViewToClusterTemplateViewV4ResponseConverter clusterTemplateViewToClusterTemplateViewV4ResponseConverter;
 
     @InjectMocks
     private ClusterTemplateService underTest;
+
+    @BeforeEach
+    public void initTests() throws CloudbreakImageCatalogException {
+        Whitebox.setInternalState(supportedRuntimes, "imageCatalogService", imageCatalogService);
+    }
 
     // @formatter:off
     // CHECKSTYLE:OFF
@@ -111,7 +123,7 @@ class ClusterTemplateServiceFilterTest {
     }
 
     @Test
-    void testIfGettingUsableTemplateWhenTemplateIsDefaultThenTrueShouldCome() {
+    void testIfGettingUsableTemplateWhenTemplateIsDefaultThenTrueShouldCome() throws CloudbreakImageCatalogException {
         ClusterTemplateViewV4Response templateViewV4Response = new ClusterTemplateViewV4Response();
         templateViewV4Response.setStatus(ResourceStatus.DEFAULT);
 

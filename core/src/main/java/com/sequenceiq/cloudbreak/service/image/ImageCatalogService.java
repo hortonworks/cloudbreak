@@ -797,4 +797,9 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
         return statedImage(image.get(), catalogUrl, catalogName);
     }
+
+    public List<String> getRuntimeVersionsFromDefault()
+            throws CloudbreakImageCatalogException {
+        return imageCatalogProvider.getImageCatalogMetaData(defaultCatalogUrl).getRuntimeVersions();
+    }
 }

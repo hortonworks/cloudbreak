@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCat
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.RuntimeVersionsV4Response;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.doc.ControllerDescription;
 import com.sequenceiq.cloudbreak.doc.OperationDescriptions.ImageCatalogOpDescription;
@@ -183,4 +184,11 @@ public interface ImageCatalogV4Endpoint {
     ImageV4Response getImageFromDefault(@PathParam("workspaceId") Long workspaceId,
             @PathParam("type") String type,
             @PathParam("provider") String provider) throws Exception;
+
+    @GET
+    @Path("default_runtime_versions")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ImageCatalogOpDescription.GET_DEFAULT_IMAGE_CATALOG_RUNTIME_VERSIONS, produces = MediaType.APPLICATION_JSON,
+            notes = IMAGE_CATALOG_NOTES, nickname = "getRuntimeVersionsFromDefault")
+    RuntimeVersionsV4Response getRuntimeVersionsFromDefault(@PathParam("workspaceId") Long workspaceId) throws Exception;
 }
