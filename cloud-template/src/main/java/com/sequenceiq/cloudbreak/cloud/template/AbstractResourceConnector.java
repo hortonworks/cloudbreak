@@ -16,7 +16,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
-import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
@@ -175,7 +174,7 @@ public abstract class AbstractResourceConnector implements ResourceConnector<Lis
 
     @Override
     public List<CloudResourceStatus> upscale(AuthenticatedContext auth, CloudStack stack, List<CloudResource> resources,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException {
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
         LOGGER.info("Upscale stack ({}) with adjustment type and threshold: {}", auth.getCloudContext().getName(), adjustmentTypeWithThreshold);
         CloudContext cloudContext = auth.getCloudContext();
         Platform platform = cloudContext.getPlatform();

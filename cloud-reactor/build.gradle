@@ -29,26 +29,3 @@ dependencies {
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter',            version: springBootVersion
     testImplementation group: 'org.springframework.boot',  name: 'spring-boot-starter-test',       version: springBootVersion
 }
-
-task testJar(type: Jar, dependsOn: testClasses) {
-    baseName = "test-${project.archivesBaseName}"
-    classifier 'test'
-    from sourceSets.test.output
-    from sourceSets.main.output
-}
-
-configurations {
-    tests
-}
-
-test {
-    if (project.hasProperty("componentTest")) {
-        include "com/sequenceiq/cloudbreak/cloud/**"
-    } else {
-        include "com/sequenceiq/cloudbreak/cloud/**"
-    }
-}
-
-artifacts {
-    tests testJar
-}

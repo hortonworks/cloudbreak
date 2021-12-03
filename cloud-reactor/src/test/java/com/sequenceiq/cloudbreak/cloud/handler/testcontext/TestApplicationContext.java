@@ -17,8 +17,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.MockBeans;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.ComponentScans;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 
@@ -34,7 +35,6 @@ import com.sequenceiq.cloudbreak.cloud.ResourceConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.handler.ParameterGenerator;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
-import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformInitializer;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
@@ -58,7 +58,6 @@ import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowRegister;
-import com.sequenceiq.flow.reactor.config.EventBusConfig;
 import com.sequenceiq.flow.reactor.config.EventBusStatisticReporter;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
@@ -68,7 +67,8 @@ import reactor.Environment;
 
 @MockBeans({@MockBean(ApplicationFlowInformation.class), @MockBean(FlowLogDBService.class), @MockBean(FlowRegister.class)})
 @Configuration
-@Import({ParameterGenerator.class, EventBusConfig.class, CloudPlatformInitializer.class})
+@ComponentScans({ @ComponentScan("com.sequenceiq.cloudbreak.cloud"), @ComponentScan("com.sequenceiq.flow.reactor"),
+        @ComponentScan("com.sequenceiq.cloudbreak.auth"), @ComponentScan("com.sequenceiq.cloudbreak.client")})
 @PropertySource("classpath:application.properties")
 public class TestApplicationContext {
 

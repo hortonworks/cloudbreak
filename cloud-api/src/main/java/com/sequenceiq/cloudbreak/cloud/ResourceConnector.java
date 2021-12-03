@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cloud;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
-import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -228,7 +227,7 @@ public interface ResourceConnector<R> {
      * @return the status of updated resources
      */
     List<CloudResourceStatus> upscale(AuthenticatedContext authenticatedContext, CloudStack stack, List<CloudResource> resources,
-            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException;
+            AdjustmentTypeWithThreshold adjustmentTypeWithThreshold);
 
     /**
      * Update of infrastructure on Cloud platform, delete instances. It does not need to wait/block until the infrastructure update is

@@ -303,7 +303,6 @@ dependencies {
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':flow', configuration: 'tests')
-  testImplementation project(path: ':cloud-reactor', configuration: 'tests')
 
   testImplementation group: 'org.powermock',            name: 'powermock-module-junit4'
   testImplementation group: 'org.powermock',            name: 'powermock-api-mockito2'
