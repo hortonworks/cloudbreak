@@ -5,6 +5,7 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.model.User;
 
@@ -16,7 +17,7 @@ public class UserFindResponse extends AbstractFreeIpaResponse<Set<User>> {
     }
 
     @Override
-    protected Set<User> handleInternal(String body) {
+    protected Set<User> handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         User user = new User();
         user.setDn("admin");
         user.setUid("admin");

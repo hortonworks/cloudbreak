@@ -1,7 +1,10 @@
 package com.sequenceiq.mock.freeipa.response;
 
+import java.util.List;
+
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.freeipa.client.model.Ca;
 
 @Component
@@ -35,7 +38,7 @@ public class CaShowResponse extends AbstractFreeIpaResponse<Ca> {
     }
 
     @Override
-    protected Ca handleInternal(String body) {
+    protected Ca handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         Ca ca = new Ca();
         ca.setCertificate(CERT);
         return ca;

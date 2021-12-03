@@ -3,13 +3,13 @@ package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterProxyReRegistrationResult;
-import com.sequenceiq.flow.core.FlowEvent;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
+import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.event.EventSelectorUtil;
 
 public enum StackUpscaleEvent implements FlowEvent {
     ADD_INSTANCES_EVENT("STACK_UPSCALE_TRIGGER_EVENT"),

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cloud.handler;
+package com.sequenceiq.freeipa.flow.freeipa.upscale.handler;
 
 import java.util.List;
 
@@ -12,19 +12,20 @@ import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
+import com.sequenceiq.cloudbreak.cloud.handler.CloudPlatformEventHandler;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackRequest;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
 @Component
-public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleStackRequest> {
+public class FreeipaUpscaleStackHandler implements CloudPlatformEventHandler<UpscaleStackRequest> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(UpscaleStackHandler.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeipaUpscaleStackHandler.class);
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -66,3 +67,4 @@ public class UpscaleStackHandler implements CloudPlatformEventHandler<UpscaleSta
     }
 
 }
+

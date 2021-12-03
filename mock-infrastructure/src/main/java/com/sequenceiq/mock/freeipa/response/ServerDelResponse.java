@@ -5,16 +5,17 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
+import com.sequenceiq.freeipa.client.model.Host;
 
 @Component
-public class DnsZoneDelResponse extends AbstractFreeIpaResponse<Object> {
+public class ServerDelResponse extends AbstractFreeIpaResponse<Host> {
     @Override
     public String method() {
-        return "dnszone_del";
+        return "server_del";
     }
 
     @Override
-    protected Object handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
-        return "";
+    protected Host handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
+        return new Host();
     }
 }

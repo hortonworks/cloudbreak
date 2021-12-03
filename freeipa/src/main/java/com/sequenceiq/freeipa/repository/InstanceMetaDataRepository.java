@@ -19,8 +19,6 @@ import com.sequenceiq.freeipa.entity.projection.StackAuthenticationView;
 @Transactional(TxType.REQUIRED)
 public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaData, Long> {
 
-    Set<InstanceMetaData> findAllByInstanceIdIn(Iterable<String> instanceId);
-
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId " +
             "AND i.instanceStatus <> 'TERMINATED' " +
             "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
@@ -32,6 +30,12 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId = :instanceId AND i.instanceGroup.stack.id= :stackId")
     InstanceMetaData findByInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId IN :instanceIds AND i.instanceGroup.stack.id= :stackId")
+    Set<InstanceMetaData> findAllByInstanceIdIn(@Param("stackId") Long stackId, @Param("instanceIds") Iterable<String> instanceIds);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId IN :instanceIds AND i.instanceGroup.stack.id= :stackId AND i.instanceStatus <> 'TERMINATED'")
+    Set<InstanceMetaData> findAllNotTerminatedByInstanceIdIn(@Param("stackId") Long stackId, @Param("instanceIds") Iterable<String> instanceIds);
 
     @Query("SELECT s.id as stackId, s.stackAuthentication as stackAuthentication FROM InstanceMetaData i " +
             "LEFT JOIN i.instanceGroup ig " +

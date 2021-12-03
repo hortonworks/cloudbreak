@@ -24,7 +24,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackScaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackScalingFlowContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.common.api.adjustment.AdjustmentTypeWithThreshold;

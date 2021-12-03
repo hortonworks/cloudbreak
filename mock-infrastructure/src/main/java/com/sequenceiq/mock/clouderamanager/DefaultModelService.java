@@ -3,6 +3,7 @@ package com.sequenceiq.mock.clouderamanager;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.PostConstruct;
 
@@ -55,7 +56,7 @@ public class DefaultModelService {
             for (int instanceIndex = 0; instanceIndex < group.getInstances().size(); instanceIndex++) {
                 CloudInstance cloudInstance = group.getInstances().get(instanceIndex);
                 String address = generateAddress(prefix, spiDto, indexOfExistedGroup, ret);
-                String instanceId = String.format("instance-%s", address);
+                String instanceId = String.format("instance-%s", address + "-" + UUID.randomUUID());
                 CloudInstance cloudInstanceWithId = new CloudInstance(
                         instanceId,
                         getTemplateCreated(cloudInstance),

@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.azure.upscale;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -13,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.microsoft.azure.CloudError;
 import com.microsoft.azure.CloudException;
 import com.microsoft.azure.management.resources.Deployment;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureCloudResourceService;
@@ -28,6 +31,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.view.AzureStackView;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
+import com.sequenceiq.cloudbreak.cloud.exception.QuotaExceededException;
 import com.sequenceiq.cloudbreak.cloud.exception.RolledbackResourcesException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
@@ -46,6 +50,12 @@ import com.sequenceiq.common.api.type.ResourceType;
 public class AzureUpscaleService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureUpscaleService.class);
+
+    private static final int ADDITIONAL_REQUIRED_GROUP = 3;
+
+    private static final int CURRENT_USAGE_GROUP = 2;
+
+    private static final int CURRENT_LIMIT_GROUP = 1;
 
     @Inject
     private AzureUtils azureUtils;
@@ -72,7 +82,7 @@ public class AzureUpscaleService {
     private AzureCloudResourceService azureCloudResourceService;
 
     public List<CloudResourceStatus> upscale(AuthenticatedContext ac, CloudStack stack, List<CloudResource> resources, AzureStackView azureStackView,
-            AzureClient client, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) {
+            AzureClient client, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold) throws QuotaExceededException {
         CloudContext cloudContext = ac.getCloudContext();
         String stackName = azureUtils.getStackName(cloudContext);
         String resourceGroupName = azureResourceGroupMetadataProvider.getResourceGroupName(cloudContext, stack);
@@ -114,19 +124,44 @@ public class AzureUpscaleService {
             return ListUtils.union(Collections.singletonList(new CloudResourceStatus(armTemplate, ResourceStatus.IN_PROGRESS)),
                     successfulInstances);
         } catch (Retry.ActionFailedException e) {
+            LOGGER.error("Retry.ActionFailedException happened", e);
             rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw azureUtils.convertToCloudConnectorException(e.getCause(), "Stack upscale");
         } catch (CloudException e) {
+            LOGGER.error("CloudException happened", e);
             rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
+            checkIfQuotaLimitIssued(e);
             throw azureUtils.convertToCloudConnectorException(e, "Stack upscale");
         } catch (RolledbackResourcesException e) {
+            LOGGER.error("RolledbackResourcesException happened", e);
             rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back with resources: %s, %s",
                     stackName, e.getMessage()), e);
         } catch (Exception e) {
+            LOGGER.error("Exception happened", e);
             rollbackResources(ac, client, stack, cloudContext, resources, preDeploymentTime);
             throw new CloudConnectorException(String.format("Could not upscale Azure infrastructure, infrastructure was rolled back: %s, %s", stackName,
                     e.getMessage()), e);
+        }
+    }
+
+    private void checkIfQuotaLimitIssued(CloudException e) throws QuotaExceededException {
+        if (e.body() != null && e.body().details() != null) {
+            List<CloudError> errorDetails = e.body().details();
+            for (CloudError errorDetail : errorDetails) {
+                if ("QuotaExceeded".equals(errorDetail.code())) {
+                    Pattern pattern = Pattern.compile(".*Current Limit: ([0-9]+), Current Usage: ([0-9]+), Additional Required: ([0-9]+).*");
+                    Matcher matcher = pattern.matcher(errorDetail.message());
+                    if (matcher.find()) {
+                        int currentLimit = Integer.parseInt(matcher.group(CURRENT_LIMIT_GROUP));
+                        int currentUsage = Integer.parseInt(matcher.group(CURRENT_USAGE_GROUP));
+                        int additionalRequired = Integer.parseInt(matcher.group(ADDITIONAL_REQUIRED_GROUP));
+                        throw new QuotaExceededException(currentLimit, currentUsage, additionalRequired, errorDetail.message(), e);
+                    } else {
+                        LOGGER.warn("Quota exceeded pattern does not match: {}", errorDetail.message());
+                    }
+                }
+            }
         }
     }
 
@@ -185,8 +220,8 @@ public class AzureUpscaleService {
     }
 
     private void filterExistingInstances(AzureStackView azureStackView) {
-        azureStackView.getGroups().forEach((key, value) -> value.removeIf(AzureInstanceView::hasRealInstanceId));
-        azureStackView.getGroups().entrySet().removeIf(group -> group.getValue() == null || group.getValue().isEmpty());
+        azureStackView.getInstancesByGroupType().forEach((key, value) -> value.removeIf(AzureInstanceView::hasRealInstanceId));
+        azureStackView.getInstancesByGroupType().entrySet().removeIf(group -> group.getValue() == null || group.getValue().isEmpty());
     }
 
     private CloudResource getArmTemplate(List<CloudResource> resources, String stackName) {
@@ -201,4 +236,5 @@ public class AzureUpscaleService {
                         || newInstances.stream().anyMatch(inst -> inst.getInstanceId().equals(cloudResource.getInstanceId())))
                 .collect(Collectors.toList());
     }
+
 }

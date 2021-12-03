@@ -3,9 +3,9 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale.failure;
 import java.util.Map;
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.flow.core.PayloadConverter;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 
 public class UpscaleStackResultToUpscaleFailureEventConverter implements PayloadConverter<UpscaleFailureEvent> {
     @Override

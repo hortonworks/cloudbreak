@@ -2,7 +2,6 @@ package com.sequenceiq.freeipa.flow.freeipa.upscale;
 
 import com.sequenceiq.cloudbreak.cloud.event.CloudPlatformResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.bootstrap.BootstrapMachinesFailed;
@@ -20,6 +19,7 @@ import com.sequenceiq.freeipa.flow.freeipa.provision.event.postinstall.PostInsta
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesFailed;
 import com.sequenceiq.freeipa.flow.freeipa.provision.event.services.InstallFreeIpaServicesSuccess;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleFailureEvent;
+import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleStackResult;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationFailed;
 import com.sequenceiq.freeipa.flow.stack.provision.event.clusterproxy.ClusterProxyRegistrationSuccess;
 

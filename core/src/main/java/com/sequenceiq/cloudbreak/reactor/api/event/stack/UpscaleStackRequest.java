@@ -1,9 +1,10 @@
-package com.sequenceiq.cloudbreak.cloud.event.resource;
+package com.sequenceiq.cloudbreak.reactor.api.event.stack;
 
 import java.util.List;
 import java.util.StringJoiner;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.resource.CloudStackRequest;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;

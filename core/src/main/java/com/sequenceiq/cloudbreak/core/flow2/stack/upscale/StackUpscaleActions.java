@@ -21,8 +21,6 @@ import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.CollectMetadataResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.GetSSHFingerprintsResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackValidationResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -55,6 +53,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.BootstrapNewNodesRes
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.ExtendHostMetadataResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.CleanupFreeIpaEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.stack.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.publicendpoint.ClusterPublicEndpointManagementService;

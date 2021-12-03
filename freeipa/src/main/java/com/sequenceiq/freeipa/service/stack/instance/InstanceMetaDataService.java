@@ -85,12 +85,16 @@ public class InstanceMetaDataService {
         return instanceMetaDataRepository.save(instanceMetaData);
     }
 
-    public Set<InstanceMetaData> getByInstanceId(String instanceId) {
-        return instanceMetaDataRepository.findAllByInstanceIdIn(Set.of(instanceId));
+    public Set<InstanceMetaData> getByInstanceId(Long stackId, String instanceId) {
+        return instanceMetaDataRepository.findAllByInstanceIdIn(stackId, Set.of(instanceId));
     }
 
-    public Set<InstanceMetaData> getByInstanceIds(Iterable<String> instanceIds) {
-        return instanceMetaDataRepository.findAllByInstanceIdIn(instanceIds);
+    public Set<InstanceMetaData> getByInstanceIds(Long stackId, Iterable<String> instanceIds) {
+        return instanceMetaDataRepository.findAllByInstanceIdIn(stackId, instanceIds);
+    }
+
+    public Set<InstanceMetaData> getNotTerminatedByInstanceIds(Long stackId, Iterable<String> instanceIds) {
+        return instanceMetaDataRepository.findAllNotTerminatedByInstanceIdIn(stackId, instanceIds);
     }
 
     public Optional<InstanceMetaData> getById(Long id) {

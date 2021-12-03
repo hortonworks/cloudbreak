@@ -7,8 +7,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchLoadBalancerRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchLoadBalancerResult;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackRequest;
 import com.sequenceiq.cloudbreak.cloud.event.resource.LaunchStackResult;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackRequest;
-import com.sequenceiq.cloudbreak.cloud.event.resource.UpscaleStackResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.task.ResourcesStatePollerResult;
 
@@ -30,7 +28,4 @@ public class ResourcesStatePollerResults {
         return new LaunchLoadBalancerResult(request.getResourceId(), result.getResults());
     }
 
-    public static UpscaleStackResult transformToUpscaleStackResult(ResourcesStatePollerResult result, UpscaleStackRequest<?> request) {
-        return new UpscaleStackResult(request.getResourceId(), result.getStatus(), result.getResults());
-    }
 }

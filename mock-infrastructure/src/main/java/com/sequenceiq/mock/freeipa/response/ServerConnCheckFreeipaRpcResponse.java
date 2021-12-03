@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.client.RPCMessage;
+import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 
 @Component
 public class ServerConnCheckFreeipaRpcResponse extends AbstractFreeIpaResponse<Boolean> {
@@ -33,7 +34,7 @@ public class ServerConnCheckFreeipaRpcResponse extends AbstractFreeIpaResponse<B
     }
 
     @Override
-    protected Boolean handleInternal(String body) {
+    protected Boolean handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
         return result;
     }
 

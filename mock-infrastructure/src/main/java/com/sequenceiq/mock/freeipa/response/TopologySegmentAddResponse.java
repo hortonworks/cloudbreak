@@ -1,7 +1,6 @@
 package com.sequenceiq.mock.freeipa.response;
 
 import java.util.List;
-import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
@@ -9,14 +8,14 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 
 @Component
-public class TopologySegmentFindResponse extends AbstractFreeIpaResponse<Set<TopologySegment>> {
+public class TopologySegmentAddResponse extends AbstractFreeIpaResponse<TopologySegment> {
     @Override
     public String method() {
-        return "topologysegment_find";
+        return "topologysegment_add";
     }
 
     @Override
-    protected Set<TopologySegment> handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
-        return Set.of();
+    protected TopologySegment handleInternal(List<CloudVmMetaDataStatus> metadatas, String body) {
+        return new TopologySegment();
     }
 }
