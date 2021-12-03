@@ -101,11 +101,10 @@ public class SdxReactorFlowManager {
 
     public FlowIdentifier triggerSdxResize(Long sdxClusterId, SdxCluster newSdxCluster) {
         LOGGER.info("Trigger Datalake resizing for: {}", sdxClusterId);
-        String selector = SDX_RESIZE_FLOW_CHAIN_START_EVENT;
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
         boolean performBackup = entitlementService.isDatalakeBackupOnResizeEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
                 datalakeDrConfig.isConfigured() && shouldSdxBackupBePerformed(newSdxCluster);
-        return notify(selector, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
+        return notify(SDX_RESIZE_FLOW_CHAIN_START_EVENT, new DatalakeResizeFlowChainStartEvent(sdxClusterId, newSdxCluster, userId,
                 environmentClientService.getBackupLocation(newSdxCluster.getEnvCrn()), performBackup));
     }
 
@@ -124,10 +123,10 @@ public class SdxReactorFlowManager {
         return notify(selector, new SdxRepairStartEvent(selector, cluster.getId(), userId, settings));
     }
 
-    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms) {
+    public FlowIdentifier triggerDatalakeRuntimeUpgradeFlow(SdxCluster cluster, String imageId, SdxUpgradeReplaceVms replaceVms, boolean skipBackup) {
         LOGGER.info("Trigger Datalake runtime upgrade for: {} with imageId: {} and replace vm param: {}", cluster, imageId, replaceVms);
         String userId = ThreadBasedUserCrnProvider.getUserCrn();
-        if (entitlementService.isDatalakeBackupOnUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
+        if (!skipBackup && entitlementService.isDatalakeBackupOnUpgradeEnabled(ThreadBasedUserCrnProvider.getAccountId()) &&
                 datalakeDrConfig.isConfigured() && shouldSdxBackupBePerformed(cluster)) {
             LOGGER.info("Triggering backup before an upgrade");
             return notify(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT,
@@ -179,7 +178,7 @@ public class SdxReactorFlowManager {
     private static boolean isVersionOlderThan(SdxCluster cluster, String baseVersion) {
         LOGGER.info("Compared: String version {} with Versioned {}", cluster.getRuntime(), baseVersion);
         Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> cluster.getRuntime(), () -> baseVersion) < 0;
+        return versionComparator.compare(cluster::getRuntime, () -> baseVersion) < 0;
     }
 
     public FlowIdentifier triggerDatalakeRuntimeRecoveryFlow(SdxCluster cluster, SdxRecoveryType recoveryType) {

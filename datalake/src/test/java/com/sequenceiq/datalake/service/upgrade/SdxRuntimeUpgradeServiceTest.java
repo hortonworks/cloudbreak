@@ -35,8 +35,8 @@ import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.client.RestClientFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -76,6 +76,8 @@ public class SdxRuntimeUpgradeServiceTest {
     private static final String V_7_0_2 = "7.0.2";
 
     private static final SdxUpgradeReplaceVms REPAIR_AFTER_UPGRADE = SdxUpgradeReplaceVms.ENABLED;
+
+    private static final boolean SKIP_BACKUP = false;
 
     @Mock
     private StackV4Endpoint stackV4Endpoint;
@@ -236,8 +238,8 @@ public class SdxRuntimeUpgradeServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID));
 
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
     }
 
     @Test
@@ -260,9 +262,9 @@ public class SdxRuntimeUpgradeServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, null, ACCOUNT_ID));
 
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.DISABLED);
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.ENABLED);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.ENABLED);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.ENABLED, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.ENABLED, SKIP_BACKUP);
     }
 
     @Test
@@ -288,9 +290,9 @@ public class SdxRuntimeUpgradeServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, null, ACCOUNT_ID));
 
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.DISABLED);
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.ENABLED);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.ENABLED);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, SdxUpgradeReplaceVms.ENABLED, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.ENABLED, SKIP_BACKUP);
     }
 
     @Test
@@ -436,8 +438,8 @@ public class SdxRuntimeUpgradeServiceTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.triggerUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID));
 
-        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE);
+        verify(sdxReactorFlowManager, times(1)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
     }
 
     @Test
@@ -477,8 +479,8 @@ public class SdxRuntimeUpgradeServiceTest {
             assertEquals(errorMessage, e.getMessage());
         }
 
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
     }
 
     @Test
@@ -517,8 +519,8 @@ public class SdxRuntimeUpgradeServiceTest {
             assertEquals(errorMessage, e.getMessage());
         }
 
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE);
-        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID_LAST, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
+        verify(sdxReactorFlowManager, times(0)).triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, REPAIR_AFTER_UPGRADE, SKIP_BACKUP);
     }
 
     @Test
@@ -604,10 +606,10 @@ public class SdxRuntimeUpgradeServiceTest {
         ArgumentCaptor<UpgradeV4Response> upgradeV4ResponseCaptor = ArgumentCaptor.forClass(UpgradeV4Response.class);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4ResponseCaptor.capture())).thenReturn(expectedResponse);
 
-        SdxUpgradeResponse actualRespone = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID);
+        SdxUpgradeResponse actualResponse = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID);
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
-        assertEquals(actualRespone, expectedResponse);
+        assertEquals(actualResponse, expectedResponse);
         assertTrue(capturedUpgradeV4Response.getReason().contains("No information about current image, cannot filter patch upgrade candidates based on it"));
         assertTrue(capturedUpgradeV4Response.getUpgradeCandidates().isEmpty());
     }
@@ -638,10 +640,10 @@ public class SdxRuntimeUpgradeServiceTest {
         ArgumentCaptor<UpgradeV4Response> upgradeV4ResponseCaptor = ArgumentCaptor.forClass(UpgradeV4Response.class);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4ResponseCaptor.capture())).thenReturn(expectedResponse);
 
-        SdxUpgradeResponse actualRespone = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, new SdxUpgradeRequest(), ACCOUNT_ID);
+        SdxUpgradeResponse actualResponse = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, new SdxUpgradeRequest(), ACCOUNT_ID);
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
-        assertEquals(expectedResponse, actualRespone);
+        assertEquals(expectedResponse, actualResponse);
         assertTrue(StringUtils.isEmpty(capturedUpgradeV4Response.getReason()));
         assertEquals(1, capturedUpgradeV4Response.getUpgradeCandidates().size());
         assertEquals(MATCHING_TARGET_RUNTIME, capturedUpgradeV4Response.getUpgradeCandidates().get(0).getComponentVersions().getCdp());
@@ -673,10 +675,10 @@ public class SdxRuntimeUpgradeServiceTest {
         ArgumentCaptor<UpgradeV4Response> upgradeV4ResponseCaptor = ArgumentCaptor.forClass(UpgradeV4Response.class);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4ResponseCaptor.capture())).thenReturn(expectedResponse);
 
-        SdxUpgradeResponse actualRespone = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, new SdxUpgradeRequest(), ACCOUNT_ID);
+        SdxUpgradeResponse actualResponse = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, new SdxUpgradeRequest(), ACCOUNT_ID);
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
-        assertEquals(expectedResponse, actualRespone);
+        assertEquals(expectedResponse, actualResponse);
         assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
     }
 
@@ -708,10 +710,10 @@ public class SdxRuntimeUpgradeServiceTest {
         ArgumentCaptor<UpgradeV4Response> upgradeV4ResponseCaptor = ArgumentCaptor.forClass(UpgradeV4Response.class);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4ResponseCaptor.capture())).thenReturn(expectedResponse);
 
-        SdxUpgradeResponse actualRespone = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID);
+        SdxUpgradeResponse actualResponse = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID);
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
-        assertEquals(expectedResponse, actualRespone);
+        assertEquals(expectedResponse, actualResponse);
         assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
         assertTrue(capturedUpgradeV4Response.getReason().contains("it is not possible to upgrade from [7.0.2] to [7.2.0] runtime"));
     }
@@ -744,10 +746,10 @@ public class SdxRuntimeUpgradeServiceTest {
         ArgumentCaptor<UpgradeV4Response> upgradeV4ResponseCaptor = ArgumentCaptor.forClass(UpgradeV4Response.class);
         when(sdxUpgradeClusterConverter.upgradeResponseToSdxUpgradeResponse(upgradeV4ResponseCaptor.capture())).thenReturn(expectedResponse);
 
-        SdxUpgradeResponse actualRespone = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID);
+        SdxUpgradeResponse actualResponse = underTest.checkForUpgradeByCrn(USER_CRN, STACK_CRN, sdxUpgradeRequest, ACCOUNT_ID);
 
         UpgradeV4Response capturedUpgradeV4Response = upgradeV4ResponseCaptor.getValue();
-        assertEquals(expectedResponse, actualRespone);
+        assertEquals(expectedResponse, actualResponse);
         assertEquals(0, capturedUpgradeV4Response.getUpgradeCandidates().size());
         assertTrue(capturedUpgradeV4Response.getReason().contains("The version of target runtime has to be the same as the current one"));
     }

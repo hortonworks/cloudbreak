@@ -20,11 +20,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
+
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
+import com.sequenceiq.cloudbreak.auth.ClouderaManagerLicenseProvider;
 import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.PaywallAccessChecker;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -163,7 +164,8 @@ public class SdxRuntimeUpgradeService {
     private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
         verifyPaywallAccess(userCrn, request);
         String imageId = determineImageId(request, upgradeCandidates);
-        FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request));
+        boolean skipBackup = request != null && request.isBackupSkipped();
+        FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup);
         String message = getMessage(imageId);
         return new SdxUpgradeResponse(message, flowIdentifier);
     }
@@ -230,9 +232,9 @@ public class SdxRuntimeUpgradeService {
         paywallAccessChecker.checkPaywallAccess(license, paywallUrl);
     }
 
-    private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster, SdxUpgradeReplaceVms replaceVms) {
+    private FlowIdentifier triggerDatalakeUpgradeFlow(String imageId, SdxCluster cluster, SdxUpgradeReplaceVms replaceVms, boolean skipBackup) {
         MDCBuilder.buildMdcContext(cluster);
-        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, replaceVms);
+        return sdxReactorFlowManager.triggerDatalakeRuntimeUpgradeFlow(cluster, imageId, replaceVms, skipBackup);
     }
 
     private String getMessage(String imageId) {
@@ -278,8 +280,8 @@ public class SdxRuntimeUpgradeService {
         String imageId;
         Supplier<Stream<ImageInfoV4Response>> imagesWithMatchingRuntime = () -> upgradeCandidates.stream().filter(
                 imageInfoV4Response -> runtime.equals(imageInfoV4Response.getComponentVersions().getCdp()));
-        boolean hasCompatbileImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
-        if (!hasCompatbileImageWithRuntime) {
+        boolean hasCompatibleImageWithRuntime = imagesWithMatchingRuntime.get().anyMatch(e -> true);
+        if (!hasCompatibleImageWithRuntime) {
             String availableRuntimes = upgradeCandidates
                     .stream()
                     .map(ImageInfoV4Response::getComponentVersions)

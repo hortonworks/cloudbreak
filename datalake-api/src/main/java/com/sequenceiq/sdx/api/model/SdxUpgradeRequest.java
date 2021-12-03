@@ -17,6 +17,8 @@ public class SdxUpgradeRequest {
 
     private Boolean dryRun;
 
+    private Boolean skipBackup;
+
     private SdxUpgradeShowAvailableImages showAvailableImages;
 
     private SdxUpgradeReplaceVms replaceVms;
@@ -55,6 +57,14 @@ public class SdxUpgradeRequest {
 
     public void setDryRun(Boolean dryRun) {
         this.dryRun = dryRun;
+    }
+
+    public boolean isBackupSkipped() {
+        return Boolean.TRUE.equals(skipBackup);
+    }
+
+    public void setSkipBackup(Boolean skipBackup) {
+        this.skipBackup = skipBackup;
     }
 
     public SdxUpgradeShowAvailableImages getShowAvailableImages() {
@@ -110,6 +120,7 @@ public class SdxUpgradeRequest {
                 ", runtime='" + runtime + '\'' +
                 ", lockComponents=" + lockComponents +
                 ", dryRun=" + dryRun +
+                ", skipBackup=" + skipBackup +
                 ", replaceVms=" + replaceVms +
                 '}';
     }
