@@ -10,6 +10,7 @@ public enum InstanceStatus {
     SERVICES_UNHEALTHY,
     WAITING_FOR_REPAIR,
     STOPPED,
+    STARTED,
     DELETED_ON_PROVIDER_SIDE,
     DELETED_BY_PROVIDER,
     DELETE_REQUESTED,
@@ -30,6 +31,8 @@ public enum InstanceStatus {
                 return "WAITING_FOR_REPAIR";
             case SERVICES_RUNNING:
                 return "RUNNING";
+            case STARTED:
+                return "STARTED";
             default:
                 return "UNKNOWN";
         }
