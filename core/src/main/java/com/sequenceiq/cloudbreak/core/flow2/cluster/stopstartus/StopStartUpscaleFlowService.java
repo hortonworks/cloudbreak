@@ -61,16 +61,14 @@ class StopStartUpscaleFlowService {
     //  What inside vs outside a transaction. Forcing a persist?, etc
 
     void startingInstances(long stackId, String hostGroupName, int nodeCount) {
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.UPSCALE_IN_PROGRESS,
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.UPSCALE_BY_START_IN_PROGRESS,
                 String.format("Scaling up (stopstart) host  group: %s", hostGroupName));
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_INIT, hostGroupName, String.valueOf(nodeCount));
     }
 
     void instancesStarted(StopStartUpscaleContext context, long stackId, List<InstanceMetaData> instancesStarted) {
         Stack stack = context.getStack();
-        // TODO CB-14929: Introduce a new state when STARTING. CREATED is not very useful in the context of START/STOP.
-        //  Likely a mirror of the CREATED state in terms of functionality.
-        instancesStarted.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.CREATED));
+        instancesStarted.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STARTED));
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES,
                 "Instances: " + instancesStarted.size() + " started successfully.");
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED,
@@ -95,7 +93,7 @@ class StopStartUpscaleFlowService {
             flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED, hostgroupName);
         } else {
             LOGGER.debug("stopstart upscale failed. {} hosts failed to upscale", numOfFailedHosts);
-            clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.UPSCALE_FAILED);
+            clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.UPSCALE_BY_START_FAILED);
             flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to",
                     String.format("Cluster upscale operation failed on %d node(s).", numOfFailedHosts));
         }
@@ -103,8 +101,8 @@ class StopStartUpscaleFlowService {
 
     void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.info("Error during stopstart upscale flow: " + errorDetails.getMessage(), errorDetails);
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.UPSCALE_FAILED, errorDetails.getMessage());
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_FAILED,
+        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.UPSCALE_BY_START_FAILED, errorDetails.getMessage());
+        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_BY_START_FAILED,
                 String.format("New node(s) could not be added to the cluster: %s", errorDetails));
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to", errorDetails.getMessage());
     }
