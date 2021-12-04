@@ -9,7 +9,7 @@
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="PublicKeyReaderUtil.java|AmbariClusterService.java|CachedUserDetailsService.java|StructuredParameterQueryResponse.java|BlueprintService.java|FileSystemV4Endpoint.java|FileSystemV4Controller.java|PlatformParameterService.java"/>
     <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="StatusToPollGroupConverter.java|StringTypesCompare.java|CredentialPlatformResourceEndpoint.java|CredentialPlatformResourceController.java"/>
     <!-- cases are increasing the the complexity since the switchBlockAsSingleDecisionPoint=true parameter does not work  -->
-    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ContainerConfigService.java"/>
+    <suppress checks="ParameterNumber|ClassFanOutComplexity|CyclomaticComplexity|JavaNCSS|NPathComplexity" files="ContainerConfigService.java|InstanceMetaDataToCloudInstanceConverter.java"/>
     <suppress checks="IllegalCatch" files="GcpProvisionSetup.java"/>
     <suppress checks="IllegalCatch" files="ImageCatalogService.java"/>
     <suppress checks="IllegalThrow" files="ConcurrentMethodExecutionAspect.java"/>
