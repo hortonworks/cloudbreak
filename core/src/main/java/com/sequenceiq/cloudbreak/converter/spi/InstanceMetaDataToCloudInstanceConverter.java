@@ -77,11 +77,11 @@ public class InstanceMetaDataToCloudInstanceConverter {
 
     private InstanceStatus getInstanceStatus(InstanceMetaData metaData) {
         switch (metaData.getInstanceStatus()) {
-
             case REQUESTED:
                 return InstanceStatus.CREATE_REQUESTED;
             case CREATED:
                 return InstanceStatus.CREATED;
+            case STARTED:
             case SERVICES_RUNNING:
             case SERVICES_HEALTHY:
             case SERVICES_UNHEALTHY:
