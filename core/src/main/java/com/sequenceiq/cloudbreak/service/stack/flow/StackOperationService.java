@@ -133,35 +133,45 @@ public class StackOperationService {
             throw new BadRequestException("Downscale request cannot process a 'null' instanceIds collection");
         }
 
-        Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
-        for (String instanceId : instanceIds) {
-            // TODO CB-14929: CB-15154 An invalid instanceId should not necessarily fail a downscale-stop operation?
-            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
-            instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
-        }
-        updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
-                .stream()
-                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
-        LOGGER.info("ZZZ: removeInstances: instanceIds/hostnames received: {}", instanceIds);
-        LOGGER.info("ZZZ: removeInstances: computedInstanceIds: {}", instanceIdsByHostgroupMap);
-        // TODO CB-14929: Validations for start-stop
-        if (!forced) {
-            for (Map.Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
-                String instanceGroupName = entry.getKey();
-                int scalingAdjustment = entry.getValue().size() * -1;
-                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
-                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+        try {
+            return transactionService.required(() -> {
+                Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
+                for (String instanceId : instanceIds) {
+                    // TODO CB-14929: CB-15154 An invalid instanceId should not necessarily fail a downscale-stop operation?
+                    InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
+                    instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
+                }
+                updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+                LOGGER.info("ZZZ: removeInstances: instanceIds/hostnames received: {}", instanceIds);
+                LOGGER.info("ZZZ: removeInstances: computedInstanceIds: {}", instanceIdsByHostgroupMap);
+                // TODO CB-14929: Validations for start-stop
+                if (!forced) {
+                    for (Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
+                        String instanceGroupName = entry.getKey();
+                        int scalingAdjustment = entry.getValue().size() * -1;
+                        updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
+                        updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+                    }
+                }
+                if (scalingStrategy != null) {
+                    // TODO: CB-14929: CB-15154 stopstart can only support a single hostGroup being specified.
+                    if (instanceIdsByHostgroupMap.size() > 1) {
+                        throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
+                    }
+                    stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_BY_STOP_REQUESTED,
+                            "Requested node count for downscaling (stopstart): " + instanceIds.size());
+                    return flowManager.triggerStopStartStackDownscale(stack.getId(), instanceIdsByHostgroupMap, forced);
+                } else {
+                    return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
+                }
+            });
+        } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof BadRequestException) {
+                throw e.getCause();
             }
-        }
-        if (scalingStrategy != null) {
-            // TODO: CB-14929: CB-15154 stopstart can only support a single hostGroup being specified.
-            // TODO: CB-14929: Should this not be putting the stack into a UpdateInProgress state?, and maybe run inside a transaction? (similar to the upscale)
-            if (instanceIdsByHostgroupMap.size() > 1) {
-                throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
-            }
-            return flowManager.triggerStopStartStackDownscale(stack.getId(), instanceIdsByHostgroupMap, forced);
-        } else {
-            return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -302,10 +312,7 @@ public class StackOperationService {
                     updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 // TODO CB-14929: Post CB-15162 and add an additional check to ignore upscale requests of size 0 in stackCommonService
-
-                // TODO CB-14929: When should DB status be updated. Should the DetailStackStatus be something other than UPSCALE_REQUESTED.
-                //  i.e. differentiate between an actual upscale and a 'VM pool / start-stop'
-                stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
+                stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED,
                         "Requested node count for upscaling (stopstart): " + instanceGroupAdjustmentJson.getScalingAdjustment());
                 return flowManager.triggerStopStartStackUpscale(
                         stackWithLists.getId(),
