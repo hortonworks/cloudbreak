@@ -14,6 +14,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -318,6 +319,10 @@ public class InstanceMetaDataService {
         repository.delete(instanceMetaData);
     }
 
+    public void deleteAll(List<InstanceMetaData> instanceMetaData) {
+        repository.deleteAll(instanceMetaData);
+    }
+
     public Optional<InstanceMetaData> findNotTerminatedByPrivateAddress(Long stackId, String privateAddress) {
         return repository.findNotTerminatedByPrivateAddress(stackId, privateAddress);
     }
@@ -359,4 +364,7 @@ public class InstanceMetaDataService {
         return repository.findHostInStack(stackId, hostName);
     }
 
+    public Page<InstanceMetaData> getTerminatedInstanceMetaDataBefore(Long stackId, Long thresholdTerminationDate, PageRequest pageRequest) {
+        return repository.findTerminatedInstanceMetadataByStackIdAndTerminatedBefore(stackId, thresholdTerminationDate, pageRequest);
+    }
 }
