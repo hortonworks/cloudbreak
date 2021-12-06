@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.provision.action.AbstractStack
 import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackCreationContext;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
+import com.sequenceiq.cloudbreak.job.instancemetadata.ArchiveInstanceMetaDataJobService;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
@@ -103,6 +104,9 @@ public class ClusterCreationActions {
 
     @Inject
     private StatusCheckerJobService jobService;
+
+    @Inject
+    private ArchiveInstanceMetaDataJobService aimJobService;
 
     @Inject
     private StructuredSynchronizerJobService syncJobService;
@@ -646,6 +650,7 @@ public class ClusterCreationActions {
                 clusterCreationService.clusterInstallationFinished(context.getStack(), context.getProvisionType());
                 jobService.schedule(context.getStackId(), StackJobAdapter.class);
                 syncJobService.schedule(context.getStackId(), StructuredSynchronizerJobAdapter.class);
+                aimJobService.schedule(context.getStackId());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_CREATION_SUCCESSFUL, context.getStack());
                 sendEvent(context);
             }

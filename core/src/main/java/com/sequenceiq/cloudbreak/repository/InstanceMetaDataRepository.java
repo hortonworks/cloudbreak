@@ -7,6 +7,7 @@ import java.util.Set;
 import javax.transaction.Transactional;
 import javax.transaction.Transactional.TxType;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.EntityGraph.EntityGraphType;
@@ -140,5 +141,10 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "WHERE id = :id AND instanceStatus <> 'TERMINATED'")
     int updateStatusIfNotTerminated(@Param("id") Long id, @Param("newInstanceStatus") InstanceStatus newInstanceStatus,
             @Param("newStatusReason") String newStatusReason);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceStatus = 'TERMINATED' AND i.instanceGroup.stack.id= :stackId " +
+            "AND i.terminationDate < :thresholdTerminationDate ORDER BY i.terminationDate ASC")
+    Page<InstanceMetaData> findTerminatedInstanceMetadataByStackIdAndTerminatedBefore(@Param("stackId") Long stackId,
+            @Param("thresholdTerminationDate") Long thresholdTerminationDate, Pageable pageable);
 
 }
