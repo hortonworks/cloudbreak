@@ -8,10 +8,12 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static org.apache.commons.collections4.CollectionUtils.emptyIfNull;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +34,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.ClouderaManagerResourceApi;
+import com.cloudera.api.swagger.ClustersResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.RolesResourceApi;
 import com.cloudera.api.swagger.ServicesResourceApi;
@@ -53,6 +56,7 @@ import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
+import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatus;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
@@ -60,12 +64,15 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiClientProvider;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerClientInitException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
+import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
+import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
 @Scope("prototype")
@@ -125,6 +132,12 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     @Inject
     private RetryTemplate cmApiRetryTemplate;
+
+    @Inject
+    private SyncApiCommandRetriever syncApiCommandRetriever;
+
+    @Inject
+    private ClouderaManagerCommandsService clouderaManagerCommandsService;
 
     private ApiClient client;
 
@@ -428,6 +441,43 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
             LOGGER.info("Failed to get active commands from CM: ", e);
             throw new ClouderaManagerOperationFailedException("Failed to get active commands from CM", e);
         }
+    }
+
+    @Override
+    public Optional<ClusterManagerCommand> findCommand(Stack stack, ClusterCommandType command) {
+        try {
+            ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(client);
+            ClouderaManagerCommand clouderaManagerCommand = ClouderaManagerCommand.ofType(command);
+            if (clouderaManagerCommand == null) {
+                return Optional.empty();
+            }
+            Optional<BigDecimal> commandId = syncApiCommandRetriever.getCommandId(clouderaManagerCommand.getName(), clustersResourceApi, stack);
+            if (commandId.isPresent()) {
+                return Optional.ofNullable(convertApiCommand(clouderaManagerCommandsService.getApiCommand(client, commandId.get())));
+            } else {
+                LOGGER.info("Command {} could not been found in CM for stack {}", command, stack.getName());
+                return Optional.empty();
+            }
+        } catch (CloudbreakException | ApiException e) {
+            LOGGER.warn("Unexpected error during CM command table fetching, assuming no such command exists", e);
+            return Optional.empty();
+        }
+    }
+
+    private ClusterManagerCommand convertApiCommand(ApiCommand apiCommand) {
+        if (Objects.isNull(apiCommand)) {
+            return null;
+        }
+        ClusterManagerCommand command = new ClusterManagerCommand();
+        command.setId(apiCommand.getId());
+        command.setName(apiCommand.getName());
+        command.setSuccess(apiCommand.getSuccess());
+        command.setActive(apiCommand.getActive());
+        command.setRetryable(apiCommand.getCanRetry());
+        command.setEndTime(apiCommand.getEndTime());
+        command.setResultMessage(apiCommand.getResultMessage());
+        command.setStartTime(apiCommand.getStartTime());
+        return command;
     }
 
     private List<String> convertCommandsList(List<ApiCommand> activeCommands) {
