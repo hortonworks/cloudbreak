@@ -19,9 +19,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import javax.ws.rs.BadRequestException;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -30,25 +33,30 @@ import org.mockito.MockitoAnnotations;
 import com.sequenceiq.cloudbreak.TestUtil;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackViewV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
+import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
@@ -121,6 +129,15 @@ public class StackOperationsTest {
 
     @Mock
     private GenerateImageCatalogService generateImageCatalogService;
+
+    @Mock
+    private UpgradeService upgradeService;
+
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
+
+    @Mock
+    private LimitConfiguration limitConfiguration;
 
     private Stack stack;
 
@@ -247,6 +264,22 @@ public class StackOperationsTest {
         CloudbreakImageCatalogV3 actual = underTest.generateImageCatalog(nameOrCrn, stack.getWorkspace().getId());
 
         assertEquals(imageCatalog, actual);
+    }
+
+    @Test
+    public void throwsBadRequestIfClusterHasMoreNodesThanTheLimit() {
+        UpgradeV4Request upgradeV4Request = new UpgradeV4Request();
+        upgradeV4Request.setReplaceVms(true);
+        StackInstanceCount stackInstanceCount = mock(StackInstanceCount.class);
+        when(stackInstanceCount.getInstanceCount()).thenReturn(201);
+        when(limitConfiguration.getUpgradeNodeCountLimit()).thenReturn(200);
+        when(instanceMetaDataService.countByStackId(any())).thenReturn(stackInstanceCount);
+
+        BadRequestException exception = Assertions.assertThrows(BadRequestException.class,
+                () -> underTest.checkForClusterUpgrade("accId", stack, stack.getWorkspace().getId(), upgradeV4Request));
+
+        assertEquals("There are 201 nodes in the cluster. Upgrade has a limit of 200 nodes, above the limit it is unstable. " +
+                "Please downscale the cluster below the limit and retry the upgrade.", exception.getMessage());
     }
 
     private StackV4Response stackResponse() {

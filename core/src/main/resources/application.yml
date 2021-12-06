@@ -173,6 +173,7 @@ cb:
     nodeCountLimits:
       cm: 400
       infrastructure: 500
+      upgrade: 200
 
   aws:
     spotinstances.enabled: true
