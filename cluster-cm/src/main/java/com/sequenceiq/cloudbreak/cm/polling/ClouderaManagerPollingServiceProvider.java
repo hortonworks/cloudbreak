@@ -37,6 +37,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerSyncApiCommandId
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerTemplateInstallationChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDistributeListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerUpgradeParcelDownloadListenerTask;
+import com.sequenceiq.cloudbreak.cm.polling.task.NoExceptionOnTimeoutClouderaManagerListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.SilentCMDecommissionHostListenerTask;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
@@ -167,12 +168,10 @@ public class ClouderaManagerPollingServiceProvider {
     }
 
     public PollingResult startPollingCmHostsRecommission(Stack stack, ApiClient apiClient, BigDecimal commandId) {
-        LOGGER.debug("ZZZ: Waiting for Cloudera Manager to re-commission host. [Server address: {}]", stack.getClusterManagerIp());
+        LOGGER.debug("Waiting for Cloudera Manager to re-commission host with commandId: {}. [Server address: {}]", commandId, stack.getClusterManagerIp());
         long timeout = POLL_FOR_5_MINUTES;
-        LOGGER.info("Cloudera Manager re-commission hosts command will have {} minutes timeout, " +
-                "since all affected nodes are already deleted from provider side.", TimeUnit.SECONDS.toMinutes(timeout));
         return pollCommandWithTimeListener(stack, apiClient, commandId, timeout,
-                new SilentCMDecommissionHostListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
+                new NoExceptionOnTimeoutClouderaManagerListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "RecommissionHosts"));
     }
 
     public PollingResult startPollingCmHostDecommissioning(Stack stack, ApiClient apiClient, BigDecimal commandId,
