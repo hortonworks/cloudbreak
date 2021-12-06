@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -85,7 +85,7 @@ public class StopStartUpscaleCommissionViaCMHandler implements EventHandler<Stop
             flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED,
                     String.valueOf(request.getInstancesToCommission().size()));
 
-            ClusterDecomissionService clusterDecomissionService = clusterApiConnectors.getConnector(stack).clusterDecomissionService();
+            ClusterCommissionService clusterCommissionService = clusterApiConnectors.getConnector(stack).clusterCommissionService();
 
             // TODO CB-14929:  No null fqdn etc checking in place. Rant:  Java Streams are terrible to easily get things wrong,
             // and not think through what could potetntially braek. Not to mention the syntax..
@@ -95,7 +95,7 @@ public class StopStartUpscaleCommissionViaCMHandler implements EventHandler<Stop
             HostGroup hostGroup = hostGroupService.getByClusterIdAndName(cluster.getId(), request.getHostGroupName())
                     .orElseThrow(NotFoundException.notFound("hostgroup", request.getHostGroupName()));
 
-            Map<String, InstanceMetaData> hostsToRecommission = clusterDecomissionService.collectHostsToRemove(hostGroup, hostNames);
+            Map<String, InstanceMetaData> hostsToRecommission = clusterCommissionService.collectHostsToCommission(hostGroup, hostNames);
             LOGGER.info("ZZZ: hostNamesToRecommission after checking with CM: count={}, details={}", hostsToRecommission.size(), hostsToRecommission);
 
             // TODO CB-14929: Ensure CM, relevant services (YARN RM) are in a functional state - or fail/delay the operation
@@ -106,7 +106,7 @@ public class StopStartUpscaleCommissionViaCMHandler implements EventHandler<Stop
 
             Set<String> recommissionedHostnames = Collections.emptySet();
             if (hostsToRecommission.size() > 0) {
-                recommissionedHostnames = clusterDecomissionService.recommissionClusterNodes(hostsToRecommission);
+                recommissionedHostnames = clusterCommissionService.recommissionClusterNodes(hostsToRecommission);
             }
             LOGGER.info("ZZZ: hostsRecommissioned: count={}, hostNames={}", recommissionedHostnames.size(), recommissionedHostnames);
 

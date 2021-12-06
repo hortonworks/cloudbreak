@@ -23,9 +23,6 @@ public interface ClusterDecomissionService {
 
     Set<String> decommissionClusterNodes(Map<String, InstanceMetaData> hostsToRemove);
 
-    // TODO CB-14929: Introduce a clusterRecommissionHandler and move this API out.
-    Set<String> recommissionClusterNodes(Map<String, InstanceMetaData> hostsToRecommission);
-
     void enterMaintenanceMode(Stack stack, Map<String, InstanceMetaData> hostList);
 
     void removeManagementServices();
