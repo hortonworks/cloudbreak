@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDiagnosticsService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterModificationService;
@@ -55,6 +56,11 @@ public class ClouderaManagerConnector implements ClusterApi {
     @Override
     public ClusterDecomissionService clusterDecomissionService() {
         return applicationContext.getBean(ClouderaManagerClusterDecomissionService.class, stack, clientConfig);
+    }
+
+    @Override
+    public ClusterCommissionService clusterCommissionService() {
+        return applicationContext.getBean(ClouderaManagerClusterCommissionService.class, stack, clientConfig);
     }
 
     @Override

@@ -214,73 +214,29 @@ public class ClouderaManagerDecomissioner {
         }
     }
 
-    // TODO CB-14929: Move this out into a RecommissionedService
-    public Set<String> recommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRecommission, ApiClient client) {
-
-        // TODO CB-14929: Check status of target nodes / previously issued commands - in case of pod restarts etc.
-        //  Ideally without needing to persist anything (commandId etc)
-        // TODO CB-14929: Deal with situations where CM itself is unavailable. Go back and STOP resources on the cloud-provider.
-        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
-        try {
-            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
-            LOGGER.info("ZZZ: hostRefListFromCM: {}", hostRefList);
-            List<String> hostsAvailableForRecommission = hostRefList.getItems().stream()
-                    .filter(apiHostRef -> hostsToRecommission.containsKey(apiHostRef.getHostname()))
-                    // TODO CB-14929: Why is this DECOMISSIONED state filter removed?
-                    //.filter(a -> a.getCommissionState().equals(ApiCommissionState.DECOMMISSIONED))
-                    .parallel()
-                    .map(ApiHost::getHostname)
-                    .collect(Collectors.toList());
-
-            LOGGER.info("ZZZ: Nodes available from initial list: {}", hostsAvailableForRecommission);
-
-            ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
-
-            ApiHostNameList body = new ApiHostNameList().items(hostsAvailableForRecommission);
-
-            ApiCommand apiCommand = apiInstance.hostsRecommissionAndExitMaintenanceModeCommand("recommission_with_start", body);
-            // TODO CB-14929: The polling timeout needs to be controlled here. Timeout if this takes a long time, and try recovering by STOPPING the nodes.
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider
-                    .startPollingCmHostsRecommission(stack, client, apiCommand.getId());
-            if (isExited(pollingResult)) {
-                throw new CancellationException("Cluster was terminated while waiting for host decommission");
-            } else if (isTimeout(pollingResult)) {
-                throw new CloudbreakServiceException("Timeout while Cloudera Manager recommissioned hosts.");
-            }
-
-            return hostsAvailableForRecommission.stream()
-                    .map(hostsToRecommission::get)
-                    .map(InstanceMetaData::getDiscoveryFQDN)
-                    .collect(Collectors.toSet());
-        } catch (ApiException e) {
-            // TODO CB-14929: Evaluate whether it is possible to figure out if a partial commission succeeded. Retry / STOP other nodes where it may have failed.
-            LOGGER.error("Failed to decommission hosts: {}", hostsToRecommission.keySet(), e);
-            throw new CloudbreakServiceException(e.getMessage(), e);
-        }
-    }
-
     public void enterMaintenanceMode(Stack stack, Map<String, InstanceMetaData> hostList, ApiClient client) {
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         String currentHostId = null;
         int successCount = 0;
+        List<String> availableHostsIdsFromCm = null;
+        LOGGER.debug("Attempting to put {} instances into CM maintenance mode", hostList == null ? 0 : hostList.size());
         try {
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
-            List<String> availableHostsIdsFromCm = hostRefList.getItems().stream()
+            availableHostsIdsFromCm = hostRefList.getItems().stream()
                     .filter(apiHostRef -> hostList.containsKey(apiHostRef.getHostname()))
                     .parallel()
                     .map(ApiHost::getHostId)
                     .collect(Collectors.toList());
-
 
             for (String hostId : availableHostsIdsFromCm) {
                 currentHostId = hostId;
                 hostsResourceApi.enterMaintenanceMode(hostId);
                 successCount++;
             }
-
-
+            LOGGER.debug("Finished putting {} instances into CM maintenance mode. Initial request size: {}, CM availableCount: {}",
+                    successCount, hostList == null ? 0 : hostList.size(), availableHostsIdsFromCm == null ? "null" : availableHostsIdsFromCm);
         } catch (ApiException e) {
-            LOGGER.error("ZZZ: Failed while putting a node into maintenance mode. nodeId=" + currentHostId + ", successCount=" + successCount, e);
+            LOGGER.error("Failed while putting a node into maintenance mode. nodeId=" + currentHostId + ", successCount=" + successCount, e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }

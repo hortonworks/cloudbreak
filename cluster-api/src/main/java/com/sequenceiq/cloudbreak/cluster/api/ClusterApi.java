@@ -147,5 +147,7 @@ public interface ClusterApi {
 
     ClusterDecomissionService clusterDecomissionService();
 
+    ClusterCommissionService clusterCommissionService();
+
     ClusterDiagnosticsService clusterDiagnosticsService();
 }
