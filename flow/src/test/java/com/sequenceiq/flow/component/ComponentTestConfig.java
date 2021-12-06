@@ -34,13 +34,13 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.dbmigration.SchemaLocationProvider;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.flow.component.sleep.SleepFlowConfig;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.EventParameterFactory;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
-import com.sequenceiq.flow.component.sleep.SleepFlowConfig;
 
 @EnableAutoConfiguration
 @EnableJpaRepositories(basePackages = "com.sequenceiq")
@@ -51,7 +51,8 @@ import com.sequenceiq.flow.component.sleep.SleepFlowConfig;
         pattern = {
                 "com.sequenceiq.authorization.*",
                 "com.sequenceiq.cloudbreak.auth.*",
-                "com.sequenceiq.cloudbreak.quartz.*"
+                "com.sequenceiq.cloudbreak.quartz.*",
+                "com.sequenceiq.cloudbreak.tracing.*"
         }
 ))
 public class ComponentTestConfig {

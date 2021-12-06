@@ -35,7 +35,7 @@ public class TracingConfiguration {
 
     private final Set<String> allowedHeaderTags;
 
-    @Value("${opentracing.jdbc.enabled:true}")
+    @Value("${opentracing.jdbc.enabled}")
     private boolean jdbcEnabled;
 
     public TracingConfiguration(Tracer tracer, @Value("#{'${opentracing.allowed-header-tags}'.split(',')}") Set<String> allowedHeaderTags) {
@@ -65,6 +65,10 @@ public class TracingConfiguration {
         clientTracingFeatureBuilder.withTraceSerialization(false);
         clientTracingFeatureBuilder.withDecorators(List.of(new SpanDecorator()));
         return clientTracingFeatureBuilder.build();
+    }
+
+    public boolean isJdbcTracingEnabled() {
+        return jdbcEnabled;
     }
 
     public class SpanDecorator implements ServerSpanDecorator, ClientSpanDecorator {

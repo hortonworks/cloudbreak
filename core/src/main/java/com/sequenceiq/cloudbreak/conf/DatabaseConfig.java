@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 import com.sequenceiq.cloudbreak.common.database.BatchProperties;
 import com.sequenceiq.cloudbreak.common.database.JpaPropertiesFacory;
 import com.sequenceiq.cloudbreak.common.tx.CircuitBreakerType;
+import com.sequenceiq.cloudbreak.tracing.TracingConfiguration;
 import com.sequenceiq.cloudbreak.util.DatabaseUtil;
 import com.sequenceiq.flow.ha.NodeConfig;
 import com.zaxxer.hikari.HikariConfig;
@@ -79,6 +80,9 @@ public class DatabaseConfig {
     private CircuitBreakerType circuitBreakerType;
 
     @Inject
+    private TracingConfiguration tracingConfiguration;
+
+    @Inject
     @Named("databaseAddress")
     private String databaseAddress;
 
@@ -100,7 +104,9 @@ public class DatabaseConfig {
         if (nodeConfig.isNodeIdSpecified()) {
             config.addDataSourceProperty("ApplicationName", nodeConfig.getId());
         }
-        config.setDriverClassName("io.opentracing.contrib.jdbc.TracingDriver");
+        if (tracingConfiguration.isJdbcTracingEnabled()) {
+            config.setDriverClassName("io.opentracing.contrib.jdbc.TracingDriver");
+        }
         config.setJdbcUrl(String.format("jdbc:tracing:postgresql://%s/%s?currentSchema=%s&traceWithActiveSpanOnly=true", databaseAddress, dbName, dbSchemaName));
         config.setUsername(dbUser);
         config.setPassword(dbPassword);

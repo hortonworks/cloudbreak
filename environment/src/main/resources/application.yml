@@ -7,7 +7,10 @@ server.port: 8088
 
 opentracing:
   allowed-header-tags: "uber-trace-id,cdp-destination-api,cdp-caller-id,x-b3-parentspanid,x-b3-traceid,x-b3-spanid,x-b3-sampled,user-agent"
+  jdbc:
+    enabled: false
   jaeger:
+    enabled: true
     log-spans: false
 
 management:
