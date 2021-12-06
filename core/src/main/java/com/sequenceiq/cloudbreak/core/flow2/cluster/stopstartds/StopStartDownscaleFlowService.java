@@ -2,12 +2,12 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAILED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING2;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING2;
 
 import java.util.List;
 import java.util.Set;
@@ -25,7 +25,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -93,7 +92,6 @@ public class StopStartDownscaleFlowService {
     }
 
     public void clusterDownscaleFinished(Long stackId, @Nullable String hostGroupName, Set<InstanceMetaData> instancesStopped) {
-        StackView stackView = stackService.getViewByIdWithoutAuth(stackId);
         // TODO CB-14929: Make sure Database state updates are handled correctly.
         instancesStopped.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STOPPED));
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instances: " + instancesStopped.size() + " stopped successfully.");
