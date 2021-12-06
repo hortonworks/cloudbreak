@@ -1,8 +1,11 @@
 package com.sequenceiq.freeipa.flow.freeipa.backup.full.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class TriggerFullBackupEvent extends StackEvent {
+
     private final String operationId;
 
     private final boolean chained;
@@ -26,6 +29,14 @@ public class TriggerFullBackupEvent extends StackEvent {
 
     public boolean isFinalChain() {
         return finalChain;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(TriggerFullBackupEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && chained == event.chained
+                        && finalChain == event.finalChain);
     }
 
     @Override

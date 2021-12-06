@@ -1,8 +1,11 @@
 package com.sequenceiq.freeipa.flow.freeipa.upscale.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class UpscaleEvent extends StackEvent {
+
     private final Integer instanceCountByGroup;
 
     private final Boolean repair;
@@ -40,6 +43,16 @@ public class UpscaleEvent extends StackEvent {
 
     public boolean isFinalChain() {
         return finalChain;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(UpscaleEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && Objects.equals(instanceCountByGroup, event.instanceCountByGroup)
+                        && Objects.equals(repair, event.repair)
+                        && finalChain == event.finalChain
+                        && chained == event.chained);
     }
 
     @Override

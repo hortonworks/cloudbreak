@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -9,6 +10,7 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import reactor.rx.Promise;
 
 public class ChangePrimaryGatewayEvent extends StackEvent {
+
     private final String operationId;
 
     private final Boolean finalChain;
@@ -40,6 +42,14 @@ public class ChangePrimaryGatewayEvent extends StackEvent {
 
     public String getOperationId() {
         return operationId;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(ChangePrimaryGatewayEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && Objects.equals(repairInstanceIds, event.repairInstanceIds)
+                        && Objects.equals(finalChain, event.finalChain));
     }
 
     @Override

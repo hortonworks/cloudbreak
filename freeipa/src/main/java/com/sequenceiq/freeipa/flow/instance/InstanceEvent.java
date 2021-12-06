@@ -1,17 +1,19 @@
 package com.sequenceiq.freeipa.flow.instance;
 
 import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
 
-public class InstanceEvent implements Selectable, Acceptable {
+public class InstanceEvent implements IdempotentEvent<InstanceEvent> {
+
     private final String selector;
 
     private final Long resourceId;
@@ -52,6 +54,25 @@ public class InstanceEvent implements Selectable, Acceptable {
     @Override
     public Promise<AcceptResult> accepted() {
         return accepted;
+    }
+
+    @Override
+    public boolean equalsEvent(InstanceEvent other) {
+        return isClassAndEqualsEvent(InstanceEvent.class, other);
+    }
+
+    protected <T extends InstanceEvent> boolean isClassAndEqualsEvent(Class<T> clazz, InstanceEvent other) {
+        return isClassAndEqualsEvent(clazz, other, instanceEvent -> true);
+    }
+
+    protected <T extends InstanceEvent> boolean isClassAndEqualsEvent(Class<T> clazz, InstanceEvent other, Predicate<T> equalsSubclass) {
+        if (!clazz.equals(getClass())) {
+            return false;
+        }
+        return Objects.equals(selector, other.selector)
+                && Objects.equals(resourceId, other.resourceId)
+                && Objects.equals(instanceIds, other.instanceIds)
+                && equalsSubclass.test((T) other);
     }
 
     @Override

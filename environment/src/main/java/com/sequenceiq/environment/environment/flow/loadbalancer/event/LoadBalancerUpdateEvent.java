@@ -1,14 +1,16 @@
 package com.sequenceiq.environment.environment.flow.loadbalancer.event;
 
+import java.util.Objects;
 import java.util.Set;
-
-import reactor.rx.Promise;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.common.api.type.PublicEndpointAccessGateway;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
+
+import reactor.rx.Promise;
 
 public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
 
@@ -52,6 +54,13 @@ public class LoadBalancerUpdateEvent extends BaseNamedFlowEvent {
 
     public Set<String> getSubnetIds() {
         return subnetIds;
+    }
+
+    @Override
+    public boolean equalsEvent(BaseFlowEvent other) {
+        return isClassAndEqualsEvent(LoadBalancerUpdateEvent.class, other,
+                event -> Objects.equals(subnetIds, event.subnetIds)
+                        && Objects.equals(endpointAccessGateway, event.endpointAccessGateway));
     }
 
     public static final class LoadBalancerUpdateEventBuilder {

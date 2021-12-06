@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.upgrade;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
@@ -48,4 +49,15 @@ public class UpgradeEvent extends StackEvent {
     public boolean isBackupSet() {
         return backupSet;
     }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(UpgradeEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && Objects.equals(instanceIds, event.instanceIds)
+                        && Objects.equals(primareGwInstanceId, event.primareGwInstanceId)
+                        && Objects.equals(imageSettingsRequest, event.imageSettingsRequest)
+                        && backupSet == event.backupSet);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.freeipa.flow.freeipa.cleanup;
 
+import java.util.Objects;
 import java.util.Set;
 
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -92,6 +93,20 @@ public class CleanupEvent extends StackEvent {
 
     public Set<String> getStatesToSkip() {
         return statesToSkip;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(CleanupEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && Objects.equals(accountId, event.accountId)
+                        && Objects.equals(users, event.users)
+                        && Objects.equals(hosts, event.hosts)
+                        && Objects.equals(roles, event.roles)
+                        && Objects.equals(clusterName, event.clusterName)
+                        && Objects.equals(environmentCrn, event.environmentCrn)
+                        && Objects.equals(statesToSkip, event.statesToSkip)
+                        && Objects.equals(ips, event.ips));
     }
 
     @Override

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.image.change.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -38,6 +40,13 @@ public class ImageChangeEvent extends StackEvent {
 
     public String getOperationId() {
         return operationId;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(ImageChangeEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && Objects.equals(request, event.request));
     }
 
     @Override

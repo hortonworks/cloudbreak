@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.stop.event;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
@@ -13,6 +14,11 @@ public class EnvStopEvent extends BaseNamedFlowEvent {
 
     public EnvStopEvent(String selector, Long resourceId, Promise<AcceptResult> accepted, String resourceName, String resourceCrn) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
+    }
+
+    @Override
+    public boolean equalsEvent(BaseFlowEvent other) {
+        return isClassAndEqualsEvent(EnvStopEvent.class, other);
     }
 
     public static final class EnvStopEventBuilder {
