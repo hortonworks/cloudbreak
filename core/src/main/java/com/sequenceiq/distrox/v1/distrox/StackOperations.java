@@ -55,12 +55,14 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
+import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.detach.StackUpdateService;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
+import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
@@ -70,6 +72,7 @@ import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -164,6 +167,12 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private FlowLogService flowLogService;
+
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
+    @Inject
+    private LimitConfiguration limitConfiguration;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -320,6 +329,15 @@ public class StackOperations implements ResourcePropertyProvider {
         MDCBuilder.buildMdcContext(stack);
         boolean osUpgrade = upgradeService.isOsUpgrade(request);
         boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
+        if (replaceVms) {
+            StackInstanceCount stackInstanceCount = instanceMetaDataService.countByStackId(stack.getId());
+            if (stackInstanceCount.getInstanceCount() > limitConfiguration.getUpgradeNodeCountLimit()) {
+                throw new BadRequestException(
+                        String.format("There are %s nodes in the cluster. Upgrade has a limit of %s nodes, above the limit it is unstable. " +
+                                        "Please downscale the cluster below the limit and retry the upgrade.",
+                                stackInstanceCount.getInstanceCount(), limitConfiguration.getUpgradeNodeCountLimit()));
+            }
+        }
         UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
                 request.getInternalUpgradeSettings());
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
