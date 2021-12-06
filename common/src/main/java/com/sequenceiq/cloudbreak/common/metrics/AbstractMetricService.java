@@ -12,6 +12,8 @@ import java.util.stream.Collectors;
 
 import com.google.common.util.concurrent.AtomicDouble;
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
+import com.sequenceiq.cloudbreak.common.metrics.type.MetricType;
+import com.sequenceiq.cloudbreak.common.service.TransactionMetricsContext;
 
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Metrics;
@@ -100,6 +102,10 @@ public abstract class AbstractMetricService implements MetricService {
             return Collections.emptyList();
         }
         return tags.entrySet().stream().map(e -> Tag.of(e.getKey(), e.getValue())).collect(Collectors.toList());
+    }
+
+    public void recordTransactionTime(TransactionMetricsContext transactionMetricsContext, long duration) {
+        recordTimer(duration, MetricType.DB_TRANSACTION_ID);
     }
 
     protected abstract String getMetricPrefix();

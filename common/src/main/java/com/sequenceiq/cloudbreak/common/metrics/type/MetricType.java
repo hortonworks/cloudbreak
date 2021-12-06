@@ -10,7 +10,8 @@ public enum MetricType implements Metric {
     HEARTBEAT_UPDATE_FAILED("heartbeat.update.failed"),
     REST_OPERATION("rest.operation"),
     REST_OPERATION_FAILED("rest.operation.failed"),
-    REST_OPERATION_CALLER_ID("rest.operation.caller.id");
+    REST_OPERATION_CALLER_ID("rest.operation.caller.id"),
+    DB_TRANSACTION_ID("db.transaction");
 
     private final String metricName;
 
