@@ -34,6 +34,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.ClusterUpgradeContext;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.config.ClusterUpgradeUpdateCheckFailedToClusterUpgradeValidationFailureEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeDiskSpaceValidationFinishedEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationEvent;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeFreeIpaStatusValidationFinishedEvent;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.datalake.upgrade.validation.event.ClusterUpgradeServiceValidationEvent;
@@ -69,6 +71,8 @@ public class ClusterUpgradeValidationActions {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClusterUpgradeValidationActions.class);
 
     private static final String LOCK_COMPONENTS = "lockComponents";
+
+    private static final String TARGET_IMAGE = "targetImage";
 
     @Inject
     private StackService stackService;
@@ -121,6 +125,7 @@ public class ClusterUpgradeValidationActions {
                 UpgradeImageInfo upgradeImageInfo = upgradeImageInfoFactory.create(payload.getImageId(), payload.getResourceId());
                 Image targetImage = stackImageService
                         .getImageModelFromStatedImage(context.getStack(), upgradeImageInfo.getCurrentImage(), upgradeImageInfo.getTargetStatedImage());
+                variables.put(TARGET_IMAGE, targetImage);
                 CloudStack cloudStack = context.getCloudStack().replaceImage(targetImage);
                 ClusterUpgradeImageValidationEvent event = new ClusterUpgradeImageValidationEvent(payload.getResourceId(), payload.getImageId(), cloudStack,
                         context.getCloudCredential(), context.getCloudContext());
@@ -176,19 +181,40 @@ public class ClusterUpgradeValidationActions {
         };
     }
 
-    @Bean(name = "CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE")
-    public Action<?, ?> clusterUpgradeFreeIpaStatusValidation() {
+    @Bean(name = "CLUSTER_UPGRADE_EXISTING_UPGRADE_COMMAND_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeExistingUpgradeCommandValidation() {
         return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeUpdateCheckFinishedEvent.class) {
 
             @Override
             protected void doExecute(StackContext context, ClusterUpgradeUpdateCheckFinishedEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Starting the validation if an existing, retryable upgradeCDH command exists...");
+                Image targetImage = (Image) variables.get(TARGET_IMAGE);
+                ClusterUpgradeExistingUpgradeCommandValidationEvent event =
+                        new ClusterUpgradeExistingUpgradeCommandValidationEvent(payload.getResourceId(), targetImage);
+                sendEvent(context, event.selector(), event);
+            }
+
+            @Override
+            protected Object getFailurePayload(ClusterUpgradeUpdateCheckFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
+                return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
+            }
+        };
+    }
+
+    @Bean(name = "CLUSTER_UPGRADE_FREEIPA_STATUS_VALIDATION_STATE")
+    public Action<?, ?> clusterUpgradeFreeIpaStatusValidation() {
+        return new AbstractClusterUpgradeValidationAction<>(ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent.class) {
+
+            @Override
+            protected void doExecute(StackContext context, ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Starting the validation if FreeIPA is reachable...");
                 ClusterUpgradeFreeIpaStatusValidationEvent event = new ClusterUpgradeFreeIpaStatusValidationEvent(payload.getResourceId());
                 sendEvent(context, event.selector(), event);
             }
 
             @Override
-            protected Object getFailurePayload(ClusterUpgradeUpdateCheckFinishedEvent payload, Optional<StackContext> flowContext, Exception ex) {
+            protected Object getFailurePayload(ClusterUpgradeExistingUpgradeCommandValidationFinishedEvent payload,
+                    Optional<StackContext> flowContext, Exception ex) {
                 return new ClusterUpgradeValidationFailureEvent(payload.getResourceId(), ex);
             }
         };

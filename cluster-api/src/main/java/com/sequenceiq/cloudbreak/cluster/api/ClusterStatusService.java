@@ -5,8 +5,11 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
+import com.sequenceiq.cloudbreak.cluster.model.ClusterManagerCommand;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 
 public interface ClusterStatusService {
 
@@ -26,4 +29,6 @@ public interface ClusterStatusService {
     Optional<String> getClusterManagerVersion();
 
     List<String> getActiveCommandsList();
+
+    Optional<ClusterManagerCommand> findCommand(Stack stack, ClusterCommandType command);
 }
