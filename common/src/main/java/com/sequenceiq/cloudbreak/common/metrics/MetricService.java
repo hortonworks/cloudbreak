@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.function.ToDoubleFunction;
 
 import com.sequenceiq.cloudbreak.common.metrics.type.Metric;
+import com.sequenceiq.cloudbreak.common.service.TransactionMetricsContext;
 
 public interface MetricService {
     void submit(Metric metric, double value);
@@ -20,4 +21,6 @@ public interface MetricService {
     void recordTimerMetric(Metric metric, Duration duration, String... tags);
 
     <T> void registerGaugeMetric(Metric metric, T object, ToDoubleFunction<T> valueFunction, Map<String, String> tags);
+
+    void recordTransactionTime(TransactionMetricsContext transactionMetricsContext, long duration);
 }

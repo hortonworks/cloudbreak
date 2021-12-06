@@ -4,11 +4,15 @@ import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+
+import com.sequenceiq.cloudbreak.common.metrics.MetricService;
 
 @Service
 public class TransactionMetricsService {
@@ -25,6 +29,9 @@ public class TransactionMetricsService {
     @Value("${cb.log.transaction.stacktrace:true}")
     private boolean logTransactionStacktrace;
 
+    @Inject
+    private MetricService metricService;
+
     public TransactionMetricsContext createTransactionMetricsContext() {
         long start = clock.getCurrentTimeMillis();
         TransactionMetricsContext transactionMetricsContext = new TransactionMetricsContext(start);
@@ -34,6 +41,7 @@ public class TransactionMetricsService {
 
     public void processTransactionDuration(TransactionMetricsContext transactionMetricsContext) {
         long duration = clock.getCurrentTimeMillis() - transactionMetricsContext.getStart();
+        metricService.recordTransactionTime(transactionMetricsContext, duration);
         if (TX_DURATION_ERROR < duration) {
             if (logTransactionStacktrace) {
                 LOGGER.error("Transaction duration was critical, transactionMetricsId: {}, took {}ms at: {}", transactionMetricsContext.getTxId(),
