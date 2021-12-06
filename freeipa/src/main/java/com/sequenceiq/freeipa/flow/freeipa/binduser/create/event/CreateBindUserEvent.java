@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.freeipa.binduser.create.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class CreateBindUserEvent extends StackEvent {
@@ -50,6 +52,15 @@ public class CreateBindUserEvent extends StackEvent {
 
     public String getEnvironmentCrn() {
         return environmentCrn;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(CreateBindUserEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && Objects.equals(accountId, event.accountId)
+                        && Objects.equals(suffix, event.suffix)
+                        && Objects.equals(environmentCrn, event.environmentCrn));
     }
 
     @Override

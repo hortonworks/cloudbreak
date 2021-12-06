@@ -24,7 +24,6 @@ import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryG
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.event.ChangePrimaryGatewayEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateTriggerEvent;
-import com.sequenceiq.freeipa.flow.freeipa.salt.update.action.SaltUpdateActions;
 import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.event.UpscaleEvent;
@@ -33,7 +32,7 @@ import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvent;
 @Component
 public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<UpgradeEvent> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SaltUpdateActions.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeFlowEventChainFactory.class);
 
     private static final int PRIMARY_GW_EVENT_COUNT = 3;
 

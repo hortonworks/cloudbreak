@@ -2,6 +2,7 @@ package com.sequenceiq.freeipa.flow.freeipa.downscale.event;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
@@ -9,6 +10,7 @@ import com.sequenceiq.freeipa.flow.stack.StackEvent;
 import reactor.rx.Promise;
 
 public class DownscaleEvent extends StackEvent {
+
     private final ArrayList<String> instanceIds;
 
     private final boolean repair;
@@ -60,6 +62,17 @@ public class DownscaleEvent extends StackEvent {
 
     public boolean isFinalChain() {
         return finalChain;
+    }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(DownscaleEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && Objects.equals(instanceIds, event.instanceIds)
+                        && instanceCountByGroup == event.instanceCountByGroup
+                        && repair == event.repair
+                        && chained == event.chained
+                        && finalChain == event.finalChain);
     }
 
     @Override

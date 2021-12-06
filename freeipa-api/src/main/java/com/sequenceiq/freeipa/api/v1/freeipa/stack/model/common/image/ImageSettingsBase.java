@@ -1,10 +1,13 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image;
 
+import java.util.Objects;
+
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.doc.FreeIpaModelDescriptions.ImageSettingsModelDescription;
 
 import io.swagger.annotations.ApiModelProperty;
 
 public abstract class ImageSettingsBase {
+
     @ApiModelProperty(ImageSettingsModelDescription.IMAGE_CATALOG)
     private String catalog;
 
@@ -36,6 +39,23 @@ public abstract class ImageSettingsBase {
 
     public void setOs(String os) {
         this.os = os;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ImageSettingsBase that = (ImageSettingsBase) o;
+        return Objects.equals(catalog, that.catalog) && Objects.equals(id, that.id) && Objects.equals(os, that.os);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(catalog, id, os);
     }
 
     @Override

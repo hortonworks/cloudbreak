@@ -1,16 +1,18 @@
 package com.sequenceiq.redbeams.flow.redbeams.common;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+
 import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
-import com.sequenceiq.cloudbreak.common.event.Payload;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 
 import reactor.rx.Promise;
 
-public class RedbeamsEvent implements Selectable, Acceptable, Payload {
+public class RedbeamsEvent implements IdempotentEvent<RedbeamsEvent> {
+
     private final String selector;
 
     private final Long resourceId;
@@ -63,5 +65,23 @@ public class RedbeamsEvent implements Selectable, Acceptable, Payload {
 
     public String toString() {
         return selector;
+    }
+
+    @Override
+    public boolean equalsEvent(RedbeamsEvent other) {
+        return isClassAndEqualsEvent(RedbeamsEvent.class, other);
+    }
+
+    protected <T extends RedbeamsEvent> boolean isClassAndEqualsEvent(Class<T> clazz, RedbeamsEvent other) {
+        return isClassAndEqualsEvent(clazz, other, redbeamsEvent -> true);
+    }
+
+    protected <T extends RedbeamsEvent> boolean isClassAndEqualsEvent(Class<T> clazz, RedbeamsEvent other, Predicate<T> equalsSubclass) {
+        if (!clazz.equals(getClass())) {
+            return false;
+        }
+        return Objects.equals(selector, other.selector)
+                && Objects.equals(resourceId, other.resourceId)
+                && equalsSubclass.test((T) other);
     }
 }

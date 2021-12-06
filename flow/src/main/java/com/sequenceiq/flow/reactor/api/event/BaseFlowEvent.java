@@ -1,13 +1,16 @@
 package com.sequenceiq.flow.reactor.api.event;
 
+import java.util.Objects;
+import java.util.function.Predicate;
+
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
-import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.event.IdempotentEvent;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
-import com.sequenceiq.cloudbreak.common.event.Selectable;
 
 import reactor.rx.Promise;
 
-public class BaseFlowEvent implements Selectable, Acceptable, ResourceCrnPayload {
+public class BaseFlowEvent implements IdempotentEvent<BaseFlowEvent>, ResourceCrnPayload {
+
     private final String selector;
 
     private final Long resourceId;
@@ -45,5 +48,24 @@ public class BaseFlowEvent implements Selectable, Acceptable, ResourceCrnPayload
     @Override
     public String getResourceCrn() {
         return resourceCrn;
+    }
+
+    @Override
+    public boolean equalsEvent(BaseFlowEvent other) {
+        return isClassAndEqualsEvent(BaseFlowEvent.class, other);
+    }
+
+    protected <T extends BaseFlowEvent> boolean isClassAndEqualsEvent(Class<T> clazz, BaseFlowEvent other) {
+        return isClassAndEqualsEvent(clazz, other, baseFlowEvent -> true);
+    }
+
+    protected <T extends BaseFlowEvent> boolean isClassAndEqualsEvent(Class<T> clazz, BaseFlowEvent other, Predicate<T> equalsSubclass) {
+        if (!clazz.equals(getClass())) {
+            return false;
+        }
+        return Objects.equals(selector, other.selector)
+                && Objects.equals(resourceId, other.resourceId)
+                && Objects.equals(resourceCrn, other.resourceCrn)
+                && equalsSubclass.test((T) other);
     }
 }

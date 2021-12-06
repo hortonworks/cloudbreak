@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.flow.stack.termination.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 import reactor.rx.Promise;
@@ -16,4 +18,11 @@ public class TerminationEvent extends StackEvent {
     public Boolean getForced() {
         return forced;
     }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(TerminationEvent.class, other,
+                event -> Objects.equals(forced, event.forced));
+    }
+
 }

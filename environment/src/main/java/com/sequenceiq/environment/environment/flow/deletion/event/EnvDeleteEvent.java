@@ -1,6 +1,7 @@
 package com.sequenceiq.environment.environment.flow.deletion.event;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
@@ -21,6 +22,12 @@ public class EnvDeleteEvent extends BaseNamedFlowEvent {
 
     public boolean isForceDelete() {
         return forceDelete;
+    }
+
+    @Override
+    public boolean equalsEvent(BaseFlowEvent other) {
+        return isClassAndEqualsEvent(EnvDeleteEvent.class, other,
+                event -> forceDelete == event.forceDelete);
     }
 
     public static EnvDeleteEventBuilder builder() {

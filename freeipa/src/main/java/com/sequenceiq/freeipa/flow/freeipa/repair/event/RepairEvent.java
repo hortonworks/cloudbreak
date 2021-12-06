@@ -1,10 +1,12 @@
 package com.sequenceiq.freeipa.flow.freeipa.repair.event;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.sequenceiq.freeipa.flow.stack.StackEvent;
 
 public class RepairEvent extends StackEvent {
+
     private final String operationId;
 
     private final int instanceCountByGroup;
@@ -37,4 +39,14 @@ public class RepairEvent extends StackEvent {
     public List<String> getAdditionalTerminatedInstanceIds() {
         return additionalTerminatedInstanceIds;
     }
+
+    @Override
+    public boolean equalsEvent(StackEvent other) {
+        return isClassAndEqualsEvent(RepairEvent.class, other,
+                event -> Objects.equals(operationId, event.operationId)
+                        && instanceCountByGroup == event.instanceCountByGroup
+                        && Objects.equals(repairInstanceIds, event.repairInstanceIds)
+                        && Objects.equals(additionalTerminatedInstanceIds, event.additionalTerminatedInstanceIds));
+    }
+
 }

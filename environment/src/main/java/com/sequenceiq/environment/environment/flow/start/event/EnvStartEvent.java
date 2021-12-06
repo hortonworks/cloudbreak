@@ -1,7 +1,10 @@
 package com.sequenceiq.environment.environment.flow.start.event;
 
+import java.util.Objects;
+
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.common.api.type.DataHubStartAction;
+import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.flow.reactor.api.event.BaseNamedFlowEvent;
 
 import reactor.rx.Promise;
@@ -19,6 +22,12 @@ public class EnvStartEvent extends BaseNamedFlowEvent {
         String resourceCrn, DataHubStartAction dataHubStartAction) {
         super(selector, resourceId, accepted, resourceName, resourceCrn);
         this.dataHubStartAction = dataHubStartAction;
+    }
+
+    @Override
+    public boolean equalsEvent(BaseFlowEvent other) {
+        return isClassAndEqualsEvent(EnvStartEvent.class, other,
+                event -> Objects.equals(dataHubStartAction, event.dataHubStartAction));
     }
 
     public DataHubStartAction getDataHubStartAction() {
