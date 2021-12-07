@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -16,7 +17,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,9 +30,11 @@ import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.FreeIpaServerBase;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachChildEnvironmentRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.authorization.FreeIpaFiltering;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -165,6 +167,21 @@ class FreeIpaV1ControllerTest {
     @Test
     void describe() {
         assertNull(underTest.describe(ENVIRONMENT_CRN));
+    }
+
+    @Test
+    void describeAll() {
+        List<DescribeFreeIpaResponse> response = List.of(new DescribeFreeIpaResponse());
+        when(describeService.describeAll(anyString(), anyString())).thenReturn(response);
+        assertEquals(response, underTest.describeAll(ENVIRONMENT_CRN));
+    }
+
+    @Test
+    void describeAllInternal() {
+        List<DescribeFreeIpaResponse> response = List.of(new DescribeFreeIpaResponse());
+        when(describeService.describeAll(anyString(), anyString())).thenReturn(response);
+        assertEquals(response, underTest.describeAllInternal(ENVIRONMENT_CRN, ACCOUNT_ID));
+        verify(describeService).describeAll(ENVIRONMENT_CRN, ACCOUNT_ID);
     }
 
     @Test

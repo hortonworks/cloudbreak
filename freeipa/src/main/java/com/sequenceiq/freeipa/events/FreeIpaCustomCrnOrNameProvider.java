@@ -17,6 +17,6 @@ public class FreeIpaCustomCrnOrNameProvider extends AbstractCustomCrnOrNameProvi
 
     @Override
     protected List<? extends AccountAwareResource> getResource(String environmentCrn, String accountId) {
-        return stackService.getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId);
+        return stackService.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(environmentCrn, accountId);
     }
 }
