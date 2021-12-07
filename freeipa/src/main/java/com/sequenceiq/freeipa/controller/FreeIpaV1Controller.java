@@ -196,6 +196,19 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     }
 
     @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public List<DescribeFreeIpaResponse> describeAll(@ResourceCrn String environmentCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        return freeIpaDescribeService.describeAll(environmentCrn, accountId);
+    }
+
+    @Override
+    @InternalOnly
+    public List<DescribeFreeIpaResponse> describeAllInternal(@ResourceCrn String environmentCrn, @AccountId String accountId) {
+        return freeIpaDescribeService.describeAll(environmentCrn, accountId);
+    }
+
+    @Override
     @FilterListBasedOnPermissions
     public List<ListFreeIpaResponse> list() {
         return freeIpaFiltering.filterFreeIpas(AuthorizationResourceAction.DESCRIBE_ENVIRONMENT);

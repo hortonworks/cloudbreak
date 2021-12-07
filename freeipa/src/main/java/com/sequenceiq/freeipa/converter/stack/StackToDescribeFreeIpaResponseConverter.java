@@ -64,7 +64,7 @@ public class StackToDescribeFreeIpaResponseConverter {
     @Inject
     private StackToAvailabilityStatusConverter stackToAvailabilityStatusConverter;
 
-    public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, UserSyncStatus userSyncStatus) {
+    public DescribeFreeIpaResponse convert(Stack stack, ImageEntity image, FreeIpa freeIpa, UserSyncStatus userSyncStatus, Boolean includeAllInstances) {
         DescribeFreeIpaResponse describeFreeIpaResponse = new DescribeFreeIpaResponse();
         describeFreeIpaResponse.setName(stack.getName());
         describeFreeIpaResponse.setEnvironmentCrn(stack.getEnvironmentCrn());
@@ -77,7 +77,7 @@ public class StackToDescribeFreeIpaResponseConverter {
         describeFreeIpaResponse.setNetwork(networkResponseConverter.convert(stack));
         describeFreeIpaResponse.setPlacement(convertToPlacementResponse(stack));
         describeFreeIpaResponse.setTunnel(stack.getTunnel());
-        describeFreeIpaResponse.setInstanceGroups(instanceGroupConverter.convert(stack.getInstanceGroups()));
+        describeFreeIpaResponse.setInstanceGroups(instanceGroupConverter.convert(stack.getInstanceGroups(), includeAllInstances));
         describeFreeIpaResponse.setAvailabilityStatus(stackToAvailabilityStatusConverter.convert(stack));
         describeFreeIpaResponse.setStatus(stack.getStackStatus().getStatus());
         describeFreeIpaResponse.setStatusString(stack.getStackStatus().getStatusString());

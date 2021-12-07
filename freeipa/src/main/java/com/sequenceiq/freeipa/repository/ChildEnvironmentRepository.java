@@ -23,6 +23,14 @@ public interface ChildEnvironmentRepository extends CrudRepository<ChildEnvironm
             @Param("childEnvironmentCrn") String childEnvironmentCrn,
             @Param("accountId") String accountId);
 
+    @Query("SELECT c.stack FROM ChildEnvironment c "
+            + "LEFT JOIN FETCH c.stack.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.accountId = :accountId")
+    List<Stack> findMultipleParentByEnvironmentCrnEvenIfTerminatedWithList(
+            @Param("childEnvironmentCrn") String childEnvironmentCrn,
+            @Param("accountId") String accountId);
+
     @Query("SELECT c.stack FROM ChildEnvironment c LEFT JOIN FETCH c.stack.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData "
             + "WHERE c.environmentCrn = :childEnvironmentCrn AND c.stack.accountId = :accountId AND c.stack.resourceCrn = :resourceCrn")
     Optional<Stack> findParentByEnvironmentCrnAndCrnWthListsEvenIfTerminated(

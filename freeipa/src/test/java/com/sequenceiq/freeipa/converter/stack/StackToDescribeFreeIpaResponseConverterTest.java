@@ -132,12 +132,12 @@ class StackToDescribeFreeIpaResponseConverterTest {
         when(authenticationResponseConverter.convert(stack.getStackAuthentication())).thenReturn(STACK_AUTHENTICATION_RESPONSE);
         when(imageSettingsResponseConverter.convert(image)).thenReturn(IMAGE_SETTINGS_RESPONSE);
         when(freeIpaServerResponseConverter.convert(freeIpa)).thenReturn(freeIpaServerResponse);
-        when(instanceGroupConverter.convert(stack.getInstanceGroups())).thenReturn(INSTANCE_GROUP_RESPONSES);
+        when(instanceGroupConverter.convert(stack.getInstanceGroups(), true)).thenReturn(INSTANCE_GROUP_RESPONSES);
         when(userSyncStatusConverter.convert(userSyncStatus)).thenReturn(USERSYNC_STATUS_RESPONSE);
         when(balancedDnsAvailabilityChecker.isBalancedDnsAvailable(stack)).thenReturn(true);
         when(stackToAvailabilityStatusConverter.convert(stack)).thenReturn(AvailabilityStatus.AVAILABLE);
 
-        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, userSyncStatus);
+        DescribeFreeIpaResponse result = underTest.convert(stack, image, freeIpa, userSyncStatus, true);
 
         assertThat(result)
                 .returns(NAME, DescribeFreeIpaResponse::getName)

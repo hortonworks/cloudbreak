@@ -71,7 +71,7 @@ public class FreeIpaCustomCrnOrNameProviderTest {
         stack.setResourceCrn("stackCrn");
         stack.setId(2922L);
 
-        when(stackService.getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated("env-crn", "acc")).thenReturn(List.of(stack));
+        when(stackService.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated("env-crn", "acc")).thenReturn(List.of(stack));
 
         Map<String, String> restParams = new HashMap<>();
         Map<String, String> expected = ThreadBasedUserCrnProvider.doAs(userCrn, () -> underTest.provide(restCallDetails, null, restParams, "name", "crn"));
