@@ -70,6 +70,9 @@ class EntitlementServiceTest {
                 {"CDP_FREEIPA_HA_REPAIR", (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, false},
                 {"CDP_FREEIPA_HA_REPAIR", (EntitlementCheckFunction) EntitlementService::freeIpaHaRepairEnabled, true},
 
+                {"CDP_FREEIPA_REBUILD", (EntitlementCheckFunction) EntitlementService::isFreeIpaRebuildEnabled, false},
+                {"CDP_FREEIPA_REBUILD", (EntitlementCheckFunction) EntitlementService::isFreeIpaRebuildEnabled, true},
+
                 {"CLOUDERA_INTERNAL_ACCOUNT", (EntitlementCheckFunction) EntitlementService::internalTenant, false},
                 {"CLOUDERA_INTERNAL_ACCOUNT", (EntitlementCheckFunction) EntitlementService::internalTenant, true},
 

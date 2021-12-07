@@ -9,6 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
@@ -40,6 +42,9 @@ public class FreeIpaDescribeService {
     @Inject
     private StackToDescribeFreeIpaResponseConverter stackToDescribeFreeIpaResponseConverter;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     public DescribeFreeIpaResponse describe(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
         DescribeFreeIpaResponse response = getResponseForStack(stack, false);
@@ -48,6 +53,9 @@ public class FreeIpaDescribeService {
     }
 
     public List<DescribeFreeIpaResponse> describeAll(String environmentCrn, String accountId) {
+        if (!entitlementService.isFreeIpaRebuildEnabled(accountId)) {
+            throw new BadRequestException("The FreeIPA rebuild capability is disabled.");
+        }
         List<Stack> stacks = stackService.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(environmentCrn, accountId);
         List<DescribeFreeIpaResponse> response = stacks.stream()
                 .map(s -> getResponseForStack(s, true))
