@@ -55,4 +55,35 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .await(FREEIPA_DELETE_COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .validate();
     }
+
+    @Test(dataProvider = TEST_CONTEXT)
+    @Description(
+            given = "there is a running cloudbreak",
+            when = "a valid stack create request is sent with 3 FreeIPA instances " +
+                    "AND the stack is upgraded one node at a time",
+            then = "the stack should be available AND deletable")
+    public void testHAFreeIpaInstanceUpgrade(TestContext testContext) {
+        String freeIpa = resourcePropertyProvider().getName();
+
+        testContext
+                .given("telemetry", TelemetryTestDto.class)
+                .withLogging()
+                .withReportClusterLogs()
+                .given(freeIpa, FreeIpaTestDto.class)
+                .withFreeIpaHa(1, 3)
+                .withTelemetry("telemetry")
+                .withUpgradeCatalogAndImage()
+                .when(freeIpaTestClient.create(), key(freeIpa))
+                .await(FREEIPA_AVAILABLE)
+                .when(freeIpaTestClient.upgrade())
+                .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .given(FreeIpaOperationStatusTestDto.class)
+                .withOperationId(((FreeIpaTestDto) testContext.get(freeIpa)).getOperationId())
+                .await(COMPLETED)
+                .given(freeIpa, FreeIpaTestDto.class)
+                .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))
+                .await(FREEIPA_DELETE_COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE))
+                .validate();
+    }
 }
