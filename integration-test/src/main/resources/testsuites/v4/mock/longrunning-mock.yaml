@@ -1,10 +1,7 @@
 name: "mock-tests"
 tests:
-  - name: "newway mock testcases"
-    packages:
-      - com.sequenceiq.it.cloudbreak.testcase.mock.*
+  - name: "long running mock testcases"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.mock.DistroXClusterUpscaleDownscaleTest
-        excludedMethods:
+        includedMethods:
           - testScaleDownAndUpManyTimes
-

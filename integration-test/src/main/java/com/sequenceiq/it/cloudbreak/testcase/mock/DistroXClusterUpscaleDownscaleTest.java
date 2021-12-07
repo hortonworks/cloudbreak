@@ -122,6 +122,37 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
+            given = "there is a running DistroX cluster with 300 instances in worker group",
+            when = "up- and downscale is called many times",
+            then = "the cluster should be available")
+    public void testScaleDownAndUpManyTimes(MockedTestContext testContext, ITestContext testNgContext) {
+        String stack = resourcePropertyProvider().getName();
+        createDatalake(testContext);
+        DistroXTestDto currentContext = createDistroxDto(testContext, stack, 300)
+                .when(distroXClient.create(), key(stack))
+                .await(STACK_AVAILABLE, key(stack));
+
+        currentContext = currentContext
+                .when(distroXClient.scale(HostGroupType.WORKER.getName(), 10))
+                .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+
+        for (int i = 0; i < 40; i++) {
+            currentContext = currentContext
+                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), 398))
+                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+
+            currentContext = currentContext
+                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), 10))
+                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+        }
+
+        currentContext
+                .validate();
+    }
+
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
             given = "there is a running DistroX cluster with 1000 instances in worker group with 5 volumes per instance",
             when = "a scale, start stop called many times",
             then = "the scale should fail")
