@@ -29,6 +29,10 @@ import com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager.AbstractCloude
 
 public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerTest {
 
+    private static final int CLUSTER_NODE_COUNT_MAX = 400;
+
+    private static final int CLUSTER_NODE_COUNT_MIN = 2;
+
     private static final int UPPER_NODE_COUNT = 10;
 
     private static final int LOWER_NODE_COUNT = 5;
@@ -96,23 +100,37 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running DistroX cluster with 1000 instances in worker group with 5 volumes per instance",
-            when = "a scale, start stop called many times",
+            given = "there is a running DistroX cluster with 300 instances in worker group with 5 volumes per instance",
+            when = "up- and downscale is called 3 times",
             then = "the cluster should be available")
     public void testScaleDownAndUpWithLargeNodes(MockedTestContext testContext, ITestContext testNgContext) {
+        scalingTestWithManyNodes(testContext, 300, 150, 125, 3);
+    }
+
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Description(
+            given = "there is a running DistroX cluster with 398 instances in worker group",
+            when = "up- and downscale is called 30 times",
+            then = "the cluster should be available")
+    public void testScaleDownAndUpManyTimes(MockedTestContext testContext, ITestContext testNgContext) {
+        scalingTestWithManyNodes(testContext, CLUSTER_NODE_COUNT_MAX, CLUSTER_NODE_COUNT_MAX - CLUSTER_NODE_COUNT_MIN, 10, 30);
+    }
+
+    private void scalingTestWithManyNodes(MockedTestContext testContext, int initialNodeCount, int workerNodeCountAfterUpscale,
+            int workerNodeCountAfterDownscale, int scalingCycles) {
         String stack = resourcePropertyProvider().getName();
         createDatalake(testContext);
-        DistroXTestDto currentContext = createDistroxDto(testContext, stack, 300)
+        DistroXTestDto currentContext = createDistroxDto(testContext, stack, initialNodeCount)
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack));
 
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < scalingCycles; i++) {
             currentContext = currentContext
-                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), 150))
+                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterUpscale))
                     .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
 
             currentContext = currentContext
-                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), 125))
+                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterDownscale))
                     .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
         }
 
@@ -122,13 +140,13 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
-            given = "there is a running DistroX cluster with 1000 instances in worker group with 5 volumes per instance",
-            when = "a scale, start stop called many times",
-            then = "the scale should fail")
+            given = "there is a running datalake",
+            when = "a DostroX is created with 401 nodes or scaled to 401 nodes",
+            then = "the creation or scale should fail")
     public void testNodeCountLimit(MockedTestContext testContext, ITestContext testNgContext) {
         String stack = resourcePropertyProvider().getName();
         createDatalake(testContext);
-        createDistroxDto(testContext, stack, 401)
+        createDistroxDto(testContext, stack, CLUSTER_NODE_COUNT_MAX + 1)
                 .whenException(distroXClient.create(), BadRequestException.class, key(stack)
                         .expectedMessage("The maximum count of nodes for this cluster cannot be higher than 400"))
                 .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
@@ -136,7 +154,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .given(stack, DistroXTestDto.class)
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack))
-                .whenException(distroXClient.scale(HostGroupType.WORKER.getName(), 401), BadRequestException.class, key(stack)
+                .whenException(distroXClient.scale(HostGroupType.WORKER.getName(), CLUSTER_NODE_COUNT_MAX + 1), BadRequestException.class, key(stack)
                         .expectedMessage("The maximum count of nodes for this cluster cannot be higher than 400"))
                 .validate();
     }
