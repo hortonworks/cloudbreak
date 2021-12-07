@@ -1,18 +1,21 @@
 package com.sequenceiq.freeipa.service.freeipa.flow;
 
 import static com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil.ignoreNotFoundException;
+import static java.util.function.Predicate.not;
 
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -23,8 +26,7 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.TopologySegment;
 import com.sequenceiq.freeipa.client.model.TopologySuffix;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
-import com.sequenceiq.freeipa.entity.Stack;
-import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class FreeIpaTopologyService {
@@ -34,69 +36,80 @@ public class FreeIpaTopologyService {
     private static final Integer MAX_REPLICATION_CONNECTIONS = 4;
 
     @Inject
-    private StackService stackService;
+    private InstanceMetaDataService instanceMetaDataService;
 
     public void updateReplicationTopology(Long stackId, Set<String> fqdnsToExclude, FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        Set<String> allNodesFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
+        Set<String> allNodesFqdn = instanceMetaDataService.findNotTerminatedForStack(stackId).stream()
                 .map(InstanceMetaData::getDiscoveryFQDN)
-                .filter(Objects::nonNull)
-                .filter(fqdn -> fqdnsToExclude.isEmpty() || !fqdnsToExclude.contains(fqdn))
+                .filter(StringUtils::isNotBlank)
+                .filter(not(fqdnsToExclude::contains))
                 .collect(Collectors.toSet());
         Set<TopologySegment> topology = generateTopology(allNodesFqdn).stream()
-                .map(pair -> {
-                    TopologySegment s = new TopologySegment();
-                    s.setDirection("both");
-                    s.setLeftNode(pair.getLeft());
-                    s.setRightNode(pair.getRight());
-                    s.setCn(String.format("%s-to-%s", pair.getLeft(), pair.getRight()));
-                    return s;
-                }).collect(Collectors.toSet());
+                .map(this::convertUnorderedPairToTopologySegment)
+                .collect(Collectors.toSet());
         List<TopologySuffix> topologySuffixes = freeIpaClient.findAllTopologySuffixes();
         for (TopologySuffix topologySuffix : topologySuffixes) {
             createMissingSegments(freeIpaClient, topologySuffix.getCn(), topology);
-            removeExtraSegements(freeIpaClient, topologySuffix.getCn(), topology);
+            removeExtraSegments(freeIpaClient, topologySuffix.getCn(), topology);
         }
+    }
+
+    private TopologySegment convertUnorderedPairToTopologySegment(UnorderedPair pair) {
+        TopologySegment s = new TopologySegment();
+        s.setDirection("both");
+        s.setLeftNode(pair.getLeft());
+        s.setRightNode(pair.getRight());
+        s.setCn(String.format("%s-to-%s", pair.getLeft(), pair.getRight()));
+        return s;
     }
 
     @VisibleForTesting
     Set<UnorderedPair> generateTopology(Set<String> nodes) {
         LOGGER.debug("Generating topology for FreeIPA [{}}", nodes);
-        Map<String, Integer> connectionRemaining = nodes.stream()
-                .sorted()
-                .collect(Collectors.toMap(n -> n, n -> MAX_REPLICATION_CONNECTIONS, (k, v) -> v, LinkedHashMap::new));
-        Set<UnorderedPair> ret = new HashSet<>();
-        Iterator<String> itr2 = null;
-        for (Map.Entry<String, Integer> entry : connectionRemaining.entrySet()) {
-            String node = entry.getKey();
-            Integer remainingConnectionsForNode = entry.getValue();
-            for (int i = remainingConnectionsForNode; i > 0; i--) {
-                // Note: It is not possible for itr2 to reference on object with 0 remaining connections
-                // because itr2 is after the node iterator and the node iterator is checked for
-                // remaining connections.
-                if (itr2 == null || !itr2.hasNext()) {
-                    itr2 = getIteratorAfterCurrentNode(node, connectionRemaining.keySet());
-                    if (!itr2.hasNext()) {
-                        break;
-                    }
-                }
-                String node2 = itr2.next();
-                connectionRemaining.put(node2, connectionRemaining.get(node2) - 1);
-                ret.add(new UnorderedPair(node, node2));
+        Map<String, Integer> connectionRemaining = createConnectionRemainingPerNode(nodes);
+        Set<UnorderedPair> generatedTopology = new HashSet<>();
+        for (String node : new LinkedHashSet<>(connectionRemaining.keySet())) {
+            Integer remainingConnectionForNode = getAndRemoveNodeFromConnectionRemaining(connectionRemaining, node);
+            for (int i = remainingConnectionForNode; i > 0; i--) {
+                Optional<String> selectedPairForNode = selectPairForNode(connectionRemaining);
+                selectedPairForNode.ifPresent(selectedNode -> {
+                    decreaseRemainingCount(connectionRemaining, selectedNode);
+                    generatedTopology.add(new UnorderedPair(node, selectedNode));
+                });
             }
         }
-        return ret;
+        LOGGER.debug("Generated topology: {}", generatedTopology);
+        return generatedTopology;
     }
 
-    @SuppressWarnings("checkstyle:EmptyBlock")
-    private Iterator<String> getIteratorAfterCurrentNode(String node, Set<String> keySet) {
-        Iterator<String> ret = keySet.iterator();
-        while (ret.hasNext()) {
-            if (ret.next().equals(node)) {
-                break;
-            }
-        }
-        return ret;
+    private Integer getAndRemoveNodeFromConnectionRemaining(Map<String, Integer> connectionRemaining, String node) {
+        Integer remainingConnectionForNode = connectionRemaining.get(node);
+        connectionRemaining.remove(node);
+        return remainingConnectionForNode;
+    }
+
+    private Map<String, Integer> createConnectionRemainingPerNode(Set<String> nodes) {
+        int maxConnectionCount = Math.min(nodes.size() - 1, MAX_REPLICATION_CONNECTIONS);
+        return nodes.stream()
+                .sorted()
+                .collect(Collectors.toMap(n -> n, n -> maxConnectionCount, (k, v) -> v, LinkedHashMap::new));
+    }
+
+    private Optional<String> selectPairForNode(Map<String, Integer> connectionRemaining) {
+        Optional<Integer> maxConnectionRemaining = connectionRemaining.values().stream().max(Integer::compareTo);
+        return selectNodeWithMaxConnectionRemainingFirstByName(connectionRemaining, maxConnectionRemaining);
+    }
+
+    private Optional<String> selectNodeWithMaxConnectionRemainingFirstByName(Map<String, Integer> connectionRemaining,
+            Optional<Integer> maxConnectionRemaining) {
+        return maxConnectionRemaining.flatMap(max -> connectionRemaining.entrySet().stream()
+                .filter(entry -> max.equals(entry.getValue()))
+                .map(Map.Entry::getKey)
+                .min(String::compareTo));
+    }
+
+    private void decreaseRemainingCount(Map<String, Integer> connectionRemainingByNode, String node) {
+        connectionRemainingByNode.computeIfPresent(node, (key, connectionRemaining) -> connectionRemaining - 1);
     }
 
     private void createMissingSegments(FreeIpaClient freeIpaClient, String topologySuffixCn, Set<TopologySegment> topology) throws FreeIpaClientException {
@@ -111,7 +124,7 @@ public class FreeIpaTopologyService {
         }
     }
 
-    private void removeExtraSegements(FreeIpaClient freeIpaClient, String topologySuffixCn, Set<TopologySegment> topology) throws FreeIpaClientException {
+    private void removeExtraSegments(FreeIpaClient freeIpaClient, String topologySuffixCn, Set<TopologySegment> topology) throws FreeIpaClientException {
         Set<UnorderedPair> topologyToKeep = topology.stream()
                 .map(segment -> new UnorderedPair(segment.getLeftNode(), segment.getRightNode()))
                 .collect(Collectors.toSet());
@@ -153,7 +166,7 @@ public class FreeIpaTopologyService {
             if (this == obj) {
                 return true;
             }
-            if (obj == null || !(obj instanceof UnorderedPair)) {
+            if (!(obj instanceof UnorderedPair)) {
                 return false;
             }
 
@@ -165,6 +178,14 @@ public class FreeIpaTopologyService {
         @Override
         public int hashCode() {
             return Objects.hash(left, right);
+        }
+
+        @Override
+        public String toString() {
+            return System.lineSeparator() + "UnorderedPair{" +
+                    "left='" + left + '\'' +
+                    ", right='" + right + '\'' +
+                    '}';
         }
     }
 

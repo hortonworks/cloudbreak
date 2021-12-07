@@ -39,6 +39,12 @@ class UpgradeValidationServiceTest {
         Set<InstanceMetaData> allInstances = Set.of(createAvailableInstance("im1"), createAvailableInstance("im2"));
 
         underTest.validateStackForUpgrade(allInstances, stack);
+
+        allInstances = Set.of(createAvailableInstance("im1"), createAvailableInstance("im2"), createAvailableInstance("im3"));
+        underTest.validateStackForUpgrade(allInstances, stack);
+
+        allInstances = Set.of(createAvailableInstance("im1"));
+        underTest.validateStackForUpgrade(allInstances, stack);
     }
 
     @Test
@@ -50,9 +56,10 @@ class UpgradeValidationServiceTest {
     }
 
     @Test
-    public void testMoreThanTwoInstances() {
+    public void testMoreThanThreeInstances() {
         Stack stack = mock(Stack.class);
-        Set<InstanceMetaData> allInstances = Set.of(createAvailableInstance("im1"), createAvailableInstance("im2"), createAvailableInstance("im2"));
+        Set<InstanceMetaData> allInstances = Set.of(createAvailableInstance("im1"), createAvailableInstance("im2"), createAvailableInstance("im3"),
+                createAvailableInstance("im4"));
 
         assertThrows(BadRequestException.class, () -> underTest.validateStackForUpgrade(allInstances, stack));
     }
