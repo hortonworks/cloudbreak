@@ -45,7 +45,7 @@ public class GcpProvisionSetup implements Setup {
 
     private static final String READY = "READY";
 
-    private static final int ATTEMPT_COUNT = 300;
+    private static final int ATTEMPT_COUNT = 600;
 
     private static final int SLEEPTIME = 20;
 
