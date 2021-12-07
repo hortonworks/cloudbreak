@@ -49,7 +49,8 @@ public enum DatalakeStatusEnum {
     DATALAKE_RESTORE_FAILED(ResourceEvent.DATALAKE_RESTORE_FAILED),
     DATALAKE_DETACHED(ResourceEvent.DATALAKE_DETACHED),
     RECOVERY_IN_PROGRESS(ResourceEvent.DATALAKE_RECOVERY_IN_PROGRESS),
-    RECOVERY_FAILED(ResourceEvent.DATALAKE_RECOVERY_FAILED);
+    RECOVERY_FAILED(ResourceEvent.DATALAKE_RECOVERY_FAILED),
+    DATALAKE_RESIZE_IN_PROGRESS(ResourceEvent.DATALAKE_RESIZE_IN_PROGRESS);
 
     private ResourceEvent resourceEvent;
 
@@ -94,6 +95,26 @@ public enum DatalakeStatusEnum {
                 return RECOVERY_FAILED;
             default:
                 return this;
+        }
+    }
+
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
+    public boolean isFailedState() {
+        switch (this) {
+            case START_FAILED:
+            case STOP_FAILED:
+            case PROVISIONING_FAILED:
+            case DELETE_FAILED:
+            case REPAIR_FAILED:
+            case DATALAKE_UPGRADE_FAILED:
+            case CERT_ROTATION_FAILED:
+            case RECOVERY_FAILED:
+            case DATALAKE_RESTORE_FAILED:
+            case SYNC_FAILED:
+            case CERT_RENEWAL_FAILED:
+                return true;
+            default:
+                return false;
         }
     }
 

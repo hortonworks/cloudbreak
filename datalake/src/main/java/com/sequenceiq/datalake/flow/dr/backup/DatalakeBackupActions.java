@@ -96,7 +96,8 @@ public class DatalakeBackupActions {
 
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS);
-
+                sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_BACKUP_INPROGRESS, ResourceEvent.DATALAKE_BACKUP_REQUESTED,
+                        "Datalake backup requested", sdxCluster.getId(), context.getFlowId());
                 DatalakeDrStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
                                 payload.getBackupName(), payload.getUserId());
@@ -173,7 +174,7 @@ public class DatalakeBackupActions {
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.INPROGRESS, null);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DATALAKE_BACKUP_INPROGRESS,
                         ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS,
-                        "Datalake backup in progress", payload.getResourceId());
+                        "Datalake backup in progress", payload.getResourceId(), context.getFlowId());
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_REQUESTED, sdxCluster);
                 sendEvent(context, DatalakeDatabaseBackupWaitRequest.from(context, operationId));
             }
@@ -261,7 +262,7 @@ public class DatalakeBackupActions {
                 sendEvent(context, DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT.event(), payload);
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.DATALAKE_BACKUP_FINISHED,
-                        "Datalake backup finished, Datalake is running", payload.getResourceId());
+                        "Datalake backup finished, Datalake is running", payload.getResourceId(), context.getFlowId());
 
                 eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_FINISHED);
 
@@ -340,9 +341,9 @@ public class DatalakeBackupActions {
     private String getFailureReason(Map<Object, Object> variables, Exception exception) {
         StringBuilder reason = new StringBuilder();
         if (variables.containsKey(REASON) && variables.get(REASON).equals(DatalakeBackupFailureReason.BACKUP_ON_UPGRADE.name())) {
-            reason.append("Upgrade not started, datalake backup failed.");
+            reason.append("Upgrade not started, data lake backup failed.");
         } else {
-            reason.append("Backup failed, returning datalake to running state.");
+            reason.append("Backup failed.");
         }
         if (exception != null && StringUtils.isNotEmpty(exception.getMessage())) {
             reason.append(" Failure message: ").append(exception.getMessage());

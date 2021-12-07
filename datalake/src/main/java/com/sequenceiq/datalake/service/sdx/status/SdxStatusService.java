@@ -30,6 +30,10 @@ import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.repository.SdxStatusRepository;
 import com.sequenceiq.datalake.service.sdx.SdxNotificationService;
+import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.FlowChainLog;
+import com.sequenceiq.flow.domain.FlowLog;
+import com.sequenceiq.flow.service.flowlog.FlowChainLogService;
 
 @Service
 public class SdxStatusService {
@@ -53,9 +57,28 @@ public class SdxStatusService {
     @Inject
     private Clock clock;
 
+    @Inject
+    private FlowLogService flowLogService;
+
+    @Inject
+    private FlowChainLogService flowChainLogService;
+
     public void setStatusForDatalakeAndNotify(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
         setStatusForDatalake(status, statusReason, sdxCluster);
         sdxNotificationService.send(status.getDefaultResourceEvent(), sdxCluster);
+    }
+
+    public SdxCluster setStatusForDatalakeAndNotify(DatalakeStatusEnum status, String statusReason, Long datalakeId, String flowId) {
+        FlowLog flowLog = flowLogService.getLastFlowLog(flowId).get();
+        FlowChainLog flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowLog.getFlowChainId()).orElse(null);
+        if (flowChainLog != null && getStatusByFLowChainFactory(flowChainLog.getFlowChainType()) != null &&
+                !status.isFailedState()) {
+            return setStatusForDatalakeAndNotify(getStatusByFLowChainFactory(flowChainLog.getFlowChainType()),
+                    statusReason,
+                    datalakeId);
+        } else {
+            return setStatusForDatalakeAndNotify(status, statusReason, datalakeId);
+        }
     }
 
     public SdxCluster setStatusForDatalakeAndNotify(DatalakeStatusEnum status, String statusReason, Long datalakeId) {
@@ -84,6 +107,17 @@ public class SdxStatusService {
             sdxNotificationService.send(event, cluster);
             return cluster;
         }).orElseThrow(() -> new NotFoundException("SdxCluster was not found with ID: " + datalakeId));
+    }
+
+    public SdxCluster setStatusForDatalakeAndNotify(DatalakeStatusEnum status, ResourceEvent event, String statusReason, Long datalakeId, String flowId) {
+        FlowLog flowLog = flowLogService.getLastFlowLog(flowId).get();
+        FlowChainLog flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(flowLog.getFlowChainId()).orElse(null);
+        if (flowChainLog != null && getResourceEventByFLowChainFactory(flowChainLog.getFlowChainType()) != null &&
+                !status.isFailedState()) {
+            return setStatusForDatalakeAndNotify(getStatusByFLowChainFactory(flowChainLog.getFlowChainType()), event, statusReason, datalakeId);
+        } else {
+            return setStatusForDatalakeAndNotify(status, event, statusReason, datalakeId);
+        }
     }
 
     public void setStatusForDatalake(DatalakeStatusEnum status, String statusReason, SdxCluster sdxCluster) {
@@ -204,5 +238,27 @@ public class SdxStatusService {
         }
         return String.format("Stack status: %s, reason: %s, cluster status: %s, reason: %s",
                 stackStatus, stackStatusReason, clusterStatus, clusterStatusReason);
+    }
+
+    public ResourceEvent getResourceEventByFLowChainFactory(String flowChainFactory) {
+        switch (flowChainFactory) {
+            case "DatalakeResizeFlowEventChainFactory":
+                return ResourceEvent.DATALAKE_RESIZE_IN_PROGRESS;
+            case "DatalakeUpgradeFlowEventChainFactory":
+                return ResourceEvent.DATALAKE_UPGRADE_STARTED;
+            default:
+                return null;
+        }
+    }
+
+    public DatalakeStatusEnum getStatusByFLowChainFactory(String flowChainFactory) {
+        switch (flowChainFactory) {
+            case "DatalakeResizeFlowEventChainFactory":
+                return DatalakeStatusEnum.DATALAKE_RESIZE_IN_PROGRESS;
+            case "DatalakeUpgradeFlowEventChainFactory":
+                return DatalakeStatusEnum.DATALAKE_UPGRADE_IN_PROGRESS;
+            default:
+                return null;
+        }
     }
 }

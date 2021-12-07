@@ -395,6 +395,7 @@ public enum ResourceEvent {
     DATALAKE_DATABASE_RESTORE_FINISHED("datalake.database.restore.finished"),
     DATALAKE_DATABASE_RESTORE_FAILED("datalake.database.restore.failed"),
     DATALAKE_DATABASE_RESTORE_COULD_NOT_START("datalake.database.restore.could.not.start"),
+    DATALAKE_BACKUP_REQUESTED("datalake.backup.requested"),
     DATALAKE_BACKUP_IN_PROGRESS("datalake.backup.in.progress"),
     DATALAKE_RESTORE_IN_PROGRESS("datalake.restore.in.progress"),
     DATALAKE_BACKUP_FINISHED("datalake.backup.finished"),
@@ -415,7 +416,9 @@ public enum ResourceEvent {
     DATALAKE_RECOVERY_BRINGUP_FAILED("datalake.recovery.bringup.failed"),
     DATALAKE_RECOVERY_TEARDOWN_FINISHED("datalake.recovery.teardown.finished"),
     DATALAKE_RECOVERY_FAILED("datalake.recovery.failed"),
-    DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished");
+    DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished"),
+    DATALAKE_RESIZE_REQUESTED("datalake.resize.requested"),
+    DATALAKE_RESIZE_IN_PROGRESS("datalake.resize.in.progress");
 
     private final String message;
 
