@@ -25,14 +25,10 @@ import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaTopologyService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class RemoveReplicationAgreementsHandler extends ExceptionCatcherEventHandler<RemoveReplicationAgreementsRequest> {
     private static final Logger LOGGER = LoggerFactory.getLogger(RemoveReplicationAgreementsHandler.class);
-
-    @Inject
-    private EventBus eventBus;
 
     @Inject
     private StackService stackService;

@@ -22,6 +22,8 @@ public class UpgradeValidationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradeValidationService.class);
 
+    private static final int MAX_NUMBER_OF_INSTANCES_FOR_UPGRADE = 3;
+
     @Inject
     private EntitlementService entitlementService;
 
@@ -29,9 +31,9 @@ public class UpgradeValidationService {
         if (allInstances.isEmpty()) {
             LOGGER.warn("Instances are empty for stack.");
             throw new BadRequestException("There are no instances available for upgrade!");
-        } else if (allInstances.size() > 2) {
+        } else if (allInstances.size() > MAX_NUMBER_OF_INSTANCES_FOR_UPGRADE) {
             LOGGER.warn("FreeIPA instance count is bigger then allowed. Size: [{}]", allInstances.size());
-            throw new BadRequestException("Upgrade currently only available for FreeIPA installation with 1 or 2 instances");
+            throw new BadRequestException("Upgrade currently only available for FreeIPA installation with 1 to 3 instances");
         } else if (isAnyInstanceInNotAvailableState(allInstances)) {
             throwErrorForNotAvailableInstances(allInstances);
         } else if (!stack.isAvailable()) {
