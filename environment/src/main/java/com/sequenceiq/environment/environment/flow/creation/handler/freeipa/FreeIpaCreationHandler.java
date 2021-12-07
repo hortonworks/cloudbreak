@@ -81,7 +81,7 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaCreationHandler.class);
 
-    private static final String MASTER_GROUP_NAME = "master0";
+    private static final String MASTER_GROUP_NAME = "master";
 
     private static final String TCP = "tcp";
 
