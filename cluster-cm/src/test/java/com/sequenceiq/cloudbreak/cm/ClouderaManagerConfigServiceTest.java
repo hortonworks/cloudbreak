@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_1_0;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -56,9 +57,13 @@ public class ClouderaManagerConfigServiceTest {
 
     private static final String NIFI_SERVICE = "NIFI";
 
+    private static final String HIVE_SERVICE = "HIVE";
+
     private static final String NIFI_ROLE = "NIFI-ROLE";
 
     private static final String NIFI_SERVICE_TYPE = "NIFI-SERVICE-TYPE";
+
+    private static final String HIVE_SERVICE_TYPE = "HIVE-SERVICE";
 
     private static final String NIFI_CONFIG_GROUP = "NIFI-CONFIG-GROUP";
 
@@ -319,6 +324,37 @@ public class ClouderaManagerConfigServiceTest {
         verify(servicesResourceApi).readServices(eq(TEST_CLUSTER_NAME), any());
         verify(roleConfigGroupsResourceApi).readRoleConfigGroups(TEST_CLUSTER_NAME, NIFI_SERVICE);
         verify(roleConfigGroupsResourceApi).readConfig(TEST_CLUSTER_NAME, NIFI_CONFIG_GROUP, NIFI_SERVICE, CONFIG_VIEW);
+    }
+
+    @Test
+    public void testDoesServiceTypeExistSuucess() throws ApiException {
+        ServicesResourceApi servicesResourceApi = Mockito.mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
+        List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE), createApiService(HIVE_SERVICE, HIVE_SERVICE_TYPE));
+        when(servicesResourceApi.readServices(eq(TEST_CLUSTER_NAME), any())).thenReturn(createApiServiceList(services));
+
+        Optional<String> actual = underTest.getServiceNameIfExists(API_CLIENT, TEST_CLUSTER_NAME, HIVE_SERVICE_TYPE);
+
+        assertTrue(actual.isPresent());
+        assertEquals("HIVE", actual.get());
+
+        // verifying case sensitivity
+        underTest.getServiceNameIfExists(API_CLIENT, TEST_CLUSTER_NAME, "hive_service");
+
+        assertTrue(actual.isPresent());
+        assertEquals("HIVE", actual.get());
+    }
+
+    @Test
+    public void testDoesServiceTypeExistFailure() throws ApiException {
+        ServicesResourceApi servicesResourceApi = Mockito.mock(ServicesResourceApi.class);
+        when(clouderaManagerApiFactory.getServicesResourceApi(API_CLIENT)).thenReturn(servicesResourceApi);
+        List<ApiService> services = List.of(createApiService(NIFI_SERVICE, NIFI_SERVICE_TYPE));
+        when(servicesResourceApi.readServices(eq(TEST_CLUSTER_NAME), any())).thenReturn(createApiServiceList(services));
+
+        Optional<String> actual = underTest.getServiceNameIfExists(API_CLIENT, TEST_CLUSTER_NAME, HIVE_SERVICE_TYPE);
+
+        assertTrue(!actual.isPresent());
     }
 
     private ApiConfigList createApiConfigList(List<ApiConfig> apiConfigs) {

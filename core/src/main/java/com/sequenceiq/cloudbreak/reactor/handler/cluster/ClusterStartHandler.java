@@ -95,25 +95,26 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Optional<Stack> datalakeStack = datalakeService.getDatalakeStackByDatahubStack(stack);
             int requestId;
-            // Update the RDC of data lake and update the HMS configuration
-            if (stack.getType() == StackType.WORKLOAD && datalakeStack.isPresent() &&
-                    isDatalakeCreatedAfterDataHub(datalakeStack.get(), stack) &&
-                    entitlementService.isDatalakeLightToMediumMigrationEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
+            // Re-configuring DH using the Remote Data Context of Data lake.
+            boolean clusterDataHub = stack.getType().equals(StackType.WORKLOAD);
+            boolean dlIsRebuild = datalakeStack.isPresent() && isDatalakeCreatedAfterDataHub(datalakeStack.get(), stack);
+            boolean resizeEntitlementEnabled = entitlementService.isDatalakeLightToMediumMigrationEnabled(ThreadBasedUserCrnProvider.getAccountId());
+            LOGGER.info("Is cluster DH: {}, Found data lake stack: {}, Is DL rebuild: {},  Is resize entitlement Enabled: {}",
+                    clusterDataHub,
+                    datalakeStack.isPresent(),
+                    dlIsRebuild,
+                    resizeEntitlementEnabled);
+            if (clusterDataHub && datalakeStack.isPresent() &&
+                    dlIsRebuild &&
+                    resizeEntitlementEnabled) {
                 LOGGER.info("Triggering update of remote data context");
                 apiConnectors.getConnector(stack).startClusterMgmtServices();
                 clusterBuilderService.configureManagementServices(stack.getId());
-                //Update Hive service configuration
-                Cluster cluster = clusterService.getById(datalakeStack.get().getCluster().getId());
-                Optional<RDSConfig> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack.get(), cluster, DatabaseType.HIVE)
-                        .stream().filter(config -> config.getType().toLowerCase().equals(DatabaseType.HIVE.toString().toLowerCase()))
-                        .findFirst();
-                try {
-                    if (rdsConfig.isEmpty()) {
-                        throw new CloudbreakException("Could not find RDS configuration for Hive");
-                    }
-                    apiConnectors.getConnector(stack).updateServiceConfig(HIVE_SERVICE, getRdsConfigMap(rdsConfig.get()));
-                } catch (CloudbreakException e) {
-                    LOGGER.info("Exception while updating the Data-Hub configuration", e);
+                if (apiConnectors.getConnector(stack).doesServiceExist(HIVE_SERVICE)) {
+                    //Update Hive service database configuration
+                    updateDatabaseConfiguration(datalakeStack, stack, HIVE_SERVICE, DatabaseType.HIVE);
+                } else {
+                    LOGGER.info("Database configuration is not refreshed");
                 }
                 requestId = apiConnectors.getConnector(stack).startClusterServices();
             } else {
@@ -124,6 +125,22 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
             result = new ClusterStartResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    private void updateDatabaseConfiguration(Optional<Stack> datalakeStack, Stack dataHubStack, String service, DatabaseType databaseType) {
+        Cluster cluster = clusterService.getById(datalakeStack.get().getCluster().getId());
+        Optional<RDSConfig> rdsConfig = postgresConfigService.createRdsConfigIfNeeded(datalakeStack.get(), cluster, databaseType)
+                .stream().filter(config -> config.getType().toLowerCase().equals(databaseType.toString().toLowerCase()))
+                .findFirst();
+        try {
+            if (rdsConfig.isPresent()) {
+                apiConnectors.getConnector(dataHubStack).updateServiceConfig(service, getRdsConfigMap(rdsConfig.get()));
+            } else {
+                LOGGER.error("Could not find RDS configuration for Hive");
+            }
+        } catch (CloudbreakException e) {
+            LOGGER.info("Exception while updating the Data-Hub configuration", e);
+        }
     }
 
     private Map<String, String> getRdsConfigMap(RDSConfig rdsConfig) {
