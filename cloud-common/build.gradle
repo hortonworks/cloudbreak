@@ -43,7 +43,7 @@ dependencies {
     implementation group: 'io.micrometer',                         name: 'micrometer-jersey2',             version: micrometerVersion
     implementation group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
     implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
-    implementation group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
+    implementation group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
     implementation group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
     implementation group: 'org.freemarker',                        name: 'freemarker',                     version: freemarkerVersion
     implementation group: 'org.bouncycastle',                      name: 'bcprov-jdk15on',                 version: bouncycastleVersion

@@ -27,8 +27,8 @@ bootRun {
   }
 }
 
-springBoot {
-  mainClassName = 'com.sequenceiq.mock.MockInfrastructureApplication'
+bootRun {
+  main = 'com.sequenceiq.mock.MockInfrastructureApplication'
 }
 
 bootJar {

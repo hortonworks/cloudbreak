@@ -136,8 +136,8 @@ bootRun {
   }
 }
 
-springBoot {
-  mainClassName = "com.sequenceiq.environment.EnvironmentApplication"
+bootRun {
+  main = "com.sequenceiq.environment.EnvironmentApplication"
 }
 
 bootJar {

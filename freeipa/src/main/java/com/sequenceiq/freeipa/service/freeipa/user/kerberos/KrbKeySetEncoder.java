@@ -7,7 +7,7 @@ import java.util.Base64;
 import java.util.List;
 
 import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.DERInteger;
+import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERTaggedObject;
@@ -68,14 +68,14 @@ public final class KrbKeySetEncoder {
 
     private static DERSequence makeSalt(int type, String salt) throws UnsupportedEncodingException {
         return new DERSequence(new ASN1Encodable[]{
-            new DERTaggedObject(true, TAG_ATTRIBUTE_MAJOR_VNO, new DERInteger(type)),
+            new DERTaggedObject(true, TAG_ATTRIBUTE_MAJOR_VNO, new ASN1Integer(type)),
             new DERTaggedObject(true, TAG_ATTRIBUTE_MINOR_VNO, new DEROctetString(salt.getBytes(StandardCharsets.UTF_8)))
         });
     }
 
     private static DERSequence makeEncryptionKey(int enctype, byte[] value) {
         return new DERSequence(new ASN1Encodable[]{
-            new DERTaggedObject(true, TAG_ATTRIBUTE_MAJOR_VNO, new DERInteger(enctype)),
+            new DERTaggedObject(true, TAG_ATTRIBUTE_MAJOR_VNO, new ASN1Integer(enctype)),
             new DERTaggedObject(true, TAG_ATTRIBUTE_MINOR_VNO, new DEROctetString(value))
         });
     }
@@ -100,16 +100,16 @@ public final class KrbKeySetEncoder {
 
         DERSequence krbKeySet = new DERSequence(new ASN1Encodable[]{
             // attribute-major-vno
-            new DERTaggedObject(true, TAG_ATTRIBUTE_MAJOR_VNO, new DERInteger(1)),
+            new DERTaggedObject(true, TAG_ATTRIBUTE_MAJOR_VNO, new ASN1Integer(1)),
 
             // attribute-minor-vno
-            new DERTaggedObject(true, TAG_ATTRIBUTE_MINOR_VNO, new DERInteger(1)),
+            new DERTaggedObject(true, TAG_ATTRIBUTE_MINOR_VNO, new ASN1Integer(1)),
 
             // kvno
-            new DERTaggedObject(true, TAG_KVNO, new DERInteger(1)),
+            new DERTaggedObject(true, TAG_KVNO, new ASN1Integer(1)),
 
             // mkvno
-            new DERTaggedObject(true, TAG_MKVNO, new DERInteger(1)),
+            new DERTaggedObject(true, TAG_MKVNO, new ASN1Integer(1)),
 
             new DERTaggedObject(true, TAG_KEYS, krbKeys)
         });

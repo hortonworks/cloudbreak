@@ -13,7 +13,7 @@ WORKDIR /
 ADD ${REPO_URL}/com/sequenceiq/periscope/$VERSION/periscope-$VERSION.jar /periscope.jar
 
 # add jmx exporter
-ADD jmx_prometheus_javaagent-0.10.jar /jmx_prometheus_javaagent.jar
+ADD jmx_prometheus_javaagent-0.16.1.jar /jmx_prometheus_javaagent.jar
 
 # extract schema files
 RUN jar xf periscope.jar && mv /BOOT-INF/classes/schema/ /schema/
