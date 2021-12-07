@@ -54,7 +54,7 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         if (resourceType == ResourceType.AWS_VOLUMESET) {
             resourceName = attachedDiskResourceName(parts);
         } else if (resourceType == ResourceType.AWS_INSTANCE) {
-            resourceName = instanceName(parts);
+            resourceName = nativeInstanceName(parts);
         } else if (resourceType == ResourceType.AWS_SECURITY_GROUP) {
             resourceName = securityGroup(parts);
         } else if (resourceType == ResourceType.AWS_RESERVED_IP) {
@@ -96,6 +96,24 @@ public class AwsResourceNameService extends CloudbreakResourceNameService {
         name = appendPart(name, normalize(instanceGroupName));
         name = appendPart(name, privateId);
         name = adjustBaseLength(name, maxResourceNameLength);
+
+        return name;
+    }
+
+    private String nativeInstanceName(Object[] parts) {
+        checkArgs(INSTANCE_NAME_PART_COUNT, parts);
+        String name;
+        String stackName = String.valueOf(parts[0]);
+        String instanceGroupName = CaseFormat.LOWER_UNDERSCORE.to(CaseFormat.LOWER_CAMEL, String.valueOf(parts[1]).toLowerCase());
+        String resourceId = String.valueOf(parts[2]);
+        String privateId = String.valueOf(parts[PART_3]);
+
+        name = normalize(stackName);
+        name = adjustPartLength(name);
+        name = appendPart(name, resourceId);
+        name = appendPart(name, normalize(instanceGroupName));
+        name = appendPart(name, privateId);
+        name = adjustPartLength(name, maxResourceNameLength);
 
         return name;
     }

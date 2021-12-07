@@ -46,13 +46,17 @@ public abstract class CloudbreakResourceNameService implements ResourceNameServi
     }
 
     public String adjustPartLength(String part) {
+        return adjustPartLength(part, MAX_PART_LENGTH);
+    }
+
+    public String adjustPartLength(String part, int maxLength) {
         if (part == null) {
             throw new IllegalStateException("Resource name part must not be null!");
         }
         String shortPart = part;
-        if (part.length() > MAX_PART_LENGTH) {
+        if (part.length() > maxLength) {
             LOGGER.debug("Shortening part name: {}", part);
-            shortPart = String.copyValueOf(part.toCharArray(), 0, MAX_PART_LENGTH);
+            shortPart = String.copyValueOf(part.toCharArray(), 0, maxLength);
         } else {
             LOGGER.debug("Part name length OK, no need to shorten: {}", part);
         }
