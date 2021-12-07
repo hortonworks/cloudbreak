@@ -165,8 +165,8 @@ bootRun {
   }
 }
 
-springBoot {
-  mainClassName = 'com.sequenceiq.freeipa.FreeIpaApplication'
+bootRun {
+  main = 'com.sequenceiq.freeipa.FreeIpaApplication'
 }
 
 bootJar {

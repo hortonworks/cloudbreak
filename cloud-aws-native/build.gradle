@@ -23,7 +23,7 @@ dependencies {
   implementation group: 'net.bytebuddy',                 name: 'byte-buddy',                     version: '1.9.12'
   implementation group: 'org.slf4j',                     name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
-  implementation group: 'commons-io',                    name: 'commons-io',                     version: '2.4'
+  implementation group: 'commons-io',                    name: 'commons-io',                     version: apacheCommonsIoVersion
   implementation group: 'commons-codec',                 name: 'commons-codec',                  version: commonsCodecVersion
 
   implementation(group: 'com.amazonaws',                 name: 'aws-java-sdk-core',              version: awsSdkVersion) {

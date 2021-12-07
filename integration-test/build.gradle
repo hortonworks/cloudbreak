@@ -27,8 +27,8 @@ bootRun {
   }
 }
 
-springBoot {
-  mainClassName = 'com.sequenceiq.it.IntegrationTestApp'
+bootRun {
+  main = 'com.sequenceiq.it.IntegrationTestApp'
 }
 
 bootJar {

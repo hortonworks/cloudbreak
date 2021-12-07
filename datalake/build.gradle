@@ -108,8 +108,8 @@ bootRun {
   }
 }
 
-springBoot {
-  mainClassName = 'com.sequenceiq.datalake.DatalakeApplication'
+bootRun {
+  main = 'com.sequenceiq.datalake.DatalakeApplication'
 }
 
 bootJar {

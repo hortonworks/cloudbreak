@@ -27,8 +27,8 @@ bootRun {
   }
 }
 
-springBoot {
-  mainClassName = 'com.sequenceiq.thunderhead.MockThunderheadApplication'
+bootRun {
+  main = 'com.sequenceiq.thunderhead.MockThunderheadApplication'
 }
 
 bootJar {

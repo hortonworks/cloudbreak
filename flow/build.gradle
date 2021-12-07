@@ -36,7 +36,7 @@ dependencies {
   api group: 'io.projectreactor',                     name: 'reactor-core',                   version: eventBusVersion
   api group: 'io.projectreactor',                     name: 'reactor-bus',                    version: eventBusVersion
   api group: 'io.projectreactor',                     name: 'reactor-stream',                 version: eventBusVersion
-  implementation group: 'commons-io',                            name: 'commons-io',                     version: '2.4'
+  implementation group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
   implementation group: 'com.cedarsoftware',                     name: 'json-io',                        version: '4.9.12'
   implementation group: 'org.mybatis',                           name: 'mybatis-migrations',             version: mybatisMigrationVersion
 

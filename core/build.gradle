@@ -59,10 +59,7 @@ bootRun {
   if (project.hasProperty("jvmArgs")) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()
   }
-}
-
-springBoot {
-  mainClassName = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
+  main = 'com.sequenceiq.cloudbreak.CloudbreakApplication'
 }
 
 bootJar {

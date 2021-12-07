@@ -65,7 +65,9 @@ public class EnvCreationActions {
 
     private final EnvironmentJobService environmentJobService;
 
-    public EnvCreationActions(EnvironmentService environmentService, EventSenderService eventService, EnvironmentMetricService metricService,
+    public EnvCreationActions(EnvironmentService environmentService,
+            EventSenderService eventService,
+            EnvironmentMetricService metricService,
             EnvironmentJobService environmentJobService) {
         this.environmentService = environmentService;
         this.eventService = eventService;

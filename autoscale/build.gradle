@@ -52,8 +52,8 @@ bootRun {
     }
 }
 
-springBoot {
-  mainClassName = 'com.sequenceiq.periscope.PeriscopeApplication'
+bootRun {
+    main = 'com.sequenceiq.periscope.PeriscopeApplication'
 }
 
 bootJar {

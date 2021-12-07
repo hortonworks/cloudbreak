@@ -54,9 +54,6 @@ public class ClusterService {
     private ClusterPertainRepository clusterPertainRepository;
 
     @Inject
-    private AlertService alertService;
-
-    @Inject
     private PeriscopeNodeConfig periscopeNodeConfig;
 
     @Inject

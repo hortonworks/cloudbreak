@@ -35,9 +35,6 @@ public class AlertService {
     private ClusterService clusterService;
 
     @Inject
-    private ScalingService scalingPolicyService;
-
-    @Inject
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
     public TimeAlert createTimeAlert(Long clusterId, TimeAlert alert) {

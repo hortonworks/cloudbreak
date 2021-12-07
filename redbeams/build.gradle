@@ -143,8 +143,8 @@ bootRun {
   }
 }
 
-springBoot {
-  mainClassName = 'com.sequenceiq.redbeams.RedbeamsApplication'
+bootRun {
+  main = 'com.sequenceiq.redbeams.RedbeamsApplication'
 }
 
 bootJar {
