@@ -876,6 +876,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
+    public boolean doesServiceExist(String serviceType) {
+        return configService.getServiceNameIfExists(apiClient, stack.getName(), serviceType).isPresent();
+    }
+
+    @Override
     public Optional<String> getRoleConfigValueByServiceType(String clusterName, String roleConfigGroup, String serviceType, String configName) {
         return configService.getRoleConfigValueByServiceType(apiClient, clusterName, roleConfigGroup, serviceType, configName);
     }
