@@ -79,6 +79,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.service.Retry;
@@ -186,6 +187,9 @@ public class AwsLaunchTest {
 
     @MockBean
     private EntitlementService entitlementService;
+
+    @MockBean
+    private ResourceRetriever resourceRetriever;
 
     @Test
     public void launchStack() throws Exception {

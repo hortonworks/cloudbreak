@@ -16,6 +16,7 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Component;
 
+import com.amazonaws.AmazonClientException;
 import com.amazonaws.services.ec2.model.AttachVolumeRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
 import com.amazonaws.services.ec2.model.DescribeVolumesResult;
@@ -96,7 +97,13 @@ public class AwsAttachmentResourceBuilder extends AbstractAwsComputeBuilder {
 
         LOGGER.debug("Waiting for attach volumes request");
         for (Future<?> future : futures) {
-            future.get();
+            try {
+                future.get();
+            } catch (AmazonClientException e) {
+                LOGGER.error("Attach was unsuccesful. Group: {}, Volume: {} Instance: {}, AWS error: {}", group.getName(), instance.getName(),
+                        volumeSet.getName(), e.getMessage());
+                throw e;
+            }
         }
         LOGGER.debug("Attach volume requests sent");
 

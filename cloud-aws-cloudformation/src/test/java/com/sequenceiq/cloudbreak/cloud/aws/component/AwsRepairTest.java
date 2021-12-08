@@ -94,6 +94,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.notification.ResourceNotifier;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.storage.LocationHelper;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
@@ -170,6 +171,9 @@ public class AwsRepairTest {
 
     @MockBean
     private LocationHelper locationHelper;
+
+    @MockBean
+    private ResourceRetriever resourceRetriever;
 
     @Inject
     private AwsResourceConnector underTest;
