@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
 
@@ -69,7 +70,7 @@ public class TerminationTriggerService {
         List<FlowLog> flowLogs = flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId());
         return flowLogs.stream()
                 .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
-                        .anyMatch(terminationFlowClass -> terminationFlowClass.equals(flowLog.getFlowType())))
+                        .anyMatch(flowLog::isFlowType))
                 .filter(fl -> StackTerminationState.INIT_STATE.name().equalsIgnoreCase(fl.getCurrentState())
                         || ClusterTerminationState.INIT_STATE.name().equalsIgnoreCase(fl.getCurrentState()))
                 .findFirst();
@@ -86,8 +87,8 @@ public class TerminationTriggerService {
     }
 
     private boolean isRunningFlowForced(FlowLog fl) {
-        Class<?> payloadType = fl.getPayloadType();
-        if (TerminationEvent.class.equals(payloadType)) {
+        ClassValue payloadType = fl.getPayloadType();
+        if (payloadType != null && payloadType.isOnClassPath() && TerminationEvent.class.equals(payloadType.getClassValue())) {
             TerminationEvent payload = (TerminationEvent) JsonReader.jsonToJava(fl.getPayload());
             return payload.getTerminationType().isForced();
         } else {

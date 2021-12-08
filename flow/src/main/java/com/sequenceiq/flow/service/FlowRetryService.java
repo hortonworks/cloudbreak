@@ -156,7 +156,7 @@ public class FlowRetryService {
 
     private Function<FlowLog, RetryableFlow> toRetryableFlow() {
         return flowLog -> flowConfigs.stream()
-                .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst()
+                .filter(fc -> flowLog.isFlowType(fc.getClass())).findFirst()
                 .map(FlowConfiguration::getDisplayName)
                 .map(displayName -> RetryableFlow.RetryableFlowBuilder.builder()
                         .setName(displayName)

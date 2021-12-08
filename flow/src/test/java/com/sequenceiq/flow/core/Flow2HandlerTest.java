@@ -60,6 +60,7 @@ import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -472,7 +473,8 @@ public class Flow2HandlerTest {
     @Test
     public void testRestartFlowNotRestartable() throws TransactionExecutionException {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
-        flowLog.setFlowType(String.class);
+        flowLog.setFlowType(ClassValue.of(String.class));
+        flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         underTest.restartFlow(FLOW_ID);
 
@@ -481,10 +483,9 @@ public class Flow2HandlerTest {
 
     @Test
     public void testRestartFlow() throws TransactionExecutionException {
-        ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
-
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new TestPayload(STACK_ID);
+        flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
         when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
@@ -515,10 +516,9 @@ public class Flow2HandlerTest {
 
     @Test
     public void testRestartFlowNoRestartAction() throws TransactionExecutionException {
-        ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
-
         FlowLog flowLog = createFlowLog(FLOW_CHAIN_ID);
         Payload payload = new TestPayload(STACK_ID);
+        flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
@@ -539,10 +539,9 @@ public class Flow2HandlerTest {
 
     @Test
     public void testRestartFlowNoRestartActionNoFlowChainId() throws TransactionExecutionException {
-        ReflectionTestUtils.setField(underTest, "flowChainHandler", flowChainHandler);
-
         FlowLog flowLog = createFlowLog(null);
         Payload payload = new TestPayload(STACK_ID);
+        flowLog.setPayloadType(ClassValue.of(TestPayload.class));
         flowLog.setPayload(JsonWriter.objectToJson(payload));
         when(flowLogService.findFirstByFlowIdOrderByCreatedDesc(FLOW_ID)).thenReturn(Optional.of(flowLog));
         when(applicationFlowInformation.getRestartableFlows()).thenReturn(List.of(HelloWorldFlowConfig.class));
@@ -562,7 +561,7 @@ public class Flow2HandlerTest {
 
     private FlowLog createFlowLog(String flowChainId) {
         FlowLog flowLog = new FlowLog(STACK_ID, FLOW_ID, "START_STATE", true, StateStatus.SUCCESSFUL, OperationType.UNKNOWN);
-        flowLog.setFlowType(HelloWorldFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(HelloWorldFlowConfig.class));
         flowLog.setVariables(JsonWriter.objectToJson(new HashMap<>()));
         flowLog.setFlowChainId(flowChainId);
         flowLog.setNextEvent(NEXT_EVENT);

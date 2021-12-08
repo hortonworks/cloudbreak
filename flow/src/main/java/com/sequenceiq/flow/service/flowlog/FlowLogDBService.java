@@ -36,6 +36,7 @@ import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
@@ -77,7 +78,7 @@ public class FlowLogDBService implements FlowLogService {
         String payloadAsString = getSerializedString(payload);
         String variablesJson = getSerializedString(variables);
         FlowLog flowLog = new FlowLog(payload.getResourceId(), flowParameters.getFlowId(), flowChanId, flowParameters.getFlowTriggerUserCrn(), key,
-                payloadAsString, payload.getClass(), variablesJson, flowType, currentState.toString());
+                payloadAsString, ClassValue.of(payload.getClass()), variablesJson, ClassValue.of(flowType), currentState.toString());
         flowLog.setOperationType(StringUtils.isNotBlank(flowParameters.getFlowOperationType())
                 ? OperationType.valueOf(flowParameters.getFlowOperationType())
                 : OperationType.UNKNOWN);

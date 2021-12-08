@@ -43,6 +43,7 @@ import com.sequenceiq.flow.core.ResourceIdProvider;
 import com.sequenceiq.flow.core.RestartAction;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.restart.DefaultRestartAction;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -200,12 +201,10 @@ public class FlowLogDBServiceTest {
     public void cancelTooOldTerminationFlowForResourceTest() throws TransactionService.TransactionExecutionException {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new LinkedHashSet<>();
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        Class flow2Class = Class.class;
-        when(flowLog2.getFlowType()).thenReturn(flow2Class);
+        when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
         flowLogs.add(flowLog2);
         FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        Class termFlowClass = TerminationFlowConfig.class;
-        when(flowLog1.getFlowType()).thenReturn(termFlowClass);
+        when(flowLog1.getFlowType()).thenReturn(ClassValue.of(TerminationFlowConfig.class));
         when(flowLog1.getCreated()).thenReturn(9000L);
         when(flowLog1.getFlowId()).thenReturn("flow1");
         flowLogs.add(flowLog1);
@@ -226,13 +225,11 @@ public class FlowLogDBServiceTest {
     public void doNotCancelTooYoungTerminationFlowForResourceTest() {
         Set<FlowLogIdWithTypeAndTimestamp> flowLogs = new HashSet<>();
         FlowLogIdWithTypeAndTimestamp flowLog1 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        Class termFlowClass = TerminationFlowConfig.class;
-        when(flowLog1.getFlowType()).thenReturn(termFlowClass);
+        when(flowLog1.getFlowType()).thenReturn(ClassValue.of(TerminationFlowConfig.class));
         when(flowLog1.getCreated()).thenReturn(11000L);
         flowLogs.add(flowLog1);
         FlowLogIdWithTypeAndTimestamp flowLog2 = mock(FlowLogIdWithTypeAndTimestamp.class);
-        Class flow2Class = Class.class;
-        when(flowLog2.getFlowType()).thenReturn(flow2Class);
+        when(flowLog2.getFlowType()).thenReturn(ClassValue.of(Class.class));
         flowLogs.add(flowLog2);
         when(flowLogRepository.findAllRunningFlowLogByResourceId(eq(1L))).thenReturn(flowLogs);
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(Collections.singletonList(TerminationFlowConfig.class));

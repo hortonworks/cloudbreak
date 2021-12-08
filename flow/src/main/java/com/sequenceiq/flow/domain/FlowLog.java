@@ -1,9 +1,5 @@
 package com.sequenceiq.flow.domain;
 
-import com.sequenceiq.flow.api.model.operation.OperationType;
-import com.sequenceiq.flow.converter.OperationTypeConverter;
-import com.sequenceiq.flow.converter.StateStatusConverter;
-
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -14,6 +10,11 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Version;
+
+import com.sequenceiq.flow.api.model.operation.OperationType;
+import com.sequenceiq.flow.converter.ClassValueConverter;
+import com.sequenceiq.flow.converter.OperationTypeConverter;
+import com.sequenceiq.flow.converter.StateStatusConverter;
 
 @Entity
 public class FlowLog {
@@ -38,12 +39,14 @@ public class FlowLog {
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String payload;
 
-    private Class<?> payloadType;
+    @Convert(converter = ClassValueConverter.class)
+    private ClassValue payloadType;
 
     @Column(length = Integer.MAX_VALUE, columnDefinition = "TEXT")
     private String variables;
 
-    private Class<?> flowType;
+    @Convert(converter = ClassValueConverter.class)
+    private ClassValue flowType;
 
     private String currentState;
 
@@ -69,7 +72,12 @@ public class FlowLog {
 
     }
 
-    public FlowLog(Long resourceId, String flowId, String currentState, Boolean finalized, StateStatus stateStatus, OperationType operationType) {
+    public FlowLog(Long resourceId,
+            String flowId,
+            String currentState,
+            Boolean finalized,
+            StateStatus stateStatus,
+            OperationType operationType) {
         this.resourceId = resourceId;
         this.flowId = flowId;
         this.currentState = currentState;
@@ -78,8 +86,16 @@ public class FlowLog {
         this.operationType = operationType;
     }
 
-    public FlowLog(Long resourceId, String flowId, String flowChainId, String flowTriggerUserCrn, String nextEvent, String payload,
-            Class<?> payloadType, String variables, Class<?> flowType, String currentState) {
+    public FlowLog(Long resourceId,
+            String flowId,
+            String flowChainId,
+            String flowTriggerUserCrn,
+            String nextEvent,
+            String payload,
+            ClassValue payloadType,
+            String variables,
+            ClassValue flowType,
+            String currentState) {
         this.resourceId = resourceId;
         this.flowId = flowId;
         this.flowChainId = flowChainId;
@@ -148,19 +164,19 @@ public class FlowLog {
         this.payload = payload;
     }
 
-    public Class<?> getPayloadType() {
+    public ClassValue getPayloadType() {
         return payloadType;
     }
 
-    public void setPayloadType(Class<?> payloadType) {
+    public void setPayloadType(ClassValue payloadType) {
         this.payloadType = payloadType;
     }
 
-    public Class<?> getFlowType() {
+    public ClassValue getFlowType() {
         return flowType;
     }
 
-    public void setFlowType(Class<?> flowType) {
+    public void setFlowType(ClassValue flowType) {
         this.flowType = flowType;
     }
 
@@ -251,5 +267,11 @@ public class FlowLog {
     @Override
     public String toString() {
         return minimizedString();
+    }
+
+    public boolean isFlowType(Class<?> flowTypeClass) {
+        return flowType != null
+                && flowType.isOnClassPath()
+                && flowTypeClass.equals(flowType.getClassValue());
     }
 }

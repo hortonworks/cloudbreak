@@ -444,10 +444,22 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     }
 
     public void restartFlow(FlowLog flowLog) {
+        if (notSupportedFlowType(flowLog)) {
+            try {
+                LOGGER.error("Flow type or payload is not present on the classpath anymore. Terminating the flow {}.", flowLog);
+                flowLogService.terminate(flowLog.getResourceId(), flowLog.getFlowId());
+                return;
+            } catch (TransactionExecutionException e) {
+                throw new TransactionRuntimeExecutionException(e);
+            }
+        }
+
         if (flowLog.getFlowType() != null) {
-            if (applicationFlowInformation.getRestartableFlows().contains(flowLog.getFlowType())) {
-                Optional<FlowConfiguration<?>> flowConfig = flowConfigs.stream()
-                        .filter(fc -> fc.getClass().equals(flowLog.getFlowType())).findFirst();
+            if (applicationFlowInformation.getRestartableFlows().contains(flowLog.getFlowType().getClassValue())) {
+                Optional<FlowConfiguration<?>> flowConfig = flowConfigs
+                        .stream()
+                        .filter(fc -> flowLog.isFlowType(fc.getClass()))
+                        .findFirst();
                 try {
                     String flowChainType = flowChainLogService.getFlowChainType(flowLog.getFlowChainId());
                     Payload payload = (Payload) JsonReader.jsonToJava(flowLog.getPayload());
@@ -463,7 +475,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     RestartAction restartAction = flowConfig.get().getRestartAction(flowLog.getNextEvent());
                     if (restartAction != null) {
                         LOGGER.debug("Restarting flow with id: '{}', flow chain id: '{}', flow type: '{}', restart action: '{}'", flow.getFlowId(),
-                                flowLog.getFlowChainId(), flowLog.getFlowType().getSimpleName(), restartAction.getClass().getSimpleName());
+                                flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName(), restartAction.getClass().getSimpleName());
                         Span span = tracer.buildSpan(flowLog.getCurrentState()).ignoreActiveSpan().start();
                         restartAction.restart(new FlowParameters(flowLog.getFlowId(), flowLog.getFlowTriggerUserCrn(),
                                 flowLog.getOperationType().name(), span.context()), flowLog.getFlowChainId(), flowLog.getNextEvent(), payload);
@@ -471,7 +483,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     }
                 } catch (RuntimeException e) {
                     String message = String.format("Flow could not be restarted with id: '%s', flow chain id: '%s' and flow type: '%s'", flowLog.getFlowId(),
-                            flowLog.getFlowChainId(), flowLog.getFlowType().getSimpleName());
+                            flowLog.getFlowChainId(), flowLog.getFlowType().getClassValue().getSimpleName());
                     LOGGER.error(message, e);
                 }
             }
@@ -481,6 +493,19 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 throw new TransactionRuntimeExecutionException(e);
             }
         }
+    }
+
+    private boolean notSupportedFlowType(FlowLog flowLog) {
+        if (flowLog.getFlowType() != null && !flowLog.getFlowType().isOnClassPath()) {
+            LOGGER.error("Flow type '{}' is not on classpath.", flowLog.getFlowType().getName());
+            return true;
+        }
+
+        if (flowLog.getPayloadType() != null && !flowLog.getPayloadType().isOnClassPath()) {
+            LOGGER.error("Payload type {} is not on classpath.", flowLog.getPayloadType().getName());
+            return true;
+        }
+        return false;
     }
 
     private String getFlowId(Event<?> event) {

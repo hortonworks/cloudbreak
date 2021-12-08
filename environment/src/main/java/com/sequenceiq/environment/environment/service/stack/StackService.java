@@ -60,8 +60,7 @@ public class StackService {
 
     public void cancelRunningStackConfigUpdates(Environment environment) {
         List<FlowLog> flowLogs = flowLogDBService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(environment.getId());
-        if (!flowLogs.isEmpty() && flowLogs.get(0).getFlowType() != null
-            && EnvStackConfigUpdatesFlowConfig.class.equals(flowLogs.get(0).getFlowType())) {
+        if (!flowLogs.isEmpty() && flowLogs.get(0).isFlowType(EnvStackConfigUpdatesFlowConfig.class)) {
             LOGGER.info("Canceling running Stack config update flow for environment {}", environment.getResourceCrn());
             EnvironmentInMemoryStateStore.put(environment.getId(), PollGroup.CANCELLED);
             flowCancelService.cancelFlowSilently(flowLogs.get(0));
