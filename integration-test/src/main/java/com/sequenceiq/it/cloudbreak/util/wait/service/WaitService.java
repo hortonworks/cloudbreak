@@ -12,12 +12,12 @@ public class WaitService<T extends WaitObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(WaitService.class);
 
     public Result<WaitResult, Exception> waitObject(StatusChecker<T> statusChecker, T t, TestContext testContext, Duration interval, int maxAttempts,
-            int maxFailure) {
-        return waitObject(statusChecker, t, testContext, interval, new TimeoutChecker(maxAttempts), maxFailure);
+            int maxRetryCount) {
+        return waitObject(statusChecker, t, testContext, interval, new TimeoutChecker(maxAttempts), maxRetryCount);
     }
 
     public Result<WaitResult, Exception> waitObject(StatusChecker<T> statusChecker, T t, TestContext testContext, Duration interval,
-            TimeoutChecker timeoutChecker, int maxFailure) {
+            TimeoutChecker timeoutChecker, int maxRetryCount) {
         boolean timeout = false;
         int attempts = 0;
         int failures = 0;
@@ -38,11 +38,13 @@ public class WaitService<T extends WaitObject> {
                 failures++;
                 actual = ex;
 
-                if (failures >= maxFailure) {
-                    LOGGER.debug("Waiting failure reached the limit which was {}, wait will drop the last exception.", maxFailure);
+                if (failures >= maxRetryCount) {
+                    LOGGER.info("Waiting failure reached the limit which was {}, wait will drop the last exception.", maxRetryCount);
                     statusChecker.handleException(actual);
                     testContext.setStatuses(statusChecker.getStatuses(t));
                     return Result.exception(actual);
+                } else {
+                    LOGGER.info("Retrying after failure. Failure count {}", failures);
                 }
             }
             sleep(interval, statusChecker.getStatuses(t));

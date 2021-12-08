@@ -21,7 +21,7 @@ public class ResourceAwait {
     private static final Logger LOGGER = LoggerFactory.getLogger(ResourceAwait.class);
 
     public <E extends Enum<E>> CloudbreakTestDto await(CloudbreakTestDto entity, Map<String, E> desiredStatuses, Set<E> ignoredFailedStatuses,
-            TestContext testContext, RunningParameter runningParameter, Duration pollingInterval, int maxRetry) {
+            TestContext testContext, RunningParameter runningParameter, Duration pollingInterval, int maxRetry, int maxRetryCount) {
         try {
             if (entity == null) {
                 throw new RuntimeException("Cloudbreak key has been provided but no result in resource map!");
@@ -32,12 +32,12 @@ public class ResourceAwait {
             String name = entity.getName();
             WaitObject waitObject = client.waitObject(entity, name, desiredStatuses, testContext, ignoredFailedStatuses);
             if (waitObject.isDeletionCheck()) {
-                client.waiterService().waitObject(new WaitTerminationChecker<>(), waitObject, testContext, pollingInterval, maxRetry, 1);
+                client.waiterService().waitObject(new WaitTerminationChecker<>(), waitObject, testContext, pollingInterval, maxRetry, maxRetryCount);
             } else if (waitObject.isFailedCheck()) {
-                client.waiterService().waitObject(new WaitFailedChecker<>(), waitObject, testContext, pollingInterval, maxRetry, 1);
+                client.waiterService().waitObject(new WaitFailedChecker<>(), waitObject, testContext, pollingInterval, maxRetry, maxRetryCount);
                 entity.refresh();
             } else {
-                client.waiterService().waitObject(new WaitOperationChecker<>(), waitObject, testContext, pollingInterval, maxRetry, 1);
+                client.waiterService().waitObject(new WaitOperationChecker<>(), waitObject, testContext, pollingInterval, maxRetry, maxRetryCount);
                 entity.refresh();
             }
         } catch (Exception e) {

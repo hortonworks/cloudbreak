@@ -49,7 +49,7 @@ public class MockSdxResizeTests extends AbstractMockTest {
                 .validate();
     }
 
-    @Test(enabled = false, dataProvider = TEST_CONTEXT_WITH_MOCK)
+    @Test(dataProvider = TEST_CONTEXT_WITH_MOCK)
     @Description(
             given = "there is a running Cloudbreak",
             when = "a valid SDX Internal Create request is sent",
