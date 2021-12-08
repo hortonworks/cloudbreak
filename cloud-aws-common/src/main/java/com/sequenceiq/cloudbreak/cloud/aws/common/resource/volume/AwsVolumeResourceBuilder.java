@@ -22,6 +22,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -67,7 +68,9 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -99,6 +102,9 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
     @Inject
     private AwsMethodExecutor awsMethodExecutor;
 
+    @Inject
+    private ResourceRetriever resourceRetriever;
+
     private Function<Volume, InstanceBlockDeviceMappingSpecification> toInstanceBlockDeviceMappingSpecification = volume -> {
         EbsInstanceBlockDeviceSpecification device = new EbsInstanceBlockDeviceSpecification()
                 .withVolumeId(volume.getId())
@@ -124,12 +130,44 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                 .filter(resource -> ResourceType.AWS_VOLUMESET.equals(resource.getType()))
                 .findFirst();
 
-        String subnetId = getSubnetId(context, instance);
-        Optional<String> availabilityZone = getAvailabilityZone(context, instance);
-        if (reattachableVolumeSet.isPresent()) {
+        if (reattachableVolumeSet.isEmpty()) {
+            reattachableVolumeSet = fetchCloudResourceFromDBIfAvailable(privateId, auth, group, computeResources);
+        } else {
             LOGGER.debug("Reattachable volumeset found: {}", reattachableVolumeSet.get());
         }
+
+        String subnetId = getSubnetId(context, instance);
+        Optional<String> availabilityZone = getAvailabilityZone(context, instance);
         return List.of(reattachableVolumeSet.orElseGet(createVolumeSet(privateId, auth, group, subnetId, availabilityZone)));
+    }
+
+    Optional<CloudResource> fetchCloudResourceFromDBIfAvailable(long privateId, AuthenticatedContext auth, Group group,
+            List<CloudResource> computeResources) {
+        Optional<CloudResource> reattachableVolumeSet;
+        CloudResource instanceResource = computeResources.stream()
+                .filter(cr -> cr.getType().equals(ResourceType.AWS_INSTANCE))
+                .findFirst()
+                .orElseThrow(NotFoundException.notFound("AWS_INSTANCE", privateId));
+
+        reattachableVolumeSet = findVolumeSet(auth, group, instanceResource, CommonStatus.CREATED);
+        if (reattachableVolumeSet.isEmpty()) {
+            reattachableVolumeSet = findVolumeSet(auth, group, instanceResource, CommonStatus.REQUESTED);
+        }
+        if (reattachableVolumeSet.isPresent()) {
+            LOGGER.debug("Attachable volumeset present in the DB: {}, so use it", reattachableVolumeSet.get().getName());
+        } else {
+            LOGGER.debug("Volumeset cannot be find in DB for group: {}, privateId: {}", group.getName(), privateId);
+        }
+        return reattachableVolumeSet;
+    }
+
+    @NotNull
+    private Optional<CloudResource> findVolumeSet(AuthenticatedContext auth, Group group, CloudResource instanceResource, CommonStatus commonStatus) {
+        return resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(commonStatus, ResourceType.AWS_VOLUMESET, auth.getCloudContext().getId(),
+                        group.getName())
+                .stream()
+                .filter(cr -> instanceResource.getInstanceId().equals(cr.getInstanceId()))
+                .findFirst();
     }
 
     protected String getSubnetId(AwsContext context, CloudInstance cloudInstance) {
@@ -206,7 +244,6 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         LOGGER.debug("Create volumes on provider: {}", buildableResource.stream().map(CloudResource::getName).collect(Collectors.toList()));
         AmazonEc2Client client = getAmazonEC2Client(auth);
 
-        String availabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
         Map<String, List<Volume>> volumeSetMap = Collections.synchronizedMap(new HashMap<>());
 
         List<Future<?>> futures = new ArrayList<>();
@@ -245,7 +282,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
             future.get();
         }
         LOGGER.debug("Volume creation requests sent");
-
+        String defaultAvailabilityZone = auth.getCloudContext().getLocation().getAvailabilityZone().value();
         return requestedResources.stream()
                 .peek(resource -> {
                     List<Volume> volumes = volumeSetMap.get(resource.getName());
@@ -253,7 +290,7 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
                         resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class).setVolumes(volumes);
                     }
                 })
-                .map(copyResourceWithCreatedStatus(availabilityZone))
+                .map(copyResourceWithCreatedStatus(defaultAvailabilityZone))
                 .collect(Collectors.toList());
     }
 
@@ -267,14 +304,14 @@ public class AwsVolumeResourceBuilder extends AbstractAwsComputeBuilder {
         }
     }
 
-    private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(String availabilityZone) {
+    private Function<CloudResource, CloudResource> copyResourceWithCreatedStatus(String defaultAvailabilityZone) {
         return resource -> new Builder()
                 .persistent(true)
                 .group(resource.getGroup())
                 .type(resource.getType())
                 .status(CommonStatus.CREATED)
                 .name(resource.getName())
-                .availabilityZone(availabilityZone)
+                .availabilityZone(resource.getAvailabilityZone() == null ? defaultAvailabilityZone : resource.getAvailabilityZone())
                 .params(resource.getParameters())
                 .build();
     }

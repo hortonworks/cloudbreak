@@ -6,8 +6,11 @@ import static java.util.Collections.emptyMap;
 import static java.util.Collections.singletonList;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +19,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.FutureTask;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +30,8 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.core.task.AsyncTaskExecutor;
 
 import com.amazonaws.services.ec2.model.CreateVolumeRequest;
@@ -53,6 +59,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AwsInstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
+import com.sequenceiq.cloudbreak.cloud.service.ResourceRetriever;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.EncryptionType;
@@ -61,7 +68,7 @@ import com.sequenceiq.common.api.type.OutboundInternetTraffic;
 import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.model.AwsDiskType;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class})
 class AwsVolumeResourceBuilderTest {
 
     private static final long PRIVATE_ID = 1234L;
@@ -116,6 +123,9 @@ class AwsVolumeResourceBuilderTest {
 
     @InjectMocks
     private AwsVolumeResourceBuilder underTest;
+
+    @Mock
+    private ResourceRetriever resourceRetriever;
 
     @Mock
     private AwsContext awsContext;
@@ -276,6 +286,62 @@ class AwsVolumeResourceBuilderTest {
         verifyCreateVolumeRequest(null, true, ENCRYPTION_KEY_ARN);
     }
 
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void fetchCloudResourceFromDBIfAvailableWhenNotAvailableInTheDB() {
+        Group group = mock(Group.class);
+        when(group.getName()).thenReturn("groupName");
+        CloudResource instanceResource = createAwsInstance();
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"))).thenReturn(List.of());
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"))).thenReturn(List.of());
+        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
+        assertThat(actual.isEmpty()).isTrue();
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"));
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void fetchCloudResourceFromDBIfAvailableWhenAvailableAsRequested() {
+        Group group = mock(Group.class);
+        when(group.getName()).thenReturn("groupName");
+        CloudResource instanceResource = createAwsInstance();
+        CloudResource volumeSet = CloudResource.builder().cloudResource(createVolumeSet(emptyList())).instanceId("instanceId").build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"))).thenReturn(List.of());
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"))).thenReturn(List.of(volumeSet));
+        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
+        assertThat(actual.isEmpty()).isFalse();
+        assertThat(actual.get()).isEqualTo(volumeSet);
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"));
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"));
+    }
+
+    @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
+    void fetchCloudResourceFromDBIfAvailableWhenAvailableAsCreated() {
+        Group group = mock(Group.class);
+        when(group.getName()).thenReturn("groupName");
+        CloudResource instanceResource = createAwsInstance();
+        CloudResource volumeSet = CloudResource.builder().cloudResource(createVolumeSet(emptyList())).instanceId("instanceId").build();
+        when(resourceRetriever.findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"))).thenReturn(List.of(volumeSet));
+        Optional<CloudResource> actual = underTest.fetchCloudResourceFromDBIfAvailable(0L, authenticatedContext, group, List.of(instanceResource));
+        assertThat(actual.isEmpty()).isFalse();
+        assertThat(actual.get()).isEqualTo(volumeSet);
+        verify(resourceRetriever).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.CREATED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"));
+        verify(resourceRetriever, never()).findAllByStatusAndTypeAndStackAndInstanceGroup(eq(CommonStatus.REQUESTED), eq(ResourceType.AWS_VOLUMESET),
+                any(), eq("groupName"));
+    }
+
     @SuppressWarnings("unchecked")
     private void setUpTaskExecutors() {
         when(intermediateBuilderExecutor.submit(isA(Runnable.class))).thenAnswer(invocation -> {
@@ -310,6 +376,15 @@ class AwsVolumeResourceBuilderTest {
                         .withAvailabilityZone(AVAILABILITY_ZONE)
                         .withVolumes(volumes)
                         .build()))
+                .build();
+    }
+
+    private CloudResource createAwsInstance() {
+        return CloudResource.builder()
+                .type(ResourceType.AWS_INSTANCE)
+                .name("name")
+                .instanceId("instanceId")
+                .status(CommonStatus.CREATED)
                 .build();
     }
 

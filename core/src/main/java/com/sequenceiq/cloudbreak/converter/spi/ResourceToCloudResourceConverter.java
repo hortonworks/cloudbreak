@@ -34,6 +34,7 @@ public class ResourceToCloudResourceConverter {
                 .name(resource.getResourceName())
                 .reference(resource.getResourceReference())
                 .status(resource.getResourceStatus())
+                .availabilityZone(resource.getAvailabilityZone())
                 .group(resource.getInstanceGroup())
                 .instanceId(resource.getInstanceId())
                 .params(paramsMap)
