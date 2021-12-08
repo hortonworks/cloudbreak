@@ -22,10 +22,10 @@ import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.proxy.ProxyTestDto;
-import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.environment.EnvironmentWaitObject;
 
-public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environment.client.EnvironmentClient, EnvironmentServiceCrnEndpoints> {
+public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environment.client.EnvironmentClient, EnvironmentServiceCrnEndpoints,
+        EnvironmentStatus, EnvironmentWaitObject> {
 
     public static final String ENVIRONMENT_CLIENT = "ENVIRONMENT_CLIENT";
 
@@ -51,9 +51,9 @@ public class EnvironmentClient extends MicroserviceClient<com.sequenceiq.environ
     }
 
     @Override
-    public <E extends Enum<E>, T extends WaitObject> T waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext, Set<E> ignoredFailedStatuses) {
-        return (T) new EnvironmentWaitObject(this, entity.getName(), entity.getCrn(), (EnvironmentStatus) desiredStatuses.get("status"));
+    public EnvironmentWaitObject waitObject(CloudbreakTestDto entity, String name, Map<String, EnvironmentStatus> desiredStatuses,
+            TestContext testContext, Set<EnvironmentStatus> ignoredFailedStatuses) {
+        return new EnvironmentWaitObject(this, entity.getName(), entity.getCrn(), desiredStatuses.get("status"), ignoredFailedStatuses);
     }
 
     public static synchronized EnvironmentClient createProxyEnvironmentClient(TestParameter testParameter, CloudbreakUser cloudbreakUser) {

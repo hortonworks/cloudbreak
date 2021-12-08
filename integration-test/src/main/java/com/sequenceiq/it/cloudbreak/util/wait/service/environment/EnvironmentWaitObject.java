@@ -5,6 +5,7 @@ import static com.sequenceiq.environment.api.v1.environment.model.response.Envir
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.DELETE_FAILED;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.environment.api.v1.environment.endpoint.EnvironmentEndpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
@@ -20,15 +21,19 @@ public class EnvironmentWaitObject implements WaitObject {
 
     private final EnvironmentStatus desiredStatus;
 
+    private final Set<EnvironmentStatus> ignoredFailedStatuses;
+
     private DetailedEnvironmentResponse environment;
 
     private final String name;
 
-    public EnvironmentWaitObject(EnvironmentClient environmentClient, String name, String environmentCrn, EnvironmentStatus desiredStatus) {
+    public EnvironmentWaitObject(EnvironmentClient environmentClient, String name, String environmentCrn, EnvironmentStatus desiredStatus,
+            Set<EnvironmentStatus> ignoredFailedStatuses) {
         this.client = environmentClient;
         this.crn = environmentCrn;
         this.name = name;
         this.desiredStatus = desiredStatus;
+        this.ignoredFailedStatuses = ignoredFailedStatuses;
     }
 
     public EnvironmentEndpoint getEndpoint() {
@@ -84,7 +89,7 @@ public class EnvironmentWaitObject implements WaitObject {
 
     @Override
     public boolean isFailedButIgnored() {
-        return false;
+        return ignoredFailedStatuses.contains(environment.getEnvironmentStatus());
     }
 
     @Override

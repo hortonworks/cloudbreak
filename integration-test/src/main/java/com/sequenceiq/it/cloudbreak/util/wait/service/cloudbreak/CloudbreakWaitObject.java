@@ -56,8 +56,7 @@ public class CloudbreakWaitObject implements WaitObject {
 
     private StackStatusV4Response stackStatus;
 
-    public CloudbreakWaitObject(CloudbreakClient client, String name, Map<String, Status> desiredStatuses, String accountId,
-            Set<Status> ignoredFailedStatuses) {
+    public CloudbreakWaitObject(CloudbreakClient client, String name, Map<String, Status> desiredStatuses, String accountId, Set<Status> ignoredFailedStatuses) {
         this.client = client;
         this.name = name;
         this.desiredStatuses = desiredStatuses;

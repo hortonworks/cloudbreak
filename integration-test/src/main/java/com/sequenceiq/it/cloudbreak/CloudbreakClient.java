@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -48,12 +47,12 @@ import com.sequenceiq.it.cloudbreak.dto.util.RenewDistroXCertificateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.StackMatrixTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.UsedImagesTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.VersionCheckTestDto;
-import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.cloudbreak.CloudbreakWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
 
-public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbreak.client.CloudbreakClient, CloudbreakServiceCrnEndpoints> {
+public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbreak.client.CloudbreakClient, CloudbreakServiceCrnEndpoints, Status,
+        CloudbreakWaitObject> {
     public static final String CLOUDBREAK_CLIENT = "CLOUDBREAK_CLIENT";
 
     private static com.sequenceiq.cloudbreak.client.CloudbreakClient singletonCloudbreakClient;
@@ -82,11 +81,9 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     }
 
     @Override
-    public <E extends Enum<E>, T extends WaitObject> T waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext, Set<E> ignoredFailedStatuses) {
-        Map<String, Status> map = new HashMap<>();
-        desiredStatuses.forEach((key, v) -> map.put(key, (Status) v));
-        return (T) new CloudbreakWaitObject(this, name, map, testContext.getActingUserCrn().getAccountId(), (Set<Status>) ignoredFailedStatuses);
+    public CloudbreakWaitObject waitObject(CloudbreakTestDto entity, String name, Map<String, Status> desiredStatuses,
+            TestContext testContext, Set<Status> ignoredFailedStatuses) {
+        return new CloudbreakWaitObject(this, name, desiredStatuses, testContext.getActingUserCrn().getAccountId(), ignoredFailedStatuses);
     }
 
     @Override
@@ -200,8 +197,8 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
     }
 
     @Override
-    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
-            List<String> instanceIds, E instanceStatus) {
+    public <O extends Enum<O>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, O instanceStatus) {
         return new CloudbreakInstanceWaitObject(testContext, entity.getName(), instanceIds, (InstanceStatus) instanceStatus);
     }
 }

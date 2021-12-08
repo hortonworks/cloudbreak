@@ -28,12 +28,15 @@ public class RedbeamsWaitObject implements WaitObject {
 
     private final Status desiredStatus;
 
-    private DatabaseServerV4Response redbeams;
+    private final Set<Status> ignoredFailedStatuses;
 
-    public RedbeamsWaitObject(RedbeamsClient client, String crn, Status desiredStatus) {
+    private DatabaseServerV4Response databaseServerV4Response;
+
+    public RedbeamsWaitObject(RedbeamsClient client, String crn, Status desiredStatus, Set<Status> ignoredFailedStatuses) {
         this.client = client;
         this.crn = crn;
         this.desiredStatus = desiredStatus;
+        this.ignoredFailedStatuses = ignoredFailedStatuses;
     }
 
     public DatabaseServerV4Endpoint getEndpoint() {
@@ -46,22 +49,22 @@ public class RedbeamsWaitObject implements WaitObject {
 
     @Override
     public void fetchData() {
-        redbeams = getEndpoint().getByCrn(crn);
+        databaseServerV4Response = getEndpoint().getByCrn(crn);
     }
 
     @Override
     public boolean isDeleteFailed() {
-        return redbeams.getStatus().equals(DELETE_FAILED);
+        return databaseServerV4Response.getStatus().equals(DELETE_FAILED);
     }
 
     @Override
     public Map<String, String> actualStatuses() {
-        return Map.of(STATUS, redbeams.getStatus().name());
+        return Map.of(STATUS, databaseServerV4Response.getStatus().name());
     }
 
     @Override
     public Map<String, String> actualStatusReason() {
-        String statusReason = redbeams.getStatusReason();
+        String statusReason = databaseServerV4Response.getStatusReason();
         if (statusReason != null) {
             return Map.of(STATUS_REASON, statusReason);
         }
@@ -80,29 +83,29 @@ public class RedbeamsWaitObject implements WaitObject {
 
     @Override
     public boolean isDeleted() {
-        return redbeams.getStatus().equals(DELETE_COMPLETED);
+        return databaseServerV4Response.getStatus().equals(DELETE_COMPLETED);
     }
 
     @Override
     public boolean isFailedButIgnored() {
-        return false;
+        return ignoredFailedStatuses.contains(databaseServerV4Response.getStatus());
     }
 
     @Override
     public boolean isFailed() {
         Set<Status> failedStatuses = Set.of(UPDATE_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED, START_FAILED, STOP_FAILED);
-        return failedStatuses.contains(redbeams.getStatus());
+        return failedStatuses.contains(databaseServerV4Response.getStatus());
     }
 
     @Override
     public boolean isDeletionInProgress() {
         Set<Status> deleteInProgressStatuses = Set.of(DELETE_REQUESTED, PRE_DELETE_IN_PROGRESS, DELETE_IN_PROGRESS);
-        return deleteInProgressStatuses.contains(redbeams.getStatus());
+        return deleteInProgressStatuses.contains(databaseServerV4Response.getStatus());
     }
 
     @Override
     public boolean isCreateFailed() {
-        return redbeams.getStatus().equals(CREATE_FAILED);
+        return databaseServerV4Response.getStatus().equals(CREATE_FAILED);
     }
 
     @Override

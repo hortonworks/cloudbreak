@@ -37,10 +37,11 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaOperationWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaUserSyncWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.freeipa.FreeIpaWaitObject;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.freeipa.FreeIpaInstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.freeipa.FreeIpaInstanceWaitObject;
 
-public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api.client.FreeIpaClient, FreeIpaApiUserCrnEndpoint> {
+public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.sequenceiq.freeipa.api.client.FreeIpaClient, FreeIpaApiUserCrnEndpoint, E,
+        WaitObject> {
     public static final String FREEIPA_CLIENT = "FREEIPA_CLIENT";
 
     private com.sequenceiq.freeipa.api.client.FreeIpaClient freeIpaClient;
@@ -61,24 +62,26 @@ public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api
     }
 
     @Override
-    public <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
+    public WaitObject waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
             TestContext testContext, Set<E> ignoredFailedStatuses) {
         if (entity instanceof FreeIpaUserSyncTestDto) {
             FreeIpaUserSyncTestDto freeIpaSyncTestDto = (FreeIpaUserSyncTestDto) entity;
             if (freeIpaSyncTestDto.getOperationId() == null) {
-                return (W) new FreeIpaUserSyncWaitObject(this, freeIpaSyncTestDto.getName(),
-                        freeIpaSyncTestDto.getEnvironmentCrn(), (UserSyncState) desiredStatuses.get("status"));
+                return new FreeIpaUserSyncWaitObject(this, freeIpaSyncTestDto.getName(), freeIpaSyncTestDto.getEnvironmentCrn(),
+                        (UserSyncState) desiredStatuses.get("status"), (Set<UserSyncState>) ignoredFailedStatuses);
             } else {
-                return (W) new FreeIpaOperationWaitObject(this, freeIpaSyncTestDto.getOperationId(), freeIpaSyncTestDto.getName(),
-                        freeIpaSyncTestDto.getEnvironmentCrn(), (OperationState) desiredStatuses.get("status"));
+                return new FreeIpaOperationWaitObject(this, freeIpaSyncTestDto.getOperationId(), freeIpaSyncTestDto.getName(),
+                        freeIpaSyncTestDto.getEnvironmentCrn(), (OperationState) desiredStatuses.get("status"), (Set<OperationState>) ignoredFailedStatuses);
             }
         } else if (entity instanceof FreeIpaOperationStatusTestDto) {
             FreeIpaOperationStatusTestDto testDto = (FreeIpaOperationStatusTestDto) entity;
-            return (W) new FreeIpaOperationWaitObject(this, testDto.getOperationId(), testDto.getName(),
-                    testContext.get(EnvironmentTestDto.class).getResponse().getCrn(), (OperationState) desiredStatuses.get("status"));
+            return new FreeIpaOperationWaitObject(this, testDto.getOperationId(), testDto.getName(),
+                    testContext.get(EnvironmentTestDto.class).getResponse().getCrn(), (OperationState) desiredStatuses.get("status"),
+                    (Set<OperationState>) ignoredFailedStatuses);
         } else {
             FreeIpaTestDto freeIpaTestDto = (FreeIpaTestDto) entity;
-            return (W) new FreeIpaWaitObject(this, entity.getName(), freeIpaTestDto.getResponse().getEnvironmentCrn(), (Status) desiredStatuses.get("status"));
+            return new FreeIpaWaitObject(this, entity.getName(), freeIpaTestDto.getResponse().getEnvironmentCrn(), (Status) desiredStatuses.get("status"),
+                    (Set<Status>) ignoredFailedStatuses);
         }
     }
 
@@ -130,8 +133,8 @@ public class FreeIpaClient extends MicroserviceClient<com.sequenceiq.freeipa.api
     }
 
     @Override
-    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
-            List<String> instanceIds, E instanceStatus) {
+    public <O extends Enum<O>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, O instanceStatus) {
         return new FreeIpaInstanceWaitObject(testContext, ((FreeIpaTestDto) entity).getResponse().getEnvironmentCrn(), instanceIds,
                 (InstanceStatus) instanceStatus);
     }

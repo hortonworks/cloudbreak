@@ -18,7 +18,6 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxCustomTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
-import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.datalake.DatalakeWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.cloudbreak.CloudbreakInstanceWaitObject;
@@ -26,7 +25,7 @@ import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyClient;
 import com.sequenceiq.sdx.client.SdxServiceApiKeyEndpoints;
 
-public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Void> {
+public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Void, SdxClusterStatusResponse, DatalakeWaitObject> {
     public static final String SDX_CLIENT = "SDX_CLIENT";
 
     private SdxServiceApiKeyEndpoints sdxClient;
@@ -41,10 +40,9 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Voi
     }
 
     @Override
-    public <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext, Set<E> ignoredFailedStatuses) {
-        return (W) new DatalakeWaitObject(this, entity.getName(), (SdxClusterStatusResponse) desiredStatuses.get("status"),
-                (Set<SdxClusterStatusResponse>) ignoredFailedStatuses);
+    public DatalakeWaitObject waitObject(CloudbreakTestDto entity, String name, Map<String, SdxClusterStatusResponse> desiredStatuses,
+            TestContext testContext, Set<SdxClusterStatusResponse> ignoredFailedStatuses) {
+        return new DatalakeWaitObject(this, entity.getName(), desiredStatuses.get("status"), ignoredFailedStatuses);
     }
 
     @Override
@@ -76,8 +74,8 @@ public class SdxClient extends MicroserviceClient<SdxServiceApiKeyEndpoints, Voi
     }
 
     @Override
-    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
-            List<String> instanceIds, E instanceStatus) {
+    public <O extends Enum<O>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, O instanceStatus) {
         return new CloudbreakInstanceWaitObject(testContext, entity.getName(), instanceIds, (InstanceStatus) instanceStatus);
     }
 }
