@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -20,6 +19,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.tags.TagsV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractTestDto;
@@ -47,6 +47,8 @@ public class TagsUtilTest {
             "Cloudera-Resource-Name", "whatever"
     );
 
+    private CloudPlatform cloudPlatform;
+
     private TagsUtil underTest;
 
     private MockedTestContext testContext;
@@ -56,8 +58,9 @@ public class TagsUtilTest {
     @BeforeMethod
     public void setUp() {
         underTest = new TagsUtil();
-        testContext = Mockito.mock(MockedTestContext.class);
-        gcpLabelUtil = Mockito.mock(GcpLabelUtil.class);
+        testContext = mock(MockedTestContext.class);
+        gcpLabelUtil = mock(GcpLabelUtil.class);
+        cloudPlatform = testContext.getCloudProvider().getCloudPlatform();
         ReflectionTestUtils.setField(underTest, "gcpLabelUtil", gcpLabelUtil);
         when(testContext.getTestMethodName()).thenReturn(Optional.of(TEST_NAME));
         when(testContext.getActingUserName()).thenReturn(ACTING_USER_NAME);
@@ -68,15 +71,15 @@ public class TagsUtilTest {
     void addTestNameTagShouldNotFailWhenTestDtoIsNotAbstractTestDto() {
         CloudbreakTestDto testDto = mock(CloudbreakTestDto.class);
 
-        assertThatCode(() -> underTest.addTestNameTag(testDto, TEST_NAME))
+        assertThatCode(() -> underTest.addTestNameTag(cloudPlatform, testDto, TEST_NAME))
                 .doesNotThrowAnyException();
     }
 
     @Test
-    void addTestNameTagShouldNotFailWhenTestDtoDoesNotHaveTaggableRequest() {
+    void addTestNameTagShouldNotFailWhenTestDtoDoesNotHaveTaggedRequest() {
         CloudbreakTestDto testDto = mock(AbstractTestDto.class);
 
-        assertThatCode(() -> underTest.addTestNameTag(testDto, TEST_NAME))
+        assertThatCode(() -> underTest.addTestNameTag(cloudPlatform, testDto, TEST_NAME))
                 .doesNotThrowAnyException();
     }
 
@@ -86,7 +89,7 @@ public class TagsUtilTest {
         SdxClusterRequest request = new SdxClusterRequest();
         testDto.setRequest(request);
 
-        underTest.addTestNameTag(testDto, TEST_NAME);
+        underTest.addTestNameTag(cloudPlatform, testDto, TEST_NAME);
 
         assertThat(request.getTags().get(TagsUtil.TEST_NAME_TAG))
                 .isEqualTo(TEST_NAME);
@@ -124,7 +127,7 @@ public class TagsUtilTest {
     }
 
     @Test
-    void verifyTagsShouldFailWhenAbstractTestDtoWithTaggedResponseDoesNotHaveAllNeededTags() {
+    void verifyShouldFailAbstractTestDtoDoesNotHaveAllNeededTags() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
@@ -143,7 +146,7 @@ public class TagsUtilTest {
     }
 
     @Test
-    void verifyTagsShouldFailWhenTestContextHasNullAsActingCrn() {
+    void verifyShouldFailTestContextHasNullAsActingUserCrn() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
@@ -160,7 +163,7 @@ public class TagsUtilTest {
     }
 
     @Test
-    void verifyTagsShouldFailWhenAbstractTestDtoWithTaggedResponseDoesNotHaveAnyNeededTags() {
+    void verifyShouldFailAbstractTestDtoDoesNotHaveAnyNeededTags() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         testDto.setResponse(new StackV4Response());
 
@@ -170,7 +173,7 @@ public class TagsUtilTest {
     }
 
     @Test
-    void verifyTagsShouldVerifyTagWithTaggedResponseWhenTagsResponseContainCreatorWithAltusPartitionedCrnButTestContextHasCdpPartitionedCrn() {
+    void verifyCreatorTagWithAltusCrnButTestContextHasCdpCrn() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
@@ -187,7 +190,7 @@ public class TagsUtilTest {
     }
 
     @Test
-    void verifyTagsShouldVerifyTagWithTaggedResponseWhenTagsResponseContainCreatorWithCdpPartitionedCrnButTestContextHasAltusPartitionedCrn() {
+    void verifyCreatorTagWithCdpCrnButTestContextHasAltusCrn() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();
@@ -203,7 +206,7 @@ public class TagsUtilTest {
     }
 
     @Test
-    void verifyTagsShouldVerifyTagWithTaggedResponseWhenTagsResponseContainsCreatorAsGcpLabelTransformedValue() {
+    void verifyCreatorTagAsGcpLabelTransformedValue() {
         DistroXTestDto testDto = new DistroXTestDto(mock(TestContext.class));
         StackV4Response response = new StackV4Response();
         TagsV4Response tags = new TagsV4Response();

@@ -24,7 +24,7 @@ public class E2ETestContext extends TestContext {
         if  (cloudPlatform == CloudPlatform.GCP) {
             testName = testName.toLowerCase();
         }
-        tagsUtil.addTestNameTag(bean, testName);
+        tagsUtil.addTestNameTag(getCloudProvider().getCloudPlatform(), bean, testName);
         return bean;
     }
 

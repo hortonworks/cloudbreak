@@ -553,8 +553,8 @@ public abstract class TestContext implements ApplicationContextAware {
      * by `useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN)`
      */
     private Optional<String> getRealUMSUserName() {
-        if (Crn.isCrn(getActingUser().getCrn())) {
-            return Optional.of(Objects.requireNonNull(Crn.fromString(getActingUser().getCrn())).getUserId());
+        if (getRealUMSUserCrn().isPresent()) {
+            return Optional.of(getActingUser().getDisplayName());
         }
         return Optional.empty();
     }
