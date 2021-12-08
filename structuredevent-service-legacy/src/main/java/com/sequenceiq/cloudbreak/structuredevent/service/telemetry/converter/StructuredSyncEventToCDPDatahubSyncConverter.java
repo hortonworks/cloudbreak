@@ -21,10 +21,10 @@ public class StructuredSyncEventToCDPDatahubSyncConverter {
     private StructuredSyncEventToCDPSyncDetailsConverter syncDetailsConverter;
 
     @Inject
-    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+    private StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter;
 
     @Inject
-    private StructuredEventToStatusDetailsConverter statusDetailsConverter;
+    private StructuredEventToCDPStatusDetailsConverter statusDetailsConverter;
 
     public UsageProto.CDPDatahubSync convert(StructuredSyncEvent structuredSyncEvent) {
         UsageProto.CDPDatahubSync.Builder cdpDatahubSyncBuilder = UsageProto.CDPDatahubSync.newBuilder();

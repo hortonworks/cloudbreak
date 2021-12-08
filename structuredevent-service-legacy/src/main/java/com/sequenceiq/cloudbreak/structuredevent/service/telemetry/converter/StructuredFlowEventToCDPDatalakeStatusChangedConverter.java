@@ -18,13 +18,13 @@ public class StructuredFlowEventToCDPDatalakeStatusChangedConverter {
     private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredEventToStatusDetailsConverter statusDetailsConverter;
+    private StructuredEventToCDPStatusDetailsConverter statusDetailsConverter;
 
     @Inject
-    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+    private StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter;
 
     @Inject
-    private StructuredFlowEventToCDPDatalakeFeaturesConverter featuresConverter;
+    private StructuredEventToCDPDatalakeFeaturesConverter featuresConverter;
 
     public UsageProto.CDPDatalakeStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
         UsageProto.CDPDatalakeStatusChanged.Builder cdpDatalakeStatusChanged = UsageProto.CDPDatalakeStatusChanged.newBuilder();
@@ -35,11 +35,10 @@ public class StructuredFlowEventToCDPDatalakeStatusChangedConverter {
 
         cdpDatalakeStatusChanged.setStatusDetails(statusDetailsConverter.convert(structuredFlowEvent));
 
-        if (structuredFlowEvent != null) {
-            cdpDatalakeStatusChanged.setFeatures(featuresConverter.convert(structuredFlowEvent.getCluster()));
-            if (structuredFlowEvent.getOperation() != null) {
-                cdpDatalakeStatusChanged.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
-            }
+        cdpDatalakeStatusChanged.setFeatures(featuresConverter.convert(structuredFlowEvent));
+
+        if (structuredFlowEvent != null && structuredFlowEvent.getOperation() != null) {
+            cdpDatalakeStatusChanged.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
         }
 
         cdpDatalakeStatusChanged.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));

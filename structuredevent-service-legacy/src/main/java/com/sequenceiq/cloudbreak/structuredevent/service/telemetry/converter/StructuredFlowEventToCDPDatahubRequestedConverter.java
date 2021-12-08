@@ -20,7 +20,7 @@ public class StructuredFlowEventToCDPDatahubRequestedConverter {
     private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+    private StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter;
 
     public UsageProto.CDPDatahubRequested convert(StructuredFlowEvent structuredFlowEvent) {
         UsageProto.CDPDatahubRequested.Builder cdpDatahubRequested = UsageProto.CDPDatahubRequested.newBuilder();

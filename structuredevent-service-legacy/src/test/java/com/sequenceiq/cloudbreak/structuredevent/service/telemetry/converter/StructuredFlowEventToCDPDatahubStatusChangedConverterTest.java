@@ -23,12 +23,12 @@ public class StructuredFlowEventToCDPDatahubStatusChangedConverterTest {
         Whitebox.setInternalState(operationDetailsConverter, "appVersion", "version-1234");
         Whitebox.setInternalState(operationDetailsConverter, "clusterRequestProcessingStepMapper", new ClusterRequestProcessingStepMapper());
         Whitebox.setInternalState(underTest, "operationDetailsConverter", operationDetailsConverter);
-        StructuredEventToClusterDetailsConverter clusterDetailsConverter = new StructuredEventToClusterDetailsConverter();
-        Whitebox.setInternalState(clusterDetailsConverter, "clusterShapeConverter", new StructuredEventToClusterShapeConverter());
-        Whitebox.setInternalState(clusterDetailsConverter, "imageDetailsConverter", new StructuredEventToImageDetailsConverter());
-        Whitebox.setInternalState(clusterDetailsConverter, "versionDetailsConverter", new StructuredEventToVersionDetailsConverter());
+        StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter = new StructuredEventToCDPClusterDetailsConverter();
+        Whitebox.setInternalState(clusterDetailsConverter, "clusterShapeConverter", new StructuredEventToCDPClusterShapeConverter());
+        Whitebox.setInternalState(clusterDetailsConverter, "imageDetailsConverter", new StructuredEventToCDPImageDetailsConverter());
+        Whitebox.setInternalState(clusterDetailsConverter, "versionDetailsConverter", new StructuredEventToCDPVersionDetailsConverter());
         Whitebox.setInternalState(underTest, "clusterDetailsConverter", clusterDetailsConverter);
-        Whitebox.setInternalState(underTest, "statusDetailsConverter", new StructuredEventToStatusDetailsConverter());
+        Whitebox.setInternalState(underTest, "statusDetailsConverter", new StructuredEventToCDPStatusDetailsConverter());
     }
 
     @Test

@@ -1231,6 +1231,8 @@ message CDPDatalakeSync {
   CDPClusterDetails clusterDetails = 3;
   // Describes the detailed status of the stack and the cluster of the datalake
   CDPStatusDetails statusDetails = 4;
+  // Feature tracking for DL
+  CDPDatalakeFeatures features = 5;
 }
 
 // Generated periodically for Datahub clusters

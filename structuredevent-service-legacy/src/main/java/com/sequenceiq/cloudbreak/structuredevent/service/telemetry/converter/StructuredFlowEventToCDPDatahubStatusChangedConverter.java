@@ -20,10 +20,10 @@ public class StructuredFlowEventToCDPDatahubStatusChangedConverter {
     private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredEventToStatusDetailsConverter statusDetailsConverter;
+    private StructuredEventToCDPStatusDetailsConverter statusDetailsConverter;
 
     @Inject
-    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+    private StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter;
 
     public UsageProto.CDPDatahubStatusChanged convert(StructuredFlowEvent structuredFlowEvent, UsageProto.CDPClusterStatus.Value status) {
         UsageProto.CDPDatahubStatusChanged.Builder cdpDatahubStatusChanged = UsageProto.CDPDatahubStatusChanged.newBuilder();

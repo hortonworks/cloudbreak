@@ -18,21 +18,20 @@ public class StructuredFlowEventToCDPDatalakeRequestedConverter {
     private StructuredEventToCDPOperationDetailsConverter operationDetailsConverter;
 
     @Inject
-    private StructuredEventToClusterDetailsConverter clusterDetailsConverter;
+    private StructuredEventToCDPClusterDetailsConverter clusterDetailsConverter;
 
     @Inject
-    private StructuredFlowEventToCDPDatalakeFeaturesConverter featuresConverter;
+    private StructuredEventToCDPDatalakeFeaturesConverter featuresConverter;
 
     public UsageProto.CDPDatalakeRequested convert(StructuredFlowEvent structuredFlowEvent) {
         UsageProto.CDPDatalakeRequested.Builder cdpDatalakeRequested = UsageProto.CDPDatalakeRequested.newBuilder();
 
         cdpDatalakeRequested.setOperationDetails(operationDetailsConverter.convert(structuredFlowEvent));
 
-        if (structuredFlowEvent != null) {
-            cdpDatalakeRequested.setFeatures(featuresConverter.convert(structuredFlowEvent.getCluster()));
-            if (structuredFlowEvent.getOperation() != null) {
-                cdpDatalakeRequested.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
-            }
+        cdpDatalakeRequested.setFeatures(featuresConverter.convert(structuredFlowEvent));
+
+        if (structuredFlowEvent != null && structuredFlowEvent.getOperation() != null) {
+            cdpDatalakeRequested.setEnvironmentCrn(structuredFlowEvent.getOperation().getEnvironmentCrn());
         }
 
         cdpDatalakeRequested.setClusterDetails(clusterDetailsConverter.convert(structuredFlowEvent));
