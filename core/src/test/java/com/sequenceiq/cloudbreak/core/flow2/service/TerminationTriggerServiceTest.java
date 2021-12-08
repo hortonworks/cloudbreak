@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.stack.TerminationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
 
@@ -114,7 +115,7 @@ public class TerminationTriggerServiceTest {
     @Test
     public void whenStackNotDeletedAndNotTerminationFlowLogAndKerbAndNotForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
-        flowLog.setFlowType(StackCreationFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
         setupKerberized();
 
@@ -126,7 +127,7 @@ public class TerminationTriggerServiceTest {
     @Test
     public void whenStackNotDeletedAndNotTerminationFlowLogAndKerbAndForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
-        flowLog.setFlowType(StackCreationFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
         setupKerberized();
 
@@ -138,7 +139,7 @@ public class TerminationTriggerServiceTest {
     @Test
     public void whenStackNotDeletedAndNotTerminationFlowLogAndNotKerbAndNotForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
-        flowLog.setFlowType(StackCreationFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
         setupNotKerberized();
 
@@ -150,7 +151,7 @@ public class TerminationTriggerServiceTest {
     @Test
     public void whenStackNotDeletedAndNotTerminationFlowLogAndNotKerbAndForcedShouldTerminate() {
         FlowLog flowLog = new FlowLog();
-        flowLog.setFlowType(StackCreationFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(StackCreationFlowConfig.class));
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(anyLong())).thenReturn(List.of(flowLog));
         setupNotKerberized();
 
@@ -283,11 +284,11 @@ public class TerminationTriggerServiceTest {
 
     private FlowLog getTerminationFlowLog(boolean forced) {
         FlowLog flowLog = new FlowLog();
-        flowLog.setFlowType(StackTerminationFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(StackTerminationFlowConfig.class));
         flowLog.setCurrentState("INIT_STATE");
         TerminationEvent event = new TerminationEvent("selector", 1L, forced ? TerminationType.FORCED : TerminationType.REGULAR);
         flowLog.setPayload(JsonWriter.objectToJson(event));
-        flowLog.setPayloadType(TerminationEvent.class);
+        flowLog.setPayloadType(ClassValue.of(TerminationEvent.class));
         return flowLog;
     }
 }

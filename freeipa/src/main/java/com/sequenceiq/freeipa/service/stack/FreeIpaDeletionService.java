@@ -93,7 +93,7 @@ public class FreeIpaDeletionService {
         List<FlowLog> flowLogs = flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId());
         return flowLogs.stream()
                 .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
-                        .anyMatch(terminationFlowClass -> terminationFlowClass.equals(flowLog.getFlowType())))
+                        .anyMatch(flowLog::isFlowType))
                 .filter(fl -> StackTerminationState.INIT_STATE.name().equalsIgnoreCase(fl.getCurrentState()))
                 .findFirst();
     }

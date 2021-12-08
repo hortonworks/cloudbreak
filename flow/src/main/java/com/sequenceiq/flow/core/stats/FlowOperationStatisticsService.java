@@ -81,7 +81,7 @@ public class FlowOperationStatisticsService {
         }
         Map<String, List<FlowLog>> flowLogsPerType = flowLogs.stream()
                 .filter(fl -> fl.getFlowType() != null)
-                .collect(groupingBy(fl -> fl.getFlowType().getCanonicalName()));
+                .collect(groupingBy(fl -> fl.getFlowType().getName()));
         Map<String, FlowProgressResponse> response = new HashMap<>();
         Map<Long, String> createdMap = new TreeMap<>();
         Integer progressFromHistory = DEFAULT_PROGRESS;

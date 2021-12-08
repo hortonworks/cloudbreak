@@ -46,7 +46,7 @@ public class FlowProgressResponseConverter {
             FlowLog lastFlowLog = flowLogs.get(0);
             Optional<String> flowTypeOpt = flowLogs.stream()
                     .filter(fl -> fl.getFlowType() != null).findFirst()
-                    .map(fl -> fl.getFlowType().getCanonicalName());
+                    .map(fl -> fl.getFlowType().getClassValue().getName());
             FlowLog firstFlowLog = flowLogs.get(flowLogs.size() - 1);
             response.setFlowId(lastFlowLog.getFlowId());
             response.setFlowChainId(lastFlowLog.getFlowChainId());

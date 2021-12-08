@@ -28,6 +28,7 @@ import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowOperationStats;
 import com.sequenceiq.flow.repository.FlowOperationStatsRepository;
@@ -90,7 +91,7 @@ public class FlowOperationStatisticsServiceTest {
         fl1.setOperationType(OperationType.PROVISION);
         fl1.setFlowId("flowid");
         fl1.setResourceId(1L);
-        fl1.setFlowType(flowConfiguration.getClass());
+        fl1.setFlowType(ClassValue.of(flowConfiguration.getClass()));
         result.add(fl1);
         return result;
     }

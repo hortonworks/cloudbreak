@@ -2,6 +2,7 @@ package com.sequenceiq.flow.component;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -12,6 +13,7 @@ import java.nio.file.Path;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -52,6 +54,7 @@ import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.core.model.ResultType;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.component.ComponentTestConfig.TestEnvironmentInitializer;
 import com.sequenceiq.flow.component.sleep.SleepChainEventFactory;
@@ -60,6 +63,7 @@ import com.sequenceiq.flow.component.sleep.event.SleepChainTriggerEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepConfig;
 import com.sequenceiq.flow.component.sleep.event.SleepEvent;
 import com.sequenceiq.flow.component.sleep.event.SleepStartEvent;
+import com.sequenceiq.flow.repository.FlowLogRepository;
 import com.sequenceiq.flow.service.FlowService;
 
 import reactor.bus.Event;
@@ -109,6 +113,9 @@ public class FlowComponentTest {
 
     @Inject
     private Flow2Handler flow2Handler;
+
+    @Inject
+    private FlowLogRepository flowLogRepository;
 
     @AfterAll
     public static void afterAll() throws IOException, InterruptedException {
@@ -419,6 +426,32 @@ public class FlowComponentTest {
         assertEquals(FlowType.FLOW, flowIdentifier.getType());
         assertEquals(acceptResult.getAsFlowId(), flowIdentifier.getPollableId());
         waitFlowToFail(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
+    }
+
+    @Test
+    public void shouldTolerateWhenFlowLogTypeOrPayloadTypeClassIsNotOnClassPath() {
+        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        FlowLog flowLog = new FlowLog(
+                resourceId,
+                "test-flow-id",
+                null,
+                "userCrn",
+                "NEXT_EVENT",
+                "payload",
+                ClassValue.ofUnknown("nope.NopePayload"),
+                "variables",
+                ClassValue.ofUnknown("nope.NopeFlowType"),
+                "CURRENT_STATE");
+        flowLog.setFinalized(true);
+        flowLogRepository.save(flowLog);
+
+        List<FlowLog> flowLogs = flowLogRepository.findAllByResourceIdOrderByCreatedDesc(resourceId);
+
+        assertEquals(1, flowLogs.size());
+        ClassValue flowType = flowLogs.get(0).getFlowType();
+        ClassValue payloadType = flowLogs.get(0).getPayloadType();
+        assertFalse(flowType.isOnClassPath());
+        assertFalse(payloadType.isOnClassPath());
     }
 
     private void assertRunningInFlow(FlowAcceptResult acceptResult) {

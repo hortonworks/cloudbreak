@@ -29,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowLogService;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -124,7 +125,7 @@ class FreeIpaDeletionServiceTest {
         when(stackService.findAllByEnvironmentCrnAndAccountId(eq(ENVIRONMENT_CRN), eq(ACCOUNT_ID))).thenReturn(Collections.singletonList(stack));
         when(applicationFlowInformation.getTerminationFlow()).thenReturn(List.of(StackTerminationFlowConfig.class));
         FlowLog flowLog = new FlowLog();
-        flowLog.setFlowType(StackTerminationFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(StackTerminationFlowConfig.class));
         flowLog.setCurrentState(StackTerminationState.INIT_STATE.name());
         when(flowLogService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(stack.getId())).thenReturn(List.of(flowLog));
 

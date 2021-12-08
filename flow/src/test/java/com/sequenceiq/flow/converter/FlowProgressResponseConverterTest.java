@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.flow.api.model.FlowProgressResponse;
 import com.sequenceiq.flow.core.config.FlowProgressHolder;
 import com.sequenceiq.flow.core.config.TestFlowConfig;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
@@ -135,7 +136,7 @@ public class FlowProgressResponseConverterTest {
         for (FlowLog fl : flowLogs) {
             fl.setFlowId(flowId);
             fl.setFinalized(true);
-            fl.setFlowType(TestFlowConfig.class);
+            fl.setFlowType(ClassValue.of(TestFlowConfig.class));
             fl.setStateStatus(StateStatus.SUCCESSFUL);
         }
     }

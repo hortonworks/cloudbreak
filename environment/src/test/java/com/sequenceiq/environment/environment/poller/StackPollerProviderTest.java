@@ -3,6 +3,19 @@ package com.sequenceiq.environment.environment.poller;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doThrow;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
+
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.Mockito;
+
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptState;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -10,18 +23,9 @@ import com.sequenceiq.environment.environment.flow.config.update.EnvStackConfigU
 import com.sequenceiq.environment.environment.flow.config.update.config.EnvStackConfigUpdatesFlowConfig;
 import com.sequenceiq.environment.environment.service.stack.StackService;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.WebApplicationException;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.Mockito;
 
 public class StackPollerProviderTest {
 
@@ -79,7 +83,7 @@ public class StackPollerProviderTest {
         flowLog.setCreated(1L);
         flowLog.setFlowId("1");
         flowLog.setResourceId(1L);
-        flowLog.setFlowType(EnvStackConfigUpdatesFlowConfig.class);
+        flowLog.setFlowType(ClassValue.of(EnvStackConfigUpdatesFlowConfig.class));
         return flowLog;
     }
 }

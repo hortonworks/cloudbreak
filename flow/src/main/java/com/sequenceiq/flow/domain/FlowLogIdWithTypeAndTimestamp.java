@@ -4,7 +4,7 @@ public interface FlowLogIdWithTypeAndTimestamp {
 
     String getFlowId();
 
-    Class<?> getFlowType();
+    ClassValue getFlowType();
 
     Long getCreated();
 }

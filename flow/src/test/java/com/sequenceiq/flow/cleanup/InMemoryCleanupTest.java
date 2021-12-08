@@ -27,6 +27,7 @@ import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 
@@ -85,7 +86,7 @@ class InMemoryCleanupTest {
             for (int j = 0; j < random.nextInt(99) + 1; j++) {
                 FlowLog flowLog = new FlowLog(stackId + i, "" + flowId + i, "RUNNING",
                         false, StateStatus.PENDING, OperationType.UNKNOWN);
-                flowLog.setFlowType(FlowConfiguration.class);
+                flowLog.setFlowType(ClassValue.of(FlowConfiguration.class));
                 flows.add(flowLog);
             }
         }

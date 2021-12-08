@@ -62,6 +62,7 @@ import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowRegister;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.core.helloworld.config.HelloWorldFlowConfig;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
 import com.sequenceiq.flow.ha.NodeConfig;
@@ -315,12 +316,12 @@ public class HeartbeatServiceTest {
         // all flows that need to be re-distributed
 
         List<FlowLog> node1FlowLogs = getFlowLogs(2, 5000);
-        node1FlowLogs.forEach(fl -> fl.setFlowType(HelloWorldFlowConfig.class));
+        node1FlowLogs.forEach(fl -> fl.setFlowType(ClassValue.of(HelloWorldFlowConfig.class)));
         List<String> suspendedFlows = node1FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList());
         when(flowLogService.findAllByCloudbreakNodeId(NODE_1_ID)).thenReturn(new HashSet<>(node1FlowLogs));
 
         Set<FlowLog> node2FlowLogs = new HashSet<>(getFlowLogs(3, 3000));
-        node2FlowLogs.forEach(fl -> fl.setFlowType(HelloWorldFlowConfig.class));
+        node2FlowLogs.forEach(fl -> fl.setFlowType(ClassValue.of(HelloWorldFlowConfig.class)));
         suspendedFlows.addAll(node2FlowLogs.stream().map(FlowLog::getFlowId).distinct().collect(Collectors.toList()));
         when(flowLogService.findAllByCloudbreakNodeId(NODE_2_ID)).thenReturn(node2FlowLogs);
 
@@ -535,7 +536,7 @@ public class HeartbeatServiceTest {
             for (int j = 0; j < random.nextInt(99) + 1; j++) {
                 FlowLog flowLog = new FlowLog(stackId + i, "" + flowId + i, "RUNNING",
                         false, StateStatus.PENDING, OperationType.UNKNOWN);
-                flowLog.setFlowType(FlowConfiguration.class);
+                flowLog.setFlowType(ClassValue.of(FlowConfiguration.class));
                 flows.add(flowLog);
             }
         }

@@ -27,7 +27,7 @@ public class FlowNameFormatService {
         }
         return flows.stream()
                 .map(FlowLogIdWithTypeAndTimestamp::getFlowType)
-                .map(Class::getSimpleName)
+                .map(t -> t.isOnClassPath() ? t.getClassValue().getSimpleName() : t.getSimpleName())
                 .map(this::formatFlowName)
                 .collect(Collectors.joining(","));
     }
