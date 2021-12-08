@@ -115,6 +115,9 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
+    @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 3 : ${integrationtest.testsuite.maxRetryCount:3}}")
+    private int maxRetryCount;
+
     @Value("${integrationtest.ums.host:localhost}")
     private String umsHost;
 
@@ -969,7 +972,7 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Resource Crn is not available for: {}", awaitEntity.getName());
         }
 
-        resourceAwait.await(awaitEntity, desiredStatuses, ignoredFailedStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        resourceAwait.await(awaitEntity, desiredStatuses, ignoredFailedStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry, maxRetryCount);
         return entity;
     }
 
