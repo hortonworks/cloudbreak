@@ -20,7 +20,7 @@ public class ClientVersionUtil {
             }
             String[] serverParts = removeStartingV(server).split("\\.");
             String[] clientParts = removeStartingV(client).split("\\.");
-            if (serverParts[0].equals(clientParts[0]) && serverParts[1].equals(clientParts[1])) {
+            if (serverParts[0].equals(clientParts[0])) {
                 return true;
             }
         } catch (ArrayIndexOutOfBoundsException | NullPointerException ignore) {
