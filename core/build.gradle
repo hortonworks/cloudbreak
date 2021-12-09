@@ -228,10 +228,6 @@ dependencies {
 
   implementation group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
 
-  implementation (group: 'com.nimbusds',                      name: 'oauth2-oidc-sdk',                  version: '6.5') {
-    force = true
-  }
-
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
     exclude group: 'org.yaml'
   }
@@ -243,6 +239,25 @@ dependencies {
   implementation group: 'com.google.auth',                    name: 'google-auth-library-oauth2-http',  version: '1.2.2'
   implementation group: 'org.apache.commons',                 name: 'commons-lang3',                    version: '3.12.0'
   implementation group: 'com.google.guava',                   name: 'guava',                            version: guavaVersion
+
+  implementation(group: 'com.nimbusds', name: 'oauth2-oidc-sdk') {
+    version {
+      strictly '6.5'
+    }
+    because 'java.lang.NoClassDefFoundError: com/nimbusds/oauth2/sdk/http/CommonContentTypes caused by multiple oauth2-oidc-sdk versions on classpath.'
+  }
+  implementation(group: 'net.minidev', name: 'json-smart') {
+    version {
+      strictly '2.4.5'
+    }
+    because 'CVE-2021-31684'
+  }
+  implementation(group: 'net.minidev', name: 'accessors-smart') {
+    version {
+      strictly '2.4.7'
+    }
+    because 'because there is no jar for 2.4.3 in maven central repo...'
+  }
 
   implementation project(':core-api')
   implementation project(':core-model')
