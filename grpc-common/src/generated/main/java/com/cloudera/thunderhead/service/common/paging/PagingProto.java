@@ -131,7 +131,7 @@ public final class PagingProto {
    *
    * Protobuf type {@code paging.PageToken}
    */
-  public  static final class PageToken extends
+  public static final class PageToken extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:paging.PageToken)
       PageTokenOrBuilder {
@@ -141,6 +141,13 @@ public final class PagingProto {
       super(builder);
     }
     private PageToken() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PageToken();
     }
 
     @java.lang.Override
@@ -168,7 +175,7 @@ public final class PagingProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 exclusiveStartKeyStringAttrs_ = com.google.protobuf.MapField.newMapField(
                     ExclusiveStartKeyStringAttrsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000001;
@@ -181,7 +188,7 @@ public final class PagingProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 exclusiveStartKeyNumAttrs_ = com.google.protobuf.MapField.newMapField(
                     ExclusiveStartKeyNumAttrsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000002;
@@ -194,7 +201,7 @@ public final class PagingProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -275,14 +282,16 @@ public final class PagingProto {
      * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
      */
 
+    @java.lang.Override
     public boolean containsExclusiveStartKeyStringAttrs(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetExclusiveStartKeyStringAttrs().getMap().containsKey(key);
     }
     /**
      * Use {@link #getExclusiveStartKeyStringAttrsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyStringAttrs() {
       return getExclusiveStartKeyStringAttrsMap();
@@ -296,6 +305,7 @@ public final class PagingProto {
      *
      * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyStringAttrsMap() {
       return internalGetExclusiveStartKeyStringAttrs().getMap();
@@ -309,11 +319,12 @@ public final class PagingProto {
      *
      * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getExclusiveStartKeyStringAttrsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetExclusiveStartKeyStringAttrs().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -327,10 +338,11 @@ public final class PagingProto {
      *
      * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getExclusiveStartKeyStringAttrsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetExclusiveStartKeyStringAttrs().getMap();
       if (!map.containsKey(key)) {
@@ -369,14 +381,16 @@ public final class PagingProto {
      * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsExclusiveStartKeyNumAttrs(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetExclusiveStartKeyNumAttrs().getMap().containsKey(key);
     }
     /**
      * Use {@link #getExclusiveStartKeyNumAttrsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyNumAttrs() {
       return getExclusiveStartKeyNumAttrsMap();
@@ -384,6 +398,7 @@ public final class PagingProto {
     /**
      * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyNumAttrsMap() {
       return internalGetExclusiveStartKeyNumAttrs().getMap();
@@ -391,11 +406,12 @@ public final class PagingProto {
     /**
      * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getExclusiveStartKeyNumAttrsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetExclusiveStartKeyNumAttrs().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -403,10 +419,11 @@ public final class PagingProto {
     /**
      * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getExclusiveStartKeyNumAttrsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetExclusiveStartKeyNumAttrs().getMap();
       if (!map.containsKey(key)) {
@@ -485,13 +502,12 @@ public final class PagingProto {
       }
       com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken other = (com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken) obj;
 
-      boolean result = true;
-      result = result && internalGetExclusiveStartKeyStringAttrs().equals(
-          other.internalGetExclusiveStartKeyStringAttrs());
-      result = result && internalGetExclusiveStartKeyNumAttrs().equals(
-          other.internalGetExclusiveStartKeyNumAttrs());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!internalGetExclusiveStartKeyStringAttrs().equals(
+          other.internalGetExclusiveStartKeyStringAttrs())) return false;
+      if (!internalGetExclusiveStartKeyNumAttrs().equals(
+          other.internalGetExclusiveStartKeyNumAttrs())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -719,35 +735,35 @@ public final class PagingProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -831,14 +847,16 @@ public final class PagingProto {
        * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
        */
 
+      @java.lang.Override
       public boolean containsExclusiveStartKeyStringAttrs(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetExclusiveStartKeyStringAttrs().getMap().containsKey(key);
       }
       /**
        * Use {@link #getExclusiveStartKeyStringAttrsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyStringAttrs() {
         return getExclusiveStartKeyStringAttrsMap();
@@ -852,6 +870,7 @@ public final class PagingProto {
        *
        * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyStringAttrsMap() {
         return internalGetExclusiveStartKeyStringAttrs().getMap();
@@ -865,11 +884,12 @@ public final class PagingProto {
        *
        * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getExclusiveStartKeyStringAttrsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetExclusiveStartKeyStringAttrs().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -883,10 +903,11 @@ public final class PagingProto {
        *
        * <code>map&lt;string, string&gt; exclusiveStartKeyStringAttrs = 1;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getExclusiveStartKeyStringAttrsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetExclusiveStartKeyStringAttrs().getMap();
         if (!map.containsKey(key)) {
@@ -912,7 +933,7 @@ public final class PagingProto {
 
       public Builder removeExclusiveStartKeyStringAttrs(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableExclusiveStartKeyStringAttrs().getMutableMap()
             .remove(key);
         return this;
@@ -937,8 +958,11 @@ public final class PagingProto {
       public Builder putExclusiveStartKeyStringAttrs(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableExclusiveStartKeyStringAttrs().getMutableMap()
             .put(key, value);
         return this;
@@ -990,14 +1014,16 @@ public final class PagingProto {
        * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
        */
 
+      @java.lang.Override
       public boolean containsExclusiveStartKeyNumAttrs(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetExclusiveStartKeyNumAttrs().getMap().containsKey(key);
       }
       /**
        * Use {@link #getExclusiveStartKeyNumAttrsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyNumAttrs() {
         return getExclusiveStartKeyNumAttrsMap();
@@ -1005,6 +1031,7 @@ public final class PagingProto {
       /**
        * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getExclusiveStartKeyNumAttrsMap() {
         return internalGetExclusiveStartKeyNumAttrs().getMap();
@@ -1012,11 +1039,12 @@ public final class PagingProto {
       /**
        * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getExclusiveStartKeyNumAttrsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetExclusiveStartKeyNumAttrs().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -1024,10 +1052,11 @@ public final class PagingProto {
       /**
        * <code>map&lt;string, string&gt; exclusiveStartKeyNumAttrs = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getExclusiveStartKeyNumAttrsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetExclusiveStartKeyNumAttrs().getMap();
         if (!map.containsKey(key)) {
@@ -1047,7 +1076,7 @@ public final class PagingProto {
 
       public Builder removeExclusiveStartKeyNumAttrs(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableExclusiveStartKeyNumAttrs().getMutableMap()
             .remove(key);
         return this;
@@ -1066,8 +1095,11 @@ public final class PagingProto {
       public Builder putExclusiveStartKeyNumAttrs(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableExclusiveStartKeyNumAttrs().getMutableMap()
             .put(key, value);
         return this;
@@ -1085,7 +1117,7 @@ public final class PagingProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1172,18 +1204,10 @@ public final class PagingProto {
       "agingProtoZ\031com/cloudera/cdp/protobufb\006p" +
       "roto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_paging_PageToken_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_paging_PageToken_fieldAccessorTable = new

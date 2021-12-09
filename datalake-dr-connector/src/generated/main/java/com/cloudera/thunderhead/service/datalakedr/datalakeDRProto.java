@@ -24,6 +24,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
     java.lang.String getDatalakeName();
     /**
@@ -32,6 +33,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
     com.google.protobuf.ByteString
         getDatalakeNameBytes();
@@ -42,6 +44,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The backupName.
      */
     java.lang.String getBackupName();
     /**
@@ -50,6 +53,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The bytes for backupName.
      */
     com.google.protobuf.ByteString
         getBackupNameBytes();
@@ -60,6 +64,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 3;</code>
+     * @return The backupLocation.
      */
     java.lang.String getBackupLocation();
     /**
@@ -68,6 +73,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 3;</code>
+     * @return The bytes for backupLocation.
      */
     com.google.protobuf.ByteString
         getBackupLocationBytes();
@@ -78,6 +84,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>bool closeDbConnections = 4;</code>
+     * @return The closeDbConnections.
      */
     boolean getCloseDbConnections();
   }
@@ -89,7 +96,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.BackupDatalakeRequest}
    */
-  public  static final class BackupDatalakeRequest extends
+  public static final class BackupDatalakeRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.BackupDatalakeRequest)
       BackupDatalakeRequestOrBuilder {
@@ -102,7 +109,13 @@ public final class datalakeDRProto {
       datalakeName_ = "";
       backupName_ = "";
       backupLocation_ = "";
-      closeDbConnections_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupDatalakeRequest();
     }
 
     @java.lang.Override
@@ -118,7 +131,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -153,7 +165,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -192,7 +204,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
+    @java.lang.Override
     public java.lang.String getDatalakeName() {
       java.lang.Object ref = datalakeName_;
       if (ref instanceof java.lang.String) {
@@ -211,7 +225,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDatalakeNameBytes() {
       java.lang.Object ref = datalakeName_;
@@ -234,7 +250,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The backupName.
      */
+    @java.lang.Override
     public java.lang.String getBackupName() {
       java.lang.Object ref = backupName_;
       if (ref instanceof java.lang.String) {
@@ -253,7 +271,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The bytes for backupName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupNameBytes() {
       java.lang.Object ref = backupName_;
@@ -276,7 +296,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 3;</code>
+     * @return The backupLocation.
      */
+    @java.lang.Override
     public java.lang.String getBackupLocation() {
       java.lang.Object ref = backupLocation_;
       if (ref instanceof java.lang.String) {
@@ -295,7 +317,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 3;</code>
+     * @return The bytes for backupLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupLocationBytes() {
       java.lang.Object ref = backupLocation_;
@@ -318,7 +342,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>bool closeDbConnections = 4;</code>
+     * @return The closeDbConnections.
      */
+    @java.lang.Override
     public boolean getCloseDbConnections() {
       return closeDbConnections_;
     }
@@ -337,13 +363,13 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
       }
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, backupName_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, backupLocation_);
       }
       if (closeDbConnections_ != false) {
@@ -358,13 +384,13 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
       }
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, backupName_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, backupLocation_);
       }
       if (closeDbConnections_ != false) {
@@ -386,17 +412,16 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest) obj;
 
-      boolean result = true;
-      result = result && getDatalakeName()
-          .equals(other.getDatalakeName());
-      result = result && getBackupName()
-          .equals(other.getBackupName());
-      result = result && getBackupLocation()
-          .equals(other.getBackupLocation());
-      result = result && (getCloseDbConnections()
-          == other.getCloseDbConnections());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDatalakeName()
+          .equals(other.getDatalakeName())) return false;
+      if (!getBackupName()
+          .equals(other.getBackupName())) return false;
+      if (!getBackupLocation()
+          .equals(other.getBackupLocation())) return false;
+      if (getCloseDbConnections()
+          != other.getCloseDbConnections()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -597,35 +622,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -690,6 +715,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The datalakeName.
        */
       public java.lang.String getDatalakeName() {
         java.lang.Object ref = datalakeName_;
@@ -709,6 +735,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The bytes for datalakeName.
        */
       public com.google.protobuf.ByteString
           getDatalakeNameBytes() {
@@ -729,6 +756,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeName(
           java.lang.String value) {
@@ -746,6 +775,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatalakeName() {
         
@@ -759,6 +789,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The bytes for datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeNameBytes(
           com.google.protobuf.ByteString value) {
@@ -779,6 +811,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @return The backupName.
        */
       public java.lang.String getBackupName() {
         java.lang.Object ref = backupName_;
@@ -798,6 +831,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @return The bytes for backupName.
        */
       public com.google.protobuf.ByteString
           getBackupNameBytes() {
@@ -818,6 +852,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @param value The backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupName(
           java.lang.String value) {
@@ -835,6 +871,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupName() {
         
@@ -848,6 +885,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @param value The bytes for backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupNameBytes(
           com.google.protobuf.ByteString value) {
@@ -868,6 +907,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 3;</code>
+       * @return The backupLocation.
        */
       public java.lang.String getBackupLocation() {
         java.lang.Object ref = backupLocation_;
@@ -887,6 +927,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 3;</code>
+       * @return The bytes for backupLocation.
        */
       public com.google.protobuf.ByteString
           getBackupLocationBytes() {
@@ -907,6 +948,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 3;</code>
+       * @param value The backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocation(
           java.lang.String value) {
@@ -924,6 +967,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupLocation() {
         
@@ -937,6 +981,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 3;</code>
+       * @param value The bytes for backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -957,7 +1003,9 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool closeDbConnections = 4;</code>
+       * @return The closeDbConnections.
        */
+      @java.lang.Override
       public boolean getCloseDbConnections() {
         return closeDbConnections_;
       }
@@ -967,6 +1015,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool closeDbConnections = 4;</code>
+       * @param value The closeDbConnections to set.
+       * @return This builder for chaining.
        */
       public Builder setCloseDbConnections(boolean value) {
         
@@ -980,6 +1030,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool closeDbConnections = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCloseDbConnections() {
         
@@ -990,7 +1041,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1050,6 +1101,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The backupName.
      */
     java.lang.String getBackupName();
     /**
@@ -1058,6 +1110,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The bytes for backupName.
      */
     com.google.protobuf.ByteString
         getBackupNameBytes();
@@ -1068,6 +1121,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -1076,6 +1130,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -1086,6 +1141,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -1094,6 +1150,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -1104,6 +1161,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The backupId.
      */
     java.lang.String getBackupId();
     /**
@@ -1112,6 +1170,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The bytes for backupId.
      */
     com.google.protobuf.ByteString
         getBackupIdBytes();
@@ -1122,6 +1181,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
     java.lang.String getInternalState();
     /**
@@ -1130,6 +1190,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
     com.google.protobuf.ByteString
         getInternalStateBytes();
@@ -1140,6 +1201,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
     java.lang.String getOverallState();
     /**
@@ -1148,6 +1210,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
     com.google.protobuf.ByteString
         getOverallStateBytes();
@@ -1158,6 +1221,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
     java.lang.String getStartTimestamp();
     /**
@@ -1166,6 +1230,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
     com.google.protobuf.ByteString
         getStartTimestampBytes();
@@ -1176,6 +1241,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
     java.lang.String getEndTimestamp();
     /**
@@ -1184,6 +1250,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
     com.google.protobuf.ByteString
         getEndTimestampBytes();
@@ -1194,6 +1261,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
     java.lang.String getBackupLocation();
     /**
@@ -1202,6 +1270,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
     com.google.protobuf.ByteString
         getBackupLocationBytes();
@@ -1212,6 +1281,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
     java.lang.String getFailureReason();
     /**
@@ -1220,6 +1290,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
@@ -1232,7 +1303,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.BackupDatalakeResponse}
    */
-  public  static final class BackupDatalakeResponse extends
+  public static final class BackupDatalakeResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.BackupDatalakeResponse)
       BackupDatalakeResponseOrBuilder {
@@ -1255,6 +1326,13 @@ public final class datalakeDRProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupDatalakeResponse();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -1267,7 +1345,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1339,7 +1416,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1378,7 +1455,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The backupName.
      */
+    @java.lang.Override
     public java.lang.String getBackupName() {
       java.lang.Object ref = backupName_;
       if (ref instanceof java.lang.String) {
@@ -1397,7 +1476,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The bytes for backupName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupNameBytes() {
       java.lang.Object ref = backupName_;
@@ -1420,7 +1501,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -1439,7 +1522,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -1462,7 +1547,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -1481,7 +1568,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -1504,7 +1593,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The backupId.
      */
+    @java.lang.Override
     public java.lang.String getBackupId() {
       java.lang.Object ref = backupId_;
       if (ref instanceof java.lang.String) {
@@ -1523,7 +1614,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The bytes for backupId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupIdBytes() {
       java.lang.Object ref = backupId_;
@@ -1546,7 +1639,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
+    @java.lang.Override
     public java.lang.String getInternalState() {
       java.lang.Object ref = internalState_;
       if (ref instanceof java.lang.String) {
@@ -1565,7 +1660,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getInternalStateBytes() {
       java.lang.Object ref = internalState_;
@@ -1588,7 +1685,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
+    @java.lang.Override
     public java.lang.String getOverallState() {
       java.lang.Object ref = overallState_;
       if (ref instanceof java.lang.String) {
@@ -1607,7 +1706,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOverallStateBytes() {
       java.lang.Object ref = overallState_;
@@ -1630,7 +1731,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getStartTimestamp() {
       java.lang.Object ref = startTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -1649,7 +1752,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStartTimestampBytes() {
       java.lang.Object ref = startTimestamp_;
@@ -1672,7 +1777,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getEndTimestamp() {
       java.lang.Object ref = endTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -1691,7 +1798,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndTimestampBytes() {
       java.lang.Object ref = endTimestamp_;
@@ -1714,7 +1823,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
+    @java.lang.Override
     public java.lang.String getBackupLocation() {
       java.lang.Object ref = backupLocation_;
       if (ref instanceof java.lang.String) {
@@ -1733,7 +1844,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupLocationBytes() {
       java.lang.Object ref = backupLocation_;
@@ -1756,7 +1869,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
+    @java.lang.Override
     public java.lang.String getFailureReason() {
       java.lang.Object ref = failureReason_;
       if (ref instanceof java.lang.String) {
@@ -1775,7 +1890,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFailureReasonBytes() {
       java.lang.Object ref = failureReason_;
@@ -1804,34 +1921,34 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, backupName_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, userCrn_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, backupId_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
       unknownFields.writeTo(output);
@@ -1843,34 +1960,34 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, backupName_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, userCrn_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, backupId_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
       size += unknownFields.getSerializedSize();
@@ -1888,29 +2005,28 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse) obj;
 
-      boolean result = true;
-      result = result && getBackupName()
-          .equals(other.getBackupName());
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && getBackupId()
-          .equals(other.getBackupId());
-      result = result && getInternalState()
-          .equals(other.getInternalState());
-      result = result && getOverallState()
-          .equals(other.getOverallState());
-      result = result && getStartTimestamp()
-          .equals(other.getStartTimestamp());
-      result = result && getEndTimestamp()
-          .equals(other.getEndTimestamp());
-      result = result && getBackupLocation()
-          .equals(other.getBackupLocation());
-      result = result && getFailureReason()
-          .equals(other.getFailureReason());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getBackupName()
+          .equals(other.getBackupName())) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (!getInternalState()
+          .equals(other.getInternalState())) return false;
+      if (!getOverallState()
+          .equals(other.getOverallState())) return false;
+      if (!getStartTimestamp()
+          .equals(other.getStartTimestamp())) return false;
+      if (!getEndTimestamp()
+          .equals(other.getEndTimestamp())) return false;
+      if (!getBackupLocation()
+          .equals(other.getBackupLocation())) return false;
+      if (!getFailureReason()
+          .equals(other.getFailureReason())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2140,35 +2256,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2258,6 +2374,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return The backupName.
        */
       public java.lang.String getBackupName() {
         java.lang.Object ref = backupName_;
@@ -2277,6 +2394,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return The bytes for backupName.
        */
       public com.google.protobuf.ByteString
           getBackupNameBytes() {
@@ -2297,6 +2415,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @param value The backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupName(
           java.lang.String value) {
@@ -2314,6 +2434,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupName() {
         
@@ -2327,6 +2448,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @param value The bytes for backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupNameBytes(
           com.google.protobuf.ByteString value) {
@@ -2347,6 +2470,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -2366,6 +2490,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -2386,6 +2511,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -2403,6 +2530,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -2416,6 +2544,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -2436,6 +2566,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -2455,6 +2586,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -2475,6 +2607,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -2492,6 +2626,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -2505,6 +2640,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -2525,6 +2662,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return The backupId.
        */
       public java.lang.String getBackupId() {
         java.lang.Object ref = backupId_;
@@ -2544,6 +2682,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return The bytes for backupId.
        */
       public com.google.protobuf.ByteString
           getBackupIdBytes() {
@@ -2564,6 +2703,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupId(
           java.lang.String value) {
@@ -2581,6 +2722,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupId() {
         
@@ -2594,6 +2736,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupIdBytes(
           com.google.protobuf.ByteString value) {
@@ -2614,6 +2758,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The internalState.
        */
       public java.lang.String getInternalState() {
         java.lang.Object ref = internalState_;
@@ -2633,6 +2778,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The bytes for internalState.
        */
       public com.google.protobuf.ByteString
           getInternalStateBytes() {
@@ -2653,6 +2799,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalState(
           java.lang.String value) {
@@ -2670,6 +2818,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInternalState() {
         
@@ -2683,6 +2832,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The bytes for internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalStateBytes(
           com.google.protobuf.ByteString value) {
@@ -2703,6 +2854,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The overallState.
        */
       public java.lang.String getOverallState() {
         java.lang.Object ref = overallState_;
@@ -2722,6 +2874,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The bytes for overallState.
        */
       public com.google.protobuf.ByteString
           getOverallStateBytes() {
@@ -2742,6 +2895,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallState(
           java.lang.String value) {
@@ -2759,6 +2914,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOverallState() {
         
@@ -2772,6 +2928,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The bytes for overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallStateBytes(
           com.google.protobuf.ByteString value) {
@@ -2792,6 +2950,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The startTimestamp.
        */
       public java.lang.String getStartTimestamp() {
         java.lang.Object ref = startTimestamp_;
@@ -2811,6 +2970,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The bytes for startTimestamp.
        */
       public com.google.protobuf.ByteString
           getStartTimestampBytes() {
@@ -2831,6 +2991,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestamp(
           java.lang.String value) {
@@ -2848,6 +3010,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartTimestamp() {
         
@@ -2861,6 +3024,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The bytes for startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -2881,6 +3046,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The endTimestamp.
        */
       public java.lang.String getEndTimestamp() {
         java.lang.Object ref = endTimestamp_;
@@ -2900,6 +3066,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The bytes for endTimestamp.
        */
       public com.google.protobuf.ByteString
           getEndTimestampBytes() {
@@ -2920,6 +3087,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestamp(
           java.lang.String value) {
@@ -2937,6 +3106,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndTimestamp() {
         
@@ -2950,6 +3120,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The bytes for endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -2970,6 +3142,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The backupLocation.
        */
       public java.lang.String getBackupLocation() {
         java.lang.Object ref = backupLocation_;
@@ -2989,6 +3162,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The bytes for backupLocation.
        */
       public com.google.protobuf.ByteString
           getBackupLocationBytes() {
@@ -3009,6 +3183,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocation(
           java.lang.String value) {
@@ -3026,6 +3202,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupLocation() {
         
@@ -3039,6 +3216,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The bytes for backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -3059,6 +3238,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The failureReason.
        */
       public java.lang.String getFailureReason() {
         java.lang.Object ref = failureReason_;
@@ -3078,6 +3258,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The bytes for failureReason.
        */
       public com.google.protobuf.ByteString
           getFailureReasonBytes() {
@@ -3098,6 +3279,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReason(
           java.lang.String value) {
@@ -3115,6 +3298,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFailureReason() {
         
@@ -3128,6 +3312,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The bytes for failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReasonBytes(
           com.google.protobuf.ByteString value) {
@@ -3143,7 +3329,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3203,6 +3389,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
     java.lang.String getDatalakeName();
     /**
@@ -3211,6 +3398,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
     com.google.protobuf.ByteString
         getDatalakeNameBytes();
@@ -3221,6 +3409,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The backupName.
      */
     java.lang.String getBackupName();
     /**
@@ -3229,6 +3418,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The bytes for backupName.
      */
     com.google.protobuf.ByteString
         getBackupNameBytes();
@@ -3239,6 +3429,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The backupId.
      */
     java.lang.String getBackupId();
     /**
@@ -3247,6 +3438,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The bytes for backupId.
      */
     com.google.protobuf.ByteString
         getBackupIdBytes();
@@ -3257,6 +3449,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>bool includeDatabase = 4;</code>
+     * @return The includeDatabase.
      */
     boolean getIncludeDatabase();
 
@@ -3266,6 +3459,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>bool force = 5;</code>
+     * @return The force.
      */
     boolean getForce();
 
@@ -3275,6 +3469,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocationOverride = 6;</code>
+     * @return The backupLocationOverride.
      */
     java.lang.String getBackupLocationOverride();
     /**
@@ -3283,6 +3478,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocationOverride = 6;</code>
+     * @return The bytes for backupLocationOverride.
      */
     com.google.protobuf.ByteString
         getBackupLocationOverrideBytes();
@@ -3295,7 +3491,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.RestoreDatalakeRequest}
    */
-  public  static final class RestoreDatalakeRequest extends
+  public static final class RestoreDatalakeRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.RestoreDatalakeRequest)
       RestoreDatalakeRequestOrBuilder {
@@ -3308,9 +3504,14 @@ public final class datalakeDRProto {
       datalakeName_ = "";
       backupName_ = "";
       backupId_ = "";
-      includeDatabase_ = false;
-      force_ = false;
       backupLocationOverride_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RestoreDatalakeRequest();
     }
 
     @java.lang.Override
@@ -3326,7 +3527,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3372,7 +3572,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3411,7 +3611,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
+    @java.lang.Override
     public java.lang.String getDatalakeName() {
       java.lang.Object ref = datalakeName_;
       if (ref instanceof java.lang.String) {
@@ -3430,7 +3632,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDatalakeNameBytes() {
       java.lang.Object ref = datalakeName_;
@@ -3453,7 +3657,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The backupName.
      */
+    @java.lang.Override
     public java.lang.String getBackupName() {
       java.lang.Object ref = backupName_;
       if (ref instanceof java.lang.String) {
@@ -3472,7 +3678,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 2;</code>
+     * @return The bytes for backupName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupNameBytes() {
       java.lang.Object ref = backupName_;
@@ -3495,7 +3703,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The backupId.
      */
+    @java.lang.Override
     public java.lang.String getBackupId() {
       java.lang.Object ref = backupId_;
       if (ref instanceof java.lang.String) {
@@ -3514,7 +3724,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The bytes for backupId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupIdBytes() {
       java.lang.Object ref = backupId_;
@@ -3537,7 +3749,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>bool includeDatabase = 4;</code>
+     * @return The includeDatabase.
      */
+    @java.lang.Override
     public boolean getIncludeDatabase() {
       return includeDatabase_;
     }
@@ -3550,7 +3764,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>bool force = 5;</code>
+     * @return The force.
      */
+    @java.lang.Override
     public boolean getForce() {
       return force_;
     }
@@ -3563,7 +3779,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocationOverride = 6;</code>
+     * @return The backupLocationOverride.
      */
+    @java.lang.Override
     public java.lang.String getBackupLocationOverride() {
       java.lang.Object ref = backupLocationOverride_;
       if (ref instanceof java.lang.String) {
@@ -3582,7 +3800,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocationOverride = 6;</code>
+     * @return The bytes for backupLocationOverride.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupLocationOverrideBytes() {
       java.lang.Object ref = backupLocationOverride_;
@@ -3611,13 +3831,13 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
       }
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, backupName_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, backupId_);
       }
       if (includeDatabase_ != false) {
@@ -3626,7 +3846,7 @@ public final class datalakeDRProto {
       if (force_ != false) {
         output.writeBool(5, force_);
       }
-      if (!getBackupLocationOverrideBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocationOverride_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, backupLocationOverride_);
       }
       unknownFields.writeTo(output);
@@ -3638,13 +3858,13 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
       }
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, backupName_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, backupId_);
       }
       if (includeDatabase_ != false) {
@@ -3655,7 +3875,7 @@ public final class datalakeDRProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(5, force_);
       }
-      if (!getBackupLocationOverrideBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocationOverride_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, backupLocationOverride_);
       }
       size += unknownFields.getSerializedSize();
@@ -3673,21 +3893,20 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest) obj;
 
-      boolean result = true;
-      result = result && getDatalakeName()
-          .equals(other.getDatalakeName());
-      result = result && getBackupName()
-          .equals(other.getBackupName());
-      result = result && getBackupId()
-          .equals(other.getBackupId());
-      result = result && (getIncludeDatabase()
-          == other.getIncludeDatabase());
-      result = result && (getForce()
-          == other.getForce());
-      result = result && getBackupLocationOverride()
-          .equals(other.getBackupLocationOverride());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDatalakeName()
+          .equals(other.getDatalakeName())) return false;
+      if (!getBackupName()
+          .equals(other.getBackupName())) return false;
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (getIncludeDatabase()
+          != other.getIncludeDatabase()) return false;
+      if (getForce()
+          != other.getForce()) return false;
+      if (!getBackupLocationOverride()
+          .equals(other.getBackupLocationOverride())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3899,35 +4118,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3999,6 +4218,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The datalakeName.
        */
       public java.lang.String getDatalakeName() {
         java.lang.Object ref = datalakeName_;
@@ -4018,6 +4238,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The bytes for datalakeName.
        */
       public com.google.protobuf.ByteString
           getDatalakeNameBytes() {
@@ -4038,6 +4259,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeName(
           java.lang.String value) {
@@ -4055,6 +4278,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatalakeName() {
         
@@ -4068,6 +4292,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The bytes for datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeNameBytes(
           com.google.protobuf.ByteString value) {
@@ -4088,6 +4314,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @return The backupName.
        */
       public java.lang.String getBackupName() {
         java.lang.Object ref = backupName_;
@@ -4107,6 +4334,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @return The bytes for backupName.
        */
       public com.google.protobuf.ByteString
           getBackupNameBytes() {
@@ -4127,6 +4355,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @param value The backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupName(
           java.lang.String value) {
@@ -4144,6 +4374,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupName() {
         
@@ -4157,6 +4388,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 2;</code>
+       * @param value The bytes for backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupNameBytes(
           com.google.protobuf.ByteString value) {
@@ -4177,6 +4410,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @return The backupId.
        */
       public java.lang.String getBackupId() {
         java.lang.Object ref = backupId_;
@@ -4196,6 +4430,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @return The bytes for backupId.
        */
       public com.google.protobuf.ByteString
           getBackupIdBytes() {
@@ -4216,6 +4451,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupId(
           java.lang.String value) {
@@ -4233,6 +4470,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupId() {
         
@@ -4246,6 +4484,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupIdBytes(
           com.google.protobuf.ByteString value) {
@@ -4266,7 +4506,9 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool includeDatabase = 4;</code>
+       * @return The includeDatabase.
        */
+      @java.lang.Override
       public boolean getIncludeDatabase() {
         return includeDatabase_;
       }
@@ -4276,6 +4518,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool includeDatabase = 4;</code>
+       * @param value The includeDatabase to set.
+       * @return This builder for chaining.
        */
       public Builder setIncludeDatabase(boolean value) {
         
@@ -4289,6 +4533,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool includeDatabase = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIncludeDatabase() {
         
@@ -4304,7 +4549,9 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool force = 5;</code>
+       * @return The force.
        */
+      @java.lang.Override
       public boolean getForce() {
         return force_;
       }
@@ -4314,6 +4561,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool force = 5;</code>
+       * @param value The force to set.
+       * @return This builder for chaining.
        */
       public Builder setForce(boolean value) {
         
@@ -4327,6 +4576,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>bool force = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearForce() {
         
@@ -4342,6 +4592,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocationOverride = 6;</code>
+       * @return The backupLocationOverride.
        */
       public java.lang.String getBackupLocationOverride() {
         java.lang.Object ref = backupLocationOverride_;
@@ -4361,6 +4612,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocationOverride = 6;</code>
+       * @return The bytes for backupLocationOverride.
        */
       public com.google.protobuf.ByteString
           getBackupLocationOverrideBytes() {
@@ -4381,6 +4633,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocationOverride = 6;</code>
+       * @param value The backupLocationOverride to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationOverride(
           java.lang.String value) {
@@ -4398,6 +4652,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocationOverride = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupLocationOverride() {
         
@@ -4411,6 +4666,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocationOverride = 6;</code>
+       * @param value The bytes for backupLocationOverride to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationOverrideBytes(
           com.google.protobuf.ByteString value) {
@@ -4426,7 +4683,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4486,6 +4743,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -4494,16 +4752,19 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
 
     /**
      * <code>string backupId = 2;</code>
+     * @return The backupId.
      */
     java.lang.String getBackupId();
     /**
      * <code>string backupId = 2;</code>
+     * @return The bytes for backupId.
      */
     com.google.protobuf.ByteString
         getBackupIdBytes();
@@ -4514,6 +4775,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 3;</code>
+     * @return The restoreId.
      */
     java.lang.String getRestoreId();
     /**
@@ -4522,6 +4784,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 3;</code>
+     * @return The bytes for restoreId.
      */
     com.google.protobuf.ByteString
         getRestoreIdBytes();
@@ -4532,6 +4795,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -4540,6 +4804,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -4550,6 +4815,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
     java.lang.String getInternalState();
     /**
@@ -4558,6 +4824,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
     com.google.protobuf.ByteString
         getInternalStateBytes();
@@ -4568,6 +4835,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
     java.lang.String getOverallState();
     /**
@@ -4576,6 +4844,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
     com.google.protobuf.ByteString
         getOverallStateBytes();
@@ -4586,6 +4855,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
     java.lang.String getStartTimestamp();
     /**
@@ -4594,6 +4864,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
     com.google.protobuf.ByteString
         getStartTimestampBytes();
@@ -4604,6 +4875,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
     java.lang.String getEndTimestamp();
     /**
@@ -4612,6 +4884,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
     com.google.protobuf.ByteString
         getEndTimestampBytes();
@@ -4622,6 +4895,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
     java.lang.String getBackupLocation();
     /**
@@ -4630,6 +4904,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
     com.google.protobuf.ByteString
         getBackupLocationBytes();
@@ -4640,6 +4915,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
     java.lang.String getFailureReason();
     /**
@@ -4648,6 +4924,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
@@ -4660,7 +4937,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.RestoreDatalakeResponse}
    */
-  public  static final class RestoreDatalakeResponse extends
+  public static final class RestoreDatalakeResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.RestoreDatalakeResponse)
       RestoreDatalakeResponseOrBuilder {
@@ -4683,6 +4960,13 @@ public final class datalakeDRProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RestoreDatalakeResponse();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -4695,7 +4979,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4767,7 +5050,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4806,7 +5089,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -4825,7 +5110,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -4844,7 +5131,9 @@ public final class datalakeDRProto {
     private volatile java.lang.Object backupId_;
     /**
      * <code>string backupId = 2;</code>
+     * @return The backupId.
      */
+    @java.lang.Override
     public java.lang.String getBackupId() {
       java.lang.Object ref = backupId_;
       if (ref instanceof java.lang.String) {
@@ -4859,7 +5148,9 @@ public final class datalakeDRProto {
     }
     /**
      * <code>string backupId = 2;</code>
+     * @return The bytes for backupId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupIdBytes() {
       java.lang.Object ref = backupId_;
@@ -4882,7 +5173,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 3;</code>
+     * @return The restoreId.
      */
+    @java.lang.Override
     public java.lang.String getRestoreId() {
       java.lang.Object ref = restoreId_;
       if (ref instanceof java.lang.String) {
@@ -4901,7 +5194,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 3;</code>
+     * @return The bytes for restoreId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRestoreIdBytes() {
       java.lang.Object ref = restoreId_;
@@ -4924,7 +5219,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -4943,7 +5240,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -4966,7 +5265,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
+    @java.lang.Override
     public java.lang.String getInternalState() {
       java.lang.Object ref = internalState_;
       if (ref instanceof java.lang.String) {
@@ -4985,7 +5286,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getInternalStateBytes() {
       java.lang.Object ref = internalState_;
@@ -5008,7 +5311,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
+    @java.lang.Override
     public java.lang.String getOverallState() {
       java.lang.Object ref = overallState_;
       if (ref instanceof java.lang.String) {
@@ -5027,7 +5332,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOverallStateBytes() {
       java.lang.Object ref = overallState_;
@@ -5050,7 +5357,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getStartTimestamp() {
       java.lang.Object ref = startTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -5069,7 +5378,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStartTimestampBytes() {
       java.lang.Object ref = startTimestamp_;
@@ -5092,7 +5403,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getEndTimestamp() {
       java.lang.Object ref = endTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -5111,7 +5424,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndTimestampBytes() {
       java.lang.Object ref = endTimestamp_;
@@ -5134,7 +5449,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
+    @java.lang.Override
     public java.lang.String getBackupLocation() {
       java.lang.Object ref = backupLocation_;
       if (ref instanceof java.lang.String) {
@@ -5153,7 +5470,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupLocationBytes() {
       java.lang.Object ref = backupLocation_;
@@ -5176,7 +5495,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
+    @java.lang.Override
     public java.lang.String getFailureReason() {
       java.lang.Object ref = failureReason_;
       if (ref instanceof java.lang.String) {
@@ -5195,7 +5516,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFailureReasonBytes() {
       java.lang.Object ref = failureReason_;
@@ -5224,34 +5547,34 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, backupId_);
       }
-      if (!getRestoreIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, restoreId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, userCrn_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
       unknownFields.writeTo(output);
@@ -5263,34 +5586,34 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, backupId_);
       }
-      if (!getRestoreIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, restoreId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, userCrn_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
       size += unknownFields.getSerializedSize();
@@ -5308,29 +5631,28 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getBackupId()
-          .equals(other.getBackupId());
-      result = result && getRestoreId()
-          .equals(other.getRestoreId());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && getInternalState()
-          .equals(other.getInternalState());
-      result = result && getOverallState()
-          .equals(other.getOverallState());
-      result = result && getStartTimestamp()
-          .equals(other.getStartTimestamp());
-      result = result && getEndTimestamp()
-          .equals(other.getEndTimestamp());
-      result = result && getBackupLocation()
-          .equals(other.getBackupLocation());
-      result = result && getFailureReason()
-          .equals(other.getFailureReason());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (!getRestoreId()
+          .equals(other.getRestoreId())) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!getInternalState()
+          .equals(other.getInternalState())) return false;
+      if (!getOverallState()
+          .equals(other.getOverallState())) return false;
+      if (!getStartTimestamp()
+          .equals(other.getStartTimestamp())) return false;
+      if (!getEndTimestamp()
+          .equals(other.getEndTimestamp())) return false;
+      if (!getBackupLocation()
+          .equals(other.getBackupLocation())) return false;
+      if (!getFailureReason()
+          .equals(other.getFailureReason())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5560,35 +5882,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5678,6 +6000,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -5697,6 +6020,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -5717,6 +6041,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -5734,6 +6060,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -5747,6 +6074,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -5763,6 +6092,7 @@ public final class datalakeDRProto {
       private java.lang.Object backupId_ = "";
       /**
        * <code>string backupId = 2;</code>
+       * @return The backupId.
        */
       public java.lang.String getBackupId() {
         java.lang.Object ref = backupId_;
@@ -5778,6 +6108,7 @@ public final class datalakeDRProto {
       }
       /**
        * <code>string backupId = 2;</code>
+       * @return The bytes for backupId.
        */
       public com.google.protobuf.ByteString
           getBackupIdBytes() {
@@ -5794,6 +6125,8 @@ public final class datalakeDRProto {
       }
       /**
        * <code>string backupId = 2;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupId(
           java.lang.String value) {
@@ -5807,6 +6140,7 @@ public final class datalakeDRProto {
       }
       /**
        * <code>string backupId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupId() {
         
@@ -5816,6 +6150,8 @@ public final class datalakeDRProto {
       }
       /**
        * <code>string backupId = 2;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupIdBytes(
           com.google.protobuf.ByteString value) {
@@ -5836,6 +6172,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 3;</code>
+       * @return The restoreId.
        */
       public java.lang.String getRestoreId() {
         java.lang.Object ref = restoreId_;
@@ -5855,6 +6192,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 3;</code>
+       * @return The bytes for restoreId.
        */
       public com.google.protobuf.ByteString
           getRestoreIdBytes() {
@@ -5875,6 +6213,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 3;</code>
+       * @param value The restoreId to set.
+       * @return This builder for chaining.
        */
       public Builder setRestoreId(
           java.lang.String value) {
@@ -5892,6 +6232,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRestoreId() {
         
@@ -5905,6 +6246,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 3;</code>
+       * @param value The bytes for restoreId to set.
+       * @return This builder for chaining.
        */
       public Builder setRestoreIdBytes(
           com.google.protobuf.ByteString value) {
@@ -5925,6 +6268,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -5944,6 +6288,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -5964,6 +6309,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -5981,6 +6328,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -5994,6 +6342,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -6014,6 +6364,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The internalState.
        */
       public java.lang.String getInternalState() {
         java.lang.Object ref = internalState_;
@@ -6033,6 +6384,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The bytes for internalState.
        */
       public com.google.protobuf.ByteString
           getInternalStateBytes() {
@@ -6053,6 +6405,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalState(
           java.lang.String value) {
@@ -6070,6 +6424,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInternalState() {
         
@@ -6083,6 +6438,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The bytes for internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalStateBytes(
           com.google.protobuf.ByteString value) {
@@ -6103,6 +6460,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The overallState.
        */
       public java.lang.String getOverallState() {
         java.lang.Object ref = overallState_;
@@ -6122,6 +6480,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The bytes for overallState.
        */
       public com.google.protobuf.ByteString
           getOverallStateBytes() {
@@ -6142,6 +6501,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallState(
           java.lang.String value) {
@@ -6159,6 +6520,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOverallState() {
         
@@ -6172,6 +6534,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The bytes for overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallStateBytes(
           com.google.protobuf.ByteString value) {
@@ -6192,6 +6556,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The startTimestamp.
        */
       public java.lang.String getStartTimestamp() {
         java.lang.Object ref = startTimestamp_;
@@ -6211,6 +6576,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The bytes for startTimestamp.
        */
       public com.google.protobuf.ByteString
           getStartTimestampBytes() {
@@ -6231,6 +6597,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestamp(
           java.lang.String value) {
@@ -6248,6 +6616,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartTimestamp() {
         
@@ -6261,6 +6630,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The bytes for startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -6281,6 +6652,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The endTimestamp.
        */
       public java.lang.String getEndTimestamp() {
         java.lang.Object ref = endTimestamp_;
@@ -6300,6 +6672,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The bytes for endTimestamp.
        */
       public com.google.protobuf.ByteString
           getEndTimestampBytes() {
@@ -6320,6 +6693,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestamp(
           java.lang.String value) {
@@ -6337,6 +6712,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndTimestamp() {
         
@@ -6350,6 +6726,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The bytes for endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -6370,6 +6748,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The backupLocation.
        */
       public java.lang.String getBackupLocation() {
         java.lang.Object ref = backupLocation_;
@@ -6389,6 +6768,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The bytes for backupLocation.
        */
       public com.google.protobuf.ByteString
           getBackupLocationBytes() {
@@ -6409,6 +6789,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocation(
           java.lang.String value) {
@@ -6426,6 +6808,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupLocation() {
         
@@ -6439,6 +6822,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The bytes for backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -6459,6 +6844,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The failureReason.
        */
       public java.lang.String getFailureReason() {
         java.lang.Object ref = failureReason_;
@@ -6478,6 +6864,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The bytes for failureReason.
        */
       public com.google.protobuf.ByteString
           getFailureReasonBytes() {
@@ -6498,6 +6885,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReason(
           java.lang.String value) {
@@ -6515,6 +6904,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFailureReason() {
         
@@ -6528,6 +6918,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The bytes for failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReasonBytes(
           com.google.protobuf.ByteString value) {
@@ -6543,7 +6935,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6603,6 +6995,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
     java.lang.String getDatalakeName();
     /**
@@ -6611,6 +7004,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
     com.google.protobuf.ByteString
         getDatalakeNameBytes();
@@ -6621,6 +7015,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 2;</code>
+     * @return The backupId.
      */
     java.lang.String getBackupId();
     /**
@@ -6629,6 +7024,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 2;</code>
+     * @return The bytes for backupId.
      */
     com.google.protobuf.ByteString
         getBackupIdBytes();
@@ -6639,6 +7035,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 3;</code>
+     * @return The backupName.
      */
     java.lang.String getBackupName();
     /**
@@ -6647,6 +7044,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 3;</code>
+     * @return The bytes for backupName.
      */
     com.google.protobuf.ByteString
         getBackupNameBytes();
@@ -6659,7 +7057,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.BackupDatalakeStatusRequest}
    */
-  public  static final class BackupDatalakeStatusRequest extends
+  public static final class BackupDatalakeStatusRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.BackupDatalakeStatusRequest)
       BackupDatalakeStatusRequestOrBuilder {
@@ -6675,6 +7073,13 @@ public final class datalakeDRProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupDatalakeStatusRequest();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -6687,7 +7092,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6717,7 +7121,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6756,7 +7160,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
+    @java.lang.Override
     public java.lang.String getDatalakeName() {
       java.lang.Object ref = datalakeName_;
       if (ref instanceof java.lang.String) {
@@ -6775,7 +7181,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDatalakeNameBytes() {
       java.lang.Object ref = datalakeName_;
@@ -6798,7 +7206,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 2;</code>
+     * @return The backupId.
      */
+    @java.lang.Override
     public java.lang.String getBackupId() {
       java.lang.Object ref = backupId_;
       if (ref instanceof java.lang.String) {
@@ -6817,7 +7227,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 2;</code>
+     * @return The bytes for backupId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupIdBytes() {
       java.lang.Object ref = backupId_;
@@ -6840,7 +7252,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 3;</code>
+     * @return The backupName.
      */
+    @java.lang.Override
     public java.lang.String getBackupName() {
       java.lang.Object ref = backupName_;
       if (ref instanceof java.lang.String) {
@@ -6859,7 +7273,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 3;</code>
+     * @return The bytes for backupName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupNameBytes() {
       java.lang.Object ref = backupName_;
@@ -6888,13 +7304,13 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, backupId_);
       }
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, backupName_);
       }
       unknownFields.writeTo(output);
@@ -6906,13 +7322,13 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, backupId_);
       }
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, backupName_);
       }
       size += unknownFields.getSerializedSize();
@@ -6930,15 +7346,14 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest) obj;
 
-      boolean result = true;
-      result = result && getDatalakeName()
-          .equals(other.getDatalakeName());
-      result = result && getBackupId()
-          .equals(other.getBackupId());
-      result = result && getBackupName()
-          .equals(other.getBackupName());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDatalakeName()
+          .equals(other.getDatalakeName())) return false;
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (!getBackupName()
+          .equals(other.getBackupName())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7133,35 +7548,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7223,6 +7638,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The datalakeName.
        */
       public java.lang.String getDatalakeName() {
         java.lang.Object ref = datalakeName_;
@@ -7242,6 +7658,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The bytes for datalakeName.
        */
       public com.google.protobuf.ByteString
           getDatalakeNameBytes() {
@@ -7262,6 +7679,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeName(
           java.lang.String value) {
@@ -7279,6 +7698,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatalakeName() {
         
@@ -7292,6 +7712,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The bytes for datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeNameBytes(
           com.google.protobuf.ByteString value) {
@@ -7312,6 +7734,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 2;</code>
+       * @return The backupId.
        */
       public java.lang.String getBackupId() {
         java.lang.Object ref = backupId_;
@@ -7331,6 +7754,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 2;</code>
+       * @return The bytes for backupId.
        */
       public com.google.protobuf.ByteString
           getBackupIdBytes() {
@@ -7351,6 +7775,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 2;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupId(
           java.lang.String value) {
@@ -7368,6 +7794,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupId() {
         
@@ -7381,6 +7808,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 2;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupIdBytes(
           com.google.protobuf.ByteString value) {
@@ -7401,6 +7830,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 3;</code>
+       * @return The backupName.
        */
       public java.lang.String getBackupName() {
         java.lang.Object ref = backupName_;
@@ -7420,6 +7850,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 3;</code>
+       * @return The bytes for backupName.
        */
       public com.google.protobuf.ByteString
           getBackupNameBytes() {
@@ -7440,6 +7871,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 3;</code>
+       * @param value The backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupName(
           java.lang.String value) {
@@ -7457,6 +7890,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupName() {
         
@@ -7470,6 +7904,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 3;</code>
+       * @param value The bytes for backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupNameBytes(
           com.google.protobuf.ByteString value) {
@@ -7485,7 +7921,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7545,6 +7981,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The backupName.
      */
     java.lang.String getBackupName();
     /**
@@ -7553,6 +7990,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The bytes for backupName.
      */
     com.google.protobuf.ByteString
         getBackupNameBytes();
@@ -7563,6 +8001,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -7571,6 +8010,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -7581,6 +8021,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -7589,6 +8030,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -7599,6 +8041,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The backupId.
      */
     java.lang.String getBackupId();
     /**
@@ -7607,6 +8050,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The bytes for backupId.
      */
     com.google.protobuf.ByteString
         getBackupIdBytes();
@@ -7617,6 +8061,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
     java.lang.String getInternalState();
     /**
@@ -7625,6 +8070,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
     com.google.protobuf.ByteString
         getInternalStateBytes();
@@ -7635,6 +8081,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
     java.lang.String getOverallState();
     /**
@@ -7643,6 +8090,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
     com.google.protobuf.ByteString
         getOverallStateBytes();
@@ -7653,6 +8101,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
     java.lang.String getStartTimestamp();
     /**
@@ -7661,6 +8110,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
     com.google.protobuf.ByteString
         getStartTimestampBytes();
@@ -7671,6 +8121,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
     java.lang.String getEndTimestamp();
     /**
@@ -7679,6 +8130,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
     com.google.protobuf.ByteString
         getEndTimestampBytes();
@@ -7689,6 +8141,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
     java.lang.String getBackupLocation();
     /**
@@ -7697,6 +8150,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
     com.google.protobuf.ByteString
         getBackupLocationBytes();
@@ -7707,6 +8161,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
     java.lang.String getFailureReason();
     /**
@@ -7715,6 +8170,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
@@ -7727,7 +8183,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.BackupDatalakeStatusResponse}
    */
-  public  static final class BackupDatalakeStatusResponse extends
+  public static final class BackupDatalakeStatusResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.BackupDatalakeStatusResponse)
       BackupDatalakeStatusResponseOrBuilder {
@@ -7750,6 +8206,13 @@ public final class datalakeDRProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BackupDatalakeStatusResponse();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -7762,7 +8225,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7834,7 +8296,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7873,7 +8335,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The backupName.
      */
+    @java.lang.Override
     public java.lang.String getBackupName() {
       java.lang.Object ref = backupName_;
       if (ref instanceof java.lang.String) {
@@ -7892,7 +8356,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The bytes for backupName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupNameBytes() {
       java.lang.Object ref = backupName_;
@@ -7915,7 +8381,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -7934,7 +8402,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -7957,7 +8427,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -7976,7 +8448,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -7999,7 +8473,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The backupId.
      */
+    @java.lang.Override
     public java.lang.String getBackupId() {
       java.lang.Object ref = backupId_;
       if (ref instanceof java.lang.String) {
@@ -8018,7 +8494,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The bytes for backupId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupIdBytes() {
       java.lang.Object ref = backupId_;
@@ -8041,7 +8519,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
+    @java.lang.Override
     public java.lang.String getInternalState() {
       java.lang.Object ref = internalState_;
       if (ref instanceof java.lang.String) {
@@ -8060,7 +8540,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getInternalStateBytes() {
       java.lang.Object ref = internalState_;
@@ -8083,7 +8565,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
+    @java.lang.Override
     public java.lang.String getOverallState() {
       java.lang.Object ref = overallState_;
       if (ref instanceof java.lang.String) {
@@ -8102,7 +8586,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOverallStateBytes() {
       java.lang.Object ref = overallState_;
@@ -8125,7 +8611,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getStartTimestamp() {
       java.lang.Object ref = startTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -8144,7 +8632,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStartTimestampBytes() {
       java.lang.Object ref = startTimestamp_;
@@ -8167,7 +8657,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getEndTimestamp() {
       java.lang.Object ref = endTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -8186,7 +8678,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndTimestampBytes() {
       java.lang.Object ref = endTimestamp_;
@@ -8209,7 +8703,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
+    @java.lang.Override
     public java.lang.String getBackupLocation() {
       java.lang.Object ref = backupLocation_;
       if (ref instanceof java.lang.String) {
@@ -8228,7 +8724,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupLocationBytes() {
       java.lang.Object ref = backupLocation_;
@@ -8251,7 +8749,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
+    @java.lang.Override
     public java.lang.String getFailureReason() {
       java.lang.Object ref = failureReason_;
       if (ref instanceof java.lang.String) {
@@ -8270,7 +8770,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFailureReasonBytes() {
       java.lang.Object ref = failureReason_;
@@ -8299,34 +8801,34 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, backupName_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, userCrn_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, backupId_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
       unknownFields.writeTo(output);
@@ -8338,34 +8840,34 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, backupName_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, userCrn_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, backupId_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
       size += unknownFields.getSerializedSize();
@@ -8383,29 +8885,28 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse) obj;
 
-      boolean result = true;
-      result = result && getBackupName()
-          .equals(other.getBackupName());
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && getBackupId()
-          .equals(other.getBackupId());
-      result = result && getInternalState()
-          .equals(other.getInternalState());
-      result = result && getOverallState()
-          .equals(other.getOverallState());
-      result = result && getStartTimestamp()
-          .equals(other.getStartTimestamp());
-      result = result && getEndTimestamp()
-          .equals(other.getEndTimestamp());
-      result = result && getBackupLocation()
-          .equals(other.getBackupLocation());
-      result = result && getFailureReason()
-          .equals(other.getFailureReason());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getBackupName()
+          .equals(other.getBackupName())) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (!getInternalState()
+          .equals(other.getInternalState())) return false;
+      if (!getOverallState()
+          .equals(other.getOverallState())) return false;
+      if (!getStartTimestamp()
+          .equals(other.getStartTimestamp())) return false;
+      if (!getEndTimestamp()
+          .equals(other.getEndTimestamp())) return false;
+      if (!getBackupLocation()
+          .equals(other.getBackupLocation())) return false;
+      if (!getFailureReason()
+          .equals(other.getFailureReason())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8635,35 +9136,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8753,6 +9254,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return The backupName.
        */
       public java.lang.String getBackupName() {
         java.lang.Object ref = backupName_;
@@ -8772,6 +9274,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return The bytes for backupName.
        */
       public com.google.protobuf.ByteString
           getBackupNameBytes() {
@@ -8792,6 +9295,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @param value The backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupName(
           java.lang.String value) {
@@ -8809,6 +9314,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupName() {
         
@@ -8822,6 +9328,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @param value The bytes for backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupNameBytes(
           com.google.protobuf.ByteString value) {
@@ -8842,6 +9350,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -8861,6 +9370,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -8881,6 +9391,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -8898,6 +9410,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -8911,6 +9424,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -8931,6 +9446,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -8950,6 +9466,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -8970,6 +9487,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -8987,6 +9506,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -9000,6 +9520,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -9020,6 +9542,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return The backupId.
        */
       public java.lang.String getBackupId() {
         java.lang.Object ref = backupId_;
@@ -9039,6 +9562,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return The bytes for backupId.
        */
       public com.google.protobuf.ByteString
           getBackupIdBytes() {
@@ -9059,6 +9583,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupId(
           java.lang.String value) {
@@ -9076,6 +9602,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupId() {
         
@@ -9089,6 +9616,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupIdBytes(
           com.google.protobuf.ByteString value) {
@@ -9109,6 +9638,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The internalState.
        */
       public java.lang.String getInternalState() {
         java.lang.Object ref = internalState_;
@@ -9128,6 +9658,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The bytes for internalState.
        */
       public com.google.protobuf.ByteString
           getInternalStateBytes() {
@@ -9148,6 +9679,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalState(
           java.lang.String value) {
@@ -9165,6 +9698,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInternalState() {
         
@@ -9178,6 +9712,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The bytes for internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalStateBytes(
           com.google.protobuf.ByteString value) {
@@ -9198,6 +9734,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The overallState.
        */
       public java.lang.String getOverallState() {
         java.lang.Object ref = overallState_;
@@ -9217,6 +9754,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The bytes for overallState.
        */
       public com.google.protobuf.ByteString
           getOverallStateBytes() {
@@ -9237,6 +9775,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallState(
           java.lang.String value) {
@@ -9254,6 +9794,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOverallState() {
         
@@ -9267,6 +9808,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The bytes for overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallStateBytes(
           com.google.protobuf.ByteString value) {
@@ -9287,6 +9830,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The startTimestamp.
        */
       public java.lang.String getStartTimestamp() {
         java.lang.Object ref = startTimestamp_;
@@ -9306,6 +9850,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The bytes for startTimestamp.
        */
       public com.google.protobuf.ByteString
           getStartTimestampBytes() {
@@ -9326,6 +9871,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestamp(
           java.lang.String value) {
@@ -9343,6 +9890,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartTimestamp() {
         
@@ -9356,6 +9904,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The bytes for startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -9376,6 +9926,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The endTimestamp.
        */
       public java.lang.String getEndTimestamp() {
         java.lang.Object ref = endTimestamp_;
@@ -9395,6 +9946,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The bytes for endTimestamp.
        */
       public com.google.protobuf.ByteString
           getEndTimestampBytes() {
@@ -9415,6 +9967,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestamp(
           java.lang.String value) {
@@ -9432,6 +9986,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndTimestamp() {
         
@@ -9445,6 +10000,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The bytes for endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -9465,6 +10022,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The backupLocation.
        */
       public java.lang.String getBackupLocation() {
         java.lang.Object ref = backupLocation_;
@@ -9484,6 +10042,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The bytes for backupLocation.
        */
       public com.google.protobuf.ByteString
           getBackupLocationBytes() {
@@ -9504,6 +10063,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocation(
           java.lang.String value) {
@@ -9521,6 +10082,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupLocation() {
         
@@ -9534,6 +10096,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The bytes for backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -9554,6 +10118,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The failureReason.
        */
       public java.lang.String getFailureReason() {
         java.lang.Object ref = failureReason_;
@@ -9573,6 +10138,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The bytes for failureReason.
        */
       public com.google.protobuf.ByteString
           getFailureReasonBytes() {
@@ -9593,6 +10159,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReason(
           java.lang.String value) {
@@ -9610,6 +10178,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFailureReason() {
         
@@ -9623,6 +10192,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The bytes for failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReasonBytes(
           com.google.protobuf.ByteString value) {
@@ -9638,7 +10209,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9698,6 +10269,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
     java.lang.String getDatalakeName();
     /**
@@ -9706,6 +10278,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
     com.google.protobuf.ByteString
         getDatalakeNameBytes();
@@ -9716,6 +10289,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The restoreId.
      */
     java.lang.String getRestoreId();
     /**
@@ -9724,6 +10298,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The bytes for restoreId.
      */
     com.google.protobuf.ByteString
         getRestoreIdBytes();
@@ -9736,7 +10311,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.RestoreDatalakeStatusRequest}
    */
-  public  static final class RestoreDatalakeStatusRequest extends
+  public static final class RestoreDatalakeStatusRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.RestoreDatalakeStatusRequest)
       RestoreDatalakeStatusRequestOrBuilder {
@@ -9748,6 +10323,13 @@ public final class datalakeDRProto {
     private RestoreDatalakeStatusRequest() {
       datalakeName_ = "";
       restoreId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RestoreDatalakeStatusRequest();
     }
 
     @java.lang.Override
@@ -9763,7 +10345,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -9787,7 +10368,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9826,7 +10407,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
+    @java.lang.Override
     public java.lang.String getDatalakeName() {
       java.lang.Object ref = datalakeName_;
       if (ref instanceof java.lang.String) {
@@ -9845,7 +10428,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDatalakeNameBytes() {
       java.lang.Object ref = datalakeName_;
@@ -9868,7 +10453,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The restoreId.
      */
+    @java.lang.Override
     public java.lang.String getRestoreId() {
       java.lang.Object ref = restoreId_;
       if (ref instanceof java.lang.String) {
@@ -9887,7 +10474,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The bytes for restoreId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRestoreIdBytes() {
       java.lang.Object ref = restoreId_;
@@ -9916,10 +10505,10 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
       }
-      if (!getRestoreIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, restoreId_);
       }
       unknownFields.writeTo(output);
@@ -9931,10 +10520,10 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
       }
-      if (!getRestoreIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, restoreId_);
       }
       size += unknownFields.getSerializedSize();
@@ -9952,13 +10541,12 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest) obj;
 
-      boolean result = true;
-      result = result && getDatalakeName()
-          .equals(other.getDatalakeName());
-      result = result && getRestoreId()
-          .equals(other.getRestoreId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDatalakeName()
+          .equals(other.getDatalakeName())) return false;
+      if (!getRestoreId()
+          .equals(other.getRestoreId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10148,35 +10736,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10234,6 +10822,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The datalakeName.
        */
       public java.lang.String getDatalakeName() {
         java.lang.Object ref = datalakeName_;
@@ -10253,6 +10842,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The bytes for datalakeName.
        */
       public com.google.protobuf.ByteString
           getDatalakeNameBytes() {
@@ -10273,6 +10863,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeName(
           java.lang.String value) {
@@ -10290,6 +10882,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatalakeName() {
         
@@ -10303,6 +10896,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The bytes for datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeNameBytes(
           com.google.protobuf.ByteString value) {
@@ -10323,6 +10918,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @return The restoreId.
        */
       public java.lang.String getRestoreId() {
         java.lang.Object ref = restoreId_;
@@ -10342,6 +10938,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @return The bytes for restoreId.
        */
       public com.google.protobuf.ByteString
           getRestoreIdBytes() {
@@ -10362,6 +10959,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @param value The restoreId to set.
+       * @return This builder for chaining.
        */
       public Builder setRestoreId(
           java.lang.String value) {
@@ -10379,6 +10978,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRestoreId() {
         
@@ -10392,6 +10992,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @param value The bytes for restoreId to set.
+       * @return This builder for chaining.
        */
       public Builder setRestoreIdBytes(
           com.google.protobuf.ByteString value) {
@@ -10407,7 +11009,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10467,6 +11069,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -10475,6 +11078,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -10485,6 +11089,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The restoreId.
      */
     java.lang.String getRestoreId();
     /**
@@ -10493,6 +11098,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The bytes for restoreId.
      */
     com.google.protobuf.ByteString
         getRestoreIdBytes();
@@ -10503,6 +11109,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The backupId.
      */
     java.lang.String getBackupId();
     /**
@@ -10511,6 +11118,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The bytes for backupId.
      */
     com.google.protobuf.ByteString
         getBackupIdBytes();
@@ -10521,6 +11129,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -10529,6 +11138,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -10539,6 +11149,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
     java.lang.String getInternalState();
     /**
@@ -10547,6 +11158,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
     com.google.protobuf.ByteString
         getInternalStateBytes();
@@ -10557,6 +11169,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
     java.lang.String getOverallState();
     /**
@@ -10565,6 +11178,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
     com.google.protobuf.ByteString
         getOverallStateBytes();
@@ -10575,6 +11189,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
     java.lang.String getStartTimestamp();
     /**
@@ -10583,6 +11198,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
     com.google.protobuf.ByteString
         getStartTimestampBytes();
@@ -10593,6 +11209,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
     java.lang.String getEndTimestamp();
     /**
@@ -10601,6 +11218,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
     com.google.protobuf.ByteString
         getEndTimestampBytes();
@@ -10611,6 +11229,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
     java.lang.String getBackupLocation();
     /**
@@ -10619,6 +11238,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
     com.google.protobuf.ByteString
         getBackupLocationBytes();
@@ -10629,6 +11249,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
     java.lang.String getFailureReason();
     /**
@@ -10637,6 +11258,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
@@ -10649,7 +11271,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.RestoreDatalakeStatusResponse}
    */
-  public  static final class RestoreDatalakeStatusResponse extends
+  public static final class RestoreDatalakeStatusResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.RestoreDatalakeStatusResponse)
       RestoreDatalakeStatusResponseOrBuilder {
@@ -10672,6 +11294,13 @@ public final class datalakeDRProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RestoreDatalakeStatusResponse();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -10684,7 +11313,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -10756,7 +11384,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10795,7 +11423,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -10814,7 +11444,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -10837,7 +11469,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The restoreId.
      */
+    @java.lang.Override
     public java.lang.String getRestoreId() {
       java.lang.Object ref = restoreId_;
       if (ref instanceof java.lang.String) {
@@ -10856,7 +11490,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string restoreId = 2;</code>
+     * @return The bytes for restoreId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRestoreIdBytes() {
       java.lang.Object ref = restoreId_;
@@ -10879,7 +11515,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The backupId.
      */
+    @java.lang.Override
     public java.lang.String getBackupId() {
       java.lang.Object ref = backupId_;
       if (ref instanceof java.lang.String) {
@@ -10898,7 +11536,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 3;</code>
+     * @return The bytes for backupId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupIdBytes() {
       java.lang.Object ref = backupId_;
@@ -10921,7 +11561,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -10940,7 +11582,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 4;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -10963,7 +11607,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
+    @java.lang.Override
     public java.lang.String getInternalState() {
       java.lang.Object ref = internalState_;
       if (ref instanceof java.lang.String) {
@@ -10982,7 +11628,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getInternalStateBytes() {
       java.lang.Object ref = internalState_;
@@ -11005,7 +11653,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
+    @java.lang.Override
     public java.lang.String getOverallState() {
       java.lang.Object ref = overallState_;
       if (ref instanceof java.lang.String) {
@@ -11024,7 +11674,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOverallStateBytes() {
       java.lang.Object ref = overallState_;
@@ -11047,7 +11699,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getStartTimestamp() {
       java.lang.Object ref = startTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -11066,7 +11720,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStartTimestampBytes() {
       java.lang.Object ref = startTimestamp_;
@@ -11089,7 +11745,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getEndTimestamp() {
       java.lang.Object ref = endTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -11108,7 +11766,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndTimestampBytes() {
       java.lang.Object ref = endTimestamp_;
@@ -11131,7 +11791,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
+    @java.lang.Override
     public java.lang.String getBackupLocation() {
       java.lang.Object ref = backupLocation_;
       if (ref instanceof java.lang.String) {
@@ -11150,7 +11812,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupLocationBytes() {
       java.lang.Object ref = backupLocation_;
@@ -11173,7 +11837,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
+    @java.lang.Override
     public java.lang.String getFailureReason() {
       java.lang.Object ref = failureReason_;
       if (ref instanceof java.lang.String) {
@@ -11192,7 +11858,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFailureReasonBytes() {
       java.lang.Object ref = failureReason_;
@@ -11221,34 +11889,34 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getRestoreIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, restoreId_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, backupId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, userCrn_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
       unknownFields.writeTo(output);
@@ -11260,34 +11928,34 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getRestoreIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(restoreId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, restoreId_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, backupId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, userCrn_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
       size += unknownFields.getSerializedSize();
@@ -11305,29 +11973,28 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getRestoreId()
-          .equals(other.getRestoreId());
-      result = result && getBackupId()
-          .equals(other.getBackupId());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && getInternalState()
-          .equals(other.getInternalState());
-      result = result && getOverallState()
-          .equals(other.getOverallState());
-      result = result && getStartTimestamp()
-          .equals(other.getStartTimestamp());
-      result = result && getEndTimestamp()
-          .equals(other.getEndTimestamp());
-      result = result && getBackupLocation()
-          .equals(other.getBackupLocation());
-      result = result && getFailureReason()
-          .equals(other.getFailureReason());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getRestoreId()
+          .equals(other.getRestoreId())) return false;
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!getInternalState()
+          .equals(other.getInternalState())) return false;
+      if (!getOverallState()
+          .equals(other.getOverallState())) return false;
+      if (!getStartTimestamp()
+          .equals(other.getStartTimestamp())) return false;
+      if (!getEndTimestamp()
+          .equals(other.getEndTimestamp())) return false;
+      if (!getBackupLocation()
+          .equals(other.getBackupLocation())) return false;
+      if (!getFailureReason()
+          .equals(other.getFailureReason())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -11557,35 +12224,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11675,6 +12342,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -11694,6 +12362,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -11714,6 +12383,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -11731,6 +12402,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -11744,6 +12416,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -11764,6 +12438,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @return The restoreId.
        */
       public java.lang.String getRestoreId() {
         java.lang.Object ref = restoreId_;
@@ -11783,6 +12458,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @return The bytes for restoreId.
        */
       public com.google.protobuf.ByteString
           getRestoreIdBytes() {
@@ -11803,6 +12479,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @param value The restoreId to set.
+       * @return This builder for chaining.
        */
       public Builder setRestoreId(
           java.lang.String value) {
@@ -11820,6 +12498,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRestoreId() {
         
@@ -11833,6 +12512,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string restoreId = 2;</code>
+       * @param value The bytes for restoreId to set.
+       * @return This builder for chaining.
        */
       public Builder setRestoreIdBytes(
           com.google.protobuf.ByteString value) {
@@ -11853,6 +12534,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @return The backupId.
        */
       public java.lang.String getBackupId() {
         java.lang.Object ref = backupId_;
@@ -11872,6 +12554,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @return The bytes for backupId.
        */
       public com.google.protobuf.ByteString
           getBackupIdBytes() {
@@ -11892,6 +12575,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupId(
           java.lang.String value) {
@@ -11909,6 +12594,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupId() {
         
@@ -11922,6 +12608,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 3;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupIdBytes(
           com.google.protobuf.ByteString value) {
@@ -11942,6 +12630,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -11961,6 +12650,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -11981,6 +12671,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -11998,6 +12690,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -12011,6 +12704,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 4;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -12031,6 +12726,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The internalState.
        */
       public java.lang.String getInternalState() {
         java.lang.Object ref = internalState_;
@@ -12050,6 +12746,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The bytes for internalState.
        */
       public com.google.protobuf.ByteString
           getInternalStateBytes() {
@@ -12070,6 +12767,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalState(
           java.lang.String value) {
@@ -12087,6 +12786,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInternalState() {
         
@@ -12100,6 +12800,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The bytes for internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalStateBytes(
           com.google.protobuf.ByteString value) {
@@ -12120,6 +12822,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The overallState.
        */
       public java.lang.String getOverallState() {
         java.lang.Object ref = overallState_;
@@ -12139,6 +12842,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The bytes for overallState.
        */
       public com.google.protobuf.ByteString
           getOverallStateBytes() {
@@ -12159,6 +12863,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallState(
           java.lang.String value) {
@@ -12176,6 +12882,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOverallState() {
         
@@ -12189,6 +12896,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The bytes for overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallStateBytes(
           com.google.protobuf.ByteString value) {
@@ -12209,6 +12918,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The startTimestamp.
        */
       public java.lang.String getStartTimestamp() {
         java.lang.Object ref = startTimestamp_;
@@ -12228,6 +12938,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The bytes for startTimestamp.
        */
       public com.google.protobuf.ByteString
           getStartTimestampBytes() {
@@ -12248,6 +12959,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestamp(
           java.lang.String value) {
@@ -12265,6 +12978,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartTimestamp() {
         
@@ -12278,6 +12992,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The bytes for startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -12298,6 +13014,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The endTimestamp.
        */
       public java.lang.String getEndTimestamp() {
         java.lang.Object ref = endTimestamp_;
@@ -12317,6 +13034,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The bytes for endTimestamp.
        */
       public com.google.protobuf.ByteString
           getEndTimestampBytes() {
@@ -12337,6 +13055,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestamp(
           java.lang.String value) {
@@ -12354,6 +13074,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndTimestamp() {
         
@@ -12367,6 +13088,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The bytes for endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -12387,6 +13110,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The backupLocation.
        */
       public java.lang.String getBackupLocation() {
         java.lang.Object ref = backupLocation_;
@@ -12406,6 +13130,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The bytes for backupLocation.
        */
       public com.google.protobuf.ByteString
           getBackupLocationBytes() {
@@ -12426,6 +13151,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocation(
           java.lang.String value) {
@@ -12443,6 +13170,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupLocation() {
         
@@ -12456,6 +13184,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The bytes for backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -12476,6 +13206,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The failureReason.
        */
       public java.lang.String getFailureReason() {
         java.lang.Object ref = failureReason_;
@@ -12495,6 +13226,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The bytes for failureReason.
        */
       public com.google.protobuf.ByteString
           getFailureReasonBytes() {
@@ -12515,6 +13247,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReason(
           java.lang.String value) {
@@ -12532,6 +13266,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFailureReason() {
         
@@ -12545,6 +13280,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The bytes for failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReasonBytes(
           com.google.protobuf.ByteString value) {
@@ -12560,7 +13297,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12620,6 +13357,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The backupName.
      */
     java.lang.String getBackupName();
     /**
@@ -12628,6 +13366,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The bytes for backupName.
      */
     com.google.protobuf.ByteString
         getBackupNameBytes();
@@ -12638,6 +13377,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -12646,6 +13386,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -12656,6 +13397,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -12664,6 +13406,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -12674,6 +13417,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The backupId.
      */
     java.lang.String getBackupId();
     /**
@@ -12682,6 +13426,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The bytes for backupId.
      */
     com.google.protobuf.ByteString
         getBackupIdBytes();
@@ -12692,6 +13437,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
     java.lang.String getInternalState();
     /**
@@ -12700,6 +13446,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
     com.google.protobuf.ByteString
         getInternalStateBytes();
@@ -12710,6 +13457,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
     java.lang.String getOverallState();
     /**
@@ -12718,6 +13466,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
     com.google.protobuf.ByteString
         getOverallStateBytes();
@@ -12728,6 +13477,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
     java.lang.String getStartTimestamp();
     /**
@@ -12736,6 +13486,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
     com.google.protobuf.ByteString
         getStartTimestampBytes();
@@ -12746,6 +13497,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
     java.lang.String getEndTimestamp();
     /**
@@ -12754,6 +13506,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
     com.google.protobuf.ByteString
         getEndTimestampBytes();
@@ -12764,6 +13517,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
     java.lang.String getBackupLocation();
     /**
@@ -12772,6 +13526,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
     com.google.protobuf.ByteString
         getBackupLocationBytes();
@@ -12782,6 +13537,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
     java.lang.String getFailureReason();
     /**
@@ -12790,6 +13546,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
     com.google.protobuf.ByteString
         getFailureReasonBytes();
@@ -12802,7 +13559,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.DatalakeBackupInfo}
    */
-  public  static final class DatalakeBackupInfo extends
+  public static final class DatalakeBackupInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.DatalakeBackupInfo)
       DatalakeBackupInfoOrBuilder {
@@ -12825,6 +13582,13 @@ public final class datalakeDRProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DatalakeBackupInfo();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -12837,7 +13601,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -12909,7 +13672,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -12948,7 +13711,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The backupName.
      */
+    @java.lang.Override
     public java.lang.String getBackupName() {
       java.lang.Object ref = backupName_;
       if (ref instanceof java.lang.String) {
@@ -12967,7 +13732,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupName = 1;</code>
+     * @return The bytes for backupName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupNameBytes() {
       java.lang.Object ref = backupName_;
@@ -12990,7 +13757,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -13009,7 +13778,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -13032,7 +13803,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -13051,7 +13824,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string userCrn = 3;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -13074,7 +13849,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The backupId.
      */
+    @java.lang.Override
     public java.lang.String getBackupId() {
       java.lang.Object ref = backupId_;
       if (ref instanceof java.lang.String) {
@@ -13093,7 +13870,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupId = 4;</code>
+     * @return The bytes for backupId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupIdBytes() {
       java.lang.Object ref = backupId_;
@@ -13116,7 +13895,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The internalState.
      */
+    @java.lang.Override
     public java.lang.String getInternalState() {
       java.lang.Object ref = internalState_;
       if (ref instanceof java.lang.String) {
@@ -13135,7 +13916,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string internalState = 5;</code>
+     * @return The bytes for internalState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getInternalStateBytes() {
       java.lang.Object ref = internalState_;
@@ -13158,7 +13941,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The overallState.
      */
+    @java.lang.Override
     public java.lang.String getOverallState() {
       java.lang.Object ref = overallState_;
       if (ref instanceof java.lang.String) {
@@ -13177,7 +13962,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string overallState = 6;</code>
+     * @return The bytes for overallState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOverallStateBytes() {
       java.lang.Object ref = overallState_;
@@ -13200,7 +13987,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The startTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getStartTimestamp() {
       java.lang.Object ref = startTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -13219,7 +14008,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string startTimestamp = 7;</code>
+     * @return The bytes for startTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStartTimestampBytes() {
       java.lang.Object ref = startTimestamp_;
@@ -13242,7 +14033,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The endTimestamp.
      */
+    @java.lang.Override
     public java.lang.String getEndTimestamp() {
       java.lang.Object ref = endTimestamp_;
       if (ref instanceof java.lang.String) {
@@ -13261,7 +14054,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string endTimestamp = 8;</code>
+     * @return The bytes for endTimestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndTimestampBytes() {
       java.lang.Object ref = endTimestamp_;
@@ -13284,7 +14079,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The backupLocation.
      */
+    @java.lang.Override
     public java.lang.String getBackupLocation() {
       java.lang.Object ref = backupLocation_;
       if (ref instanceof java.lang.String) {
@@ -13303,7 +14100,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string backupLocation = 9;</code>
+     * @return The bytes for backupLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBackupLocationBytes() {
       java.lang.Object ref = backupLocation_;
@@ -13326,7 +14125,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The failureReason.
      */
+    @java.lang.Override
     public java.lang.String getFailureReason() {
       java.lang.Object ref = failureReason_;
       if (ref instanceof java.lang.String) {
@@ -13345,7 +14146,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string failureReason = 10;</code>
+     * @return The bytes for failureReason.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFailureReasonBytes() {
       java.lang.Object ref = failureReason_;
@@ -13374,34 +14177,34 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, backupName_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, userCrn_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, backupId_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, failureReason_);
       }
       unknownFields.writeTo(output);
@@ -13413,34 +14216,34 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getBackupNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, backupName_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, userCrn_);
       }
-      if (!getBackupIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, backupId_);
       }
-      if (!getInternalStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(internalState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, internalState_);
       }
-      if (!getOverallStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(overallState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, overallState_);
       }
-      if (!getStartTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(startTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, startTimestamp_);
       }
-      if (!getEndTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endTimestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, endTimestamp_);
       }
-      if (!getBackupLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(backupLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, backupLocation_);
       }
-      if (!getFailureReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(failureReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, failureReason_);
       }
       size += unknownFields.getSerializedSize();
@@ -13458,29 +14261,28 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo) obj;
 
-      boolean result = true;
-      result = result && getBackupName()
-          .equals(other.getBackupName());
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && getBackupId()
-          .equals(other.getBackupId());
-      result = result && getInternalState()
-          .equals(other.getInternalState());
-      result = result && getOverallState()
-          .equals(other.getOverallState());
-      result = result && getStartTimestamp()
-          .equals(other.getStartTimestamp());
-      result = result && getEndTimestamp()
-          .equals(other.getEndTimestamp());
-      result = result && getBackupLocation()
-          .equals(other.getBackupLocation());
-      result = result && getFailureReason()
-          .equals(other.getFailureReason());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getBackupName()
+          .equals(other.getBackupName())) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!getBackupId()
+          .equals(other.getBackupId())) return false;
+      if (!getInternalState()
+          .equals(other.getInternalState())) return false;
+      if (!getOverallState()
+          .equals(other.getOverallState())) return false;
+      if (!getStartTimestamp()
+          .equals(other.getStartTimestamp())) return false;
+      if (!getEndTimestamp()
+          .equals(other.getEndTimestamp())) return false;
+      if (!getBackupLocation()
+          .equals(other.getBackupLocation())) return false;
+      if (!getFailureReason()
+          .equals(other.getFailureReason())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -13710,35 +14512,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13828,6 +14630,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return The backupName.
        */
       public java.lang.String getBackupName() {
         java.lang.Object ref = backupName_;
@@ -13847,6 +14650,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return The bytes for backupName.
        */
       public com.google.protobuf.ByteString
           getBackupNameBytes() {
@@ -13867,6 +14671,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @param value The backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupName(
           java.lang.String value) {
@@ -13884,6 +14690,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupName() {
         
@@ -13897,6 +14704,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupName = 1;</code>
+       * @param value The bytes for backupName to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupNameBytes(
           com.google.protobuf.ByteString value) {
@@ -13917,6 +14726,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -13936,6 +14746,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -13956,6 +14767,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -13973,6 +14786,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -13986,6 +14800,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string accountId = 2;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -14006,6 +14822,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -14025,6 +14842,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -14045,6 +14863,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -14062,6 +14882,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -14075,6 +14896,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string userCrn = 3;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -14095,6 +14918,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return The backupId.
        */
       public java.lang.String getBackupId() {
         java.lang.Object ref = backupId_;
@@ -14114,6 +14938,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return The bytes for backupId.
        */
       public com.google.protobuf.ByteString
           getBackupIdBytes() {
@@ -14134,6 +14959,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @param value The backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupId(
           java.lang.String value) {
@@ -14151,6 +14978,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupId() {
         
@@ -14164,6 +14992,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupId = 4;</code>
+       * @param value The bytes for backupId to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupIdBytes(
           com.google.protobuf.ByteString value) {
@@ -14184,6 +15014,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The internalState.
        */
       public java.lang.String getInternalState() {
         java.lang.Object ref = internalState_;
@@ -14203,6 +15034,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return The bytes for internalState.
        */
       public com.google.protobuf.ByteString
           getInternalStateBytes() {
@@ -14223,6 +15055,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalState(
           java.lang.String value) {
@@ -14240,6 +15074,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInternalState() {
         
@@ -14253,6 +15088,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string internalState = 5;</code>
+       * @param value The bytes for internalState to set.
+       * @return This builder for chaining.
        */
       public Builder setInternalStateBytes(
           com.google.protobuf.ByteString value) {
@@ -14273,6 +15110,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The overallState.
        */
       public java.lang.String getOverallState() {
         java.lang.Object ref = overallState_;
@@ -14292,6 +15130,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return The bytes for overallState.
        */
       public com.google.protobuf.ByteString
           getOverallStateBytes() {
@@ -14312,6 +15151,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallState(
           java.lang.String value) {
@@ -14329,6 +15170,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOverallState() {
         
@@ -14342,6 +15184,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string overallState = 6;</code>
+       * @param value The bytes for overallState to set.
+       * @return This builder for chaining.
        */
       public Builder setOverallStateBytes(
           com.google.protobuf.ByteString value) {
@@ -14362,6 +15206,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The startTimestamp.
        */
       public java.lang.String getStartTimestamp() {
         java.lang.Object ref = startTimestamp_;
@@ -14381,6 +15226,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return The bytes for startTimestamp.
        */
       public com.google.protobuf.ByteString
           getStartTimestampBytes() {
@@ -14401,6 +15247,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestamp(
           java.lang.String value) {
@@ -14418,6 +15266,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartTimestamp() {
         
@@ -14431,6 +15280,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string startTimestamp = 7;</code>
+       * @param value The bytes for startTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setStartTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -14451,6 +15302,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The endTimestamp.
        */
       public java.lang.String getEndTimestamp() {
         java.lang.Object ref = endTimestamp_;
@@ -14470,6 +15322,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return The bytes for endTimestamp.
        */
       public com.google.protobuf.ByteString
           getEndTimestampBytes() {
@@ -14490,6 +15343,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestamp(
           java.lang.String value) {
@@ -14507,6 +15362,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndTimestamp() {
         
@@ -14520,6 +15376,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string endTimestamp = 8;</code>
+       * @param value The bytes for endTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setEndTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -14540,6 +15398,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The backupLocation.
        */
       public java.lang.String getBackupLocation() {
         java.lang.Object ref = backupLocation_;
@@ -14559,6 +15418,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return The bytes for backupLocation.
        */
       public com.google.protobuf.ByteString
           getBackupLocationBytes() {
@@ -14579,6 +15439,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocation(
           java.lang.String value) {
@@ -14596,6 +15458,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBackupLocation() {
         
@@ -14609,6 +15472,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string backupLocation = 9;</code>
+       * @param value The bytes for backupLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setBackupLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -14629,6 +15494,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The failureReason.
        */
       public java.lang.String getFailureReason() {
         java.lang.Object ref = failureReason_;
@@ -14648,6 +15514,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return The bytes for failureReason.
        */
       public com.google.protobuf.ByteString
           getFailureReasonBytes() {
@@ -14668,6 +15535,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReason(
           java.lang.String value) {
@@ -14685,6 +15554,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFailureReason() {
         
@@ -14698,6 +15568,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string failureReason = 10;</code>
+       * @param value The bytes for failureReason to set.
+       * @return This builder for chaining.
        */
       public Builder setFailureReasonBytes(
           com.google.protobuf.ByteString value) {
@@ -14713,7 +15585,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -14773,6 +15645,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
     java.lang.String getDatalakeName();
     /**
@@ -14781,6 +15654,7 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
     com.google.protobuf.ByteString
         getDatalakeNameBytes();
@@ -14793,7 +15667,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.ListDatalakeBackupRequest}
    */
-  public  static final class ListDatalakeBackupRequest extends
+  public static final class ListDatalakeBackupRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.ListDatalakeBackupRequest)
       ListDatalakeBackupRequestOrBuilder {
@@ -14804,6 +15678,13 @@ public final class datalakeDRProto {
     }
     private ListDatalakeBackupRequest() {
       datalakeName_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDatalakeBackupRequest();
     }
 
     @java.lang.Override
@@ -14819,7 +15700,6 @@ public final class datalakeDRProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -14837,7 +15717,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -14876,7 +15756,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The datalakeName.
      */
+    @java.lang.Override
     public java.lang.String getDatalakeName() {
       java.lang.Object ref = datalakeName_;
       if (ref instanceof java.lang.String) {
@@ -14895,7 +15777,9 @@ public final class datalakeDRProto {
      * </pre>
      *
      * <code>string datalakeName = 1;</code>
+     * @return The bytes for datalakeName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDatalakeNameBytes() {
       java.lang.Object ref = datalakeName_;
@@ -14924,7 +15808,7 @@ public final class datalakeDRProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, datalakeName_);
       }
       unknownFields.writeTo(output);
@@ -14936,7 +15820,7 @@ public final class datalakeDRProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getDatalakeNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(datalakeName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, datalakeName_);
       }
       size += unknownFields.getSerializedSize();
@@ -14954,11 +15838,10 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest) obj;
 
-      boolean result = true;
-      result = result && getDatalakeName()
-          .equals(other.getDatalakeName());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDatalakeName()
+          .equals(other.getDatalakeName())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -15143,35 +16026,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -15225,6 +16108,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The datalakeName.
        */
       public java.lang.String getDatalakeName() {
         java.lang.Object ref = datalakeName_;
@@ -15244,6 +16128,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return The bytes for datalakeName.
        */
       public com.google.protobuf.ByteString
           getDatalakeNameBytes() {
@@ -15264,6 +16149,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeName(
           java.lang.String value) {
@@ -15281,6 +16168,7 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatalakeName() {
         
@@ -15294,6 +16182,8 @@ public final class datalakeDRProto {
        * </pre>
        *
        * <code>string datalakeName = 1;</code>
+       * @param value The bytes for datalakeName to set.
+       * @return This builder for chaining.
        */
       public Builder setDatalakeNameBytes(
           com.google.protobuf.ByteString value) {
@@ -15309,7 +16199,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -15410,7 +16300,7 @@ public final class datalakeDRProto {
    *
    * Protobuf type {@code datalakedr.ListDatalakeBackupResponse}
    */
-  public  static final class ListDatalakeBackupResponse extends
+  public static final class ListDatalakeBackupResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:datalakedr.ListDatalakeBackupResponse)
       ListDatalakeBackupResponseOrBuilder {
@@ -15421,6 +16311,13 @@ public final class datalakeDRProto {
     }
     private ListDatalakeBackupResponse() {
       datalakeInfo_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListDatalakeBackupResponse();
     }
 
     @java.lang.Override
@@ -15448,7 +16345,7 @@ public final class datalakeDRProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 datalakeInfo_ = new java.util.ArrayList<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -15457,7 +16354,7 @@ public final class datalakeDRProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -15471,7 +16368,7 @@ public final class datalakeDRProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           datalakeInfo_ = java.util.Collections.unmodifiableList(datalakeInfo_);
         }
         this.unknownFields = unknownFields.build();
@@ -15499,6 +16396,7 @@ public final class datalakeDRProto {
      *
      * <code>repeated .datalakedr.DatalakeBackupInfo datalake_info = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo> getDatalakeInfoList() {
       return datalakeInfo_;
     }
@@ -15508,6 +16406,7 @@ public final class datalakeDRProto {
      *
      * <code>repeated .datalakedr.DatalakeBackupInfo datalake_info = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfoOrBuilder> 
         getDatalakeInfoOrBuilderList() {
       return datalakeInfo_;
@@ -15518,6 +16417,7 @@ public final class datalakeDRProto {
      *
      * <code>repeated .datalakedr.DatalakeBackupInfo datalake_info = 1;</code>
      */
+    @java.lang.Override
     public int getDatalakeInfoCount() {
       return datalakeInfo_.size();
     }
@@ -15527,6 +16427,7 @@ public final class datalakeDRProto {
      *
      * <code>repeated .datalakedr.DatalakeBackupInfo datalake_info = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo getDatalakeInfo(int index) {
       return datalakeInfo_.get(index);
     }
@@ -15536,6 +16437,7 @@ public final class datalakeDRProto {
      *
      * <code>repeated .datalakedr.DatalakeBackupInfo datalake_info = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfoOrBuilder getDatalakeInfoOrBuilder(
         int index) {
       return datalakeInfo_.get(index);
@@ -15586,11 +16488,10 @@ public final class datalakeDRProto {
       }
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse other = (com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse) obj;
 
-      boolean result = true;
-      result = result && getDatalakeInfoList()
-          .equals(other.getDatalakeInfoList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDatalakeInfoList()
+          .equals(other.getDatalakeInfoList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -15777,7 +16678,7 @@ public final class datalakeDRProto {
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse result = new com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse(this);
         int from_bitField0_ = bitField0_;
         if (datalakeInfoBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             datalakeInfo_ = java.util.Collections.unmodifiableList(datalakeInfo_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -15791,35 +16692,35 @@ public final class datalakeDRProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -15892,7 +16793,7 @@ public final class datalakeDRProto {
       private java.util.List<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo> datalakeInfo_ =
         java.util.Collections.emptyList();
       private void ensureDatalakeInfoIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           datalakeInfo_ = new java.util.ArrayList<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo>(datalakeInfo_);
           bitField0_ |= 0x00000001;
          }
@@ -16175,7 +17076,7 @@ public final class datalakeDRProto {
           datalakeInfoBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfo.Builder, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.DatalakeBackupInfoOrBuilder>(
                   datalakeInfo_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           datalakeInfo_ = null;
@@ -16185,7 +17086,7 @@ public final class datalakeDRProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -16363,19 +17264,11 @@ public final class datalakeDRProto {
       "com.cloudera.thunderhead.service.datalak" +
       "edrB\017datalakeDRProtob\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
-        }, assigner);
+        });
     internal_static_datalakedr_BackupDatalakeRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_datalakedr_BackupDatalakeRequest_fieldAccessorTable = new

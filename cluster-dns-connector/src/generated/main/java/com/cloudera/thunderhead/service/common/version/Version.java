@@ -21,7 +21,7 @@ public final class Version {
   /**
    * Protobuf type {@code version.VersionRequest}
    */
-  public  static final class VersionRequest extends
+  public static final class VersionRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:version.VersionRequest)
       VersionRequestOrBuilder {
@@ -31,6 +31,13 @@ public final class Version {
       super(builder);
     }
     private VersionRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VersionRequest();
     }
 
     @java.lang.Override
@@ -57,7 +64,7 @@ public final class Version {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -126,9 +133,8 @@ public final class Version {
       }
       com.cloudera.thunderhead.service.common.version.Version.VersionRequest other = (com.cloudera.thunderhead.service.common.version.Version.VersionRequest) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -303,35 +309,35 @@ public final class Version {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -376,7 +382,7 @@ public final class Version {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -432,80 +438,96 @@ public final class Version {
 
     /**
      * <code>string name = 1;</code>
+     * @return The name.
      */
     java.lang.String getName();
     /**
      * <code>string name = 1;</code>
+     * @return The bytes for name.
      */
     com.google.protobuf.ByteString
         getNameBytes();
 
     /**
      * <code>string version = 2;</code>
+     * @return The version.
      */
     java.lang.String getVersion();
     /**
      * <code>string version = 2;</code>
+     * @return The bytes for version.
      */
     com.google.protobuf.ByteString
         getVersionBytes();
 
     /**
      * <code>string commit = 3;</code>
+     * @return The commit.
      */
     java.lang.String getCommit();
     /**
      * <code>string commit = 3;</code>
+     * @return The bytes for commit.
      */
     com.google.protobuf.ByteString
         getCommitBytes();
 
     /**
      * <code>string timestamp = 4;</code>
+     * @return The timestamp.
      */
     java.lang.String getTimestamp();
     /**
      * <code>string timestamp = 4;</code>
+     * @return The bytes for timestamp.
      */
     com.google.protobuf.ByteString
         getTimestampBytes();
 
     /**
      * <code>string buildNumber = 5;</code>
+     * @return The buildNumber.
      */
     java.lang.String getBuildNumber();
     /**
      * <code>string buildNumber = 5;</code>
+     * @return The bytes for buildNumber.
      */
     com.google.protobuf.ByteString
         getBuildNumberBytes();
 
     /**
      * <code>string host = 6;</code>
+     * @return The host.
      */
     java.lang.String getHost();
     /**
      * <code>string host = 6;</code>
+     * @return The bytes for host.
      */
     com.google.protobuf.ByteString
         getHostBytes();
 
     /**
      * <code>string user = 7;</code>
+     * @return The user.
      */
     java.lang.String getUser();
     /**
      * <code>string user = 7;</code>
+     * @return The bytes for user.
      */
     com.google.protobuf.ByteString
         getUserBytes();
 
     /**
      * <code>string pokemon = 8;</code>
+     * @return The pokemon.
      */
     java.lang.String getPokemon();
     /**
      * <code>string pokemon = 8;</code>
+     * @return The bytes for pokemon.
      */
     com.google.protobuf.ByteString
         getPokemonBytes();
@@ -513,7 +535,7 @@ public final class Version {
   /**
    * Protobuf type {@code version.VersionResponse}
    */
-  public  static final class VersionResponse extends
+  public static final class VersionResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:version.VersionResponse)
       VersionResponseOrBuilder {
@@ -534,6 +556,13 @@ public final class Version {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VersionResponse();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -546,7 +575,6 @@ public final class Version {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -606,7 +634,7 @@ public final class Version {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -641,7 +669,9 @@ public final class Version {
     private volatile java.lang.Object name_;
     /**
      * <code>string name = 1;</code>
+     * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -656,7 +686,9 @@ public final class Version {
     }
     /**
      * <code>string name = 1;</code>
+     * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -675,7 +707,9 @@ public final class Version {
     private volatile java.lang.Object version_;
     /**
      * <code>string version = 2;</code>
+     * @return The version.
      */
+    @java.lang.Override
     public java.lang.String getVersion() {
       java.lang.Object ref = version_;
       if (ref instanceof java.lang.String) {
@@ -690,7 +724,9 @@ public final class Version {
     }
     /**
      * <code>string version = 2;</code>
+     * @return The bytes for version.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getVersionBytes() {
       java.lang.Object ref = version_;
@@ -709,7 +745,9 @@ public final class Version {
     private volatile java.lang.Object commit_;
     /**
      * <code>string commit = 3;</code>
+     * @return The commit.
      */
+    @java.lang.Override
     public java.lang.String getCommit() {
       java.lang.Object ref = commit_;
       if (ref instanceof java.lang.String) {
@@ -724,7 +762,9 @@ public final class Version {
     }
     /**
      * <code>string commit = 3;</code>
+     * @return The bytes for commit.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCommitBytes() {
       java.lang.Object ref = commit_;
@@ -743,7 +783,9 @@ public final class Version {
     private volatile java.lang.Object timestamp_;
     /**
      * <code>string timestamp = 4;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public java.lang.String getTimestamp() {
       java.lang.Object ref = timestamp_;
       if (ref instanceof java.lang.String) {
@@ -758,7 +800,9 @@ public final class Version {
     }
     /**
      * <code>string timestamp = 4;</code>
+     * @return The bytes for timestamp.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getTimestampBytes() {
       java.lang.Object ref = timestamp_;
@@ -777,7 +821,9 @@ public final class Version {
     private volatile java.lang.Object buildNumber_;
     /**
      * <code>string buildNumber = 5;</code>
+     * @return The buildNumber.
      */
+    @java.lang.Override
     public java.lang.String getBuildNumber() {
       java.lang.Object ref = buildNumber_;
       if (ref instanceof java.lang.String) {
@@ -792,7 +838,9 @@ public final class Version {
     }
     /**
      * <code>string buildNumber = 5;</code>
+     * @return The bytes for buildNumber.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBuildNumberBytes() {
       java.lang.Object ref = buildNumber_;
@@ -811,7 +859,9 @@ public final class Version {
     private volatile java.lang.Object host_;
     /**
      * <code>string host = 6;</code>
+     * @return The host.
      */
+    @java.lang.Override
     public java.lang.String getHost() {
       java.lang.Object ref = host_;
       if (ref instanceof java.lang.String) {
@@ -826,7 +876,9 @@ public final class Version {
     }
     /**
      * <code>string host = 6;</code>
+     * @return The bytes for host.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getHostBytes() {
       java.lang.Object ref = host_;
@@ -845,7 +897,9 @@ public final class Version {
     private volatile java.lang.Object user_;
     /**
      * <code>string user = 7;</code>
+     * @return The user.
      */
+    @java.lang.Override
     public java.lang.String getUser() {
       java.lang.Object ref = user_;
       if (ref instanceof java.lang.String) {
@@ -860,7 +914,9 @@ public final class Version {
     }
     /**
      * <code>string user = 7;</code>
+     * @return The bytes for user.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserBytes() {
       java.lang.Object ref = user_;
@@ -879,7 +935,9 @@ public final class Version {
     private volatile java.lang.Object pokemon_;
     /**
      * <code>string pokemon = 8;</code>
+     * @return The pokemon.
      */
+    @java.lang.Override
     public java.lang.String getPokemon() {
       java.lang.Object ref = pokemon_;
       if (ref instanceof java.lang.String) {
@@ -894,7 +952,9 @@ public final class Version {
     }
     /**
      * <code>string pokemon = 8;</code>
+     * @return The bytes for pokemon.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPokemonBytes() {
       java.lang.Object ref = pokemon_;
@@ -923,28 +983,28 @@ public final class Version {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
       }
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, version_);
       }
-      if (!getCommitBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(commit_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, commit_);
       }
-      if (!getTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(timestamp_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, timestamp_);
       }
-      if (!getBuildNumberBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(buildNumber_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, buildNumber_);
       }
-      if (!getHostBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, host_);
       }
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, user_);
       }
-      if (!getPokemonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pokemon_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, pokemon_);
       }
       unknownFields.writeTo(output);
@@ -956,28 +1016,28 @@ public final class Version {
       if (size != -1) return size;
 
       size = 0;
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
       }
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, version_);
       }
-      if (!getCommitBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(commit_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, commit_);
       }
-      if (!getTimestampBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(timestamp_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, timestamp_);
       }
-      if (!getBuildNumberBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(buildNumber_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, buildNumber_);
       }
-      if (!getHostBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, host_);
       }
-      if (!getUserBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(user_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, user_);
       }
-      if (!getPokemonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pokemon_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, pokemon_);
       }
       size += unknownFields.getSerializedSize();
@@ -995,25 +1055,24 @@ public final class Version {
       }
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse other = (com.cloudera.thunderhead.service.common.version.Version.VersionResponse) obj;
 
-      boolean result = true;
-      result = result && getName()
-          .equals(other.getName());
-      result = result && getVersion()
-          .equals(other.getVersion());
-      result = result && getCommit()
-          .equals(other.getCommit());
-      result = result && getTimestamp()
-          .equals(other.getTimestamp());
-      result = result && getBuildNumber()
-          .equals(other.getBuildNumber());
-      result = result && getHost()
-          .equals(other.getHost());
-      result = result && getUser()
-          .equals(other.getUser());
-      result = result && getPokemon()
-          .equals(other.getPokemon());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (!getCommit()
+          .equals(other.getCommit())) return false;
+      if (!getTimestamp()
+          .equals(other.getTimestamp())) return false;
+      if (!getBuildNumber()
+          .equals(other.getBuildNumber())) return false;
+      if (!getHost()
+          .equals(other.getHost())) return false;
+      if (!getUser()
+          .equals(other.getUser())) return false;
+      if (!getPokemon()
+          .equals(other.getPokemon())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1228,35 +1287,35 @@ public final class Version {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1334,6 +1393,7 @@ public final class Version {
       private java.lang.Object name_ = "";
       /**
        * <code>string name = 1;</code>
+       * @return The name.
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -1349,6 +1409,7 @@ public final class Version {
       }
       /**
        * <code>string name = 1;</code>
+       * @return The bytes for name.
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -1365,6 +1426,8 @@ public final class Version {
       }
       /**
        * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
        */
       public Builder setName(
           java.lang.String value) {
@@ -1378,6 +1441,7 @@ public final class Version {
       }
       /**
        * <code>string name = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearName() {
         
@@ -1387,6 +1451,8 @@ public final class Version {
       }
       /**
        * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -1403,6 +1469,7 @@ public final class Version {
       private java.lang.Object version_ = "";
       /**
        * <code>string version = 2;</code>
+       * @return The version.
        */
       public java.lang.String getVersion() {
         java.lang.Object ref = version_;
@@ -1418,6 +1485,7 @@ public final class Version {
       }
       /**
        * <code>string version = 2;</code>
+       * @return The bytes for version.
        */
       public com.google.protobuf.ByteString
           getVersionBytes() {
@@ -1434,6 +1502,8 @@ public final class Version {
       }
       /**
        * <code>string version = 2;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersion(
           java.lang.String value) {
@@ -1447,6 +1517,7 @@ public final class Version {
       }
       /**
        * <code>string version = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVersion() {
         
@@ -1456,6 +1527,8 @@ public final class Version {
       }
       /**
        * <code>string version = 2;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -1472,6 +1545,7 @@ public final class Version {
       private java.lang.Object commit_ = "";
       /**
        * <code>string commit = 3;</code>
+       * @return The commit.
        */
       public java.lang.String getCommit() {
         java.lang.Object ref = commit_;
@@ -1487,6 +1561,7 @@ public final class Version {
       }
       /**
        * <code>string commit = 3;</code>
+       * @return The bytes for commit.
        */
       public com.google.protobuf.ByteString
           getCommitBytes() {
@@ -1503,6 +1578,8 @@ public final class Version {
       }
       /**
        * <code>string commit = 3;</code>
+       * @param value The commit to set.
+       * @return This builder for chaining.
        */
       public Builder setCommit(
           java.lang.String value) {
@@ -1516,6 +1593,7 @@ public final class Version {
       }
       /**
        * <code>string commit = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCommit() {
         
@@ -1525,6 +1603,8 @@ public final class Version {
       }
       /**
        * <code>string commit = 3;</code>
+       * @param value The bytes for commit to set.
+       * @return This builder for chaining.
        */
       public Builder setCommitBytes(
           com.google.protobuf.ByteString value) {
@@ -1541,6 +1621,7 @@ public final class Version {
       private java.lang.Object timestamp_ = "";
       /**
        * <code>string timestamp = 4;</code>
+       * @return The timestamp.
        */
       public java.lang.String getTimestamp() {
         java.lang.Object ref = timestamp_;
@@ -1556,6 +1637,7 @@ public final class Version {
       }
       /**
        * <code>string timestamp = 4;</code>
+       * @return The bytes for timestamp.
        */
       public com.google.protobuf.ByteString
           getTimestampBytes() {
@@ -1572,6 +1654,8 @@ public final class Version {
       }
       /**
        * <code>string timestamp = 4;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(
           java.lang.String value) {
@@ -1585,6 +1669,7 @@ public final class Version {
       }
       /**
        * <code>string timestamp = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -1594,6 +1679,8 @@ public final class Version {
       }
       /**
        * <code>string timestamp = 4;</code>
+       * @param value The bytes for timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestampBytes(
           com.google.protobuf.ByteString value) {
@@ -1610,6 +1697,7 @@ public final class Version {
       private java.lang.Object buildNumber_ = "";
       /**
        * <code>string buildNumber = 5;</code>
+       * @return The buildNumber.
        */
       public java.lang.String getBuildNumber() {
         java.lang.Object ref = buildNumber_;
@@ -1625,6 +1713,7 @@ public final class Version {
       }
       /**
        * <code>string buildNumber = 5;</code>
+       * @return The bytes for buildNumber.
        */
       public com.google.protobuf.ByteString
           getBuildNumberBytes() {
@@ -1641,6 +1730,8 @@ public final class Version {
       }
       /**
        * <code>string buildNumber = 5;</code>
+       * @param value The buildNumber to set.
+       * @return This builder for chaining.
        */
       public Builder setBuildNumber(
           java.lang.String value) {
@@ -1654,6 +1745,7 @@ public final class Version {
       }
       /**
        * <code>string buildNumber = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBuildNumber() {
         
@@ -1663,6 +1755,8 @@ public final class Version {
       }
       /**
        * <code>string buildNumber = 5;</code>
+       * @param value The bytes for buildNumber to set.
+       * @return This builder for chaining.
        */
       public Builder setBuildNumberBytes(
           com.google.protobuf.ByteString value) {
@@ -1679,6 +1773,7 @@ public final class Version {
       private java.lang.Object host_ = "";
       /**
        * <code>string host = 6;</code>
+       * @return The host.
        */
       public java.lang.String getHost() {
         java.lang.Object ref = host_;
@@ -1694,6 +1789,7 @@ public final class Version {
       }
       /**
        * <code>string host = 6;</code>
+       * @return The bytes for host.
        */
       public com.google.protobuf.ByteString
           getHostBytes() {
@@ -1710,6 +1806,8 @@ public final class Version {
       }
       /**
        * <code>string host = 6;</code>
+       * @param value The host to set.
+       * @return This builder for chaining.
        */
       public Builder setHost(
           java.lang.String value) {
@@ -1723,6 +1821,7 @@ public final class Version {
       }
       /**
        * <code>string host = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHost() {
         
@@ -1732,6 +1831,8 @@ public final class Version {
       }
       /**
        * <code>string host = 6;</code>
+       * @param value The bytes for host to set.
+       * @return This builder for chaining.
        */
       public Builder setHostBytes(
           com.google.protobuf.ByteString value) {
@@ -1748,6 +1849,7 @@ public final class Version {
       private java.lang.Object user_ = "";
       /**
        * <code>string user = 7;</code>
+       * @return The user.
        */
       public java.lang.String getUser() {
         java.lang.Object ref = user_;
@@ -1763,6 +1865,7 @@ public final class Version {
       }
       /**
        * <code>string user = 7;</code>
+       * @return The bytes for user.
        */
       public com.google.protobuf.ByteString
           getUserBytes() {
@@ -1779,6 +1882,8 @@ public final class Version {
       }
       /**
        * <code>string user = 7;</code>
+       * @param value The user to set.
+       * @return This builder for chaining.
        */
       public Builder setUser(
           java.lang.String value) {
@@ -1792,6 +1897,7 @@ public final class Version {
       }
       /**
        * <code>string user = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUser() {
         
@@ -1801,6 +1907,8 @@ public final class Version {
       }
       /**
        * <code>string user = 7;</code>
+       * @param value The bytes for user to set.
+       * @return This builder for chaining.
        */
       public Builder setUserBytes(
           com.google.protobuf.ByteString value) {
@@ -1817,6 +1925,7 @@ public final class Version {
       private java.lang.Object pokemon_ = "";
       /**
        * <code>string pokemon = 8;</code>
+       * @return The pokemon.
        */
       public java.lang.String getPokemon() {
         java.lang.Object ref = pokemon_;
@@ -1832,6 +1941,7 @@ public final class Version {
       }
       /**
        * <code>string pokemon = 8;</code>
+       * @return The bytes for pokemon.
        */
       public com.google.protobuf.ByteString
           getPokemonBytes() {
@@ -1848,6 +1958,8 @@ public final class Version {
       }
       /**
        * <code>string pokemon = 8;</code>
+       * @param value The pokemon to set.
+       * @return This builder for chaining.
        */
       public Builder setPokemon(
           java.lang.String value) {
@@ -1861,6 +1973,7 @@ public final class Version {
       }
       /**
        * <code>string pokemon = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPokemon() {
         
@@ -1870,6 +1983,8 @@ public final class Version {
       }
       /**
        * <code>string pokemon = 8;</code>
+       * @param value The bytes for pokemon to set.
+       * @return This builder for chaining.
        */
       public Builder setPokemonBytes(
           com.google.protobuf.ByteString value) {
@@ -1885,7 +2000,7 @@ public final class Version {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1963,18 +2078,10 @@ public final class Version {
       "rsionB\007VersionZ\031com/cloudera/cdp/protobu" +
       "fb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_version_VersionRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_version_VersionRequest_fieldAccessorTable = new

@@ -27,6 +27,7 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string instanceId = 1;</code>
+     * @return The instanceId.
      */
     java.lang.String getInstanceId();
     /**
@@ -38,6 +39,7 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string instanceId = 1;</code>
+     * @return The bytes for instanceId.
      */
     com.google.protobuf.ByteString
         getInstanceIdBytes();
@@ -48,6 +50,7 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+     * @return The enum numeric value on the wire for endpointService.
      */
     int getEndpointServiceValue();
     /**
@@ -56,13 +59,14 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+     * @return The endpointService.
      */
     com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value getEndpointService();
   }
   /**
    * Protobuf type {@code minasshd.GetServiceEndpointRequest}
    */
-  public  static final class GetServiceEndpointRequest extends
+  public static final class GetServiceEndpointRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:minasshd.GetServiceEndpointRequest)
       GetServiceEndpointRequestOrBuilder {
@@ -74,6 +78,13 @@ public final class MinaSshdProto {
     private GetServiceEndpointRequest() {
       instanceId_ = "";
       endpointService_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetServiceEndpointRequest();
     }
 
     @java.lang.Override
@@ -89,7 +100,6 @@ public final class MinaSshdProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -113,7 +123,7 @@ public final class MinaSshdProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -155,7 +165,9 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string instanceId = 1;</code>
+     * @return The instanceId.
      */
+    @java.lang.Override
     public java.lang.String getInstanceId() {
       java.lang.Object ref = instanceId_;
       if (ref instanceof java.lang.String) {
@@ -177,7 +189,9 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string instanceId = 1;</code>
+     * @return The bytes for instanceId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getInstanceIdBytes() {
       java.lang.Object ref = instanceId_;
@@ -200,8 +214,9 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+     * @return The enum numeric value on the wire for endpointService.
      */
-    public int getEndpointServiceValue() {
+    @java.lang.Override public int getEndpointServiceValue() {
       return endpointService_;
     }
     /**
@@ -210,8 +225,9 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+     * @return The endpointService.
      */
-    public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value getEndpointService() {
+    @java.lang.Override public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value getEndpointService() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value result = com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value.valueOf(endpointService_);
       return result == null ? com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value.UNRECOGNIZED : result;
@@ -231,7 +247,7 @@ public final class MinaSshdProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getInstanceIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, instanceId_);
       }
       if (endpointService_ != com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value.UNSET.getNumber()) {
@@ -246,7 +262,7 @@ public final class MinaSshdProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getInstanceIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(instanceId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, instanceId_);
       }
       if (endpointService_ != com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value.UNSET.getNumber()) {
@@ -268,12 +284,11 @@ public final class MinaSshdProto {
       }
       com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest other = (com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest) obj;
 
-      boolean result = true;
-      result = result && getInstanceId()
-          .equals(other.getInstanceId());
-      result = result && endpointService_ == other.endpointService_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getInstanceId()
+          .equals(other.getInstanceId())) return false;
+      if (endpointService_ != other.endpointService_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -458,35 +473,35 @@ public final class MinaSshdProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -546,6 +561,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string instanceId = 1;</code>
+       * @return The instanceId.
        */
       public java.lang.String getInstanceId() {
         java.lang.Object ref = instanceId_;
@@ -568,6 +584,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string instanceId = 1;</code>
+       * @return The bytes for instanceId.
        */
       public com.google.protobuf.ByteString
           getInstanceIdBytes() {
@@ -591,6 +608,8 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string instanceId = 1;</code>
+       * @param value The instanceId to set.
+       * @return This builder for chaining.
        */
       public Builder setInstanceId(
           java.lang.String value) {
@@ -611,6 +630,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string instanceId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInstanceId() {
         
@@ -627,6 +647,8 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string instanceId = 1;</code>
+       * @param value The bytes for instanceId to set.
+       * @return This builder for chaining.
        */
       public Builder setInstanceIdBytes(
           com.google.protobuf.ByteString value) {
@@ -647,8 +669,9 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+       * @return The enum numeric value on the wire for endpointService.
        */
-      public int getEndpointServiceValue() {
+      @java.lang.Override public int getEndpointServiceValue() {
         return endpointService_;
       }
       /**
@@ -657,8 +680,11 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+       * @param value The enum numeric value on the wire for endpointService to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpointServiceValue(int value) {
+        
         endpointService_ = value;
         onChanged();
         return this;
@@ -669,7 +695,9 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+       * @return The endpointService.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value getEndpointService() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value result = com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value.valueOf(endpointService_);
@@ -681,6 +709,8 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+       * @param value The endpointService to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpointService(com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService.Value value) {
         if (value == null) {
@@ -697,6 +727,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>.minasshd.EndpointService.Value endpointService = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndpointService() {
         
@@ -707,7 +738,7 @@ public final class MinaSshdProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -763,10 +794,12 @@ public final class MinaSshdProto {
 
     /**
      * <code>.minasshd.ServiceEndpoint serviceEndpoint = 1;</code>
+     * @return Whether the serviceEndpoint field is set.
      */
     boolean hasServiceEndpoint();
     /**
      * <code>.minasshd.ServiceEndpoint serviceEndpoint = 1;</code>
+     * @return The serviceEndpoint.
      */
     com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint getServiceEndpoint();
     /**
@@ -777,7 +810,7 @@ public final class MinaSshdProto {
   /**
    * Protobuf type {@code minasshd.GetServiceEndpointResponse}
    */
-  public  static final class GetServiceEndpointResponse extends
+  public static final class GetServiceEndpointResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:minasshd.GetServiceEndpointResponse)
       GetServiceEndpointResponseOrBuilder {
@@ -787,6 +820,13 @@ public final class MinaSshdProto {
       super(builder);
     }
     private GetServiceEndpointResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetServiceEndpointResponse();
     }
 
     @java.lang.Override
@@ -802,7 +842,6 @@ public final class MinaSshdProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -827,7 +866,7 @@ public final class MinaSshdProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -862,19 +901,24 @@ public final class MinaSshdProto {
     private com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint serviceEndpoint_;
     /**
      * <code>.minasshd.ServiceEndpoint serviceEndpoint = 1;</code>
+     * @return Whether the serviceEndpoint field is set.
      */
+    @java.lang.Override
     public boolean hasServiceEndpoint() {
       return serviceEndpoint_ != null;
     }
     /**
      * <code>.minasshd.ServiceEndpoint serviceEndpoint = 1;</code>
+     * @return The serviceEndpoint.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint getServiceEndpoint() {
       return serviceEndpoint_ == null ? com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint.getDefaultInstance() : serviceEndpoint_;
     }
     /**
      * <code>.minasshd.ServiceEndpoint serviceEndpoint = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpointOrBuilder getServiceEndpointOrBuilder() {
       return getServiceEndpoint();
     }
@@ -924,14 +968,13 @@ public final class MinaSshdProto {
       }
       com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse other = (com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse) obj;
 
-      boolean result = true;
-      result = result && (hasServiceEndpoint() == other.hasServiceEndpoint());
+      if (hasServiceEndpoint() != other.hasServiceEndpoint()) return false;
       if (hasServiceEndpoint()) {
-        result = result && getServiceEndpoint()
-            .equals(other.getServiceEndpoint());
+        if (!getServiceEndpoint()
+            .equals(other.getServiceEndpoint())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1121,35 +1164,35 @@ public final class MinaSshdProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1195,17 +1238,19 @@ public final class MinaSshdProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint serviceEndpoint_ = null;
+      private com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint serviceEndpoint_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint, com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint.Builder, com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpointOrBuilder> serviceEndpointBuilder_;
       /**
        * <code>.minasshd.ServiceEndpoint serviceEndpoint = 1;</code>
+       * @return Whether the serviceEndpoint field is set.
        */
       public boolean hasServiceEndpoint() {
         return serviceEndpointBuilder_ != null || serviceEndpoint_ != null;
       }
       /**
        * <code>.minasshd.ServiceEndpoint serviceEndpoint = 1;</code>
+       * @return The serviceEndpoint.
        */
       public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint getServiceEndpoint() {
         if (serviceEndpointBuilder_ == null) {
@@ -1314,7 +1359,7 @@ public final class MinaSshdProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1374,6 +1419,7 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string hostName = 1;</code>
+     * @return The hostName.
      */
     java.lang.String getHostName();
     /**
@@ -1382,6 +1428,7 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string hostName = 1;</code>
+     * @return The bytes for hostName.
      */
     com.google.protobuf.ByteString
         getHostNameBytes();
@@ -1392,13 +1439,14 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>int32 port = 2;</code>
+     * @return The port.
      */
     int getPort();
   }
   /**
    * Protobuf type {@code minasshd.ServiceEndpoint}
    */
-  public  static final class ServiceEndpoint extends
+  public static final class ServiceEndpoint extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:minasshd.ServiceEndpoint)
       ServiceEndpointOrBuilder {
@@ -1409,7 +1457,13 @@ public final class MinaSshdProto {
     }
     private ServiceEndpoint() {
       hostName_ = "";
-      port_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ServiceEndpoint();
     }
 
     @java.lang.Override
@@ -1425,7 +1479,6 @@ public final class MinaSshdProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1448,7 +1501,7 @@ public final class MinaSshdProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1487,7 +1540,9 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string hostName = 1;</code>
+     * @return The hostName.
      */
+    @java.lang.Override
     public java.lang.String getHostName() {
       java.lang.Object ref = hostName_;
       if (ref instanceof java.lang.String) {
@@ -1506,7 +1561,9 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>string hostName = 1;</code>
+     * @return The bytes for hostName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getHostNameBytes() {
       java.lang.Object ref = hostName_;
@@ -1529,7 +1586,9 @@ public final class MinaSshdProto {
      * </pre>
      *
      * <code>int32 port = 2;</code>
+     * @return The port.
      */
+    @java.lang.Override
     public int getPort() {
       return port_;
     }
@@ -1548,7 +1607,7 @@ public final class MinaSshdProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getHostNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, hostName_);
       }
       if (port_ != 0) {
@@ -1563,7 +1622,7 @@ public final class MinaSshdProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getHostNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, hostName_);
       }
       if (port_ != 0) {
@@ -1585,13 +1644,12 @@ public final class MinaSshdProto {
       }
       com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint other = (com.cloudera.thunderhead.service.minasshd.MinaSshdProto.ServiceEndpoint) obj;
 
-      boolean result = true;
-      result = result && getHostName()
-          .equals(other.getHostName());
-      result = result && (getPort()
-          == other.getPort());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getHostName()
+          .equals(other.getHostName())) return false;
+      if (getPort()
+          != other.getPort()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1776,35 +1834,35 @@ public final class MinaSshdProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1861,6 +1919,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string hostName = 1;</code>
+       * @return The hostName.
        */
       public java.lang.String getHostName() {
         java.lang.Object ref = hostName_;
@@ -1880,6 +1939,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string hostName = 1;</code>
+       * @return The bytes for hostName.
        */
       public com.google.protobuf.ByteString
           getHostNameBytes() {
@@ -1900,6 +1960,8 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string hostName = 1;</code>
+       * @param value The hostName to set.
+       * @return This builder for chaining.
        */
       public Builder setHostName(
           java.lang.String value) {
@@ -1917,6 +1979,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string hostName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHostName() {
         
@@ -1930,6 +1993,8 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>string hostName = 1;</code>
+       * @param value The bytes for hostName to set.
+       * @return This builder for chaining.
        */
       public Builder setHostNameBytes(
           com.google.protobuf.ByteString value) {
@@ -1950,7 +2015,9 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>int32 port = 2;</code>
+       * @return The port.
        */
+      @java.lang.Override
       public int getPort() {
         return port_;
       }
@@ -1960,6 +2027,8 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>int32 port = 2;</code>
+       * @param value The port to set.
+       * @return This builder for chaining.
        */
       public Builder setPort(int value) {
         
@@ -1973,6 +2042,7 @@ public final class MinaSshdProto {
        * </pre>
        *
        * <code>int32 port = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPort() {
         
@@ -1983,7 +2053,7 @@ public final class MinaSshdProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2045,7 +2115,7 @@ public final class MinaSshdProto {
    *
    * Protobuf type {@code minasshd.EndpointService}
    */
-  public  static final class EndpointService extends
+  public static final class EndpointService extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:minasshd.EndpointService)
       EndpointServiceOrBuilder {
@@ -2055,6 +2125,13 @@ public final class MinaSshdProto {
       super(builder);
     }
     private EndpointService() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new EndpointService();
     }
 
     @java.lang.Override
@@ -2081,7 +2158,7 @@ public final class MinaSshdProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2179,6 +2256,8 @@ public final class MinaSshdProto {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -2186,6 +2265,10 @@ public final class MinaSshdProto {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static Value forNumber(int value) {
         switch (value) {
           case 0: return UNSET;
@@ -2212,6 +2295,10 @@ public final class MinaSshdProto {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -2284,9 +2371,8 @@ public final class MinaSshdProto {
       }
       com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService other = (com.cloudera.thunderhead.service.minasshd.MinaSshdProto.EndpointService) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2466,35 +2552,35 @@ public final class MinaSshdProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2539,7 +2625,7 @@ public final class MinaSshdProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2635,19 +2721,11 @@ public final class MinaSshdProto {
       "dera.thunderhead.service.minasshdB\rMinaS" +
       "shdProtob\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
-        }, assigner);
+        });
     internal_static_minasshd_GetServiceEndpointRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_minasshd_GetServiceEndpointRequest_fieldAccessorTable = new

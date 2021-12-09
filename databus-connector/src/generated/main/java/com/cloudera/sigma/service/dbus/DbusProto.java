@@ -20,30 +20,36 @@ public final class DbusProto {
 
     /**
      * <code>string streamName = 1;</code>
+     * @return The streamName.
      */
     java.lang.String getStreamName();
     /**
      * <code>string streamName = 1;</code>
+     * @return The bytes for streamName.
      */
     com.google.protobuf.ByteString
         getStreamNameBytes();
 
     /**
      * <code>string partitionKey = 2;</code>
+     * @return The partitionKey.
      */
     java.lang.String getPartitionKey();
     /**
      * <code>string partitionKey = 2;</code>
+     * @return The bytes for partitionKey.
      */
     com.google.protobuf.ByteString
         getPartitionKeyBytes();
 
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return Whether the body field is set.
      */
     boolean hasBody();
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return The body.
      */
     com.cloudera.sigma.service.dbus.DbusProto.Record.Body getBody();
     /**
@@ -53,23 +59,26 @@ public final class DbusProto {
 
     /**
      * <code>string accountId = 4;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
      * <code>string accountId = 4;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
 
     /**
      * <code>bool strictSizeCheck = 5;</code>
+     * @return The strictSizeCheck.
      */
     boolean getStrictSizeCheck();
   }
   /**
    * Protobuf type {@code sigmadbus.Record}
    */
-  public  static final class Record extends
+  public static final class Record extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.Record)
       RecordOrBuilder {
@@ -82,7 +91,13 @@ public final class DbusProto {
       streamName_ = "";
       partitionKey_ = "";
       accountId_ = "";
-      strictSizeCheck_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Record();
     }
 
     @java.lang.Override
@@ -98,7 +113,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -146,7 +160,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -183,20 +197,24 @@ public final class DbusProto {
 
       /**
        * <code>string name = 1;</code>
+       * @return The name.
        */
       java.lang.String getName();
       /**
        * <code>string name = 1;</code>
+       * @return The bytes for name.
        */
       com.google.protobuf.ByteString
           getNameBytes();
 
       /**
        * <code>string value = 2;</code>
+       * @return The value.
        */
       java.lang.String getValue();
       /**
        * <code>string value = 2;</code>
+       * @return The bytes for value.
        */
       com.google.protobuf.ByteString
           getValueBytes();
@@ -204,7 +222,7 @@ public final class DbusProto {
     /**
      * Protobuf type {@code sigmadbus.Record.Header}
      */
-    public  static final class Header extends
+    public static final class Header extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:sigmadbus.Record.Header)
         HeaderOrBuilder {
@@ -216,6 +234,13 @@ public final class DbusProto {
       private Header() {
         name_ = "";
         value_ = "";
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Header();
       }
 
       @java.lang.Override
@@ -231,7 +256,6 @@ public final class DbusProto {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
         }
-        int mutable_bitField0_ = 0;
         com.google.protobuf.UnknownFieldSet.Builder unknownFields =
             com.google.protobuf.UnknownFieldSet.newBuilder();
         try {
@@ -255,7 +279,7 @@ public final class DbusProto {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -290,7 +314,9 @@ public final class DbusProto {
       private volatile java.lang.Object name_;
       /**
        * <code>string name = 1;</code>
+       * @return The name.
        */
+      @java.lang.Override
       public java.lang.String getName() {
         java.lang.Object ref = name_;
         if (ref instanceof java.lang.String) {
@@ -305,7 +331,9 @@ public final class DbusProto {
       }
       /**
        * <code>string name = 1;</code>
+       * @return The bytes for name.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getNameBytes() {
         java.lang.Object ref = name_;
@@ -324,7 +352,9 @@ public final class DbusProto {
       private volatile java.lang.Object value_;
       /**
        * <code>string value = 2;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
         if (ref instanceof java.lang.String) {
@@ -339,7 +369,9 @@ public final class DbusProto {
       }
       /**
        * <code>string value = 2;</code>
+       * @return The bytes for value.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getValueBytes() {
         java.lang.Object ref = value_;
@@ -368,10 +400,10 @@ public final class DbusProto {
       @java.lang.Override
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
-        if (!getNameBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
         }
-        if (!getValueBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 2, value_);
         }
         unknownFields.writeTo(output);
@@ -383,10 +415,10 @@ public final class DbusProto {
         if (size != -1) return size;
 
         size = 0;
-        if (!getNameBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
         }
-        if (!getValueBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, value_);
         }
         size += unknownFields.getSerializedSize();
@@ -404,13 +436,12 @@ public final class DbusProto {
         }
         com.cloudera.sigma.service.dbus.DbusProto.Record.Header other = (com.cloudera.sigma.service.dbus.DbusProto.Record.Header) obj;
 
-        boolean result = true;
-        result = result && getName()
-            .equals(other.getName());
-        result = result && getValue()
-            .equals(other.getValue());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!getName()
+            .equals(other.getName())) return false;
+        if (!getValue()
+            .equals(other.getValue())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -595,35 +626,35 @@ public final class DbusProto {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -677,6 +708,7 @@ public final class DbusProto {
         private java.lang.Object name_ = "";
         /**
          * <code>string name = 1;</code>
+         * @return The name.
          */
         public java.lang.String getName() {
           java.lang.Object ref = name_;
@@ -692,6 +724,7 @@ public final class DbusProto {
         }
         /**
          * <code>string name = 1;</code>
+         * @return The bytes for name.
          */
         public com.google.protobuf.ByteString
             getNameBytes() {
@@ -708,6 +741,8 @@ public final class DbusProto {
         }
         /**
          * <code>string name = 1;</code>
+         * @param value The name to set.
+         * @return This builder for chaining.
          */
         public Builder setName(
             java.lang.String value) {
@@ -721,6 +756,7 @@ public final class DbusProto {
         }
         /**
          * <code>string name = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearName() {
           
@@ -730,6 +766,8 @@ public final class DbusProto {
         }
         /**
          * <code>string name = 1;</code>
+         * @param value The bytes for name to set.
+         * @return This builder for chaining.
          */
         public Builder setNameBytes(
             com.google.protobuf.ByteString value) {
@@ -746,6 +784,7 @@ public final class DbusProto {
         private java.lang.Object value_ = "";
         /**
          * <code>string value = 2;</code>
+         * @return The value.
          */
         public java.lang.String getValue() {
           java.lang.Object ref = value_;
@@ -761,6 +800,7 @@ public final class DbusProto {
         }
         /**
          * <code>string value = 2;</code>
+         * @return The bytes for value.
          */
         public com.google.protobuf.ByteString
             getValueBytes() {
@@ -777,6 +817,8 @@ public final class DbusProto {
         }
         /**
          * <code>string value = 2;</code>
+         * @param value The value to set.
+         * @return This builder for chaining.
          */
         public Builder setValue(
             java.lang.String value) {
@@ -790,6 +832,7 @@ public final class DbusProto {
         }
         /**
          * <code>string value = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearValue() {
           
@@ -799,6 +842,8 @@ public final class DbusProto {
         }
         /**
          * <code>string value = 2;</code>
+         * @param value The bytes for value to set.
+         * @return This builder for chaining.
          */
         public Builder setValueBytes(
             com.google.protobuf.ByteString value) {
@@ -814,7 +859,7 @@ public final class DbusProto {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -870,11 +915,13 @@ public final class DbusProto {
 
       /**
        * <code>int64 payloadSize = 1;</code>
+       * @return The payloadSize.
        */
       long getPayloadSize();
 
       /**
        * <code>bytes payload = 2;</code>
+       * @return The payload.
        */
       com.google.protobuf.ByteString getPayload();
 
@@ -905,7 +952,7 @@ public final class DbusProto {
     /**
      * Protobuf type {@code sigmadbus.Record.Body}
      */
-    public  static final class Body extends
+    public static final class Body extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:sigmadbus.Record.Body)
         BodyOrBuilder {
@@ -915,9 +962,15 @@ public final class DbusProto {
         super(builder);
       }
       private Body() {
-        payloadSize_ = 0L;
         payload_ = com.google.protobuf.ByteString.EMPTY;
         header_ = java.util.Collections.emptyList();
+      }
+
+      @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Body();
       }
 
       @java.lang.Override
@@ -955,16 +1008,16 @@ public final class DbusProto {
                 break;
               }
               case 26: {
-                if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+                if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                   header_ = new java.util.ArrayList<com.cloudera.sigma.service.dbus.DbusProto.Record.Header>();
-                  mutable_bitField0_ |= 0x00000004;
+                  mutable_bitField0_ |= 0x00000001;
                 }
                 header_.add(
                     input.readMessage(com.cloudera.sigma.service.dbus.DbusProto.Record.Header.parser(), extensionRegistry));
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -978,7 +1031,7 @@ public final class DbusProto {
           throw new com.google.protobuf.InvalidProtocolBufferException(
               e).setUnfinishedMessage(this);
         } finally {
-          if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+          if (((mutable_bitField0_ & 0x00000001) != 0)) {
             header_ = java.util.Collections.unmodifiableList(header_);
           }
           this.unknownFields = unknownFields.build();
@@ -998,12 +1051,13 @@ public final class DbusProto {
                 com.cloudera.sigma.service.dbus.DbusProto.Record.Body.class, com.cloudera.sigma.service.dbus.DbusProto.Record.Body.Builder.class);
       }
 
-      private int bitField0_;
       public static final int PAYLOADSIZE_FIELD_NUMBER = 1;
       private long payloadSize_;
       /**
        * <code>int64 payloadSize = 1;</code>
+       * @return The payloadSize.
        */
+      @java.lang.Override
       public long getPayloadSize() {
         return payloadSize_;
       }
@@ -1012,7 +1066,9 @@ public final class DbusProto {
       private com.google.protobuf.ByteString payload_;
       /**
        * <code>bytes payload = 2;</code>
+       * @return The payload.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getPayload() {
         return payload_;
       }
@@ -1022,12 +1078,14 @@ public final class DbusProto {
       /**
        * <code>repeated .sigmadbus.Record.Header header = 3;</code>
        */
+      @java.lang.Override
       public java.util.List<com.cloudera.sigma.service.dbus.DbusProto.Record.Header> getHeaderList() {
         return header_;
       }
       /**
        * <code>repeated .sigmadbus.Record.Header header = 3;</code>
        */
+      @java.lang.Override
       public java.util.List<? extends com.cloudera.sigma.service.dbus.DbusProto.Record.HeaderOrBuilder> 
           getHeaderOrBuilderList() {
         return header_;
@@ -1035,18 +1093,21 @@ public final class DbusProto {
       /**
        * <code>repeated .sigmadbus.Record.Header header = 3;</code>
        */
+      @java.lang.Override
       public int getHeaderCount() {
         return header_.size();
       }
       /**
        * <code>repeated .sigmadbus.Record.Header header = 3;</code>
        */
+      @java.lang.Override
       public com.cloudera.sigma.service.dbus.DbusProto.Record.Header getHeader(int index) {
         return header_.get(index);
       }
       /**
        * <code>repeated .sigmadbus.Record.Header header = 3;</code>
        */
+      @java.lang.Override
       public com.cloudera.sigma.service.dbus.DbusProto.Record.HeaderOrBuilder getHeaderOrBuilder(
           int index) {
         return header_.get(index);
@@ -1111,15 +1172,14 @@ public final class DbusProto {
         }
         com.cloudera.sigma.service.dbus.DbusProto.Record.Body other = (com.cloudera.sigma.service.dbus.DbusProto.Record.Body) obj;
 
-        boolean result = true;
-        result = result && (getPayloadSize()
-            == other.getPayloadSize());
-        result = result && getPayload()
-            .equals(other.getPayload());
-        result = result && getHeaderList()
-            .equals(other.getHeaderList());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (getPayloadSize()
+            != other.getPayloadSize()) return false;
+        if (!getPayload()
+            .equals(other.getPayload())) return false;
+        if (!getHeaderList()
+            .equals(other.getHeaderList())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -1278,7 +1338,7 @@ public final class DbusProto {
 
           if (headerBuilder_ == null) {
             header_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             headerBuilder_.clear();
           }
@@ -1309,54 +1369,52 @@ public final class DbusProto {
         public com.cloudera.sigma.service.dbus.DbusProto.Record.Body buildPartial() {
           com.cloudera.sigma.service.dbus.DbusProto.Record.Body result = new com.cloudera.sigma.service.dbus.DbusProto.Record.Body(this);
           int from_bitField0_ = bitField0_;
-          int to_bitField0_ = 0;
           result.payloadSize_ = payloadSize_;
           result.payload_ = payload_;
           if (headerBuilder_ == null) {
-            if (((bitField0_ & 0x00000004) == 0x00000004)) {
+            if (((bitField0_ & 0x00000001) != 0)) {
               header_ = java.util.Collections.unmodifiableList(header_);
-              bitField0_ = (bitField0_ & ~0x00000004);
+              bitField0_ = (bitField0_ & ~0x00000001);
             }
             result.header_ = header_;
           } else {
             result.header_ = headerBuilder_.build();
           }
-          result.bitField0_ = to_bitField0_;
           onBuilt();
           return result;
         }
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1380,7 +1438,7 @@ public final class DbusProto {
             if (!other.header_.isEmpty()) {
               if (header_.isEmpty()) {
                 header_ = other.header_;
-                bitField0_ = (bitField0_ & ~0x00000004);
+                bitField0_ = (bitField0_ & ~0x00000001);
               } else {
                 ensureHeaderIsMutable();
                 header_.addAll(other.header_);
@@ -1393,7 +1451,7 @@ public final class DbusProto {
                 headerBuilder_.dispose();
                 headerBuilder_ = null;
                 header_ = other.header_;
-                bitField0_ = (bitField0_ & ~0x00000004);
+                bitField0_ = (bitField0_ & ~0x00000001);
                 headerBuilder_ = 
                   com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                      getHeaderFieldBuilder() : null;
@@ -1435,12 +1493,16 @@ public final class DbusProto {
         private long payloadSize_ ;
         /**
          * <code>int64 payloadSize = 1;</code>
+         * @return The payloadSize.
          */
+        @java.lang.Override
         public long getPayloadSize() {
           return payloadSize_;
         }
         /**
          * <code>int64 payloadSize = 1;</code>
+         * @param value The payloadSize to set.
+         * @return This builder for chaining.
          */
         public Builder setPayloadSize(long value) {
           
@@ -1450,6 +1512,7 @@ public final class DbusProto {
         }
         /**
          * <code>int64 payloadSize = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearPayloadSize() {
           
@@ -1461,12 +1524,16 @@ public final class DbusProto {
         private com.google.protobuf.ByteString payload_ = com.google.protobuf.ByteString.EMPTY;
         /**
          * <code>bytes payload = 2;</code>
+         * @return The payload.
          */
+        @java.lang.Override
         public com.google.protobuf.ByteString getPayload() {
           return payload_;
         }
         /**
          * <code>bytes payload = 2;</code>
+         * @param value The payload to set.
+         * @return This builder for chaining.
          */
         public Builder setPayload(com.google.protobuf.ByteString value) {
           if (value == null) {
@@ -1479,6 +1546,7 @@ public final class DbusProto {
         }
         /**
          * <code>bytes payload = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearPayload() {
           
@@ -1490,9 +1558,9 @@ public final class DbusProto {
         private java.util.List<com.cloudera.sigma.service.dbus.DbusProto.Record.Header> header_ =
           java.util.Collections.emptyList();
         private void ensureHeaderIsMutable() {
-          if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+          if (!((bitField0_ & 0x00000001) != 0)) {
             header_ = new java.util.ArrayList<com.cloudera.sigma.service.dbus.DbusProto.Record.Header>(header_);
-            bitField0_ |= 0x00000004;
+            bitField0_ |= 0x00000001;
            }
         }
 
@@ -1642,7 +1710,7 @@ public final class DbusProto {
         public Builder clearHeader() {
           if (headerBuilder_ == null) {
             header_ = java.util.Collections.emptyList();
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
             onChanged();
           } else {
             headerBuilder_.clear();
@@ -1719,7 +1787,7 @@ public final class DbusProto {
             headerBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
                 com.cloudera.sigma.service.dbus.DbusProto.Record.Header, com.cloudera.sigma.service.dbus.DbusProto.Record.Header.Builder, com.cloudera.sigma.service.dbus.DbusProto.Record.HeaderOrBuilder>(
                     header_,
-                    ((bitField0_ & 0x00000004) == 0x00000004),
+                    ((bitField0_ & 0x00000001) != 0),
                     getParentForChildren(),
                     isClean());
             header_ = null;
@@ -1729,7 +1797,7 @@ public final class DbusProto {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -1785,29 +1853,35 @@ public final class DbusProto {
 
       /**
        * <code>string recordId = 1;</code>
+       * @return The recordId.
        */
       java.lang.String getRecordId();
       /**
        * <code>string recordId = 1;</code>
+       * @return The bytes for recordId.
        */
       com.google.protobuf.ByteString
           getRecordIdBytes();
 
       /**
        * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+       * @return The enum numeric value on the wire for status.
        */
       int getStatusValue();
       /**
        * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+       * @return The status.
        */
       com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status getStatus();
 
       /**
        * <code>string uploadUrl = 3;</code>
+       * @return The uploadUrl.
        */
       java.lang.String getUploadUrl();
       /**
        * <code>string uploadUrl = 3;</code>
+       * @return The bytes for uploadUrl.
        */
       com.google.protobuf.ByteString
           getUploadUrlBytes();
@@ -1815,7 +1889,7 @@ public final class DbusProto {
     /**
      * Protobuf type {@code sigmadbus.Record.Reply}
      */
-    public  static final class Reply extends
+    public static final class Reply extends
         com.google.protobuf.GeneratedMessageV3 implements
         // @@protoc_insertion_point(message_implements:sigmadbus.Record.Reply)
         ReplyOrBuilder {
@@ -1831,6 +1905,13 @@ public final class DbusProto {
       }
 
       @java.lang.Override
+      @SuppressWarnings({"unused"})
+      protected java.lang.Object newInstance(
+          UnusedPrivateParameter unused) {
+        return new Reply();
+      }
+
+      @java.lang.Override
       public final com.google.protobuf.UnknownFieldSet
       getUnknownFields() {
         return this.unknownFields;
@@ -1843,7 +1924,6 @@ public final class DbusProto {
         if (extensionRegistry == null) {
           throw new java.lang.NullPointerException();
         }
-        int mutable_bitField0_ = 0;
         com.google.protobuf.UnknownFieldSet.Builder unknownFields =
             com.google.protobuf.UnknownFieldSet.newBuilder();
         try {
@@ -1873,7 +1953,7 @@ public final class DbusProto {
                 break;
               }
               default: {
-                if (!parseUnknownFieldProto3(
+                if (!parseUnknownField(
                     input, unknownFields, extensionRegistry, tag)) {
                   done = true;
                 }
@@ -1947,6 +2027,8 @@ public final class DbusProto {
         }
 
         /**
+         * @param value The numeric wire value of the corresponding enum entry.
+         * @return The enum associated with the given numeric wire value.
          * @deprecated Use {@link #forNumber(int)} instead.
          */
         @java.lang.Deprecated
@@ -1954,6 +2036,10 @@ public final class DbusProto {
           return forNumber(value);
         }
 
+        /**
+         * @param value The numeric wire value of the corresponding enum entry.
+         * @return The enum associated with the given numeric wire value.
+         */
         public static Status forNumber(int value) {
           switch (value) {
             case 0: return UNSET;
@@ -1977,6 +2063,10 @@ public final class DbusProto {
 
         public final com.google.protobuf.Descriptors.EnumValueDescriptor
             getValueDescriptor() {
+          if (this == UNRECOGNIZED) {
+            throw new java.lang.IllegalStateException(
+                "Can't get the descriptor of an unrecognized enum value.");
+          }
           return getDescriptor().getValues().get(ordinal());
         }
         public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -2015,7 +2105,9 @@ public final class DbusProto {
       private volatile java.lang.Object recordId_;
       /**
        * <code>string recordId = 1;</code>
+       * @return The recordId.
        */
+      @java.lang.Override
       public java.lang.String getRecordId() {
         java.lang.Object ref = recordId_;
         if (ref instanceof java.lang.String) {
@@ -2030,7 +2122,9 @@ public final class DbusProto {
       }
       /**
        * <code>string recordId = 1;</code>
+       * @return The bytes for recordId.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getRecordIdBytes() {
         java.lang.Object ref = recordId_;
@@ -2049,14 +2143,16 @@ public final class DbusProto {
       private int status_;
       /**
        * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+       * @return The enum numeric value on the wire for status.
        */
-      public int getStatusValue() {
+      @java.lang.Override public int getStatusValue() {
         return status_;
       }
       /**
        * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+       * @return The status.
        */
-      public com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status getStatus() {
+      @java.lang.Override public com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status getStatus() {
         @SuppressWarnings("deprecation")
         com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status result = com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status.valueOf(status_);
         return result == null ? com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status.UNRECOGNIZED : result;
@@ -2066,7 +2162,9 @@ public final class DbusProto {
       private volatile java.lang.Object uploadUrl_;
       /**
        * <code>string uploadUrl = 3;</code>
+       * @return The uploadUrl.
        */
+      @java.lang.Override
       public java.lang.String getUploadUrl() {
         java.lang.Object ref = uploadUrl_;
         if (ref instanceof java.lang.String) {
@@ -2081,7 +2179,9 @@ public final class DbusProto {
       }
       /**
        * <code>string uploadUrl = 3;</code>
+       * @return The bytes for uploadUrl.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getUploadUrlBytes() {
         java.lang.Object ref = uploadUrl_;
@@ -2110,13 +2210,13 @@ public final class DbusProto {
       @java.lang.Override
       public void writeTo(com.google.protobuf.CodedOutputStream output)
                           throws java.io.IOException {
-        if (!getRecordIdBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(recordId_)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 1, recordId_);
         }
         if (status_ != com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status.UNSET.getNumber()) {
           output.writeEnum(2, status_);
         }
-        if (!getUploadUrlBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uploadUrl_)) {
           com.google.protobuf.GeneratedMessageV3.writeString(output, 3, uploadUrl_);
         }
         unknownFields.writeTo(output);
@@ -2128,14 +2228,14 @@ public final class DbusProto {
         if (size != -1) return size;
 
         size = 0;
-        if (!getRecordIdBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(recordId_)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, recordId_);
         }
         if (status_ != com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status.UNSET.getNumber()) {
           size += com.google.protobuf.CodedOutputStream
             .computeEnumSize(2, status_);
         }
-        if (!getUploadUrlBytes().isEmpty()) {
+        if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uploadUrl_)) {
           size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, uploadUrl_);
         }
         size += unknownFields.getSerializedSize();
@@ -2153,14 +2253,13 @@ public final class DbusProto {
         }
         com.cloudera.sigma.service.dbus.DbusProto.Record.Reply other = (com.cloudera.sigma.service.dbus.DbusProto.Record.Reply) obj;
 
-        boolean result = true;
-        result = result && getRecordId()
-            .equals(other.getRecordId());
-        result = result && status_ == other.status_;
-        result = result && getUploadUrl()
-            .equals(other.getUploadUrl());
-        result = result && unknownFields.equals(other.unknownFields);
-        return result;
+        if (!getRecordId()
+            .equals(other.getRecordId())) return false;
+        if (status_ != other.status_) return false;
+        if (!getUploadUrl()
+            .equals(other.getUploadUrl())) return false;
+        if (!unknownFields.equals(other.unknownFields)) return false;
+        return true;
       }
 
       @java.lang.Override
@@ -2350,35 +2449,35 @@ public final class DbusProto {
 
         @java.lang.Override
         public Builder clone() {
-          return (Builder) super.clone();
+          return super.clone();
         }
         @java.lang.Override
         public Builder setField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.setField(field, value);
+          return super.setField(field, value);
         }
         @java.lang.Override
         public Builder clearField(
             com.google.protobuf.Descriptors.FieldDescriptor field) {
-          return (Builder) super.clearField(field);
+          return super.clearField(field);
         }
         @java.lang.Override
         public Builder clearOneof(
             com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-          return (Builder) super.clearOneof(oneof);
+          return super.clearOneof(oneof);
         }
         @java.lang.Override
         public Builder setRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             int index, java.lang.Object value) {
-          return (Builder) super.setRepeatedField(field, index, value);
+          return super.setRepeatedField(field, index, value);
         }
         @java.lang.Override
         public Builder addRepeatedField(
             com.google.protobuf.Descriptors.FieldDescriptor field,
             java.lang.Object value) {
-          return (Builder) super.addRepeatedField(field, value);
+          return super.addRepeatedField(field, value);
         }
         @java.lang.Override
         public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2435,6 +2534,7 @@ public final class DbusProto {
         private java.lang.Object recordId_ = "";
         /**
          * <code>string recordId = 1;</code>
+         * @return The recordId.
          */
         public java.lang.String getRecordId() {
           java.lang.Object ref = recordId_;
@@ -2450,6 +2550,7 @@ public final class DbusProto {
         }
         /**
          * <code>string recordId = 1;</code>
+         * @return The bytes for recordId.
          */
         public com.google.protobuf.ByteString
             getRecordIdBytes() {
@@ -2466,6 +2567,8 @@ public final class DbusProto {
         }
         /**
          * <code>string recordId = 1;</code>
+         * @param value The recordId to set.
+         * @return This builder for chaining.
          */
         public Builder setRecordId(
             java.lang.String value) {
@@ -2479,6 +2582,7 @@ public final class DbusProto {
         }
         /**
          * <code>string recordId = 1;</code>
+         * @return This builder for chaining.
          */
         public Builder clearRecordId() {
           
@@ -2488,6 +2592,8 @@ public final class DbusProto {
         }
         /**
          * <code>string recordId = 1;</code>
+         * @param value The bytes for recordId to set.
+         * @return This builder for chaining.
          */
         public Builder setRecordIdBytes(
             com.google.protobuf.ByteString value) {
@@ -2504,21 +2610,27 @@ public final class DbusProto {
         private int status_ = 0;
         /**
          * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+         * @return The enum numeric value on the wire for status.
          */
-        public int getStatusValue() {
+        @java.lang.Override public int getStatusValue() {
           return status_;
         }
         /**
          * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+         * @param value The enum numeric value on the wire for status to set.
+         * @return This builder for chaining.
          */
         public Builder setStatusValue(int value) {
+          
           status_ = value;
           onChanged();
           return this;
         }
         /**
          * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+         * @return The status.
          */
+        @java.lang.Override
         public com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status getStatus() {
           @SuppressWarnings("deprecation")
           com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status result = com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status.valueOf(status_);
@@ -2526,6 +2638,8 @@ public final class DbusProto {
         }
         /**
          * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+         * @param value The status to set.
+         * @return This builder for chaining.
          */
         public Builder setStatus(com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Status value) {
           if (value == null) {
@@ -2538,6 +2652,7 @@ public final class DbusProto {
         }
         /**
          * <code>.sigmadbus.Record.Reply.Status status = 2;</code>
+         * @return This builder for chaining.
          */
         public Builder clearStatus() {
           
@@ -2549,6 +2664,7 @@ public final class DbusProto {
         private java.lang.Object uploadUrl_ = "";
         /**
          * <code>string uploadUrl = 3;</code>
+         * @return The uploadUrl.
          */
         public java.lang.String getUploadUrl() {
           java.lang.Object ref = uploadUrl_;
@@ -2564,6 +2680,7 @@ public final class DbusProto {
         }
         /**
          * <code>string uploadUrl = 3;</code>
+         * @return The bytes for uploadUrl.
          */
         public com.google.protobuf.ByteString
             getUploadUrlBytes() {
@@ -2580,6 +2697,8 @@ public final class DbusProto {
         }
         /**
          * <code>string uploadUrl = 3;</code>
+         * @param value The uploadUrl to set.
+         * @return This builder for chaining.
          */
         public Builder setUploadUrl(
             java.lang.String value) {
@@ -2593,6 +2712,7 @@ public final class DbusProto {
         }
         /**
          * <code>string uploadUrl = 3;</code>
+         * @return This builder for chaining.
          */
         public Builder clearUploadUrl() {
           
@@ -2602,6 +2722,8 @@ public final class DbusProto {
         }
         /**
          * <code>string uploadUrl = 3;</code>
+         * @param value The bytes for uploadUrl to set.
+         * @return This builder for chaining.
          */
         public Builder setUploadUrlBytes(
             com.google.protobuf.ByteString value) {
@@ -2617,7 +2739,7 @@ public final class DbusProto {
         @java.lang.Override
         public final Builder setUnknownFields(
             final com.google.protobuf.UnknownFieldSet unknownFields) {
-          return super.setUnknownFieldsProto3(unknownFields);
+          return super.setUnknownFields(unknownFields);
         }
 
         @java.lang.Override
@@ -2671,7 +2793,9 @@ public final class DbusProto {
     private volatile java.lang.Object streamName_;
     /**
      * <code>string streamName = 1;</code>
+     * @return The streamName.
      */
+    @java.lang.Override
     public java.lang.String getStreamName() {
       java.lang.Object ref = streamName_;
       if (ref instanceof java.lang.String) {
@@ -2686,7 +2810,9 @@ public final class DbusProto {
     }
     /**
      * <code>string streamName = 1;</code>
+     * @return The bytes for streamName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStreamNameBytes() {
       java.lang.Object ref = streamName_;
@@ -2705,7 +2831,9 @@ public final class DbusProto {
     private volatile java.lang.Object partitionKey_;
     /**
      * <code>string partitionKey = 2;</code>
+     * @return The partitionKey.
      */
+    @java.lang.Override
     public java.lang.String getPartitionKey() {
       java.lang.Object ref = partitionKey_;
       if (ref instanceof java.lang.String) {
@@ -2720,7 +2848,9 @@ public final class DbusProto {
     }
     /**
      * <code>string partitionKey = 2;</code>
+     * @return The bytes for partitionKey.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPartitionKeyBytes() {
       java.lang.Object ref = partitionKey_;
@@ -2739,19 +2869,24 @@ public final class DbusProto {
     private com.cloudera.sigma.service.dbus.DbusProto.Record.Body body_;
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return Whether the body field is set.
      */
+    @java.lang.Override
     public boolean hasBody() {
       return body_ != null;
     }
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return The body.
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.Record.Body getBody() {
       return body_ == null ? com.cloudera.sigma.service.dbus.DbusProto.Record.Body.getDefaultInstance() : body_;
     }
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.Record.BodyOrBuilder getBodyOrBuilder() {
       return getBody();
     }
@@ -2760,7 +2895,9 @@ public final class DbusProto {
     private volatile java.lang.Object accountId_;
     /**
      * <code>string accountId = 4;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -2775,7 +2912,9 @@ public final class DbusProto {
     }
     /**
      * <code>string accountId = 4;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -2794,7 +2933,9 @@ public final class DbusProto {
     private boolean strictSizeCheck_;
     /**
      * <code>bool strictSizeCheck = 5;</code>
+     * @return The strictSizeCheck.
      */
+    @java.lang.Override
     public boolean getStrictSizeCheck() {
       return strictSizeCheck_;
     }
@@ -2813,16 +2954,16 @@ public final class DbusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getStreamNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(streamName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, streamName_);
       }
-      if (!getPartitionKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(partitionKey_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, partitionKey_);
       }
       if (body_ != null) {
         output.writeMessage(3, getBody());
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, accountId_);
       }
       if (strictSizeCheck_ != false) {
@@ -2837,17 +2978,17 @@ public final class DbusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getStreamNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(streamName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, streamName_);
       }
-      if (!getPartitionKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(partitionKey_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, partitionKey_);
       }
       if (body_ != null) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(3, getBody());
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, accountId_);
       }
       if (strictSizeCheck_ != false) {
@@ -2869,22 +3010,21 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.Record other = (com.cloudera.sigma.service.dbus.DbusProto.Record) obj;
 
-      boolean result = true;
-      result = result && getStreamName()
-          .equals(other.getStreamName());
-      result = result && getPartitionKey()
-          .equals(other.getPartitionKey());
-      result = result && (hasBody() == other.hasBody());
+      if (!getStreamName()
+          .equals(other.getStreamName())) return false;
+      if (!getPartitionKey()
+          .equals(other.getPartitionKey())) return false;
+      if (hasBody() != other.hasBody()) return false;
       if (hasBody()) {
-        result = result && getBody()
-            .equals(other.getBody());
+        if (!getBody()
+            .equals(other.getBody())) return false;
       }
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && (getStrictSizeCheck()
-          == other.getStrictSizeCheck());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (getStrictSizeCheck()
+          != other.getStrictSizeCheck()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3095,35 +3235,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3187,6 +3327,7 @@ public final class DbusProto {
       private java.lang.Object streamName_ = "";
       /**
        * <code>string streamName = 1;</code>
+       * @return The streamName.
        */
       public java.lang.String getStreamName() {
         java.lang.Object ref = streamName_;
@@ -3202,6 +3343,7 @@ public final class DbusProto {
       }
       /**
        * <code>string streamName = 1;</code>
+       * @return The bytes for streamName.
        */
       public com.google.protobuf.ByteString
           getStreamNameBytes() {
@@ -3218,6 +3360,8 @@ public final class DbusProto {
       }
       /**
        * <code>string streamName = 1;</code>
+       * @param value The streamName to set.
+       * @return This builder for chaining.
        */
       public Builder setStreamName(
           java.lang.String value) {
@@ -3231,6 +3375,7 @@ public final class DbusProto {
       }
       /**
        * <code>string streamName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStreamName() {
         
@@ -3240,6 +3385,8 @@ public final class DbusProto {
       }
       /**
        * <code>string streamName = 1;</code>
+       * @param value The bytes for streamName to set.
+       * @return This builder for chaining.
        */
       public Builder setStreamNameBytes(
           com.google.protobuf.ByteString value) {
@@ -3256,6 +3403,7 @@ public final class DbusProto {
       private java.lang.Object partitionKey_ = "";
       /**
        * <code>string partitionKey = 2;</code>
+       * @return The partitionKey.
        */
       public java.lang.String getPartitionKey() {
         java.lang.Object ref = partitionKey_;
@@ -3271,6 +3419,7 @@ public final class DbusProto {
       }
       /**
        * <code>string partitionKey = 2;</code>
+       * @return The bytes for partitionKey.
        */
       public com.google.protobuf.ByteString
           getPartitionKeyBytes() {
@@ -3287,6 +3436,8 @@ public final class DbusProto {
       }
       /**
        * <code>string partitionKey = 2;</code>
+       * @param value The partitionKey to set.
+       * @return This builder for chaining.
        */
       public Builder setPartitionKey(
           java.lang.String value) {
@@ -3300,6 +3451,7 @@ public final class DbusProto {
       }
       /**
        * <code>string partitionKey = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPartitionKey() {
         
@@ -3309,6 +3461,8 @@ public final class DbusProto {
       }
       /**
        * <code>string partitionKey = 2;</code>
+       * @param value The bytes for partitionKey to set.
+       * @return This builder for chaining.
        */
       public Builder setPartitionKeyBytes(
           com.google.protobuf.ByteString value) {
@@ -3322,17 +3476,19 @@ public final class DbusProto {
         return this;
       }
 
-      private com.cloudera.sigma.service.dbus.DbusProto.Record.Body body_ = null;
+      private com.cloudera.sigma.service.dbus.DbusProto.Record.Body body_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.sigma.service.dbus.DbusProto.Record.Body, com.cloudera.sigma.service.dbus.DbusProto.Record.Body.Builder, com.cloudera.sigma.service.dbus.DbusProto.Record.BodyOrBuilder> bodyBuilder_;
       /**
        * <code>.sigmadbus.Record.Body body = 3;</code>
+       * @return Whether the body field is set.
        */
       public boolean hasBody() {
         return bodyBuilder_ != null || body_ != null;
       }
       /**
        * <code>.sigmadbus.Record.Body body = 3;</code>
+       * @return The body.
        */
       public com.cloudera.sigma.service.dbus.DbusProto.Record.Body getBody() {
         if (bodyBuilder_ == null) {
@@ -3442,6 +3598,7 @@ public final class DbusProto {
       private java.lang.Object accountId_ = "";
       /**
        * <code>string accountId = 4;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -3457,6 +3614,7 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 4;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -3473,6 +3631,8 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 4;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -3486,6 +3646,7 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -3495,6 +3656,8 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 4;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -3511,12 +3674,16 @@ public final class DbusProto {
       private boolean strictSizeCheck_ ;
       /**
        * <code>bool strictSizeCheck = 5;</code>
+       * @return The strictSizeCheck.
        */
+      @java.lang.Override
       public boolean getStrictSizeCheck() {
         return strictSizeCheck_;
       }
       /**
        * <code>bool strictSizeCheck = 5;</code>
+       * @param value The strictSizeCheck to set.
+       * @return This builder for chaining.
        */
       public Builder setStrictSizeCheck(boolean value) {
         
@@ -3526,6 +3693,7 @@ public final class DbusProto {
       }
       /**
        * <code>bool strictSizeCheck = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStrictSizeCheck() {
         
@@ -3536,7 +3704,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3592,10 +3760,12 @@ public final class DbusProto {
 
     /**
      * <code>.sigmadbus.Record record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return Whether the record field is set.
      */
     boolean hasRecord();
     /**
      * <code>.sigmadbus.Record record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The record.
      */
     com.cloudera.sigma.service.dbus.DbusProto.Record getRecord();
     /**
@@ -3609,6 +3779,7 @@ public final class DbusProto {
      * </pre>
      *
      * <code>string urlPrefix = 2;</code>
+     * @return The urlPrefix.
      */
     java.lang.String getUrlPrefix();
     /**
@@ -3617,6 +3788,7 @@ public final class DbusProto {
      * </pre>
      *
      * <code>string urlPrefix = 2;</code>
+     * @return The bytes for urlPrefix.
      */
     com.google.protobuf.ByteString
         getUrlPrefixBytes();
@@ -3624,7 +3796,7 @@ public final class DbusProto {
   /**
    * Protobuf type {@code sigmadbus.PutRecordRequest}
    */
-  public  static final class PutRecordRequest extends
+  public static final class PutRecordRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.PutRecordRequest)
       PutRecordRequestOrBuilder {
@@ -3635,6 +3807,13 @@ public final class DbusProto {
     }
     private PutRecordRequest() {
       urlPrefix_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PutRecordRequest();
     }
 
     @java.lang.Override
@@ -3650,7 +3829,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3681,7 +3859,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3716,19 +3894,24 @@ public final class DbusProto {
     private com.cloudera.sigma.service.dbus.DbusProto.Record record_;
     /**
      * <code>.sigmadbus.Record record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return Whether the record field is set.
      */
+    @java.lang.Override
     public boolean hasRecord() {
       return record_ != null;
     }
     /**
      * <code>.sigmadbus.Record record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The record.
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.Record getRecord() {
       return record_ == null ? com.cloudera.sigma.service.dbus.DbusProto.Record.getDefaultInstance() : record_;
     }
     /**
      * <code>.sigmadbus.Record record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.RecordOrBuilder getRecordOrBuilder() {
       return getRecord();
     }
@@ -3741,7 +3924,9 @@ public final class DbusProto {
      * </pre>
      *
      * <code>string urlPrefix = 2;</code>
+     * @return The urlPrefix.
      */
+    @java.lang.Override
     public java.lang.String getUrlPrefix() {
       java.lang.Object ref = urlPrefix_;
       if (ref instanceof java.lang.String) {
@@ -3760,7 +3945,9 @@ public final class DbusProto {
      * </pre>
      *
      * <code>string urlPrefix = 2;</code>
+     * @return The bytes for urlPrefix.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUrlPrefixBytes() {
       java.lang.Object ref = urlPrefix_;
@@ -3792,7 +3979,7 @@ public final class DbusProto {
       if (record_ != null) {
         output.writeMessage(1, getRecord());
       }
-      if (!getUrlPrefixBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(urlPrefix_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, urlPrefix_);
       }
       unknownFields.writeTo(output);
@@ -3808,7 +3995,7 @@ public final class DbusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getRecord());
       }
-      if (!getUrlPrefixBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(urlPrefix_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, urlPrefix_);
       }
       size += unknownFields.getSerializedSize();
@@ -3826,16 +4013,15 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest other = (com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest) obj;
 
-      boolean result = true;
-      result = result && (hasRecord() == other.hasRecord());
+      if (hasRecord() != other.hasRecord()) return false;
       if (hasRecord()) {
-        result = result && getRecord()
-            .equals(other.getRecord());
+        if (!getRecord()
+            .equals(other.getRecord())) return false;
       }
-      result = result && getUrlPrefix()
-          .equals(other.getUrlPrefix());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUrlPrefix()
+          .equals(other.getUrlPrefix())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4030,35 +4216,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4108,17 +4294,19 @@ public final class DbusProto {
         return this;
       }
 
-      private com.cloudera.sigma.service.dbus.DbusProto.Record record_ = null;
+      private com.cloudera.sigma.service.dbus.DbusProto.Record record_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.sigma.service.dbus.DbusProto.Record, com.cloudera.sigma.service.dbus.DbusProto.Record.Builder, com.cloudera.sigma.service.dbus.DbusProto.RecordOrBuilder> recordBuilder_;
       /**
        * <code>.sigmadbus.Record record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return Whether the record field is set.
        */
       public boolean hasRecord() {
         return recordBuilder_ != null || record_ != null;
       }
       /**
        * <code>.sigmadbus.Record record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The record.
        */
       public com.cloudera.sigma.service.dbus.DbusProto.Record getRecord() {
         if (recordBuilder_ == null) {
@@ -4232,6 +4420,7 @@ public final class DbusProto {
        * </pre>
        *
        * <code>string urlPrefix = 2;</code>
+       * @return The urlPrefix.
        */
       public java.lang.String getUrlPrefix() {
         java.lang.Object ref = urlPrefix_;
@@ -4251,6 +4440,7 @@ public final class DbusProto {
        * </pre>
        *
        * <code>string urlPrefix = 2;</code>
+       * @return The bytes for urlPrefix.
        */
       public com.google.protobuf.ByteString
           getUrlPrefixBytes() {
@@ -4271,6 +4461,8 @@ public final class DbusProto {
        * </pre>
        *
        * <code>string urlPrefix = 2;</code>
+       * @param value The urlPrefix to set.
+       * @return This builder for chaining.
        */
       public Builder setUrlPrefix(
           java.lang.String value) {
@@ -4288,6 +4480,7 @@ public final class DbusProto {
        * </pre>
        *
        * <code>string urlPrefix = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUrlPrefix() {
         
@@ -4301,6 +4494,8 @@ public final class DbusProto {
        * </pre>
        *
        * <code>string urlPrefix = 2;</code>
+       * @param value The bytes for urlPrefix to set.
+       * @return This builder for chaining.
        */
       public Builder setUrlPrefixBytes(
           com.google.protobuf.ByteString value) {
@@ -4316,7 +4511,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4372,10 +4567,12 @@ public final class DbusProto {
 
     /**
      * <code>.sigmadbus.Record.Reply record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return Whether the record field is set.
      */
     boolean hasRecord();
     /**
      * <code>.sigmadbus.Record.Reply record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The record.
      */
     com.cloudera.sigma.service.dbus.DbusProto.Record.Reply getRecord();
     /**
@@ -4386,7 +4583,7 @@ public final class DbusProto {
   /**
    * Protobuf type {@code sigmadbus.PutRecordResponse}
    */
-  public  static final class PutRecordResponse extends
+  public static final class PutRecordResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.PutRecordResponse)
       PutRecordResponseOrBuilder {
@@ -4396,6 +4593,13 @@ public final class DbusProto {
       super(builder);
     }
     private PutRecordResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PutRecordResponse();
     }
 
     @java.lang.Override
@@ -4411,7 +4615,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4436,7 +4639,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4471,19 +4674,24 @@ public final class DbusProto {
     private com.cloudera.sigma.service.dbus.DbusProto.Record.Reply record_;
     /**
      * <code>.sigmadbus.Record.Reply record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return Whether the record field is set.
      */
+    @java.lang.Override
     public boolean hasRecord() {
       return record_ != null;
     }
     /**
      * <code>.sigmadbus.Record.Reply record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The record.
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.Record.Reply getRecord() {
       return record_ == null ? com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.getDefaultInstance() : record_;
     }
     /**
      * <code>.sigmadbus.Record.Reply record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.Record.ReplyOrBuilder getRecordOrBuilder() {
       return getRecord();
     }
@@ -4533,14 +4741,13 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse other = (com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse) obj;
 
-      boolean result = true;
-      result = result && (hasRecord() == other.hasRecord());
+      if (hasRecord() != other.hasRecord()) return false;
       if (hasRecord()) {
-        result = result && getRecord()
-            .equals(other.getRecord());
+        if (!getRecord()
+            .equals(other.getRecord())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4730,35 +4937,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4804,17 +5011,19 @@ public final class DbusProto {
         return this;
       }
 
-      private com.cloudera.sigma.service.dbus.DbusProto.Record.Reply record_ = null;
+      private com.cloudera.sigma.service.dbus.DbusProto.Record.Reply record_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.sigma.service.dbus.DbusProto.Record.Reply, com.cloudera.sigma.service.dbus.DbusProto.Record.Reply.Builder, com.cloudera.sigma.service.dbus.DbusProto.Record.ReplyOrBuilder> recordBuilder_;
       /**
        * <code>.sigmadbus.Record.Reply record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return Whether the record field is set.
        */
       public boolean hasRecord() {
         return recordBuilder_ != null || record_ != null;
       }
       /**
        * <code>.sigmadbus.Record.Reply record = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The record.
        */
       public com.cloudera.sigma.service.dbus.DbusProto.Record.Reply getRecord() {
         if (recordBuilder_ == null) {
@@ -4923,7 +5132,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4979,20 +5188,24 @@ public final class DbusProto {
 
     /**
      * <code>string bucketName = 1;</code>
+     * @return The bucketName.
      */
     java.lang.String getBucketName();
     /**
      * <code>string bucketName = 1;</code>
+     * @return The bytes for bucketName.
      */
     com.google.protobuf.ByteString
         getBucketNameBytes();
 
     /**
      * <code>string key = 2;</code>
+     * @return The key.
      */
     java.lang.String getKey();
     /**
      * <code>string key = 2;</code>
+     * @return The bytes for key.
      */
     com.google.protobuf.ByteString
         getKeyBytes();
@@ -5000,7 +5213,7 @@ public final class DbusProto {
   /**
    * Protobuf type {@code sigmadbus.S3Link}
    */
-  public  static final class S3Link extends
+  public static final class S3Link extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.S3Link)
       S3LinkOrBuilder {
@@ -5012,6 +5225,13 @@ public final class DbusProto {
     private S3Link() {
       bucketName_ = "";
       key_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new S3Link();
     }
 
     @java.lang.Override
@@ -5027,7 +5247,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -5051,7 +5270,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5086,7 +5305,9 @@ public final class DbusProto {
     private volatile java.lang.Object bucketName_;
     /**
      * <code>string bucketName = 1;</code>
+     * @return The bucketName.
      */
+    @java.lang.Override
     public java.lang.String getBucketName() {
       java.lang.Object ref = bucketName_;
       if (ref instanceof java.lang.String) {
@@ -5101,7 +5322,9 @@ public final class DbusProto {
     }
     /**
      * <code>string bucketName = 1;</code>
+     * @return The bytes for bucketName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBucketNameBytes() {
       java.lang.Object ref = bucketName_;
@@ -5120,7 +5343,9 @@ public final class DbusProto {
     private volatile java.lang.Object key_;
     /**
      * <code>string key = 2;</code>
+     * @return The key.
      */
+    @java.lang.Override
     public java.lang.String getKey() {
       java.lang.Object ref = key_;
       if (ref instanceof java.lang.String) {
@@ -5135,7 +5360,9 @@ public final class DbusProto {
     }
     /**
      * <code>string key = 2;</code>
+     * @return The bytes for key.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getKeyBytes() {
       java.lang.Object ref = key_;
@@ -5164,10 +5391,10 @@ public final class DbusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getBucketNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(bucketName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, bucketName_);
       }
-      if (!getKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, key_);
       }
       unknownFields.writeTo(output);
@@ -5179,10 +5406,10 @@ public final class DbusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getBucketNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(bucketName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, bucketName_);
       }
-      if (!getKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(key_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, key_);
       }
       size += unknownFields.getSerializedSize();
@@ -5200,13 +5427,12 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.S3Link other = (com.cloudera.sigma.service.dbus.DbusProto.S3Link) obj;
 
-      boolean result = true;
-      result = result && getBucketName()
-          .equals(other.getBucketName());
-      result = result && getKey()
-          .equals(other.getKey());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getBucketName()
+          .equals(other.getBucketName())) return false;
+      if (!getKey()
+          .equals(other.getKey())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5391,35 +5617,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5473,6 +5699,7 @@ public final class DbusProto {
       private java.lang.Object bucketName_ = "";
       /**
        * <code>string bucketName = 1;</code>
+       * @return The bucketName.
        */
       public java.lang.String getBucketName() {
         java.lang.Object ref = bucketName_;
@@ -5488,6 +5715,7 @@ public final class DbusProto {
       }
       /**
        * <code>string bucketName = 1;</code>
+       * @return The bytes for bucketName.
        */
       public com.google.protobuf.ByteString
           getBucketNameBytes() {
@@ -5504,6 +5732,8 @@ public final class DbusProto {
       }
       /**
        * <code>string bucketName = 1;</code>
+       * @param value The bucketName to set.
+       * @return This builder for chaining.
        */
       public Builder setBucketName(
           java.lang.String value) {
@@ -5517,6 +5747,7 @@ public final class DbusProto {
       }
       /**
        * <code>string bucketName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBucketName() {
         
@@ -5526,6 +5757,8 @@ public final class DbusProto {
       }
       /**
        * <code>string bucketName = 1;</code>
+       * @param value The bytes for bucketName to set.
+       * @return This builder for chaining.
        */
       public Builder setBucketNameBytes(
           com.google.protobuf.ByteString value) {
@@ -5542,6 +5775,7 @@ public final class DbusProto {
       private java.lang.Object key_ = "";
       /**
        * <code>string key = 2;</code>
+       * @return The key.
        */
       public java.lang.String getKey() {
         java.lang.Object ref = key_;
@@ -5557,6 +5791,7 @@ public final class DbusProto {
       }
       /**
        * <code>string key = 2;</code>
+       * @return The bytes for key.
        */
       public com.google.protobuf.ByteString
           getKeyBytes() {
@@ -5573,6 +5808,8 @@ public final class DbusProto {
       }
       /**
        * <code>string key = 2;</code>
+       * @param value The key to set.
+       * @return This builder for chaining.
        */
       public Builder setKey(
           java.lang.String value) {
@@ -5586,6 +5823,7 @@ public final class DbusProto {
       }
       /**
        * <code>string key = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearKey() {
         
@@ -5595,6 +5833,8 @@ public final class DbusProto {
       }
       /**
        * <code>string key = 2;</code>
+       * @param value The bytes for key to set.
+       * @return This builder for chaining.
        */
       public Builder setKeyBytes(
           com.google.protobuf.ByteString value) {
@@ -5610,7 +5850,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5666,30 +5906,36 @@ public final class DbusProto {
 
     /**
      * <code>string recordId = 1;</code>
+     * @return The recordId.
      */
     java.lang.String getRecordId();
     /**
      * <code>string recordId = 1;</code>
+     * @return The bytes for recordId.
      */
     com.google.protobuf.ByteString
         getRecordIdBytes();
 
     /**
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
 
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return Whether the body field is set.
      */
     boolean hasBody();
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return The body.
      */
     com.cloudera.sigma.service.dbus.DbusProto.Record.Body getBody();
     /**
@@ -5699,10 +5945,12 @@ public final class DbusProto {
 
     /**
      * <code>.sigmadbus.S3Link s3Link = 4;</code>
+     * @return Whether the s3Link field is set.
      */
     boolean hasS3Link();
     /**
      * <code>.sigmadbus.S3Link s3Link = 4;</code>
+     * @return The s3Link.
      */
     com.cloudera.sigma.service.dbus.DbusProto.S3Link getS3Link();
     /**
@@ -5713,7 +5961,7 @@ public final class DbusProto {
   /**
    * Protobuf type {@code sigmadbus.DbusKinesisRecord}
    */
-  public  static final class DbusKinesisRecord extends
+  public static final class DbusKinesisRecord extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.DbusKinesisRecord)
       DbusKinesisRecordOrBuilder {
@@ -5725,6 +5973,13 @@ public final class DbusProto {
     private DbusKinesisRecord() {
       recordId_ = "";
       accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DbusKinesisRecord();
     }
 
     @java.lang.Override
@@ -5740,7 +5995,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -5790,7 +6044,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5825,7 +6079,9 @@ public final class DbusProto {
     private volatile java.lang.Object recordId_;
     /**
      * <code>string recordId = 1;</code>
+     * @return The recordId.
      */
+    @java.lang.Override
     public java.lang.String getRecordId() {
       java.lang.Object ref = recordId_;
       if (ref instanceof java.lang.String) {
@@ -5840,7 +6096,9 @@ public final class DbusProto {
     }
     /**
      * <code>string recordId = 1;</code>
+     * @return The bytes for recordId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRecordIdBytes() {
       java.lang.Object ref = recordId_;
@@ -5859,7 +6117,9 @@ public final class DbusProto {
     private volatile java.lang.Object accountId_;
     /**
      * <code>string accountId = 2;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -5874,7 +6134,9 @@ public final class DbusProto {
     }
     /**
      * <code>string accountId = 2;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -5893,19 +6155,24 @@ public final class DbusProto {
     private com.cloudera.sigma.service.dbus.DbusProto.Record.Body body_;
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return Whether the body field is set.
      */
+    @java.lang.Override
     public boolean hasBody() {
       return body_ != null;
     }
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
+     * @return The body.
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.Record.Body getBody() {
       return body_ == null ? com.cloudera.sigma.service.dbus.DbusProto.Record.Body.getDefaultInstance() : body_;
     }
     /**
      * <code>.sigmadbus.Record.Body body = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.Record.BodyOrBuilder getBodyOrBuilder() {
       return getBody();
     }
@@ -5914,19 +6181,24 @@ public final class DbusProto {
     private com.cloudera.sigma.service.dbus.DbusProto.S3Link s3Link_;
     /**
      * <code>.sigmadbus.S3Link s3Link = 4;</code>
+     * @return Whether the s3Link field is set.
      */
+    @java.lang.Override
     public boolean hasS3Link() {
       return s3Link_ != null;
     }
     /**
      * <code>.sigmadbus.S3Link s3Link = 4;</code>
+     * @return The s3Link.
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.S3Link getS3Link() {
       return s3Link_ == null ? com.cloudera.sigma.service.dbus.DbusProto.S3Link.getDefaultInstance() : s3Link_;
     }
     /**
      * <code>.sigmadbus.S3Link s3Link = 4;</code>
      */
+    @java.lang.Override
     public com.cloudera.sigma.service.dbus.DbusProto.S3LinkOrBuilder getS3LinkOrBuilder() {
       return getS3Link();
     }
@@ -5945,10 +6217,10 @@ public final class DbusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getRecordIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(recordId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, recordId_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, accountId_);
       }
       if (body_ != null) {
@@ -5966,10 +6238,10 @@ public final class DbusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getRecordIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(recordId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, recordId_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, accountId_);
       }
       if (body_ != null) {
@@ -5995,23 +6267,22 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.DbusKinesisRecord other = (com.cloudera.sigma.service.dbus.DbusProto.DbusKinesisRecord) obj;
 
-      boolean result = true;
-      result = result && getRecordId()
-          .equals(other.getRecordId());
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && (hasBody() == other.hasBody());
+      if (!getRecordId()
+          .equals(other.getRecordId())) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (hasBody() != other.hasBody()) return false;
       if (hasBody()) {
-        result = result && getBody()
-            .equals(other.getBody());
+        if (!getBody()
+            .equals(other.getBody())) return false;
       }
-      result = result && (hasS3Link() == other.hasS3Link());
+      if (hasS3Link() != other.hasS3Link()) return false;
       if (hasS3Link()) {
-        result = result && getS3Link()
-            .equals(other.getS3Link());
+        if (!getS3Link()
+            .equals(other.getS3Link())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6226,35 +6497,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6314,6 +6585,7 @@ public final class DbusProto {
       private java.lang.Object recordId_ = "";
       /**
        * <code>string recordId = 1;</code>
+       * @return The recordId.
        */
       public java.lang.String getRecordId() {
         java.lang.Object ref = recordId_;
@@ -6329,6 +6601,7 @@ public final class DbusProto {
       }
       /**
        * <code>string recordId = 1;</code>
+       * @return The bytes for recordId.
        */
       public com.google.protobuf.ByteString
           getRecordIdBytes() {
@@ -6345,6 +6618,8 @@ public final class DbusProto {
       }
       /**
        * <code>string recordId = 1;</code>
+       * @param value The recordId to set.
+       * @return This builder for chaining.
        */
       public Builder setRecordId(
           java.lang.String value) {
@@ -6358,6 +6633,7 @@ public final class DbusProto {
       }
       /**
        * <code>string recordId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRecordId() {
         
@@ -6367,6 +6643,8 @@ public final class DbusProto {
       }
       /**
        * <code>string recordId = 1;</code>
+       * @param value The bytes for recordId to set.
+       * @return This builder for chaining.
        */
       public Builder setRecordIdBytes(
           com.google.protobuf.ByteString value) {
@@ -6383,6 +6661,7 @@ public final class DbusProto {
       private java.lang.Object accountId_ = "";
       /**
        * <code>string accountId = 2;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -6398,6 +6677,7 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 2;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -6414,6 +6694,8 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 2;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -6427,6 +6709,7 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -6436,6 +6719,8 @@ public final class DbusProto {
       }
       /**
        * <code>string accountId = 2;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -6449,17 +6734,19 @@ public final class DbusProto {
         return this;
       }
 
-      private com.cloudera.sigma.service.dbus.DbusProto.Record.Body body_ = null;
+      private com.cloudera.sigma.service.dbus.DbusProto.Record.Body body_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.sigma.service.dbus.DbusProto.Record.Body, com.cloudera.sigma.service.dbus.DbusProto.Record.Body.Builder, com.cloudera.sigma.service.dbus.DbusProto.Record.BodyOrBuilder> bodyBuilder_;
       /**
        * <code>.sigmadbus.Record.Body body = 3;</code>
+       * @return Whether the body field is set.
        */
       public boolean hasBody() {
         return bodyBuilder_ != null || body_ != null;
       }
       /**
        * <code>.sigmadbus.Record.Body body = 3;</code>
+       * @return The body.
        */
       public com.cloudera.sigma.service.dbus.DbusProto.Record.Body getBody() {
         if (bodyBuilder_ == null) {
@@ -6566,17 +6853,19 @@ public final class DbusProto {
         return bodyBuilder_;
       }
 
-      private com.cloudera.sigma.service.dbus.DbusProto.S3Link s3Link_ = null;
+      private com.cloudera.sigma.service.dbus.DbusProto.S3Link s3Link_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.sigma.service.dbus.DbusProto.S3Link, com.cloudera.sigma.service.dbus.DbusProto.S3Link.Builder, com.cloudera.sigma.service.dbus.DbusProto.S3LinkOrBuilder> s3LinkBuilder_;
       /**
        * <code>.sigmadbus.S3Link s3Link = 4;</code>
+       * @return Whether the s3Link field is set.
        */
       public boolean hasS3Link() {
         return s3LinkBuilder_ != null || s3Link_ != null;
       }
       /**
        * <code>.sigmadbus.S3Link s3Link = 4;</code>
+       * @return The s3Link.
        */
       public com.cloudera.sigma.service.dbus.DbusProto.S3Link getS3Link() {
         if (s3LinkBuilder_ == null) {
@@ -6685,7 +6974,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6741,10 +7030,12 @@ public final class DbusProto {
 
     /**
      * <code>string uuid = 1;</code>
+     * @return The uuid.
      */
     java.lang.String getUuid();
     /**
      * <code>string uuid = 1;</code>
+     * @return The bytes for uuid.
      */
     com.google.protobuf.ByteString
         getUuidBytes();
@@ -6752,7 +7043,7 @@ public final class DbusProto {
   /**
    * Protobuf type {@code sigmadbus.ValidateUuidRequest}
    */
-  public  static final class ValidateUuidRequest extends
+  public static final class ValidateUuidRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.ValidateUuidRequest)
       ValidateUuidRequestOrBuilder {
@@ -6763,6 +7054,13 @@ public final class DbusProto {
     }
     private ValidateUuidRequest() {
       uuid_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ValidateUuidRequest();
     }
 
     @java.lang.Override
@@ -6778,7 +7076,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6796,7 +7093,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6831,7 +7128,9 @@ public final class DbusProto {
     private volatile java.lang.Object uuid_;
     /**
      * <code>string uuid = 1;</code>
+     * @return The uuid.
      */
+    @java.lang.Override
     public java.lang.String getUuid() {
       java.lang.Object ref = uuid_;
       if (ref instanceof java.lang.String) {
@@ -6846,7 +7145,9 @@ public final class DbusProto {
     }
     /**
      * <code>string uuid = 1;</code>
+     * @return The bytes for uuid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUuidBytes() {
       java.lang.Object ref = uuid_;
@@ -6875,7 +7176,7 @@ public final class DbusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getUuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, uuid_);
       }
       unknownFields.writeTo(output);
@@ -6887,7 +7188,7 @@ public final class DbusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getUuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, uuid_);
       }
       size += unknownFields.getSerializedSize();
@@ -6905,11 +7206,10 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest other = (com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest) obj;
 
-      boolean result = true;
-      result = result && getUuid()
-          .equals(other.getUuid());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUuid()
+          .equals(other.getUuid())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7089,35 +7389,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7167,6 +7467,7 @@ public final class DbusProto {
       private java.lang.Object uuid_ = "";
       /**
        * <code>string uuid = 1;</code>
+       * @return The uuid.
        */
       public java.lang.String getUuid() {
         java.lang.Object ref = uuid_;
@@ -7182,6 +7483,7 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @return The bytes for uuid.
        */
       public com.google.protobuf.ByteString
           getUuidBytes() {
@@ -7198,6 +7500,8 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @param value The uuid to set.
+       * @return This builder for chaining.
        */
       public Builder setUuid(
           java.lang.String value) {
@@ -7211,6 +7515,7 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUuid() {
         
@@ -7220,6 +7525,8 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @param value The bytes for uuid to set.
+       * @return This builder for chaining.
        */
       public Builder setUuidBytes(
           com.google.protobuf.ByteString value) {
@@ -7235,7 +7542,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7295,25 +7602,30 @@ public final class DbusProto {
      * </pre>
      *
      * <code>bool valid = 1;</code>
+     * @return The valid.
      */
     boolean getValid();
 
     /**
      * <code>string bucket = 2;</code>
+     * @return The bucket.
      */
     java.lang.String getBucket();
     /**
      * <code>string bucket = 2;</code>
+     * @return The bytes for bucket.
      */
     com.google.protobuf.ByteString
         getBucketBytes();
 
     /**
      * <code>string stream = 3;</code>
+     * @return The stream.
      */
     java.lang.String getStream();
     /**
      * <code>string stream = 3;</code>
+     * @return The bytes for stream.
      */
     com.google.protobuf.ByteString
         getStreamBytes();
@@ -7321,7 +7633,7 @@ public final class DbusProto {
   /**
    * Protobuf type {@code sigmadbus.ValidateUuidResponse}
    */
-  public  static final class ValidateUuidResponse extends
+  public static final class ValidateUuidResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.ValidateUuidResponse)
       ValidateUuidResponseOrBuilder {
@@ -7331,9 +7643,15 @@ public final class DbusProto {
       super(builder);
     }
     private ValidateUuidResponse() {
-      valid_ = false;
       bucket_ = "";
       stream_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ValidateUuidResponse();
     }
 
     @java.lang.Override
@@ -7349,7 +7667,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7378,7 +7695,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7417,7 +7734,9 @@ public final class DbusProto {
      * </pre>
      *
      * <code>bool valid = 1;</code>
+     * @return The valid.
      */
+    @java.lang.Override
     public boolean getValid() {
       return valid_;
     }
@@ -7426,7 +7745,9 @@ public final class DbusProto {
     private volatile java.lang.Object bucket_;
     /**
      * <code>string bucket = 2;</code>
+     * @return The bucket.
      */
+    @java.lang.Override
     public java.lang.String getBucket() {
       java.lang.Object ref = bucket_;
       if (ref instanceof java.lang.String) {
@@ -7441,7 +7762,9 @@ public final class DbusProto {
     }
     /**
      * <code>string bucket = 2;</code>
+     * @return The bytes for bucket.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBucketBytes() {
       java.lang.Object ref = bucket_;
@@ -7460,7 +7783,9 @@ public final class DbusProto {
     private volatile java.lang.Object stream_;
     /**
      * <code>string stream = 3;</code>
+     * @return The stream.
      */
+    @java.lang.Override
     public java.lang.String getStream() {
       java.lang.Object ref = stream_;
       if (ref instanceof java.lang.String) {
@@ -7475,7 +7800,9 @@ public final class DbusProto {
     }
     /**
      * <code>string stream = 3;</code>
+     * @return The bytes for stream.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStreamBytes() {
       java.lang.Object ref = stream_;
@@ -7507,10 +7834,10 @@ public final class DbusProto {
       if (valid_ != false) {
         output.writeBool(1, valid_);
       }
-      if (!getBucketBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(bucket_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, bucket_);
       }
-      if (!getStreamBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(stream_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, stream_);
       }
       unknownFields.writeTo(output);
@@ -7526,10 +7853,10 @@ public final class DbusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, valid_);
       }
-      if (!getBucketBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(bucket_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, bucket_);
       }
-      if (!getStreamBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(stream_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, stream_);
       }
       size += unknownFields.getSerializedSize();
@@ -7547,15 +7874,14 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse other = (com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse) obj;
 
-      boolean result = true;
-      result = result && (getValid()
-          == other.getValid());
-      result = result && getBucket()
-          .equals(other.getBucket());
-      result = result && getStream()
-          .equals(other.getStream());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getValid()
+          != other.getValid()) return false;
+      if (!getBucket()
+          .equals(other.getBucket())) return false;
+      if (!getStream()
+          .equals(other.getStream())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7746,35 +8072,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7835,7 +8161,9 @@ public final class DbusProto {
        * </pre>
        *
        * <code>bool valid = 1;</code>
+       * @return The valid.
        */
+      @java.lang.Override
       public boolean getValid() {
         return valid_;
       }
@@ -7845,6 +8173,8 @@ public final class DbusProto {
        * </pre>
        *
        * <code>bool valid = 1;</code>
+       * @param value The valid to set.
+       * @return This builder for chaining.
        */
       public Builder setValid(boolean value) {
         
@@ -7858,6 +8188,7 @@ public final class DbusProto {
        * </pre>
        *
        * <code>bool valid = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValid() {
         
@@ -7869,6 +8200,7 @@ public final class DbusProto {
       private java.lang.Object bucket_ = "";
       /**
        * <code>string bucket = 2;</code>
+       * @return The bucket.
        */
       public java.lang.String getBucket() {
         java.lang.Object ref = bucket_;
@@ -7884,6 +8216,7 @@ public final class DbusProto {
       }
       /**
        * <code>string bucket = 2;</code>
+       * @return The bytes for bucket.
        */
       public com.google.protobuf.ByteString
           getBucketBytes() {
@@ -7900,6 +8233,8 @@ public final class DbusProto {
       }
       /**
        * <code>string bucket = 2;</code>
+       * @param value The bucket to set.
+       * @return This builder for chaining.
        */
       public Builder setBucket(
           java.lang.String value) {
@@ -7913,6 +8248,7 @@ public final class DbusProto {
       }
       /**
        * <code>string bucket = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBucket() {
         
@@ -7922,6 +8258,8 @@ public final class DbusProto {
       }
       /**
        * <code>string bucket = 2;</code>
+       * @param value The bytes for bucket to set.
+       * @return This builder for chaining.
        */
       public Builder setBucketBytes(
           com.google.protobuf.ByteString value) {
@@ -7938,6 +8276,7 @@ public final class DbusProto {
       private java.lang.Object stream_ = "";
       /**
        * <code>string stream = 3;</code>
+       * @return The stream.
        */
       public java.lang.String getStream() {
         java.lang.Object ref = stream_;
@@ -7953,6 +8292,7 @@ public final class DbusProto {
       }
       /**
        * <code>string stream = 3;</code>
+       * @return The bytes for stream.
        */
       public com.google.protobuf.ByteString
           getStreamBytes() {
@@ -7969,6 +8309,8 @@ public final class DbusProto {
       }
       /**
        * <code>string stream = 3;</code>
+       * @param value The stream to set.
+       * @return This builder for chaining.
        */
       public Builder setStream(
           java.lang.String value) {
@@ -7982,6 +8324,7 @@ public final class DbusProto {
       }
       /**
        * <code>string stream = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStream() {
         
@@ -7991,6 +8334,8 @@ public final class DbusProto {
       }
       /**
        * <code>string stream = 3;</code>
+       * @param value The bytes for stream to set.
+       * @return This builder for chaining.
        */
       public Builder setStreamBytes(
           com.google.protobuf.ByteString value) {
@@ -8006,7 +8351,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8062,23 +8407,26 @@ public final class DbusProto {
 
     /**
      * <code>string uuid = 1;</code>
+     * @return The uuid.
      */
     java.lang.String getUuid();
     /**
      * <code>string uuid = 1;</code>
+     * @return The bytes for uuid.
      */
     com.google.protobuf.ByteString
         getUuidBytes();
 
     /**
      * <code>int64 uploadedFileSize = 2;</code>
+     * @return The uploadedFileSize.
      */
     long getUploadedFileSize();
   }
   /**
    * Protobuf type {@code sigmadbus.NotifyFileUploadRequest}
    */
-  public  static final class NotifyFileUploadRequest extends
+  public static final class NotifyFileUploadRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.NotifyFileUploadRequest)
       NotifyFileUploadRequestOrBuilder {
@@ -8089,7 +8437,13 @@ public final class DbusProto {
     }
     private NotifyFileUploadRequest() {
       uuid_ = "";
-      uploadedFileSize_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NotifyFileUploadRequest();
     }
 
     @java.lang.Override
@@ -8105,7 +8459,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -8128,7 +8481,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8163,7 +8516,9 @@ public final class DbusProto {
     private volatile java.lang.Object uuid_;
     /**
      * <code>string uuid = 1;</code>
+     * @return The uuid.
      */
+    @java.lang.Override
     public java.lang.String getUuid() {
       java.lang.Object ref = uuid_;
       if (ref instanceof java.lang.String) {
@@ -8178,7 +8533,9 @@ public final class DbusProto {
     }
     /**
      * <code>string uuid = 1;</code>
+     * @return The bytes for uuid.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUuidBytes() {
       java.lang.Object ref = uuid_;
@@ -8197,7 +8554,9 @@ public final class DbusProto {
     private long uploadedFileSize_;
     /**
      * <code>int64 uploadedFileSize = 2;</code>
+     * @return The uploadedFileSize.
      */
+    @java.lang.Override
     public long getUploadedFileSize() {
       return uploadedFileSize_;
     }
@@ -8216,7 +8575,7 @@ public final class DbusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getUuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, uuid_);
       }
       if (uploadedFileSize_ != 0L) {
@@ -8231,7 +8590,7 @@ public final class DbusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getUuidBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(uuid_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, uuid_);
       }
       if (uploadedFileSize_ != 0L) {
@@ -8253,13 +8612,12 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest other = (com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest) obj;
 
-      boolean result = true;
-      result = result && getUuid()
-          .equals(other.getUuid());
-      result = result && (getUploadedFileSize()
-          == other.getUploadedFileSize());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUuid()
+          .equals(other.getUuid())) return false;
+      if (getUploadedFileSize()
+          != other.getUploadedFileSize()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8445,35 +8803,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8526,6 +8884,7 @@ public final class DbusProto {
       private java.lang.Object uuid_ = "";
       /**
        * <code>string uuid = 1;</code>
+       * @return The uuid.
        */
       public java.lang.String getUuid() {
         java.lang.Object ref = uuid_;
@@ -8541,6 +8900,7 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @return The bytes for uuid.
        */
       public com.google.protobuf.ByteString
           getUuidBytes() {
@@ -8557,6 +8917,8 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @param value The uuid to set.
+       * @return This builder for chaining.
        */
       public Builder setUuid(
           java.lang.String value) {
@@ -8570,6 +8932,7 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUuid() {
         
@@ -8579,6 +8942,8 @@ public final class DbusProto {
       }
       /**
        * <code>string uuid = 1;</code>
+       * @param value The bytes for uuid to set.
+       * @return This builder for chaining.
        */
       public Builder setUuidBytes(
           com.google.protobuf.ByteString value) {
@@ -8595,12 +8960,16 @@ public final class DbusProto {
       private long uploadedFileSize_ ;
       /**
        * <code>int64 uploadedFileSize = 2;</code>
+       * @return The uploadedFileSize.
        */
+      @java.lang.Override
       public long getUploadedFileSize() {
         return uploadedFileSize_;
       }
       /**
        * <code>int64 uploadedFileSize = 2;</code>
+       * @param value The uploadedFileSize to set.
+       * @return This builder for chaining.
        */
       public Builder setUploadedFileSize(long value) {
         
@@ -8610,6 +8979,7 @@ public final class DbusProto {
       }
       /**
        * <code>int64 uploadedFileSize = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUploadedFileSize() {
         
@@ -8620,7 +8990,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8680,13 +9050,14 @@ public final class DbusProto {
      * </pre>
      *
      * <code>bool valid = 1;</code>
+     * @return The valid.
      */
     boolean getValid();
   }
   /**
    * Protobuf type {@code sigmadbus.NotifyFileUploadResponse}
    */
-  public  static final class NotifyFileUploadResponse extends
+  public static final class NotifyFileUploadResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:sigmadbus.NotifyFileUploadResponse)
       NotifyFileUploadResponseOrBuilder {
@@ -8696,7 +9067,13 @@ public final class DbusProto {
       super(builder);
     }
     private NotifyFileUploadResponse() {
-      valid_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NotifyFileUploadResponse();
     }
 
     @java.lang.Override
@@ -8712,7 +9089,6 @@ public final class DbusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -8729,7 +9105,7 @@ public final class DbusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8768,7 +9144,9 @@ public final class DbusProto {
      * </pre>
      *
      * <code>bool valid = 1;</code>
+     * @return The valid.
      */
+    @java.lang.Override
     public boolean getValid() {
       return valid_;
     }
@@ -8818,11 +9196,10 @@ public final class DbusProto {
       }
       com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse other = (com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse) obj;
 
-      boolean result = true;
-      result = result && (getValid()
-          == other.getValid());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getValid()
+          != other.getValid()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9003,35 +9380,35 @@ public final class DbusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9084,7 +9461,9 @@ public final class DbusProto {
        * </pre>
        *
        * <code>bool valid = 1;</code>
+       * @return The valid.
        */
+      @java.lang.Override
       public boolean getValid() {
         return valid_;
       }
@@ -9094,6 +9473,8 @@ public final class DbusProto {
        * </pre>
        *
        * <code>bool valid = 1;</code>
+       * @param value The valid to set.
+       * @return This builder for chaining.
        */
       public Builder setValid(boolean value) {
         
@@ -9107,6 +9488,7 @@ public final class DbusProto {
        * </pre>
        *
        * <code>bool valid = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValid() {
         
@@ -9117,7 +9499,7 @@ public final class DbusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9272,20 +9654,12 @@ public final class DbusProto {
       "oadResponse\"\000B,\n\037com.cloudera.sigma.serv" +
       "ice.dbusB\tDbusProtob\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
-        }, assigner);
+        });
     internal_static_sigmadbus_Record_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_sigmadbus_Record_fieldAccessorTable = new

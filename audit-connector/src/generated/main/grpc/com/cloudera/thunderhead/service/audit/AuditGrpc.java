@@ -1,19 +1,6 @@
 package com.cloudera.thunderhead.service.audit;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -22,8 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.12.0)",
+    value = "by gRPC proto compiler (version 1.42.1)",
     comments = "Source: audit.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class AuditGrpc {
 
   private AuditGrpc() {}
@@ -31,308 +19,266 @@ public final class AuditGrpc {
   public static final String SERVICE_NAME = "audit.Audit";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> METHOD_GET_VERSION = getGetVersionMethodHelper();
-
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetVersion",
+      requestType = com.cloudera.thunderhead.service.common.version.Version.VersionRequest.class,
+      responseType = com.cloudera.thunderhead.service.common.version.Version.VersionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod() {
-    return getGetVersionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
     if ((getGetVersionMethod = AuditGrpc.getGetVersionMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getGetVersionMethod = AuditGrpc.getGetVersionMethod) == null) {
-          AuditGrpc.getGetVersionMethod = getGetVersionMethod = 
+          AuditGrpc.getGetVersionMethod = getGetVersionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "GetVersion"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetVersion"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("GetVersion"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("GetVersion"))
+              .build();
         }
-     }
-     return getGetVersionMethod;
+      }
+    }
+    return getGetVersionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateAuditEventMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> METHOD_CREATE_AUDIT_EVENT = getCreateAuditEventMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> getCreateAuditEventMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateAuditEvent",
+      requestType = com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest.class,
+      responseType = com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> getCreateAuditEventMethod() {
-    return getCreateAuditEventMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> getCreateAuditEventMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest, com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> getCreateAuditEventMethod;
     if ((getCreateAuditEventMethod = AuditGrpc.getCreateAuditEventMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getCreateAuditEventMethod = AuditGrpc.getCreateAuditEventMethod) == null) {
-          AuditGrpc.getCreateAuditEventMethod = getCreateAuditEventMethod = 
+          AuditGrpc.getCreateAuditEventMethod = getCreateAuditEventMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest, com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "CreateAuditEvent"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateAuditEvent"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("CreateAuditEvent"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("CreateAuditEvent"))
+              .build();
         }
-     }
-     return getCreateAuditEventMethod;
+      }
+    }
+    return getCreateAuditEventMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateAttemptAuditEventMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> METHOD_CREATE_ATTEMPT_AUDIT_EVENT = getCreateAttemptAuditEventMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> getCreateAttemptAuditEventMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateAttemptAuditEvent",
+      requestType = com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest.class,
+      responseType = com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> getCreateAttemptAuditEventMethod() {
-    return getCreateAttemptAuditEventMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> getCreateAttemptAuditEventMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest, com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> getCreateAttemptAuditEventMethod;
     if ((getCreateAttemptAuditEventMethod = AuditGrpc.getCreateAttemptAuditEventMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getCreateAttemptAuditEventMethod = AuditGrpc.getCreateAttemptAuditEventMethod) == null) {
-          AuditGrpc.getCreateAttemptAuditEventMethod = getCreateAttemptAuditEventMethod = 
+          AuditGrpc.getCreateAttemptAuditEventMethod = getCreateAttemptAuditEventMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest, com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "CreateAttemptAuditEvent"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateAttemptAuditEvent"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("CreateAttemptAuditEvent"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("CreateAttemptAuditEvent"))
+              .build();
         }
-     }
-     return getCreateAttemptAuditEventMethod;
+      }
+    }
+    return getCreateAttemptAuditEventMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUpdateAttemptAuditEventWithResultMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> METHOD_UPDATE_ATTEMPT_AUDIT_EVENT_WITH_RESULT = getUpdateAttemptAuditEventWithResultMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> getUpdateAttemptAuditEventWithResultMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpdateAttemptAuditEventWithResult",
+      requestType = com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest.class,
+      responseType = com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> getUpdateAttemptAuditEventWithResultMethod() {
-    return getUpdateAttemptAuditEventWithResultMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> getUpdateAttemptAuditEventWithResultMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest, com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> getUpdateAttemptAuditEventWithResultMethod;
     if ((getUpdateAttemptAuditEventWithResultMethod = AuditGrpc.getUpdateAttemptAuditEventWithResultMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getUpdateAttemptAuditEventWithResultMethod = AuditGrpc.getUpdateAttemptAuditEventWithResultMethod) == null) {
-          AuditGrpc.getUpdateAttemptAuditEventWithResultMethod = getUpdateAttemptAuditEventWithResultMethod = 
+          AuditGrpc.getUpdateAttemptAuditEventWithResultMethod = getUpdateAttemptAuditEventWithResultMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest, com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "UpdateAttemptAuditEventWithResult"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdateAttemptAuditEventWithResult"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("UpdateAttemptAuditEventWithResult"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("UpdateAttemptAuditEventWithResult"))
+              .build();
         }
-     }
-     return getUpdateAttemptAuditEventWithResultMethod;
+      }
+    }
+    return getUpdateAttemptAuditEventWithResultMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListEventsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> METHOD_LIST_EVENTS = getListEventsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> getListEventsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListEvents",
+      requestType = com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest.class,
+      responseType = com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> getListEventsMethod() {
-    return getListEventsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> getListEventsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest, com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> getListEventsMethod;
     if ((getListEventsMethod = AuditGrpc.getListEventsMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getListEventsMethod = AuditGrpc.getListEventsMethod) == null) {
-          AuditGrpc.getListEventsMethod = getListEventsMethod = 
+          AuditGrpc.getListEventsMethod = getListEventsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest, com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "ListEvents"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListEvents"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ListEvents"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ListEvents"))
+              .build();
         }
-     }
-     return getListEventsMethod;
+      }
+    }
+    return getListEventsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getConfigureArchivingMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> METHOD_CONFIGURE_ARCHIVING = getConfigureArchivingMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ConfigureArchiving",
+      requestType = com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.class,
+      responseType = com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethod() {
-    return getConfigureArchivingMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> getConfigureArchivingMethod;
     if ((getConfigureArchivingMethod = AuditGrpc.getConfigureArchivingMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getConfigureArchivingMethod = AuditGrpc.getConfigureArchivingMethod) == null) {
-          AuditGrpc.getConfigureArchivingMethod = getConfigureArchivingMethod = 
+          AuditGrpc.getConfigureArchivingMethod = getConfigureArchivingMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest, com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "ConfigureArchiving"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ConfigureArchiving"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ConfigureArchiving"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ConfigureArchiving"))
+              .build();
         }
-     }
-     return getConfigureArchivingMethod;
+      }
+    }
+    return getConfigureArchivingMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetArchivingConfigMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> METHOD_GET_ARCHIVING_CONFIG = getGetArchivingConfigMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetArchivingConfig",
+      requestType = com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.class,
+      responseType = com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethod() {
-    return getGetArchivingConfigMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getGetArchivingConfigMethod;
     if ((getGetArchivingConfigMethod = AuditGrpc.getGetArchivingConfigMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getGetArchivingConfigMethod = AuditGrpc.getGetArchivingConfigMethod) == null) {
-          AuditGrpc.getGetArchivingConfigMethod = getGetArchivingConfigMethod = 
+          AuditGrpc.getGetArchivingConfigMethod = getGetArchivingConfigMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest, com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "GetArchivingConfig"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetArchivingConfig"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("GetArchivingConfig"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("GetArchivingConfig"))
+              .build();
         }
-     }
-     return getGetArchivingConfigMethod;
+      }
+    }
+    return getGetArchivingConfigMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getArchiveAuditEventsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> METHOD_ARCHIVE_AUDIT_EVENTS = getArchiveAuditEventsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> getArchiveAuditEventsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ArchiveAuditEvents",
+      requestType = com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest.class,
+      responseType = com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest,
       com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> getArchiveAuditEventsMethod() {
-    return getArchiveAuditEventsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest,
-      com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> getArchiveAuditEventsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest, com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> getArchiveAuditEventsMethod;
     if ((getArchiveAuditEventsMethod = AuditGrpc.getArchiveAuditEventsMethod) == null) {
       synchronized (AuditGrpc.class) {
         if ((getArchiveAuditEventsMethod = AuditGrpc.getArchiveAuditEventsMethod) == null) {
-          AuditGrpc.getArchiveAuditEventsMethod = getArchiveAuditEventsMethod = 
+          AuditGrpc.getArchiveAuditEventsMethod = getArchiveAuditEventsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest, com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "audit.Audit", "ArchiveAuditEvents"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ArchiveAuditEvents"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ArchiveAuditEvents"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuditMethodDescriptorSupplier("ArchiveAuditEvents"))
+              .build();
         }
-     }
-     return getArchiveAuditEventsMethod;
+      }
+    }
+    return getArchiveAuditEventsMethod;
   }
 
   /**
    * Creates a new async stub that supports all call types for the service
    */
   public static AuditStub newStub(io.grpc.Channel channel) {
-    return new AuditStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<AuditStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuditStub>() {
+        @java.lang.Override
+        public AuditStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuditStub(channel, callOptions);
+        }
+      };
+    return AuditStub.newStub(factory, channel);
   }
 
   /**
@@ -340,7 +286,14 @@ public final class AuditGrpc {
    */
   public static AuditBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new AuditBlockingStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<AuditBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuditBlockingStub>() {
+        @java.lang.Override
+        public AuditBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuditBlockingStub(channel, callOptions);
+        }
+      };
+    return AuditBlockingStub.newStub(factory, channel);
   }
 
   /**
@@ -348,7 +301,14 @@ public final class AuditGrpc {
    */
   public static AuditFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new AuditFutureStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<AuditFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuditFutureStub>() {
+        @java.lang.Override
+        public AuditFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuditFutureStub(channel, callOptions);
+        }
+      };
+    return AuditFutureStub.newStub(factory, channel);
   }
 
   /**
@@ -366,7 +326,7 @@ public final class AuditGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetVersionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
@@ -376,7 +336,7 @@ public final class AuditGrpc {
      */
     public void createAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateAuditEventMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAuditEventMethod(), responseObserver);
     }
 
     /**
@@ -387,7 +347,7 @@ public final class AuditGrpc {
      */
     public void createAttemptAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateAttemptAuditEventMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAttemptAuditEventMethod(), responseObserver);
     }
 
     /**
@@ -397,7 +357,7 @@ public final class AuditGrpc {
      */
     public void updateAttemptAuditEventWithResult(com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUpdateAttemptAuditEventWithResultMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateAttemptAuditEventWithResultMethod(), responseObserver);
     }
 
     /**
@@ -407,7 +367,7 @@ public final class AuditGrpc {
      */
     public void listEvents(com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListEventsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListEventsMethod(), responseObserver);
     }
 
     /**
@@ -417,7 +377,7 @@ public final class AuditGrpc {
      */
     public void configureArchiving(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getConfigureArchivingMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getConfigureArchivingMethod(), responseObserver);
     }
 
     /**
@@ -427,7 +387,7 @@ public final class AuditGrpc {
      */
     public void getArchivingConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetArchivingConfigMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetArchivingConfigMethod(), responseObserver);
     }
 
     /**
@@ -437,63 +397,63 @@ public final class AuditGrpc {
      */
     public void archiveAuditEvents(com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getArchiveAuditEventsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getArchiveAuditEventsMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getGetVersionMethodHelper(),
-            asyncUnaryCall(
+            getGetVersionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
                 com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
                   this, METHODID_GET_VERSION)))
           .addMethod(
-            getCreateAuditEventMethodHelper(),
-            asyncUnaryCall(
+            getCreateAuditEventMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest,
                 com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse>(
                   this, METHODID_CREATE_AUDIT_EVENT)))
           .addMethod(
-            getCreateAttemptAuditEventMethodHelper(),
-            asyncUnaryCall(
+            getCreateAttemptAuditEventMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest,
                 com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse>(
                   this, METHODID_CREATE_ATTEMPT_AUDIT_EVENT)))
           .addMethod(
-            getUpdateAttemptAuditEventWithResultMethodHelper(),
-            asyncUnaryCall(
+            getUpdateAttemptAuditEventWithResultMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest,
                 com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse>(
                   this, METHODID_UPDATE_ATTEMPT_AUDIT_EVENT_WITH_RESULT)))
           .addMethod(
-            getListEventsMethodHelper(),
-            asyncUnaryCall(
+            getListEventsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest,
                 com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse>(
                   this, METHODID_LIST_EVENTS)))
           .addMethod(
-            getConfigureArchivingMethodHelper(),
-            asyncUnaryCall(
+            getConfigureArchivingMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest,
                 com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse>(
                   this, METHODID_CONFIGURE_ARCHIVING)))
           .addMethod(
-            getGetArchivingConfigMethodHelper(),
-            asyncUnaryCall(
+            getGetArchivingConfigMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest,
                 com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse>(
                   this, METHODID_GET_ARCHIVING_CONFIG)))
           .addMethod(
-            getArchiveAuditEventsMethodHelper(),
-            asyncUnaryCall(
+            getArchiveAuditEventsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest,
                 com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse>(
@@ -508,19 +468,15 @@ public final class AuditGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuditStub extends io.grpc.stub.AbstractStub<AuditStub> {
-    private AuditStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private AuditStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class AuditStub extends io.grpc.stub.AbstractAsyncStub<AuditStub> {
+    private AuditStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected AuditStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected AuditStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AuditStub(channel, callOptions);
     }
 
@@ -531,8 +487,8 @@ public final class AuditGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -542,8 +498,8 @@ public final class AuditGrpc {
      */
     public void createAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateAuditEventMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateAuditEventMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -554,8 +510,8 @@ public final class AuditGrpc {
      */
     public void createAttemptAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateAttemptAuditEventMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateAttemptAuditEventMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -565,8 +521,8 @@ public final class AuditGrpc {
      */
     public void updateAttemptAuditEventWithResult(com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUpdateAttemptAuditEventWithResultMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateAttemptAuditEventWithResultMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -576,8 +532,8 @@ public final class AuditGrpc {
      */
     public void listEvents(com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListEventsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListEventsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -587,8 +543,8 @@ public final class AuditGrpc {
      */
     public void configureArchiving(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getConfigureArchivingMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getConfigureArchivingMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -598,8 +554,8 @@ public final class AuditGrpc {
      */
     public void getArchivingConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetArchivingConfigMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetArchivingConfigMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -609,8 +565,8 @@ public final class AuditGrpc {
      */
     public void archiveAuditEvents(com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getArchiveAuditEventsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getArchiveAuditEventsMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -620,19 +576,15 @@ public final class AuditGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuditBlockingStub extends io.grpc.stub.AbstractStub<AuditBlockingStub> {
-    private AuditBlockingStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private AuditBlockingStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class AuditBlockingStub extends io.grpc.stub.AbstractBlockingStub<AuditBlockingStub> {
+    private AuditBlockingStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected AuditBlockingStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected AuditBlockingStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AuditBlockingStub(channel, callOptions);
     }
 
@@ -642,8 +594,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetVersionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -652,8 +604,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse createAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateAuditEventMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateAuditEventMethod(), getCallOptions(), request);
     }
 
     /**
@@ -663,8 +615,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse createAttemptAuditEvent(com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateAttemptAuditEventMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateAttemptAuditEventMethod(), getCallOptions(), request);
     }
 
     /**
@@ -673,8 +625,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse updateAttemptAuditEventWithResult(com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUpdateAttemptAuditEventWithResultMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateAttemptAuditEventWithResultMethod(), getCallOptions(), request);
     }
 
     /**
@@ -683,8 +635,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse listEvents(com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListEventsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListEventsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -693,8 +645,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse configureArchiving(com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getConfigureArchivingMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getConfigureArchivingMethod(), getCallOptions(), request);
     }
 
     /**
@@ -703,8 +655,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse getArchivingConfig(com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetArchivingConfigMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetArchivingConfigMethod(), getCallOptions(), request);
     }
 
     /**
@@ -713,8 +665,8 @@ public final class AuditGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse archiveAuditEvents(com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getArchiveAuditEventsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getArchiveAuditEventsMethod(), getCallOptions(), request);
     }
   }
 
@@ -724,19 +676,15 @@ public final class AuditGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuditFutureStub extends io.grpc.stub.AbstractStub<AuditFutureStub> {
-    private AuditFutureStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private AuditFutureStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class AuditFutureStub extends io.grpc.stub.AbstractFutureStub<AuditFutureStub> {
+    private AuditFutureStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected AuditFutureStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected AuditFutureStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AuditFutureStub(channel, callOptions);
     }
 
@@ -747,8 +695,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getVersion(
         com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -758,8 +706,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse> createAuditEvent(
         com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateAuditEventMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateAuditEventMethod(), getCallOptions()), request);
     }
 
     /**
@@ -770,8 +718,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse> createAttemptAuditEvent(
         com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateAttemptAuditEventMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateAttemptAuditEventMethod(), getCallOptions()), request);
     }
 
     /**
@@ -781,8 +729,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse> updateAttemptAuditEventWithResult(
         com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUpdateAttemptAuditEventWithResultMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateAttemptAuditEventWithResultMethod(), getCallOptions()), request);
     }
 
     /**
@@ -792,8 +740,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse> listEvents(
         com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListEventsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListEventsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -803,8 +751,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse> configureArchiving(
         com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getConfigureArchivingMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getConfigureArchivingMethod(), getCallOptions()), request);
     }
 
     /**
@@ -814,8 +762,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse> getArchivingConfig(
         com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetArchivingConfigMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetArchivingConfigMethod(), getCallOptions()), request);
     }
 
     /**
@@ -825,8 +773,8 @@ public final class AuditGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse> archiveAuditEvents(
         com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getArchiveAuditEventsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getArchiveAuditEventsMethod(), getCallOptions()), request);
     }
   }
 
@@ -949,14 +897,14 @@ public final class AuditGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new AuditFileDescriptorSupplier())
-              .addMethod(getGetVersionMethodHelper())
-              .addMethod(getCreateAuditEventMethodHelper())
-              .addMethod(getCreateAttemptAuditEventMethodHelper())
-              .addMethod(getUpdateAttemptAuditEventWithResultMethodHelper())
-              .addMethod(getListEventsMethodHelper())
-              .addMethod(getConfigureArchivingMethodHelper())
-              .addMethod(getGetArchivingConfigMethodHelper())
-              .addMethod(getArchiveAuditEventsMethodHelper())
+              .addMethod(getGetVersionMethod())
+              .addMethod(getCreateAuditEventMethod())
+              .addMethod(getCreateAttemptAuditEventMethod())
+              .addMethod(getUpdateAttemptAuditEventWithResultMethod())
+              .addMethod(getListEventsMethod())
+              .addMethod(getConfigureArchivingMethod())
+              .addMethod(getGetArchivingConfigMethod())
+              .addMethod(getArchiveAuditEventsMethod())
               .build();
         }
       }

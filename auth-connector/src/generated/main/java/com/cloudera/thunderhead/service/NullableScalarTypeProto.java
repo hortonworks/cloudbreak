@@ -20,13 +20,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>double value = 1;</code>
+     * @return The value.
      */
     double getValue();
   }
   /**
    * Protobuf type {@code nullable.DoubleValue}
    */
-  public  static final class DoubleValue extends
+  public static final class DoubleValue extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.DoubleValue)
       DoubleValueOrBuilder {
@@ -36,7 +37,13 @@ public final class NullableScalarTypeProto {
       super(builder);
     }
     private DoubleValue() {
-      value_ = 0D;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DoubleValue();
     }
 
     @java.lang.Override
@@ -52,7 +59,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -69,7 +75,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -104,7 +110,9 @@ public final class NullableScalarTypeProto {
     private double value_;
     /**
      * <code>double value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public double getValue() {
       return value_;
     }
@@ -123,7 +131,7 @@ public final class NullableScalarTypeProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (value_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(value_) != 0) {
         output.writeDouble(1, value_);
       }
       unknownFields.writeTo(output);
@@ -135,7 +143,7 @@ public final class NullableScalarTypeProto {
       if (size != -1) return size;
 
       size = 0;
-      if (value_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(value_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, value_);
       }
@@ -154,13 +162,11 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.DoubleValue other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.DoubleValue) obj;
 
-      boolean result = true;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getValue())
-          == java.lang.Double.doubleToLongBits(
-              other.getValue()));
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (java.lang.Double.doubleToLongBits(getValue())
+          != java.lang.Double.doubleToLongBits(
+              other.getValue())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -341,35 +347,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -418,12 +424,16 @@ public final class NullableScalarTypeProto {
       private double value_ ;
       /**
        * <code>double value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public double getValue() {
         return value_;
       }
       /**
        * <code>double value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(double value) {
         
@@ -433,6 +443,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>double value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -443,7 +454,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -499,13 +510,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>float value = 1;</code>
+     * @return The value.
      */
     float getValue();
   }
   /**
    * Protobuf type {@code nullable.FloatValue}
    */
-  public  static final class FloatValue extends
+  public static final class FloatValue extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.FloatValue)
       FloatValueOrBuilder {
@@ -515,7 +527,13 @@ public final class NullableScalarTypeProto {
       super(builder);
     }
     private FloatValue() {
-      value_ = 0F;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new FloatValue();
     }
 
     @java.lang.Override
@@ -531,7 +549,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -548,7 +565,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -583,7 +600,9 @@ public final class NullableScalarTypeProto {
     private float value_;
     /**
      * <code>float value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public float getValue() {
       return value_;
     }
@@ -602,7 +621,7 @@ public final class NullableScalarTypeProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (value_ != 0F) {
+      if (java.lang.Float.floatToRawIntBits(value_) != 0) {
         output.writeFloat(1, value_);
       }
       unknownFields.writeTo(output);
@@ -614,7 +633,7 @@ public final class NullableScalarTypeProto {
       if (size != -1) return size;
 
       size = 0;
-      if (value_ != 0F) {
+      if (java.lang.Float.floatToRawIntBits(value_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeFloatSize(1, value_);
       }
@@ -633,13 +652,11 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.FloatValue other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.FloatValue) obj;
 
-      boolean result = true;
-      result = result && (
-          java.lang.Float.floatToIntBits(getValue())
-          == java.lang.Float.floatToIntBits(
-              other.getValue()));
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (java.lang.Float.floatToIntBits(getValue())
+          != java.lang.Float.floatToIntBits(
+              other.getValue())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -820,35 +837,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -897,12 +914,16 @@ public final class NullableScalarTypeProto {
       private float value_ ;
       /**
        * <code>float value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public float getValue() {
         return value_;
       }
       /**
        * <code>float value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(float value) {
         
@@ -912,6 +933,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>float value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -922,7 +944,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -978,13 +1000,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>int64 value = 1;</code>
+     * @return The value.
      */
     long getValue();
   }
   /**
    * Protobuf type {@code nullable.Int64Value}
    */
-  public  static final class Int64Value extends
+  public static final class Int64Value extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.Int64Value)
       Int64ValueOrBuilder {
@@ -994,7 +1017,13 @@ public final class NullableScalarTypeProto {
       super(builder);
     }
     private Int64Value() {
-      value_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Int64Value();
     }
 
     @java.lang.Override
@@ -1010,7 +1039,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1027,7 +1055,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1062,7 +1090,9 @@ public final class NullableScalarTypeProto {
     private long value_;
     /**
      * <code>int64 value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public long getValue() {
       return value_;
     }
@@ -1112,11 +1142,10 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.Int64Value other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.Int64Value) obj;
 
-      boolean result = true;
-      result = result && (getValue()
-          == other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getValue()
+          != other.getValue()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1297,35 +1326,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1374,12 +1403,16 @@ public final class NullableScalarTypeProto {
       private long value_ ;
       /**
        * <code>int64 value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public long getValue() {
         return value_;
       }
       /**
        * <code>int64 value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(long value) {
         
@@ -1389,6 +1422,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>int64 value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -1399,7 +1433,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1455,13 +1489,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>uint64 value = 1;</code>
+     * @return The value.
      */
     long getValue();
   }
   /**
    * Protobuf type {@code nullable.UInt64Value}
    */
-  public  static final class UInt64Value extends
+  public static final class UInt64Value extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.UInt64Value)
       UInt64ValueOrBuilder {
@@ -1471,7 +1506,13 @@ public final class NullableScalarTypeProto {
       super(builder);
     }
     private UInt64Value() {
-      value_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UInt64Value();
     }
 
     @java.lang.Override
@@ -1487,7 +1528,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1504,7 +1544,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1539,7 +1579,9 @@ public final class NullableScalarTypeProto {
     private long value_;
     /**
      * <code>uint64 value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public long getValue() {
       return value_;
     }
@@ -1589,11 +1631,10 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.UInt64Value other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.UInt64Value) obj;
 
-      boolean result = true;
-      result = result && (getValue()
-          == other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getValue()
+          != other.getValue()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1774,35 +1815,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1851,12 +1892,16 @@ public final class NullableScalarTypeProto {
       private long value_ ;
       /**
        * <code>uint64 value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public long getValue() {
         return value_;
       }
       /**
        * <code>uint64 value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(long value) {
         
@@ -1866,6 +1911,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>uint64 value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -1876,7 +1922,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1932,13 +1978,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>int32 value = 1;</code>
+     * @return The value.
      */
     int getValue();
   }
   /**
    * Protobuf type {@code nullable.Int32Value}
    */
-  public  static final class Int32Value extends
+  public static final class Int32Value extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.Int32Value)
       Int32ValueOrBuilder {
@@ -1948,7 +1995,13 @@ public final class NullableScalarTypeProto {
       super(builder);
     }
     private Int32Value() {
-      value_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Int32Value();
     }
 
     @java.lang.Override
@@ -1964,7 +2017,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1981,7 +2033,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2016,7 +2068,9 @@ public final class NullableScalarTypeProto {
     private int value_;
     /**
      * <code>int32 value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public int getValue() {
       return value_;
     }
@@ -2066,11 +2120,10 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.Int32Value other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.Int32Value) obj;
 
-      boolean result = true;
-      result = result && (getValue()
-          == other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getValue()
+          != other.getValue()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2250,35 +2303,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2327,12 +2380,16 @@ public final class NullableScalarTypeProto {
       private int value_ ;
       /**
        * <code>int32 value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public int getValue() {
         return value_;
       }
       /**
        * <code>int32 value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(int value) {
         
@@ -2342,6 +2399,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>int32 value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -2352,7 +2410,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2408,13 +2466,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>uint32 value = 1;</code>
+     * @return The value.
      */
     int getValue();
   }
   /**
    * Protobuf type {@code nullable.UInt32Value}
    */
-  public  static final class UInt32Value extends
+  public static final class UInt32Value extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.UInt32Value)
       UInt32ValueOrBuilder {
@@ -2424,7 +2483,13 @@ public final class NullableScalarTypeProto {
       super(builder);
     }
     private UInt32Value() {
-      value_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UInt32Value();
     }
 
     @java.lang.Override
@@ -2440,7 +2505,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2457,7 +2521,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2492,7 +2556,9 @@ public final class NullableScalarTypeProto {
     private int value_;
     /**
      * <code>uint32 value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public int getValue() {
       return value_;
     }
@@ -2542,11 +2608,10 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.UInt32Value other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.UInt32Value) obj;
 
-      boolean result = true;
-      result = result && (getValue()
-          == other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getValue()
+          != other.getValue()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2726,35 +2791,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2803,12 +2868,16 @@ public final class NullableScalarTypeProto {
       private int value_ ;
       /**
        * <code>uint32 value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public int getValue() {
         return value_;
       }
       /**
        * <code>uint32 value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(int value) {
         
@@ -2818,6 +2887,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>uint32 value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -2828,7 +2898,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2884,13 +2954,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>bool value = 1;</code>
+     * @return The value.
      */
     boolean getValue();
   }
   /**
    * Protobuf type {@code nullable.BoolValue}
    */
-  public  static final class BoolValue extends
+  public static final class BoolValue extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.BoolValue)
       BoolValueOrBuilder {
@@ -2900,7 +2971,13 @@ public final class NullableScalarTypeProto {
       super(builder);
     }
     private BoolValue() {
-      value_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BoolValue();
     }
 
     @java.lang.Override
@@ -2916,7 +2993,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2933,7 +3009,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2968,7 +3044,9 @@ public final class NullableScalarTypeProto {
     private boolean value_;
     /**
      * <code>bool value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public boolean getValue() {
       return value_;
     }
@@ -3018,11 +3096,10 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.BoolValue other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.BoolValue) obj;
 
-      boolean result = true;
-      result = result && (getValue()
-          == other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getValue()
+          != other.getValue()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3203,35 +3280,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3280,12 +3357,16 @@ public final class NullableScalarTypeProto {
       private boolean value_ ;
       /**
        * <code>bool value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public boolean getValue() {
         return value_;
       }
       /**
        * <code>bool value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(boolean value) {
         
@@ -3295,6 +3376,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>bool value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -3305,7 +3387,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3361,10 +3443,12 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>string value = 1;</code>
+     * @return The value.
      */
     java.lang.String getValue();
     /**
      * <code>string value = 1;</code>
+     * @return The bytes for value.
      */
     com.google.protobuf.ByteString
         getValueBytes();
@@ -3372,7 +3456,7 @@ public final class NullableScalarTypeProto {
   /**
    * Protobuf type {@code nullable.StringValue}
    */
-  public  static final class StringValue extends
+  public static final class StringValue extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.StringValue)
       StringValueOrBuilder {
@@ -3383,6 +3467,13 @@ public final class NullableScalarTypeProto {
     }
     private StringValue() {
       value_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StringValue();
     }
 
     @java.lang.Override
@@ -3398,7 +3489,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3416,7 +3506,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3451,7 +3541,9 @@ public final class NullableScalarTypeProto {
     private volatile java.lang.Object value_;
     /**
      * <code>string value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
       if (ref instanceof java.lang.String) {
@@ -3466,7 +3558,9 @@ public final class NullableScalarTypeProto {
     }
     /**
      * <code>string value = 1;</code>
+     * @return The bytes for value.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getValueBytes() {
       java.lang.Object ref = value_;
@@ -3495,7 +3589,7 @@ public final class NullableScalarTypeProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getValueBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, value_);
       }
       unknownFields.writeTo(output);
@@ -3507,7 +3601,7 @@ public final class NullableScalarTypeProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getValueBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, value_);
       }
       size += unknownFields.getSerializedSize();
@@ -3525,11 +3619,10 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.StringValue other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.StringValue) obj;
 
-      boolean result = true;
-      result = result && getValue()
-          .equals(other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getValue()
+          .equals(other.getValue())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3709,35 +3802,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3787,6 +3880,7 @@ public final class NullableScalarTypeProto {
       private java.lang.Object value_ = "";
       /**
        * <code>string value = 1;</code>
+       * @return The value.
        */
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
@@ -3802,6 +3896,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>string value = 1;</code>
+       * @return The bytes for value.
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
@@ -3818,6 +3913,8 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>string value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           java.lang.String value) {
@@ -3831,6 +3928,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>string value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -3840,6 +3938,8 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>string value = 1;</code>
+       * @param value The bytes for value to set.
+       * @return This builder for chaining.
        */
       public Builder setValueBytes(
           com.google.protobuf.ByteString value) {
@@ -3855,7 +3955,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3911,13 +4011,14 @@ public final class NullableScalarTypeProto {
 
     /**
      * <code>bytes value = 1;</code>
+     * @return The value.
      */
     com.google.protobuf.ByteString getValue();
   }
   /**
    * Protobuf type {@code nullable.BytesValue}
    */
-  public  static final class BytesValue extends
+  public static final class BytesValue extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:nullable.BytesValue)
       BytesValueOrBuilder {
@@ -3928,6 +4029,13 @@ public final class NullableScalarTypeProto {
     }
     private BytesValue() {
       value_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new BytesValue();
     }
 
     @java.lang.Override
@@ -3943,7 +4051,6 @@ public final class NullableScalarTypeProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3960,7 +4067,7 @@ public final class NullableScalarTypeProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3995,7 +4102,9 @@ public final class NullableScalarTypeProto {
     private com.google.protobuf.ByteString value_;
     /**
      * <code>bytes value = 1;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getValue() {
       return value_;
     }
@@ -4045,11 +4154,10 @@ public final class NullableScalarTypeProto {
       }
       com.cloudera.thunderhead.service.NullableScalarTypeProto.BytesValue other = (com.cloudera.thunderhead.service.NullableScalarTypeProto.BytesValue) obj;
 
-      boolean result = true;
-      result = result && getValue()
-          .equals(other.getValue());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getValue()
+          .equals(other.getValue())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4229,35 +4337,35 @@ public final class NullableScalarTypeProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4306,12 +4414,16 @@ public final class NullableScalarTypeProto {
       private com.google.protobuf.ByteString value_ = com.google.protobuf.ByteString.EMPTY;
       /**
        * <code>bytes value = 1;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getValue() {
         return value_;
       }
       /**
        * <code>bytes value = 1;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -4324,6 +4436,7 @@ public final class NullableScalarTypeProto {
       }
       /**
        * <code>bytes value = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -4334,7 +4447,7 @@ public final class NullableScalarTypeProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4449,18 +4562,10 @@ public final class NullableScalarTypeProto {
       "erviceB\027NullableScalarTypeProtoZ\031com/clo" +
       "udera/cdp/protobufb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_nullable_DoubleValue_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_nullable_DoubleValue_fieldAccessorTable = new

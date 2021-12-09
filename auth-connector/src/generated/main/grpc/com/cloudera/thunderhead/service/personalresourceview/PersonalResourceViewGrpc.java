@@ -1,19 +1,6 @@
 package com.cloudera.thunderhead.service.personalresourceview;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -22,8 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.12.0)",
+    value = "by gRPC proto compiler (version 1.42.1)",
     comments = "Source: personalresourceview.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class PersonalResourceViewGrpc {
 
   private PersonalResourceViewGrpc() {}
@@ -31,86 +19,80 @@ public final class PersonalResourceViewGrpc {
   public static final String SERVICE_NAME = "authorization.PersonalResourceView";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> METHOD_GET_VERSION = getGetVersionMethodHelper();
-
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetVersion",
+      requestType = com.cloudera.thunderhead.service.common.version.Version.VersionRequest.class,
+      responseType = com.cloudera.thunderhead.service.common.version.Version.VersionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod() {
-    return getGetVersionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
     if ((getGetVersionMethod = PersonalResourceViewGrpc.getGetVersionMethod) == null) {
       synchronized (PersonalResourceViewGrpc.class) {
         if ((getGetVersionMethod = PersonalResourceViewGrpc.getGetVersionMethod) == null) {
-          PersonalResourceViewGrpc.getGetVersionMethod = getGetVersionMethod = 
+          PersonalResourceViewGrpc.getGetVersionMethod = getGetVersionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "authorization.PersonalResourceView", "GetVersion"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetVersion"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new PersonalResourceViewMethodDescriptorSupplier("GetVersion"))
-                  .build();
-          }
+              .setSchemaDescriptor(new PersonalResourceViewMethodDescriptorSupplier("GetVersion"))
+              .build();
         }
-     }
-     return getGetVersionMethod;
+      }
+    }
+    return getGetVersionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getHasResourcesByRightMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest,
-      com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> METHOD_HAS_RESOURCES_BY_RIGHT = getHasResourcesByRightMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest,
       com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> getHasResourcesByRightMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "hasResourcesByRight",
+      requestType = com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest.class,
+      responseType = com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest,
       com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> getHasResourcesByRightMethod() {
-    return getHasResourcesByRightMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest,
-      com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> getHasResourcesByRightMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest, com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> getHasResourcesByRightMethod;
     if ((getHasResourcesByRightMethod = PersonalResourceViewGrpc.getHasResourcesByRightMethod) == null) {
       synchronized (PersonalResourceViewGrpc.class) {
         if ((getHasResourcesByRightMethod = PersonalResourceViewGrpc.getHasResourcesByRightMethod) == null) {
-          PersonalResourceViewGrpc.getHasResourcesByRightMethod = getHasResourcesByRightMethod = 
+          PersonalResourceViewGrpc.getHasResourcesByRightMethod = getHasResourcesByRightMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest, com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "authorization.PersonalResourceView", "hasResourcesByRight"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "hasResourcesByRight"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new PersonalResourceViewMethodDescriptorSupplier("hasResourcesByRight"))
-                  .build();
-          }
+              .setSchemaDescriptor(new PersonalResourceViewMethodDescriptorSupplier("hasResourcesByRight"))
+              .build();
         }
-     }
-     return getHasResourcesByRightMethod;
+      }
+    }
+    return getHasResourcesByRightMethod;
   }
 
   /**
    * Creates a new async stub that supports all call types for the service
    */
   public static PersonalResourceViewStub newStub(io.grpc.Channel channel) {
-    return new PersonalResourceViewStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewStub>() {
+        @java.lang.Override
+        public PersonalResourceViewStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new PersonalResourceViewStub(channel, callOptions);
+        }
+      };
+    return PersonalResourceViewStub.newStub(factory, channel);
   }
 
   /**
@@ -118,7 +100,14 @@ public final class PersonalResourceViewGrpc {
    */
   public static PersonalResourceViewBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new PersonalResourceViewBlockingStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewBlockingStub>() {
+        @java.lang.Override
+        public PersonalResourceViewBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new PersonalResourceViewBlockingStub(channel, callOptions);
+        }
+      };
+    return PersonalResourceViewBlockingStub.newStub(factory, channel);
   }
 
   /**
@@ -126,7 +115,14 @@ public final class PersonalResourceViewGrpc {
    */
   public static PersonalResourceViewFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new PersonalResourceViewFutureStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<PersonalResourceViewFutureStub>() {
+        @java.lang.Override
+        public PersonalResourceViewFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new PersonalResourceViewFutureStub(channel, callOptions);
+        }
+      };
+    return PersonalResourceViewFutureStub.newStub(factory, channel);
   }
 
   /**
@@ -144,7 +140,7 @@ public final class PersonalResourceViewGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetVersionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
@@ -155,21 +151,21 @@ public final class PersonalResourceViewGrpc {
      */
     public void hasResourcesByRight(com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getHasResourcesByRightMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getHasResourcesByRightMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getGetVersionMethodHelper(),
-            asyncUnaryCall(
+            getGetVersionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
                 com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
                   this, METHODID_GET_VERSION)))
           .addMethod(
-            getHasResourcesByRightMethodHelper(),
-            asyncUnaryCall(
+            getHasResourcesByRightMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest,
                 com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse>(
@@ -184,19 +180,15 @@ public final class PersonalResourceViewGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PersonalResourceViewStub extends io.grpc.stub.AbstractStub<PersonalResourceViewStub> {
-    private PersonalResourceViewStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private PersonalResourceViewStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class PersonalResourceViewStub extends io.grpc.stub.AbstractAsyncStub<PersonalResourceViewStub> {
+    private PersonalResourceViewStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected PersonalResourceViewStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected PersonalResourceViewStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new PersonalResourceViewStub(channel, callOptions);
     }
 
@@ -207,8 +199,8 @@ public final class PersonalResourceViewGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -219,8 +211,8 @@ public final class PersonalResourceViewGrpc {
      */
     public void hasResourcesByRight(com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getHasResourcesByRightMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getHasResourcesByRightMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -230,19 +222,15 @@ public final class PersonalResourceViewGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PersonalResourceViewBlockingStub extends io.grpc.stub.AbstractStub<PersonalResourceViewBlockingStub> {
-    private PersonalResourceViewBlockingStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private PersonalResourceViewBlockingStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class PersonalResourceViewBlockingStub extends io.grpc.stub.AbstractBlockingStub<PersonalResourceViewBlockingStub> {
+    private PersonalResourceViewBlockingStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected PersonalResourceViewBlockingStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected PersonalResourceViewBlockingStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new PersonalResourceViewBlockingStub(channel, callOptions);
     }
 
@@ -252,8 +240,8 @@ public final class PersonalResourceViewGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetVersionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -263,8 +251,8 @@ public final class PersonalResourceViewGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse hasResourcesByRight(com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getHasResourcesByRightMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getHasResourcesByRightMethod(), getCallOptions(), request);
     }
   }
 
@@ -274,19 +262,15 @@ public final class PersonalResourceViewGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class PersonalResourceViewFutureStub extends io.grpc.stub.AbstractStub<PersonalResourceViewFutureStub> {
-    private PersonalResourceViewFutureStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private PersonalResourceViewFutureStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class PersonalResourceViewFutureStub extends io.grpc.stub.AbstractFutureStub<PersonalResourceViewFutureStub> {
+    private PersonalResourceViewFutureStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected PersonalResourceViewFutureStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected PersonalResourceViewFutureStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new PersonalResourceViewFutureStub(channel, callOptions);
     }
 
@@ -297,8 +281,8 @@ public final class PersonalResourceViewGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getVersion(
         com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -309,8 +293,8 @@ public final class PersonalResourceViewGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightResponse> hasResourcesByRight(
         com.cloudera.thunderhead.service.personalresourceview.PersonalResourceViewProto.HasResourcesByRightRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getHasResourcesByRightMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getHasResourcesByRightMethod(), getCallOptions()), request);
     }
   }
 
@@ -403,8 +387,8 @@ public final class PersonalResourceViewGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new PersonalResourceViewFileDescriptorSupplier())
-              .addMethod(getGetVersionMethodHelper())
-              .addMethod(getHasResourcesByRightMethodHelper())
+              .addMethod(getGetVersionMethod())
+              .addMethod(getHasResourcesByRightMethod())
               .build();
         }
       }

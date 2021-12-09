@@ -24,6 +24,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -32,6 +33,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -39,7 +41,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.CreateOrGetInvertingProxyRequest}
    */
-  public  static final class CreateOrGetInvertingProxyRequest extends
+  public static final class CreateOrGetInvertingProxyRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.CreateOrGetInvertingProxyRequest)
       CreateOrGetInvertingProxyRequestOrBuilder {
@@ -50,6 +52,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
     private CreateOrGetInvertingProxyRequest() {
       accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateOrGetInvertingProxyRequest();
     }
 
     @java.lang.Override
@@ -65,7 +74,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -83,7 +91,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -122,7 +130,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -141,7 +151,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -170,7 +182,7 @@ public final class ClusterConnectivityManagementV2Proto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
       unknownFields.writeTo(output);
@@ -182,7 +194,7 @@ public final class ClusterConnectivityManagementV2Proto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
       size += unknownFields.getSerializedSize();
@@ -200,11 +212,10 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -384,35 +395,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -466,6 +477,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -485,6 +497,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -505,6 +518,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -522,6 +537,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -535,6 +551,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -550,7 +568,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -610,6 +628,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy invertingProxy = 1;</code>
+     * @return Whether the invertingProxy field is set.
      */
     boolean hasInvertingProxy();
     /**
@@ -618,6 +637,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy invertingProxy = 1;</code>
+     * @return The invertingProxy.
      */
     com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy getInvertingProxy();
     /**
@@ -632,7 +652,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.CreateOrGetInvertingProxyResponse}
    */
-  public  static final class CreateOrGetInvertingProxyResponse extends
+  public static final class CreateOrGetInvertingProxyResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.CreateOrGetInvertingProxyResponse)
       CreateOrGetInvertingProxyResponseOrBuilder {
@@ -642,6 +662,13 @@ public final class ClusterConnectivityManagementV2Proto {
       super(builder);
     }
     private CreateOrGetInvertingProxyResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateOrGetInvertingProxyResponse();
     }
 
     @java.lang.Override
@@ -657,7 +684,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -682,7 +708,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -721,7 +747,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy invertingProxy = 1;</code>
+     * @return Whether the invertingProxy field is set.
      */
+    @java.lang.Override
     public boolean hasInvertingProxy() {
       return invertingProxy_ != null;
     }
@@ -731,7 +759,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy invertingProxy = 1;</code>
+     * @return The invertingProxy.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy getInvertingProxy() {
       return invertingProxy_ == null ? com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.getDefaultInstance() : invertingProxy_;
     }
@@ -742,6 +772,7 @@ public final class ClusterConnectivityManagementV2Proto {
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy invertingProxy = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyOrBuilder getInvertingProxyOrBuilder() {
       return getInvertingProxy();
     }
@@ -791,14 +822,13 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.CreateOrGetInvertingProxyResponse) obj;
 
-      boolean result = true;
-      result = result && (hasInvertingProxy() == other.hasInvertingProxy());
+      if (hasInvertingProxy() != other.hasInvertingProxy()) return false;
       if (hasInvertingProxy()) {
-        result = result && getInvertingProxy()
-            .equals(other.getInvertingProxy());
+        if (!getInvertingProxy()
+            .equals(other.getInvertingProxy())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -988,35 +1018,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1062,7 +1092,7 @@ public final class ClusterConnectivityManagementV2Proto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy invertingProxy_ = null;
+      private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy invertingProxy_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyOrBuilder> invertingProxyBuilder_;
       /**
@@ -1071,6 +1101,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxy invertingProxy = 1;</code>
+       * @return Whether the invertingProxy field is set.
        */
       public boolean hasInvertingProxy() {
         return invertingProxyBuilder_ != null || invertingProxy_ != null;
@@ -1081,6 +1112,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxy invertingProxy = 1;</code>
+       * @return The invertingProxy.
        */
       public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy getInvertingProxy() {
         if (invertingProxyBuilder_ == null) {
@@ -1217,7 +1249,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1277,6 +1309,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -1285,6 +1318,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -1292,7 +1326,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.RemoveInvertingProxyRequest}
    */
-  public  static final class RemoveInvertingProxyRequest extends
+  public static final class RemoveInvertingProxyRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RemoveInvertingProxyRequest)
       RemoveInvertingProxyRequestOrBuilder {
@@ -1303,6 +1337,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
     private RemoveInvertingProxyRequest() {
       accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RemoveInvertingProxyRequest();
     }
 
     @java.lang.Override
@@ -1318,7 +1359,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1336,7 +1376,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1375,7 +1415,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -1394,7 +1436,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -1423,7 +1467,7 @@ public final class ClusterConnectivityManagementV2Proto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
       unknownFields.writeTo(output);
@@ -1435,7 +1479,7 @@ public final class ClusterConnectivityManagementV2Proto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
       size += unknownFields.getSerializedSize();
@@ -1453,11 +1497,10 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1637,35 +1680,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1719,6 +1762,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -1738,6 +1782,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -1758,6 +1803,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -1775,6 +1822,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -1788,6 +1836,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -1803,7 +1853,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1860,7 +1910,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.RemoveInvertingProxyResponse}
    */
-  public  static final class RemoveInvertingProxyResponse extends
+  public static final class RemoveInvertingProxyResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RemoveInvertingProxyResponse)
       RemoveInvertingProxyResponseOrBuilder {
@@ -1870,6 +1920,13 @@ public final class ClusterConnectivityManagementV2Proto {
       super(builder);
     }
     private RemoveInvertingProxyResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RemoveInvertingProxyResponse();
     }
 
     @java.lang.Override
@@ -1896,7 +1953,7 @@ public final class ClusterConnectivityManagementV2Proto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1965,9 +2022,8 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RemoveInvertingProxyResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2142,35 +2198,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2215,7 +2271,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2275,6 +2331,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -2283,6 +2340,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -2294,6 +2352,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string domainName = 2;</code>
+     * @return The domainName.
      */
     java.lang.String getDomainName();
     /**
@@ -2303,6 +2362,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string domainName = 2;</code>
+     * @return The bytes for domainName.
      */
     com.google.protobuf.ByteString
         getDomainNameBytes();
@@ -2314,6 +2374,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string keyId = 3;</code>
+     * @return The keyId.
      */
     java.lang.String getKeyId();
     /**
@@ -2323,6 +2384,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string keyId = 3;</code>
+     * @return The bytes for keyId.
      */
     com.google.protobuf.ByteString
         getKeyIdBytes();
@@ -2338,6 +2400,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
      */
     java.lang.String getEnvironmentCrn();
     /**
@@ -2351,6 +2414,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentCrnBytes();
@@ -2358,7 +2422,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.RegisterAgentRequest}
    */
-  public  static final class RegisterAgentRequest extends
+  public static final class RegisterAgentRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RegisterAgentRequest)
       RegisterAgentRequestOrBuilder {
@@ -2375,6 +2439,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RegisterAgentRequest();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -2387,7 +2458,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2423,7 +2493,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2462,7 +2532,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -2481,7 +2553,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -2505,7 +2579,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string domainName = 2;</code>
+     * @return The domainName.
      */
+    @java.lang.Override
     public java.lang.String getDomainName() {
       java.lang.Object ref = domainName_;
       if (ref instanceof java.lang.String) {
@@ -2525,7 +2601,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string domainName = 2;</code>
+     * @return The bytes for domainName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDomainNameBytes() {
       java.lang.Object ref = domainName_;
@@ -2549,7 +2627,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string keyId = 3;</code>
+     * @return The keyId.
      */
+    @java.lang.Override
     public java.lang.String getKeyId() {
       java.lang.Object ref = keyId_;
       if (ref instanceof java.lang.String) {
@@ -2569,7 +2649,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string keyId = 3;</code>
+     * @return The bytes for keyId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getKeyIdBytes() {
       java.lang.Object ref = keyId_;
@@ -2597,7 +2679,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentCrn() {
       java.lang.Object ref = environmentCrn_;
       if (ref instanceof java.lang.String) {
@@ -2621,7 +2705,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentCrnBytes() {
       java.lang.Object ref = environmentCrn_;
@@ -2650,16 +2736,16 @@ public final class ClusterConnectivityManagementV2Proto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getDomainNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(domainName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, domainName_);
       }
-      if (!getKeyIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, keyId_);
       }
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, environmentCrn_);
       }
       unknownFields.writeTo(output);
@@ -2671,16 +2757,16 @@ public final class ClusterConnectivityManagementV2Proto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getDomainNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(domainName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, domainName_);
       }
-      if (!getKeyIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(keyId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, keyId_);
       }
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, environmentCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -2698,17 +2784,16 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getDomainName()
-          .equals(other.getDomainName());
-      result = result && getKeyId()
-          .equals(other.getKeyId());
-      result = result && getEnvironmentCrn()
-          .equals(other.getEnvironmentCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getDomainName()
+          .equals(other.getDomainName())) return false;
+      if (!getKeyId()
+          .equals(other.getKeyId())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2903,35 +2988,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2997,6 +3082,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -3016,6 +3102,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -3036,6 +3123,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -3053,6 +3142,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -3066,6 +3156,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -3087,6 +3179,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string domainName = 2;</code>
+       * @return The domainName.
        */
       public java.lang.String getDomainName() {
         java.lang.Object ref = domainName_;
@@ -3107,6 +3200,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string domainName = 2;</code>
+       * @return The bytes for domainName.
        */
       public com.google.protobuf.ByteString
           getDomainNameBytes() {
@@ -3128,6 +3222,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string domainName = 2;</code>
+       * @param value The domainName to set.
+       * @return This builder for chaining.
        */
       public Builder setDomainName(
           java.lang.String value) {
@@ -3146,6 +3242,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string domainName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDomainName() {
         
@@ -3160,6 +3257,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string domainName = 2;</code>
+       * @param value The bytes for domainName to set.
+       * @return This builder for chaining.
        */
       public Builder setDomainNameBytes(
           com.google.protobuf.ByteString value) {
@@ -3181,6 +3280,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string keyId = 3;</code>
+       * @return The keyId.
        */
       public java.lang.String getKeyId() {
         java.lang.Object ref = keyId_;
@@ -3201,6 +3301,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string keyId = 3;</code>
+       * @return The bytes for keyId.
        */
       public com.google.protobuf.ByteString
           getKeyIdBytes() {
@@ -3222,6 +3323,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string keyId = 3;</code>
+       * @param value The keyId to set.
+       * @return This builder for chaining.
        */
       public Builder setKeyId(
           java.lang.String value) {
@@ -3240,6 +3343,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string keyId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearKeyId() {
         
@@ -3254,6 +3358,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string keyId = 3;</code>
+       * @param value The bytes for keyId to set.
+       * @return This builder for chaining.
        */
       public Builder setKeyIdBytes(
           com.google.protobuf.ByteString value) {
@@ -3279,6 +3385,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return The environmentCrn.
        */
       public java.lang.String getEnvironmentCrn() {
         java.lang.Object ref = environmentCrn_;
@@ -3303,6 +3410,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return The bytes for environmentCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentCrnBytes() {
@@ -3328,6 +3436,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrn(
           java.lang.String value) {
@@ -3350,6 +3460,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentCrn() {
         
@@ -3368,6 +3479,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -3383,7 +3496,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3443,6 +3556,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return Whether the invertingProxyAgent field is set.
      */
     boolean hasInvertingProxyAgent();
     /**
@@ -3451,6 +3565,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return The invertingProxyAgent.
      */
     com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent();
     /**
@@ -3465,7 +3580,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.RegisterAgentResponse}
    */
-  public  static final class RegisterAgentResponse extends
+  public static final class RegisterAgentResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RegisterAgentResponse)
       RegisterAgentResponseOrBuilder {
@@ -3475,6 +3590,13 @@ public final class ClusterConnectivityManagementV2Proto {
       super(builder);
     }
     private RegisterAgentResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RegisterAgentResponse();
     }
 
     @java.lang.Override
@@ -3490,7 +3612,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3515,7 +3636,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3554,7 +3675,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return Whether the invertingProxyAgent field is set.
      */
+    @java.lang.Override
     public boolean hasInvertingProxyAgent() {
       return invertingProxyAgent_ != null;
     }
@@ -3564,7 +3687,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return The invertingProxyAgent.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent() {
       return invertingProxyAgent_ == null ? com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.getDefaultInstance() : invertingProxyAgent_;
     }
@@ -3575,6 +3700,7 @@ public final class ClusterConnectivityManagementV2Proto {
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder getInvertingProxyAgentOrBuilder() {
       return getInvertingProxyAgent();
     }
@@ -3624,14 +3750,13 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RegisterAgentResponse) obj;
 
-      boolean result = true;
-      result = result && (hasInvertingProxyAgent() == other.hasInvertingProxyAgent());
+      if (hasInvertingProxyAgent() != other.hasInvertingProxyAgent()) return false;
       if (hasInvertingProxyAgent()) {
-        result = result && getInvertingProxyAgent()
-            .equals(other.getInvertingProxyAgent());
+        if (!getInvertingProxyAgent()
+            .equals(other.getInvertingProxyAgent())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3821,35 +3946,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3895,7 +4020,7 @@ public final class ClusterConnectivityManagementV2Proto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent_ = null;
+      private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder> invertingProxyAgentBuilder_;
       /**
@@ -3904,6 +4029,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       * @return Whether the invertingProxyAgent field is set.
        */
       public boolean hasInvertingProxyAgent() {
         return invertingProxyAgentBuilder_ != null || invertingProxyAgent_ != null;
@@ -3914,6 +4040,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       * @return The invertingProxyAgent.
        */
       public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent() {
         if (invertingProxyAgentBuilder_ == null) {
@@ -4050,7 +4177,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4110,6 +4237,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The agentCrn.
      */
     java.lang.String getAgentCrn();
     /**
@@ -4118,6 +4246,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The bytes for agentCrn.
      */
     com.google.protobuf.ByteString
         getAgentCrnBytes();
@@ -4125,7 +4254,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.UnregisterAgentRequest}
    */
-  public  static final class UnregisterAgentRequest extends
+  public static final class UnregisterAgentRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.UnregisterAgentRequest)
       UnregisterAgentRequestOrBuilder {
@@ -4136,6 +4265,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
     private UnregisterAgentRequest() {
       agentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UnregisterAgentRequest();
     }
 
     @java.lang.Override
@@ -4151,7 +4287,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4169,7 +4304,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4208,7 +4343,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The agentCrn.
      */
+    @java.lang.Override
     public java.lang.String getAgentCrn() {
       java.lang.Object ref = agentCrn_;
       if (ref instanceof java.lang.String) {
@@ -4227,7 +4364,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The bytes for agentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAgentCrnBytes() {
       java.lang.Object ref = agentCrn_;
@@ -4256,7 +4395,7 @@ public final class ClusterConnectivityManagementV2Proto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAgentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, agentCrn_);
       }
       unknownFields.writeTo(output);
@@ -4268,7 +4407,7 @@ public final class ClusterConnectivityManagementV2Proto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAgentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, agentCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -4286,11 +4425,10 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentRequest) obj;
 
-      boolean result = true;
-      result = result && getAgentCrn()
-          .equals(other.getAgentCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAgentCrn()
+          .equals(other.getAgentCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4470,35 +4608,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4552,6 +4690,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return The agentCrn.
        */
       public java.lang.String getAgentCrn() {
         java.lang.Object ref = agentCrn_;
@@ -4571,6 +4710,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return The bytes for agentCrn.
        */
       public com.google.protobuf.ByteString
           getAgentCrnBytes() {
@@ -4591,6 +4731,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @param value The agentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setAgentCrn(
           java.lang.String value) {
@@ -4608,6 +4750,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAgentCrn() {
         
@@ -4621,6 +4764,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @param value The bytes for agentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setAgentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -4636,7 +4781,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4696,6 +4841,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -4704,6 +4850,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -4711,7 +4858,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.GetAllAgentsCertificatesRequest}
    */
-  public  static final class GetAllAgentsCertificatesRequest extends
+  public static final class GetAllAgentsCertificatesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.GetAllAgentsCertificatesRequest)
       GetAllAgentsCertificatesRequestOrBuilder {
@@ -4722,6 +4869,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
     private GetAllAgentsCertificatesRequest() {
       accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetAllAgentsCertificatesRequest();
     }
 
     @java.lang.Override
@@ -4737,7 +4891,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4755,7 +4908,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4794,7 +4947,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -4813,7 +4968,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -4842,7 +4999,7 @@ public final class ClusterConnectivityManagementV2Proto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
       unknownFields.writeTo(output);
@@ -4854,7 +5011,7 @@ public final class ClusterConnectivityManagementV2Proto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
       size += unknownFields.getSerializedSize();
@@ -4872,11 +5029,10 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5056,35 +5212,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5138,6 +5294,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -5157,6 +5314,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -5177,6 +5335,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -5194,6 +5354,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -5207,6 +5368,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -5222,7 +5385,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5282,6 +5445,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     java.util.List<java.lang.String>
         getCertificatesList();
@@ -5291,6 +5455,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     int getCertificatesCount();
     /**
@@ -5299,6 +5464,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     java.lang.String getCertificates(int index);
     /**
@@ -5307,6 +5474,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     com.google.protobuf.ByteString
         getCertificatesBytes(int index);
@@ -5314,7 +5483,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.GetAllAgentsCertificatesResponse}
    */
-  public  static final class GetAllAgentsCertificatesResponse extends
+  public static final class GetAllAgentsCertificatesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.GetAllAgentsCertificatesResponse)
       GetAllAgentsCertificatesResponseOrBuilder {
@@ -5325,6 +5494,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
     private GetAllAgentsCertificatesResponse() {
       certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetAllAgentsCertificatesResponse();
     }
 
     @java.lang.Override
@@ -5353,7 +5529,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             case 10: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 certificates_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -5361,7 +5537,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5375,7 +5551,7 @@ public final class ClusterConnectivityManagementV2Proto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -5403,6 +5579,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     public com.google.protobuf.ProtocolStringList
         getCertificatesList() {
@@ -5414,6 +5591,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     public int getCertificatesCount() {
       return certificates_.size();
@@ -5424,6 +5602,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     public java.lang.String getCertificates(int index) {
       return certificates_.get(index);
@@ -5434,6 +5614,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     public com.google.protobuf.ByteString
         getCertificatesBytes(int index) {
@@ -5489,11 +5671,10 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse) obj;
 
-      boolean result = true;
-      result = result && getCertificatesList()
-          .equals(other.getCertificatesList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getCertificatesList()
+          .equals(other.getCertificatesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5669,7 +5850,7 @@ public final class ClusterConnectivityManagementV2Proto {
       public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse buildPartial() {
         com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.GetAllAgentsCertificatesResponse(this);
         int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
@@ -5680,35 +5861,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5764,7 +5945,7 @@ public final class ClusterConnectivityManagementV2Proto {
 
       private com.google.protobuf.LazyStringList certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureCertificatesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           certificates_ = new com.google.protobuf.LazyStringArrayList(certificates_);
           bitField0_ |= 0x00000001;
          }
@@ -5775,6 +5956,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return A list containing the certificates.
        */
       public com.google.protobuf.ProtocolStringList
           getCertificatesList() {
@@ -5786,6 +5968,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The count of certificates.
        */
       public int getCertificatesCount() {
         return certificates_.size();
@@ -5796,6 +5979,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the element to return.
+       * @return The certificates at the given index.
        */
       public java.lang.String getCertificates(int index) {
         return certificates_.get(index);
@@ -5806,6 +5991,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the certificates at the given index.
        */
       public com.google.protobuf.ByteString
           getCertificatesBytes(int index) {
@@ -5817,6 +6004,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index to set the value at.
+       * @param value The certificates to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificates(
           int index, java.lang.String value) {
@@ -5834,6 +6024,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificates(
           java.lang.String value) {
@@ -5851,6 +6043,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param values The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addAllCertificates(
           java.lang.Iterable<java.lang.String> values) {
@@ -5866,6 +6060,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCertificates() {
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -5879,6 +6074,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 1 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The bytes of the certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificatesBytes(
           com.google.protobuf.ByteString value) {
@@ -5894,7 +6091,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5951,7 +6148,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.UnregisterAgentResponse}
    */
-  public  static final class UnregisterAgentResponse extends
+  public static final class UnregisterAgentResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.UnregisterAgentResponse)
       UnregisterAgentResponseOrBuilder {
@@ -5961,6 +6158,13 @@ public final class ClusterConnectivityManagementV2Proto {
       super(builder);
     }
     private UnregisterAgentResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UnregisterAgentResponse();
     }
 
     @java.lang.Override
@@ -5987,7 +6191,7 @@ public final class ClusterConnectivityManagementV2Proto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6056,9 +6260,8 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.UnregisterAgentResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6233,35 +6436,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6306,7 +6509,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6367,6 +6570,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+     * @return The enum numeric value on the wire for status.
      */
     int getStatusValue();
     /**
@@ -6376,6 +6580,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+     * @return The status.
      */
     com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status getStatus();
 
@@ -6385,6 +6590,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string hostname = 2;</code>
+     * @return The hostname.
      */
     java.lang.String getHostname();
     /**
@@ -6393,6 +6599,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string hostname = 2;</code>
+     * @return The bytes for hostname.
      */
     com.google.protobuf.ByteString
         getHostnameBytes();
@@ -6404,6 +6611,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string causeOfFailure = 3;</code>
+     * @return The causeOfFailure.
      */
     java.lang.String getCauseOfFailure();
     /**
@@ -6413,6 +6621,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string causeOfFailure = 3;</code>
+     * @return The bytes for causeOfFailure.
      */
     com.google.protobuf.ByteString
         getCauseOfFailureBytes();
@@ -6424,6 +6633,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The certificate.
      */
     java.lang.String getCertificate();
     /**
@@ -6433,6 +6643,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The bytes for certificate.
      */
     com.google.protobuf.ByteString
         getCertificateBytes();
@@ -6443,6 +6654,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The caCertificate.
      */
     java.lang.String getCaCertificate();
     /**
@@ -6451,6 +6663,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The bytes for caCertificate.
      */
     com.google.protobuf.ByteString
         getCaCertificateBytes();
@@ -6458,7 +6671,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.InvertingProxy}
    */
-  public  static final class InvertingProxy extends
+  public static final class InvertingProxy extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.InvertingProxy)
       InvertingProxyOrBuilder {
@@ -6476,6 +6689,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new InvertingProxy();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -6488,7 +6708,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6530,7 +6749,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6632,6 +6851,8 @@ public final class ClusterConnectivityManagementV2Proto {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -6639,6 +6860,10 @@ public final class ClusterConnectivityManagementV2Proto {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static Status forNumber(int value) {
         switch (value) {
           case 0: return CREATING;
@@ -6662,6 +6887,10 @@ public final class ClusterConnectivityManagementV2Proto {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -6705,8 +6934,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+     * @return The enum numeric value on the wire for status.
      */
-    public int getStatusValue() {
+    @java.lang.Override public int getStatusValue() {
       return status_;
     }
     /**
@@ -6716,8 +6946,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+     * @return The status.
      */
-    public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status getStatus() {
+    @java.lang.Override public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status getStatus() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status result = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status.valueOf(status_);
       return result == null ? com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status.UNRECOGNIZED : result;
@@ -6731,7 +6962,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string hostname = 2;</code>
+     * @return The hostname.
      */
+    @java.lang.Override
     public java.lang.String getHostname() {
       java.lang.Object ref = hostname_;
       if (ref instanceof java.lang.String) {
@@ -6750,7 +6983,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string hostname = 2;</code>
+     * @return The bytes for hostname.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getHostnameBytes() {
       java.lang.Object ref = hostname_;
@@ -6774,7 +7009,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string causeOfFailure = 3;</code>
+     * @return The causeOfFailure.
      */
+    @java.lang.Override
     public java.lang.String getCauseOfFailure() {
       java.lang.Object ref = causeOfFailure_;
       if (ref instanceof java.lang.String) {
@@ -6794,7 +7031,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string causeOfFailure = 3;</code>
+     * @return The bytes for causeOfFailure.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCauseOfFailureBytes() {
       java.lang.Object ref = causeOfFailure_;
@@ -6818,7 +7057,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The certificate.
      */
+    @java.lang.Override
     public java.lang.String getCertificate() {
       java.lang.Object ref = certificate_;
       if (ref instanceof java.lang.String) {
@@ -6838,7 +7079,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The bytes for certificate.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCertificateBytes() {
       java.lang.Object ref = certificate_;
@@ -6861,7 +7104,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The caCertificate.
      */
+    @java.lang.Override
     public java.lang.String getCaCertificate() {
       java.lang.Object ref = caCertificate_;
       if (ref instanceof java.lang.String) {
@@ -6880,7 +7125,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The bytes for caCertificate.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCaCertificateBytes() {
       java.lang.Object ref = caCertificate_;
@@ -6912,16 +7159,16 @@ public final class ClusterConnectivityManagementV2Proto {
       if (status_ != com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status.CREATING.getNumber()) {
         output.writeEnum(1, status_);
       }
-      if (!getHostnameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostname_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, hostname_);
       }
-      if (!getCauseOfFailureBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(causeOfFailure_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, causeOfFailure_);
       }
-      if (!getCertificateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(certificate_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, certificate_);
       }
-      if (!getCaCertificateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(caCertificate_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, caCertificate_);
       }
       unknownFields.writeTo(output);
@@ -6937,16 +7184,16 @@ public final class ClusterConnectivityManagementV2Proto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(1, status_);
       }
-      if (!getHostnameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostname_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, hostname_);
       }
-      if (!getCauseOfFailureBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(causeOfFailure_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, causeOfFailure_);
       }
-      if (!getCertificateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(certificate_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, certificate_);
       }
-      if (!getCaCertificateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(caCertificate_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, caCertificate_);
       }
       size += unknownFields.getSerializedSize();
@@ -6964,18 +7211,17 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy) obj;
 
-      boolean result = true;
-      result = result && status_ == other.status_;
-      result = result && getHostname()
-          .equals(other.getHostname());
-      result = result && getCauseOfFailure()
-          .equals(other.getCauseOfFailure());
-      result = result && getCertificate()
-          .equals(other.getCertificate());
-      result = result && getCaCertificate()
-          .equals(other.getCaCertificate());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (status_ != other.status_) return false;
+      if (!getHostname()
+          .equals(other.getHostname())) return false;
+      if (!getCauseOfFailure()
+          .equals(other.getCauseOfFailure())) return false;
+      if (!getCertificate()
+          .equals(other.getCertificate())) return false;
+      if (!getCaCertificate()
+          .equals(other.getCaCertificate())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7175,35 +7421,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7273,8 +7519,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+       * @return The enum numeric value on the wire for status.
        */
-      public int getStatusValue() {
+      @java.lang.Override public int getStatusValue() {
         return status_;
       }
       /**
@@ -7284,8 +7531,11 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusValue(int value) {
+        
         status_ = value;
         onChanged();
         return this;
@@ -7297,7 +7547,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+       * @return The status.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status getStatus() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status result = com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status.valueOf(status_);
@@ -7310,6 +7562,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatus(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxy.Status value) {
         if (value == null) {
@@ -7327,6 +7581,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>.clusterconnectivitymanagementv2.InvertingProxy.Status status = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStatus() {
         
@@ -7342,6 +7597,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string hostname = 2;</code>
+       * @return The hostname.
        */
       public java.lang.String getHostname() {
         java.lang.Object ref = hostname_;
@@ -7361,6 +7617,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string hostname = 2;</code>
+       * @return The bytes for hostname.
        */
       public com.google.protobuf.ByteString
           getHostnameBytes() {
@@ -7381,6 +7638,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string hostname = 2;</code>
+       * @param value The hostname to set.
+       * @return This builder for chaining.
        */
       public Builder setHostname(
           java.lang.String value) {
@@ -7398,6 +7657,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string hostname = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHostname() {
         
@@ -7411,6 +7671,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string hostname = 2;</code>
+       * @param value The bytes for hostname to set.
+       * @return This builder for chaining.
        */
       public Builder setHostnameBytes(
           com.google.protobuf.ByteString value) {
@@ -7432,6 +7694,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string causeOfFailure = 3;</code>
+       * @return The causeOfFailure.
        */
       public java.lang.String getCauseOfFailure() {
         java.lang.Object ref = causeOfFailure_;
@@ -7452,6 +7715,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string causeOfFailure = 3;</code>
+       * @return The bytes for causeOfFailure.
        */
       public com.google.protobuf.ByteString
           getCauseOfFailureBytes() {
@@ -7473,6 +7737,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string causeOfFailure = 3;</code>
+       * @param value The causeOfFailure to set.
+       * @return This builder for chaining.
        */
       public Builder setCauseOfFailure(
           java.lang.String value) {
@@ -7491,6 +7757,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string causeOfFailure = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCauseOfFailure() {
         
@@ -7505,6 +7772,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string causeOfFailure = 3;</code>
+       * @param value The bytes for causeOfFailure to set.
+       * @return This builder for chaining.
        */
       public Builder setCauseOfFailureBytes(
           com.google.protobuf.ByteString value) {
@@ -7526,6 +7795,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @return The certificate.
        */
       public java.lang.String getCertificate() {
         java.lang.Object ref = certificate_;
@@ -7546,6 +7816,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @return The bytes for certificate.
        */
       public com.google.protobuf.ByteString
           getCertificateBytes() {
@@ -7567,6 +7838,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @param value The certificate to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificate(
           java.lang.String value) {
@@ -7585,6 +7858,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCertificate() {
         
@@ -7599,6 +7873,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 4 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @param value The bytes for certificate to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificateBytes(
           com.google.protobuf.ByteString value) {
@@ -7619,6 +7895,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The caCertificate.
        */
       public java.lang.String getCaCertificate() {
         java.lang.Object ref = caCertificate_;
@@ -7638,6 +7915,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The bytes for caCertificate.
        */
       public com.google.protobuf.ByteString
           getCaCertificateBytes() {
@@ -7658,6 +7936,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The caCertificate to set.
+       * @return This builder for chaining.
        */
       public Builder setCaCertificate(
           java.lang.String value) {
@@ -7675,6 +7955,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCaCertificate() {
         
@@ -7688,6 +7969,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string caCertificate = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The bytes for caCertificate to set.
+       * @return This builder for chaining.
        */
       public Builder setCaCertificateBytes(
           com.google.protobuf.ByteString value) {
@@ -7703,7 +7986,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7763,6 +8046,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The agentCrn.
      */
     java.lang.String getAgentCrn();
     /**
@@ -7771,6 +8055,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The bytes for agentCrn.
      */
     com.google.protobuf.ByteString
         getAgentCrnBytes();
@@ -7781,6 +8066,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The encipheredPrivateKey.
      */
     java.lang.String getEncipheredPrivateKey();
     /**
@@ -7789,6 +8075,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The bytes for encipheredPrivateKey.
      */
     com.google.protobuf.ByteString
         getEncipheredPrivateKeyBytes();
@@ -7801,6 +8088,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The certificate.
      */
     java.lang.String getCertificate();
     /**
@@ -7811,6 +8099,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The bytes for certificate.
      */
     com.google.protobuf.ByteString
         getCertificateBytes();
@@ -7823,6 +8112,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
      */
     java.lang.String getEnvironmentCrn();
     /**
@@ -7833,6 +8123,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentCrnBytes();
@@ -7843,6 +8134,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     java.util.List<java.lang.String>
         getCertificatesList();
@@ -7852,6 +8144,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     int getCertificatesCount();
     /**
@@ -7860,6 +8153,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     java.lang.String getCertificates(int index);
     /**
@@ -7868,6 +8163,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     com.google.protobuf.ByteString
         getCertificatesBytes(int index);
@@ -7878,6 +8175,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accessKeyId = 6;</code>
+     * @return The accessKeyId.
      */
     java.lang.String getAccessKeyId();
     /**
@@ -7886,6 +8184,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accessKeyId = 6;</code>
+     * @return The bytes for accessKeyId.
      */
     com.google.protobuf.ByteString
         getAccessKeyIdBytes();
@@ -7897,6 +8196,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The encipheredAccessKey.
      */
     java.lang.String getEncipheredAccessKey();
     /**
@@ -7906,6 +8206,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for encipheredAccessKey.
      */
     com.google.protobuf.ByteString
         getEncipheredAccessKeyBytes();
@@ -7913,7 +8214,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.InvertingProxyAgent}
    */
-  public  static final class InvertingProxyAgent extends
+  public static final class InvertingProxyAgent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.InvertingProxyAgent)
       InvertingProxyAgentOrBuilder {
@@ -7930,6 +8231,13 @@ public final class ClusterConnectivityManagementV2Proto {
       certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       accessKeyId_ = "";
       encipheredAccessKey_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new InvertingProxyAgent();
     }
 
     @java.lang.Override
@@ -7982,9 +8290,9 @@ public final class ClusterConnectivityManagementV2Proto {
             }
             case 42: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 certificates_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000001;
               }
               certificates_.add(s);
               break;
@@ -8002,7 +8310,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8016,7 +8324,7 @@ public final class ClusterConnectivityManagementV2Proto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -8036,7 +8344,6 @@ public final class ClusterConnectivityManagementV2Proto {
               com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder.class);
     }
 
-    private int bitField0_;
     public static final int AGENTCRN_FIELD_NUMBER = 1;
     private volatile java.lang.Object agentCrn_;
     /**
@@ -8045,7 +8352,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The agentCrn.
      */
+    @java.lang.Override
     public java.lang.String getAgentCrn() {
       java.lang.Object ref = agentCrn_;
       if (ref instanceof java.lang.String) {
@@ -8064,7 +8373,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The bytes for agentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAgentCrnBytes() {
       java.lang.Object ref = agentCrn_;
@@ -8087,7 +8398,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The encipheredPrivateKey.
      */
+    @java.lang.Override
     public java.lang.String getEncipheredPrivateKey() {
       java.lang.Object ref = encipheredPrivateKey_;
       if (ref instanceof java.lang.String) {
@@ -8106,7 +8419,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The bytes for encipheredPrivateKey.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEncipheredPrivateKeyBytes() {
       java.lang.Object ref = encipheredPrivateKey_;
@@ -8131,7 +8446,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The certificate.
      */
+    @java.lang.Override
     public java.lang.String getCertificate() {
       java.lang.Object ref = certificate_;
       if (ref instanceof java.lang.String) {
@@ -8152,7 +8469,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+     * @return The bytes for certificate.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCertificateBytes() {
       java.lang.Object ref = certificate_;
@@ -8177,7 +8496,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentCrn() {
       java.lang.Object ref = environmentCrn_;
       if (ref instanceof java.lang.String) {
@@ -8198,7 +8519,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentCrnBytes() {
       java.lang.Object ref = environmentCrn_;
@@ -8221,6 +8544,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     public com.google.protobuf.ProtocolStringList
         getCertificatesList() {
@@ -8232,6 +8556,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     public int getCertificatesCount() {
       return certificates_.size();
@@ -8242,6 +8567,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     public java.lang.String getCertificates(int index) {
       return certificates_.get(index);
@@ -8252,6 +8579,8 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     public com.google.protobuf.ByteString
         getCertificatesBytes(int index) {
@@ -8266,7 +8595,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accessKeyId = 6;</code>
+     * @return The accessKeyId.
      */
+    @java.lang.Override
     public java.lang.String getAccessKeyId() {
       java.lang.Object ref = accessKeyId_;
       if (ref instanceof java.lang.String) {
@@ -8285,7 +8616,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accessKeyId = 6;</code>
+     * @return The bytes for accessKeyId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccessKeyIdBytes() {
       java.lang.Object ref = accessKeyId_;
@@ -8309,7 +8642,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The encipheredAccessKey.
      */
+    @java.lang.Override
     public java.lang.String getEncipheredAccessKey() {
       java.lang.Object ref = encipheredAccessKey_;
       if (ref instanceof java.lang.String) {
@@ -8329,7 +8664,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+     * @return The bytes for encipheredAccessKey.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEncipheredAccessKeyBytes() {
       java.lang.Object ref = encipheredAccessKey_;
@@ -8358,25 +8695,25 @@ public final class ClusterConnectivityManagementV2Proto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAgentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, agentCrn_);
       }
-      if (!getEncipheredPrivateKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encipheredPrivateKey_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, encipheredPrivateKey_);
       }
-      if (!getCertificateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(certificate_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, certificate_);
       }
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, environmentCrn_);
       }
       for (int i = 0; i < certificates_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, certificates_.getRaw(i));
       }
-      if (!getAccessKeyIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessKeyId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, accessKeyId_);
       }
-      if (!getEncipheredAccessKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encipheredAccessKey_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, encipheredAccessKey_);
       }
       unknownFields.writeTo(output);
@@ -8388,16 +8725,16 @@ public final class ClusterConnectivityManagementV2Proto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAgentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, agentCrn_);
       }
-      if (!getEncipheredPrivateKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encipheredPrivateKey_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, encipheredPrivateKey_);
       }
-      if (!getCertificateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(certificate_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, certificate_);
       }
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, environmentCrn_);
       }
       {
@@ -8408,10 +8745,10 @@ public final class ClusterConnectivityManagementV2Proto {
         size += dataSize;
         size += 1 * getCertificatesList().size();
       }
-      if (!getAccessKeyIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accessKeyId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, accessKeyId_);
       }
-      if (!getEncipheredAccessKeyBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(encipheredAccessKey_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, encipheredAccessKey_);
       }
       size += unknownFields.getSerializedSize();
@@ -8429,23 +8766,22 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent) obj;
 
-      boolean result = true;
-      result = result && getAgentCrn()
-          .equals(other.getAgentCrn());
-      result = result && getEncipheredPrivateKey()
-          .equals(other.getEncipheredPrivateKey());
-      result = result && getCertificate()
-          .equals(other.getCertificate());
-      result = result && getEnvironmentCrn()
-          .equals(other.getEnvironmentCrn());
-      result = result && getCertificatesList()
-          .equals(other.getCertificatesList());
-      result = result && getAccessKeyId()
-          .equals(other.getAccessKeyId());
-      result = result && getEncipheredAccessKey()
-          .equals(other.getEncipheredAccessKey());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAgentCrn()
+          .equals(other.getAgentCrn())) return false;
+      if (!getEncipheredPrivateKey()
+          .equals(other.getEncipheredPrivateKey())) return false;
+      if (!getCertificate()
+          .equals(other.getCertificate())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!getCertificatesList()
+          .equals(other.getCertificatesList())) return false;
+      if (!getAccessKeyId()
+          .equals(other.getAccessKeyId())) return false;
+      if (!getEncipheredAccessKey()
+          .equals(other.getEncipheredAccessKey())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8613,7 +8949,7 @@ public final class ClusterConnectivityManagementV2Proto {
         environmentCrn_ = "";
 
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000001);
         accessKeyId_ = "";
 
         encipheredAccessKey_ = "";
@@ -8645,54 +8981,52 @@ public final class ClusterConnectivityManagementV2Proto {
       public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent buildPartial() {
         com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.agentCrn_ = agentCrn_;
         result.encipheredPrivateKey_ = encipheredPrivateKey_;
         result.certificate_ = certificate_;
         result.environmentCrn_ = environmentCrn_;
-        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.certificates_ = certificates_;
         result.accessKeyId_ = accessKeyId_;
         result.encipheredAccessKey_ = encipheredAccessKey_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8725,7 +9059,7 @@ public final class ClusterConnectivityManagementV2Proto {
         if (!other.certificates_.isEmpty()) {
           if (certificates_.isEmpty()) {
             certificates_ = other.certificates_;
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureCertificatesIsMutable();
             certificates_.addAll(other.certificates_);
@@ -8777,6 +9111,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return The agentCrn.
        */
       public java.lang.String getAgentCrn() {
         java.lang.Object ref = agentCrn_;
@@ -8796,6 +9131,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return The bytes for agentCrn.
        */
       public com.google.protobuf.ByteString
           getAgentCrnBytes() {
@@ -8816,6 +9152,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @param value The agentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setAgentCrn(
           java.lang.String value) {
@@ -8833,6 +9171,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAgentCrn() {
         
@@ -8846,6 +9185,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @param value The bytes for agentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setAgentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -8866,6 +9207,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The encipheredPrivateKey.
        */
       public java.lang.String getEncipheredPrivateKey() {
         java.lang.Object ref = encipheredPrivateKey_;
@@ -8885,6 +9227,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The bytes for encipheredPrivateKey.
        */
       public com.google.protobuf.ByteString
           getEncipheredPrivateKeyBytes() {
@@ -8905,6 +9248,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The encipheredPrivateKey to set.
+       * @return This builder for chaining.
        */
       public Builder setEncipheredPrivateKey(
           java.lang.String value) {
@@ -8922,6 +9267,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearEncipheredPrivateKey() {
         
@@ -8935,6 +9281,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredPrivateKey = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The bytes for encipheredPrivateKey to set.
+       * @return This builder for chaining.
        */
       public Builder setEncipheredPrivateKeyBytes(
           com.google.protobuf.ByteString value) {
@@ -8957,6 +9305,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @return The certificate.
        */
       public java.lang.String getCertificate() {
         java.lang.Object ref = certificate_;
@@ -8978,6 +9327,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @return The bytes for certificate.
        */
       public com.google.protobuf.ByteString
           getCertificateBytes() {
@@ -9000,6 +9350,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @param value The certificate to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificate(
           java.lang.String value) {
@@ -9019,6 +9371,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCertificate() {
         
@@ -9034,6 +9387,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string certificate = 3 [(.options.FieldExtension.skipLogging) = true, (.options.FieldExtension.deprecated) = true];</code>
+       * @param value The bytes for certificate to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificateBytes(
           com.google.protobuf.ByteString value) {
@@ -9056,6 +9411,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return The environmentCrn.
        */
       public java.lang.String getEnvironmentCrn() {
         java.lang.Object ref = environmentCrn_;
@@ -9077,6 +9433,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return The bytes for environmentCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentCrnBytes() {
@@ -9099,6 +9456,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrn(
           java.lang.String value) {
@@ -9118,6 +9477,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentCrn() {
         
@@ -9133,6 +9493,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -9148,9 +9510,9 @@ public final class ClusterConnectivityManagementV2Proto {
 
       private com.google.protobuf.LazyStringList certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureCertificatesIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           certificates_ = new com.google.protobuf.LazyStringArrayList(certificates_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -9159,6 +9521,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return A list containing the certificates.
        */
       public com.google.protobuf.ProtocolStringList
           getCertificatesList() {
@@ -9170,6 +9533,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The count of certificates.
        */
       public int getCertificatesCount() {
         return certificates_.size();
@@ -9180,6 +9544,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the element to return.
+       * @return The certificates at the given index.
        */
       public java.lang.String getCertificates(int index) {
         return certificates_.get(index);
@@ -9190,6 +9556,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the certificates at the given index.
        */
       public com.google.protobuf.ByteString
           getCertificatesBytes(int index) {
@@ -9201,6 +9569,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index to set the value at.
+       * @param value The certificates to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificates(
           int index, java.lang.String value) {
@@ -9218,6 +9589,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificates(
           java.lang.String value) {
@@ -9235,6 +9608,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param values The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addAllCertificates(
           java.lang.Iterable<java.lang.String> values) {
@@ -9250,10 +9625,11 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCertificates() {
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -9263,6 +9639,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>repeated string certificates = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The bytes of the certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificatesBytes(
           com.google.protobuf.ByteString value) {
@@ -9283,6 +9661,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accessKeyId = 6;</code>
+       * @return The accessKeyId.
        */
       public java.lang.String getAccessKeyId() {
         java.lang.Object ref = accessKeyId_;
@@ -9302,6 +9681,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accessKeyId = 6;</code>
+       * @return The bytes for accessKeyId.
        */
       public com.google.protobuf.ByteString
           getAccessKeyIdBytes() {
@@ -9322,6 +9702,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accessKeyId = 6;</code>
+       * @param value The accessKeyId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccessKeyId(
           java.lang.String value) {
@@ -9339,6 +9721,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accessKeyId = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccessKeyId() {
         
@@ -9352,6 +9735,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accessKeyId = 6;</code>
+       * @param value The bytes for accessKeyId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccessKeyIdBytes(
           com.google.protobuf.ByteString value) {
@@ -9373,6 +9758,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The encipheredAccessKey.
        */
       public java.lang.String getEncipheredAccessKey() {
         java.lang.Object ref = encipheredAccessKey_;
@@ -9393,6 +9779,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return The bytes for encipheredAccessKey.
        */
       public com.google.protobuf.ByteString
           getEncipheredAccessKeyBytes() {
@@ -9414,6 +9801,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The encipheredAccessKey to set.
+       * @return This builder for chaining.
        */
       public Builder setEncipheredAccessKey(
           java.lang.String value) {
@@ -9432,6 +9821,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearEncipheredAccessKey() {
         
@@ -9446,6 +9836,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string encipheredAccessKey = 7 [(.options.FieldExtension.sensitive) = true];</code>
+       * @param value The bytes for encipheredAccessKey to set.
+       * @return This builder for chaining.
        */
       public Builder setEncipheredAccessKeyBytes(
           com.google.protobuf.ByteString value) {
@@ -9461,7 +9853,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9517,15 +9909,18 @@ public final class ClusterConnectivityManagementV2Proto {
 
     /**
      * <code>int32 pageSize = 1;</code>
+     * @return The pageSize.
      */
     int getPageSize();
 
     /**
      * <code>.paging.PageToken pageToken = 2;</code>
+     * @return Whether the pageToken field is set.
      */
     boolean hasPageToken();
     /**
      * <code>.paging.PageToken pageToken = 2;</code>
+     * @return The pageToken.
      */
     com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken getPageToken();
     /**
@@ -9539,6 +9934,16 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return Whether the accountId field is set.
+     */
+    boolean hasAccountId();
+    /**
+     * <pre>
+     * If an accountId is passed-in, all agents belonging to this accountId would be returned.
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -9547,6 +9952,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -9557,6 +9963,16 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return Whether the environmentCrn field is set.
+     */
+    boolean hasEnvironmentCrn();
+    /**
+     * <pre>
+     * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
      */
     java.lang.String getEnvironmentCrn();
     /**
@@ -9565,6 +9981,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentCrnBytes();
@@ -9574,7 +9991,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.ListAgentsRequest}
    */
-  public  static final class ListAgentsRequest extends
+  public static final class ListAgentsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.ListAgentsRequest)
       ListAgentsRequestOrBuilder {
@@ -9584,7 +10001,13 @@ public final class ClusterConnectivityManagementV2Proto {
       super(builder);
     }
     private ListAgentsRequest() {
-      pageSize_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListAgentsRequest();
     }
 
     @java.lang.Override
@@ -9600,7 +10023,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -9642,7 +10064,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9676,7 +10098,8 @@ public final class ClusterConnectivityManagementV2Proto {
     private int filterOneofCase_ = 0;
     private java.lang.Object filterOneof_;
     public enum FilterOneofCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       ACCOUNTID(3),
       ENVIRONMENTCRN(4),
       FILTERONEOF_NOT_SET(0);
@@ -9685,6 +10108,8 @@ public final class ClusterConnectivityManagementV2Proto {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -9715,7 +10140,9 @@ public final class ClusterConnectivityManagementV2Proto {
     private int pageSize_;
     /**
      * <code>int32 pageSize = 1;</code>
+     * @return The pageSize.
      */
+    @java.lang.Override
     public int getPageSize() {
       return pageSize_;
     }
@@ -9724,19 +10151,24 @@ public final class ClusterConnectivityManagementV2Proto {
     private com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken pageToken_;
     /**
      * <code>.paging.PageToken pageToken = 2;</code>
+     * @return Whether the pageToken field is set.
      */
+    @java.lang.Override
     public boolean hasPageToken() {
       return pageToken_ != null;
     }
     /**
      * <code>.paging.PageToken pageToken = 2;</code>
+     * @return The pageToken.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken getPageToken() {
       return pageToken_ == null ? com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken.getDefaultInstance() : pageToken_;
     }
     /**
      * <code>.paging.PageToken pageToken = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.common.paging.PagingProto.PageTokenOrBuilder getPageTokenOrBuilder() {
       return getPageToken();
     }
@@ -9748,6 +10180,18 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return Whether the accountId field is set.
+     */
+    public boolean hasAccountId() {
+      return filterOneofCase_ == 3;
+    }
+    /**
+     * <pre>
+     * If an accountId is passed-in, all agents belonging to this accountId would be returned.
+     * </pre>
+     *
+     * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
     public java.lang.String getAccountId() {
       java.lang.Object ref = "";
@@ -9772,6 +10216,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
@@ -9799,6 +10244,18 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return Whether the environmentCrn field is set.
+     */
+    public boolean hasEnvironmentCrn() {
+      return filterOneofCase_ == 4;
+    }
+    /**
+     * <pre>
+     * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
+     * </pre>
+     *
+     * <code>string environmentCrn = 4;</code>
+     * @return The environmentCrn.
      */
     public java.lang.String getEnvironmentCrn() {
       java.lang.Object ref = "";
@@ -9823,6 +10280,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string environmentCrn = 4;</code>
+     * @return The bytes for environmentCrn.
      */
     public com.google.protobuf.ByteString
         getEnvironmentCrnBytes() {
@@ -9907,31 +10365,28 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsRequest) obj;
 
-      boolean result = true;
-      result = result && (getPageSize()
-          == other.getPageSize());
-      result = result && (hasPageToken() == other.hasPageToken());
+      if (getPageSize()
+          != other.getPageSize()) return false;
+      if (hasPageToken() != other.hasPageToken()) return false;
       if (hasPageToken()) {
-        result = result && getPageToken()
-            .equals(other.getPageToken());
+        if (!getPageToken()
+            .equals(other.getPageToken())) return false;
       }
-      result = result && getFilterOneofCase().equals(
-          other.getFilterOneofCase());
-      if (!result) return false;
+      if (!getFilterOneofCase().equals(other.getFilterOneofCase())) return false;
       switch (filterOneofCase_) {
         case 3:
-          result = result && getAccountId()
-              .equals(other.getAccountId());
+          if (!getAccountId()
+              .equals(other.getAccountId())) return false;
           break;
         case 4:
-          result = result && getEnvironmentCrn()
-              .equals(other.getEnvironmentCrn());
+          if (!getEnvironmentCrn()
+              .equals(other.getEnvironmentCrn())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10147,35 +10602,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10259,12 +10714,16 @@ public final class ClusterConnectivityManagementV2Proto {
       private int pageSize_ ;
       /**
        * <code>int32 pageSize = 1;</code>
+       * @return The pageSize.
        */
+      @java.lang.Override
       public int getPageSize() {
         return pageSize_;
       }
       /**
        * <code>int32 pageSize = 1;</code>
+       * @param value The pageSize to set.
+       * @return This builder for chaining.
        */
       public Builder setPageSize(int value) {
         
@@ -10274,6 +10733,7 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       /**
        * <code>int32 pageSize = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPageSize() {
         
@@ -10282,17 +10742,19 @@ public final class ClusterConnectivityManagementV2Proto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken pageToken_ = null;
+      private com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken pageToken_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken, com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken.Builder, com.cloudera.thunderhead.service.common.paging.PagingProto.PageTokenOrBuilder> pageTokenBuilder_;
       /**
        * <code>.paging.PageToken pageToken = 2;</code>
+       * @return Whether the pageToken field is set.
        */
       public boolean hasPageToken() {
         return pageTokenBuilder_ != null || pageToken_ != null;
       }
       /**
        * <code>.paging.PageToken pageToken = 2;</code>
+       * @return The pageToken.
        */
       public com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken getPageToken() {
         if (pageTokenBuilder_ == null) {
@@ -10405,7 +10867,21 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return Whether the accountId field is set.
        */
+      @java.lang.Override
+      public boolean hasAccountId() {
+        return filterOneofCase_ == 3;
+      }
+      /**
+       * <pre>
+       * If an accountId is passed-in, all agents belonging to this accountId would be returned.
+       * </pre>
+       *
+       * <code>string accountId = 3;</code>
+       * @return The accountId.
+       */
+      @java.lang.Override
       public java.lang.String getAccountId() {
         java.lang.Object ref = "";
         if (filterOneofCase_ == 3) {
@@ -10429,7 +10905,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return The bytes for accountId.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
         java.lang.Object ref = "";
@@ -10454,6 +10932,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -10471,6 +10951,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         if (filterOneofCase_ == 3) {
@@ -10486,6 +10967,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -10505,7 +10988,21 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return Whether the environmentCrn field is set.
        */
+      @java.lang.Override
+      public boolean hasEnvironmentCrn() {
+        return filterOneofCase_ == 4;
+      }
+      /**
+       * <pre>
+       * If an environmentCrn is passed-in, all agents belonging to this environmnent would be returned.
+       * </pre>
+       *
+       * <code>string environmentCrn = 4;</code>
+       * @return The environmentCrn.
+       */
+      @java.lang.Override
       public java.lang.String getEnvironmentCrn() {
         java.lang.Object ref = "";
         if (filterOneofCase_ == 4) {
@@ -10529,7 +11026,9 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return The bytes for environmentCrn.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getEnvironmentCrnBytes() {
         java.lang.Object ref = "";
@@ -10554,6 +11053,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrn(
           java.lang.String value) {
@@ -10571,6 +11072,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentCrn() {
         if (filterOneofCase_ == 4) {
@@ -10586,6 +11088,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string environmentCrn = 4;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -10601,7 +11105,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10657,10 +11161,12 @@ public final class ClusterConnectivityManagementV2Proto {
 
     /**
      * <code>.paging.PageToken nextPageToken = 1;</code>
+     * @return Whether the nextPageToken field is set.
      */
     boolean hasNextPageToken();
     /**
      * <code>.paging.PageToken nextPageToken = 1;</code>
+     * @return The nextPageToken.
      */
     com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken getNextPageToken();
     /**
@@ -10715,7 +11221,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.ListAgentsResponse}
    */
-  public  static final class ListAgentsResponse extends
+  public static final class ListAgentsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.ListAgentsResponse)
       ListAgentsResponseOrBuilder {
@@ -10726,6 +11232,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
     private ListAgentsResponse() {
       agents_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListAgentsResponse();
     }
 
     @java.lang.Override
@@ -10766,16 +11279,16 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 agents_ = new java.util.ArrayList<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent>();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               agents_.add(
                   input.readMessage(com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.parser(), extensionRegistry));
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10789,7 +11302,7 @@ public final class ClusterConnectivityManagementV2Proto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           agents_ = java.util.Collections.unmodifiableList(agents_);
         }
         this.unknownFields = unknownFields.build();
@@ -10809,24 +11322,28 @@ public final class ClusterConnectivityManagementV2Proto {
               com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse.class, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int NEXTPAGETOKEN_FIELD_NUMBER = 1;
     private com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken nextPageToken_;
     /**
      * <code>.paging.PageToken nextPageToken = 1;</code>
+     * @return Whether the nextPageToken field is set.
      */
+    @java.lang.Override
     public boolean hasNextPageToken() {
       return nextPageToken_ != null;
     }
     /**
      * <code>.paging.PageToken nextPageToken = 1;</code>
+     * @return The nextPageToken.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken getNextPageToken() {
       return nextPageToken_ == null ? com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken.getDefaultInstance() : nextPageToken_;
     }
     /**
      * <code>.paging.PageToken nextPageToken = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.common.paging.PagingProto.PageTokenOrBuilder getNextPageTokenOrBuilder() {
       return getNextPageToken();
     }
@@ -10840,6 +11357,7 @@ public final class ClusterConnectivityManagementV2Proto {
      *
      * <code>repeated .clusterconnectivitymanagementv2.InvertingProxyAgent agents = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent> getAgentsList() {
       return agents_;
     }
@@ -10850,6 +11368,7 @@ public final class ClusterConnectivityManagementV2Proto {
      *
      * <code>repeated .clusterconnectivitymanagementv2.InvertingProxyAgent agents = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder> 
         getAgentsOrBuilderList() {
       return agents_;
@@ -10861,6 +11380,7 @@ public final class ClusterConnectivityManagementV2Proto {
      *
      * <code>repeated .clusterconnectivitymanagementv2.InvertingProxyAgent agents = 2;</code>
      */
+    @java.lang.Override
     public int getAgentsCount() {
       return agents_.size();
     }
@@ -10871,6 +11391,7 @@ public final class ClusterConnectivityManagementV2Proto {
      *
      * <code>repeated .clusterconnectivitymanagementv2.InvertingProxyAgent agents = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getAgents(int index) {
       return agents_.get(index);
     }
@@ -10881,6 +11402,7 @@ public final class ClusterConnectivityManagementV2Proto {
      *
      * <code>repeated .clusterconnectivitymanagementv2.InvertingProxyAgent agents = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder getAgentsOrBuilder(
         int index) {
       return agents_.get(index);
@@ -10938,16 +11460,15 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse) obj;
 
-      boolean result = true;
-      result = result && (hasNextPageToken() == other.hasNextPageToken());
+      if (hasNextPageToken() != other.hasNextPageToken()) return false;
       if (hasNextPageToken()) {
-        result = result && getNextPageToken()
-            .equals(other.getNextPageToken());
+        if (!getNextPageToken()
+            .equals(other.getNextPageToken())) return false;
       }
-      result = result && getAgentsList()
-          .equals(other.getAgentsList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAgentsList()
+          .equals(other.getAgentsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -11107,7 +11628,7 @@ public final class ClusterConnectivityManagementV2Proto {
         }
         if (agentsBuilder_ == null) {
           agents_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           agentsBuilder_.clear();
         }
@@ -11138,57 +11659,55 @@ public final class ClusterConnectivityManagementV2Proto {
       public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse buildPartial() {
         com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse result = new com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.ListAgentsResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (nextPageTokenBuilder_ == null) {
           result.nextPageToken_ = nextPageToken_;
         } else {
           result.nextPageToken_ = nextPageTokenBuilder_.build();
         }
         if (agentsBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             agents_ = java.util.Collections.unmodifiableList(agents_);
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.agents_ = agents_;
         } else {
           result.agents_ = agentsBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11209,7 +11728,7 @@ public final class ClusterConnectivityManagementV2Proto {
           if (!other.agents_.isEmpty()) {
             if (agents_.isEmpty()) {
               agents_ = other.agents_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureAgentsIsMutable();
               agents_.addAll(other.agents_);
@@ -11222,7 +11741,7 @@ public final class ClusterConnectivityManagementV2Proto {
               agentsBuilder_.dispose();
               agentsBuilder_ = null;
               agents_ = other.agents_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
               agentsBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getAgentsFieldBuilder() : null;
@@ -11261,17 +11780,19 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       private int bitField0_;
 
-      private com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken nextPageToken_ = null;
+      private com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken nextPageToken_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken, com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken.Builder, com.cloudera.thunderhead.service.common.paging.PagingProto.PageTokenOrBuilder> nextPageTokenBuilder_;
       /**
        * <code>.paging.PageToken nextPageToken = 1;</code>
+       * @return Whether the nextPageToken field is set.
        */
       public boolean hasNextPageToken() {
         return nextPageTokenBuilder_ != null || nextPageToken_ != null;
       }
       /**
        * <code>.paging.PageToken nextPageToken = 1;</code>
+       * @return The nextPageToken.
        */
       public com.cloudera.thunderhead.service.common.paging.PagingProto.PageToken getNextPageToken() {
         if (nextPageTokenBuilder_ == null) {
@@ -11381,9 +11902,9 @@ public final class ClusterConnectivityManagementV2Proto {
       private java.util.List<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent> agents_ =
         java.util.Collections.emptyList();
       private void ensureAgentsIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           agents_ = new java.util.ArrayList<com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent>(agents_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
          }
       }
 
@@ -11577,7 +12098,7 @@ public final class ClusterConnectivityManagementV2Proto {
       public Builder clearAgents() {
         if (agentsBuilder_ == null) {
           agents_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           agentsBuilder_.clear();
@@ -11682,7 +12203,7 @@ public final class ClusterConnectivityManagementV2Proto {
           agentsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder>(
                   agents_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           agents_ = null;
@@ -11692,7 +12213,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -11752,6 +12273,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The agentCrn.
      */
     java.lang.String getAgentCrn();
     /**
@@ -11760,6 +12282,7 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The bytes for agentCrn.
      */
     com.google.protobuf.ByteString
         getAgentCrnBytes();
@@ -11767,7 +12290,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest}
    */
-  public  static final class RotateAgentAccessKeyRequest extends
+  public static final class RotateAgentAccessKeyRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RotateAgentAccessKeyRequest)
       RotateAgentAccessKeyRequestOrBuilder {
@@ -11778,6 +12301,13 @@ public final class ClusterConnectivityManagementV2Proto {
     }
     private RotateAgentAccessKeyRequest() {
       agentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RotateAgentAccessKeyRequest();
     }
 
     @java.lang.Override
@@ -11793,7 +12323,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -11811,7 +12340,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11850,7 +12379,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The agentCrn.
      */
+    @java.lang.Override
     public java.lang.String getAgentCrn() {
       java.lang.Object ref = agentCrn_;
       if (ref instanceof java.lang.String) {
@@ -11869,7 +12400,9 @@ public final class ClusterConnectivityManagementV2Proto {
      * </pre>
      *
      * <code>string agentCrn = 1;</code>
+     * @return The bytes for agentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAgentCrnBytes() {
       java.lang.Object ref = agentCrn_;
@@ -11898,7 +12431,7 @@ public final class ClusterConnectivityManagementV2Proto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAgentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, agentCrn_);
       }
       unknownFields.writeTo(output);
@@ -11910,7 +12443,7 @@ public final class ClusterConnectivityManagementV2Proto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAgentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(agentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, agentCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -11928,11 +12461,10 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyRequest) obj;
 
-      boolean result = true;
-      result = result && getAgentCrn()
-          .equals(other.getAgentCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAgentCrn()
+          .equals(other.getAgentCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12112,35 +12644,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12194,6 +12726,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return The agentCrn.
        */
       public java.lang.String getAgentCrn() {
         java.lang.Object ref = agentCrn_;
@@ -12213,6 +12746,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return The bytes for agentCrn.
        */
       public com.google.protobuf.ByteString
           getAgentCrnBytes() {
@@ -12233,6 +12767,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @param value The agentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setAgentCrn(
           java.lang.String value) {
@@ -12250,6 +12786,7 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAgentCrn() {
         
@@ -12263,6 +12800,8 @@ public final class ClusterConnectivityManagementV2Proto {
        * </pre>
        *
        * <code>string agentCrn = 1;</code>
+       * @param value The bytes for agentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setAgentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -12278,7 +12817,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12334,10 +12873,12 @@ public final class ClusterConnectivityManagementV2Proto {
 
     /**
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return Whether the invertingProxyAgent field is set.
      */
     boolean hasInvertingProxyAgent();
     /**
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return The invertingProxyAgent.
      */
     com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent();
     /**
@@ -12348,7 +12889,7 @@ public final class ClusterConnectivityManagementV2Proto {
   /**
    * Protobuf type {@code clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse}
    */
-  public  static final class RotateAgentAccessKeyResponse extends
+  public static final class RotateAgentAccessKeyResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:clusterconnectivitymanagementv2.RotateAgentAccessKeyResponse)
       RotateAgentAccessKeyResponseOrBuilder {
@@ -12358,6 +12899,13 @@ public final class ClusterConnectivityManagementV2Proto {
       super(builder);
     }
     private RotateAgentAccessKeyResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RotateAgentAccessKeyResponse();
     }
 
     @java.lang.Override
@@ -12373,7 +12921,6 @@ public final class ClusterConnectivityManagementV2Proto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -12398,7 +12945,7 @@ public final class ClusterConnectivityManagementV2Proto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -12433,19 +12980,24 @@ public final class ClusterConnectivityManagementV2Proto {
     private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent_;
     /**
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return Whether the invertingProxyAgent field is set.
      */
+    @java.lang.Override
     public boolean hasInvertingProxyAgent() {
       return invertingProxyAgent_ != null;
     }
     /**
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+     * @return The invertingProxyAgent.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent() {
       return invertingProxyAgent_ == null ? com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.getDefaultInstance() : invertingProxyAgent_;
     }
     /**
      * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder getInvertingProxyAgentOrBuilder() {
       return getInvertingProxyAgent();
     }
@@ -12495,14 +13047,13 @@ public final class ClusterConnectivityManagementV2Proto {
       }
       com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse other = (com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.RotateAgentAccessKeyResponse) obj;
 
-      boolean result = true;
-      result = result && (hasInvertingProxyAgent() == other.hasInvertingProxyAgent());
+      if (hasInvertingProxyAgent() != other.hasInvertingProxyAgent()) return false;
       if (hasInvertingProxyAgent()) {
-        result = result && getInvertingProxyAgent()
-            .equals(other.getInvertingProxyAgent());
+        if (!getInvertingProxyAgent()
+            .equals(other.getInvertingProxyAgent())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12692,35 +13243,35 @@ public final class ClusterConnectivityManagementV2Proto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12766,17 +13317,19 @@ public final class ClusterConnectivityManagementV2Proto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent_ = null;
+      private com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent invertingProxyAgent_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent.Builder, com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgentOrBuilder> invertingProxyAgentBuilder_;
       /**
        * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       * @return Whether the invertingProxyAgent field is set.
        */
       public boolean hasInvertingProxyAgent() {
         return invertingProxyAgentBuilder_ != null || invertingProxyAgent_ != null;
       }
       /**
        * <code>.clusterconnectivitymanagementv2.InvertingProxyAgent invertingProxyAgent = 1;</code>
+       * @return The invertingProxyAgent.
        */
       public com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterConnectivityManagementV2Proto.InvertingProxyAgent getInvertingProxyAgent() {
         if (invertingProxyAgentBuilder_ == null) {
@@ -12885,7 +13438,7 @@ public final class ClusterConnectivityManagementV2Proto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -13099,21 +13652,13 @@ public final class ClusterConnectivityManagementV2Proto {
       "gementV2ProtoZ\031com/cloudera/cdp/protobuf" +
       "b\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
           com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
           com.cloudera.thunderhead.service.common.paging.PagingProto.getDescriptor(),
-        }, assigner);
+        });
     internal_static_clusterconnectivitymanagementv2_CreateOrGetInvertingProxyRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_clusterconnectivitymanagementv2_CreateOrGetInvertingProxyRequest_fieldAccessorTable = new

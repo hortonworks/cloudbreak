@@ -85,6 +85,8 @@ public final class NodeStatusProto {
     }
 
     /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
      * @deprecated Use {@link #forNumber(int)} instead.
      */
     @java.lang.Deprecated
@@ -92,6 +94,10 @@ public final class NodeStatusProto {
       return forNumber(value);
     }
 
+    /**
+     * @param value The numeric wire value of the corresponding enum entry.
+     * @return The enum associated with the given numeric wire value.
+     */
     public static HealthStatus forNumber(int value) {
       switch (value) {
         case 0: return UNKNOWN;
@@ -115,6 +121,10 @@ public final class NodeStatusProto {
 
     public final com.google.protobuf.Descriptors.EnumValueDescriptor
         getValueDescriptor() {
+      if (this == UNRECOGNIZED) {
+        throw new java.lang.IllegalStateException(
+            "Can't get the descriptor of an unrecognized enum value.");
+      }
       return getDescriptor().getValues().get(ordinal());
     }
     public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -159,6 +169,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.StatusDetails statusDetails = 1;</code>
+     * @return Whether the statusDetails field is set.
      */
     boolean hasStatusDetails();
     /**
@@ -167,6 +178,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.StatusDetails statusDetails = 1;</code>
+     * @return The statusDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails getStatusDetails();
     /**
@@ -184,6 +196,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ServicesDetails servicesDetails = 2;</code>
+     * @return Whether the servicesDetails field is set.
      */
     boolean hasServicesDetails();
     /**
@@ -192,6 +205,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ServicesDetails servicesDetails = 2;</code>
+     * @return The servicesDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails getServicesDetails();
     /**
@@ -209,6 +223,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkDetails networkDetails = 3;</code>
+     * @return Whether the networkDetails field is set.
      */
     boolean hasNetworkDetails();
     /**
@@ -217,6 +232,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkDetails networkDetails = 3;</code>
+     * @return The networkDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails getNetworkDetails();
     /**
@@ -234,6 +250,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MeteringDetails meteringDetails = 4;</code>
+     * @return Whether the meteringDetails field is set.
      */
     boolean hasMeteringDetails();
     /**
@@ -242,6 +259,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MeteringDetails meteringDetails = 4;</code>
+     * @return The meteringDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails getMeteringDetails();
     /**
@@ -259,6 +277,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SystemMetrics systemMetrics = 5;</code>
+     * @return Whether the systemMetrics field is set.
      */
     boolean hasSystemMetrics();
     /**
@@ -267,6 +286,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SystemMetrics systemMetrics = 5;</code>
+     * @return The systemMetrics.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics getSystemMetrics();
     /**
@@ -285,7 +305,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.NodeStatus}
    */
-  public  static final class NodeStatus extends
+  public static final class NodeStatus extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.NodeStatus)
       NodeStatusOrBuilder {
@@ -295,6 +315,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private NodeStatus() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NodeStatus();
     }
 
     @java.lang.Override
@@ -310,7 +337,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -387,7 +413,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -426,7 +452,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.StatusDetails statusDetails = 1;</code>
+     * @return Whether the statusDetails field is set.
      */
+    @java.lang.Override
     public boolean hasStatusDetails() {
       return statusDetails_ != null;
     }
@@ -436,7 +464,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.StatusDetails statusDetails = 1;</code>
+     * @return The statusDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails getStatusDetails() {
       return statusDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.getDefaultInstance() : statusDetails_;
     }
@@ -447,6 +477,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.StatusDetails statusDetails = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetailsOrBuilder getStatusDetailsOrBuilder() {
       return getStatusDetails();
     }
@@ -459,7 +490,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ServicesDetails servicesDetails = 2;</code>
+     * @return Whether the servicesDetails field is set.
      */
+    @java.lang.Override
     public boolean hasServicesDetails() {
       return servicesDetails_ != null;
     }
@@ -469,7 +502,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ServicesDetails servicesDetails = 2;</code>
+     * @return The servicesDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails getServicesDetails() {
       return servicesDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails.getDefaultInstance() : servicesDetails_;
     }
@@ -480,6 +515,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.ServicesDetails servicesDetails = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetailsOrBuilder getServicesDetailsOrBuilder() {
       return getServicesDetails();
     }
@@ -492,7 +528,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkDetails networkDetails = 3;</code>
+     * @return Whether the networkDetails field is set.
      */
+    @java.lang.Override
     public boolean hasNetworkDetails() {
       return networkDetails_ != null;
     }
@@ -502,7 +540,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkDetails networkDetails = 3;</code>
+     * @return The networkDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails getNetworkDetails() {
       return networkDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails.getDefaultInstance() : networkDetails_;
     }
@@ -513,6 +553,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.NetworkDetails networkDetails = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetailsOrBuilder getNetworkDetailsOrBuilder() {
       return getNetworkDetails();
     }
@@ -525,7 +566,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MeteringDetails meteringDetails = 4;</code>
+     * @return Whether the meteringDetails field is set.
      */
+    @java.lang.Override
     public boolean hasMeteringDetails() {
       return meteringDetails_ != null;
     }
@@ -535,7 +578,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MeteringDetails meteringDetails = 4;</code>
+     * @return The meteringDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails getMeteringDetails() {
       return meteringDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails.getDefaultInstance() : meteringDetails_;
     }
@@ -546,6 +591,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.MeteringDetails meteringDetails = 4;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetailsOrBuilder getMeteringDetailsOrBuilder() {
       return getMeteringDetails();
     }
@@ -558,7 +604,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SystemMetrics systemMetrics = 5;</code>
+     * @return Whether the systemMetrics field is set.
      */
+    @java.lang.Override
     public boolean hasSystemMetrics() {
       return systemMetrics_ != null;
     }
@@ -568,7 +616,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SystemMetrics systemMetrics = 5;</code>
+     * @return The systemMetrics.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics getSystemMetrics() {
       return systemMetrics_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics.getDefaultInstance() : systemMetrics_;
     }
@@ -579,6 +629,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.SystemMetrics systemMetrics = 5;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetricsOrBuilder getSystemMetricsOrBuilder() {
       return getSystemMetrics();
     }
@@ -656,34 +707,33 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus) obj;
 
-      boolean result = true;
-      result = result && (hasStatusDetails() == other.hasStatusDetails());
+      if (hasStatusDetails() != other.hasStatusDetails()) return false;
       if (hasStatusDetails()) {
-        result = result && getStatusDetails()
-            .equals(other.getStatusDetails());
+        if (!getStatusDetails()
+            .equals(other.getStatusDetails())) return false;
       }
-      result = result && (hasServicesDetails() == other.hasServicesDetails());
+      if (hasServicesDetails() != other.hasServicesDetails()) return false;
       if (hasServicesDetails()) {
-        result = result && getServicesDetails()
-            .equals(other.getServicesDetails());
+        if (!getServicesDetails()
+            .equals(other.getServicesDetails())) return false;
       }
-      result = result && (hasNetworkDetails() == other.hasNetworkDetails());
+      if (hasNetworkDetails() != other.hasNetworkDetails()) return false;
       if (hasNetworkDetails()) {
-        result = result && getNetworkDetails()
-            .equals(other.getNetworkDetails());
+        if (!getNetworkDetails()
+            .equals(other.getNetworkDetails())) return false;
       }
-      result = result && (hasMeteringDetails() == other.hasMeteringDetails());
+      if (hasMeteringDetails() != other.hasMeteringDetails()) return false;
       if (hasMeteringDetails()) {
-        result = result && getMeteringDetails()
-            .equals(other.getMeteringDetails());
+        if (!getMeteringDetails()
+            .equals(other.getMeteringDetails())) return false;
       }
-      result = result && (hasSystemMetrics() == other.hasSystemMetrics());
+      if (hasSystemMetrics() != other.hasSystemMetrics()) return false;
       if (hasSystemMetrics()) {
-        result = result && getSystemMetrics()
-            .equals(other.getSystemMetrics());
+        if (!getSystemMetrics()
+            .equals(other.getSystemMetrics())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -937,35 +987,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1023,7 +1073,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails statusDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails statusDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetailsOrBuilder> statusDetailsBuilder_;
       /**
@@ -1032,6 +1082,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.StatusDetails statusDetails = 1;</code>
+       * @return Whether the statusDetails field is set.
        */
       public boolean hasStatusDetails() {
         return statusDetailsBuilder_ != null || statusDetails_ != null;
@@ -1042,6 +1093,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.StatusDetails statusDetails = 1;</code>
+       * @return The statusDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails getStatusDetails() {
         if (statusDetailsBuilder_ == null) {
@@ -1176,7 +1228,7 @@ public final class NodeStatusProto {
         return statusDetailsBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails servicesDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails servicesDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetailsOrBuilder> servicesDetailsBuilder_;
       /**
@@ -1185,6 +1237,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ServicesDetails servicesDetails = 2;</code>
+       * @return Whether the servicesDetails field is set.
        */
       public boolean hasServicesDetails() {
         return servicesDetailsBuilder_ != null || servicesDetails_ != null;
@@ -1195,6 +1248,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ServicesDetails servicesDetails = 2;</code>
+       * @return The servicesDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails getServicesDetails() {
         if (servicesDetailsBuilder_ == null) {
@@ -1329,7 +1383,7 @@ public final class NodeStatusProto {
         return servicesDetailsBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails networkDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails networkDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetailsOrBuilder> networkDetailsBuilder_;
       /**
@@ -1338,6 +1392,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkDetails networkDetails = 3;</code>
+       * @return Whether the networkDetails field is set.
        */
       public boolean hasNetworkDetails() {
         return networkDetailsBuilder_ != null || networkDetails_ != null;
@@ -1348,6 +1403,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkDetails networkDetails = 3;</code>
+       * @return The networkDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails getNetworkDetails() {
         if (networkDetailsBuilder_ == null) {
@@ -1482,7 +1538,7 @@ public final class NodeStatusProto {
         return networkDetailsBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails meteringDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails meteringDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetailsOrBuilder> meteringDetailsBuilder_;
       /**
@@ -1491,6 +1547,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.MeteringDetails meteringDetails = 4;</code>
+       * @return Whether the meteringDetails field is set.
        */
       public boolean hasMeteringDetails() {
         return meteringDetailsBuilder_ != null || meteringDetails_ != null;
@@ -1501,6 +1558,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.MeteringDetails meteringDetails = 4;</code>
+       * @return The meteringDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails getMeteringDetails() {
         if (meteringDetailsBuilder_ == null) {
@@ -1635,7 +1693,7 @@ public final class NodeStatusProto {
         return meteringDetailsBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics systemMetrics_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics systemMetrics_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetricsOrBuilder> systemMetricsBuilder_;
       /**
@@ -1644,6 +1702,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SystemMetrics systemMetrics = 5;</code>
+       * @return Whether the systemMetrics field is set.
        */
       public boolean hasSystemMetrics() {
         return systemMetricsBuilder_ != null || systemMetrics_ != null;
@@ -1654,6 +1713,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SystemMetrics systemMetrics = 5;</code>
+       * @return The systemMetrics.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics getSystemMetrics() {
         if (systemMetricsBuilder_ == null) {
@@ -1790,7 +1850,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1894,6 +1954,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return Whether the clusterDetails field is set.
      */
     boolean hasClusterDetails();
     /**
@@ -1902,6 +1963,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return The clusterDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -1919,6 +1981,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 3;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -1928,6 +1991,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 4;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -1936,6 +2000,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 4;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -1947,7 +2012,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.NodeStatusReport}
    */
-  public  static final class NodeStatusReport extends
+  public static final class NodeStatusReport extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.NodeStatusReport)
       NodeStatusReportOrBuilder {
@@ -1958,8 +2023,14 @@ public final class NodeStatusProto {
     }
     private NodeStatusReport() {
       nodes_ = java.util.Collections.emptyList();
-      timestamp_ = 0L;
       cdpTelemetryVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NodeStatusReport();
     }
 
     @java.lang.Override
@@ -1987,7 +2058,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 nodes_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -2020,7 +2091,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2034,7 +2105,7 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           nodes_ = java.util.Collections.unmodifiableList(nodes_);
         }
         this.unknownFields = unknownFields.build();
@@ -2054,7 +2125,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport.Builder.class);
     }
 
-    private int bitField0_;
     public static final int NODES_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus> nodes_;
     /**
@@ -2064,6 +2134,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.NodeStatus nodes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus> getNodesList() {
       return nodes_;
     }
@@ -2074,6 +2145,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.NodeStatus nodes = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusOrBuilder> 
         getNodesOrBuilderList() {
       return nodes_;
@@ -2085,6 +2157,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.NodeStatus nodes = 1;</code>
      */
+    @java.lang.Override
     public int getNodesCount() {
       return nodes_.size();
     }
@@ -2095,6 +2168,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.NodeStatus nodes = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus getNodes(int index) {
       return nodes_.get(index);
     }
@@ -2105,6 +2179,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.NodeStatus nodes = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusOrBuilder getNodesOrBuilder(
         int index) {
       return nodes_.get(index);
@@ -2118,7 +2193,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return Whether the clusterDetails field is set.
      */
+    @java.lang.Override
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
     }
@@ -2128,7 +2205,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return The clusterDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
     }
@@ -2139,6 +2218,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
     }
@@ -2151,7 +2231,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 3;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -2164,7 +2246,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 4;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -2183,7 +2267,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 4;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -2221,7 +2307,7 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(3, timestamp_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
@@ -2245,7 +2331,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, timestamp_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -2263,20 +2349,19 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport) obj;
 
-      boolean result = true;
-      result = result && getNodesList()
-          .equals(other.getNodesList());
-      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (!getNodesList()
+          .equals(other.getNodesList())) return false;
+      if (hasClusterDetails() != other.hasClusterDetails()) return false;
       if (hasClusterDetails()) {
-        result = result && getClusterDetails()
-            .equals(other.getClusterDetails());
+        if (!getClusterDetails()
+            .equals(other.getClusterDetails())) return false;
       }
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2480,9 +2565,8 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusReport(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (nodesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             nodes_ = java.util.Collections.unmodifiableList(nodes_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -2497,42 +2581,41 @@ public final class NodeStatusProto {
         }
         result.timestamp_ = timestamp_;
         result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2615,7 +2698,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus> nodes_ =
         java.util.Collections.emptyList();
       private void ensureNodesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           nodes_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus>(nodes_);
           bitField0_ |= 0x00000001;
          }
@@ -2916,7 +2999,7 @@ public final class NodeStatusProto {
           nodesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatus.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NodeStatusOrBuilder>(
                   nodes_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           nodes_ = null;
@@ -2924,7 +3007,7 @@ public final class NodeStatusProto {
         return nodesBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
@@ -2933,6 +3016,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       * @return Whether the clusterDetails field is set.
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -2943,6 +3027,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       * @return The clusterDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -3084,7 +3169,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 3;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -3094,6 +3181,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 3;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -3107,6 +3196,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -3122,6 +3212,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 4;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -3141,6 +3232,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 4;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -3161,6 +3253,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 4;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -3178,6 +3272,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -3191,6 +3286,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 4;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -3206,7 +3303,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3266,6 +3363,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 1;</code>
+     * @return The name.
      */
     java.lang.String getName();
     /**
@@ -3274,6 +3372,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 1;</code>
+     * @return The bytes for name.
      */
     com.google.protobuf.ByteString
         getNameBytes();
@@ -3284,6 +3383,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The enum numeric value on the wire for status.
      */
     int getStatusValue();
     /**
@@ -3292,6 +3392,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The status.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus();
   }
@@ -3302,7 +3403,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.ServiceStatus}
    */
-  public  static final class ServiceStatus extends
+  public static final class ServiceStatus extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.ServiceStatus)
       ServiceStatusOrBuilder {
@@ -3314,6 +3415,13 @@ public final class NodeStatusProto {
     private ServiceStatus() {
       name_ = "";
       status_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ServiceStatus();
     }
 
     @java.lang.Override
@@ -3329,7 +3437,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3353,7 +3460,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3392,7 +3499,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 1;</code>
+     * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -3411,7 +3520,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 1;</code>
+     * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -3434,8 +3545,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The enum numeric value on the wire for status.
      */
-    public int getStatusValue() {
+    @java.lang.Override public int getStatusValue() {
       return status_;
     }
     /**
@@ -3444,8 +3556,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The status.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(status_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -3465,7 +3578,7 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
       }
       if (status_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
@@ -3480,7 +3593,7 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
       }
       if (status_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
@@ -3502,12 +3615,11 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus) obj;
 
-      boolean result = true;
-      result = result && getName()
-          .equals(other.getName());
-      result = result && status_ == other.status_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (status_ != other.status_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3696,35 +3808,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3781,6 +3893,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 1;</code>
+       * @return The name.
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -3800,6 +3913,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 1;</code>
+       * @return The bytes for name.
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -3820,6 +3934,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
        */
       public Builder setName(
           java.lang.String value) {
@@ -3837,6 +3953,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearName() {
         
@@ -3850,6 +3967,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -3870,8 +3989,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @return The enum numeric value on the wire for status.
        */
-      public int getStatusValue() {
+      @java.lang.Override public int getStatusValue() {
         return status_;
       }
       /**
@@ -3880,8 +4000,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusValue(int value) {
+        
         status_ = value;
         onChanged();
         return this;
@@ -3892,7 +4015,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @return The status.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(status_);
@@ -3904,6 +4029,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatus(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -3920,6 +4047,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStatus() {
         
@@ -3930,7 +4058,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4166,6 +4294,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -4175,6 +4304,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 6;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -4183,6 +4313,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 6;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -4194,7 +4325,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.ServicesDetails}
    */
-  public  static final class ServicesDetails extends
+  public static final class ServicesDetails extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.ServicesDetails)
       ServicesDetailsOrBuilder {
@@ -4208,8 +4339,14 @@ public final class NodeStatusProto {
       infraServices_ = java.util.Collections.emptyList();
       cmServices_ = java.util.Collections.emptyList();
       freeipaServices_ = java.util.Collections.emptyList();
-      timestamp_ = 0L;
       cdpTelemetryVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ServicesDetails();
     }
 
     @java.lang.Override
@@ -4237,7 +4374,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 services_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -4246,7 +4383,7 @@ public final class NodeStatusProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 infraServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
                 mutable_bitField0_ |= 0x00000002;
               }
@@ -4255,7 +4392,7 @@ public final class NodeStatusProto {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
                 cmServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
                 mutable_bitField0_ |= 0x00000004;
               }
@@ -4264,7 +4401,7 @@ public final class NodeStatusProto {
               break;
             }
             case 34: {
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
                 freeipaServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
                 mutable_bitField0_ |= 0x00000008;
               }
@@ -4284,7 +4421,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4298,16 +4435,16 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           services_ = java.util.Collections.unmodifiableList(services_);
         }
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           infraServices_ = java.util.Collections.unmodifiableList(infraServices_);
         }
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000004) != 0)) {
           cmServices_ = java.util.Collections.unmodifiableList(cmServices_);
         }
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000008) != 0)) {
           freeipaServices_ = java.util.Collections.unmodifiableList(freeipaServices_);
         }
         this.unknownFields = unknownFields.build();
@@ -4327,7 +4464,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails.Builder.class);
     }
 
-    private int bitField0_;
     public static final int SERVICES_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> services_;
     /**
@@ -4337,6 +4473,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> getServicesList() {
       return services_;
     }
@@ -4347,6 +4484,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder> 
         getServicesOrBuilderList() {
       return services_;
@@ -4358,6 +4496,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public int getServicesCount() {
       return services_.size();
     }
@@ -4368,6 +4507,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus getServices(int index) {
       return services_.get(index);
     }
@@ -4378,6 +4518,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder getServicesOrBuilder(
         int index) {
       return services_.get(index);
@@ -4392,6 +4533,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus infraServices = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> getInfraServicesList() {
       return infraServices_;
     }
@@ -4402,6 +4544,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus infraServices = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder> 
         getInfraServicesOrBuilderList() {
       return infraServices_;
@@ -4413,6 +4556,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus infraServices = 2;</code>
      */
+    @java.lang.Override
     public int getInfraServicesCount() {
       return infraServices_.size();
     }
@@ -4423,6 +4567,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus infraServices = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus getInfraServices(int index) {
       return infraServices_.get(index);
     }
@@ -4433,6 +4578,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus infraServices = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder getInfraServicesOrBuilder(
         int index) {
       return infraServices_.get(index);
@@ -4447,6 +4593,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus cmServices = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> getCmServicesList() {
       return cmServices_;
     }
@@ -4457,6 +4604,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus cmServices = 3;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder> 
         getCmServicesOrBuilderList() {
       return cmServices_;
@@ -4468,6 +4616,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus cmServices = 3;</code>
      */
+    @java.lang.Override
     public int getCmServicesCount() {
       return cmServices_.size();
     }
@@ -4478,6 +4627,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus cmServices = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus getCmServices(int index) {
       return cmServices_.get(index);
     }
@@ -4488,6 +4638,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus cmServices = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder getCmServicesOrBuilder(
         int index) {
       return cmServices_.get(index);
@@ -4502,6 +4653,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus freeipaServices = 4;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> getFreeipaServicesList() {
       return freeipaServices_;
     }
@@ -4512,6 +4664,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus freeipaServices = 4;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder> 
         getFreeipaServicesOrBuilderList() {
       return freeipaServices_;
@@ -4523,6 +4676,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus freeipaServices = 4;</code>
      */
+    @java.lang.Override
     public int getFreeipaServicesCount() {
       return freeipaServices_.size();
     }
@@ -4533,6 +4687,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus freeipaServices = 4;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus getFreeipaServices(int index) {
       return freeipaServices_.get(index);
     }
@@ -4543,6 +4698,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus freeipaServices = 4;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder getFreeipaServicesOrBuilder(
         int index) {
       return freeipaServices_.get(index);
@@ -4556,7 +4712,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -4569,7 +4727,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 6;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -4588,7 +4748,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 6;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -4632,7 +4794,7 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(5, timestamp_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
@@ -4664,7 +4826,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(5, timestamp_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -4682,21 +4844,20 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails) obj;
 
-      boolean result = true;
-      result = result && getServicesList()
-          .equals(other.getServicesList());
-      result = result && getInfraServicesList()
-          .equals(other.getInfraServicesList());
-      result = result && getCmServicesList()
-          .equals(other.getCmServicesList());
-      result = result && getFreeipaServicesList()
-          .equals(other.getFreeipaServicesList());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getServicesList()
+          .equals(other.getServicesList())) return false;
+      if (!getInfraServicesList()
+          .equals(other.getInfraServicesList())) return false;
+      if (!getCmServicesList()
+          .equals(other.getCmServicesList())) return false;
+      if (!getFreeipaServicesList()
+          .equals(other.getFreeipaServicesList())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4923,9 +5084,8 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServicesDetails(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (servicesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             services_ = java.util.Collections.unmodifiableList(services_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -4934,7 +5094,7 @@ public final class NodeStatusProto {
           result.services_ = servicesBuilder_.build();
         }
         if (infraServicesBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             infraServices_ = java.util.Collections.unmodifiableList(infraServices_);
             bitField0_ = (bitField0_ & ~0x00000002);
           }
@@ -4943,7 +5103,7 @@ public final class NodeStatusProto {
           result.infraServices_ = infraServicesBuilder_.build();
         }
         if (cmServicesBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
+          if (((bitField0_ & 0x00000004) != 0)) {
             cmServices_ = java.util.Collections.unmodifiableList(cmServices_);
             bitField0_ = (bitField0_ & ~0x00000004);
           }
@@ -4952,7 +5112,7 @@ public final class NodeStatusProto {
           result.cmServices_ = cmServicesBuilder_.build();
         }
         if (freeipaServicesBuilder_ == null) {
-          if (((bitField0_ & 0x00000008) == 0x00000008)) {
+          if (((bitField0_ & 0x00000008) != 0)) {
             freeipaServices_ = java.util.Collections.unmodifiableList(freeipaServices_);
             bitField0_ = (bitField0_ & ~0x00000008);
           }
@@ -4962,42 +5122,41 @@ public final class NodeStatusProto {
         }
         result.timestamp_ = timestamp_;
         result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5155,7 +5314,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> services_ =
         java.util.Collections.emptyList();
       private void ensureServicesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           services_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>(services_);
           bitField0_ |= 0x00000001;
          }
@@ -5456,7 +5615,7 @@ public final class NodeStatusProto {
           servicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder>(
                   services_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           services_ = null;
@@ -5467,7 +5626,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> infraServices_ =
         java.util.Collections.emptyList();
       private void ensureInfraServicesIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           infraServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>(infraServices_);
           bitField0_ |= 0x00000002;
          }
@@ -5768,7 +5927,7 @@ public final class NodeStatusProto {
           infraServicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder>(
                   infraServices_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           infraServices_ = null;
@@ -5779,7 +5938,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> cmServices_ =
         java.util.Collections.emptyList();
       private void ensureCmServicesIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000004) != 0)) {
           cmServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>(cmServices_);
           bitField0_ |= 0x00000004;
          }
@@ -6080,7 +6239,7 @@ public final class NodeStatusProto {
           cmServicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder>(
                   cmServices_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
+                  ((bitField0_ & 0x00000004) != 0),
                   getParentForChildren(),
                   isClean());
           cmServices_ = null;
@@ -6091,7 +6250,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> freeipaServices_ =
         java.util.Collections.emptyList();
       private void ensureFreeipaServicesIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000008) != 0)) {
           freeipaServices_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>(freeipaServices_);
           bitField0_ |= 0x00000008;
          }
@@ -6392,7 +6551,7 @@ public final class NodeStatusProto {
           freeipaServicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder>(
                   freeipaServices_,
-                  ((bitField0_ & 0x00000008) == 0x00000008),
+                  ((bitField0_ & 0x00000008) != 0),
                   getParentForChildren(),
                   isClean());
           freeipaServices_ = null;
@@ -6407,7 +6566,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -6417,6 +6578,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -6430,6 +6593,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -6445,6 +6609,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 6;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -6464,6 +6629,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 6;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -6484,6 +6650,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 6;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -6501,6 +6669,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -6514,6 +6683,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 6;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -6529,7 +6700,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6633,6 +6804,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
   }
@@ -6644,7 +6816,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.SaltMasterHealth}
    */
-  public  static final class SaltMasterHealth extends
+  public static final class SaltMasterHealth extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.SaltMasterHealth)
       SaltMasterHealthOrBuilder {
@@ -6655,7 +6827,13 @@ public final class NodeStatusProto {
     }
     private SaltMasterHealth() {
       services_ = java.util.Collections.emptyList();
-      timestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SaltMasterHealth();
     }
 
     @java.lang.Override
@@ -6683,7 +6861,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 services_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -6697,7 +6875,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6711,7 +6889,7 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           services_ = java.util.Collections.unmodifiableList(services_);
         }
         this.unknownFields = unknownFields.build();
@@ -6731,7 +6909,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth.Builder.class);
     }
 
-    private int bitField0_;
     public static final int SERVICES_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> services_;
     /**
@@ -6741,6 +6918,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> getServicesList() {
       return services_;
     }
@@ -6751,6 +6929,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder> 
         getServicesOrBuilderList() {
       return services_;
@@ -6762,6 +6941,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public int getServicesCount() {
       return services_.size();
     }
@@ -6772,6 +6952,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus getServices(int index) {
       return services_.get(index);
     }
@@ -6782,6 +6963,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.ServiceStatus services = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder getServicesOrBuilder(
         int index) {
       return services_.get(index);
@@ -6795,7 +6977,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -6852,13 +7036,12 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth) obj;
 
-      boolean result = true;
-      result = result && getServicesList()
-          .equals(other.getServicesList());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getServicesList()
+          .equals(other.getServicesList())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7049,9 +7232,8 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (servicesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             services_ = java.util.Collections.unmodifiableList(services_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -7060,42 +7242,41 @@ public final class NodeStatusProto {
           result.services_ = servicesBuilder_.build();
         }
         result.timestamp_ = timestamp_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7171,7 +7352,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus> services_ =
         java.util.Collections.emptyList();
       private void ensureServicesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           services_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus>(services_);
           bitField0_ |= 0x00000001;
          }
@@ -7472,7 +7653,7 @@ public final class NodeStatusProto {
           servicesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatus.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ServiceStatusOrBuilder>(
                   services_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           services_ = null;
@@ -7487,7 +7668,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -7497,6 +7680,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -7510,6 +7695,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -7520,7 +7706,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7624,6 +7810,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
   }
@@ -7634,7 +7821,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.SaltMinionsHealth}
    */
-  public  static final class SaltMinionsHealth extends
+  public static final class SaltMinionsHealth extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.SaltMinionsHealth)
       SaltMinionsHealthOrBuilder {
@@ -7645,7 +7832,13 @@ public final class NodeStatusProto {
     }
     private SaltMinionsHealth() {
       pingResponses_ = java.util.Collections.emptyList();
-      timestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SaltMinionsHealth();
     }
 
     @java.lang.Override
@@ -7673,7 +7866,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 pingResponses_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -7687,7 +7880,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7701,7 +7894,7 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           pingResponses_ = java.util.Collections.unmodifiableList(pingResponses_);
         }
         this.unknownFields = unknownFields.build();
@@ -7721,7 +7914,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth.Builder.class);
     }
 
-    private int bitField0_;
     public static final int PINGRESPONSES_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails> pingResponses_;
     /**
@@ -7731,6 +7923,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.StatusDetails pingResponses = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails> getPingResponsesList() {
       return pingResponses_;
     }
@@ -7741,6 +7934,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.StatusDetails pingResponses = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetailsOrBuilder> 
         getPingResponsesOrBuilderList() {
       return pingResponses_;
@@ -7752,6 +7946,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.StatusDetails pingResponses = 1;</code>
      */
+    @java.lang.Override
     public int getPingResponsesCount() {
       return pingResponses_.size();
     }
@@ -7762,6 +7957,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.StatusDetails pingResponses = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails getPingResponses(int index) {
       return pingResponses_.get(index);
     }
@@ -7772,6 +7968,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.StatusDetails pingResponses = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetailsOrBuilder getPingResponsesOrBuilder(
         int index) {
       return pingResponses_.get(index);
@@ -7785,7 +7982,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -7842,13 +8041,12 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth) obj;
 
-      boolean result = true;
-      result = result && getPingResponsesList()
-          .equals(other.getPingResponsesList());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getPingResponsesList()
+          .equals(other.getPingResponsesList())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8038,9 +8236,8 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (pingResponsesBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             pingResponses_ = java.util.Collections.unmodifiableList(pingResponses_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -8049,42 +8246,41 @@ public final class NodeStatusProto {
           result.pingResponses_ = pingResponsesBuilder_.build();
         }
         result.timestamp_ = timestamp_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8160,7 +8356,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails> pingResponses_ =
         java.util.Collections.emptyList();
       private void ensurePingResponsesIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           pingResponses_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails>(pingResponses_);
           bitField0_ |= 0x00000001;
          }
@@ -8461,7 +8657,7 @@ public final class NodeStatusProto {
           pingResponsesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetailsOrBuilder>(
                   pingResponses_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           pingResponses_ = null;
@@ -8476,7 +8672,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -8486,6 +8684,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -8499,6 +8699,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -8509,7 +8710,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8569,6 +8770,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @return A list containing the unaccepted.
      */
     java.util.List<java.lang.String>
         getUnacceptedList();
@@ -8578,6 +8780,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @return The count of unaccepted.
      */
     int getUnacceptedCount();
     /**
@@ -8586,6 +8789,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @param index The index of the element to return.
+     * @return The unaccepted at the given index.
      */
     java.lang.String getUnaccepted(int index);
     /**
@@ -8594,6 +8799,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the unaccepted at the given index.
      */
     com.google.protobuf.ByteString
         getUnacceptedBytes(int index);
@@ -8604,6 +8811,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @return A list containing the accepted.
      */
     java.util.List<java.lang.String>
         getAcceptedList();
@@ -8613,6 +8821,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @return The count of accepted.
      */
     int getAcceptedCount();
     /**
@@ -8621,6 +8830,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @param index The index of the element to return.
+     * @return The accepted at the given index.
      */
     java.lang.String getAccepted(int index);
     /**
@@ -8629,6 +8840,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the accepted at the given index.
      */
     com.google.protobuf.ByteString
         getAcceptedBytes(int index);
@@ -8639,6 +8852,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @return A list containing the rejected.
      */
     java.util.List<java.lang.String>
         getRejectedList();
@@ -8648,6 +8862,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @return The count of rejected.
      */
     int getRejectedCount();
     /**
@@ -8656,6 +8871,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @param index The index of the element to return.
+     * @return The rejected at the given index.
      */
     java.lang.String getRejected(int index);
     /**
@@ -8664,6 +8881,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the rejected at the given index.
      */
     com.google.protobuf.ByteString
         getRejectedBytes(int index);
@@ -8674,6 +8893,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @return A list containing the denied.
      */
     java.util.List<java.lang.String>
         getDeniedList();
@@ -8683,6 +8903,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @return The count of denied.
      */
     int getDeniedCount();
     /**
@@ -8691,6 +8912,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @param index The index of the element to return.
+     * @return The denied at the given index.
      */
     java.lang.String getDenied(int index);
     /**
@@ -8699,6 +8922,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the denied at the given index.
      */
     com.google.protobuf.ByteString
         getDeniedBytes(int index);
@@ -8709,6 +8934,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
   }
@@ -8719,7 +8945,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.SaltKeys}
    */
-  public  static final class SaltKeys extends
+  public static final class SaltKeys extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.SaltKeys)
       SaltKeysOrBuilder {
@@ -8733,7 +8959,13 @@ public final class NodeStatusProto {
       accepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       denied_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      timestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SaltKeys();
     }
 
     @java.lang.Override
@@ -8762,7 +8994,7 @@ public final class NodeStatusProto {
               break;
             case 10: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 unaccepted_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -8771,7 +9003,7 @@ public final class NodeStatusProto {
             }
             case 18: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 accepted_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000002;
               }
@@ -8780,7 +9012,7 @@ public final class NodeStatusProto {
             }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000004) != 0)) {
                 rejected_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000004;
               }
@@ -8789,7 +9021,7 @@ public final class NodeStatusProto {
             }
             case 34: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+              if (!((mutable_bitField0_ & 0x00000008) != 0)) {
                 denied_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000008;
               }
@@ -8802,7 +9034,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8816,16 +9048,16 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           unaccepted_ = unaccepted_.getUnmodifiableView();
         }
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           accepted_ = accepted_.getUnmodifiableView();
         }
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000004) != 0)) {
           rejected_ = rejected_.getUnmodifiableView();
         }
-        if (((mutable_bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((mutable_bitField0_ & 0x00000008) != 0)) {
           denied_ = denied_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -8845,7 +9077,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder.class);
     }
 
-    private int bitField0_;
     public static final int UNACCEPTED_FIELD_NUMBER = 1;
     private com.google.protobuf.LazyStringList unaccepted_;
     /**
@@ -8854,6 +9085,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @return A list containing the unaccepted.
      */
     public com.google.protobuf.ProtocolStringList
         getUnacceptedList() {
@@ -8865,6 +9097,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @return The count of unaccepted.
      */
     public int getUnacceptedCount() {
       return unaccepted_.size();
@@ -8875,6 +9108,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @param index The index of the element to return.
+     * @return The unaccepted at the given index.
      */
     public java.lang.String getUnaccepted(int index) {
       return unaccepted_.get(index);
@@ -8885,6 +9120,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string unaccepted = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the unaccepted at the given index.
      */
     public com.google.protobuf.ByteString
         getUnacceptedBytes(int index) {
@@ -8899,6 +9136,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @return A list containing the accepted.
      */
     public com.google.protobuf.ProtocolStringList
         getAcceptedList() {
@@ -8910,6 +9148,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @return The count of accepted.
      */
     public int getAcceptedCount() {
       return accepted_.size();
@@ -8920,6 +9159,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @param index The index of the element to return.
+     * @return The accepted at the given index.
      */
     public java.lang.String getAccepted(int index) {
       return accepted_.get(index);
@@ -8930,6 +9171,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string accepted = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the accepted at the given index.
      */
     public com.google.protobuf.ByteString
         getAcceptedBytes(int index) {
@@ -8944,6 +9187,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @return A list containing the rejected.
      */
     public com.google.protobuf.ProtocolStringList
         getRejectedList() {
@@ -8955,6 +9199,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @return The count of rejected.
      */
     public int getRejectedCount() {
       return rejected_.size();
@@ -8965,6 +9210,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @param index The index of the element to return.
+     * @return The rejected at the given index.
      */
     public java.lang.String getRejected(int index) {
       return rejected_.get(index);
@@ -8975,6 +9222,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string rejected = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the rejected at the given index.
      */
     public com.google.protobuf.ByteString
         getRejectedBytes(int index) {
@@ -8989,6 +9238,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @return A list containing the denied.
      */
     public com.google.protobuf.ProtocolStringList
         getDeniedList() {
@@ -9000,6 +9250,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @return The count of denied.
      */
     public int getDeniedCount() {
       return denied_.size();
@@ -9010,6 +9261,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @param index The index of the element to return.
+     * @return The denied at the given index.
      */
     public java.lang.String getDenied(int index) {
       return denied_.get(index);
@@ -9020,6 +9273,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string denied = 4;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the denied at the given index.
      */
     public com.google.protobuf.ByteString
         getDeniedBytes(int index) {
@@ -9034,7 +9289,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -9128,19 +9385,18 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys) obj;
 
-      boolean result = true;
-      result = result && getUnacceptedList()
-          .equals(other.getUnacceptedList());
-      result = result && getAcceptedList()
-          .equals(other.getAcceptedList());
-      result = result && getRejectedList()
-          .equals(other.getRejectedList());
-      result = result && getDeniedList()
-          .equals(other.getDeniedList());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getUnacceptedList()
+          .equals(other.getUnacceptedList())) return false;
+      if (!getAcceptedList()
+          .equals(other.getAcceptedList())) return false;
+      if (!getRejectedList()
+          .equals(other.getRejectedList())) return false;
+      if (!getDeniedList()
+          .equals(other.getDeniedList())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9343,64 +9599,62 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           unaccepted_ = unaccepted_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.unaccepted_ = unaccepted_;
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((bitField0_ & 0x00000002) != 0)) {
           accepted_ = accepted_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.accepted_ = accepted_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((bitField0_ & 0x00000004) != 0)) {
           rejected_ = rejected_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000004);
         }
         result.rejected_ = rejected_;
-        if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (((bitField0_ & 0x00000008) != 0)) {
           denied_ = denied_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000008);
         }
         result.denied_ = denied_;
         result.timestamp_ = timestamp_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9489,7 +9743,7 @@ public final class NodeStatusProto {
 
       private com.google.protobuf.LazyStringList unaccepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureUnacceptedIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           unaccepted_ = new com.google.protobuf.LazyStringArrayList(unaccepted_);
           bitField0_ |= 0x00000001;
          }
@@ -9500,6 +9754,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @return A list containing the unaccepted.
        */
       public com.google.protobuf.ProtocolStringList
           getUnacceptedList() {
@@ -9511,6 +9766,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @return The count of unaccepted.
        */
       public int getUnacceptedCount() {
         return unaccepted_.size();
@@ -9521,6 +9777,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @param index The index of the element to return.
+       * @return The unaccepted at the given index.
        */
       public java.lang.String getUnaccepted(int index) {
         return unaccepted_.get(index);
@@ -9531,6 +9789,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the unaccepted at the given index.
        */
       public com.google.protobuf.ByteString
           getUnacceptedBytes(int index) {
@@ -9542,6 +9802,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The unaccepted to set.
+       * @return This builder for chaining.
        */
       public Builder setUnaccepted(
           int index, java.lang.String value) {
@@ -9559,6 +9822,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @param value The unaccepted to add.
+       * @return This builder for chaining.
        */
       public Builder addUnaccepted(
           java.lang.String value) {
@@ -9576,6 +9841,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @param values The unaccepted to add.
+       * @return This builder for chaining.
        */
       public Builder addAllUnaccepted(
           java.lang.Iterable<java.lang.String> values) {
@@ -9591,6 +9858,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUnaccepted() {
         unaccepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -9604,6 +9872,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string unaccepted = 1;</code>
+       * @param value The bytes of the unaccepted to add.
+       * @return This builder for chaining.
        */
       public Builder addUnacceptedBytes(
           com.google.protobuf.ByteString value) {
@@ -9619,7 +9889,7 @@ public final class NodeStatusProto {
 
       private com.google.protobuf.LazyStringList accepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureAcceptedIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           accepted_ = new com.google.protobuf.LazyStringArrayList(accepted_);
           bitField0_ |= 0x00000002;
          }
@@ -9630,6 +9900,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @return A list containing the accepted.
        */
       public com.google.protobuf.ProtocolStringList
           getAcceptedList() {
@@ -9641,6 +9912,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @return The count of accepted.
        */
       public int getAcceptedCount() {
         return accepted_.size();
@@ -9651,6 +9923,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @param index The index of the element to return.
+       * @return The accepted at the given index.
        */
       public java.lang.String getAccepted(int index) {
         return accepted_.get(index);
@@ -9661,6 +9935,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the accepted at the given index.
        */
       public com.google.protobuf.ByteString
           getAcceptedBytes(int index) {
@@ -9672,6 +9948,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The accepted to set.
+       * @return This builder for chaining.
        */
       public Builder setAccepted(
           int index, java.lang.String value) {
@@ -9689,6 +9968,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @param value The accepted to add.
+       * @return This builder for chaining.
        */
       public Builder addAccepted(
           java.lang.String value) {
@@ -9706,6 +9987,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @param values The accepted to add.
+       * @return This builder for chaining.
        */
       public Builder addAllAccepted(
           java.lang.Iterable<java.lang.String> values) {
@@ -9721,6 +10004,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccepted() {
         accepted_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -9734,6 +10018,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string accepted = 2;</code>
+       * @param value The bytes of the accepted to add.
+       * @return This builder for chaining.
        */
       public Builder addAcceptedBytes(
           com.google.protobuf.ByteString value) {
@@ -9749,7 +10035,7 @@ public final class NodeStatusProto {
 
       private com.google.protobuf.LazyStringList rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureRejectedIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000004) != 0)) {
           rejected_ = new com.google.protobuf.LazyStringArrayList(rejected_);
           bitField0_ |= 0x00000004;
          }
@@ -9760,6 +10046,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @return A list containing the rejected.
        */
       public com.google.protobuf.ProtocolStringList
           getRejectedList() {
@@ -9771,6 +10058,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @return The count of rejected.
        */
       public int getRejectedCount() {
         return rejected_.size();
@@ -9781,6 +10069,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @param index The index of the element to return.
+       * @return The rejected at the given index.
        */
       public java.lang.String getRejected(int index) {
         return rejected_.get(index);
@@ -9791,6 +10081,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the rejected at the given index.
        */
       public com.google.protobuf.ByteString
           getRejectedBytes(int index) {
@@ -9802,6 +10094,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The rejected to set.
+       * @return This builder for chaining.
        */
       public Builder setRejected(
           int index, java.lang.String value) {
@@ -9819,6 +10114,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @param value The rejected to add.
+       * @return This builder for chaining.
        */
       public Builder addRejected(
           java.lang.String value) {
@@ -9836,6 +10133,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @param values The rejected to add.
+       * @return This builder for chaining.
        */
       public Builder addAllRejected(
           java.lang.Iterable<java.lang.String> values) {
@@ -9851,6 +10150,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRejected() {
         rejected_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -9864,6 +10164,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string rejected = 3;</code>
+       * @param value The bytes of the rejected to add.
+       * @return This builder for chaining.
        */
       public Builder addRejectedBytes(
           com.google.protobuf.ByteString value) {
@@ -9879,7 +10181,7 @@ public final class NodeStatusProto {
 
       private com.google.protobuf.LazyStringList denied_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureDeniedIsMutable() {
-        if (!((bitField0_ & 0x00000008) == 0x00000008)) {
+        if (!((bitField0_ & 0x00000008) != 0)) {
           denied_ = new com.google.protobuf.LazyStringArrayList(denied_);
           bitField0_ |= 0x00000008;
          }
@@ -9890,6 +10192,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @return A list containing the denied.
        */
       public com.google.protobuf.ProtocolStringList
           getDeniedList() {
@@ -9901,6 +10204,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @return The count of denied.
        */
       public int getDeniedCount() {
         return denied_.size();
@@ -9911,6 +10215,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @param index The index of the element to return.
+       * @return The denied at the given index.
        */
       public java.lang.String getDenied(int index) {
         return denied_.get(index);
@@ -9921,6 +10227,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the denied at the given index.
        */
       public com.google.protobuf.ByteString
           getDeniedBytes(int index) {
@@ -9932,6 +10240,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @param index The index to set the value at.
+       * @param value The denied to set.
+       * @return This builder for chaining.
        */
       public Builder setDenied(
           int index, java.lang.String value) {
@@ -9949,6 +10260,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @param value The denied to add.
+       * @return This builder for chaining.
        */
       public Builder addDenied(
           java.lang.String value) {
@@ -9966,6 +10279,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @param values The denied to add.
+       * @return This builder for chaining.
        */
       public Builder addAllDenied(
           java.lang.Iterable<java.lang.String> values) {
@@ -9981,6 +10296,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDenied() {
         denied_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -9994,6 +10310,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string denied = 4;</code>
+       * @param value The bytes of the denied to add.
+       * @return This builder for chaining.
        */
       public Builder addDeniedBytes(
           com.google.protobuf.ByteString value) {
@@ -10014,7 +10332,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -10024,6 +10344,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -10037,6 +10359,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -10047,7 +10370,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10107,6 +10430,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMasterHealth master = 1;</code>
+     * @return Whether the master field is set.
      */
     boolean hasMaster();
     /**
@@ -10115,6 +10439,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMasterHealth master = 1;</code>
+     * @return The master.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth getMaster();
     /**
@@ -10132,6 +10457,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMinionsHealth minions = 2;</code>
+     * @return Whether the minions field is set.
      */
     boolean hasMinions();
     /**
@@ -10140,6 +10466,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMinionsHealth minions = 2;</code>
+     * @return The minions.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth getMinions();
     /**
@@ -10157,6 +10484,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 3;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -10166,6 +10494,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     * @return Whether the keys field is set.
      */
     boolean hasKeys();
     /**
@@ -10174,6 +10503,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     * @return The keys.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getKeys();
     /**
@@ -10191,6 +10521,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 5;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -10199,6 +10530,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 5;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -10210,7 +10542,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.SaltHealthReport}
    */
-  public  static final class SaltHealthReport extends
+  public static final class SaltHealthReport extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.SaltHealthReport)
       SaltHealthReportOrBuilder {
@@ -10220,8 +10552,14 @@ public final class NodeStatusProto {
       super(builder);
     }
     private SaltHealthReport() {
-      timestamp_ = 0L;
       cdpTelemetryVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SaltHealthReport();
     }
 
     @java.lang.Override
@@ -10237,7 +10575,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -10299,7 +10636,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10338,7 +10675,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMasterHealth master = 1;</code>
+     * @return Whether the master field is set.
      */
+    @java.lang.Override
     public boolean hasMaster() {
       return master_ != null;
     }
@@ -10348,7 +10687,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMasterHealth master = 1;</code>
+     * @return The master.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth getMaster() {
       return master_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth.getDefaultInstance() : master_;
     }
@@ -10359,6 +10700,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.SaltMasterHealth master = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealthOrBuilder getMasterOrBuilder() {
       return getMaster();
     }
@@ -10371,7 +10713,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMinionsHealth minions = 2;</code>
+     * @return Whether the minions field is set.
      */
+    @java.lang.Override
     public boolean hasMinions() {
       return minions_ != null;
     }
@@ -10381,7 +10725,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltMinionsHealth minions = 2;</code>
+     * @return The minions.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth getMinions() {
       return minions_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth.getDefaultInstance() : minions_;
     }
@@ -10392,6 +10738,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.SaltMinionsHealth minions = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealthOrBuilder getMinionsOrBuilder() {
       return getMinions();
     }
@@ -10404,7 +10751,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 3;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -10417,7 +10766,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     * @return Whether the keys field is set.
      */
+    @java.lang.Override
     public boolean hasKeys() {
       return keys_ != null;
     }
@@ -10427,7 +10778,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+     * @return The keys.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getKeys() {
       return keys_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.getDefaultInstance() : keys_;
     }
@@ -10438,6 +10791,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder getKeysOrBuilder() {
       return getKeys();
     }
@@ -10450,7 +10804,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 5;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -10469,7 +10825,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 5;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -10510,7 +10868,7 @@ public final class NodeStatusProto {
       if (keys_ != null) {
         output.writeMessage(4, getKeys());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
@@ -10538,7 +10896,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(4, getKeys());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -10556,28 +10914,27 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltHealthReport other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltHealthReport) obj;
 
-      boolean result = true;
-      result = result && (hasMaster() == other.hasMaster());
+      if (hasMaster() != other.hasMaster()) return false;
       if (hasMaster()) {
-        result = result && getMaster()
-            .equals(other.getMaster());
+        if (!getMaster()
+            .equals(other.getMaster())) return false;
       }
-      result = result && (hasMinions() == other.hasMinions());
+      if (hasMinions() != other.hasMinions()) return false;
       if (hasMinions()) {
-        result = result && getMinions()
-            .equals(other.getMinions());
+        if (!getMinions()
+            .equals(other.getMinions())) return false;
       }
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && (hasKeys() == other.hasKeys());
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (hasKeys() != other.hasKeys()) return false;
       if (hasKeys()) {
-        result = result && getKeys()
-            .equals(other.getKeys());
+        if (!getKeys()
+            .equals(other.getKeys())) return false;
       }
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10812,35 +11169,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10899,7 +11256,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth master_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth master_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealthOrBuilder> masterBuilder_;
       /**
@@ -10908,6 +11265,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SaltMasterHealth master = 1;</code>
+       * @return Whether the master field is set.
        */
       public boolean hasMaster() {
         return masterBuilder_ != null || master_ != null;
@@ -10918,6 +11276,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SaltMasterHealth master = 1;</code>
+       * @return The master.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMasterHealth getMaster() {
         if (masterBuilder_ == null) {
@@ -11052,7 +11411,7 @@ public final class NodeStatusProto {
         return masterBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth minions_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth minions_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealthOrBuilder> minionsBuilder_;
       /**
@@ -11061,6 +11420,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SaltMinionsHealth minions = 2;</code>
+       * @return Whether the minions field is set.
        */
       public boolean hasMinions() {
         return minionsBuilder_ != null || minions_ != null;
@@ -11071,6 +11431,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SaltMinionsHealth minions = 2;</code>
+       * @return The minions.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltMinionsHealth getMinions() {
         if (minionsBuilder_ == null) {
@@ -11212,7 +11573,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 3;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -11222,6 +11585,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 3;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -11235,6 +11600,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -11243,7 +11609,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys keys_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys keys_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeysOrBuilder> keysBuilder_;
       /**
@@ -11252,6 +11618,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       * @return Whether the keys field is set.
        */
       public boolean hasKeys() {
         return keysBuilder_ != null || keys_ != null;
@@ -11262,6 +11629,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SaltKeys keys = 4;</code>
+       * @return The keys.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SaltKeys getKeys() {
         if (keysBuilder_ == null) {
@@ -11403,6 +11771,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 5;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -11422,6 +11791,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 5;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -11442,6 +11812,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 5;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -11459,6 +11831,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -11472,6 +11845,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 5;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -11487,7 +11862,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -11547,6 +11922,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The host.
      */
     java.lang.String getHost();
     /**
@@ -11555,6 +11931,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The bytes for host.
      */
     com.google.protobuf.ByteString
         getHostBytes();
@@ -11565,6 +11942,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The enum numeric value on the wire for status.
      */
     int getStatusValue();
     /**
@@ -11573,6 +11951,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The status.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus();
 
@@ -11582,6 +11961,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string statusReason = 3;</code>
+     * @return The statusReason.
      */
     java.lang.String getStatusReason();
     /**
@@ -11590,6 +11970,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string statusReason = 3;</code>
+     * @return The bytes for statusReason.
      */
     com.google.protobuf.ByteString
         getStatusReasonBytes();
@@ -11600,6 +11981,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 4;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
   }
@@ -11610,7 +11992,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.StatusDetails}
    */
-  public  static final class StatusDetails extends
+  public static final class StatusDetails extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.StatusDetails)
       StatusDetailsOrBuilder {
@@ -11623,7 +12005,13 @@ public final class NodeStatusProto {
       host_ = "";
       status_ = 0;
       statusReason_ = "";
-      timestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new StatusDetails();
     }
 
     @java.lang.Override
@@ -11639,7 +12027,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -11674,7 +12061,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11713,7 +12100,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The host.
      */
+    @java.lang.Override
     public java.lang.String getHost() {
       java.lang.Object ref = host_;
       if (ref instanceof java.lang.String) {
@@ -11732,7 +12121,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The bytes for host.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getHostBytes() {
       java.lang.Object ref = host_;
@@ -11755,8 +12146,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The enum numeric value on the wire for status.
      */
-    public int getStatusValue() {
+    @java.lang.Override public int getStatusValue() {
       return status_;
     }
     /**
@@ -11765,8 +12157,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+     * @return The status.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(status_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -11780,7 +12173,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string statusReason = 3;</code>
+     * @return The statusReason.
      */
+    @java.lang.Override
     public java.lang.String getStatusReason() {
       java.lang.Object ref = statusReason_;
       if (ref instanceof java.lang.String) {
@@ -11799,7 +12194,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string statusReason = 3;</code>
+     * @return The bytes for statusReason.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStatusReasonBytes() {
       java.lang.Object ref = statusReason_;
@@ -11822,7 +12219,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 4;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -11841,13 +12240,13 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getHostBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, host_);
       }
       if (status_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(2, status_);
       }
-      if (!getStatusReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, statusReason_);
       }
       if (timestamp_ != 0L) {
@@ -11862,14 +12261,14 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getHostBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, host_);
       }
       if (status_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(2, status_);
       }
-      if (!getStatusReasonBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(statusReason_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, statusReason_);
       }
       if (timestamp_ != 0L) {
@@ -11891,16 +12290,15 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.StatusDetails) obj;
 
-      boolean result = true;
-      result = result && getHost()
-          .equals(other.getHost());
-      result = result && status_ == other.status_;
-      result = result && getStatusReason()
-          .equals(other.getStatusReason());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getHost()
+          .equals(other.getHost())) return false;
+      if (status_ != other.status_) return false;
+      if (!getStatusReason()
+          .equals(other.getStatusReason())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12100,35 +12498,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12192,6 +12590,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @return The host.
        */
       public java.lang.String getHost() {
         java.lang.Object ref = host_;
@@ -12211,6 +12610,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @return The bytes for host.
        */
       public com.google.protobuf.ByteString
           getHostBytes() {
@@ -12231,6 +12631,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @param value The host to set.
+       * @return This builder for chaining.
        */
       public Builder setHost(
           java.lang.String value) {
@@ -12248,6 +12650,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHost() {
         
@@ -12261,6 +12664,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @param value The bytes for host to set.
+       * @return This builder for chaining.
        */
       public Builder setHostBytes(
           com.google.protobuf.ByteString value) {
@@ -12281,8 +12686,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @return The enum numeric value on the wire for status.
        */
-      public int getStatusValue() {
+      @java.lang.Override public int getStatusValue() {
         return status_;
       }
       /**
@@ -12291,8 +12697,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusValue(int value) {
+        
         status_ = value;
         onChanged();
         return this;
@@ -12303,7 +12712,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @return The status.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStatus() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(status_);
@@ -12315,6 +12726,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatus(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -12331,6 +12744,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus status = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStatus() {
         
@@ -12346,6 +12760,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string statusReason = 3;</code>
+       * @return The statusReason.
        */
       public java.lang.String getStatusReason() {
         java.lang.Object ref = statusReason_;
@@ -12365,6 +12780,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string statusReason = 3;</code>
+       * @return The bytes for statusReason.
        */
       public com.google.protobuf.ByteString
           getStatusReasonBytes() {
@@ -12385,6 +12801,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string statusReason = 3;</code>
+       * @param value The statusReason to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusReason(
           java.lang.String value) {
@@ -12402,6 +12820,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string statusReason = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStatusReason() {
         
@@ -12415,6 +12834,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string statusReason = 3;</code>
+       * @param value The bytes for statusReason to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusReasonBytes(
           com.google.protobuf.ByteString value) {
@@ -12435,7 +12856,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 4;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -12445,6 +12868,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 4;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -12458,6 +12883,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -12468,7 +12894,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12636,6 +13062,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 firstHeartbeatEventTimestamp = 3;</code>
+     * @return The firstHeartbeatEventTimestamp.
      */
     long getFirstHeartbeatEventTimestamp();
 
@@ -12645,6 +13072,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 systemBootTimestamp = 4;</code>
+     * @return The systemBootTimestamp.
      */
     long getSystemBootTimestamp();
 
@@ -12654,6 +13082,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 heartbeatEventCount = 5;</code>
+     * @return The heartbeatEventCount.
      */
     int getHeartbeatEventCount();
 
@@ -12663,6 +13092,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+     * @return The enum numeric value on the wire for heartbeatAgentRunning.
      */
     int getHeartbeatAgentRunningValue();
     /**
@@ -12671,6 +13101,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+     * @return The heartbeatAgentRunning.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatAgentRunning();
 
@@ -12680,6 +13111,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+     * @return The enum numeric value on the wire for heartbeatConfig.
      */
     int getHeartbeatConfigValue();
     /**
@@ -12688,6 +13120,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+     * @return The heartbeatConfig.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatConfig();
 
@@ -12697,6 +13130,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+     * @return The enum numeric value on the wire for databusReachable.
      */
     int getDatabusReachableValue();
     /**
@@ -12705,6 +13139,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+     * @return The databusReachable.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusReachable();
 
@@ -12714,6 +13149,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+     * @return The enum numeric value on the wire for databusTestResponse.
      */
     int getDatabusTestResponseValue();
     /**
@@ -12722,6 +13158,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+     * @return The databusTestResponse.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusTestResponse();
 
@@ -12731,6 +13168,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+     * @return The enum numeric value on the wire for loggingAgentConfig.
      */
     int getLoggingAgentConfigValue();
     /**
@@ -12739,6 +13177,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+     * @return The loggingAgentConfig.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingAgentConfig();
 
@@ -12748,6 +13187,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+     * @return The enum numeric value on the wire for loggingServiceRunning.
      */
     int getLoggingServiceRunningValue();
     /**
@@ -12756,6 +13196,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+     * @return The loggingServiceRunning.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingServiceRunning();
 
@@ -12765,6 +13206,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 12;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -12774,6 +13216,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 13;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -12782,6 +13225,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 13;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -12793,7 +13237,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.MeteringDetails}
    */
-  public  static final class MeteringDetails extends
+  public static final class MeteringDetails extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.MeteringDetails)
       MeteringDetailsOrBuilder {
@@ -12803,17 +13247,20 @@ public final class NodeStatusProto {
       super(builder);
     }
     private MeteringDetails() {
-      firstHeartbeatEventTimestamp_ = 0L;
-      systemBootTimestamp_ = 0L;
-      heartbeatEventCount_ = 0;
       heartbeatAgentRunning_ = 0;
       heartbeatConfig_ = 0;
       databusReachable_ = 0;
       databusTestResponse_ = 0;
       loggingAgentConfig_ = 0;
       loggingServiceRunning_ = 0;
-      timestamp_ = 0L;
       cdpTelemetryVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MeteringDetails();
     }
 
     @java.lang.Override
@@ -12841,7 +13288,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 databusDetails_ = com.google.protobuf.MapField.newMapField(
                     DatabusDetailsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000001;
@@ -12854,7 +13301,7 @@ public final class NodeStatusProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 eventDetails_ = com.google.protobuf.MapField.newMapField(
                     EventDetailsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000002;
@@ -12929,7 +13376,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -12974,7 +13421,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails.Builder.class);
     }
 
-    private int bitField0_;
     public static final int DATABUSDETAILS_FIELD_NUMBER = 1;
     private static final class DatabusDetailsDefaultEntryHolder {
       static final com.google.protobuf.MapEntry<
@@ -13009,14 +13455,16 @@ public final class NodeStatusProto {
      * <code>map&lt;string, string&gt; databusDetails = 1;</code>
      */
 
+    @java.lang.Override
     public boolean containsDatabusDetails(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetDatabusDetails().getMap().containsKey(key);
     }
     /**
      * Use {@link #getDatabusDetailsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getDatabusDetails() {
       return getDatabusDetailsMap();
@@ -13028,6 +13476,7 @@ public final class NodeStatusProto {
      *
      * <code>map&lt;string, string&gt; databusDetails = 1;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getDatabusDetailsMap() {
       return internalGetDatabusDetails().getMap();
@@ -13039,11 +13488,12 @@ public final class NodeStatusProto {
      *
      * <code>map&lt;string, string&gt; databusDetails = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getDatabusDetailsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetDatabusDetails().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -13055,10 +13505,11 @@ public final class NodeStatusProto {
      *
      * <code>map&lt;string, string&gt; databusDetails = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getDatabusDetailsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetDatabusDetails().getMap();
       if (!map.containsKey(key)) {
@@ -13101,14 +13552,16 @@ public final class NodeStatusProto {
      * <code>map&lt;string, string&gt; eventDetails = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsEventDetails(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetEventDetails().getMap().containsKey(key);
     }
     /**
      * Use {@link #getEventDetailsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getEventDetails() {
       return getEventDetailsMap();
@@ -13120,6 +13573,7 @@ public final class NodeStatusProto {
      *
      * <code>map&lt;string, string&gt; eventDetails = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getEventDetailsMap() {
       return internalGetEventDetails().getMap();
@@ -13131,11 +13585,12 @@ public final class NodeStatusProto {
      *
      * <code>map&lt;string, string&gt; eventDetails = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getEventDetailsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetEventDetails().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -13147,10 +13602,11 @@ public final class NodeStatusProto {
      *
      * <code>map&lt;string, string&gt; eventDetails = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getEventDetailsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetEventDetails().getMap();
       if (!map.containsKey(key)) {
@@ -13167,7 +13623,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 firstHeartbeatEventTimestamp = 3;</code>
+     * @return The firstHeartbeatEventTimestamp.
      */
+    @java.lang.Override
     public long getFirstHeartbeatEventTimestamp() {
       return firstHeartbeatEventTimestamp_;
     }
@@ -13180,7 +13638,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 systemBootTimestamp = 4;</code>
+     * @return The systemBootTimestamp.
      */
+    @java.lang.Override
     public long getSystemBootTimestamp() {
       return systemBootTimestamp_;
     }
@@ -13193,7 +13653,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 heartbeatEventCount = 5;</code>
+     * @return The heartbeatEventCount.
      */
+    @java.lang.Override
     public int getHeartbeatEventCount() {
       return heartbeatEventCount_;
     }
@@ -13206,8 +13668,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+     * @return The enum numeric value on the wire for heartbeatAgentRunning.
      */
-    public int getHeartbeatAgentRunningValue() {
+    @java.lang.Override public int getHeartbeatAgentRunningValue() {
       return heartbeatAgentRunning_;
     }
     /**
@@ -13216,8 +13679,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+     * @return The heartbeatAgentRunning.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatAgentRunning() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatAgentRunning() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(heartbeatAgentRunning_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -13231,8 +13695,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+     * @return The enum numeric value on the wire for heartbeatConfig.
      */
-    public int getHeartbeatConfigValue() {
+    @java.lang.Override public int getHeartbeatConfigValue() {
       return heartbeatConfig_;
     }
     /**
@@ -13241,8 +13706,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+     * @return The heartbeatConfig.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatConfig() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatConfig() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(heartbeatConfig_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -13256,8 +13722,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+     * @return The enum numeric value on the wire for databusReachable.
      */
-    public int getDatabusReachableValue() {
+    @java.lang.Override public int getDatabusReachableValue() {
       return databusReachable_;
     }
     /**
@@ -13266,8 +13733,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+     * @return The databusReachable.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusReachable() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusReachable() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusReachable_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -13281,8 +13749,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+     * @return The enum numeric value on the wire for databusTestResponse.
      */
-    public int getDatabusTestResponseValue() {
+    @java.lang.Override public int getDatabusTestResponseValue() {
       return databusTestResponse_;
     }
     /**
@@ -13291,8 +13760,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+     * @return The databusTestResponse.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusTestResponse() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusTestResponse() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusTestResponse_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -13306,8 +13776,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+     * @return The enum numeric value on the wire for loggingAgentConfig.
      */
-    public int getLoggingAgentConfigValue() {
+    @java.lang.Override public int getLoggingAgentConfigValue() {
       return loggingAgentConfig_;
     }
     /**
@@ -13316,8 +13787,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+     * @return The loggingAgentConfig.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingAgentConfig() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingAgentConfig() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(loggingAgentConfig_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -13331,8 +13803,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+     * @return The enum numeric value on the wire for loggingServiceRunning.
      */
-    public int getLoggingServiceRunningValue() {
+    @java.lang.Override public int getLoggingServiceRunningValue() {
       return loggingServiceRunning_;
     }
     /**
@@ -13341,8 +13814,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+     * @return The loggingServiceRunning.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingServiceRunning() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingServiceRunning() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(loggingServiceRunning_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -13356,7 +13830,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 12;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -13369,7 +13845,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 13;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -13388,7 +13866,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 13;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -13459,7 +13939,7 @@ public final class NodeStatusProto {
       if (timestamp_ != 0L) {
         output.writeInt64(12, timestamp_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 13, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
@@ -13531,7 +14011,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(12, timestamp_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(13, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -13549,29 +14029,28 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails) obj;
 
-      boolean result = true;
-      result = result && internalGetDatabusDetails().equals(
-          other.internalGetDatabusDetails());
-      result = result && internalGetEventDetails().equals(
-          other.internalGetEventDetails());
-      result = result && (getFirstHeartbeatEventTimestamp()
-          == other.getFirstHeartbeatEventTimestamp());
-      result = result && (getSystemBootTimestamp()
-          == other.getSystemBootTimestamp());
-      result = result && (getHeartbeatEventCount()
-          == other.getHeartbeatEventCount());
-      result = result && heartbeatAgentRunning_ == other.heartbeatAgentRunning_;
-      result = result && heartbeatConfig_ == other.heartbeatConfig_;
-      result = result && databusReachable_ == other.databusReachable_;
-      result = result && databusTestResponse_ == other.databusTestResponse_;
-      result = result && loggingAgentConfig_ == other.loggingAgentConfig_;
-      result = result && loggingServiceRunning_ == other.loggingServiceRunning_;
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!internalGetDatabusDetails().equals(
+          other.internalGetDatabusDetails())) return false;
+      if (!internalGetEventDetails().equals(
+          other.internalGetEventDetails())) return false;
+      if (getFirstHeartbeatEventTimestamp()
+          != other.getFirstHeartbeatEventTimestamp()) return false;
+      if (getSystemBootTimestamp()
+          != other.getSystemBootTimestamp()) return false;
+      if (getHeartbeatEventCount()
+          != other.getHeartbeatEventCount()) return false;
+      if (heartbeatAgentRunning_ != other.heartbeatAgentRunning_) return false;
+      if (heartbeatConfig_ != other.heartbeatConfig_) return false;
+      if (databusReachable_ != other.databusReachable_) return false;
+      if (databusTestResponse_ != other.databusTestResponse_) return false;
+      if (loggingAgentConfig_ != other.loggingAgentConfig_) return false;
+      if (loggingServiceRunning_ != other.loggingServiceRunning_) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -13828,7 +14307,6 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MeteringDetails(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.databusDetails_ = internalGetDatabusDetails();
         result.databusDetails_.makeImmutable();
         result.eventDetails_ = internalGetEventDetails();
@@ -13844,42 +14322,41 @@ public final class NodeStatusProto {
         result.loggingServiceRunning_ = loggingServiceRunning_;
         result.timestamp_ = timestamp_;
         result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13995,14 +14472,16 @@ public final class NodeStatusProto {
        * <code>map&lt;string, string&gt; databusDetails = 1;</code>
        */
 
+      @java.lang.Override
       public boolean containsDatabusDetails(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetDatabusDetails().getMap().containsKey(key);
       }
       /**
        * Use {@link #getDatabusDetailsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getDatabusDetails() {
         return getDatabusDetailsMap();
@@ -14014,6 +14493,7 @@ public final class NodeStatusProto {
        *
        * <code>map&lt;string, string&gt; databusDetails = 1;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getDatabusDetailsMap() {
         return internalGetDatabusDetails().getMap();
@@ -14025,11 +14505,12 @@ public final class NodeStatusProto {
        *
        * <code>map&lt;string, string&gt; databusDetails = 1;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getDatabusDetailsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetDatabusDetails().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -14041,10 +14522,11 @@ public final class NodeStatusProto {
        *
        * <code>map&lt;string, string&gt; databusDetails = 1;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getDatabusDetailsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetDatabusDetails().getMap();
         if (!map.containsKey(key)) {
@@ -14068,7 +14550,7 @@ public final class NodeStatusProto {
 
       public Builder removeDatabusDetails(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableDatabusDetails().getMutableMap()
             .remove(key);
         return this;
@@ -14091,8 +14573,11 @@ public final class NodeStatusProto {
       public Builder putDatabusDetails(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableDatabusDetails().getMutableMap()
             .put(key, value);
         return this;
@@ -14146,14 +14631,16 @@ public final class NodeStatusProto {
        * <code>map&lt;string, string&gt; eventDetails = 2;</code>
        */
 
+      @java.lang.Override
       public boolean containsEventDetails(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetEventDetails().getMap().containsKey(key);
       }
       /**
        * Use {@link #getEventDetailsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getEventDetails() {
         return getEventDetailsMap();
@@ -14165,6 +14652,7 @@ public final class NodeStatusProto {
        *
        * <code>map&lt;string, string&gt; eventDetails = 2;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getEventDetailsMap() {
         return internalGetEventDetails().getMap();
@@ -14176,11 +14664,12 @@ public final class NodeStatusProto {
        *
        * <code>map&lt;string, string&gt; eventDetails = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getEventDetailsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetEventDetails().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -14192,10 +14681,11 @@ public final class NodeStatusProto {
        *
        * <code>map&lt;string, string&gt; eventDetails = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getEventDetailsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetEventDetails().getMap();
         if (!map.containsKey(key)) {
@@ -14219,7 +14709,7 @@ public final class NodeStatusProto {
 
       public Builder removeEventDetails(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableEventDetails().getMutableMap()
             .remove(key);
         return this;
@@ -14242,8 +14732,11 @@ public final class NodeStatusProto {
       public Builder putEventDetails(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableEventDetails().getMutableMap()
             .put(key, value);
         return this;
@@ -14270,7 +14763,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 firstHeartbeatEventTimestamp = 3;</code>
+       * @return The firstHeartbeatEventTimestamp.
        */
+      @java.lang.Override
       public long getFirstHeartbeatEventTimestamp() {
         return firstHeartbeatEventTimestamp_;
       }
@@ -14280,6 +14775,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 firstHeartbeatEventTimestamp = 3;</code>
+       * @param value The firstHeartbeatEventTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setFirstHeartbeatEventTimestamp(long value) {
         
@@ -14293,6 +14790,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 firstHeartbeatEventTimestamp = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFirstHeartbeatEventTimestamp() {
         
@@ -14308,7 +14806,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 systemBootTimestamp = 4;</code>
+       * @return The systemBootTimestamp.
        */
+      @java.lang.Override
       public long getSystemBootTimestamp() {
         return systemBootTimestamp_;
       }
@@ -14318,6 +14818,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 systemBootTimestamp = 4;</code>
+       * @param value The systemBootTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setSystemBootTimestamp(long value) {
         
@@ -14331,6 +14833,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 systemBootTimestamp = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSystemBootTimestamp() {
         
@@ -14346,7 +14849,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 heartbeatEventCount = 5;</code>
+       * @return The heartbeatEventCount.
        */
+      @java.lang.Override
       public int getHeartbeatEventCount() {
         return heartbeatEventCount_;
       }
@@ -14356,6 +14861,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 heartbeatEventCount = 5;</code>
+       * @param value The heartbeatEventCount to set.
+       * @return This builder for chaining.
        */
       public Builder setHeartbeatEventCount(int value) {
         
@@ -14369,6 +14876,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 heartbeatEventCount = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeartbeatEventCount() {
         
@@ -14384,8 +14892,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+       * @return The enum numeric value on the wire for heartbeatAgentRunning.
        */
-      public int getHeartbeatAgentRunningValue() {
+      @java.lang.Override public int getHeartbeatAgentRunningValue() {
         return heartbeatAgentRunning_;
       }
       /**
@@ -14394,8 +14903,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+       * @param value The enum numeric value on the wire for heartbeatAgentRunning to set.
+       * @return This builder for chaining.
        */
       public Builder setHeartbeatAgentRunningValue(int value) {
+        
         heartbeatAgentRunning_ = value;
         onChanged();
         return this;
@@ -14406,7 +14918,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+       * @return The heartbeatAgentRunning.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatAgentRunning() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(heartbeatAgentRunning_);
@@ -14418,6 +14932,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+       * @param value The heartbeatAgentRunning to set.
+       * @return This builder for chaining.
        */
       public Builder setHeartbeatAgentRunning(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -14434,6 +14950,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatAgentRunning = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeartbeatAgentRunning() {
         
@@ -14449,8 +14966,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+       * @return The enum numeric value on the wire for heartbeatConfig.
        */
-      public int getHeartbeatConfigValue() {
+      @java.lang.Override public int getHeartbeatConfigValue() {
         return heartbeatConfig_;
       }
       /**
@@ -14459,8 +14977,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+       * @param value The enum numeric value on the wire for heartbeatConfig to set.
+       * @return This builder for chaining.
        */
       public Builder setHeartbeatConfigValue(int value) {
+        
         heartbeatConfig_ = value;
         onChanged();
         return this;
@@ -14471,7 +14992,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+       * @return The heartbeatConfig.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getHeartbeatConfig() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(heartbeatConfig_);
@@ -14483,6 +15006,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+       * @param value The heartbeatConfig to set.
+       * @return This builder for chaining.
        */
       public Builder setHeartbeatConfig(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -14499,6 +15024,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus heartbeatConfig = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHeartbeatConfig() {
         
@@ -14514,8 +15040,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+       * @return The enum numeric value on the wire for databusReachable.
        */
-      public int getDatabusReachableValue() {
+      @java.lang.Override public int getDatabusReachableValue() {
         return databusReachable_;
       }
       /**
@@ -14524,8 +15051,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+       * @param value The enum numeric value on the wire for databusReachable to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusReachableValue(int value) {
+        
         databusReachable_ = value;
         onChanged();
         return this;
@@ -14536,7 +15066,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+       * @return The databusReachable.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusReachable() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusReachable_);
@@ -14548,6 +15080,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+       * @param value The databusReachable to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusReachable(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -14564,6 +15098,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusReachable = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatabusReachable() {
         
@@ -14579,8 +15114,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+       * @return The enum numeric value on the wire for databusTestResponse.
        */
-      public int getDatabusTestResponseValue() {
+      @java.lang.Override public int getDatabusTestResponseValue() {
         return databusTestResponse_;
       }
       /**
@@ -14589,8 +15125,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+       * @param value The enum numeric value on the wire for databusTestResponse to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusTestResponseValue(int value) {
+        
         databusTestResponse_ = value;
         onChanged();
         return this;
@@ -14601,7 +15140,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+       * @return The databusTestResponse.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusTestResponse() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusTestResponse_);
@@ -14613,6 +15154,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+       * @param value The databusTestResponse to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusTestResponse(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -14629,6 +15172,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusTestResponse = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatabusTestResponse() {
         
@@ -14644,8 +15188,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+       * @return The enum numeric value on the wire for loggingAgentConfig.
        */
-      public int getLoggingAgentConfigValue() {
+      @java.lang.Override public int getLoggingAgentConfigValue() {
         return loggingAgentConfig_;
       }
       /**
@@ -14654,8 +15199,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+       * @param value The enum numeric value on the wire for loggingAgentConfig to set.
+       * @return This builder for chaining.
        */
       public Builder setLoggingAgentConfigValue(int value) {
+        
         loggingAgentConfig_ = value;
         onChanged();
         return this;
@@ -14666,7 +15214,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+       * @return The loggingAgentConfig.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingAgentConfig() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(loggingAgentConfig_);
@@ -14678,6 +15228,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+       * @param value The loggingAgentConfig to set.
+       * @return This builder for chaining.
        */
       public Builder setLoggingAgentConfig(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -14694,6 +15246,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingAgentConfig = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLoggingAgentConfig() {
         
@@ -14709,8 +15262,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+       * @return The enum numeric value on the wire for loggingServiceRunning.
        */
-      public int getLoggingServiceRunningValue() {
+      @java.lang.Override public int getLoggingServiceRunningValue() {
         return loggingServiceRunning_;
       }
       /**
@@ -14719,8 +15273,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+       * @param value The enum numeric value on the wire for loggingServiceRunning to set.
+       * @return This builder for chaining.
        */
       public Builder setLoggingServiceRunningValue(int value) {
+        
         loggingServiceRunning_ = value;
         onChanged();
         return this;
@@ -14731,7 +15288,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+       * @return The loggingServiceRunning.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getLoggingServiceRunning() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(loggingServiceRunning_);
@@ -14743,6 +15302,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+       * @param value The loggingServiceRunning to set.
+       * @return This builder for chaining.
        */
       public Builder setLoggingServiceRunning(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -14759,6 +15320,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus loggingServiceRunning = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLoggingServiceRunning() {
         
@@ -14774,7 +15336,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 12;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -14784,6 +15348,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 12;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -14797,6 +15363,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -14812,6 +15379,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 13;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -14831,6 +15399,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 13;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -14851,6 +15420,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 13;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -14868,6 +15439,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -14881,6 +15453,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 13;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -14896,7 +15470,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -14956,6 +15530,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The host.
      */
     java.lang.String getHost();
     /**
@@ -14964,6 +15539,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The bytes for host.
      */
     com.google.protobuf.ByteString
         getHostBytes();
@@ -14974,6 +15550,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>bool ccmEnabled = 2;</code>
+     * @return The ccmEnabled.
      */
     boolean getCcmEnabled();
 
@@ -14983,6 +15560,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @return A list containing the dnsResolvers.
      */
     java.util.List<java.lang.String>
         getDnsResolversList();
@@ -14992,6 +15570,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @return The count of dnsResolvers.
      */
     int getDnsResolversCount();
     /**
@@ -15000,6 +15579,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @param index The index of the element to return.
+     * @return The dnsResolvers at the given index.
      */
     java.lang.String getDnsResolvers(int index);
     /**
@@ -15008,6 +15589,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the dnsResolvers at the given index.
      */
     com.google.protobuf.ByteString
         getDnsResolversBytes(int index);
@@ -15018,6 +15601,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>bool neighbourScan = 4;</code>
+     * @return The neighbourScan.
      */
     boolean getNeighbourScan();
 
@@ -15027,6 +15611,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @return A list containing the neighbours.
      */
     java.util.List<java.lang.String>
         getNeighboursList();
@@ -15036,6 +15621,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @return The count of neighbours.
      */
     int getNeighboursCount();
     /**
@@ -15044,6 +15630,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @param index The index of the element to return.
+     * @return The neighbours at the given index.
      */
     java.lang.String getNeighbours(int index);
     /**
@@ -15052,6 +15640,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the neighbours at the given index.
      */
     com.google.protobuf.ByteString
         getNeighboursBytes(int index);
@@ -15062,6 +15652,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+     * @return The enum numeric value on the wire for anyNeighboursAccessible.
      */
     int getAnyNeighboursAccessibleValue();
     /**
@@ -15070,6 +15661,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+     * @return The anyNeighboursAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAnyNeighboursAccessible();
 
@@ -15079,6 +15671,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 numberOfNeighbours = 7;</code>
+     * @return The numberOfNeighbours.
      */
     int getNumberOfNeighbours();
 
@@ -15088,6 +15681,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 8;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -15097,6 +15691,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+     * @return The enum numeric value on the wire for ccmAccessible.
      */
     int getCcmAccessibleValue();
     /**
@@ -15105,6 +15700,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+     * @return The ccmAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getCcmAccessible();
 
@@ -15114,6 +15710,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+     * @return The enum numeric value on the wire for clouderaComAccessible.
      */
     int getClouderaComAccessibleValue();
     /**
@@ -15122,6 +15719,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+     * @return The clouderaComAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getClouderaComAccessible();
 
@@ -15131,6 +15729,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+     * @return The enum numeric value on the wire for databusAccessible.
      */
     int getDatabusAccessibleValue();
     /**
@@ -15139,6 +15738,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+     * @return The databusAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusAccessible();
 
@@ -15148,6 +15748,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+     * @return The enum numeric value on the wire for databusS3Accessible.
      */
     int getDatabusS3AccessibleValue();
     /**
@@ -15156,6 +15757,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+     * @return The databusS3Accessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusS3Accessible();
 
@@ -15165,6 +15767,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     * @return The enum numeric value on the wire for s3Accessible.
      */
     int getS3AccessibleValue();
     /**
@@ -15173,6 +15776,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     * @return The s3Accessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getS3Accessible();
 
@@ -15182,6 +15786,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     * @return The enum numeric value on the wire for adlsV2Accessible.
      */
     int getAdlsV2AccessibleValue();
     /**
@@ -15190,6 +15795,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     * @return The adlsV2Accessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAdlsV2Accessible();
 
@@ -15199,6 +15805,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     * @return The enum numeric value on the wire for gcsAccessible.
      */
     int getGcsAccessibleValue();
     /**
@@ -15207,6 +15814,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     * @return The gcsAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getGcsAccessible();
 
@@ -15216,6 +15824,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     * @return The enum numeric value on the wire for stsAccessible.
      */
     int getStsAccessibleValue();
     /**
@@ -15224,6 +15833,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     * @return The stsAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStsAccessible();
 
@@ -15233,6 +15843,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     * @return The enum numeric value on the wire for azureManagementAccessible.
      */
     int getAzureManagementAccessibleValue();
     /**
@@ -15241,6 +15852,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     * @return The azureManagementAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible();
 
@@ -15250,6 +15862,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 18;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -15258,6 +15871,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 18;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -15268,6 +15882,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+     * @return The enum numeric value on the wire for archiveClouderaComAccessible.
      */
     int getArchiveClouderaComAccessibleValue();
     /**
@@ -15276,6 +15891,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+     * @return The archiveClouderaComAccessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getArchiveClouderaComAccessible();
 
@@ -15285,6 +15901,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+     * @return The enum numeric value on the wire for serviceDeliveryCacheS3Accessible.
      */
     int getServiceDeliveryCacheS3AccessibleValue();
     /**
@@ -15293,6 +15910,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+     * @return The serviceDeliveryCacheS3Accessible.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getServiceDeliveryCacheS3Accessible();
   }
@@ -15303,7 +15921,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.NetworkDetails}
    */
-  public  static final class NetworkDetails extends
+  public static final class NetworkDetails extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.NetworkDetails)
       NetworkDetailsOrBuilder {
@@ -15314,13 +15932,9 @@ public final class NodeStatusProto {
     }
     private NetworkDetails() {
       host_ = "";
-      ccmEnabled_ = false;
       dnsResolvers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-      neighbourScan_ = false;
       neighbours_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       anyNeighboursAccessible_ = 0;
-      numberOfNeighbours_ = 0;
-      timestamp_ = 0L;
       ccmAccessible_ = 0;
       clouderaComAccessible_ = 0;
       databusAccessible_ = 0;
@@ -15333,6 +15947,13 @@ public final class NodeStatusProto {
       cdpTelemetryVersion_ = "";
       archiveClouderaComAccessible_ = 0;
       serviceDeliveryCacheS3Accessible_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NetworkDetails();
     }
 
     @java.lang.Override
@@ -15372,9 +15993,9 @@ public final class NodeStatusProto {
             }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 dnsResolvers_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               dnsResolvers_.add(s);
               break;
@@ -15386,9 +16007,9 @@ public final class NodeStatusProto {
             }
             case 42: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 neighbours_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000010;
+                mutable_bitField0_ |= 0x00000002;
               }
               neighbours_.add(s);
               break;
@@ -15482,7 +16103,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -15496,10 +16117,10 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           dnsResolvers_ = dnsResolvers_.getUnmodifiableView();
         }
-        if (((mutable_bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           neighbours_ = neighbours_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -15519,7 +16140,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails.Builder.class);
     }
 
-    private int bitField0_;
     public static final int HOST_FIELD_NUMBER = 1;
     private volatile java.lang.Object host_;
     /**
@@ -15528,7 +16148,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The host.
      */
+    @java.lang.Override
     public java.lang.String getHost() {
       java.lang.Object ref = host_;
       if (ref instanceof java.lang.String) {
@@ -15547,7 +16169,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string host = 1;</code>
+     * @return The bytes for host.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getHostBytes() {
       java.lang.Object ref = host_;
@@ -15570,7 +16194,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>bool ccmEnabled = 2;</code>
+     * @return The ccmEnabled.
      */
+    @java.lang.Override
     public boolean getCcmEnabled() {
       return ccmEnabled_;
     }
@@ -15583,6 +16209,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @return A list containing the dnsResolvers.
      */
     public com.google.protobuf.ProtocolStringList
         getDnsResolversList() {
@@ -15594,6 +16221,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @return The count of dnsResolvers.
      */
     public int getDnsResolversCount() {
       return dnsResolvers_.size();
@@ -15604,6 +16232,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @param index The index of the element to return.
+     * @return The dnsResolvers at the given index.
      */
     public java.lang.String getDnsResolvers(int index) {
       return dnsResolvers_.get(index);
@@ -15614,6 +16244,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string dnsResolvers = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the dnsResolvers at the given index.
      */
     public com.google.protobuf.ByteString
         getDnsResolversBytes(int index) {
@@ -15628,7 +16260,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>bool neighbourScan = 4;</code>
+     * @return The neighbourScan.
      */
+    @java.lang.Override
     public boolean getNeighbourScan() {
       return neighbourScan_;
     }
@@ -15641,6 +16275,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @return A list containing the neighbours.
      */
     public com.google.protobuf.ProtocolStringList
         getNeighboursList() {
@@ -15652,6 +16287,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @return The count of neighbours.
      */
     public int getNeighboursCount() {
       return neighbours_.size();
@@ -15662,6 +16298,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @param index The index of the element to return.
+     * @return The neighbours at the given index.
      */
     public java.lang.String getNeighbours(int index) {
       return neighbours_.get(index);
@@ -15672,6 +16310,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated string neighbours = 5;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the neighbours at the given index.
      */
     public com.google.protobuf.ByteString
         getNeighboursBytes(int index) {
@@ -15686,8 +16326,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+     * @return The enum numeric value on the wire for anyNeighboursAccessible.
      */
-    public int getAnyNeighboursAccessibleValue() {
+    @java.lang.Override public int getAnyNeighboursAccessibleValue() {
       return anyNeighboursAccessible_;
     }
     /**
@@ -15696,8 +16337,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+     * @return The anyNeighboursAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAnyNeighboursAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAnyNeighboursAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(anyNeighboursAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15711,7 +16353,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 numberOfNeighbours = 7;</code>
+     * @return The numberOfNeighbours.
      */
+    @java.lang.Override
     public int getNumberOfNeighbours() {
       return numberOfNeighbours_;
     }
@@ -15724,7 +16368,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 8;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -15737,8 +16383,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+     * @return The enum numeric value on the wire for ccmAccessible.
      */
-    public int getCcmAccessibleValue() {
+    @java.lang.Override public int getCcmAccessibleValue() {
       return ccmAccessible_;
     }
     /**
@@ -15747,8 +16394,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+     * @return The ccmAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getCcmAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getCcmAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(ccmAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15762,8 +16410,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+     * @return The enum numeric value on the wire for clouderaComAccessible.
      */
-    public int getClouderaComAccessibleValue() {
+    @java.lang.Override public int getClouderaComAccessibleValue() {
       return clouderaComAccessible_;
     }
     /**
@@ -15772,8 +16421,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+     * @return The clouderaComAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getClouderaComAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getClouderaComAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(clouderaComAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15787,8 +16437,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+     * @return The enum numeric value on the wire for databusAccessible.
      */
-    public int getDatabusAccessibleValue() {
+    @java.lang.Override public int getDatabusAccessibleValue() {
       return databusAccessible_;
     }
     /**
@@ -15797,8 +16448,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+     * @return The databusAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15812,8 +16464,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+     * @return The enum numeric value on the wire for databusS3Accessible.
      */
-    public int getDatabusS3AccessibleValue() {
+    @java.lang.Override public int getDatabusS3AccessibleValue() {
       return databusS3Accessible_;
     }
     /**
@@ -15822,8 +16475,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+     * @return The databusS3Accessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusS3Accessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusS3Accessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusS3Accessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15837,8 +16491,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     * @return The enum numeric value on the wire for s3Accessible.
      */
-    public int getS3AccessibleValue() {
+    @java.lang.Override public int getS3AccessibleValue() {
       return s3Accessible_;
     }
     /**
@@ -15847,8 +16502,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+     * @return The s3Accessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getS3Accessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getS3Accessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(s3Accessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15862,8 +16518,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     * @return The enum numeric value on the wire for adlsV2Accessible.
      */
-    public int getAdlsV2AccessibleValue() {
+    @java.lang.Override public int getAdlsV2AccessibleValue() {
       return adlsV2Accessible_;
     }
     /**
@@ -15872,8 +16529,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+     * @return The adlsV2Accessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAdlsV2Accessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAdlsV2Accessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(adlsV2Accessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15887,8 +16545,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     * @return The enum numeric value on the wire for gcsAccessible.
      */
-    public int getGcsAccessibleValue() {
+    @java.lang.Override public int getGcsAccessibleValue() {
       return gcsAccessible_;
     }
     /**
@@ -15897,8 +16556,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+     * @return The gcsAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getGcsAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getGcsAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(gcsAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15912,8 +16572,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     * @return The enum numeric value on the wire for stsAccessible.
      */
-    public int getStsAccessibleValue() {
+    @java.lang.Override public int getStsAccessibleValue() {
       return stsAccessible_;
     }
     /**
@@ -15922,8 +16583,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+     * @return The stsAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStsAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStsAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(stsAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15937,8 +16599,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     * @return The enum numeric value on the wire for azureManagementAccessible.
      */
-    public int getAzureManagementAccessibleValue() {
+    @java.lang.Override public int getAzureManagementAccessibleValue() {
       return azureManagementAccessible_;
     }
     /**
@@ -15947,8 +16610,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+     * @return The azureManagementAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(azureManagementAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -15962,7 +16626,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 18;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -15981,7 +16647,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 18;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -16004,8 +16672,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+     * @return The enum numeric value on the wire for archiveClouderaComAccessible.
      */
-    public int getArchiveClouderaComAccessibleValue() {
+    @java.lang.Override public int getArchiveClouderaComAccessibleValue() {
       return archiveClouderaComAccessible_;
     }
     /**
@@ -16014,8 +16683,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+     * @return The archiveClouderaComAccessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getArchiveClouderaComAccessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getArchiveClouderaComAccessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(archiveClouderaComAccessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -16029,8 +16699,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+     * @return The enum numeric value on the wire for serviceDeliveryCacheS3Accessible.
      */
-    public int getServiceDeliveryCacheS3AccessibleValue() {
+    @java.lang.Override public int getServiceDeliveryCacheS3AccessibleValue() {
       return serviceDeliveryCacheS3Accessible_;
     }
     /**
@@ -16039,8 +16710,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+     * @return The serviceDeliveryCacheS3Accessible.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getServiceDeliveryCacheS3Accessible() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getServiceDeliveryCacheS3Accessible() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(serviceDeliveryCacheS3Accessible_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNRECOGNIZED : result;
@@ -16060,7 +16732,7 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getHostBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, host_);
       }
       if (ccmEnabled_ != false) {
@@ -16111,7 +16783,7 @@ public final class NodeStatusProto {
       if (azureManagementAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
         output.writeEnum(17, azureManagementAccessible_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 18, cdpTelemetryVersion_);
       }
       if (archiveClouderaComAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
@@ -16129,7 +16801,7 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getHostBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(host_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, host_);
       }
       if (ccmEnabled_ != false) {
@@ -16204,7 +16876,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeEnumSize(17, azureManagementAccessible_);
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(18, cdpTelemetryVersion_);
       }
       if (archiveClouderaComAccessible_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.UNKNOWN.getNumber()) {
@@ -16230,37 +16902,36 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails) obj;
 
-      boolean result = true;
-      result = result && getHost()
-          .equals(other.getHost());
-      result = result && (getCcmEnabled()
-          == other.getCcmEnabled());
-      result = result && getDnsResolversList()
-          .equals(other.getDnsResolversList());
-      result = result && (getNeighbourScan()
-          == other.getNeighbourScan());
-      result = result && getNeighboursList()
-          .equals(other.getNeighboursList());
-      result = result && anyNeighboursAccessible_ == other.anyNeighboursAccessible_;
-      result = result && (getNumberOfNeighbours()
-          == other.getNumberOfNeighbours());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && ccmAccessible_ == other.ccmAccessible_;
-      result = result && clouderaComAccessible_ == other.clouderaComAccessible_;
-      result = result && databusAccessible_ == other.databusAccessible_;
-      result = result && databusS3Accessible_ == other.databusS3Accessible_;
-      result = result && s3Accessible_ == other.s3Accessible_;
-      result = result && adlsV2Accessible_ == other.adlsV2Accessible_;
-      result = result && gcsAccessible_ == other.gcsAccessible_;
-      result = result && stsAccessible_ == other.stsAccessible_;
-      result = result && azureManagementAccessible_ == other.azureManagementAccessible_;
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && archiveClouderaComAccessible_ == other.archiveClouderaComAccessible_;
-      result = result && serviceDeliveryCacheS3Accessible_ == other.serviceDeliveryCacheS3Accessible_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getHost()
+          .equals(other.getHost())) return false;
+      if (getCcmEnabled()
+          != other.getCcmEnabled()) return false;
+      if (!getDnsResolversList()
+          .equals(other.getDnsResolversList())) return false;
+      if (getNeighbourScan()
+          != other.getNeighbourScan()) return false;
+      if (!getNeighboursList()
+          .equals(other.getNeighboursList())) return false;
+      if (anyNeighboursAccessible_ != other.anyNeighboursAccessible_) return false;
+      if (getNumberOfNeighbours()
+          != other.getNumberOfNeighbours()) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (ccmAccessible_ != other.ccmAccessible_) return false;
+      if (clouderaComAccessible_ != other.clouderaComAccessible_) return false;
+      if (databusAccessible_ != other.databusAccessible_) return false;
+      if (databusS3Accessible_ != other.databusS3Accessible_) return false;
+      if (s3Accessible_ != other.s3Accessible_) return false;
+      if (adlsV2Accessible_ != other.adlsV2Accessible_) return false;
+      if (gcsAccessible_ != other.gcsAccessible_) return false;
+      if (stsAccessible_ != other.stsAccessible_) return false;
+      if (azureManagementAccessible_ != other.azureManagementAccessible_) return false;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (archiveClouderaComAccessible_ != other.archiveClouderaComAccessible_) return false;
+      if (serviceDeliveryCacheS3Accessible_ != other.serviceDeliveryCacheS3Accessible_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -16459,11 +17130,11 @@ public final class NodeStatusProto {
         ccmEnabled_ = false;
 
         dnsResolvers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         neighbourScan_ = false;
 
         neighbours_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000002);
         anyNeighboursAccessible_ = 0;
 
         numberOfNeighbours_ = 0;
@@ -16521,18 +17192,17 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkDetails(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.host_ = host_;
         result.ccmEnabled_ = ccmEnabled_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           dnsResolvers_ = dnsResolvers_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.dnsResolvers_ = dnsResolvers_;
         result.neighbourScan_ = neighbourScan_;
-        if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (((bitField0_ & 0x00000002) != 0)) {
           neighbours_ = neighbours_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000010);
+          bitField0_ = (bitField0_ & ~0x00000002);
         }
         result.neighbours_ = neighbours_;
         result.anyNeighboursAccessible_ = anyNeighboursAccessible_;
@@ -16550,42 +17220,41 @@ public final class NodeStatusProto {
         result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
         result.archiveClouderaComAccessible_ = archiveClouderaComAccessible_;
         result.serviceDeliveryCacheS3Accessible_ = serviceDeliveryCacheS3Accessible_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -16609,7 +17278,7 @@ public final class NodeStatusProto {
         if (!other.dnsResolvers_.isEmpty()) {
           if (dnsResolvers_.isEmpty()) {
             dnsResolvers_ = other.dnsResolvers_;
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureDnsResolversIsMutable();
             dnsResolvers_.addAll(other.dnsResolvers_);
@@ -16622,7 +17291,7 @@ public final class NodeStatusProto {
         if (!other.neighbours_.isEmpty()) {
           if (neighbours_.isEmpty()) {
             neighbours_ = other.neighbours_;
-            bitField0_ = (bitField0_ & ~0x00000010);
+            bitField0_ = (bitField0_ & ~0x00000002);
           } else {
             ensureNeighboursIsMutable();
             neighbours_.addAll(other.neighbours_);
@@ -16712,6 +17381,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @return The host.
        */
       public java.lang.String getHost() {
         java.lang.Object ref = host_;
@@ -16731,6 +17401,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @return The bytes for host.
        */
       public com.google.protobuf.ByteString
           getHostBytes() {
@@ -16751,6 +17422,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @param value The host to set.
+       * @return This builder for chaining.
        */
       public Builder setHost(
           java.lang.String value) {
@@ -16768,6 +17441,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHost() {
         
@@ -16781,6 +17455,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string host = 1;</code>
+       * @param value The bytes for host to set.
+       * @return This builder for chaining.
        */
       public Builder setHostBytes(
           com.google.protobuf.ByteString value) {
@@ -16801,7 +17477,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>bool ccmEnabled = 2;</code>
+       * @return The ccmEnabled.
        */
+      @java.lang.Override
       public boolean getCcmEnabled() {
         return ccmEnabled_;
       }
@@ -16811,6 +17489,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>bool ccmEnabled = 2;</code>
+       * @param value The ccmEnabled to set.
+       * @return This builder for chaining.
        */
       public Builder setCcmEnabled(boolean value) {
         
@@ -16824,6 +17504,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>bool ccmEnabled = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCcmEnabled() {
         
@@ -16834,9 +17515,9 @@ public final class NodeStatusProto {
 
       private com.google.protobuf.LazyStringList dnsResolvers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureDnsResolversIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           dnsResolvers_ = new com.google.protobuf.LazyStringArrayList(dnsResolvers_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -16845,6 +17526,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @return A list containing the dnsResolvers.
        */
       public com.google.protobuf.ProtocolStringList
           getDnsResolversList() {
@@ -16856,6 +17538,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @return The count of dnsResolvers.
        */
       public int getDnsResolversCount() {
         return dnsResolvers_.size();
@@ -16866,6 +17549,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @param index The index of the element to return.
+       * @return The dnsResolvers at the given index.
        */
       public java.lang.String getDnsResolvers(int index) {
         return dnsResolvers_.get(index);
@@ -16876,6 +17561,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the dnsResolvers at the given index.
        */
       public com.google.protobuf.ByteString
           getDnsResolversBytes(int index) {
@@ -16887,6 +17574,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The dnsResolvers to set.
+       * @return This builder for chaining.
        */
       public Builder setDnsResolvers(
           int index, java.lang.String value) {
@@ -16904,6 +17594,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @param value The dnsResolvers to add.
+       * @return This builder for chaining.
        */
       public Builder addDnsResolvers(
           java.lang.String value) {
@@ -16921,6 +17613,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @param values The dnsResolvers to add.
+       * @return This builder for chaining.
        */
       public Builder addAllDnsResolvers(
           java.lang.Iterable<java.lang.String> values) {
@@ -16936,10 +17630,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDnsResolvers() {
         dnsResolvers_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -16949,6 +17644,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string dnsResolvers = 3;</code>
+       * @param value The bytes of the dnsResolvers to add.
+       * @return This builder for chaining.
        */
       public Builder addDnsResolversBytes(
           com.google.protobuf.ByteString value) {
@@ -16969,7 +17666,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>bool neighbourScan = 4;</code>
+       * @return The neighbourScan.
        */
+      @java.lang.Override
       public boolean getNeighbourScan() {
         return neighbourScan_;
       }
@@ -16979,6 +17678,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>bool neighbourScan = 4;</code>
+       * @param value The neighbourScan to set.
+       * @return This builder for chaining.
        */
       public Builder setNeighbourScan(boolean value) {
         
@@ -16992,6 +17693,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>bool neighbourScan = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNeighbourScan() {
         
@@ -17002,9 +17704,9 @@ public final class NodeStatusProto {
 
       private com.google.protobuf.LazyStringList neighbours_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureNeighboursIsMutable() {
-        if (!((bitField0_ & 0x00000010) == 0x00000010)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           neighbours_ = new com.google.protobuf.LazyStringArrayList(neighbours_);
-          bitField0_ |= 0x00000010;
+          bitField0_ |= 0x00000002;
          }
       }
       /**
@@ -17013,6 +17715,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @return A list containing the neighbours.
        */
       public com.google.protobuf.ProtocolStringList
           getNeighboursList() {
@@ -17024,6 +17727,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @return The count of neighbours.
        */
       public int getNeighboursCount() {
         return neighbours_.size();
@@ -17034,6 +17738,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @param index The index of the element to return.
+       * @return The neighbours at the given index.
        */
       public java.lang.String getNeighbours(int index) {
         return neighbours_.get(index);
@@ -17044,6 +17750,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the neighbours at the given index.
        */
       public com.google.protobuf.ByteString
           getNeighboursBytes(int index) {
@@ -17055,6 +17763,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @param index The index to set the value at.
+       * @param value The neighbours to set.
+       * @return This builder for chaining.
        */
       public Builder setNeighbours(
           int index, java.lang.String value) {
@@ -17072,6 +17783,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @param value The neighbours to add.
+       * @return This builder for chaining.
        */
       public Builder addNeighbours(
           java.lang.String value) {
@@ -17089,6 +17802,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @param values The neighbours to add.
+       * @return This builder for chaining.
        */
       public Builder addAllNeighbours(
           java.lang.Iterable<java.lang.String> values) {
@@ -17104,10 +17819,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNeighbours() {
         neighbours_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000010);
+        bitField0_ = (bitField0_ & ~0x00000002);
         onChanged();
         return this;
       }
@@ -17117,6 +17833,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated string neighbours = 5;</code>
+       * @param value The bytes of the neighbours to add.
+       * @return This builder for chaining.
        */
       public Builder addNeighboursBytes(
           com.google.protobuf.ByteString value) {
@@ -17137,8 +17855,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+       * @return The enum numeric value on the wire for anyNeighboursAccessible.
        */
-      public int getAnyNeighboursAccessibleValue() {
+      @java.lang.Override public int getAnyNeighboursAccessibleValue() {
         return anyNeighboursAccessible_;
       }
       /**
@@ -17147,8 +17866,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+       * @param value The enum numeric value on the wire for anyNeighboursAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setAnyNeighboursAccessibleValue(int value) {
+        
         anyNeighboursAccessible_ = value;
         onChanged();
         return this;
@@ -17159,7 +17881,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+       * @return The anyNeighboursAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAnyNeighboursAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(anyNeighboursAccessible_);
@@ -17171,6 +17895,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+       * @param value The anyNeighboursAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setAnyNeighboursAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17187,6 +17913,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus anyNeighboursAccessible = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAnyNeighboursAccessible() {
         
@@ -17202,7 +17929,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 numberOfNeighbours = 7;</code>
+       * @return The numberOfNeighbours.
        */
+      @java.lang.Override
       public int getNumberOfNeighbours() {
         return numberOfNeighbours_;
       }
@@ -17212,6 +17941,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 numberOfNeighbours = 7;</code>
+       * @param value The numberOfNeighbours to set.
+       * @return This builder for chaining.
        */
       public Builder setNumberOfNeighbours(int value) {
         
@@ -17225,6 +17956,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 numberOfNeighbours = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNumberOfNeighbours() {
         
@@ -17240,7 +17972,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 8;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -17250,6 +17984,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 8;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -17263,6 +17999,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -17278,8 +18015,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+       * @return The enum numeric value on the wire for ccmAccessible.
        */
-      public int getCcmAccessibleValue() {
+      @java.lang.Override public int getCcmAccessibleValue() {
         return ccmAccessible_;
       }
       /**
@@ -17288,8 +18026,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+       * @param value The enum numeric value on the wire for ccmAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setCcmAccessibleValue(int value) {
+        
         ccmAccessible_ = value;
         onChanged();
         return this;
@@ -17300,7 +18041,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+       * @return The ccmAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getCcmAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(ccmAccessible_);
@@ -17312,6 +18055,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+       * @param value The ccmAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setCcmAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17328,6 +18073,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus ccmAccessible = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCcmAccessible() {
         
@@ -17343,8 +18089,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+       * @return The enum numeric value on the wire for clouderaComAccessible.
        */
-      public int getClouderaComAccessibleValue() {
+      @java.lang.Override public int getClouderaComAccessibleValue() {
         return clouderaComAccessible_;
       }
       /**
@@ -17353,8 +18100,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+       * @param value The enum numeric value on the wire for clouderaComAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setClouderaComAccessibleValue(int value) {
+        
         clouderaComAccessible_ = value;
         onChanged();
         return this;
@@ -17365,7 +18115,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+       * @return The clouderaComAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getClouderaComAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(clouderaComAccessible_);
@@ -17377,6 +18129,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+       * @param value The clouderaComAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setClouderaComAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17393,6 +18147,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus clouderaComAccessible = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearClouderaComAccessible() {
         
@@ -17408,8 +18163,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+       * @return The enum numeric value on the wire for databusAccessible.
        */
-      public int getDatabusAccessibleValue() {
+      @java.lang.Override public int getDatabusAccessibleValue() {
         return databusAccessible_;
       }
       /**
@@ -17418,8 +18174,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+       * @param value The enum numeric value on the wire for databusAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusAccessibleValue(int value) {
+        
         databusAccessible_ = value;
         onChanged();
         return this;
@@ -17430,7 +18189,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+       * @return The databusAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusAccessible_);
@@ -17442,6 +18203,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+       * @param value The databusAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17458,6 +18221,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusAccessible = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatabusAccessible() {
         
@@ -17473,8 +18237,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+       * @return The enum numeric value on the wire for databusS3Accessible.
        */
-      public int getDatabusS3AccessibleValue() {
+      @java.lang.Override public int getDatabusS3AccessibleValue() {
         return databusS3Accessible_;
       }
       /**
@@ -17483,8 +18248,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+       * @param value The enum numeric value on the wire for databusS3Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusS3AccessibleValue(int value) {
+        
         databusS3Accessible_ = value;
         onChanged();
         return this;
@@ -17495,7 +18263,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+       * @return The databusS3Accessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getDatabusS3Accessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(databusS3Accessible_);
@@ -17507,6 +18277,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+       * @param value The databusS3Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setDatabusS3Accessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17523,6 +18295,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus databusS3Accessible = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDatabusS3Accessible() {
         
@@ -17538,8 +18311,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       * @return The enum numeric value on the wire for s3Accessible.
        */
-      public int getS3AccessibleValue() {
+      @java.lang.Override public int getS3AccessibleValue() {
         return s3Accessible_;
       }
       /**
@@ -17548,8 +18322,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       * @param value The enum numeric value on the wire for s3Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setS3AccessibleValue(int value) {
+        
         s3Accessible_ = value;
         onChanged();
         return this;
@@ -17560,7 +18337,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       * @return The s3Accessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getS3Accessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(s3Accessible_);
@@ -17572,6 +18351,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       * @param value The s3Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setS3Accessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17588,6 +18369,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus s3Accessible = 13;</code>
+       * @return This builder for chaining.
        */
       public Builder clearS3Accessible() {
         
@@ -17603,8 +18385,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       * @return The enum numeric value on the wire for adlsV2Accessible.
        */
-      public int getAdlsV2AccessibleValue() {
+      @java.lang.Override public int getAdlsV2AccessibleValue() {
         return adlsV2Accessible_;
       }
       /**
@@ -17613,8 +18396,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       * @param value The enum numeric value on the wire for adlsV2Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setAdlsV2AccessibleValue(int value) {
+        
         adlsV2Accessible_ = value;
         onChanged();
         return this;
@@ -17625,7 +18411,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       * @return The adlsV2Accessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAdlsV2Accessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(adlsV2Accessible_);
@@ -17637,6 +18425,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       * @param value The adlsV2Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setAdlsV2Accessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17653,6 +18443,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus adlsV2Accessible = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAdlsV2Accessible() {
         
@@ -17668,8 +18459,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       * @return The enum numeric value on the wire for gcsAccessible.
        */
-      public int getGcsAccessibleValue() {
+      @java.lang.Override public int getGcsAccessibleValue() {
         return gcsAccessible_;
       }
       /**
@@ -17678,8 +18470,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       * @param value The enum numeric value on the wire for gcsAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setGcsAccessibleValue(int value) {
+        
         gcsAccessible_ = value;
         onChanged();
         return this;
@@ -17690,7 +18485,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       * @return The gcsAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getGcsAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(gcsAccessible_);
@@ -17702,6 +18499,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       * @param value The gcsAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setGcsAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17718,6 +18517,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus gcsAccessible = 15;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGcsAccessible() {
         
@@ -17733,8 +18533,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       * @return The enum numeric value on the wire for stsAccessible.
        */
-      public int getStsAccessibleValue() {
+      @java.lang.Override public int getStsAccessibleValue() {
         return stsAccessible_;
       }
       /**
@@ -17743,8 +18544,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       * @param value The enum numeric value on the wire for stsAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setStsAccessibleValue(int value) {
+        
         stsAccessible_ = value;
         onChanged();
         return this;
@@ -17755,7 +18559,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       * @return The stsAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getStsAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(stsAccessible_);
@@ -17767,6 +18573,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       * @param value The stsAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setStsAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17783,6 +18591,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus stsAccessible = 16;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStsAccessible() {
         
@@ -17798,8 +18607,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       * @return The enum numeric value on the wire for azureManagementAccessible.
        */
-      public int getAzureManagementAccessibleValue() {
+      @java.lang.Override public int getAzureManagementAccessibleValue() {
         return azureManagementAccessible_;
       }
       /**
@@ -17808,8 +18618,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       * @param value The enum numeric value on the wire for azureManagementAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setAzureManagementAccessibleValue(int value) {
+        
         azureManagementAccessible_ = value;
         onChanged();
         return this;
@@ -17820,7 +18633,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       * @return The azureManagementAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getAzureManagementAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(azureManagementAccessible_);
@@ -17832,6 +18647,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       * @param value The azureManagementAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setAzureManagementAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -17848,6 +18665,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus azureManagementAccessible = 17;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAzureManagementAccessible() {
         
@@ -17863,6 +18681,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 18;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -17882,6 +18701,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 18;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -17902,6 +18722,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 18;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -17919,6 +18741,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 18;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -17932,6 +18755,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 18;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -17952,8 +18777,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+       * @return The enum numeric value on the wire for archiveClouderaComAccessible.
        */
-      public int getArchiveClouderaComAccessibleValue() {
+      @java.lang.Override public int getArchiveClouderaComAccessibleValue() {
         return archiveClouderaComAccessible_;
       }
       /**
@@ -17962,8 +18788,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+       * @param value The enum numeric value on the wire for archiveClouderaComAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setArchiveClouderaComAccessibleValue(int value) {
+        
         archiveClouderaComAccessible_ = value;
         onChanged();
         return this;
@@ -17974,7 +18803,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+       * @return The archiveClouderaComAccessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getArchiveClouderaComAccessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(archiveClouderaComAccessible_);
@@ -17986,6 +18817,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+       * @param value The archiveClouderaComAccessible to set.
+       * @return This builder for chaining.
        */
       public Builder setArchiveClouderaComAccessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -18002,6 +18835,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus archiveClouderaComAccessible = 19;</code>
+       * @return This builder for chaining.
        */
       public Builder clearArchiveClouderaComAccessible() {
         
@@ -18017,8 +18851,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+       * @return The enum numeric value on the wire for serviceDeliveryCacheS3Accessible.
        */
-      public int getServiceDeliveryCacheS3AccessibleValue() {
+      @java.lang.Override public int getServiceDeliveryCacheS3AccessibleValue() {
         return serviceDeliveryCacheS3Accessible_;
       }
       /**
@@ -18027,8 +18862,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+       * @param value The enum numeric value on the wire for serviceDeliveryCacheS3Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceDeliveryCacheS3AccessibleValue(int value) {
+        
         serviceDeliveryCacheS3Accessible_ = value;
         onChanged();
         return this;
@@ -18039,7 +18877,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+       * @return The serviceDeliveryCacheS3Accessible.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus getServiceDeliveryCacheS3Accessible() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus.valueOf(serviceDeliveryCacheS3Accessible_);
@@ -18051,6 +18891,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+       * @param value The serviceDeliveryCacheS3Accessible to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceDeliveryCacheS3Accessible(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.HealthStatus value) {
         if (value == null) {
@@ -18067,6 +18909,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.HealthStatus serviceDeliveryCacheS3Accessible = 20;</code>
+       * @return This builder for chaining.
        */
       public Builder clearServiceDeliveryCacheS3Accessible() {
         
@@ -18077,7 +18920,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -18137,6 +18980,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuMetrics cpu = 1;</code>
+     * @return Whether the cpu field is set.
      */
     boolean hasCpu();
     /**
@@ -18145,6 +18989,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuMetrics cpu = 1;</code>
+     * @return The cpu.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics getCpu();
     /**
@@ -18162,6 +19007,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskMetrics disk = 2;</code>
+     * @return Whether the disk field is set.
      */
     boolean hasDisk();
     /**
@@ -18170,6 +19016,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskMetrics disk = 2;</code>
+     * @return The disk.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics getDisk();
     /**
@@ -18187,6 +19034,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MemoryMetrics memory = 3;</code>
+     * @return Whether the memory field is set.
      */
     boolean hasMemory();
     /**
@@ -18195,6 +19043,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MemoryMetrics memory = 3;</code>
+     * @return The memory.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics getMemory();
     /**
@@ -18212,6 +19061,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkMetrics network = 4;</code>
+     * @return Whether the network field is set.
      */
     boolean hasNetwork();
     /**
@@ -18220,6 +19070,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkMetrics network = 4;</code>
+     * @return The network.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics getNetwork();
     /**
@@ -18237,6 +19088,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -18246,6 +19098,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return Whether the clusterDetails field is set.
      */
     boolean hasClusterDetails();
     /**
@@ -18254,6 +19107,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return The clusterDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -18271,6 +19125,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 7;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -18279,6 +19134,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 7;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -18290,7 +19146,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.SystemMetrics}
    */
-  public  static final class SystemMetrics extends
+  public static final class SystemMetrics extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.SystemMetrics)
       SystemMetricsOrBuilder {
@@ -18300,8 +19156,14 @@ public final class NodeStatusProto {
       super(builder);
     }
     private SystemMetrics() {
-      timestamp_ = 0L;
       cdpTelemetryVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SystemMetrics();
     }
 
     @java.lang.Override
@@ -18317,7 +19179,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -18405,7 +19266,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -18444,7 +19305,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuMetrics cpu = 1;</code>
+     * @return Whether the cpu field is set.
      */
+    @java.lang.Override
     public boolean hasCpu() {
       return cpu_ != null;
     }
@@ -18454,7 +19317,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuMetrics cpu = 1;</code>
+     * @return The cpu.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics getCpu() {
       return cpu_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics.getDefaultInstance() : cpu_;
     }
@@ -18465,6 +19330,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.CpuMetrics cpu = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetricsOrBuilder getCpuOrBuilder() {
       return getCpu();
     }
@@ -18477,7 +19343,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskMetrics disk = 2;</code>
+     * @return Whether the disk field is set.
      */
+    @java.lang.Override
     public boolean hasDisk() {
       return disk_ != null;
     }
@@ -18487,7 +19355,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskMetrics disk = 2;</code>
+     * @return The disk.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics getDisk() {
       return disk_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics.getDefaultInstance() : disk_;
     }
@@ -18498,6 +19368,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.DiskMetrics disk = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetricsOrBuilder getDiskOrBuilder() {
       return getDisk();
     }
@@ -18510,7 +19381,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MemoryMetrics memory = 3;</code>
+     * @return Whether the memory field is set.
      */
+    @java.lang.Override
     public boolean hasMemory() {
       return memory_ != null;
     }
@@ -18520,7 +19393,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.MemoryMetrics memory = 3;</code>
+     * @return The memory.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics getMemory() {
       return memory_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics.getDefaultInstance() : memory_;
     }
@@ -18531,6 +19406,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.MemoryMetrics memory = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetricsOrBuilder getMemoryOrBuilder() {
       return getMemory();
     }
@@ -18543,7 +19419,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkMetrics network = 4;</code>
+     * @return Whether the network field is set.
      */
+    @java.lang.Override
     public boolean hasNetwork() {
       return network_ != null;
     }
@@ -18553,7 +19431,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkMetrics network = 4;</code>
+     * @return The network.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics getNetwork() {
       return network_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics.getDefaultInstance() : network_;
     }
@@ -18564,6 +19444,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.NetworkMetrics network = 4;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetricsOrBuilder getNetworkOrBuilder() {
       return getNetwork();
     }
@@ -18576,7 +19457,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -18589,7 +19472,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return Whether the clusterDetails field is set.
      */
+    @java.lang.Override
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
     }
@@ -18599,7 +19484,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return The clusterDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
     }
@@ -18610,6 +19497,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
     }
@@ -18622,7 +19510,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 7;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -18641,7 +19531,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 7;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -18688,7 +19580,7 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         output.writeMessage(6, getClusterDetails());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
@@ -18724,7 +19616,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getClusterDetails());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -18742,38 +19634,37 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SystemMetrics) obj;
 
-      boolean result = true;
-      result = result && (hasCpu() == other.hasCpu());
+      if (hasCpu() != other.hasCpu()) return false;
       if (hasCpu()) {
-        result = result && getCpu()
-            .equals(other.getCpu());
+        if (!getCpu()
+            .equals(other.getCpu())) return false;
       }
-      result = result && (hasDisk() == other.hasDisk());
+      if (hasDisk() != other.hasDisk()) return false;
       if (hasDisk()) {
-        result = result && getDisk()
-            .equals(other.getDisk());
+        if (!getDisk()
+            .equals(other.getDisk())) return false;
       }
-      result = result && (hasMemory() == other.hasMemory());
+      if (hasMemory() != other.hasMemory()) return false;
       if (hasMemory()) {
-        result = result && getMemory()
-            .equals(other.getMemory());
+        if (!getMemory()
+            .equals(other.getMemory())) return false;
       }
-      result = result && (hasNetwork() == other.hasNetwork());
+      if (hasNetwork() != other.hasNetwork()) return false;
       if (hasNetwork()) {
-        result = result && getNetwork()
-            .equals(other.getNetwork());
+        if (!getNetwork()
+            .equals(other.getNetwork())) return false;
       }
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (hasClusterDetails() != other.hasClusterDetails()) return false;
       if (hasClusterDetails()) {
-        result = result && getClusterDetails()
-            .equals(other.getClusterDetails());
+        if (!getClusterDetails()
+            .equals(other.getClusterDetails())) return false;
       }
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -19038,35 +19929,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -19131,7 +20022,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics cpu_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics cpu_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetricsOrBuilder> cpuBuilder_;
       /**
@@ -19140,6 +20031,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuMetrics cpu = 1;</code>
+       * @return Whether the cpu field is set.
        */
       public boolean hasCpu() {
         return cpuBuilder_ != null || cpu_ != null;
@@ -19150,6 +20042,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuMetrics cpu = 1;</code>
+       * @return The cpu.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics getCpu() {
         if (cpuBuilder_ == null) {
@@ -19284,7 +20177,7 @@ public final class NodeStatusProto {
         return cpuBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics disk_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics disk_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetricsOrBuilder> diskBuilder_;
       /**
@@ -19293,6 +20186,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.DiskMetrics disk = 2;</code>
+       * @return Whether the disk field is set.
        */
       public boolean hasDisk() {
         return diskBuilder_ != null || disk_ != null;
@@ -19303,6 +20197,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.DiskMetrics disk = 2;</code>
+       * @return The disk.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics getDisk() {
         if (diskBuilder_ == null) {
@@ -19437,7 +20332,7 @@ public final class NodeStatusProto {
         return diskBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics memory_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics memory_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetricsOrBuilder> memoryBuilder_;
       /**
@@ -19446,6 +20341,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.MemoryMetrics memory = 3;</code>
+       * @return Whether the memory field is set.
        */
       public boolean hasMemory() {
         return memoryBuilder_ != null || memory_ != null;
@@ -19456,6 +20352,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.MemoryMetrics memory = 3;</code>
+       * @return The memory.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics getMemory() {
         if (memoryBuilder_ == null) {
@@ -19590,7 +20487,7 @@ public final class NodeStatusProto {
         return memoryBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics network_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics network_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetricsOrBuilder> networkBuilder_;
       /**
@@ -19599,6 +20496,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkMetrics network = 4;</code>
+       * @return Whether the network field is set.
        */
       public boolean hasNetwork() {
         return networkBuilder_ != null || network_ != null;
@@ -19609,6 +20507,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkMetrics network = 4;</code>
+       * @return The network.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics getNetwork() {
         if (networkBuilder_ == null) {
@@ -19750,7 +20649,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -19760,6 +20661,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -19773,6 +20676,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -19781,7 +20685,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
@@ -19790,6 +20694,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * @return Whether the clusterDetails field is set.
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -19800,6 +20705,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * @return The clusterDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -19941,6 +20847,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 7;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -19960,6 +20867,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 7;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -19980,6 +20888,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 7;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -19997,6 +20907,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -20010,6 +20921,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 7;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -20025,7 +20938,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -20129,6 +21042,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return Whether the clusterDetails field is set.
      */
     boolean hasClusterDetails();
     /**
@@ -20137,6 +21051,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return The clusterDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -20154,6 +21069,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -20162,6 +21078,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -20173,7 +21090,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CmMetricsReport}
    */
-  public  static final class CmMetricsReport extends
+  public static final class CmMetricsReport extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CmMetricsReport)
       CmMetricsReportOrBuilder {
@@ -20185,6 +21102,13 @@ public final class NodeStatusProto {
     private CmMetricsReport() {
       metrics_ = java.util.Collections.emptyList();
       cdpTelemetryVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CmMetricsReport();
     }
 
     @java.lang.Override
@@ -20212,7 +21136,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 metrics_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -20240,7 +21164,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -20254,7 +21178,7 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           metrics_ = java.util.Collections.unmodifiableList(metrics_);
         }
         this.unknownFields = unknownFields.build();
@@ -20274,7 +21198,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport.Builder.class);
     }
 
-    private int bitField0_;
     public static final int METRICS_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> metrics_;
     /**
@@ -20284,6 +21207,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> getMetricsList() {
       return metrics_;
     }
@@ -20294,6 +21218,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder> 
         getMetricsOrBuilderList() {
       return metrics_;
@@ -20305,6 +21230,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
      */
+    @java.lang.Override
     public int getMetricsCount() {
       return metrics_.size();
     }
@@ -20315,6 +21241,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent getMetrics(int index) {
       return metrics_.get(index);
     }
@@ -20325,6 +21252,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceMetricEvent metrics = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder getMetricsOrBuilder(
         int index) {
       return metrics_.get(index);
@@ -20338,7 +21266,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return Whether the clusterDetails field is set.
      */
+    @java.lang.Override
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
     }
@@ -20348,7 +21278,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return The clusterDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
     }
@@ -20359,6 +21291,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
     }
@@ -20371,7 +21304,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -20390,7 +21325,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -20425,7 +21362,7 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         output.writeMessage(2, getClusterDetails());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
@@ -20445,7 +21382,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getClusterDetails());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -20463,18 +21400,17 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport) obj;
 
-      boolean result = true;
-      result = result && getMetricsList()
-          .equals(other.getMetricsList());
-      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (!getMetricsList()
+          .equals(other.getMetricsList())) return false;
+      if (hasClusterDetails() != other.hasClusterDetails()) return false;
       if (hasClusterDetails()) {
-        result = result && getClusterDetails()
-            .equals(other.getClusterDetails());
+        if (!getClusterDetails()
+            .equals(other.getClusterDetails())) return false;
       }
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -20673,9 +21609,8 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmMetricsReport(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (metricsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             metrics_ = java.util.Collections.unmodifiableList(metrics_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -20689,42 +21624,41 @@ public final class NodeStatusProto {
           result.clusterDetails_ = clusterDetailsBuilder_.build();
         }
         result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -20804,7 +21738,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent> metrics_ =
         java.util.Collections.emptyList();
       private void ensureMetricsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           metrics_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent>(metrics_);
           bitField0_ |= 0x00000001;
          }
@@ -21105,7 +22039,7 @@ public final class NodeStatusProto {
           metricsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEventOrBuilder>(
                   metrics_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           metrics_ = null;
@@ -21113,7 +22047,7 @@ public final class NodeStatusProto {
         return metricsBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
@@ -21122,6 +22056,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       * @return Whether the clusterDetails field is set.
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -21132,6 +22067,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       * @return The clusterDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -21273,6 +22209,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -21292,6 +22229,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -21312,6 +22250,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -21329,6 +22269,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -21342,6 +22283,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -21357,7 +22300,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -21461,6 +22404,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return Whether the clusterDetails field is set.
      */
     boolean hasClusterDetails();
     /**
@@ -21469,6 +22413,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return The clusterDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -21486,6 +22431,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The cdpTelemetryVersion.
      */
     java.lang.String getCdpTelemetryVersion();
     /**
@@ -21494,6 +22440,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
     com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes();
@@ -21505,7 +22452,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CmHealthChecksReport}
    */
-  public  static final class CmHealthChecksReport extends
+  public static final class CmHealthChecksReport extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CmHealthChecksReport)
       CmHealthChecksReportOrBuilder {
@@ -21517,6 +22464,13 @@ public final class NodeStatusProto {
     private CmHealthChecksReport() {
       healthChecks_ = java.util.Collections.emptyList();
       cdpTelemetryVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CmHealthChecksReport();
     }
 
     @java.lang.Override
@@ -21544,7 +22498,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 healthChecks_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -21572,7 +22526,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -21586,7 +22540,7 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           healthChecks_ = java.util.Collections.unmodifiableList(healthChecks_);
         }
         this.unknownFields = unknownFields.build();
@@ -21606,7 +22560,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport.Builder.class);
     }
 
-    private int bitField0_;
     public static final int HEALTHCHECKS_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> healthChecks_;
     /**
@@ -21616,6 +22569,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> getHealthChecksList() {
       return healthChecks_;
     }
@@ -21626,6 +22580,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder> 
         getHealthChecksOrBuilderList() {
       return healthChecks_;
@@ -21637,6 +22592,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
      */
+    @java.lang.Override
     public int getHealthChecksCount() {
       return healthChecks_.size();
     }
@@ -21647,6 +22603,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent getHealthChecks(int index) {
       return healthChecks_.get(index);
     }
@@ -21657,6 +22614,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.CmServiceHealthCheckEvent healthChecks = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder getHealthChecksOrBuilder(
         int index) {
       return healthChecks_.get(index);
@@ -21670,7 +22628,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return Whether the clusterDetails field is set.
      */
+    @java.lang.Override
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
     }
@@ -21680,7 +22640,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+     * @return The clusterDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
     }
@@ -21691,6 +22653,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
     }
@@ -21703,7 +22666,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The cdpTelemetryVersion.
      */
+    @java.lang.Override
     public java.lang.String getCdpTelemetryVersion() {
       java.lang.Object ref = cdpTelemetryVersion_;
       if (ref instanceof java.lang.String) {
@@ -21722,7 +22687,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string cdpTelemetryVersion = 3;</code>
+     * @return The bytes for cdpTelemetryVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCdpTelemetryVersionBytes() {
       java.lang.Object ref = cdpTelemetryVersion_;
@@ -21757,7 +22724,7 @@ public final class NodeStatusProto {
       if (clusterDetails_ != null) {
         output.writeMessage(2, getClusterDetails());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, cdpTelemetryVersion_);
       }
       unknownFields.writeTo(output);
@@ -21777,7 +22744,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(2, getClusterDetails());
       }
-      if (!getCdpTelemetryVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(cdpTelemetryVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, cdpTelemetryVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -21795,18 +22762,17 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport) obj;
 
-      boolean result = true;
-      result = result && getHealthChecksList()
-          .equals(other.getHealthChecksList());
-      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (!getHealthChecksList()
+          .equals(other.getHealthChecksList())) return false;
+      if (hasClusterDetails() != other.hasClusterDetails()) return false;
       if (hasClusterDetails()) {
-        result = result && getClusterDetails()
-            .equals(other.getClusterDetails());
+        if (!getClusterDetails()
+            .equals(other.getClusterDetails())) return false;
       }
-      result = result && getCdpTelemetryVersion()
-          .equals(other.getCdpTelemetryVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getCdpTelemetryVersion()
+          .equals(other.getCdpTelemetryVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -22005,9 +22971,8 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmHealthChecksReport(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (healthChecksBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             healthChecks_ = java.util.Collections.unmodifiableList(healthChecks_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -22021,42 +22986,41 @@ public final class NodeStatusProto {
           result.clusterDetails_ = clusterDetailsBuilder_.build();
         }
         result.cdpTelemetryVersion_ = cdpTelemetryVersion_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -22136,7 +23100,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent> healthChecks_ =
         java.util.Collections.emptyList();
       private void ensureHealthChecksIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           healthChecks_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent>(healthChecks_);
           bitField0_ |= 0x00000001;
          }
@@ -22437,7 +23401,7 @@ public final class NodeStatusProto {
           healthChecksBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEventOrBuilder>(
                   healthChecks_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           healthChecks_ = null;
@@ -22445,7 +23409,7 @@ public final class NodeStatusProto {
         return healthChecksBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
@@ -22454,6 +23418,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       * @return Whether the clusterDetails field is set.
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -22464,6 +23429,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 2;</code>
+       * @return The clusterDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -22605,6 +23571,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @return The cdpTelemetryVersion.
        */
       public java.lang.String getCdpTelemetryVersion() {
         java.lang.Object ref = cdpTelemetryVersion_;
@@ -22624,6 +23591,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @return The bytes for cdpTelemetryVersion.
        */
       public com.google.protobuf.ByteString
           getCdpTelemetryVersionBytes() {
@@ -22644,6 +23612,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @param value The cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersion(
           java.lang.String value) {
@@ -22661,6 +23631,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCdpTelemetryVersion() {
         
@@ -22674,6 +23645,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string cdpTelemetryVersion = 3;</code>
+       * @param value The bytes for cdpTelemetryVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setCdpTelemetryVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -22689,7 +23662,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -22749,6 +23722,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 count = 1;</code>
+     * @return The count.
      */
     int getCount();
 
@@ -22758,6 +23732,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 logical_count = 2;</code>
+     * @return The logicalCount.
      */
     int getLogicalCount();
 
@@ -22767,6 +23742,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated float load_avg = 3;</code>
+     * @return A list containing the loadAvg.
      */
     java.util.List<java.lang.Float> getLoadAvgList();
     /**
@@ -22775,6 +23751,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated float load_avg = 3;</code>
+     * @return The count of loadAvg.
      */
     int getLoadAvgCount();
     /**
@@ -22783,6 +23760,8 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated float load_avg = 3;</code>
+     * @param index The index of the element to return.
+     * @return The loadAvg at the given index.
      */
     float getLoadAvg(int index);
 
@@ -22792,6 +23771,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuTimes times = 4;</code>
+     * @return Whether the times field is set.
      */
     boolean hasTimes();
     /**
@@ -22800,6 +23780,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuTimes times = 4;</code>
+     * @return The times.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes getTimes();
     /**
@@ -22817,6 +23798,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuStats stats = 5;</code>
+     * @return Whether the stats field is set.
      */
     boolean hasStats();
     /**
@@ -22825,6 +23807,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuStats stats = 5;</code>
+     * @return The stats.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats getStats();
     /**
@@ -22842,6 +23825,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuFrequency freq = 6;</code>
+     * @return Whether the freq field is set.
      */
     boolean hasFreq();
     /**
@@ -22850,6 +23834,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuFrequency freq = 6;</code>
+     * @return The freq.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency getFreq();
     /**
@@ -22868,7 +23853,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CpuMetrics}
    */
-  public  static final class CpuMetrics extends
+  public static final class CpuMetrics extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CpuMetrics)
       CpuMetricsOrBuilder {
@@ -22878,9 +23863,14 @@ public final class NodeStatusProto {
       super(builder);
     }
     private CpuMetrics() {
-      count_ = 0;
-      logicalCount_ = 0;
-      loadAvg_ = java.util.Collections.emptyList();
+      loadAvg_ = emptyFloatList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CpuMetrics();
     }
 
     @java.lang.Override
@@ -22918,22 +23908,22 @@ public final class NodeStatusProto {
               break;
             }
             case 29: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                loadAvg_ = new java.util.ArrayList<java.lang.Float>();
-                mutable_bitField0_ |= 0x00000004;
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                loadAvg_ = newFloatList();
+                mutable_bitField0_ |= 0x00000001;
               }
-              loadAvg_.add(input.readFloat());
+              loadAvg_.addFloat(input.readFloat());
               break;
             }
             case 26: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004) && input.getBytesUntilLimit() > 0) {
-                loadAvg_ = new java.util.ArrayList<java.lang.Float>();
-                mutable_bitField0_ |= 0x00000004;
+              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
+                loadAvg_ = newFloatList();
+                mutable_bitField0_ |= 0x00000001;
               }
               while (input.getBytesUntilLimit() > 0) {
-                loadAvg_.add(input.readFloat());
+                loadAvg_.addFloat(input.readFloat());
               }
               input.popLimit(limit);
               break;
@@ -22978,7 +23968,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -22992,8 +23982,8 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-          loadAvg_ = java.util.Collections.unmodifiableList(loadAvg_);
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          loadAvg_.makeImmutable(); // C
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -23012,7 +24002,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics.Builder.class);
     }
 
-    private int bitField0_;
     public static final int COUNT_FIELD_NUMBER = 1;
     private int count_;
     /**
@@ -23021,7 +24010,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 count = 1;</code>
+     * @return The count.
      */
+    @java.lang.Override
     public int getCount() {
       return count_;
     }
@@ -23034,20 +24025,24 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 logical_count = 2;</code>
+     * @return The logicalCount.
      */
+    @java.lang.Override
     public int getLogicalCount() {
       return logicalCount_;
     }
 
     public static final int LOAD_AVG_FIELD_NUMBER = 3;
-    private java.util.List<java.lang.Float> loadAvg_;
+    private com.google.protobuf.Internal.FloatList loadAvg_;
     /**
      * <pre>
      * Average load of CPUs - last 1 min, last 5 min and last 15 min.
      * </pre>
      *
      * <code>repeated float load_avg = 3;</code>
+     * @return A list containing the loadAvg.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Float>
         getLoadAvgList() {
       return loadAvg_;
@@ -23058,6 +24053,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated float load_avg = 3;</code>
+     * @return The count of loadAvg.
      */
     public int getLoadAvgCount() {
       return loadAvg_.size();
@@ -23068,9 +24064,11 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>repeated float load_avg = 3;</code>
+     * @param index The index of the element to return.
+     * @return The loadAvg at the given index.
      */
     public float getLoadAvg(int index) {
-      return loadAvg_.get(index);
+      return loadAvg_.getFloat(index);
     }
     private int loadAvgMemoizedSerializedSize = -1;
 
@@ -23082,7 +24080,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuTimes times = 4;</code>
+     * @return Whether the times field is set.
      */
+    @java.lang.Override
     public boolean hasTimes() {
       return times_ != null;
     }
@@ -23092,7 +24092,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuTimes times = 4;</code>
+     * @return The times.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes getTimes() {
       return times_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes.getDefaultInstance() : times_;
     }
@@ -23103,6 +24105,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.CpuTimes times = 4;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimesOrBuilder getTimesOrBuilder() {
       return getTimes();
     }
@@ -23115,7 +24118,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuStats stats = 5;</code>
+     * @return Whether the stats field is set.
      */
+    @java.lang.Override
     public boolean hasStats() {
       return stats_ != null;
     }
@@ -23125,7 +24130,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuStats stats = 5;</code>
+     * @return The stats.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats getStats() {
       return stats_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats.getDefaultInstance() : stats_;
     }
@@ -23136,6 +24143,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.CpuStats stats = 5;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStatsOrBuilder getStatsOrBuilder() {
       return getStats();
     }
@@ -23148,7 +24156,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuFrequency freq = 6;</code>
+     * @return Whether the freq field is set.
      */
+    @java.lang.Override
     public boolean hasFreq() {
       return freq_ != null;
     }
@@ -23158,7 +24168,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.CpuFrequency freq = 6;</code>
+     * @return The freq.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency getFreq() {
       return freq_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency.getDefaultInstance() : freq_;
     }
@@ -23169,6 +24181,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.CpuFrequency freq = 6;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequencyOrBuilder getFreqOrBuilder() {
       return getFreq();
     }
@@ -23199,7 +24212,7 @@ public final class NodeStatusProto {
         output.writeUInt32NoTag(loadAvgMemoizedSerializedSize);
       }
       for (int i = 0; i < loadAvg_.size(); i++) {
-        output.writeFloatNoTag(loadAvg_.get(i));
+        output.writeFloatNoTag(loadAvg_.getFloat(i));
       }
       if (times_ != null) {
         output.writeMessage(4, getTimes());
@@ -23265,30 +24278,29 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics) obj;
 
-      boolean result = true;
-      result = result && (getCount()
-          == other.getCount());
-      result = result && (getLogicalCount()
-          == other.getLogicalCount());
-      result = result && getLoadAvgList()
-          .equals(other.getLoadAvgList());
-      result = result && (hasTimes() == other.hasTimes());
+      if (getCount()
+          != other.getCount()) return false;
+      if (getLogicalCount()
+          != other.getLogicalCount()) return false;
+      if (!getLoadAvgList()
+          .equals(other.getLoadAvgList())) return false;
+      if (hasTimes() != other.hasTimes()) return false;
       if (hasTimes()) {
-        result = result && getTimes()
-            .equals(other.getTimes());
+        if (!getTimes()
+            .equals(other.getTimes())) return false;
       }
-      result = result && (hasStats() == other.hasStats());
+      if (hasStats() != other.hasStats()) return false;
       if (hasStats()) {
-        result = result && getStats()
-            .equals(other.getStats());
+        if (!getStats()
+            .equals(other.getStats())) return false;
       }
-      result = result && (hasFreq() == other.hasFreq());
+      if (hasFreq() != other.hasFreq()) return false;
       if (hasFreq()) {
-        result = result && getFreq()
-            .equals(other.getFreq());
+        if (!getFreq()
+            .equals(other.getFreq())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -23459,8 +24471,8 @@ public final class NodeStatusProto {
 
         logicalCount_ = 0;
 
-        loadAvg_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
+        loadAvg_ = emptyFloatList();
+        bitField0_ = (bitField0_ & ~0x00000001);
         if (timesBuilder_ == null) {
           times_ = null;
         } else {
@@ -23506,12 +24518,11 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuMetrics(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.count_ = count_;
         result.logicalCount_ = logicalCount_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
-          loadAvg_ = java.util.Collections.unmodifiableList(loadAvg_);
-          bitField0_ = (bitField0_ & ~0x00000004);
+        if (((bitField0_ & 0x00000001) != 0)) {
+          loadAvg_.makeImmutable();
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.loadAvg_ = loadAvg_;
         if (timesBuilder_ == null) {
@@ -23529,42 +24540,41 @@ public final class NodeStatusProto {
         } else {
           result.freq_ = freqBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -23587,7 +24597,7 @@ public final class NodeStatusProto {
         if (!other.loadAvg_.isEmpty()) {
           if (loadAvg_.isEmpty()) {
             loadAvg_ = other.loadAvg_;
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureLoadAvgIsMutable();
             loadAvg_.addAll(other.loadAvg_);
@@ -23640,7 +24650,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 count = 1;</code>
+       * @return The count.
        */
+      @java.lang.Override
       public int getCount() {
         return count_;
       }
@@ -23650,6 +24662,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 count = 1;</code>
+       * @param value The count to set.
+       * @return This builder for chaining.
        */
       public Builder setCount(int value) {
         
@@ -23663,6 +24677,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 count = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCount() {
         
@@ -23678,7 +24693,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 logical_count = 2;</code>
+       * @return The logicalCount.
        */
+      @java.lang.Override
       public int getLogicalCount() {
         return logicalCount_;
       }
@@ -23688,6 +24705,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 logical_count = 2;</code>
+       * @param value The logicalCount to set.
+       * @return This builder for chaining.
        */
       public Builder setLogicalCount(int value) {
         
@@ -23701,6 +24720,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 logical_count = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLogicalCount() {
         
@@ -23709,11 +24729,11 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private java.util.List<java.lang.Float> loadAvg_ = java.util.Collections.emptyList();
+      private com.google.protobuf.Internal.FloatList loadAvg_ = emptyFloatList();
       private void ensureLoadAvgIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
-          loadAvg_ = new java.util.ArrayList<java.lang.Float>(loadAvg_);
-          bitField0_ |= 0x00000004;
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          loadAvg_ = mutableCopy(loadAvg_);
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -23722,10 +24742,12 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated float load_avg = 3;</code>
+       * @return A list containing the loadAvg.
        */
       public java.util.List<java.lang.Float>
           getLoadAvgList() {
-        return java.util.Collections.unmodifiableList(loadAvg_);
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(loadAvg_) : loadAvg_;
       }
       /**
        * <pre>
@@ -23733,6 +24755,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated float load_avg = 3;</code>
+       * @return The count of loadAvg.
        */
       public int getLoadAvgCount() {
         return loadAvg_.size();
@@ -23743,9 +24766,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated float load_avg = 3;</code>
+       * @param index The index of the element to return.
+       * @return The loadAvg at the given index.
        */
       public float getLoadAvg(int index) {
-        return loadAvg_.get(index);
+        return loadAvg_.getFloat(index);
       }
       /**
        * <pre>
@@ -23753,11 +24778,14 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated float load_avg = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The loadAvg to set.
+       * @return This builder for chaining.
        */
       public Builder setLoadAvg(
           int index, float value) {
         ensureLoadAvgIsMutable();
-        loadAvg_.set(index, value);
+        loadAvg_.setFloat(index, value);
         onChanged();
         return this;
       }
@@ -23767,10 +24795,12 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated float load_avg = 3;</code>
+       * @param value The loadAvg to add.
+       * @return This builder for chaining.
        */
       public Builder addLoadAvg(float value) {
         ensureLoadAvgIsMutable();
-        loadAvg_.add(value);
+        loadAvg_.addFloat(value);
         onChanged();
         return this;
       }
@@ -23780,6 +24810,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated float load_avg = 3;</code>
+       * @param values The loadAvg to add.
+       * @return This builder for chaining.
        */
       public Builder addAllLoadAvg(
           java.lang.Iterable<? extends java.lang.Float> values) {
@@ -23795,15 +24827,16 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>repeated float load_avg = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLoadAvg() {
-        loadAvg_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000004);
+        loadAvg_ = emptyFloatList();
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes times_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes times_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimesOrBuilder> timesBuilder_;
       /**
@@ -23812,6 +24845,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuTimes times = 4;</code>
+       * @return Whether the times field is set.
        */
       public boolean hasTimes() {
         return timesBuilder_ != null || times_ != null;
@@ -23822,6 +24856,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuTimes times = 4;</code>
+       * @return The times.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes getTimes() {
         if (timesBuilder_ == null) {
@@ -23956,7 +24991,7 @@ public final class NodeStatusProto {
         return timesBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats stats_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats stats_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStatsOrBuilder> statsBuilder_;
       /**
@@ -23965,6 +25000,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuStats stats = 5;</code>
+       * @return Whether the stats field is set.
        */
       public boolean hasStats() {
         return statsBuilder_ != null || stats_ != null;
@@ -23975,6 +25011,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuStats stats = 5;</code>
+       * @return The stats.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats getStats() {
         if (statsBuilder_ == null) {
@@ -24109,7 +25146,7 @@ public final class NodeStatusProto {
         return statsBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency freq_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency freq_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequencyOrBuilder> freqBuilder_;
       /**
@@ -24118,6 +25155,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuFrequency freq = 6;</code>
+       * @return Whether the freq field is set.
        */
       public boolean hasFreq() {
         return freqBuilder_ != null || freq_ != null;
@@ -24128,6 +25166,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.CpuFrequency freq = 6;</code>
+       * @return The freq.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency getFreq() {
         if (freqBuilder_ == null) {
@@ -24264,7 +25303,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -24324,6 +25363,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 ctx_switches = 1;</code>
+     * @return The ctxSwitches.
      */
     long getCtxSwitches();
 
@@ -24333,6 +25373,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 interrupts = 2;</code>
+     * @return The interrupts.
      */
     long getInterrupts();
 
@@ -24342,6 +25383,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 soft_interrupts = 3;</code>
+     * @return The softInterrupts.
      */
     long getSoftInterrupts();
 
@@ -24351,6 +25393,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 syscalls = 4;</code>
+     * @return The syscalls.
      */
     long getSyscalls();
   }
@@ -24361,7 +25404,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CpuStats}
    */
-  public  static final class CpuStats extends
+  public static final class CpuStats extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CpuStats)
       CpuStatsOrBuilder {
@@ -24371,10 +25414,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private CpuStats() {
-      ctxSwitches_ = 0L;
-      interrupts_ = 0L;
-      softInterrupts_ = 0L;
-      syscalls_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CpuStats();
     }
 
     @java.lang.Override
@@ -24390,7 +25436,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -24422,7 +25467,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -24461,7 +25506,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 ctx_switches = 1;</code>
+     * @return The ctxSwitches.
      */
+    @java.lang.Override
     public long getCtxSwitches() {
       return ctxSwitches_;
     }
@@ -24474,7 +25521,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 interrupts = 2;</code>
+     * @return The interrupts.
      */
+    @java.lang.Override
     public long getInterrupts() {
       return interrupts_;
     }
@@ -24487,7 +25536,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 soft_interrupts = 3;</code>
+     * @return The softInterrupts.
      */
+    @java.lang.Override
     public long getSoftInterrupts() {
       return softInterrupts_;
     }
@@ -24500,7 +25551,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 syscalls = 4;</code>
+     * @return The syscalls.
      */
+    @java.lang.Override
     public long getSyscalls() {
       return syscalls_;
     }
@@ -24571,17 +25624,16 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuStats) obj;
 
-      boolean result = true;
-      result = result && (getCtxSwitches()
-          == other.getCtxSwitches());
-      result = result && (getInterrupts()
-          == other.getInterrupts());
-      result = result && (getSoftInterrupts()
-          == other.getSoftInterrupts());
-      result = result && (getSyscalls()
-          == other.getSyscalls());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getCtxSwitches()
+          != other.getCtxSwitches()) return false;
+      if (getInterrupts()
+          != other.getInterrupts()) return false;
+      if (getSoftInterrupts()
+          != other.getSoftInterrupts()) return false;
+      if (getSyscalls()
+          != other.getSyscalls()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -24784,35 +25836,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -24874,7 +25926,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 ctx_switches = 1;</code>
+       * @return The ctxSwitches.
        */
+      @java.lang.Override
       public long getCtxSwitches() {
         return ctxSwitches_;
       }
@@ -24884,6 +25938,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 ctx_switches = 1;</code>
+       * @param value The ctxSwitches to set.
+       * @return This builder for chaining.
        */
       public Builder setCtxSwitches(long value) {
         
@@ -24897,6 +25953,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 ctx_switches = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCtxSwitches() {
         
@@ -24912,7 +25969,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 interrupts = 2;</code>
+       * @return The interrupts.
        */
+      @java.lang.Override
       public long getInterrupts() {
         return interrupts_;
       }
@@ -24922,6 +25981,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 interrupts = 2;</code>
+       * @param value The interrupts to set.
+       * @return This builder for chaining.
        */
       public Builder setInterrupts(long value) {
         
@@ -24935,6 +25996,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 interrupts = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInterrupts() {
         
@@ -24950,7 +26012,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 soft_interrupts = 3;</code>
+       * @return The softInterrupts.
        */
+      @java.lang.Override
       public long getSoftInterrupts() {
         return softInterrupts_;
       }
@@ -24960,6 +26024,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 soft_interrupts = 3;</code>
+       * @param value The softInterrupts to set.
+       * @return This builder for chaining.
        */
       public Builder setSoftInterrupts(long value) {
         
@@ -24973,6 +26039,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 soft_interrupts = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSoftInterrupts() {
         
@@ -24988,7 +26055,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 syscalls = 4;</code>
+       * @return The syscalls.
        */
+      @java.lang.Override
       public long getSyscalls() {
         return syscalls_;
       }
@@ -24998,6 +26067,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 syscalls = 4;</code>
+       * @param value The syscalls to set.
+       * @return This builder for chaining.
        */
       public Builder setSyscalls(long value) {
         
@@ -25011,6 +26082,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 syscalls = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSyscalls() {
         
@@ -25021,7 +26093,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -25081,6 +26153,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double idle = 1;</code>
+     * @return The idle.
      */
     double getIdle();
 
@@ -25090,6 +26163,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double nice = 2;</code>
+     * @return The nice.
      */
     double getNice();
 
@@ -25099,6 +26173,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double system = 3;</code>
+     * @return The system.
      */
     double getSystem();
 
@@ -25108,6 +26183,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double user = 4;</code>
+     * @return The user.
      */
     double getUser();
   }
@@ -25118,7 +26194,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CpuTimes}
    */
-  public  static final class CpuTimes extends
+  public static final class CpuTimes extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CpuTimes)
       CpuTimesOrBuilder {
@@ -25128,10 +26204,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private CpuTimes() {
-      idle_ = 0D;
-      nice_ = 0D;
-      system_ = 0D;
-      user_ = 0D;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CpuTimes();
     }
 
     @java.lang.Override
@@ -25147,7 +26226,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -25179,7 +26257,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -25218,7 +26296,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double idle = 1;</code>
+     * @return The idle.
      */
+    @java.lang.Override
     public double getIdle() {
       return idle_;
     }
@@ -25231,7 +26311,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double nice = 2;</code>
+     * @return The nice.
      */
+    @java.lang.Override
     public double getNice() {
       return nice_;
     }
@@ -25244,7 +26326,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double system = 3;</code>
+     * @return The system.
      */
+    @java.lang.Override
     public double getSystem() {
       return system_;
     }
@@ -25257,7 +26341,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double user = 4;</code>
+     * @return The user.
      */
+    @java.lang.Override
     public double getUser() {
       return user_;
     }
@@ -25276,16 +26362,16 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (idle_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(idle_) != 0) {
         output.writeDouble(1, idle_);
       }
-      if (nice_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(nice_) != 0) {
         output.writeDouble(2, nice_);
       }
-      if (system_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(system_) != 0) {
         output.writeDouble(3, system_);
       }
-      if (user_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(user_) != 0) {
         output.writeDouble(4, user_);
       }
       unknownFields.writeTo(output);
@@ -25297,19 +26383,19 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (idle_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(idle_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(1, idle_);
       }
-      if (nice_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(nice_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, nice_);
       }
-      if (system_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(system_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(3, system_);
       }
-      if (user_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(user_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, user_);
       }
@@ -25328,25 +26414,20 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuTimes) obj;
 
-      boolean result = true;
-      result = result && (
-          java.lang.Double.doubleToLongBits(getIdle())
-          == java.lang.Double.doubleToLongBits(
-              other.getIdle()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getNice())
-          == java.lang.Double.doubleToLongBits(
-              other.getNice()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getSystem())
-          == java.lang.Double.doubleToLongBits(
-              other.getSystem()));
-      result = result && (
-          java.lang.Double.doubleToLongBits(getUser())
-          == java.lang.Double.doubleToLongBits(
-              other.getUser()));
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (java.lang.Double.doubleToLongBits(getIdle())
+          != java.lang.Double.doubleToLongBits(
+              other.getIdle())) return false;
+      if (java.lang.Double.doubleToLongBits(getNice())
+          != java.lang.Double.doubleToLongBits(
+              other.getNice())) return false;
+      if (java.lang.Double.doubleToLongBits(getSystem())
+          != java.lang.Double.doubleToLongBits(
+              other.getSystem())) return false;
+      if (java.lang.Double.doubleToLongBits(getUser())
+          != java.lang.Double.doubleToLongBits(
+              other.getUser())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -25549,35 +26630,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -25639,7 +26720,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double idle = 1;</code>
+       * @return The idle.
        */
+      @java.lang.Override
       public double getIdle() {
         return idle_;
       }
@@ -25649,6 +26732,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double idle = 1;</code>
+       * @param value The idle to set.
+       * @return This builder for chaining.
        */
       public Builder setIdle(double value) {
         
@@ -25662,6 +26747,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double idle = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIdle() {
         
@@ -25677,7 +26763,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double nice = 2;</code>
+       * @return The nice.
        */
+      @java.lang.Override
       public double getNice() {
         return nice_;
       }
@@ -25687,6 +26775,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double nice = 2;</code>
+       * @param value The nice to set.
+       * @return This builder for chaining.
        */
       public Builder setNice(double value) {
         
@@ -25700,6 +26790,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double nice = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNice() {
         
@@ -25715,7 +26806,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double system = 3;</code>
+       * @return The system.
        */
+      @java.lang.Override
       public double getSystem() {
         return system_;
       }
@@ -25725,6 +26818,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double system = 3;</code>
+       * @param value The system to set.
+       * @return This builder for chaining.
        */
       public Builder setSystem(double value) {
         
@@ -25738,6 +26833,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double system = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSystem() {
         
@@ -25753,7 +26849,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double user = 4;</code>
+       * @return The user.
        */
+      @java.lang.Override
       public double getUser() {
         return user_;
       }
@@ -25763,6 +26861,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double user = 4;</code>
+       * @param value The user to set.
+       * @return This builder for chaining.
        */
       public Builder setUser(double value) {
         
@@ -25776,6 +26876,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double user = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUser() {
         
@@ -25786,7 +26887,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -25846,6 +26947,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 current = 1;</code>
+     * @return The current.
      */
     long getCurrent();
 
@@ -25855,6 +26957,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 min = 2;</code>
+     * @return The min.
      */
     long getMin();
 
@@ -25864,6 +26967,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 max = 3;</code>
+     * @return The max.
      */
     long getMax();
   }
@@ -25874,7 +26978,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CpuFrequency}
    */
-  public  static final class CpuFrequency extends
+  public static final class CpuFrequency extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CpuFrequency)
       CpuFrequencyOrBuilder {
@@ -25884,9 +26988,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private CpuFrequency() {
-      current_ = 0L;
-      min_ = 0L;
-      max_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CpuFrequency();
     }
 
     @java.lang.Override
@@ -25902,7 +27010,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -25929,7 +27036,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -25968,7 +27075,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 current = 1;</code>
+     * @return The current.
      */
+    @java.lang.Override
     public long getCurrent() {
       return current_;
     }
@@ -25981,7 +27090,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 min = 2;</code>
+     * @return The min.
      */
+    @java.lang.Override
     public long getMin() {
       return min_;
     }
@@ -25994,7 +27105,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 max = 3;</code>
+     * @return The max.
      */
+    @java.lang.Override
     public long getMax() {
       return max_;
     }
@@ -26058,15 +27171,14 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CpuFrequency) obj;
 
-      boolean result = true;
-      result = result && (getCurrent()
-          == other.getCurrent());
-      result = result && (getMin()
-          == other.getMin());
-      result = result && (getMax()
-          == other.getMax());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getCurrent()
+          != other.getCurrent()) return false;
+      if (getMin()
+          != other.getMin()) return false;
+      if (getMax()
+          != other.getMax()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -26263,35 +27375,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -26350,7 +27462,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 current = 1;</code>
+       * @return The current.
        */
+      @java.lang.Override
       public long getCurrent() {
         return current_;
       }
@@ -26360,6 +27474,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 current = 1;</code>
+       * @param value The current to set.
+       * @return This builder for chaining.
        */
       public Builder setCurrent(long value) {
         
@@ -26373,6 +27489,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 current = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCurrent() {
         
@@ -26388,7 +27505,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 min = 2;</code>
+       * @return The min.
        */
+      @java.lang.Override
       public long getMin() {
         return min_;
       }
@@ -26398,6 +27517,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 min = 2;</code>
+       * @param value The min to set.
+       * @return This builder for chaining.
        */
       public Builder setMin(long value) {
         
@@ -26411,6 +27532,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 min = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMin() {
         
@@ -26426,7 +27548,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 max = 3;</code>
+       * @return The max.
        */
+      @java.lang.Override
       public long getMax() {
         return max_;
       }
@@ -26436,6 +27560,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 max = 3;</code>
+       * @param value The max to set.
+       * @return This builder for chaining.
        */
       public Builder setMax(long value) {
         
@@ -26449,6 +27575,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 max = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMax() {
         
@@ -26459,7 +27586,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -26607,6 +27734,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskIO io = 3;</code>
+     * @return Whether the io field is set.
      */
     boolean hasIo();
     /**
@@ -26615,6 +27743,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskIO io = 3;</code>
+     * @return The io.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO getIo();
     /**
@@ -26633,7 +27762,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.DiskMetrics}
    */
-  public  static final class DiskMetrics extends
+  public static final class DiskMetrics extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.DiskMetrics)
       DiskMetricsOrBuilder {
@@ -26645,6 +27774,13 @@ public final class NodeStatusProto {
     private DiskMetrics() {
       partitions_ = java.util.Collections.emptyList();
       topVarlog_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DiskMetrics();
     }
 
     @java.lang.Override
@@ -26672,7 +27808,7 @@ public final class NodeStatusProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 partitions_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -26681,7 +27817,7 @@ public final class NodeStatusProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 topVarlog_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog>();
                 mutable_bitField0_ |= 0x00000002;
               }
@@ -26703,7 +27839,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -26717,10 +27853,10 @@ public final class NodeStatusProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           partitions_ = java.util.Collections.unmodifiableList(partitions_);
         }
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000002) != 0)) {
           topVarlog_ = java.util.Collections.unmodifiableList(topVarlog_);
         }
         this.unknownFields = unknownFields.build();
@@ -26740,7 +27876,6 @@ public final class NodeStatusProto {
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics.class, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics.Builder.class);
     }
 
-    private int bitField0_;
     public static final int PARTITIONS_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition> partitions_;
     /**
@@ -26750,6 +27885,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.DiskPartition partitions = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition> getPartitionsList() {
       return partitions_;
     }
@@ -26760,6 +27896,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.DiskPartition partitions = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartitionOrBuilder> 
         getPartitionsOrBuilderList() {
       return partitions_;
@@ -26771,6 +27908,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.DiskPartition partitions = 1;</code>
      */
+    @java.lang.Override
     public int getPartitionsCount() {
       return partitions_.size();
     }
@@ -26781,6 +27919,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.DiskPartition partitions = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition getPartitions(int index) {
       return partitions_.get(index);
     }
@@ -26791,6 +27930,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.DiskPartition partitions = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartitionOrBuilder getPartitionsOrBuilder(
         int index) {
       return partitions_.get(index);
@@ -26805,6 +27945,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.VmLog top_varlog = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog> getTopVarlogList() {
       return topVarlog_;
     }
@@ -26815,6 +27956,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.VmLog top_varlog = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLogOrBuilder> 
         getTopVarlogOrBuilderList() {
       return topVarlog_;
@@ -26826,6 +27968,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.VmLog top_varlog = 2;</code>
      */
+    @java.lang.Override
     public int getTopVarlogCount() {
       return topVarlog_.size();
     }
@@ -26836,6 +27979,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.VmLog top_varlog = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog getTopVarlog(int index) {
       return topVarlog_.get(index);
     }
@@ -26846,6 +27990,7 @@ public final class NodeStatusProto {
      *
      * <code>repeated .cdp.telemetry.VmLog top_varlog = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLogOrBuilder getTopVarlogOrBuilder(
         int index) {
       return topVarlog_.get(index);
@@ -26859,7 +28004,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskIO io = 3;</code>
+     * @return Whether the io field is set.
      */
+    @java.lang.Override
     public boolean hasIo() {
       return io_ != null;
     }
@@ -26869,7 +28016,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskIO io = 3;</code>
+     * @return The io.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO getIo() {
       return io_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO.getDefaultInstance() : io_;
     }
@@ -26880,6 +28029,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.DiskIO io = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIOOrBuilder getIoOrBuilder() {
       return getIo();
     }
@@ -26943,18 +28093,17 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics) obj;
 
-      boolean result = true;
-      result = result && getPartitionsList()
-          .equals(other.getPartitionsList());
-      result = result && getTopVarlogList()
-          .equals(other.getTopVarlogList());
-      result = result && (hasIo() == other.hasIo());
+      if (!getPartitionsList()
+          .equals(other.getPartitionsList())) return false;
+      if (!getTopVarlogList()
+          .equals(other.getTopVarlogList())) return false;
+      if (hasIo() != other.hasIo()) return false;
       if (hasIo()) {
-        result = result && getIo()
-            .equals(other.getIo());
+        if (!getIo()
+            .equals(other.getIo())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -27160,9 +28309,8 @@ public final class NodeStatusProto {
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics buildPartial() {
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics result = new com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskMetrics(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (partitionsBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             partitions_ = java.util.Collections.unmodifiableList(partitions_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -27171,7 +28319,7 @@ public final class NodeStatusProto {
           result.partitions_ = partitionsBuilder_.build();
         }
         if (topVarlogBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000002) != 0)) {
             topVarlog_ = java.util.Collections.unmodifiableList(topVarlog_);
             bitField0_ = (bitField0_ & ~0x00000002);
           }
@@ -27184,42 +28332,41 @@ public final class NodeStatusProto {
         } else {
           result.io_ = ioBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -27321,7 +28468,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition> partitions_ =
         java.util.Collections.emptyList();
       private void ensurePartitionsIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           partitions_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition>(partitions_);
           bitField0_ |= 0x00000001;
          }
@@ -27622,7 +28769,7 @@ public final class NodeStatusProto {
           partitionsBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartitionOrBuilder>(
                   partitions_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           partitions_ = null;
@@ -27633,7 +28780,7 @@ public final class NodeStatusProto {
       private java.util.List<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog> topVarlog_ =
         java.util.Collections.emptyList();
       private void ensureTopVarlogIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000002) != 0)) {
           topVarlog_ = new java.util.ArrayList<com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog>(topVarlog_);
           bitField0_ |= 0x00000002;
          }
@@ -27934,7 +29081,7 @@ public final class NodeStatusProto {
           topVarlogBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLogOrBuilder>(
                   topVarlog_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000002) != 0),
                   getParentForChildren(),
                   isClean());
           topVarlog_ = null;
@@ -27942,7 +29089,7 @@ public final class NodeStatusProto {
         return topVarlogBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO io_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO io_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIOOrBuilder> ioBuilder_;
       /**
@@ -27951,6 +29098,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.DiskIO io = 3;</code>
+       * @return Whether the io field is set.
        */
       public boolean hasIo() {
         return ioBuilder_ != null || io_ != null;
@@ -27961,6 +29109,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.DiskIO io = 3;</code>
+       * @return The io.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO getIo() {
         if (ioBuilder_ == null) {
@@ -28097,7 +29246,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -28157,6 +29306,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string path = 1;</code>
+     * @return The path.
      */
     java.lang.String getPath();
     /**
@@ -28165,6 +29315,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string path = 1;</code>
+     * @return The bytes for path.
      */
     com.google.protobuf.ByteString
         getPathBytes();
@@ -28175,6 +29326,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string size = 2;</code>
+     * @return The size.
      */
     java.lang.String getSize();
     /**
@@ -28183,6 +29335,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string size = 2;</code>
+     * @return The bytes for size.
      */
     com.google.protobuf.ByteString
         getSizeBytes();
@@ -28194,7 +29347,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.VmLog}
    */
-  public  static final class VmLog extends
+  public static final class VmLog extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.VmLog)
       VmLogOrBuilder {
@@ -28206,6 +29359,13 @@ public final class NodeStatusProto {
     private VmLog() {
       path_ = "";
       size_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VmLog();
     }
 
     @java.lang.Override
@@ -28221,7 +29381,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -28245,7 +29404,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -28284,7 +29443,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string path = 1;</code>
+     * @return The path.
      */
+    @java.lang.Override
     public java.lang.String getPath() {
       java.lang.Object ref = path_;
       if (ref instanceof java.lang.String) {
@@ -28303,7 +29464,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string path = 1;</code>
+     * @return The bytes for path.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPathBytes() {
       java.lang.Object ref = path_;
@@ -28326,7 +29489,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string size = 2;</code>
+     * @return The size.
      */
+    @java.lang.Override
     public java.lang.String getSize() {
       java.lang.Object ref = size_;
       if (ref instanceof java.lang.String) {
@@ -28345,7 +29510,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string size = 2;</code>
+     * @return The bytes for size.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSizeBytes() {
       java.lang.Object ref = size_;
@@ -28374,10 +29541,10 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(path_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, path_);
       }
-      if (!getSizeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(size_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, size_);
       }
       unknownFields.writeTo(output);
@@ -28389,10 +29556,10 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getPathBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(path_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, path_);
       }
-      if (!getSizeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(size_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, size_);
       }
       size += unknownFields.getSerializedSize();
@@ -28410,13 +29577,12 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VmLog) obj;
 
-      boolean result = true;
-      result = result && getPath()
-          .equals(other.getPath());
-      result = result && getSize()
-          .equals(other.getSize());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getPath()
+          .equals(other.getPath())) return false;
+      if (!getSize()
+          .equals(other.getSize())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -28605,35 +29771,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -28691,6 +29857,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string path = 1;</code>
+       * @return The path.
        */
       public java.lang.String getPath() {
         java.lang.Object ref = path_;
@@ -28710,6 +29877,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string path = 1;</code>
+       * @return The bytes for path.
        */
       public com.google.protobuf.ByteString
           getPathBytes() {
@@ -28730,6 +29898,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string path = 1;</code>
+       * @param value The path to set.
+       * @return This builder for chaining.
        */
       public Builder setPath(
           java.lang.String value) {
@@ -28747,6 +29917,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string path = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPath() {
         
@@ -28760,6 +29931,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string path = 1;</code>
+       * @param value The bytes for path to set.
+       * @return This builder for chaining.
        */
       public Builder setPathBytes(
           com.google.protobuf.ByteString value) {
@@ -28780,6 +29953,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string size = 2;</code>
+       * @return The size.
        */
       public java.lang.String getSize() {
         java.lang.Object ref = size_;
@@ -28799,6 +29973,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string size = 2;</code>
+       * @return The bytes for size.
        */
       public com.google.protobuf.ByteString
           getSizeBytes() {
@@ -28819,6 +29994,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string size = 2;</code>
+       * @param value The size to set.
+       * @return This builder for chaining.
        */
       public Builder setSize(
           java.lang.String value) {
@@ -28836,6 +30013,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string size = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSize() {
         
@@ -28849,6 +30027,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string size = 2;</code>
+       * @param value The bytes for size to set.
+       * @return This builder for chaining.
        */
       public Builder setSizeBytes(
           com.google.protobuf.ByteString value) {
@@ -28864,7 +30044,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -28924,6 +30104,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskUsage usage = 1;</code>
+     * @return Whether the usage field is set.
      */
     boolean hasUsage();
     /**
@@ -28932,6 +30113,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskUsage usage = 1;</code>
+     * @return The usage.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage getUsage();
     /**
@@ -28949,6 +30131,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string device = 2;</code>
+     * @return The device.
      */
     java.lang.String getDevice();
     /**
@@ -28957,6 +30140,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string device = 2;</code>
+     * @return The bytes for device.
      */
     com.google.protobuf.ByteString
         getDeviceBytes();
@@ -28967,6 +30151,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string fstype = 3;</code>
+     * @return The fstype.
      */
     java.lang.String getFstype();
     /**
@@ -28975,6 +30160,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string fstype = 3;</code>
+     * @return The bytes for fstype.
      */
     com.google.protobuf.ByteString
         getFstypeBytes();
@@ -28985,6 +30171,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 maxfile = 4;</code>
+     * @return The maxfile.
      */
     int getMaxfile();
 
@@ -28994,6 +30181,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 maxpath = 5;</code>
+     * @return The maxpath.
      */
     int getMaxpath();
 
@@ -29003,6 +30191,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string mountpoint = 6;</code>
+     * @return The mountpoint.
      */
     java.lang.String getMountpoint();
     /**
@@ -29011,6 +30200,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string mountpoint = 6;</code>
+     * @return The bytes for mountpoint.
      */
     com.google.protobuf.ByteString
         getMountpointBytes();
@@ -29021,6 +30211,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string opts = 7;</code>
+     * @return The opts.
      */
     java.lang.String getOpts();
     /**
@@ -29029,6 +30220,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string opts = 7;</code>
+     * @return The bytes for opts.
      */
     com.google.protobuf.ByteString
         getOptsBytes();
@@ -29040,7 +30232,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.DiskPartition}
    */
-  public  static final class DiskPartition extends
+  public static final class DiskPartition extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.DiskPartition)
       DiskPartitionOrBuilder {
@@ -29052,10 +30244,15 @@ public final class NodeStatusProto {
     private DiskPartition() {
       device_ = "";
       fstype_ = "";
-      maxfile_ = 0;
-      maxpath_ = 0;
       mountpoint_ = "";
       opts_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DiskPartition();
     }
 
     @java.lang.Override
@@ -29071,7 +30268,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -29130,7 +30326,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -29169,7 +30365,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskUsage usage = 1;</code>
+     * @return Whether the usage field is set.
      */
+    @java.lang.Override
     public boolean hasUsage() {
       return usage_ != null;
     }
@@ -29179,7 +30377,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.DiskUsage usage = 1;</code>
+     * @return The usage.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage getUsage() {
       return usage_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage.getDefaultInstance() : usage_;
     }
@@ -29190,6 +30390,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.DiskUsage usage = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsageOrBuilder getUsageOrBuilder() {
       return getUsage();
     }
@@ -29202,7 +30403,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string device = 2;</code>
+     * @return The device.
      */
+    @java.lang.Override
     public java.lang.String getDevice() {
       java.lang.Object ref = device_;
       if (ref instanceof java.lang.String) {
@@ -29221,7 +30424,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string device = 2;</code>
+     * @return The bytes for device.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDeviceBytes() {
       java.lang.Object ref = device_;
@@ -29244,7 +30449,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string fstype = 3;</code>
+     * @return The fstype.
      */
+    @java.lang.Override
     public java.lang.String getFstype() {
       java.lang.Object ref = fstype_;
       if (ref instanceof java.lang.String) {
@@ -29263,7 +30470,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string fstype = 3;</code>
+     * @return The bytes for fstype.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFstypeBytes() {
       java.lang.Object ref = fstype_;
@@ -29286,7 +30495,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 maxfile = 4;</code>
+     * @return The maxfile.
      */
+    @java.lang.Override
     public int getMaxfile() {
       return maxfile_;
     }
@@ -29299,7 +30510,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 maxpath = 5;</code>
+     * @return The maxpath.
      */
+    @java.lang.Override
     public int getMaxpath() {
       return maxpath_;
     }
@@ -29312,7 +30525,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string mountpoint = 6;</code>
+     * @return The mountpoint.
      */
+    @java.lang.Override
     public java.lang.String getMountpoint() {
       java.lang.Object ref = mountpoint_;
       if (ref instanceof java.lang.String) {
@@ -29331,7 +30546,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string mountpoint = 6;</code>
+     * @return The bytes for mountpoint.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getMountpointBytes() {
       java.lang.Object ref = mountpoint_;
@@ -29354,7 +30571,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string opts = 7;</code>
+     * @return The opts.
      */
+    @java.lang.Override
     public java.lang.String getOpts() {
       java.lang.Object ref = opts_;
       if (ref instanceof java.lang.String) {
@@ -29373,7 +30592,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string opts = 7;</code>
+     * @return The bytes for opts.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getOptsBytes() {
       java.lang.Object ref = opts_;
@@ -29405,10 +30626,10 @@ public final class NodeStatusProto {
       if (usage_ != null) {
         output.writeMessage(1, getUsage());
       }
-      if (!getDeviceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(device_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, device_);
       }
-      if (!getFstypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fstype_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, fstype_);
       }
       if (maxfile_ != 0) {
@@ -29417,10 +30638,10 @@ public final class NodeStatusProto {
       if (maxpath_ != 0) {
         output.writeInt32(5, maxpath_);
       }
-      if (!getMountpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(mountpoint_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, mountpoint_);
       }
-      if (!getOptsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(opts_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, opts_);
       }
       unknownFields.writeTo(output);
@@ -29436,10 +30657,10 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, getUsage());
       }
-      if (!getDeviceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(device_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, device_);
       }
-      if (!getFstypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(fstype_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, fstype_);
       }
       if (maxfile_ != 0) {
@@ -29450,10 +30671,10 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(5, maxpath_);
       }
-      if (!getMountpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(mountpoint_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, mountpoint_);
       }
-      if (!getOptsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(opts_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, opts_);
       }
       size += unknownFields.getSerializedSize();
@@ -29471,26 +30692,25 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskPartition) obj;
 
-      boolean result = true;
-      result = result && (hasUsage() == other.hasUsage());
+      if (hasUsage() != other.hasUsage()) return false;
       if (hasUsage()) {
-        result = result && getUsage()
-            .equals(other.getUsage());
+        if (!getUsage()
+            .equals(other.getUsage())) return false;
       }
-      result = result && getDevice()
-          .equals(other.getDevice());
-      result = result && getFstype()
-          .equals(other.getFstype());
-      result = result && (getMaxfile()
-          == other.getMaxfile());
-      result = result && (getMaxpath()
-          == other.getMaxpath());
-      result = result && getMountpoint()
-          .equals(other.getMountpoint());
-      result = result && getOpts()
-          .equals(other.getOpts());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDevice()
+          .equals(other.getDevice())) return false;
+      if (!getFstype()
+          .equals(other.getFstype())) return false;
+      if (getMaxfile()
+          != other.getMaxfile()) return false;
+      if (getMaxpath()
+          != other.getMaxpath()) return false;
+      if (!getMountpoint()
+          .equals(other.getMountpoint())) return false;
+      if (!getOpts()
+          .equals(other.getOpts())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -29714,35 +30934,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -29810,7 +31030,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage usage_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage usage_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsageOrBuilder> usageBuilder_;
       /**
@@ -29819,6 +31039,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.DiskUsage usage = 1;</code>
+       * @return Whether the usage field is set.
        */
       public boolean hasUsage() {
         return usageBuilder_ != null || usage_ != null;
@@ -29829,6 +31050,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.DiskUsage usage = 1;</code>
+       * @return The usage.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage getUsage() {
         if (usageBuilder_ == null) {
@@ -29970,6 +31192,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string device = 2;</code>
+       * @return The device.
        */
       public java.lang.String getDevice() {
         java.lang.Object ref = device_;
@@ -29989,6 +31212,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string device = 2;</code>
+       * @return The bytes for device.
        */
       public com.google.protobuf.ByteString
           getDeviceBytes() {
@@ -30009,6 +31233,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string device = 2;</code>
+       * @param value The device to set.
+       * @return This builder for chaining.
        */
       public Builder setDevice(
           java.lang.String value) {
@@ -30026,6 +31252,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string device = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDevice() {
         
@@ -30039,6 +31266,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string device = 2;</code>
+       * @param value The bytes for device to set.
+       * @return This builder for chaining.
        */
       public Builder setDeviceBytes(
           com.google.protobuf.ByteString value) {
@@ -30059,6 +31288,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string fstype = 3;</code>
+       * @return The fstype.
        */
       public java.lang.String getFstype() {
         java.lang.Object ref = fstype_;
@@ -30078,6 +31308,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string fstype = 3;</code>
+       * @return The bytes for fstype.
        */
       public com.google.protobuf.ByteString
           getFstypeBytes() {
@@ -30098,6 +31329,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string fstype = 3;</code>
+       * @param value The fstype to set.
+       * @return This builder for chaining.
        */
       public Builder setFstype(
           java.lang.String value) {
@@ -30115,6 +31348,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string fstype = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFstype() {
         
@@ -30128,6 +31362,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string fstype = 3;</code>
+       * @param value The bytes for fstype to set.
+       * @return This builder for chaining.
        */
       public Builder setFstypeBytes(
           com.google.protobuf.ByteString value) {
@@ -30148,7 +31384,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 maxfile = 4;</code>
+       * @return The maxfile.
        */
+      @java.lang.Override
       public int getMaxfile() {
         return maxfile_;
       }
@@ -30158,6 +31396,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 maxfile = 4;</code>
+       * @param value The maxfile to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxfile(int value) {
         
@@ -30171,6 +31411,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 maxfile = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxfile() {
         
@@ -30186,7 +31427,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 maxpath = 5;</code>
+       * @return The maxpath.
        */
+      @java.lang.Override
       public int getMaxpath() {
         return maxpath_;
       }
@@ -30196,6 +31439,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 maxpath = 5;</code>
+       * @param value The maxpath to set.
+       * @return This builder for chaining.
        */
       public Builder setMaxpath(int value) {
         
@@ -30209,6 +31454,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 maxpath = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMaxpath() {
         
@@ -30224,6 +31470,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string mountpoint = 6;</code>
+       * @return The mountpoint.
        */
       public java.lang.String getMountpoint() {
         java.lang.Object ref = mountpoint_;
@@ -30243,6 +31490,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string mountpoint = 6;</code>
+       * @return The bytes for mountpoint.
        */
       public com.google.protobuf.ByteString
           getMountpointBytes() {
@@ -30263,6 +31511,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string mountpoint = 6;</code>
+       * @param value The mountpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setMountpoint(
           java.lang.String value) {
@@ -30280,6 +31530,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string mountpoint = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMountpoint() {
         
@@ -30293,6 +31544,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string mountpoint = 6;</code>
+       * @param value The bytes for mountpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setMountpointBytes(
           com.google.protobuf.ByteString value) {
@@ -30313,6 +31566,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string opts = 7;</code>
+       * @return The opts.
        */
       public java.lang.String getOpts() {
         java.lang.Object ref = opts_;
@@ -30332,6 +31586,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string opts = 7;</code>
+       * @return The bytes for opts.
        */
       public com.google.protobuf.ByteString
           getOptsBytes() {
@@ -30352,6 +31607,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string opts = 7;</code>
+       * @param value The opts to set.
+       * @return This builder for chaining.
        */
       public Builder setOpts(
           java.lang.String value) {
@@ -30369,6 +31626,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string opts = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearOpts() {
         
@@ -30382,6 +31640,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string opts = 7;</code>
+       * @param value The bytes for opts to set.
+       * @return This builder for chaining.
        */
       public Builder setOptsBytes(
           com.google.protobuf.ByteString value) {
@@ -30397,7 +31657,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -30457,6 +31717,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 free = 1;</code>
+     * @return The free.
      */
     long getFree();
 
@@ -30466,6 +31727,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 total = 2;</code>
+     * @return The total.
      */
     long getTotal();
 
@@ -30475,6 +31737,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 used = 3;</code>
+     * @return The used.
      */
     long getUsed();
 
@@ -30484,6 +31747,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double percent = 4;</code>
+     * @return The percent.
      */
     double getPercent();
   }
@@ -30494,7 +31758,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.DiskUsage}
    */
-  public  static final class DiskUsage extends
+  public static final class DiskUsage extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.DiskUsage)
       DiskUsageOrBuilder {
@@ -30504,10 +31768,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private DiskUsage() {
-      free_ = 0L;
-      total_ = 0L;
-      used_ = 0L;
-      percent_ = 0D;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DiskUsage();
     }
 
     @java.lang.Override
@@ -30523,7 +31790,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -30555,7 +31821,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -30594,7 +31860,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 free = 1;</code>
+     * @return The free.
      */
+    @java.lang.Override
     public long getFree() {
       return free_;
     }
@@ -30607,7 +31875,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 total = 2;</code>
+     * @return The total.
      */
+    @java.lang.Override
     public long getTotal() {
       return total_;
     }
@@ -30620,7 +31890,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 used = 3;</code>
+     * @return The used.
      */
+    @java.lang.Override
     public long getUsed() {
       return used_;
     }
@@ -30633,7 +31905,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double percent = 4;</code>
+     * @return The percent.
      */
+    @java.lang.Override
     public double getPercent() {
       return percent_;
     }
@@ -30661,7 +31935,7 @@ public final class NodeStatusProto {
       if (used_ != 0L) {
         output.writeInt64(3, used_);
       }
-      if (percent_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(percent_) != 0) {
         output.writeDouble(4, percent_);
       }
       unknownFields.writeTo(output);
@@ -30685,7 +31959,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, used_);
       }
-      if (percent_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(percent_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, percent_);
       }
@@ -30704,19 +31978,17 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskUsage) obj;
 
-      boolean result = true;
-      result = result && (getFree()
-          == other.getFree());
-      result = result && (getTotal()
-          == other.getTotal());
-      result = result && (getUsed()
-          == other.getUsed());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getPercent())
-          == java.lang.Double.doubleToLongBits(
-              other.getPercent()));
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getFree()
+          != other.getFree()) return false;
+      if (getTotal()
+          != other.getTotal()) return false;
+      if (getUsed()
+          != other.getUsed()) return false;
+      if (java.lang.Double.doubleToLongBits(getPercent())
+          != java.lang.Double.doubleToLongBits(
+              other.getPercent())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -30919,35 +32191,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -31009,7 +32281,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 1;</code>
+       * @return The free.
        */
+      @java.lang.Override
       public long getFree() {
         return free_;
       }
@@ -31019,6 +32293,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 1;</code>
+       * @param value The free to set.
+       * @return This builder for chaining.
        */
       public Builder setFree(long value) {
         
@@ -31032,6 +32308,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFree() {
         
@@ -31047,7 +32324,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 2;</code>
+       * @return The total.
        */
+      @java.lang.Override
       public long getTotal() {
         return total_;
       }
@@ -31057,6 +32336,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 2;</code>
+       * @param value The total to set.
+       * @return This builder for chaining.
        */
       public Builder setTotal(long value) {
         
@@ -31070,6 +32351,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTotal() {
         
@@ -31085,7 +32367,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 3;</code>
+       * @return The used.
        */
+      @java.lang.Override
       public long getUsed() {
         return used_;
       }
@@ -31095,6 +32379,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 3;</code>
+       * @param value The used to set.
+       * @return This builder for chaining.
        */
       public Builder setUsed(long value) {
         
@@ -31108,6 +32394,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUsed() {
         
@@ -31123,7 +32410,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 4;</code>
+       * @return The percent.
        */
+      @java.lang.Override
       public double getPercent() {
         return percent_;
       }
@@ -31133,6 +32422,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 4;</code>
+       * @param value The percent to set.
+       * @return This builder for chaining.
        */
       public Builder setPercent(double value) {
         
@@ -31146,6 +32437,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPercent() {
         
@@ -31156,7 +32448,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -31216,6 +32508,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 read_bytes = 1;</code>
+     * @return The readBytes.
      */
     long getReadBytes();
 
@@ -31225,6 +32518,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 read_count = 2;</code>
+     * @return The readCount.
      */
     long getReadCount();
 
@@ -31234,6 +32528,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 read_time = 3;</code>
+     * @return The readTime.
      */
     long getReadTime();
 
@@ -31243,6 +32538,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 write_bytes = 4;</code>
+     * @return The writeBytes.
      */
     long getWriteBytes();
 
@@ -31252,6 +32548,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 write_count = 5;</code>
+     * @return The writeCount.
      */
     long getWriteCount();
 
@@ -31261,6 +32558,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 write_time = 6;</code>
+     * @return The writeTime.
      */
     long getWriteTime();
   }
@@ -31271,7 +32569,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.DiskIO}
    */
-  public  static final class DiskIO extends
+  public static final class DiskIO extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.DiskIO)
       DiskIOOrBuilder {
@@ -31281,12 +32579,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private DiskIO() {
-      readBytes_ = 0L;
-      readCount_ = 0L;
-      readTime_ = 0L;
-      writeBytes_ = 0L;
-      writeCount_ = 0L;
-      writeTime_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DiskIO();
     }
 
     @java.lang.Override
@@ -31302,7 +32601,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -31344,7 +32642,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -31383,7 +32681,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 read_bytes = 1;</code>
+     * @return The readBytes.
      */
+    @java.lang.Override
     public long getReadBytes() {
       return readBytes_;
     }
@@ -31396,7 +32696,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 read_count = 2;</code>
+     * @return The readCount.
      */
+    @java.lang.Override
     public long getReadCount() {
       return readCount_;
     }
@@ -31409,7 +32711,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 read_time = 3;</code>
+     * @return The readTime.
      */
+    @java.lang.Override
     public long getReadTime() {
       return readTime_;
     }
@@ -31422,7 +32726,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 write_bytes = 4;</code>
+     * @return The writeBytes.
      */
+    @java.lang.Override
     public long getWriteBytes() {
       return writeBytes_;
     }
@@ -31435,7 +32741,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 write_count = 5;</code>
+     * @return The writeCount.
      */
+    @java.lang.Override
     public long getWriteCount() {
       return writeCount_;
     }
@@ -31448,7 +32756,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 write_time = 6;</code>
+     * @return The writeTime.
      */
+    @java.lang.Override
     public long getWriteTime() {
       return writeTime_;
     }
@@ -31533,21 +32843,20 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.DiskIO) obj;
 
-      boolean result = true;
-      result = result && (getReadBytes()
-          == other.getReadBytes());
-      result = result && (getReadCount()
-          == other.getReadCount());
-      result = result && (getReadTime()
-          == other.getReadTime());
-      result = result && (getWriteBytes()
-          == other.getWriteBytes());
-      result = result && (getWriteCount()
-          == other.getWriteCount());
-      result = result && (getWriteTime()
-          == other.getWriteTime());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getReadBytes()
+          != other.getReadBytes()) return false;
+      if (getReadCount()
+          != other.getReadCount()) return false;
+      if (getReadTime()
+          != other.getReadTime()) return false;
+      if (getWriteBytes()
+          != other.getWriteBytes()) return false;
+      if (getWriteCount()
+          != other.getWriteCount()) return false;
+      if (getWriteTime()
+          != other.getWriteTime()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -31762,35 +33071,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -31858,7 +33167,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_bytes = 1;</code>
+       * @return The readBytes.
        */
+      @java.lang.Override
       public long getReadBytes() {
         return readBytes_;
       }
@@ -31868,6 +33179,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_bytes = 1;</code>
+       * @param value The readBytes to set.
+       * @return This builder for chaining.
        */
       public Builder setReadBytes(long value) {
         
@@ -31881,6 +33194,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_bytes = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearReadBytes() {
         
@@ -31896,7 +33210,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_count = 2;</code>
+       * @return The readCount.
        */
+      @java.lang.Override
       public long getReadCount() {
         return readCount_;
       }
@@ -31906,6 +33222,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_count = 2;</code>
+       * @param value The readCount to set.
+       * @return This builder for chaining.
        */
       public Builder setReadCount(long value) {
         
@@ -31919,6 +33237,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_count = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearReadCount() {
         
@@ -31934,7 +33253,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_time = 3;</code>
+       * @return The readTime.
        */
+      @java.lang.Override
       public long getReadTime() {
         return readTime_;
       }
@@ -31944,6 +33265,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_time = 3;</code>
+       * @param value The readTime to set.
+       * @return This builder for chaining.
        */
       public Builder setReadTime(long value) {
         
@@ -31957,6 +33280,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 read_time = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearReadTime() {
         
@@ -31972,7 +33296,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_bytes = 4;</code>
+       * @return The writeBytes.
        */
+      @java.lang.Override
       public long getWriteBytes() {
         return writeBytes_;
       }
@@ -31982,6 +33308,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_bytes = 4;</code>
+       * @param value The writeBytes to set.
+       * @return This builder for chaining.
        */
       public Builder setWriteBytes(long value) {
         
@@ -31995,6 +33323,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_bytes = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWriteBytes() {
         
@@ -32010,7 +33339,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_count = 5;</code>
+       * @return The writeCount.
        */
+      @java.lang.Override
       public long getWriteCount() {
         return writeCount_;
       }
@@ -32020,6 +33351,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_count = 5;</code>
+       * @param value The writeCount to set.
+       * @return This builder for chaining.
        */
       public Builder setWriteCount(long value) {
         
@@ -32033,6 +33366,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_count = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWriteCount() {
         
@@ -32048,7 +33382,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_time = 6;</code>
+       * @return The writeTime.
        */
+      @java.lang.Override
       public long getWriteTime() {
         return writeTime_;
       }
@@ -32058,6 +33394,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_time = 6;</code>
+       * @param value The writeTime to set.
+       * @return This builder for chaining.
        */
       public Builder setWriteTime(long value) {
         
@@ -32071,6 +33409,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 write_time = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWriteTime() {
         
@@ -32081,7 +33420,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -32141,6 +33480,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkConnections connections = 1;</code>
+     * @return Whether the connections field is set.
      */
     boolean hasConnections();
     /**
@@ -32149,6 +33489,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkConnections connections = 1;</code>
+     * @return The connections.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections getConnections();
     /**
@@ -32166,6 +33507,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkIO io = 2;</code>
+     * @return Whether the io field is set.
      */
     boolean hasIo();
     /**
@@ -32174,6 +33516,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkIO io = 2;</code>
+     * @return The io.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO getIo();
     /**
@@ -32192,7 +33535,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.NetworkMetrics}
    */
-  public  static final class NetworkMetrics extends
+  public static final class NetworkMetrics extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.NetworkMetrics)
       NetworkMetricsOrBuilder {
@@ -32202,6 +33545,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private NetworkMetrics() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NetworkMetrics();
     }
 
     @java.lang.Override
@@ -32217,7 +33567,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -32255,7 +33604,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -32294,7 +33643,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkConnections connections = 1;</code>
+     * @return Whether the connections field is set.
      */
+    @java.lang.Override
     public boolean hasConnections() {
       return connections_ != null;
     }
@@ -32304,7 +33655,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkConnections connections = 1;</code>
+     * @return The connections.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections getConnections() {
       return connections_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections.getDefaultInstance() : connections_;
     }
@@ -32315,6 +33668,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.NetworkConnections connections = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnectionsOrBuilder getConnectionsOrBuilder() {
       return getConnections();
     }
@@ -32327,7 +33681,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkIO io = 2;</code>
+     * @return Whether the io field is set.
      */
+    @java.lang.Override
     public boolean hasIo() {
       return io_ != null;
     }
@@ -32337,7 +33693,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.NetworkIO io = 2;</code>
+     * @return The io.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO getIo() {
       return io_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO.getDefaultInstance() : io_;
     }
@@ -32348,6 +33706,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.NetworkIO io = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIOOrBuilder getIoOrBuilder() {
       return getIo();
     }
@@ -32404,19 +33763,18 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkMetrics) obj;
 
-      boolean result = true;
-      result = result && (hasConnections() == other.hasConnections());
+      if (hasConnections() != other.hasConnections()) return false;
       if (hasConnections()) {
-        result = result && getConnections()
-            .equals(other.getConnections());
+        if (!getConnections()
+            .equals(other.getConnections())) return false;
       }
-      result = result && (hasIo() == other.hasIo());
+      if (hasIo() != other.hasIo()) return false;
       if (hasIo()) {
-        result = result && getIo()
-            .equals(other.getIo());
+        if (!getIo()
+            .equals(other.getIo())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -32625,35 +33983,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -32702,7 +34060,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections connections_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections connections_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnectionsOrBuilder> connectionsBuilder_;
       /**
@@ -32711,6 +34069,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkConnections connections = 1;</code>
+       * @return Whether the connections field is set.
        */
       public boolean hasConnections() {
         return connectionsBuilder_ != null || connections_ != null;
@@ -32721,6 +34080,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkConnections connections = 1;</code>
+       * @return The connections.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections getConnections() {
         if (connectionsBuilder_ == null) {
@@ -32855,7 +34215,7 @@ public final class NodeStatusProto {
         return connectionsBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO io_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO io_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIOOrBuilder> ioBuilder_;
       /**
@@ -32864,6 +34224,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkIO io = 2;</code>
+       * @return Whether the io field is set.
        */
       public boolean hasIo() {
         return ioBuilder_ != null || io_ != null;
@@ -32874,6 +34235,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.NetworkIO io = 2;</code>
+       * @return The io.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO getIo() {
         if (ioBuilder_ == null) {
@@ -33010,7 +34372,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -33070,6 +34432,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 bytes_recv = 1;</code>
+     * @return The bytesRecv.
      */
     long getBytesRecv();
 
@@ -33079,6 +34442,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 bytes_sent = 2;</code>
+     * @return The bytesSent.
      */
     long getBytesSent();
 
@@ -33088,6 +34452,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 dropin = 3;</code>
+     * @return The dropin.
      */
     long getDropin();
 
@@ -33097,6 +34462,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 dropout = 4;</code>
+     * @return The dropout.
      */
     long getDropout();
 
@@ -33106,6 +34472,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 errin = 5;</code>
+     * @return The errin.
      */
     long getErrin();
 
@@ -33115,6 +34482,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 errout = 6;</code>
+     * @return The errout.
      */
     long getErrout();
 
@@ -33124,6 +34492,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 packets_recv = 7;</code>
+     * @return The packetsRecv.
      */
     long getPacketsRecv();
 
@@ -33133,6 +34502,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 packets_sent = 8;</code>
+     * @return The packetsSent.
      */
     long getPacketsSent();
   }
@@ -33143,7 +34513,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.NetworkIO}
    */
-  public  static final class NetworkIO extends
+  public static final class NetworkIO extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.NetworkIO)
       NetworkIOOrBuilder {
@@ -33153,14 +34523,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private NetworkIO() {
-      bytesRecv_ = 0L;
-      bytesSent_ = 0L;
-      dropin_ = 0L;
-      dropout_ = 0L;
-      errin_ = 0L;
-      errout_ = 0L;
-      packetsRecv_ = 0L;
-      packetsSent_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NetworkIO();
     }
 
     @java.lang.Override
@@ -33176,7 +34545,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -33228,7 +34596,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -33267,7 +34635,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 bytes_recv = 1;</code>
+     * @return The bytesRecv.
      */
+    @java.lang.Override
     public long getBytesRecv() {
       return bytesRecv_;
     }
@@ -33280,7 +34650,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 bytes_sent = 2;</code>
+     * @return The bytesSent.
      */
+    @java.lang.Override
     public long getBytesSent() {
       return bytesSent_;
     }
@@ -33293,7 +34665,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 dropin = 3;</code>
+     * @return The dropin.
      */
+    @java.lang.Override
     public long getDropin() {
       return dropin_;
     }
@@ -33306,7 +34680,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 dropout = 4;</code>
+     * @return The dropout.
      */
+    @java.lang.Override
     public long getDropout() {
       return dropout_;
     }
@@ -33319,7 +34695,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 errin = 5;</code>
+     * @return The errin.
      */
+    @java.lang.Override
     public long getErrin() {
       return errin_;
     }
@@ -33332,7 +34710,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 errout = 6;</code>
+     * @return The errout.
      */
+    @java.lang.Override
     public long getErrout() {
       return errout_;
     }
@@ -33345,7 +34725,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 packets_recv = 7;</code>
+     * @return The packetsRecv.
      */
+    @java.lang.Override
     public long getPacketsRecv() {
       return packetsRecv_;
     }
@@ -33358,7 +34740,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 packets_sent = 8;</code>
+     * @return The packetsSent.
      */
+    @java.lang.Override
     public long getPacketsSent() {
       return packetsSent_;
     }
@@ -33457,25 +34841,24 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkIO) obj;
 
-      boolean result = true;
-      result = result && (getBytesRecv()
-          == other.getBytesRecv());
-      result = result && (getBytesSent()
-          == other.getBytesSent());
-      result = result && (getDropin()
-          == other.getDropin());
-      result = result && (getDropout()
-          == other.getDropout());
-      result = result && (getErrin()
-          == other.getErrin());
-      result = result && (getErrout()
-          == other.getErrout());
-      result = result && (getPacketsRecv()
-          == other.getPacketsRecv());
-      result = result && (getPacketsSent()
-          == other.getPacketsSent());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getBytesRecv()
+          != other.getBytesRecv()) return false;
+      if (getBytesSent()
+          != other.getBytesSent()) return false;
+      if (getDropin()
+          != other.getDropin()) return false;
+      if (getDropout()
+          != other.getDropout()) return false;
+      if (getErrin()
+          != other.getErrin()) return false;
+      if (getErrout()
+          != other.getErrout()) return false;
+      if (getPacketsRecv()
+          != other.getPacketsRecv()) return false;
+      if (getPacketsSent()
+          != other.getPacketsSent()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -33702,35 +35085,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -33804,7 +35187,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 bytes_recv = 1;</code>
+       * @return The bytesRecv.
        */
+      @java.lang.Override
       public long getBytesRecv() {
         return bytesRecv_;
       }
@@ -33814,6 +35199,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 bytes_recv = 1;</code>
+       * @param value The bytesRecv to set.
+       * @return This builder for chaining.
        */
       public Builder setBytesRecv(long value) {
         
@@ -33827,6 +35214,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 bytes_recv = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBytesRecv() {
         
@@ -33842,7 +35230,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 bytes_sent = 2;</code>
+       * @return The bytesSent.
        */
+      @java.lang.Override
       public long getBytesSent() {
         return bytesSent_;
       }
@@ -33852,6 +35242,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 bytes_sent = 2;</code>
+       * @param value The bytesSent to set.
+       * @return This builder for chaining.
        */
       public Builder setBytesSent(long value) {
         
@@ -33865,6 +35257,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 bytes_sent = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBytesSent() {
         
@@ -33880,7 +35273,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 dropin = 3;</code>
+       * @return The dropin.
        */
+      @java.lang.Override
       public long getDropin() {
         return dropin_;
       }
@@ -33890,6 +35285,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 dropin = 3;</code>
+       * @param value The dropin to set.
+       * @return This builder for chaining.
        */
       public Builder setDropin(long value) {
         
@@ -33903,6 +35300,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 dropin = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDropin() {
         
@@ -33918,7 +35316,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 dropout = 4;</code>
+       * @return The dropout.
        */
+      @java.lang.Override
       public long getDropout() {
         return dropout_;
       }
@@ -33928,6 +35328,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 dropout = 4;</code>
+       * @param value The dropout to set.
+       * @return This builder for chaining.
        */
       public Builder setDropout(long value) {
         
@@ -33941,6 +35343,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 dropout = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDropout() {
         
@@ -33956,7 +35359,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 errin = 5;</code>
+       * @return The errin.
        */
+      @java.lang.Override
       public long getErrin() {
         return errin_;
       }
@@ -33966,6 +35371,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 errin = 5;</code>
+       * @param value The errin to set.
+       * @return This builder for chaining.
        */
       public Builder setErrin(long value) {
         
@@ -33979,6 +35386,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 errin = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrin() {
         
@@ -33994,7 +35402,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 errout = 6;</code>
+       * @return The errout.
        */
+      @java.lang.Override
       public long getErrout() {
         return errout_;
       }
@@ -34004,6 +35414,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 errout = 6;</code>
+       * @param value The errout to set.
+       * @return This builder for chaining.
        */
       public Builder setErrout(long value) {
         
@@ -34017,6 +35429,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 errout = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrout() {
         
@@ -34032,7 +35445,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 packets_recv = 7;</code>
+       * @return The packetsRecv.
        */
+      @java.lang.Override
       public long getPacketsRecv() {
         return packetsRecv_;
       }
@@ -34042,6 +35457,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 packets_recv = 7;</code>
+       * @param value The packetsRecv to set.
+       * @return This builder for chaining.
        */
       public Builder setPacketsRecv(long value) {
         
@@ -34055,6 +35472,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 packets_recv = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPacketsRecv() {
         
@@ -34070,7 +35488,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 packets_sent = 8;</code>
+       * @return The packetsSent.
        */
+      @java.lang.Override
       public long getPacketsSent() {
         return packetsSent_;
       }
@@ -34080,6 +35500,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 packets_sent = 8;</code>
+       * @param value The packetsSent to set.
+       * @return This builder for chaining.
        */
       public Builder setPacketsSent(long value) {
         
@@ -34093,6 +35515,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 packets_sent = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPacketsSent() {
         
@@ -34103,7 +35526,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -34163,6 +35586,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 LISTEN = 1;</code>
+     * @return The lISTEN.
      */
     int getLISTEN();
 
@@ -34172,6 +35596,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 ESTABLISHED = 2;</code>
+     * @return The eSTABLISHED.
      */
     int getESTABLISHED();
 
@@ -34181,6 +35606,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 TIME_WAIT = 3;</code>
+     * @return The tIMEWAIT.
      */
     int getTIMEWAIT();
 
@@ -34190,6 +35616,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 CLOSE_WAIT = 4;</code>
+     * @return The cLOSEWAIT.
      */
     int getCLOSEWAIT();
 
@@ -34199,6 +35626,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 CLOSED = 5;</code>
+     * @return The cLOSED.
      */
     int getCLOSED();
 
@@ -34208,6 +35636,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 SYN_SEND = 6;</code>
+     * @return The sYNSEND.
      */
     int getSYNSEND();
 
@@ -34217,6 +35646,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 SYN_RECEIVED = 7;</code>
+     * @return The sYNRECEIVED.
      */
     int getSYNRECEIVED();
 
@@ -34226,6 +35656,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 FIN_WAIT_1 = 8;</code>
+     * @return The fINWAIT1.
      */
     int getFINWAIT1();
 
@@ -34235,6 +35666,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 FIN_WAIT_2 = 9;</code>
+     * @return The fINWAIT2.
      */
     int getFINWAIT2();
 
@@ -34244,6 +35676,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 LAST_ACK = 10;</code>
+     * @return The lASTACK.
      */
     int getLASTACK();
   }
@@ -34254,7 +35687,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.NetworkConnections}
    */
-  public  static final class NetworkConnections extends
+  public static final class NetworkConnections extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.NetworkConnections)
       NetworkConnectionsOrBuilder {
@@ -34264,16 +35697,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private NetworkConnections() {
-      lISTEN_ = 0;
-      eSTABLISHED_ = 0;
-      tIMEWAIT_ = 0;
-      cLOSEWAIT_ = 0;
-      cLOSED_ = 0;
-      sYNSEND_ = 0;
-      sYNRECEIVED_ = 0;
-      fINWAIT1_ = 0;
-      fINWAIT2_ = 0;
-      lASTACK_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new NetworkConnections();
     }
 
     @java.lang.Override
@@ -34289,7 +35719,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -34351,7 +35780,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -34390,7 +35819,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 LISTEN = 1;</code>
+     * @return The lISTEN.
      */
+    @java.lang.Override
     public int getLISTEN() {
       return lISTEN_;
     }
@@ -34403,7 +35834,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 ESTABLISHED = 2;</code>
+     * @return The eSTABLISHED.
      */
+    @java.lang.Override
     public int getESTABLISHED() {
       return eSTABLISHED_;
     }
@@ -34416,7 +35849,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 TIME_WAIT = 3;</code>
+     * @return The tIMEWAIT.
      */
+    @java.lang.Override
     public int getTIMEWAIT() {
       return tIMEWAIT_;
     }
@@ -34429,7 +35864,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 CLOSE_WAIT = 4;</code>
+     * @return The cLOSEWAIT.
      */
+    @java.lang.Override
     public int getCLOSEWAIT() {
       return cLOSEWAIT_;
     }
@@ -34442,7 +35879,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 CLOSED = 5;</code>
+     * @return The cLOSED.
      */
+    @java.lang.Override
     public int getCLOSED() {
       return cLOSED_;
     }
@@ -34455,7 +35894,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 SYN_SEND = 6;</code>
+     * @return The sYNSEND.
      */
+    @java.lang.Override
     public int getSYNSEND() {
       return sYNSEND_;
     }
@@ -34468,7 +35909,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 SYN_RECEIVED = 7;</code>
+     * @return The sYNRECEIVED.
      */
+    @java.lang.Override
     public int getSYNRECEIVED() {
       return sYNRECEIVED_;
     }
@@ -34481,7 +35924,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 FIN_WAIT_1 = 8;</code>
+     * @return The fINWAIT1.
      */
+    @java.lang.Override
     public int getFINWAIT1() {
       return fINWAIT1_;
     }
@@ -34494,7 +35939,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 FIN_WAIT_2 = 9;</code>
+     * @return The fINWAIT2.
      */
+    @java.lang.Override
     public int getFINWAIT2() {
       return fINWAIT2_;
     }
@@ -34507,7 +35954,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int32 LAST_ACK = 10;</code>
+     * @return The lASTACK.
      */
+    @java.lang.Override
     public int getLASTACK() {
       return lASTACK_;
     }
@@ -34620,29 +36069,28 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.NetworkConnections) obj;
 
-      boolean result = true;
-      result = result && (getLISTEN()
-          == other.getLISTEN());
-      result = result && (getESTABLISHED()
-          == other.getESTABLISHED());
-      result = result && (getTIMEWAIT()
-          == other.getTIMEWAIT());
-      result = result && (getCLOSEWAIT()
-          == other.getCLOSEWAIT());
-      result = result && (getCLOSED()
-          == other.getCLOSED());
-      result = result && (getSYNSEND()
-          == other.getSYNSEND());
-      result = result && (getSYNRECEIVED()
-          == other.getSYNRECEIVED());
-      result = result && (getFINWAIT1()
-          == other.getFINWAIT1());
-      result = result && (getFINWAIT2()
-          == other.getFINWAIT2());
-      result = result && (getLASTACK()
-          == other.getLASTACK());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getLISTEN()
+          != other.getLISTEN()) return false;
+      if (getESTABLISHED()
+          != other.getESTABLISHED()) return false;
+      if (getTIMEWAIT()
+          != other.getTIMEWAIT()) return false;
+      if (getCLOSEWAIT()
+          != other.getCLOSEWAIT()) return false;
+      if (getCLOSED()
+          != other.getCLOSED()) return false;
+      if (getSYNSEND()
+          != other.getSYNSEND()) return false;
+      if (getSYNRECEIVED()
+          != other.getSYNRECEIVED()) return false;
+      if (getFINWAIT1()
+          != other.getFINWAIT1()) return false;
+      if (getFINWAIT2()
+          != other.getFINWAIT2()) return false;
+      if (getLASTACK()
+          != other.getLASTACK()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -34871,35 +36319,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -34979,7 +36427,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 LISTEN = 1;</code>
+       * @return The lISTEN.
        */
+      @java.lang.Override
       public int getLISTEN() {
         return lISTEN_;
       }
@@ -34989,6 +36439,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 LISTEN = 1;</code>
+       * @param value The lISTEN to set.
+       * @return This builder for chaining.
        */
       public Builder setLISTEN(int value) {
         
@@ -35002,6 +36454,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 LISTEN = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLISTEN() {
         
@@ -35017,7 +36470,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 ESTABLISHED = 2;</code>
+       * @return The eSTABLISHED.
        */
+      @java.lang.Override
       public int getESTABLISHED() {
         return eSTABLISHED_;
       }
@@ -35027,6 +36482,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 ESTABLISHED = 2;</code>
+       * @param value The eSTABLISHED to set.
+       * @return This builder for chaining.
        */
       public Builder setESTABLISHED(int value) {
         
@@ -35040,6 +36497,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 ESTABLISHED = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearESTABLISHED() {
         
@@ -35055,7 +36513,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 TIME_WAIT = 3;</code>
+       * @return The tIMEWAIT.
        */
+      @java.lang.Override
       public int getTIMEWAIT() {
         return tIMEWAIT_;
       }
@@ -35065,6 +36525,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 TIME_WAIT = 3;</code>
+       * @param value The tIMEWAIT to set.
+       * @return This builder for chaining.
        */
       public Builder setTIMEWAIT(int value) {
         
@@ -35078,6 +36540,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 TIME_WAIT = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTIMEWAIT() {
         
@@ -35093,7 +36556,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 CLOSE_WAIT = 4;</code>
+       * @return The cLOSEWAIT.
        */
+      @java.lang.Override
       public int getCLOSEWAIT() {
         return cLOSEWAIT_;
       }
@@ -35103,6 +36568,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 CLOSE_WAIT = 4;</code>
+       * @param value The cLOSEWAIT to set.
+       * @return This builder for chaining.
        */
       public Builder setCLOSEWAIT(int value) {
         
@@ -35116,6 +36583,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 CLOSE_WAIT = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCLOSEWAIT() {
         
@@ -35131,7 +36599,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 CLOSED = 5;</code>
+       * @return The cLOSED.
        */
+      @java.lang.Override
       public int getCLOSED() {
         return cLOSED_;
       }
@@ -35141,6 +36611,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 CLOSED = 5;</code>
+       * @param value The cLOSED to set.
+       * @return This builder for chaining.
        */
       public Builder setCLOSED(int value) {
         
@@ -35154,6 +36626,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 CLOSED = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCLOSED() {
         
@@ -35169,7 +36642,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 SYN_SEND = 6;</code>
+       * @return The sYNSEND.
        */
+      @java.lang.Override
       public int getSYNSEND() {
         return sYNSEND_;
       }
@@ -35179,6 +36654,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 SYN_SEND = 6;</code>
+       * @param value The sYNSEND to set.
+       * @return This builder for chaining.
        */
       public Builder setSYNSEND(int value) {
         
@@ -35192,6 +36669,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 SYN_SEND = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSYNSEND() {
         
@@ -35207,7 +36685,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 SYN_RECEIVED = 7;</code>
+       * @return The sYNRECEIVED.
        */
+      @java.lang.Override
       public int getSYNRECEIVED() {
         return sYNRECEIVED_;
       }
@@ -35217,6 +36697,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 SYN_RECEIVED = 7;</code>
+       * @param value The sYNRECEIVED to set.
+       * @return This builder for chaining.
        */
       public Builder setSYNRECEIVED(int value) {
         
@@ -35230,6 +36712,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 SYN_RECEIVED = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSYNRECEIVED() {
         
@@ -35245,7 +36728,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 FIN_WAIT_1 = 8;</code>
+       * @return The fINWAIT1.
        */
+      @java.lang.Override
       public int getFINWAIT1() {
         return fINWAIT1_;
       }
@@ -35255,6 +36740,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 FIN_WAIT_1 = 8;</code>
+       * @param value The fINWAIT1 to set.
+       * @return This builder for chaining.
        */
       public Builder setFINWAIT1(int value) {
         
@@ -35268,6 +36755,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 FIN_WAIT_1 = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFINWAIT1() {
         
@@ -35283,7 +36771,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 FIN_WAIT_2 = 9;</code>
+       * @return The fINWAIT2.
        */
+      @java.lang.Override
       public int getFINWAIT2() {
         return fINWAIT2_;
       }
@@ -35293,6 +36783,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 FIN_WAIT_2 = 9;</code>
+       * @param value The fINWAIT2 to set.
+       * @return This builder for chaining.
        */
       public Builder setFINWAIT2(int value) {
         
@@ -35306,6 +36798,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 FIN_WAIT_2 = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFINWAIT2() {
         
@@ -35321,7 +36814,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 LAST_ACK = 10;</code>
+       * @return The lASTACK.
        */
+      @java.lang.Override
       public int getLASTACK() {
         return lASTACK_;
       }
@@ -35331,6 +36826,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 LAST_ACK = 10;</code>
+       * @param value The lASTACK to set.
+       * @return This builder for chaining.
        */
       public Builder setLASTACK(int value) {
         
@@ -35344,6 +36841,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int32 LAST_ACK = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLASTACK() {
         
@@ -35354,7 +36852,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -35414,6 +36912,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.VirtualMemory virtual_memory = 1;</code>
+     * @return Whether the virtualMemory field is set.
      */
     boolean hasVirtualMemory();
     /**
@@ -35422,6 +36921,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.VirtualMemory virtual_memory = 1;</code>
+     * @return The virtualMemory.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory getVirtualMemory();
     /**
@@ -35439,6 +36939,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SwapMemory swap_memory = 2;</code>
+     * @return Whether the swapMemory field is set.
      */
     boolean hasSwapMemory();
     /**
@@ -35447,6 +36948,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SwapMemory swap_memory = 2;</code>
+     * @return The swapMemory.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory getSwapMemory();
     /**
@@ -35465,7 +36967,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.MemoryMetrics}
    */
-  public  static final class MemoryMetrics extends
+  public static final class MemoryMetrics extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.MemoryMetrics)
       MemoryMetricsOrBuilder {
@@ -35475,6 +36977,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private MemoryMetrics() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new MemoryMetrics();
     }
 
     @java.lang.Override
@@ -35490,7 +36999,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -35528,7 +37036,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -35567,7 +37075,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.VirtualMemory virtual_memory = 1;</code>
+     * @return Whether the virtualMemory field is set.
      */
+    @java.lang.Override
     public boolean hasVirtualMemory() {
       return virtualMemory_ != null;
     }
@@ -35577,7 +37087,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.VirtualMemory virtual_memory = 1;</code>
+     * @return The virtualMemory.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory getVirtualMemory() {
       return virtualMemory_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory.getDefaultInstance() : virtualMemory_;
     }
@@ -35588,6 +37100,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.VirtualMemory virtual_memory = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemoryOrBuilder getVirtualMemoryOrBuilder() {
       return getVirtualMemory();
     }
@@ -35600,7 +37113,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SwapMemory swap_memory = 2;</code>
+     * @return Whether the swapMemory field is set.
      */
+    @java.lang.Override
     public boolean hasSwapMemory() {
       return swapMemory_ != null;
     }
@@ -35610,7 +37125,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.SwapMemory swap_memory = 2;</code>
+     * @return The swapMemory.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory getSwapMemory() {
       return swapMemory_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory.getDefaultInstance() : swapMemory_;
     }
@@ -35621,6 +37138,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.SwapMemory swap_memory = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemoryOrBuilder getSwapMemoryOrBuilder() {
       return getSwapMemory();
     }
@@ -35677,19 +37195,18 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.MemoryMetrics) obj;
 
-      boolean result = true;
-      result = result && (hasVirtualMemory() == other.hasVirtualMemory());
+      if (hasVirtualMemory() != other.hasVirtualMemory()) return false;
       if (hasVirtualMemory()) {
-        result = result && getVirtualMemory()
-            .equals(other.getVirtualMemory());
+        if (!getVirtualMemory()
+            .equals(other.getVirtualMemory())) return false;
       }
-      result = result && (hasSwapMemory() == other.hasSwapMemory());
+      if (hasSwapMemory() != other.hasSwapMemory()) return false;
       if (hasSwapMemory()) {
-        result = result && getSwapMemory()
-            .equals(other.getSwapMemory());
+        if (!getSwapMemory()
+            .equals(other.getSwapMemory())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -35898,35 +37415,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -35975,7 +37492,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory virtualMemory_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory virtualMemory_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemoryOrBuilder> virtualMemoryBuilder_;
       /**
@@ -35984,6 +37501,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.VirtualMemory virtual_memory = 1;</code>
+       * @return Whether the virtualMemory field is set.
        */
       public boolean hasVirtualMemory() {
         return virtualMemoryBuilder_ != null || virtualMemory_ != null;
@@ -35994,6 +37512,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.VirtualMemory virtual_memory = 1;</code>
+       * @return The virtualMemory.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory getVirtualMemory() {
         if (virtualMemoryBuilder_ == null) {
@@ -36128,7 +37647,7 @@ public final class NodeStatusProto {
         return virtualMemoryBuilder_;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory swapMemory_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory swapMemory_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemoryOrBuilder> swapMemoryBuilder_;
       /**
@@ -36137,6 +37656,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SwapMemory swap_memory = 2;</code>
+       * @return Whether the swapMemory field is set.
        */
       public boolean hasSwapMemory() {
         return swapMemoryBuilder_ != null || swapMemory_ != null;
@@ -36147,6 +37667,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.SwapMemory swap_memory = 2;</code>
+       * @return The swapMemory.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory getSwapMemory() {
         if (swapMemoryBuilder_ == null) {
@@ -36283,7 +37804,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -36343,6 +37864,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 total = 1;</code>
+     * @return The total.
      */
     long getTotal();
 
@@ -36352,6 +37874,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 used = 2;</code>
+     * @return The used.
      */
     long getUsed();
 
@@ -36361,6 +37884,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 free = 3;</code>
+     * @return The free.
      */
     long getFree();
 
@@ -36370,6 +37894,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double percent = 4;</code>
+     * @return The percent.
      */
     double getPercent();
 
@@ -36379,6 +37904,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 available = 5;</code>
+     * @return The available.
      */
     long getAvailable();
 
@@ -36388,6 +37914,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 active = 6;</code>
+     * @return The active.
      */
     long getActive();
 
@@ -36397,6 +37924,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 inactive = 7;</code>
+     * @return The inactive.
      */
     long getInactive();
 
@@ -36406,6 +37934,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 buffers = 8;</code>
+     * @return The buffers.
      */
     long getBuffers();
 
@@ -36415,6 +37944,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 cached = 9;</code>
+     * @return The cached.
      */
     long getCached();
 
@@ -36424,6 +37954,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 shared = 10;</code>
+     * @return The shared.
      */
     long getShared();
 
@@ -36433,6 +37964,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 slab = 11;</code>
+     * @return The slab.
      */
     long getSlab();
   }
@@ -36443,7 +37975,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.VirtualMemory}
    */
-  public  static final class VirtualMemory extends
+  public static final class VirtualMemory extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.VirtualMemory)
       VirtualMemoryOrBuilder {
@@ -36453,17 +37985,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private VirtualMemory() {
-      total_ = 0L;
-      used_ = 0L;
-      free_ = 0L;
-      percent_ = 0D;
-      available_ = 0L;
-      active_ = 0L;
-      inactive_ = 0L;
-      buffers_ = 0L;
-      cached_ = 0L;
-      shared_ = 0L;
-      slab_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new VirtualMemory();
     }
 
     @java.lang.Override
@@ -36479,7 +38007,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -36546,7 +38073,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -36585,7 +38112,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 total = 1;</code>
+     * @return The total.
      */
+    @java.lang.Override
     public long getTotal() {
       return total_;
     }
@@ -36598,7 +38127,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 used = 2;</code>
+     * @return The used.
      */
+    @java.lang.Override
     public long getUsed() {
       return used_;
     }
@@ -36611,7 +38142,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 free = 3;</code>
+     * @return The free.
      */
+    @java.lang.Override
     public long getFree() {
       return free_;
     }
@@ -36624,7 +38157,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double percent = 4;</code>
+     * @return The percent.
      */
+    @java.lang.Override
     public double getPercent() {
       return percent_;
     }
@@ -36637,7 +38172,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 available = 5;</code>
+     * @return The available.
      */
+    @java.lang.Override
     public long getAvailable() {
       return available_;
     }
@@ -36650,7 +38187,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 active = 6;</code>
+     * @return The active.
      */
+    @java.lang.Override
     public long getActive() {
       return active_;
     }
@@ -36663,7 +38202,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 inactive = 7;</code>
+     * @return The inactive.
      */
+    @java.lang.Override
     public long getInactive() {
       return inactive_;
     }
@@ -36676,7 +38217,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 buffers = 8;</code>
+     * @return The buffers.
      */
+    @java.lang.Override
     public long getBuffers() {
       return buffers_;
     }
@@ -36689,7 +38232,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 cached = 9;</code>
+     * @return The cached.
      */
+    @java.lang.Override
     public long getCached() {
       return cached_;
     }
@@ -36702,7 +38247,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 shared = 10;</code>
+     * @return The shared.
      */
+    @java.lang.Override
     public long getShared() {
       return shared_;
     }
@@ -36715,7 +38262,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 slab = 11;</code>
+     * @return The slab.
      */
+    @java.lang.Override
     public long getSlab() {
       return slab_;
     }
@@ -36743,7 +38292,7 @@ public final class NodeStatusProto {
       if (free_ != 0L) {
         output.writeInt64(3, free_);
       }
-      if (percent_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(percent_) != 0) {
         output.writeDouble(4, percent_);
       }
       if (available_ != 0L) {
@@ -36788,7 +38337,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(3, free_);
       }
-      if (percent_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(percent_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, percent_);
       }
@@ -36835,33 +38384,31 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.VirtualMemory) obj;
 
-      boolean result = true;
-      result = result && (getTotal()
-          == other.getTotal());
-      result = result && (getUsed()
-          == other.getUsed());
-      result = result && (getFree()
-          == other.getFree());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getPercent())
-          == java.lang.Double.doubleToLongBits(
-              other.getPercent()));
-      result = result && (getAvailable()
-          == other.getAvailable());
-      result = result && (getActive()
-          == other.getActive());
-      result = result && (getInactive()
-          == other.getInactive());
-      result = result && (getBuffers()
-          == other.getBuffers());
-      result = result && (getCached()
-          == other.getCached());
-      result = result && (getShared()
-          == other.getShared());
-      result = result && (getSlab()
-          == other.getSlab());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getTotal()
+          != other.getTotal()) return false;
+      if (getUsed()
+          != other.getUsed()) return false;
+      if (getFree()
+          != other.getFree()) return false;
+      if (java.lang.Double.doubleToLongBits(getPercent())
+          != java.lang.Double.doubleToLongBits(
+              other.getPercent())) return false;
+      if (getAvailable()
+          != other.getAvailable()) return false;
+      if (getActive()
+          != other.getActive()) return false;
+      if (getInactive()
+          != other.getInactive()) return false;
+      if (getBuffers()
+          != other.getBuffers()) return false;
+      if (getCached()
+          != other.getCached()) return false;
+      if (getShared()
+          != other.getShared()) return false;
+      if (getSlab()
+          != other.getSlab()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -37106,35 +38653,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -37217,7 +38764,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 1;</code>
+       * @return The total.
        */
+      @java.lang.Override
       public long getTotal() {
         return total_;
       }
@@ -37227,6 +38776,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 1;</code>
+       * @param value The total to set.
+       * @return This builder for chaining.
        */
       public Builder setTotal(long value) {
         
@@ -37240,6 +38791,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTotal() {
         
@@ -37255,7 +38807,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 2;</code>
+       * @return The used.
        */
+      @java.lang.Override
       public long getUsed() {
         return used_;
       }
@@ -37265,6 +38819,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 2;</code>
+       * @param value The used to set.
+       * @return This builder for chaining.
        */
       public Builder setUsed(long value) {
         
@@ -37278,6 +38834,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUsed() {
         
@@ -37293,7 +38850,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 3;</code>
+       * @return The free.
        */
+      @java.lang.Override
       public long getFree() {
         return free_;
       }
@@ -37303,6 +38862,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 3;</code>
+       * @param value The free to set.
+       * @return This builder for chaining.
        */
       public Builder setFree(long value) {
         
@@ -37316,6 +38877,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFree() {
         
@@ -37331,7 +38893,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 4;</code>
+       * @return The percent.
        */
+      @java.lang.Override
       public double getPercent() {
         return percent_;
       }
@@ -37341,6 +38905,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 4;</code>
+       * @param value The percent to set.
+       * @return This builder for chaining.
        */
       public Builder setPercent(double value) {
         
@@ -37354,6 +38920,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPercent() {
         
@@ -37369,7 +38936,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 available = 5;</code>
+       * @return The available.
        */
+      @java.lang.Override
       public long getAvailable() {
         return available_;
       }
@@ -37379,6 +38948,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 available = 5;</code>
+       * @param value The available to set.
+       * @return This builder for chaining.
        */
       public Builder setAvailable(long value) {
         
@@ -37392,6 +38963,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 available = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAvailable() {
         
@@ -37407,7 +38979,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 active = 6;</code>
+       * @return The active.
        */
+      @java.lang.Override
       public long getActive() {
         return active_;
       }
@@ -37417,6 +38991,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 active = 6;</code>
+       * @param value The active to set.
+       * @return This builder for chaining.
        */
       public Builder setActive(long value) {
         
@@ -37430,6 +39006,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 active = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActive() {
         
@@ -37445,7 +39022,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 inactive = 7;</code>
+       * @return The inactive.
        */
+      @java.lang.Override
       public long getInactive() {
         return inactive_;
       }
@@ -37455,6 +39034,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 inactive = 7;</code>
+       * @param value The inactive to set.
+       * @return This builder for chaining.
        */
       public Builder setInactive(long value) {
         
@@ -37468,6 +39049,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 inactive = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearInactive() {
         
@@ -37483,7 +39065,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 buffers = 8;</code>
+       * @return The buffers.
        */
+      @java.lang.Override
       public long getBuffers() {
         return buffers_;
       }
@@ -37493,6 +39077,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 buffers = 8;</code>
+       * @param value The buffers to set.
+       * @return This builder for chaining.
        */
       public Builder setBuffers(long value) {
         
@@ -37506,6 +39092,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 buffers = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBuffers() {
         
@@ -37521,7 +39108,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 cached = 9;</code>
+       * @return The cached.
        */
+      @java.lang.Override
       public long getCached() {
         return cached_;
       }
@@ -37531,6 +39120,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 cached = 9;</code>
+       * @param value The cached to set.
+       * @return This builder for chaining.
        */
       public Builder setCached(long value) {
         
@@ -37544,6 +39135,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 cached = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCached() {
         
@@ -37559,7 +39151,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 shared = 10;</code>
+       * @return The shared.
        */
+      @java.lang.Override
       public long getShared() {
         return shared_;
       }
@@ -37569,6 +39163,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 shared = 10;</code>
+       * @param value The shared to set.
+       * @return This builder for chaining.
        */
       public Builder setShared(long value) {
         
@@ -37582,6 +39178,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 shared = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearShared() {
         
@@ -37597,7 +39194,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 slab = 11;</code>
+       * @return The slab.
        */
+      @java.lang.Override
       public long getSlab() {
         return slab_;
       }
@@ -37607,6 +39206,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 slab = 11;</code>
+       * @param value The slab to set.
+       * @return This builder for chaining.
        */
       public Builder setSlab(long value) {
         
@@ -37620,6 +39221,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 slab = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSlab() {
         
@@ -37630,7 +39232,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -37690,6 +39292,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 free = 1;</code>
+     * @return The free.
      */
     long getFree();
 
@@ -37699,6 +39302,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double percent = 2;</code>
+     * @return The percent.
      */
     double getPercent();
 
@@ -37708,6 +39312,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 sin = 3;</code>
+     * @return The sin.
      */
     long getSin();
 
@@ -37717,6 +39322,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 sout = 4;</code>
+     * @return The sout.
      */
     long getSout();
 
@@ -37726,6 +39332,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 total = 5;</code>
+     * @return The total.
      */
     long getTotal();
 
@@ -37735,6 +39342,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 used = 6;</code>
+     * @return The used.
      */
     long getUsed();
   }
@@ -37745,7 +39353,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.SwapMemory}
    */
-  public  static final class SwapMemory extends
+  public static final class SwapMemory extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.SwapMemory)
       SwapMemoryOrBuilder {
@@ -37755,12 +39363,13 @@ public final class NodeStatusProto {
       super(builder);
     }
     private SwapMemory() {
-      free_ = 0L;
-      percent_ = 0D;
-      sin_ = 0L;
-      sout_ = 0L;
-      total_ = 0L;
-      used_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SwapMemory();
     }
 
     @java.lang.Override
@@ -37776,7 +39385,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -37818,7 +39426,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -37857,7 +39465,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 free = 1;</code>
+     * @return The free.
      */
+    @java.lang.Override
     public long getFree() {
       return free_;
     }
@@ -37870,7 +39480,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double percent = 2;</code>
+     * @return The percent.
      */
+    @java.lang.Override
     public double getPercent() {
       return percent_;
     }
@@ -37883,7 +39495,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 sin = 3;</code>
+     * @return The sin.
      */
+    @java.lang.Override
     public long getSin() {
       return sin_;
     }
@@ -37896,7 +39510,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 sout = 4;</code>
+     * @return The sout.
      */
+    @java.lang.Override
     public long getSout() {
       return sout_;
     }
@@ -37909,7 +39525,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 total = 5;</code>
+     * @return The total.
      */
+    @java.lang.Override
     public long getTotal() {
       return total_;
     }
@@ -37922,7 +39540,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 used = 6;</code>
+     * @return The used.
      */
+    @java.lang.Override
     public long getUsed() {
       return used_;
     }
@@ -37944,7 +39564,7 @@ public final class NodeStatusProto {
       if (free_ != 0L) {
         output.writeInt64(1, free_);
       }
-      if (percent_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(percent_) != 0) {
         output.writeDouble(2, percent_);
       }
       if (sin_ != 0L) {
@@ -37972,7 +39592,7 @@ public final class NodeStatusProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(1, free_);
       }
-      if (percent_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(percent_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(2, percent_);
       }
@@ -38007,23 +39627,21 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.SwapMemory) obj;
 
-      boolean result = true;
-      result = result && (getFree()
-          == other.getFree());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getPercent())
-          == java.lang.Double.doubleToLongBits(
-              other.getPercent()));
-      result = result && (getSin()
-          == other.getSin());
-      result = result && (getSout()
-          == other.getSout());
-      result = result && (getTotal()
-          == other.getTotal());
-      result = result && (getUsed()
-          == other.getUsed());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getFree()
+          != other.getFree()) return false;
+      if (java.lang.Double.doubleToLongBits(getPercent())
+          != java.lang.Double.doubleToLongBits(
+              other.getPercent())) return false;
+      if (getSin()
+          != other.getSin()) return false;
+      if (getSout()
+          != other.getSout()) return false;
+      if (getTotal()
+          != other.getTotal()) return false;
+      if (getUsed()
+          != other.getUsed()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -38238,35 +39856,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -38334,7 +39952,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 1;</code>
+       * @return The free.
        */
+      @java.lang.Override
       public long getFree() {
         return free_;
       }
@@ -38344,6 +39964,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 1;</code>
+       * @param value The free to set.
+       * @return This builder for chaining.
        */
       public Builder setFree(long value) {
         
@@ -38357,6 +39979,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 free = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFree() {
         
@@ -38372,7 +39995,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 2;</code>
+       * @return The percent.
        */
+      @java.lang.Override
       public double getPercent() {
         return percent_;
       }
@@ -38382,6 +40007,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 2;</code>
+       * @param value The percent to set.
+       * @return This builder for chaining.
        */
       public Builder setPercent(double value) {
         
@@ -38395,6 +40022,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double percent = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPercent() {
         
@@ -38410,7 +40038,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 sin = 3;</code>
+       * @return The sin.
        */
+      @java.lang.Override
       public long getSin() {
         return sin_;
       }
@@ -38420,6 +40050,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 sin = 3;</code>
+       * @param value The sin to set.
+       * @return This builder for chaining.
        */
       public Builder setSin(long value) {
         
@@ -38433,6 +40065,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 sin = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSin() {
         
@@ -38448,7 +40081,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 sout = 4;</code>
+       * @return The sout.
        */
+      @java.lang.Override
       public long getSout() {
         return sout_;
       }
@@ -38458,6 +40093,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 sout = 4;</code>
+       * @param value The sout to set.
+       * @return This builder for chaining.
        */
       public Builder setSout(long value) {
         
@@ -38471,6 +40108,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 sout = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSout() {
         
@@ -38486,7 +40124,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 5;</code>
+       * @return The total.
        */
+      @java.lang.Override
       public long getTotal() {
         return total_;
       }
@@ -38496,6 +40136,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 5;</code>
+       * @param value The total to set.
+       * @return This builder for chaining.
        */
       public Builder setTotal(long value) {
         
@@ -38509,6 +40151,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 total = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTotal() {
         
@@ -38524,7 +40167,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 6;</code>
+       * @return The used.
        */
+      @java.lang.Override
       public long getUsed() {
         return used_;
       }
@@ -38534,6 +40179,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 6;</code>
+       * @param value The used to set.
+       * @return This builder for chaining.
        */
       public Builder setUsed(long value) {
         
@@ -38547,6 +40194,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 used = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUsed() {
         
@@ -38557,7 +40205,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -38617,6 +40265,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The serviceName.
      */
     java.lang.String getServiceName();
     /**
@@ -38625,6 +40274,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The bytes for serviceName.
      */
     com.google.protobuf.ByteString
         getServiceNameBytes();
@@ -38635,6 +40285,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The serviceType.
      */
     java.lang.String getServiceType();
     /**
@@ -38643,6 +40294,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The bytes for serviceType.
      */
     com.google.protobuf.ByteString
         getServiceTypeBytes();
@@ -38653,6 +40305,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The name.
      */
     java.lang.String getName();
     /**
@@ -38661,6 +40314,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The bytes for name.
      */
     com.google.protobuf.ByteString
         getNameBytes();
@@ -38671,6 +40325,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string value = 4;</code>
+     * @return The value.
      */
     java.lang.String getValue();
     /**
@@ -38679,6 +40334,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string value = 4;</code>
+     * @return The bytes for value.
      */
     com.google.protobuf.ByteString
         getValueBytes();
@@ -38689,6 +40345,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string explanation = 5;</code>
+     * @return The explanation.
      */
     java.lang.String getExplanation();
     /**
@@ -38697,6 +40354,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string explanation = 5;</code>
+     * @return The bytes for explanation.
      */
     com.google.protobuf.ByteString
         getExplanationBytes();
@@ -38707,6 +40365,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 6;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -38716,6 +40375,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * @return Whether the clusterDetails field is set.
      */
     boolean hasClusterDetails();
     /**
@@ -38724,6 +40384,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * @return The clusterDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -38742,7 +40403,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CmServiceHealthCheckEvent}
    */
-  public  static final class CmServiceHealthCheckEvent extends
+  public static final class CmServiceHealthCheckEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CmServiceHealthCheckEvent)
       CmServiceHealthCheckEventOrBuilder {
@@ -38757,7 +40418,13 @@ public final class NodeStatusProto {
       name_ = "";
       value_ = "";
       explanation_ = "";
-      timestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CmServiceHealthCheckEvent();
     }
 
     @java.lang.Override
@@ -38773,7 +40440,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -38833,7 +40499,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -38872,7 +40538,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The serviceName.
      */
+    @java.lang.Override
     public java.lang.String getServiceName() {
       java.lang.Object ref = serviceName_;
       if (ref instanceof java.lang.String) {
@@ -38891,7 +40559,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The bytes for serviceName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getServiceNameBytes() {
       java.lang.Object ref = serviceName_;
@@ -38914,7 +40584,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The serviceType.
      */
+    @java.lang.Override
     public java.lang.String getServiceType() {
       java.lang.Object ref = serviceType_;
       if (ref instanceof java.lang.String) {
@@ -38933,7 +40605,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The bytes for serviceType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getServiceTypeBytes() {
       java.lang.Object ref = serviceType_;
@@ -38956,7 +40630,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -38975,7 +40651,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -38998,7 +40676,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string value = 4;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public java.lang.String getValue() {
       java.lang.Object ref = value_;
       if (ref instanceof java.lang.String) {
@@ -39017,7 +40697,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string value = 4;</code>
+     * @return The bytes for value.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getValueBytes() {
       java.lang.Object ref = value_;
@@ -39040,7 +40722,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string explanation = 5;</code>
+     * @return The explanation.
      */
+    @java.lang.Override
     public java.lang.String getExplanation() {
       java.lang.Object ref = explanation_;
       if (ref instanceof java.lang.String) {
@@ -39059,7 +40743,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string explanation = 5;</code>
+     * @return The bytes for explanation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getExplanationBytes() {
       java.lang.Object ref = explanation_;
@@ -39082,7 +40768,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 6;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -39095,7 +40783,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * @return Whether the clusterDetails field is set.
      */
+    @java.lang.Override
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
     }
@@ -39105,7 +40795,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+     * @return The clusterDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
     }
@@ -39116,6 +40808,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
     }
@@ -39134,19 +40827,19 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getServiceNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serviceName_);
       }
-      if (!getServiceTypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceType_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, serviceType_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
       }
-      if (!getValueBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, value_);
       }
-      if (!getExplanationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(explanation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, explanation_);
       }
       if (timestamp_ != 0L) {
@@ -39164,19 +40857,19 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getServiceNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serviceName_);
       }
-      if (!getServiceTypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceType_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, serviceType_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
       }
-      if (!getValueBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(value_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, value_);
       }
-      if (!getExplanationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(explanation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, explanation_);
       }
       if (timestamp_ != 0L) {
@@ -39202,26 +40895,25 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceHealthCheckEvent) obj;
 
-      boolean result = true;
-      result = result && getServiceName()
-          .equals(other.getServiceName());
-      result = result && getServiceType()
-          .equals(other.getServiceType());
-      result = result && getName()
-          .equals(other.getName());
-      result = result && getValue()
-          .equals(other.getValue());
-      result = result && getExplanation()
-          .equals(other.getExplanation());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (!getServiceName()
+          .equals(other.getServiceName())) return false;
+      if (!getServiceType()
+          .equals(other.getServiceType())) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getValue()
+          .equals(other.getValue())) return false;
+      if (!getExplanation()
+          .equals(other.getExplanation())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (hasClusterDetails() != other.hasClusterDetails()) return false;
       if (hasClusterDetails()) {
-        result = result && getClusterDetails()
-            .equals(other.getClusterDetails());
+        if (!getClusterDetails()
+            .equals(other.getClusterDetails())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -39446,35 +41138,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -39550,6 +41242,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @return The serviceName.
        */
       public java.lang.String getServiceName() {
         java.lang.Object ref = serviceName_;
@@ -39569,6 +41262,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @return The bytes for serviceName.
        */
       public com.google.protobuf.ByteString
           getServiceNameBytes() {
@@ -39589,6 +41283,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @param value The serviceName to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceName(
           java.lang.String value) {
@@ -39606,6 +41302,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearServiceName() {
         
@@ -39619,6 +41316,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @param value The bytes for serviceName to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceNameBytes(
           com.google.protobuf.ByteString value) {
@@ -39639,6 +41338,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @return The serviceType.
        */
       public java.lang.String getServiceType() {
         java.lang.Object ref = serviceType_;
@@ -39658,6 +41358,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @return The bytes for serviceType.
        */
       public com.google.protobuf.ByteString
           getServiceTypeBytes() {
@@ -39678,6 +41379,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @param value The serviceType to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceType(
           java.lang.String value) {
@@ -39695,6 +41398,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearServiceType() {
         
@@ -39708,6 +41412,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @param value The bytes for serviceType to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -39728,6 +41434,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @return The name.
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -39747,6 +41454,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @return The bytes for name.
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -39767,6 +41475,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
        */
       public Builder setName(
           java.lang.String value) {
@@ -39784,6 +41494,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearName() {
         
@@ -39797,6 +41508,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -39817,6 +41530,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string value = 4;</code>
+       * @return The value.
        */
       public java.lang.String getValue() {
         java.lang.Object ref = value_;
@@ -39836,6 +41550,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string value = 4;</code>
+       * @return The bytes for value.
        */
       public com.google.protobuf.ByteString
           getValueBytes() {
@@ -39856,6 +41571,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string value = 4;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(
           java.lang.String value) {
@@ -39873,6 +41590,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string value = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -39886,6 +41604,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string value = 4;</code>
+       * @param value The bytes for value to set.
+       * @return This builder for chaining.
        */
       public Builder setValueBytes(
           com.google.protobuf.ByteString value) {
@@ -39906,6 +41626,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string explanation = 5;</code>
+       * @return The explanation.
        */
       public java.lang.String getExplanation() {
         java.lang.Object ref = explanation_;
@@ -39925,6 +41646,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string explanation = 5;</code>
+       * @return The bytes for explanation.
        */
       public com.google.protobuf.ByteString
           getExplanationBytes() {
@@ -39945,6 +41667,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string explanation = 5;</code>
+       * @param value The explanation to set.
+       * @return This builder for chaining.
        */
       public Builder setExplanation(
           java.lang.String value) {
@@ -39962,6 +41686,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string explanation = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearExplanation() {
         
@@ -39975,6 +41700,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string explanation = 5;</code>
+       * @param value The bytes for explanation to set.
+       * @return This builder for chaining.
        */
       public Builder setExplanationBytes(
           com.google.protobuf.ByteString value) {
@@ -39995,7 +41722,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 6;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -40005,6 +41734,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 6;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -40018,6 +41749,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -40026,7 +41758,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
@@ -40035,6 +41767,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * @return Whether the clusterDetails field is set.
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -40045,6 +41778,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 7;</code>
+       * @return The clusterDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -40181,7 +41915,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -40241,6 +41975,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The serviceName.
      */
     java.lang.String getServiceName();
     /**
@@ -40249,6 +41984,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The bytes for serviceName.
      */
     com.google.protobuf.ByteString
         getServiceNameBytes();
@@ -40259,6 +41995,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The serviceType.
      */
     java.lang.String getServiceType();
     /**
@@ -40267,6 +42004,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The bytes for serviceType.
      */
     com.google.protobuf.ByteString
         getServiceTypeBytes();
@@ -40277,6 +42015,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The name.
      */
     java.lang.String getName();
     /**
@@ -40285,6 +42024,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The bytes for name.
      */
     com.google.protobuf.ByteString
         getNameBytes();
@@ -40295,6 +42035,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double value = 4;</code>
+     * @return The value.
      */
     double getValue();
 
@@ -40304,6 +42045,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -40313,6 +42055,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return Whether the clusterDetails field is set.
      */
     boolean hasClusterDetails();
     /**
@@ -40321,6 +42064,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return The clusterDetails.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails();
     /**
@@ -40339,7 +42083,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.CmServiceMetricEvent}
    */
-  public  static final class CmServiceMetricEvent extends
+  public static final class CmServiceMetricEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.CmServiceMetricEvent)
       CmServiceMetricEventOrBuilder {
@@ -40352,8 +42096,13 @@ public final class NodeStatusProto {
       serviceName_ = "";
       serviceType_ = "";
       name_ = "";
-      value_ = 0D;
-      timestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CmServiceMetricEvent();
     }
 
     @java.lang.Override
@@ -40369,7 +42118,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -40422,7 +42170,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -40461,7 +42209,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The serviceName.
      */
+    @java.lang.Override
     public java.lang.String getServiceName() {
       java.lang.Object ref = serviceName_;
       if (ref instanceof java.lang.String) {
@@ -40480,7 +42230,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceName = 1;</code>
+     * @return The bytes for serviceName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getServiceNameBytes() {
       java.lang.Object ref = serviceName_;
@@ -40503,7 +42255,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The serviceType.
      */
+    @java.lang.Override
     public java.lang.String getServiceType() {
       java.lang.Object ref = serviceType_;
       if (ref instanceof java.lang.String) {
@@ -40522,7 +42276,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string serviceType = 2;</code>
+     * @return The bytes for serviceType.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getServiceTypeBytes() {
       java.lang.Object ref = serviceType_;
@@ -40545,7 +42301,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -40564,7 +42322,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 3;</code>
+     * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -40587,7 +42347,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>double value = 4;</code>
+     * @return The value.
      */
+    @java.lang.Override
     public double getValue() {
       return value_;
     }
@@ -40600,7 +42362,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -40613,7 +42377,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return Whether the clusterDetails field is set.
      */
+    @java.lang.Override
     public boolean hasClusterDetails() {
       return clusterDetails_ != null;
     }
@@ -40623,7 +42389,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+     * @return The clusterDetails.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
       return clusterDetails_ == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.getDefaultInstance() : clusterDetails_;
     }
@@ -40634,6 +42402,7 @@ public final class NodeStatusProto {
      *
      * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder getClusterDetailsOrBuilder() {
       return getClusterDetails();
     }
@@ -40652,16 +42421,16 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getServiceNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, serviceName_);
       }
-      if (!getServiceTypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceType_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, serviceType_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, name_);
       }
-      if (value_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(value_) != 0) {
         output.writeDouble(4, value_);
       }
       if (timestamp_ != 0L) {
@@ -40679,16 +42448,16 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getServiceNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, serviceName_);
       }
-      if (!getServiceTypeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(serviceType_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, serviceType_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, name_);
       }
-      if (value_ != 0D) {
+      if (java.lang.Double.doubleToRawLongBits(value_) != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeDoubleSize(4, value_);
       }
@@ -40715,26 +42484,24 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.CmServiceMetricEvent) obj;
 
-      boolean result = true;
-      result = result && getServiceName()
-          .equals(other.getServiceName());
-      result = result && getServiceType()
-          .equals(other.getServiceType());
-      result = result && getName()
-          .equals(other.getName());
-      result = result && (
-          java.lang.Double.doubleToLongBits(getValue())
-          == java.lang.Double.doubleToLongBits(
-              other.getValue()));
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && (hasClusterDetails() == other.hasClusterDetails());
+      if (!getServiceName()
+          .equals(other.getServiceName())) return false;
+      if (!getServiceType()
+          .equals(other.getServiceType())) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (java.lang.Double.doubleToLongBits(getValue())
+          != java.lang.Double.doubleToLongBits(
+              other.getValue())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (hasClusterDetails() != other.hasClusterDetails()) return false;
       if (hasClusterDetails()) {
-        result = result && getClusterDetails()
-            .equals(other.getClusterDetails());
+        if (!getClusterDetails()
+            .equals(other.getClusterDetails())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -40955,35 +42722,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -41054,6 +42821,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @return The serviceName.
        */
       public java.lang.String getServiceName() {
         java.lang.Object ref = serviceName_;
@@ -41073,6 +42841,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @return The bytes for serviceName.
        */
       public com.google.protobuf.ByteString
           getServiceNameBytes() {
@@ -41093,6 +42862,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @param value The serviceName to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceName(
           java.lang.String value) {
@@ -41110,6 +42881,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearServiceName() {
         
@@ -41123,6 +42895,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceName = 1;</code>
+       * @param value The bytes for serviceName to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceNameBytes(
           com.google.protobuf.ByteString value) {
@@ -41143,6 +42917,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @return The serviceType.
        */
       public java.lang.String getServiceType() {
         java.lang.Object ref = serviceType_;
@@ -41162,6 +42937,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @return The bytes for serviceType.
        */
       public com.google.protobuf.ByteString
           getServiceTypeBytes() {
@@ -41182,6 +42958,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @param value The serviceType to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceType(
           java.lang.String value) {
@@ -41199,6 +42977,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearServiceType() {
         
@@ -41212,6 +42991,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string serviceType = 2;</code>
+       * @param value The bytes for serviceType to set.
+       * @return This builder for chaining.
        */
       public Builder setServiceTypeBytes(
           com.google.protobuf.ByteString value) {
@@ -41232,6 +43013,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @return The name.
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -41251,6 +43033,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @return The bytes for name.
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -41271,6 +43054,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
        */
       public Builder setName(
           java.lang.String value) {
@@ -41288,6 +43073,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearName() {
         
@@ -41301,6 +43087,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 3;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -41321,7 +43109,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double value = 4;</code>
+       * @return The value.
        */
+      @java.lang.Override
       public double getValue() {
         return value_;
       }
@@ -41331,6 +43121,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double value = 4;</code>
+       * @param value The value to set.
+       * @return This builder for chaining.
        */
       public Builder setValue(double value) {
         
@@ -41344,6 +43136,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>double value = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearValue() {
         
@@ -41359,7 +43152,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -41369,6 +43164,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -41382,6 +43179,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -41390,7 +43188,7 @@ public final class NodeStatusProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_ = null;
+      private com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails clusterDetails_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.Builder, com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetailsOrBuilder> clusterDetailsBuilder_;
       /**
@@ -41399,6 +43197,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * @return Whether the clusterDetails field is set.
        */
       public boolean hasClusterDetails() {
         return clusterDetailsBuilder_ != null || clusterDetails_ != null;
@@ -41409,6 +43208,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails clusterDetails = 6;</code>
+       * @return The clusterDetails.
        */
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails getClusterDetails() {
         if (clusterDetailsBuilder_ == null) {
@@ -41545,7 +43345,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -41605,6 +43405,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string crn = 1;</code>
+     * @return The crn.
      */
     java.lang.String getCrn();
     /**
@@ -41613,6 +43414,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string crn = 1;</code>
+     * @return The bytes for crn.
      */
     com.google.protobuf.ByteString
         getCrnBytes();
@@ -41623,6 +43425,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 2;</code>
+     * @return The name.
      */
     java.lang.String getName();
     /**
@@ -41631,6 +43434,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 2;</code>
+     * @return The bytes for name.
      */
     com.google.protobuf.ByteString
         getNameBytes();
@@ -41641,6 +43445,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string version = 3;</code>
+     * @return The version.
      */
     java.lang.String getVersion();
     /**
@@ -41649,6 +43454,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string version = 3;</code>
+     * @return The bytes for version.
      */
     com.google.protobuf.ByteString
         getVersionBytes();
@@ -41659,6 +43465,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+     * @return The enum numeric value on the wire for type.
      */
     int getTypeValue();
     /**
@@ -41667,6 +43474,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+     * @return The type.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType getType();
 
@@ -41676,6 +43484,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+     * @return The enum numeric value on the wire for platform.
      */
     int getPlatformValue();
     /**
@@ -41684,6 +43493,7 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+     * @return The platform.
      */
     com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform getPlatform();
   }
@@ -41694,7 +43504,7 @@ public final class NodeStatusProto {
    *
    * Protobuf type {@code cdp.telemetry.ClusterDetails}
    */
-  public  static final class ClusterDetails extends
+  public static final class ClusterDetails extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:cdp.telemetry.ClusterDetails)
       ClusterDetailsOrBuilder {
@@ -41712,6 +43522,13 @@ public final class NodeStatusProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ClusterDetails();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -41724,7 +43541,6 @@ public final class NodeStatusProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -41766,7 +43582,7 @@ public final class NodeStatusProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -41868,6 +43684,8 @@ public final class NodeStatusProto {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -41875,6 +43693,10 @@ public final class NodeStatusProto {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static ClusterType forNumber(int value) {
         switch (value) {
           case 0: return DATAHUB;
@@ -41898,6 +43720,10 @@ public final class NodeStatusProto {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -42027,6 +43853,8 @@ public final class NodeStatusProto {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -42034,6 +43862,10 @@ public final class NodeStatusProto {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static CloudPlatform forNumber(int value) {
         switch (value) {
           case 0: return UNKNOWN;
@@ -42059,6 +43891,10 @@ public final class NodeStatusProto {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -42101,7 +43937,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string crn = 1;</code>
+     * @return The crn.
      */
+    @java.lang.Override
     public java.lang.String getCrn() {
       java.lang.Object ref = crn_;
       if (ref instanceof java.lang.String) {
@@ -42120,7 +43958,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string crn = 1;</code>
+     * @return The bytes for crn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCrnBytes() {
       java.lang.Object ref = crn_;
@@ -42143,7 +43983,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 2;</code>
+     * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -42162,7 +44004,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string name = 2;</code>
+     * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -42185,7 +44029,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string version = 3;</code>
+     * @return The version.
      */
+    @java.lang.Override
     public java.lang.String getVersion() {
       java.lang.Object ref = version_;
       if (ref instanceof java.lang.String) {
@@ -42204,7 +44050,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>string version = 3;</code>
+     * @return The bytes for version.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getVersionBytes() {
       java.lang.Object ref = version_;
@@ -42227,8 +44075,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+     * @return The enum numeric value on the wire for type.
      */
-    public int getTypeValue() {
+    @java.lang.Override public int getTypeValue() {
       return type_;
     }
     /**
@@ -42237,8 +44086,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+     * @return The type.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType getType() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType getType() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType.valueOf(type_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType.UNRECOGNIZED : result;
@@ -42252,8 +44102,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+     * @return The enum numeric value on the wire for platform.
      */
-    public int getPlatformValue() {
+    @java.lang.Override public int getPlatformValue() {
       return platform_;
     }
     /**
@@ -42262,8 +44113,9 @@ public final class NodeStatusProto {
      * </pre>
      *
      * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+     * @return The platform.
      */
-    public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform getPlatform() {
+    @java.lang.Override public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform getPlatform() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform.valueOf(platform_);
       return result == null ? com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform.UNRECOGNIZED : result;
@@ -42283,13 +44135,13 @@ public final class NodeStatusProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, crn_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, name_);
       }
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, version_);
       }
       if (type_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType.DATAHUB.getNumber()) {
@@ -42307,13 +44159,13 @@ public final class NodeStatusProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(crn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, crn_);
       }
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, name_);
       }
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, version_);
       }
       if (type_ != com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType.DATAHUB.getNumber()) {
@@ -42339,17 +44191,16 @@ public final class NodeStatusProto {
       }
       com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails other = (com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails) obj;
 
-      boolean result = true;
-      result = result && getCrn()
-          .equals(other.getCrn());
-      result = result && getName()
-          .equals(other.getName());
-      result = result && getVersion()
-          .equals(other.getVersion());
-      result = result && type_ == other.type_;
-      result = result && platform_ == other.platform_;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getCrn()
+          .equals(other.getCrn())) return false;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (type_ != other.type_) return false;
+      if (platform_ != other.platform_) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -42553,35 +44404,35 @@ public final class NodeStatusProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -42649,6 +44500,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string crn = 1;</code>
+       * @return The crn.
        */
       public java.lang.String getCrn() {
         java.lang.Object ref = crn_;
@@ -42668,6 +44520,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string crn = 1;</code>
+       * @return The bytes for crn.
        */
       public com.google.protobuf.ByteString
           getCrnBytes() {
@@ -42688,6 +44541,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string crn = 1;</code>
+       * @param value The crn to set.
+       * @return This builder for chaining.
        */
       public Builder setCrn(
           java.lang.String value) {
@@ -42705,6 +44560,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string crn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCrn() {
         
@@ -42718,6 +44574,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string crn = 1;</code>
+       * @param value The bytes for crn to set.
+       * @return This builder for chaining.
        */
       public Builder setCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -42738,6 +44596,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 2;</code>
+       * @return The name.
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -42757,6 +44616,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 2;</code>
+       * @return The bytes for name.
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -42777,6 +44637,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 2;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
        */
       public Builder setName(
           java.lang.String value) {
@@ -42794,6 +44656,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearName() {
         
@@ -42807,6 +44670,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string name = 2;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -42827,6 +44692,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string version = 3;</code>
+       * @return The version.
        */
       public java.lang.String getVersion() {
         java.lang.Object ref = version_;
@@ -42846,6 +44712,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string version = 3;</code>
+       * @return The bytes for version.
        */
       public com.google.protobuf.ByteString
           getVersionBytes() {
@@ -42866,6 +44733,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string version = 3;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersion(
           java.lang.String value) {
@@ -42883,6 +44752,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string version = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVersion() {
         
@@ -42896,6 +44766,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>string version = 3;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -42916,8 +44788,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+       * @return The enum numeric value on the wire for type.
        */
-      public int getTypeValue() {
+      @java.lang.Override public int getTypeValue() {
         return type_;
       }
       /**
@@ -42926,8 +44799,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+       * @param value The enum numeric value on the wire for type to set.
+       * @return This builder for chaining.
        */
       public Builder setTypeValue(int value) {
+        
         type_ = value;
         onChanged();
         return this;
@@ -42938,7 +44814,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+       * @return The type.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType getType() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType.valueOf(type_);
@@ -42950,6 +44828,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+       * @param value The type to set.
+       * @return This builder for chaining.
        */
       public Builder setType(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.ClusterType value) {
         if (value == null) {
@@ -42966,6 +44846,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.ClusterType type = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearType() {
         
@@ -42981,8 +44862,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+       * @return The enum numeric value on the wire for platform.
        */
-      public int getPlatformValue() {
+      @java.lang.Override public int getPlatformValue() {
         return platform_;
       }
       /**
@@ -42991,8 +44873,11 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+       * @param value The enum numeric value on the wire for platform to set.
+       * @return This builder for chaining.
        */
       public Builder setPlatformValue(int value) {
+        
         platform_ = value;
         onChanged();
         return this;
@@ -43003,7 +44888,9 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+       * @return The platform.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform getPlatform() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform result = com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform.valueOf(platform_);
@@ -43015,6 +44902,8 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+       * @param value The platform to set.
+       * @return This builder for chaining.
        */
       public Builder setPlatform(com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto.ClusterDetails.CloudPlatform value) {
         if (value == null) {
@@ -43031,6 +44920,7 @@ public final class NodeStatusProto {
        * </pre>
        *
        * <code>.cdp.telemetry.ClusterDetails.CloudPlatform platform = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPlatform() {
         
@@ -43041,7 +44931,7 @@ public final class NodeStatusProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -43432,18 +45322,10 @@ public final class NodeStatusProto {
       "destatusB\017NodeStatusProtoZ\031com/cloudera/" +
       "cdp/protobufb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_cdp_telemetry_NodeStatus_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_cdp_telemetry_NodeStatus_fieldAccessorTable = new

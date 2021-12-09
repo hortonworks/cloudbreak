@@ -1,19 +1,6 @@
 package com.cloudera.thunderhead.service.datalakedr;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -22,8 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.12.0)",
+    value = "by gRPC proto compiler (version 1.42.1)",
     comments = "Source: datalakedr.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class datalakeDRGrpc {
 
   private datalakeDRGrpc() {}
@@ -31,234 +19,204 @@ public final class datalakeDRGrpc {
   public static final String SERVICE_NAME = "datalakedr.datalakeDR";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> METHOD_GET_VERSION = getGetVersionMethodHelper();
-
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetVersion",
+      requestType = com.cloudera.thunderhead.service.common.version.Version.VersionRequest.class,
+      responseType = com.cloudera.thunderhead.service.common.version.Version.VersionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod() {
-    return getGetVersionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
     if ((getGetVersionMethod = datalakeDRGrpc.getGetVersionMethod) == null) {
       synchronized (datalakeDRGrpc.class) {
         if ((getGetVersionMethod = datalakeDRGrpc.getGetVersionMethod) == null) {
-          datalakeDRGrpc.getGetVersionMethod = getGetVersionMethod = 
+          datalakeDRGrpc.getGetVersionMethod = getGetVersionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "datalakedr.datalakeDR", "GetVersion"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetVersion"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("GetVersion"))
-                  .build();
-          }
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("GetVersion"))
+              .build();
         }
-     }
-     return getGetVersionMethod;
+      }
+    }
+    return getGetVersionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getBackupDatalakeMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> METHOD_BACKUP_DATALAKE = getBackupDatalakeMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> getBackupDatalakeMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "BackupDatalake",
+      requestType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest.class,
+      responseType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> getBackupDatalakeMethod() {
-    return getBackupDatalakeMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> getBackupDatalakeMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> getBackupDatalakeMethod;
     if ((getBackupDatalakeMethod = datalakeDRGrpc.getBackupDatalakeMethod) == null) {
       synchronized (datalakeDRGrpc.class) {
         if ((getBackupDatalakeMethod = datalakeDRGrpc.getBackupDatalakeMethod) == null) {
-          datalakeDRGrpc.getBackupDatalakeMethod = getBackupDatalakeMethod = 
+          datalakeDRGrpc.getBackupDatalakeMethod = getBackupDatalakeMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "datalakedr.datalakeDR", "BackupDatalake"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "BackupDatalake"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("BackupDatalake"))
-                  .build();
-          }
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("BackupDatalake"))
+              .build();
         }
-     }
-     return getBackupDatalakeMethod;
+      }
+    }
+    return getBackupDatalakeMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getRestoreDatalakeMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> METHOD_RESTORE_DATALAKE = getRestoreDatalakeMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> getRestoreDatalakeMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RestoreDatalake",
+      requestType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest.class,
+      responseType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> getRestoreDatalakeMethod() {
-    return getRestoreDatalakeMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> getRestoreDatalakeMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> getRestoreDatalakeMethod;
     if ((getRestoreDatalakeMethod = datalakeDRGrpc.getRestoreDatalakeMethod) == null) {
       synchronized (datalakeDRGrpc.class) {
         if ((getRestoreDatalakeMethod = datalakeDRGrpc.getRestoreDatalakeMethod) == null) {
-          datalakeDRGrpc.getRestoreDatalakeMethod = getRestoreDatalakeMethod = 
+          datalakeDRGrpc.getRestoreDatalakeMethod = getRestoreDatalakeMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "datalakedr.datalakeDR", "RestoreDatalake"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RestoreDatalake"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("RestoreDatalake"))
-                  .build();
-          }
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("RestoreDatalake"))
+              .build();
         }
-     }
-     return getRestoreDatalakeMethod;
+      }
+    }
+    return getRestoreDatalakeMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getBackupDatalakeStatusMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> METHOD_BACKUP_DATALAKE_STATUS = getBackupDatalakeStatusMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> getBackupDatalakeStatusMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "BackupDatalakeStatus",
+      requestType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest.class,
+      responseType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> getBackupDatalakeStatusMethod() {
-    return getBackupDatalakeStatusMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> getBackupDatalakeStatusMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> getBackupDatalakeStatusMethod;
     if ((getBackupDatalakeStatusMethod = datalakeDRGrpc.getBackupDatalakeStatusMethod) == null) {
       synchronized (datalakeDRGrpc.class) {
         if ((getBackupDatalakeStatusMethod = datalakeDRGrpc.getBackupDatalakeStatusMethod) == null) {
-          datalakeDRGrpc.getBackupDatalakeStatusMethod = getBackupDatalakeStatusMethod = 
+          datalakeDRGrpc.getBackupDatalakeStatusMethod = getBackupDatalakeStatusMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "datalakedr.datalakeDR", "BackupDatalakeStatus"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "BackupDatalakeStatus"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("BackupDatalakeStatus"))
-                  .build();
-          }
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("BackupDatalakeStatus"))
+              .build();
         }
-     }
-     return getBackupDatalakeStatusMethod;
+      }
+    }
+    return getBackupDatalakeStatusMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getRestoreDatalakeStatusMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> METHOD_RESTORE_DATALAKE_STATUS = getRestoreDatalakeStatusMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> getRestoreDatalakeStatusMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RestoreDatalakeStatus",
+      requestType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest.class,
+      responseType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> getRestoreDatalakeStatusMethod() {
-    return getRestoreDatalakeStatusMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> getRestoreDatalakeStatusMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> getRestoreDatalakeStatusMethod;
     if ((getRestoreDatalakeStatusMethod = datalakeDRGrpc.getRestoreDatalakeStatusMethod) == null) {
       synchronized (datalakeDRGrpc.class) {
         if ((getRestoreDatalakeStatusMethod = datalakeDRGrpc.getRestoreDatalakeStatusMethod) == null) {
-          datalakeDRGrpc.getRestoreDatalakeStatusMethod = getRestoreDatalakeStatusMethod = 
+          datalakeDRGrpc.getRestoreDatalakeStatusMethod = getRestoreDatalakeStatusMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "datalakedr.datalakeDR", "RestoreDatalakeStatus"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RestoreDatalakeStatus"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("RestoreDatalakeStatus"))
-                  .build();
-          }
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("RestoreDatalakeStatus"))
+              .build();
         }
-     }
-     return getRestoreDatalakeStatusMethod;
+      }
+    }
+    return getRestoreDatalakeStatusMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListDatalakeBackupsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> METHOD_LIST_DATALAKE_BACKUPS = getListDatalakeBackupsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> getListDatalakeBackupsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListDatalakeBackups",
+      requestType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest.class,
+      responseType = com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest,
       com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> getListDatalakeBackupsMethod() {
-    return getListDatalakeBackupsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest,
-      com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> getListDatalakeBackupsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> getListDatalakeBackupsMethod;
     if ((getListDatalakeBackupsMethod = datalakeDRGrpc.getListDatalakeBackupsMethod) == null) {
       synchronized (datalakeDRGrpc.class) {
         if ((getListDatalakeBackupsMethod = datalakeDRGrpc.getListDatalakeBackupsMethod) == null) {
-          datalakeDRGrpc.getListDatalakeBackupsMethod = getListDatalakeBackupsMethod = 
+          datalakeDRGrpc.getListDatalakeBackupsMethod = getListDatalakeBackupsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest, com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "datalakedr.datalakeDR", "ListDatalakeBackups"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListDatalakeBackups"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("ListDatalakeBackups"))
-                  .build();
-          }
+              .setSchemaDescriptor(new datalakeDRMethodDescriptorSupplier("ListDatalakeBackups"))
+              .build();
         }
-     }
-     return getListDatalakeBackupsMethod;
+      }
+    }
+    return getListDatalakeBackupsMethod;
   }
 
   /**
    * Creates a new async stub that supports all call types for the service
    */
   public static datalakeDRStub newStub(io.grpc.Channel channel) {
-    return new datalakeDRStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<datalakeDRStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<datalakeDRStub>() {
+        @java.lang.Override
+        public datalakeDRStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new datalakeDRStub(channel, callOptions);
+        }
+      };
+    return datalakeDRStub.newStub(factory, channel);
   }
 
   /**
@@ -266,7 +224,14 @@ public final class datalakeDRGrpc {
    */
   public static datalakeDRBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new datalakeDRBlockingStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<datalakeDRBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<datalakeDRBlockingStub>() {
+        @java.lang.Override
+        public datalakeDRBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new datalakeDRBlockingStub(channel, callOptions);
+        }
+      };
+    return datalakeDRBlockingStub.newStub(factory, channel);
   }
 
   /**
@@ -274,7 +239,14 @@ public final class datalakeDRGrpc {
    */
   public static datalakeDRFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new datalakeDRFutureStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<datalakeDRFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<datalakeDRFutureStub>() {
+        @java.lang.Override
+        public datalakeDRFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new datalakeDRFutureStub(channel, callOptions);
+        }
+      };
+    return datalakeDRFutureStub.newStub(factory, channel);
   }
 
   /**
@@ -292,7 +264,7 @@ public final class datalakeDRGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetVersionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
@@ -303,7 +275,7 @@ public final class datalakeDRGrpc {
      */
     public void backupDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getBackupDatalakeMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getBackupDatalakeMethod(), responseObserver);
     }
 
     /**
@@ -314,7 +286,7 @@ public final class datalakeDRGrpc {
      */
     public void restoreDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getRestoreDatalakeMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRestoreDatalakeMethod(), responseObserver);
     }
 
     /**
@@ -325,7 +297,7 @@ public final class datalakeDRGrpc {
      */
     public void backupDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getBackupDatalakeStatusMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getBackupDatalakeStatusMethod(), responseObserver);
     }
 
     /**
@@ -336,7 +308,7 @@ public final class datalakeDRGrpc {
      */
     public void restoreDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getRestoreDatalakeStatusMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRestoreDatalakeStatusMethod(), responseObserver);
     }
 
     /**
@@ -347,49 +319,49 @@ public final class datalakeDRGrpc {
      */
     public void listDatalakeBackups(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListDatalakeBackupsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListDatalakeBackupsMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getGetVersionMethodHelper(),
-            asyncUnaryCall(
+            getGetVersionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
                 com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
                   this, METHODID_GET_VERSION)))
           .addMethod(
-            getBackupDatalakeMethodHelper(),
-            asyncUnaryCall(
+            getBackupDatalakeMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest,
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse>(
                   this, METHODID_BACKUP_DATALAKE)))
           .addMethod(
-            getRestoreDatalakeMethodHelper(),
-            asyncUnaryCall(
+            getRestoreDatalakeMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest,
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse>(
                   this, METHODID_RESTORE_DATALAKE)))
           .addMethod(
-            getBackupDatalakeStatusMethodHelper(),
-            asyncUnaryCall(
+            getBackupDatalakeStatusMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest,
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse>(
                   this, METHODID_BACKUP_DATALAKE_STATUS)))
           .addMethod(
-            getRestoreDatalakeStatusMethodHelper(),
-            asyncUnaryCall(
+            getRestoreDatalakeStatusMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest,
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse>(
                   this, METHODID_RESTORE_DATALAKE_STATUS)))
           .addMethod(
-            getListDatalakeBackupsMethodHelper(),
-            asyncUnaryCall(
+            getListDatalakeBackupsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest,
                 com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse>(
@@ -404,19 +376,15 @@ public final class datalakeDRGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class datalakeDRStub extends io.grpc.stub.AbstractStub<datalakeDRStub> {
-    private datalakeDRStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private datalakeDRStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class datalakeDRStub extends io.grpc.stub.AbstractAsyncStub<datalakeDRStub> {
+    private datalakeDRStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected datalakeDRStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected datalakeDRStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new datalakeDRStub(channel, callOptions);
     }
 
@@ -427,8 +395,8 @@ public final class datalakeDRGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -439,8 +407,8 @@ public final class datalakeDRGrpc {
      */
     public void backupDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getBackupDatalakeMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getBackupDatalakeMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -451,8 +419,8 @@ public final class datalakeDRGrpc {
      */
     public void restoreDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getRestoreDatalakeMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRestoreDatalakeMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -463,8 +431,8 @@ public final class datalakeDRGrpc {
      */
     public void backupDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getBackupDatalakeStatusMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getBackupDatalakeStatusMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -475,8 +443,8 @@ public final class datalakeDRGrpc {
      */
     public void restoreDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getRestoreDatalakeStatusMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRestoreDatalakeStatusMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -487,8 +455,8 @@ public final class datalakeDRGrpc {
      */
     public void listDatalakeBackups(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListDatalakeBackupsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListDatalakeBackupsMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -498,19 +466,15 @@ public final class datalakeDRGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class datalakeDRBlockingStub extends io.grpc.stub.AbstractStub<datalakeDRBlockingStub> {
-    private datalakeDRBlockingStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private datalakeDRBlockingStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class datalakeDRBlockingStub extends io.grpc.stub.AbstractBlockingStub<datalakeDRBlockingStub> {
+    private datalakeDRBlockingStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected datalakeDRBlockingStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected datalakeDRBlockingStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new datalakeDRBlockingStub(channel, callOptions);
     }
 
@@ -520,8 +484,8 @@ public final class datalakeDRGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetVersionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -531,8 +495,8 @@ public final class datalakeDRGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse backupDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getBackupDatalakeMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getBackupDatalakeMethod(), getCallOptions(), request);
     }
 
     /**
@@ -542,8 +506,8 @@ public final class datalakeDRGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse restoreDatalake(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getRestoreDatalakeMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRestoreDatalakeMethod(), getCallOptions(), request);
     }
 
     /**
@@ -553,8 +517,8 @@ public final class datalakeDRGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse backupDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getBackupDatalakeStatusMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getBackupDatalakeStatusMethod(), getCallOptions(), request);
     }
 
     /**
@@ -564,8 +528,8 @@ public final class datalakeDRGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse restoreDatalakeStatus(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getRestoreDatalakeStatusMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRestoreDatalakeStatusMethod(), getCallOptions(), request);
     }
 
     /**
@@ -575,8 +539,8 @@ public final class datalakeDRGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse listDatalakeBackups(com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListDatalakeBackupsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListDatalakeBackupsMethod(), getCallOptions(), request);
     }
   }
 
@@ -586,19 +550,15 @@ public final class datalakeDRGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class datalakeDRFutureStub extends io.grpc.stub.AbstractStub<datalakeDRFutureStub> {
-    private datalakeDRFutureStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private datalakeDRFutureStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class datalakeDRFutureStub extends io.grpc.stub.AbstractFutureStub<datalakeDRFutureStub> {
+    private datalakeDRFutureStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected datalakeDRFutureStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected datalakeDRFutureStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new datalakeDRFutureStub(channel, callOptions);
     }
 
@@ -609,8 +569,8 @@ public final class datalakeDRGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getVersion(
         com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -621,8 +581,8 @@ public final class datalakeDRGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeResponse> backupDatalake(
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getBackupDatalakeMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getBackupDatalakeMethod(), getCallOptions()), request);
     }
 
     /**
@@ -633,8 +593,8 @@ public final class datalakeDRGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeResponse> restoreDatalake(
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getRestoreDatalakeMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRestoreDatalakeMethod(), getCallOptions()), request);
     }
 
     /**
@@ -645,8 +605,8 @@ public final class datalakeDRGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusResponse> backupDatalakeStatus(
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.BackupDatalakeStatusRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getBackupDatalakeStatusMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getBackupDatalakeStatusMethod(), getCallOptions()), request);
     }
 
     /**
@@ -657,8 +617,8 @@ public final class datalakeDRGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusResponse> restoreDatalakeStatus(
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getRestoreDatalakeStatusMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRestoreDatalakeStatusMethod(), getCallOptions()), request);
     }
 
     /**
@@ -669,8 +629,8 @@ public final class datalakeDRGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupResponse> listDatalakeBackups(
         com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.ListDatalakeBackupRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListDatalakeBackupsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListDatalakeBackupsMethod(), getCallOptions()), request);
     }
   }
 
@@ -783,12 +743,12 @@ public final class datalakeDRGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new datalakeDRFileDescriptorSupplier())
-              .addMethod(getGetVersionMethodHelper())
-              .addMethod(getBackupDatalakeMethodHelper())
-              .addMethod(getRestoreDatalakeMethodHelper())
-              .addMethod(getBackupDatalakeStatusMethodHelper())
-              .addMethod(getRestoreDatalakeStatusMethodHelper())
-              .addMethod(getListDatalakeBackupsMethodHelper())
+              .addMethod(getGetVersionMethod())
+              .addMethod(getBackupDatalakeMethod())
+              .addMethod(getRestoreDatalakeMethod())
+              .addMethod(getBackupDatalakeStatusMethod())
+              .addMethod(getRestoreDatalakeStatusMethod())
+              .addMethod(getListDatalakeBackupsMethod())
               .build();
         }
       }
