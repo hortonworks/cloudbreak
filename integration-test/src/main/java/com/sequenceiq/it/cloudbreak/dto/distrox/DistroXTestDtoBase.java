@@ -1,23 +1,15 @@
 package com.sequenceiq.it.cloudbreak.dto.distrox;
 
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
-import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.sharedservice.SdxV1Request;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
@@ -27,7 +19,6 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXInstanceGro
 import com.sequenceiq.it.cloudbreak.dto.distrox.instancegroup.DistroXNetworkTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
-import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
 public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCloudbreakTestDto<DistroXV1Request, StackV4Response, T> {
 
@@ -58,13 +49,11 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
 
     public DistroXTestDtoBase<T> withEnvironmentKey(String environmentKey) {
         EnvironmentTestDto env = getTestContext().get(environmentKey);
-        if (env == null) {
-            throw new IllegalArgumentException("Env is null with given key: " + environmentKey);
+        DistroXTestDtoBase<T> ret = this;
+        if (env != null && env.getResponse() != null) {
+            ret = withEnvironmentName(env.getResponse().getName());
         }
-        if (env.getResponse() == null) {
-            throw new IllegalArgumentException("Env response is null with given key: " + environmentKey);
-        }
-        return withEnvironmentName(env.getResponse().getName());
+        return ret;
     }
 
     public DistroXTestDtoBase<T> withName(String name) {
@@ -171,33 +160,4 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         getRequest().setExternalDatabase(externalDatabaseDto.getRequest());
         return this;
     }
-
-    public DistroXTestDtoBase<T> withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst() {
-        if (StringUtils.isEmpty(getRequest().getEnvironmentName())) {
-            throw new TestFailException("Cannot fetch the preferred subnet without env name, please add it");
-        }
-        try {
-            EnvironmentClient envClient = getTestContext().getMicroserviceClient(EnvironmentClient.class);
-            DetailedEnvironmentResponse envResponse = envClient.getDefaultClient()
-                    .environmentV1Endpoint()
-                    .getByName(getRequest().getEnvironmentName());
-            InstanceGroupNetworkV1Request instanceGroupNetworkV1Request = new InstanceGroupNetworkV1Request();
-            InstanceGroupAwsNetworkV1Parameters awsNetworkV1Parameters = new InstanceGroupAwsNetworkV1Parameters();
-            if ("AWS_NATIVE".equals(getRequest().getVariant())) {
-                awsNetworkV1Parameters.setSubnetIds(new ArrayList<>(envResponse.getNetwork().getPreferedSubnetIds()));
-            } else {
-                String preferredSubnetId = envResponse.getNetwork().getPreferedSubnetIds().stream()
-                        .filter(s -> !s.equals(envResponse.getNetwork().getPreferedSubnetId()))
-                        .findFirst().get();
-                awsNetworkV1Parameters.setSubnetIds(List.of(preferredSubnetId));
-            }
-            instanceGroupNetworkV1Request.setAws(awsNetworkV1Parameters);
-            getRequest().getInstanceGroups().forEach(s -> s.setNetwork(instanceGroupNetworkV1Request));
-        } catch (Exception e) {
-            String message = "Cannot fetch preferred subnets from " + getRequest().getEnvironmentName();
-            throw new TestFailException(message, e);
-        }
-        return this;
-    }
-
 }

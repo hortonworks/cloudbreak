@@ -22,6 +22,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.FetchPreferredSubnetForInstanceNetworkIfMultiAzEnabledAction;
 import com.sequenceiq.it.cloudbreak.action.v4.util.RenewDistroXCertificateAction;
 import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
@@ -33,6 +34,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> create() {
         return new DistroXCreateAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> fetchPreferredSubnetForInstanceNetworkIfMultiAzEnabled() {
+        return new FetchPreferredSubnetForInstanceNetworkIfMultiAzEnabledAction();
     }
 
     public Action<DistroXTestDto, CloudbreakClient> createInternal() {
