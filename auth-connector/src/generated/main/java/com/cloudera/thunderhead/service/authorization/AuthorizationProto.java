@@ -24,6 +24,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string right = 1;</code>
+     * @return The right.
      */
     java.lang.String getRight();
     /**
@@ -32,6 +33,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string right = 1;</code>
+     * @return The bytes for right.
      */
     com.google.protobuf.ByteString
         getRightBytes();
@@ -42,6 +44,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string resource = 2;</code>
+     * @return The resource.
      */
     java.lang.String getResource();
     /**
@@ -50,6 +53,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string resource = 2;</code>
+     * @return The bytes for resource.
      */
     com.google.protobuf.ByteString
         getResourceBytes();
@@ -61,7 +65,7 @@ public final class AuthorizationProto {
    *
    * Protobuf type {@code authorization.RightCheck}
    */
-  public  static final class RightCheck extends
+  public static final class RightCheck extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:authorization.RightCheck)
       RightCheckOrBuilder {
@@ -73,6 +77,13 @@ public final class AuthorizationProto {
     private RightCheck() {
       right_ = "";
       resource_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new RightCheck();
     }
 
     @java.lang.Override
@@ -88,7 +99,6 @@ public final class AuthorizationProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -112,7 +122,7 @@ public final class AuthorizationProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -151,7 +161,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string right = 1;</code>
+     * @return The right.
      */
+    @java.lang.Override
     public java.lang.String getRight() {
       java.lang.Object ref = right_;
       if (ref instanceof java.lang.String) {
@@ -170,7 +182,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string right = 1;</code>
+     * @return The bytes for right.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRightBytes() {
       java.lang.Object ref = right_;
@@ -193,7 +207,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string resource = 2;</code>
+     * @return The resource.
      */
+    @java.lang.Override
     public java.lang.String getResource() {
       java.lang.Object ref = resource_;
       if (ref instanceof java.lang.String) {
@@ -212,7 +228,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string resource = 2;</code>
+     * @return The bytes for resource.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResourceBytes() {
       java.lang.Object ref = resource_;
@@ -241,10 +259,10 @@ public final class AuthorizationProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getRightBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(right_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, right_);
       }
-      if (!getResourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resource_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resource_);
       }
       unknownFields.writeTo(output);
@@ -256,10 +274,10 @@ public final class AuthorizationProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getRightBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(right_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, right_);
       }
-      if (!getResourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resource_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resource_);
       }
       size += unknownFields.getSerializedSize();
@@ -277,13 +295,12 @@ public final class AuthorizationProto {
       }
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck other = (com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck) obj;
 
-      boolean result = true;
-      result = result && getRight()
-          .equals(other.getRight());
-      result = result && getResource()
-          .equals(other.getResource());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getRight()
+          .equals(other.getRight())) return false;
+      if (!getResource()
+          .equals(other.getResource())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -472,35 +489,35 @@ public final class AuthorizationProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -558,6 +575,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string right = 1;</code>
+       * @return The right.
        */
       public java.lang.String getRight() {
         java.lang.Object ref = right_;
@@ -577,6 +595,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string right = 1;</code>
+       * @return The bytes for right.
        */
       public com.google.protobuf.ByteString
           getRightBytes() {
@@ -597,6 +616,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string right = 1;</code>
+       * @param value The right to set.
+       * @return This builder for chaining.
        */
       public Builder setRight(
           java.lang.String value) {
@@ -614,6 +635,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string right = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRight() {
         
@@ -627,6 +649,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string right = 1;</code>
+       * @param value The bytes for right to set.
+       * @return This builder for chaining.
        */
       public Builder setRightBytes(
           com.google.protobuf.ByteString value) {
@@ -647,6 +671,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string resource = 2;</code>
+       * @return The resource.
        */
       public java.lang.String getResource() {
         java.lang.Object ref = resource_;
@@ -666,6 +691,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string resource = 2;</code>
+       * @return The bytes for resource.
        */
       public com.google.protobuf.ByteString
           getResourceBytes() {
@@ -686,6 +712,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string resource = 2;</code>
+       * @param value The resource to set.
+       * @return This builder for chaining.
        */
       public Builder setResource(
           java.lang.String value) {
@@ -703,6 +731,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string resource = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResource() {
         
@@ -716,6 +745,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string resource = 2;</code>
+       * @param value The bytes for resource to set.
+       * @return This builder for chaining.
        */
       public Builder setResourceBytes(
           com.google.protobuf.ByteString value) {
@@ -731,7 +762,7 @@ public final class AuthorizationProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -791,6 +822,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The actorCrn.
      */
     java.lang.String getActorCrn();
     /**
@@ -799,6 +831,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The bytes for actorCrn.
      */
     com.google.protobuf.ByteString
         getActorCrnBytes();
@@ -809,6 +842,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>.authorization.RightCheck check = 2;</code>
+     * @return Whether the check field is set.
      */
     boolean hasCheck();
     /**
@@ -817,6 +851,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>.authorization.RightCheck check = 2;</code>
+     * @return The check.
      */
     com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck getCheck();
     /**
@@ -831,7 +866,7 @@ public final class AuthorizationProto {
   /**
    * Protobuf type {@code authorization.CheckRightRequest}
    */
-  public  static final class CheckRightRequest extends
+  public static final class CheckRightRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:authorization.CheckRightRequest)
       CheckRightRequestOrBuilder {
@@ -842,6 +877,13 @@ public final class AuthorizationProto {
     }
     private CheckRightRequest() {
       actorCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CheckRightRequest();
     }
 
     @java.lang.Override
@@ -857,7 +899,6 @@ public final class AuthorizationProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -888,7 +929,7 @@ public final class AuthorizationProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -927,7 +968,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The actorCrn.
      */
+    @java.lang.Override
     public java.lang.String getActorCrn() {
       java.lang.Object ref = actorCrn_;
       if (ref instanceof java.lang.String) {
@@ -946,7 +989,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The bytes for actorCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getActorCrnBytes() {
       java.lang.Object ref = actorCrn_;
@@ -969,7 +1014,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>.authorization.RightCheck check = 2;</code>
+     * @return Whether the check field is set.
      */
+    @java.lang.Override
     public boolean hasCheck() {
       return check_ != null;
     }
@@ -979,7 +1026,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>.authorization.RightCheck check = 2;</code>
+     * @return The check.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck getCheck() {
       return check_ == null ? com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck.getDefaultInstance() : check_;
     }
@@ -990,6 +1039,7 @@ public final class AuthorizationProto {
      *
      * <code>.authorization.RightCheck check = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheckOrBuilder getCheckOrBuilder() {
       return getCheck();
     }
@@ -1008,7 +1058,7 @@ public final class AuthorizationProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getActorCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(actorCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, actorCrn_);
       }
       if (check_ != null) {
@@ -1023,7 +1073,7 @@ public final class AuthorizationProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getActorCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(actorCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, actorCrn_);
       }
       if (check_ != null) {
@@ -1045,16 +1095,15 @@ public final class AuthorizationProto {
       }
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest other = (com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest) obj;
 
-      boolean result = true;
-      result = result && getActorCrn()
-          .equals(other.getActorCrn());
-      result = result && (hasCheck() == other.hasCheck());
+      if (!getActorCrn()
+          .equals(other.getActorCrn())) return false;
+      if (hasCheck() != other.hasCheck()) return false;
       if (hasCheck()) {
-        result = result && getCheck()
-            .equals(other.getCheck());
+        if (!getCheck()
+            .equals(other.getCheck())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1249,35 +1298,35 @@ public final class AuthorizationProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1334,6 +1383,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return The actorCrn.
        */
       public java.lang.String getActorCrn() {
         java.lang.Object ref = actorCrn_;
@@ -1353,6 +1403,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return The bytes for actorCrn.
        */
       public com.google.protobuf.ByteString
           getActorCrnBytes() {
@@ -1373,6 +1424,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @param value The actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrn(
           java.lang.String value) {
@@ -1390,6 +1443,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActorCrn() {
         
@@ -1403,6 +1457,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @param value The bytes for actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -1416,7 +1472,7 @@ public final class AuthorizationProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck check_ = null;
+      private com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck check_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck, com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck.Builder, com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheckOrBuilder> checkBuilder_;
       /**
@@ -1425,6 +1481,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>.authorization.RightCheck check = 2;</code>
+       * @return Whether the check field is set.
        */
       public boolean hasCheck() {
         return checkBuilder_ != null || check_ != null;
@@ -1435,6 +1492,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>.authorization.RightCheck check = 2;</code>
+       * @return The check.
        */
       public com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck getCheck() {
         if (checkBuilder_ == null) {
@@ -1571,7 +1629,7 @@ public final class AuthorizationProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1628,7 +1686,7 @@ public final class AuthorizationProto {
   /**
    * Protobuf type {@code authorization.CheckRightResponse}
    */
-  public  static final class CheckRightResponse extends
+  public static final class CheckRightResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:authorization.CheckRightResponse)
       CheckRightResponseOrBuilder {
@@ -1638,6 +1696,13 @@ public final class AuthorizationProto {
       super(builder);
     }
     private CheckRightResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CheckRightResponse();
     }
 
     @java.lang.Override
@@ -1664,7 +1729,7 @@ public final class AuthorizationProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1733,9 +1798,8 @@ public final class AuthorizationProto {
       }
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse other = (com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1910,35 +1974,35 @@ public final class AuthorizationProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1983,7 +2047,7 @@ public final class AuthorizationProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2043,6 +2107,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The actorCrn.
      */
     java.lang.String getActorCrn();
     /**
@@ -2051,6 +2116,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The bytes for actorCrn.
      */
     com.google.protobuf.ByteString
         getActorCrnBytes();
@@ -2102,7 +2168,7 @@ public final class AuthorizationProto {
   /**
    * Protobuf type {@code authorization.HasRightsRequest}
    */
-  public  static final class HasRightsRequest extends
+  public static final class HasRightsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:authorization.HasRightsRequest)
       HasRightsRequestOrBuilder {
@@ -2114,6 +2180,13 @@ public final class AuthorizationProto {
     private HasRightsRequest() {
       actorCrn_ = "";
       check_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new HasRightsRequest();
     }
 
     @java.lang.Override
@@ -2147,16 +2220,16 @@ public final class AuthorizationProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 check_ = new java.util.ArrayList<com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck>();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               check_.add(
                   input.readMessage(com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck.parser(), extensionRegistry));
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2170,7 +2243,7 @@ public final class AuthorizationProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           check_ = java.util.Collections.unmodifiableList(check_);
         }
         this.unknownFields = unknownFields.build();
@@ -2190,7 +2263,6 @@ public final class AuthorizationProto {
               com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest.class, com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ACTORCRN_FIELD_NUMBER = 1;
     private volatile java.lang.Object actorCrn_;
     /**
@@ -2199,7 +2271,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The actorCrn.
      */
+    @java.lang.Override
     public java.lang.String getActorCrn() {
       java.lang.Object ref = actorCrn_;
       if (ref instanceof java.lang.String) {
@@ -2218,7 +2292,9 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The bytes for actorCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getActorCrnBytes() {
       java.lang.Object ref = actorCrn_;
@@ -2242,6 +2318,7 @@ public final class AuthorizationProto {
      *
      * <code>repeated .authorization.RightCheck check = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck> getCheckList() {
       return check_;
     }
@@ -2252,6 +2329,7 @@ public final class AuthorizationProto {
      *
      * <code>repeated .authorization.RightCheck check = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheckOrBuilder> 
         getCheckOrBuilderList() {
       return check_;
@@ -2263,6 +2341,7 @@ public final class AuthorizationProto {
      *
      * <code>repeated .authorization.RightCheck check = 2;</code>
      */
+    @java.lang.Override
     public int getCheckCount() {
       return check_.size();
     }
@@ -2273,6 +2352,7 @@ public final class AuthorizationProto {
      *
      * <code>repeated .authorization.RightCheck check = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck getCheck(int index) {
       return check_.get(index);
     }
@@ -2283,6 +2363,7 @@ public final class AuthorizationProto {
      *
      * <code>repeated .authorization.RightCheck check = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheckOrBuilder getCheckOrBuilder(
         int index) {
       return check_.get(index);
@@ -2302,7 +2383,7 @@ public final class AuthorizationProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getActorCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(actorCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, actorCrn_);
       }
       for (int i = 0; i < check_.size(); i++) {
@@ -2317,7 +2398,7 @@ public final class AuthorizationProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getActorCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(actorCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, actorCrn_);
       }
       for (int i = 0; i < check_.size(); i++) {
@@ -2339,13 +2420,12 @@ public final class AuthorizationProto {
       }
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest other = (com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest) obj;
 
-      boolean result = true;
-      result = result && getActorCrn()
-          .equals(other.getActorCrn());
-      result = result && getCheckList()
-          .equals(other.getCheckList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getActorCrn()
+          .equals(other.getActorCrn())) return false;
+      if (!getCheckList()
+          .equals(other.getCheckList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2499,7 +2579,7 @@ public final class AuthorizationProto {
 
         if (checkBuilder_ == null) {
           check_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           checkBuilder_.clear();
         }
@@ -2530,53 +2610,51 @@ public final class AuthorizationProto {
       public com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest buildPartial() {
         com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest result = new com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.actorCrn_ = actorCrn_;
         if (checkBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             check_ = java.util.Collections.unmodifiableList(check_);
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.check_ = check_;
         } else {
           result.check_ = checkBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2598,7 +2676,7 @@ public final class AuthorizationProto {
           if (!other.check_.isEmpty()) {
             if (check_.isEmpty()) {
               check_ = other.check_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureCheckIsMutable();
               check_.addAll(other.check_);
@@ -2611,7 +2689,7 @@ public final class AuthorizationProto {
               checkBuilder_.dispose();
               checkBuilder_ = null;
               check_ = other.check_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
               checkBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getCheckFieldBuilder() : null;
@@ -2657,6 +2735,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return The actorCrn.
        */
       public java.lang.String getActorCrn() {
         java.lang.Object ref = actorCrn_;
@@ -2676,6 +2755,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return The bytes for actorCrn.
        */
       public com.google.protobuf.ByteString
           getActorCrnBytes() {
@@ -2696,6 +2776,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @param value The actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrn(
           java.lang.String value) {
@@ -2713,6 +2795,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActorCrn() {
         
@@ -2726,6 +2809,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @param value The bytes for actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -2742,9 +2827,9 @@ public final class AuthorizationProto {
       private java.util.List<com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck> check_ =
         java.util.Collections.emptyList();
       private void ensureCheckIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           check_ = new java.util.ArrayList<com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck>(check_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
          }
       }
 
@@ -2938,7 +3023,7 @@ public final class AuthorizationProto {
       public Builder clearCheck() {
         if (checkBuilder_ == null) {
           check_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           checkBuilder_.clear();
@@ -3043,7 +3128,7 @@ public final class AuthorizationProto {
           checkBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck, com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheck.Builder, com.cloudera.thunderhead.service.authorization.AuthorizationProto.RightCheckOrBuilder>(
                   check_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           check_ = null;
@@ -3053,7 +3138,7 @@ public final class AuthorizationProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3113,6 +3198,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>repeated bool result = 1;</code>
+     * @return A list containing the result.
      */
     java.util.List<java.lang.Boolean> getResultList();
     /**
@@ -3121,6 +3207,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>repeated bool result = 1;</code>
+     * @return The count of result.
      */
     int getResultCount();
     /**
@@ -3129,13 +3216,15 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>repeated bool result = 1;</code>
+     * @param index The index of the element to return.
+     * @return The result at the given index.
      */
     boolean getResult(int index);
   }
   /**
    * Protobuf type {@code authorization.HasRightsResponse}
    */
-  public  static final class HasRightsResponse extends
+  public static final class HasRightsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:authorization.HasRightsResponse)
       HasRightsResponseOrBuilder {
@@ -3145,7 +3234,14 @@ public final class AuthorizationProto {
       super(builder);
     }
     private HasRightsResponse() {
-      result_ = java.util.Collections.emptyList();
+      result_ = emptyBooleanList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new HasRightsResponse();
     }
 
     @java.lang.Override
@@ -3173,28 +3269,28 @@ public final class AuthorizationProto {
               done = true;
               break;
             case 8: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-                result_ = new java.util.ArrayList<java.lang.Boolean>();
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
+                result_ = newBooleanList();
                 mutable_bitField0_ |= 0x00000001;
               }
-              result_.add(input.readBool());
+              result_.addBoolean(input.readBool());
               break;
             }
             case 10: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001) && input.getBytesUntilLimit() > 0) {
-                result_ = new java.util.ArrayList<java.lang.Boolean>();
+              if (!((mutable_bitField0_ & 0x00000001) != 0) && input.getBytesUntilLimit() > 0) {
+                result_ = newBooleanList();
                 mutable_bitField0_ |= 0x00000001;
               }
               while (input.getBytesUntilLimit() > 0) {
-                result_.add(input.readBool());
+                result_.addBoolean(input.readBool());
               }
               input.popLimit(limit);
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3208,8 +3304,8 @@ public final class AuthorizationProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
-          result_ = java.util.Collections.unmodifiableList(result_);
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
+          result_.makeImmutable(); // C
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -3229,14 +3325,16 @@ public final class AuthorizationProto {
     }
 
     public static final int RESULT_FIELD_NUMBER = 1;
-    private java.util.List<java.lang.Boolean> result_;
+    private com.google.protobuf.Internal.BooleanList result_;
     /**
      * <pre>
      * The results of the checks.
      * </pre>
      *
      * <code>repeated bool result = 1;</code>
+     * @return A list containing the result.
      */
+    @java.lang.Override
     public java.util.List<java.lang.Boolean>
         getResultList() {
       return result_;
@@ -3247,6 +3345,7 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>repeated bool result = 1;</code>
+     * @return The count of result.
      */
     public int getResultCount() {
       return result_.size();
@@ -3257,9 +3356,11 @@ public final class AuthorizationProto {
      * </pre>
      *
      * <code>repeated bool result = 1;</code>
+     * @param index The index of the element to return.
+     * @return The result at the given index.
      */
     public boolean getResult(int index) {
-      return result_.get(index);
+      return result_.getBoolean(index);
     }
     private int resultMemoizedSerializedSize = -1;
 
@@ -3283,7 +3384,7 @@ public final class AuthorizationProto {
         output.writeUInt32NoTag(resultMemoizedSerializedSize);
       }
       for (int i = 0; i < result_.size(); i++) {
-        output.writeBoolNoTag(result_.get(i));
+        output.writeBoolNoTag(result_.getBoolean(i));
       }
       unknownFields.writeTo(output);
     }
@@ -3320,11 +3421,10 @@ public final class AuthorizationProto {
       }
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse other = (com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse) obj;
 
-      boolean result = true;
-      result = result && getResultList()
-          .equals(other.getResultList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getResultList()
+          .equals(other.getResultList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3471,7 +3571,7 @@ public final class AuthorizationProto {
       @java.lang.Override
       public Builder clear() {
         super.clear();
-        result_ = java.util.Collections.emptyList();
+        result_ = emptyBooleanList();
         bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
@@ -3500,8 +3600,8 @@ public final class AuthorizationProto {
       public com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse buildPartial() {
         com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse result = new com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse(this);
         int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
-          result_ = java.util.Collections.unmodifiableList(result_);
+        if (((bitField0_ & 0x00000001) != 0)) {
+          result_.makeImmutable();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.result_ = result_;
@@ -3511,35 +3611,35 @@ public final class AuthorizationProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3593,10 +3693,10 @@ public final class AuthorizationProto {
       }
       private int bitField0_;
 
-      private java.util.List<java.lang.Boolean> result_ = java.util.Collections.emptyList();
+      private com.google.protobuf.Internal.BooleanList result_ = emptyBooleanList();
       private void ensureResultIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
-          result_ = new java.util.ArrayList<java.lang.Boolean>(result_);
+        if (!((bitField0_ & 0x00000001) != 0)) {
+          result_ = mutableCopy(result_);
           bitField0_ |= 0x00000001;
          }
       }
@@ -3606,10 +3706,12 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>repeated bool result = 1;</code>
+       * @return A list containing the result.
        */
       public java.util.List<java.lang.Boolean>
           getResultList() {
-        return java.util.Collections.unmodifiableList(result_);
+        return ((bitField0_ & 0x00000001) != 0) ?
+                 java.util.Collections.unmodifiableList(result_) : result_;
       }
       /**
        * <pre>
@@ -3617,6 +3719,7 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>repeated bool result = 1;</code>
+       * @return The count of result.
        */
       public int getResultCount() {
         return result_.size();
@@ -3627,9 +3730,11 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>repeated bool result = 1;</code>
+       * @param index The index of the element to return.
+       * @return The result at the given index.
        */
       public boolean getResult(int index) {
-        return result_.get(index);
+        return result_.getBoolean(index);
       }
       /**
        * <pre>
@@ -3637,11 +3742,14 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>repeated bool result = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The result to set.
+       * @return This builder for chaining.
        */
       public Builder setResult(
           int index, boolean value) {
         ensureResultIsMutable();
-        result_.set(index, value);
+        result_.setBoolean(index, value);
         onChanged();
         return this;
       }
@@ -3651,10 +3759,12 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>repeated bool result = 1;</code>
+       * @param value The result to add.
+       * @return This builder for chaining.
        */
       public Builder addResult(boolean value) {
         ensureResultIsMutable();
-        result_.add(value);
+        result_.addBoolean(value);
         onChanged();
         return this;
       }
@@ -3664,6 +3774,8 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>repeated bool result = 1;</code>
+       * @param values The result to add.
+       * @return This builder for chaining.
        */
       public Builder addAllResult(
           java.lang.Iterable<? extends java.lang.Boolean> values) {
@@ -3679,9 +3791,10 @@ public final class AuthorizationProto {
        * </pre>
        *
        * <code>repeated bool result = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResult() {
-        result_ = java.util.Collections.emptyList();
+        result_ = emptyBooleanList();
         bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
@@ -3689,7 +3802,7 @@ public final class AuthorizationProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3791,19 +3904,11 @@ public final class AuthorizationProto {
       "ervice.authorizationB\022AuthorizationProto" +
       "b\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
-        }, assigner);
+        });
     internal_static_authorization_RightCheck_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_authorization_RightCheck_fieldAccessorTable = new

@@ -1,19 +1,6 @@
 package com.cloudera.sigma.service.dbus;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -22,8 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.12.0)",
+    value = "by gRPC proto compiler (version 1.42.1)",
     comments = "Source: sigmadbus.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class SigmaDbusGrpc {
 
   private SigmaDbusGrpc() {}
@@ -31,160 +19,142 @@ public final class SigmaDbusGrpc {
   public static final String SERVICE_NAME = "sigmadbus.SigmaDbus";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getPutRecordMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
-      com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> METHOD_PUT_RECORD = getPutRecordMethodHelper();
-
   private static volatile io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
       com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> getPutRecordMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "PutRecord",
+      requestType = com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest.class,
+      responseType = com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
       com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> getPutRecordMethod() {
-    return getPutRecordMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
-      com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> getPutRecordMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest, com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> getPutRecordMethod;
     if ((getPutRecordMethod = SigmaDbusGrpc.getPutRecordMethod) == null) {
       synchronized (SigmaDbusGrpc.class) {
         if ((getPutRecordMethod = SigmaDbusGrpc.getPutRecordMethod) == null) {
-          SigmaDbusGrpc.getPutRecordMethod = getPutRecordMethod = 
+          SigmaDbusGrpc.getPutRecordMethod = getPutRecordMethod =
               io.grpc.MethodDescriptor.<com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest, com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "sigmadbus.SigmaDbus", "PutRecord"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "PutRecord"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("PutRecord"))
-                  .build();
-          }
+              .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("PutRecord"))
+              .build();
         }
-     }
-     return getPutRecordMethod;
+      }
+    }
+    return getPutRecordMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> METHOD_GET_VERSION = getGetVersionMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetVersion",
+      requestType = com.cloudera.thunderhead.service.common.version.Version.VersionRequest.class,
+      responseType = com.cloudera.thunderhead.service.common.version.Version.VersionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod() {
-    return getGetVersionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
     if ((getGetVersionMethod = SigmaDbusGrpc.getGetVersionMethod) == null) {
       synchronized (SigmaDbusGrpc.class) {
         if ((getGetVersionMethod = SigmaDbusGrpc.getGetVersionMethod) == null) {
-          SigmaDbusGrpc.getGetVersionMethod = getGetVersionMethod = 
+          SigmaDbusGrpc.getGetVersionMethod = getGetVersionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "sigmadbus.SigmaDbus", "GetVersion"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetVersion"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("GetVersion"))
-                  .build();
-          }
+              .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("GetVersion"))
+              .build();
         }
-     }
-     return getGetVersionMethod;
+      }
+    }
+    return getGetVersionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getValidateUuidMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest,
-      com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> METHOD_VALIDATE_UUID = getValidateUuidMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest,
       com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> getValidateUuidMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ValidateUuid",
+      requestType = com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest.class,
+      responseType = com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest,
       com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> getValidateUuidMethod() {
-    return getValidateUuidMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest,
-      com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> getValidateUuidMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest, com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> getValidateUuidMethod;
     if ((getValidateUuidMethod = SigmaDbusGrpc.getValidateUuidMethod) == null) {
       synchronized (SigmaDbusGrpc.class) {
         if ((getValidateUuidMethod = SigmaDbusGrpc.getValidateUuidMethod) == null) {
-          SigmaDbusGrpc.getValidateUuidMethod = getValidateUuidMethod = 
+          SigmaDbusGrpc.getValidateUuidMethod = getValidateUuidMethod =
               io.grpc.MethodDescriptor.<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest, com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "sigmadbus.SigmaDbus", "ValidateUuid"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ValidateUuid"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("ValidateUuid"))
-                  .build();
-          }
+              .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("ValidateUuid"))
+              .build();
         }
-     }
-     return getValidateUuidMethod;
+      }
+    }
+    return getValidateUuidMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getNotifyFileUploadMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest,
-      com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> METHOD_NOTIFY_FILE_UPLOAD = getNotifyFileUploadMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest,
       com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> getNotifyFileUploadMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "NotifyFileUpload",
+      requestType = com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest.class,
+      responseType = com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest,
       com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> getNotifyFileUploadMethod() {
-    return getNotifyFileUploadMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest,
-      com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> getNotifyFileUploadMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest, com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> getNotifyFileUploadMethod;
     if ((getNotifyFileUploadMethod = SigmaDbusGrpc.getNotifyFileUploadMethod) == null) {
       synchronized (SigmaDbusGrpc.class) {
         if ((getNotifyFileUploadMethod = SigmaDbusGrpc.getNotifyFileUploadMethod) == null) {
-          SigmaDbusGrpc.getNotifyFileUploadMethod = getNotifyFileUploadMethod = 
+          SigmaDbusGrpc.getNotifyFileUploadMethod = getNotifyFileUploadMethod =
               io.grpc.MethodDescriptor.<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest, com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "sigmadbus.SigmaDbus", "NotifyFileUpload"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "NotifyFileUpload"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("NotifyFileUpload"))
-                  .build();
-          }
+              .setSchemaDescriptor(new SigmaDbusMethodDescriptorSupplier("NotifyFileUpload"))
+              .build();
         }
-     }
-     return getNotifyFileUploadMethod;
+      }
+    }
+    return getNotifyFileUploadMethod;
   }
 
   /**
    * Creates a new async stub that supports all call types for the service
    */
   public static SigmaDbusStub newStub(io.grpc.Channel channel) {
-    return new SigmaDbusStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<SigmaDbusStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<SigmaDbusStub>() {
+        @java.lang.Override
+        public SigmaDbusStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new SigmaDbusStub(channel, callOptions);
+        }
+      };
+    return SigmaDbusStub.newStub(factory, channel);
   }
 
   /**
@@ -192,7 +162,14 @@ public final class SigmaDbusGrpc {
    */
   public static SigmaDbusBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new SigmaDbusBlockingStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<SigmaDbusBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<SigmaDbusBlockingStub>() {
+        @java.lang.Override
+        public SigmaDbusBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new SigmaDbusBlockingStub(channel, callOptions);
+        }
+      };
+    return SigmaDbusBlockingStub.newStub(factory, channel);
   }
 
   /**
@@ -200,7 +177,14 @@ public final class SigmaDbusGrpc {
    */
   public static SigmaDbusFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new SigmaDbusFutureStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<SigmaDbusFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<SigmaDbusFutureStub>() {
+        @java.lang.Override
+        public SigmaDbusFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new SigmaDbusFutureStub(channel, callOptions);
+        }
+      };
+    return SigmaDbusFutureStub.newStub(factory, channel);
   }
 
   /**
@@ -218,7 +202,7 @@ public final class SigmaDbusGrpc {
      */
     public void putRecord(com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getPutRecordMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPutRecordMethod(), responseObserver);
     }
 
     /**
@@ -228,14 +212,14 @@ public final class SigmaDbusGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetVersionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
      */
     public void validateUuid(com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getValidateUuidMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getValidateUuidMethod(), responseObserver);
     }
 
     /**
@@ -245,35 +229,35 @@ public final class SigmaDbusGrpc {
      */
     public void notifyFileUpload(com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getNotifyFileUploadMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getNotifyFileUploadMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getPutRecordMethodHelper(),
-            asyncUnaryCall(
+            getPutRecordMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest,
                 com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse>(
                   this, METHODID_PUT_RECORD)))
           .addMethod(
-            getGetVersionMethodHelper(),
-            asyncUnaryCall(
+            getGetVersionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
                 com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
                   this, METHODID_GET_VERSION)))
           .addMethod(
-            getValidateUuidMethodHelper(),
-            asyncUnaryCall(
+            getValidateUuidMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest,
                 com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse>(
                   this, METHODID_VALIDATE_UUID)))
           .addMethod(
-            getNotifyFileUploadMethodHelper(),
-            asyncUnaryCall(
+            getNotifyFileUploadMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest,
                 com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse>(
@@ -288,19 +272,15 @@ public final class SigmaDbusGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class SigmaDbusStub extends io.grpc.stub.AbstractStub<SigmaDbusStub> {
-    private SigmaDbusStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private SigmaDbusStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class SigmaDbusStub extends io.grpc.stub.AbstractAsyncStub<SigmaDbusStub> {
+    private SigmaDbusStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected SigmaDbusStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected SigmaDbusStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new SigmaDbusStub(channel, callOptions);
     }
 
@@ -311,8 +291,8 @@ public final class SigmaDbusGrpc {
      */
     public void putRecord(com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getPutRecordMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getPutRecordMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -322,16 +302,16 @@ public final class SigmaDbusGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
      */
     public void validateUuid(com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getValidateUuidMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getValidateUuidMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -341,8 +321,8 @@ public final class SigmaDbusGrpc {
      */
     public void notifyFileUpload(com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getNotifyFileUploadMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getNotifyFileUploadMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -352,19 +332,15 @@ public final class SigmaDbusGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class SigmaDbusBlockingStub extends io.grpc.stub.AbstractStub<SigmaDbusBlockingStub> {
-    private SigmaDbusBlockingStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private SigmaDbusBlockingStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class SigmaDbusBlockingStub extends io.grpc.stub.AbstractBlockingStub<SigmaDbusBlockingStub> {
+    private SigmaDbusBlockingStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected SigmaDbusBlockingStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected SigmaDbusBlockingStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new SigmaDbusBlockingStub(channel, callOptions);
     }
 
@@ -374,8 +350,8 @@ public final class SigmaDbusGrpc {
      * </pre>
      */
     public com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse putRecord(com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getPutRecordMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getPutRecordMethod(), getCallOptions(), request);
     }
 
     /**
@@ -384,15 +360,15 @@ public final class SigmaDbusGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetVersionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse validateUuid(com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getValidateUuidMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getValidateUuidMethod(), getCallOptions(), request);
     }
 
     /**
@@ -401,8 +377,8 @@ public final class SigmaDbusGrpc {
      * </pre>
      */
     public com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse notifyFileUpload(com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getNotifyFileUploadMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getNotifyFileUploadMethod(), getCallOptions(), request);
     }
   }
 
@@ -412,19 +388,15 @@ public final class SigmaDbusGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class SigmaDbusFutureStub extends io.grpc.stub.AbstractStub<SigmaDbusFutureStub> {
-    private SigmaDbusFutureStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private SigmaDbusFutureStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class SigmaDbusFutureStub extends io.grpc.stub.AbstractFutureStub<SigmaDbusFutureStub> {
+    private SigmaDbusFutureStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected SigmaDbusFutureStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected SigmaDbusFutureStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new SigmaDbusFutureStub(channel, callOptions);
     }
 
@@ -435,8 +407,8 @@ public final class SigmaDbusGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.sigma.service.dbus.DbusProto.PutRecordResponse> putRecord(
         com.cloudera.sigma.service.dbus.DbusProto.PutRecordRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getPutRecordMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getPutRecordMethod(), getCallOptions()), request);
     }
 
     /**
@@ -446,16 +418,16 @@ public final class SigmaDbusGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getVersion(
         com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request);
     }
 
     /**
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidResponse> validateUuid(
         com.cloudera.sigma.service.dbus.DbusProto.ValidateUuidRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getValidateUuidMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getValidateUuidMethod(), getCallOptions()), request);
     }
 
     /**
@@ -465,8 +437,8 @@ public final class SigmaDbusGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadResponse> notifyFileUpload(
         com.cloudera.sigma.service.dbus.DbusProto.NotifyFileUploadRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getNotifyFileUploadMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getNotifyFileUploadMethod(), getCallOptions()), request);
     }
   }
 
@@ -569,10 +541,10 @@ public final class SigmaDbusGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new SigmaDbusFileDescriptorSupplier())
-              .addMethod(getPutRecordMethodHelper())
-              .addMethod(getGetVersionMethodHelper())
-              .addMethod(getValidateUuidMethodHelper())
-              .addMethod(getNotifyFileUploadMethodHelper())
+              .addMethod(getPutRecordMethod())
+              .addMethod(getGetVersionMethod())
+              .addMethod(getValidateUuidMethod())
+              .addMethod(getNotifyFileUploadMethod())
               .build();
         }
       }

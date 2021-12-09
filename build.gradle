@@ -10,12 +10,12 @@ buildscript {
     }
   }
   dependencies {
-    classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.0'
+    classpath 'org.ajoberstar.grgit:grgit-gradle:4.1.1'
   }
 }
 
 plugins {
-  id "org.ajoberstar.grgit" version "4.1.0"
+  id "org.ajoberstar.grgit" version "4.1.1"
   id "com.github.spotbugs" version "4.7.8"
   id "com.adarshr.test-logger" version "2.1.1"
 //  id 'nebula.lint' version '17.2.3'

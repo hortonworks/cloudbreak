@@ -1,19 +1,6 @@
 package com.cloudera.thunderhead.service.usermanagement;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -22,8 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.12.0)",
+    value = "by gRPC proto compiler (version 1.42.1)",
     comments = "Source: usermanagement.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class UserManagementGrpc {
 
   private UserManagementGrpc() {}
@@ -31,4341 +19,3645 @@ public final class UserManagementGrpc {
   public static final String SERVICE_NAME = "usermanagement.UserManagement";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getInteractiveLoginMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> METHOD_INTERACTIVE_LOGIN = getInteractiveLoginMethodHelper();
-
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> getInteractiveLoginMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "InteractiveLogin",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> getInteractiveLoginMethod() {
-    return getInteractiveLoginMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> getInteractiveLoginMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> getInteractiveLoginMethod;
     if ((getInteractiveLoginMethod = UserManagementGrpc.getInteractiveLoginMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getInteractiveLoginMethod = UserManagementGrpc.getInteractiveLoginMethod) == null) {
-          UserManagementGrpc.getInteractiveLoginMethod = getInteractiveLoginMethod = 
+          UserManagementGrpc.getInteractiveLoginMethod = getInteractiveLoginMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "InteractiveLogin"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "InteractiveLogin"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLogin"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLogin"))
+              .build();
         }
-     }
-     return getInteractiveLoginMethod;
+      }
+    }
+    return getInteractiveLoginMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getInteractiveLogin3rdPartyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> METHOD_INTERACTIVE_LOGIN3RD_PARTY = getInteractiveLogin3rdPartyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> getInteractiveLogin3rdPartyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "InteractiveLogin3rdParty",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> getInteractiveLogin3rdPartyMethod() {
-    return getInteractiveLogin3rdPartyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> getInteractiveLogin3rdPartyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> getInteractiveLogin3rdPartyMethod;
     if ((getInteractiveLogin3rdPartyMethod = UserManagementGrpc.getInteractiveLogin3rdPartyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getInteractiveLogin3rdPartyMethod = UserManagementGrpc.getInteractiveLogin3rdPartyMethod) == null) {
-          UserManagementGrpc.getInteractiveLogin3rdPartyMethod = getInteractiveLogin3rdPartyMethod = 
+          UserManagementGrpc.getInteractiveLogin3rdPartyMethod = getInteractiveLogin3rdPartyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "InteractiveLogin3rdParty"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "InteractiveLogin3rdParty"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLogin3rdParty"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLogin3rdParty"))
+              .build();
         }
-     }
-     return getInteractiveLogin3rdPartyMethod;
+      }
+    }
+    return getInteractiveLogin3rdPartyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getInteractiveLoginLocalMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> METHOD_INTERACTIVE_LOGIN_LOCAL = getInteractiveLoginLocalMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "InteractiveLoginLocal",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethod() {
-    return getInteractiveLoginLocalMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> getInteractiveLoginLocalMethod;
     if ((getInteractiveLoginLocalMethod = UserManagementGrpc.getInteractiveLoginLocalMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getInteractiveLoginLocalMethod = UserManagementGrpc.getInteractiveLoginLocalMethod) == null) {
-          UserManagementGrpc.getInteractiveLoginLocalMethod = getInteractiveLoginLocalMethod = 
+          UserManagementGrpc.getInteractiveLoginLocalMethod = getInteractiveLoginLocalMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "InteractiveLoginLocal"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "InteractiveLoginLocal"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLoginLocal"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InteractiveLoginLocal"))
+              .build();
         }
-     }
-     return getInteractiveLoginLocalMethod;
+      }
+    }
+    return getInteractiveLoginLocalMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteAccountMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> METHOD_DELETE_ACCOUNT = getDeleteAccountMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> getDeleteAccountMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteAccount",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> getDeleteAccountMethod() {
-    return getDeleteAccountMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> getDeleteAccountMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> getDeleteAccountMethod;
     if ((getDeleteAccountMethod = UserManagementGrpc.getDeleteAccountMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteAccountMethod = UserManagementGrpc.getDeleteAccountMethod) == null) {
-          UserManagementGrpc.getDeleteAccountMethod = getDeleteAccountMethod = 
+          UserManagementGrpc.getDeleteAccountMethod = getDeleteAccountMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteAccount"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteAccount"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteAccount"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteAccount"))
+              .build();
         }
-     }
-     return getDeleteAccountMethod;
+      }
+    }
+    return getDeleteAccountMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteActorMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> METHOD_DELETE_ACTOR = getDeleteActorMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> getDeleteActorMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteActor",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> getDeleteActorMethod() {
-    return getDeleteActorMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> getDeleteActorMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> getDeleteActorMethod;
     if ((getDeleteActorMethod = UserManagementGrpc.getDeleteActorMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteActorMethod = UserManagementGrpc.getDeleteActorMethod) == null) {
-          UserManagementGrpc.getDeleteActorMethod = getDeleteActorMethod = 
+          UserManagementGrpc.getDeleteActorMethod = getDeleteActorMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteActor"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteActor"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteActor"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteActor"))
+              .build();
         }
-     }
-     return getDeleteActorMethod;
+      }
+    }
+    return getDeleteActorMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteTrialUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> METHOD_DELETE_TRIAL_USER = getDeleteTrialUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> getDeleteTrialUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteTrialUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> getDeleteTrialUserMethod() {
-    return getDeleteTrialUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> getDeleteTrialUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> getDeleteTrialUserMethod;
     if ((getDeleteTrialUserMethod = UserManagementGrpc.getDeleteTrialUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteTrialUserMethod = UserManagementGrpc.getDeleteTrialUserMethod) == null) {
-          UserManagementGrpc.getDeleteTrialUserMethod = getDeleteTrialUserMethod = 
+          UserManagementGrpc.getDeleteTrialUserMethod = getDeleteTrialUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteTrialUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteTrialUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteTrialUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteTrialUser"))
+              .build();
         }
-     }
-     return getDeleteTrialUserMethod;
+      }
+    }
+    return getDeleteTrialUserMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetAccessKeyVerificationDataMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> METHOD_GET_ACCESS_KEY_VERIFICATION_DATA = getGetAccessKeyVerificationDataMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> getGetAccessKeyVerificationDataMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetAccessKeyVerificationData",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> getGetAccessKeyVerificationDataMethod() {
-    return getGetAccessKeyVerificationDataMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> getGetAccessKeyVerificationDataMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> getGetAccessKeyVerificationDataMethod;
     if ((getGetAccessKeyVerificationDataMethod = UserManagementGrpc.getGetAccessKeyVerificationDataMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetAccessKeyVerificationDataMethod = UserManagementGrpc.getGetAccessKeyVerificationDataMethod) == null) {
-          UserManagementGrpc.getGetAccessKeyVerificationDataMethod = getGetAccessKeyVerificationDataMethod = 
+          UserManagementGrpc.getGetAccessKeyVerificationDataMethod = getGetAccessKeyVerificationDataMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetAccessKeyVerificationData"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetAccessKeyVerificationData"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccessKeyVerificationData"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccessKeyVerificationData"))
+              .build();
         }
-     }
-     return getGetAccessKeyVerificationDataMethod;
+      }
+    }
+    return getGetAccessKeyVerificationDataMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getVerifyInteractiveUserSessionTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> METHOD_VERIFY_INTERACTIVE_USER_SESSION_TOKEN = getVerifyInteractiveUserSessionTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> getVerifyInteractiveUserSessionTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "VerifyInteractiveUserSessionToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> getVerifyInteractiveUserSessionTokenMethod() {
-    return getVerifyInteractiveUserSessionTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> getVerifyInteractiveUserSessionTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> getVerifyInteractiveUserSessionTokenMethod;
     if ((getVerifyInteractiveUserSessionTokenMethod = UserManagementGrpc.getVerifyInteractiveUserSessionTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getVerifyInteractiveUserSessionTokenMethod = UserManagementGrpc.getVerifyInteractiveUserSessionTokenMethod) == null) {
-          UserManagementGrpc.getVerifyInteractiveUserSessionTokenMethod = getVerifyInteractiveUserSessionTokenMethod = 
+          UserManagementGrpc.getVerifyInteractiveUserSessionTokenMethod = getVerifyInteractiveUserSessionTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "VerifyInteractiveUserSessionToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "VerifyInteractiveUserSessionToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyInteractiveUserSessionToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyInteractiveUserSessionToken"))
+              .build();
         }
-     }
-     return getVerifyInteractiveUserSessionTokenMethod;
+      }
+    }
+    return getVerifyInteractiveUserSessionTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getVerifyAccessTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> METHOD_VERIFY_ACCESS_TOKEN = getVerifyAccessTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "VerifyAccessToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethod() {
-    return getVerifyAccessTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> getVerifyAccessTokenMethod;
     if ((getVerifyAccessTokenMethod = UserManagementGrpc.getVerifyAccessTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getVerifyAccessTokenMethod = UserManagementGrpc.getVerifyAccessTokenMethod) == null) {
-          UserManagementGrpc.getVerifyAccessTokenMethod = getVerifyAccessTokenMethod = 
+          UserManagementGrpc.getVerifyAccessTokenMethod = getVerifyAccessTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "VerifyAccessToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "VerifyAccessToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyAccessToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyAccessToken"))
+              .build();
         }
-     }
-     return getVerifyAccessTokenMethod;
+      }
+    }
+    return getVerifyAccessTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAuthenticateMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> METHOD_AUTHENTICATE = getAuthenticateMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> getAuthenticateMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "Authenticate",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> getAuthenticateMethod() {
-    return getAuthenticateMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> getAuthenticateMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> getAuthenticateMethod;
     if ((getAuthenticateMethod = UserManagementGrpc.getAuthenticateMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAuthenticateMethod = UserManagementGrpc.getAuthenticateMethod) == null) {
-          UserManagementGrpc.getAuthenticateMethod = getAuthenticateMethod = 
+          UserManagementGrpc.getAuthenticateMethod = getAuthenticateMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "Authenticate"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "Authenticate"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("Authenticate"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("Authenticate"))
+              .build();
         }
-     }
-     return getAuthenticateMethod;
+      }
+    }
+    return getAuthenticateMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAccessKeyUsageMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> METHOD_ACCESS_KEY_USAGE = getAccessKeyUsageMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> getAccessKeyUsageMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AccessKeyUsage",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> getAccessKeyUsageMethod() {
-    return getAccessKeyUsageMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> getAccessKeyUsageMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> getAccessKeyUsageMethod;
     if ((getAccessKeyUsageMethod = UserManagementGrpc.getAccessKeyUsageMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAccessKeyUsageMethod = UserManagementGrpc.getAccessKeyUsageMethod) == null) {
-          UserManagementGrpc.getAccessKeyUsageMethod = getAccessKeyUsageMethod = 
+          UserManagementGrpc.getAccessKeyUsageMethod = getAccessKeyUsageMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AccessKeyUsage"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AccessKeyUsage"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AccessKeyUsage"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AccessKeyUsage"))
+              .build();
         }
-     }
-     return getAccessKeyUsageMethod;
+      }
+    }
+    return getAccessKeyUsageMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> METHOD_CREATE_USER = getCreateUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethod() {
-    return getCreateUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> getCreateUserMethod;
     if ((getCreateUserMethod = UserManagementGrpc.getCreateUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateUserMethod = UserManagementGrpc.getCreateUserMethod) == null) {
-          UserManagementGrpc.getCreateUserMethod = getCreateUserMethod = 
+          UserManagementGrpc.getCreateUserMethod = getCreateUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateUser"))
+              .build();
         }
-     }
-     return getCreateUserMethod;
+      }
+    }
+    return getCreateUserMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> METHOD_GET_USER = getGetUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> getGetUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> getGetUserMethod() {
-    return getGetUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> getGetUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> getGetUserMethod;
     if ((getGetUserMethod = UserManagementGrpc.getGetUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetUserMethod = UserManagementGrpc.getGetUserMethod) == null) {
-          UserManagementGrpc.getGetUserMethod = getGetUserMethod = 
+          UserManagementGrpc.getGetUserMethod = getGetUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetUser"))
+              .build();
         }
-     }
-     return getGetUserMethod;
+      }
+    }
+    return getGetUserMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListUsersMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> METHOD_LIST_USERS = getListUsersMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> getListUsersMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListUsers",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> getListUsersMethod() {
-    return getListUsersMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> getListUsersMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> getListUsersMethod;
     if ((getListUsersMethod = UserManagementGrpc.getListUsersMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListUsersMethod = UserManagementGrpc.getListUsersMethod) == null) {
-          UserManagementGrpc.getListUsersMethod = getListUsersMethod = 
+          UserManagementGrpc.getListUsersMethod = getListUsersMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListUsers"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListUsers"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListUsers"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListUsers"))
+              .build();
         }
-     }
-     return getListUsersMethod;
+      }
+    }
+    return getListUsersMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getFindUsersByEmailMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> METHOD_FIND_USERS_BY_EMAIL = getFindUsersByEmailMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> getFindUsersByEmailMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "FindUsersByEmail",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> getFindUsersByEmailMethod() {
-    return getFindUsersByEmailMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> getFindUsersByEmailMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> getFindUsersByEmailMethod;
     if ((getFindUsersByEmailMethod = UserManagementGrpc.getFindUsersByEmailMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getFindUsersByEmailMethod = UserManagementGrpc.getFindUsersByEmailMethod) == null) {
-          UserManagementGrpc.getFindUsersByEmailMethod = getFindUsersByEmailMethod = 
+          UserManagementGrpc.getFindUsersByEmailMethod = getFindUsersByEmailMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "FindUsersByEmail"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "FindUsersByEmail"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("FindUsersByEmail"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("FindUsersByEmail"))
+              .build();
         }
-     }
-     return getFindUsersByEmailMethod;
+      }
+    }
+    return getFindUsersByEmailMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getFindUsersMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> METHOD_FIND_USERS = getFindUsersMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "FindUsers",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethod() {
-    return getFindUsersMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> getFindUsersMethod;
     if ((getFindUsersMethod = UserManagementGrpc.getFindUsersMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getFindUsersMethod = UserManagementGrpc.getFindUsersMethod) == null) {
-          UserManagementGrpc.getFindUsersMethod = getFindUsersMethod = 
+          UserManagementGrpc.getFindUsersMethod = getFindUsersMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "FindUsers"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "FindUsers"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("FindUsers"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("FindUsers"))
+              .build();
         }
-     }
-     return getFindUsersMethod;
+      }
+    }
+    return getFindUsersMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateAccessKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> METHOD_CREATE_ACCESS_KEY = getCreateAccessKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> getCreateAccessKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateAccessKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> getCreateAccessKeyMethod() {
-    return getCreateAccessKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> getCreateAccessKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> getCreateAccessKeyMethod;
     if ((getCreateAccessKeyMethod = UserManagementGrpc.getCreateAccessKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateAccessKeyMethod = UserManagementGrpc.getCreateAccessKeyMethod) == null) {
-          UserManagementGrpc.getCreateAccessKeyMethod = getCreateAccessKeyMethod = 
+          UserManagementGrpc.getCreateAccessKeyMethod = getCreateAccessKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateAccessKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateAccessKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateAccessKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateAccessKey"))
+              .build();
         }
-     }
-     return getCreateAccessKeyMethod;
+      }
+    }
+    return getCreateAccessKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUpdateAccessKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> METHOD_UPDATE_ACCESS_KEY = getUpdateAccessKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> getUpdateAccessKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpdateAccessKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> getUpdateAccessKeyMethod() {
-    return getUpdateAccessKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> getUpdateAccessKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> getUpdateAccessKeyMethod;
     if ((getUpdateAccessKeyMethod = UserManagementGrpc.getUpdateAccessKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUpdateAccessKeyMethod = UserManagementGrpc.getUpdateAccessKeyMethod) == null) {
-          UserManagementGrpc.getUpdateAccessKeyMethod = getUpdateAccessKeyMethod = 
+          UserManagementGrpc.getUpdateAccessKeyMethod = getUpdateAccessKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UpdateAccessKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdateAccessKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateAccessKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateAccessKey"))
+              .build();
         }
-     }
-     return getUpdateAccessKeyMethod;
+      }
+    }
+    return getUpdateAccessKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteAccessKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> METHOD_DELETE_ACCESS_KEY = getDeleteAccessKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> getDeleteAccessKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteAccessKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> getDeleteAccessKeyMethod() {
-    return getDeleteAccessKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> getDeleteAccessKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> getDeleteAccessKeyMethod;
     if ((getDeleteAccessKeyMethod = UserManagementGrpc.getDeleteAccessKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteAccessKeyMethod = UserManagementGrpc.getDeleteAccessKeyMethod) == null) {
-          UserManagementGrpc.getDeleteAccessKeyMethod = getDeleteAccessKeyMethod = 
+          UserManagementGrpc.getDeleteAccessKeyMethod = getDeleteAccessKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteAccessKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteAccessKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteAccessKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteAccessKey"))
+              .build();
         }
-     }
-     return getDeleteAccessKeyMethod;
+      }
+    }
+    return getDeleteAccessKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetAccessKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> METHOD_GET_ACCESS_KEY = getGetAccessKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> getGetAccessKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetAccessKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> getGetAccessKeyMethod() {
-    return getGetAccessKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> getGetAccessKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> getGetAccessKeyMethod;
     if ((getGetAccessKeyMethod = UserManagementGrpc.getGetAccessKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetAccessKeyMethod = UserManagementGrpc.getGetAccessKeyMethod) == null) {
-          UserManagementGrpc.getGetAccessKeyMethod = getGetAccessKeyMethod = 
+          UserManagementGrpc.getGetAccessKeyMethod = getGetAccessKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetAccessKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetAccessKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccessKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccessKey"))
+              .build();
         }
-     }
-     return getGetAccessKeyMethod;
+      }
+    }
+    return getGetAccessKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListAccessKeysMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> METHOD_LIST_ACCESS_KEYS = getListAccessKeysMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> getListAccessKeysMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListAccessKeys",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> getListAccessKeysMethod() {
-    return getListAccessKeysMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> getListAccessKeysMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> getListAccessKeysMethod;
     if ((getListAccessKeysMethod = UserManagementGrpc.getListAccessKeysMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListAccessKeysMethod = UserManagementGrpc.getListAccessKeysMethod) == null) {
-          UserManagementGrpc.getListAccessKeysMethod = getListAccessKeysMethod = 
+          UserManagementGrpc.getListAccessKeysMethod = getListAccessKeysMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListAccessKeys"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListAccessKeys"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAccessKeys"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAccessKeys"))
+              .build();
         }
-     }
-     return getListAccessKeysMethod;
+      }
+    }
+    return getListAccessKeysMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateAccessTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> METHOD_CREATE_ACCESS_TOKEN = getCreateAccessTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateAccessToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethod() {
-    return getCreateAccessTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> getCreateAccessTokenMethod;
     if ((getCreateAccessTokenMethod = UserManagementGrpc.getCreateAccessTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateAccessTokenMethod = UserManagementGrpc.getCreateAccessTokenMethod) == null) {
-          UserManagementGrpc.getCreateAccessTokenMethod = getCreateAccessTokenMethod = 
+          UserManagementGrpc.getCreateAccessTokenMethod = getCreateAccessTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateAccessToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateAccessToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateAccessToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateAccessToken"))
+              .build();
         }
-     }
-     return getCreateAccessTokenMethod;
+      }
+    }
+    return getCreateAccessTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteAccessTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> METHOD_DELETE_ACCESS_TOKEN = getDeleteAccessTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteAccessToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethod() {
-    return getDeleteAccessTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> getDeleteAccessTokenMethod;
     if ((getDeleteAccessTokenMethod = UserManagementGrpc.getDeleteAccessTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteAccessTokenMethod = UserManagementGrpc.getDeleteAccessTokenMethod) == null) {
-          UserManagementGrpc.getDeleteAccessTokenMethod = getDeleteAccessTokenMethod = 
+          UserManagementGrpc.getDeleteAccessTokenMethod = getDeleteAccessTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteAccessToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteAccessToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteAccessToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteAccessToken"))
+              .build();
         }
-     }
-     return getDeleteAccessTokenMethod;
+      }
+    }
+    return getDeleteAccessTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetAccessTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> METHOD_GET_ACCESS_TOKEN = getGetAccessTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetAccessToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethod() {
-    return getGetAccessTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getGetAccessTokenMethod;
     if ((getGetAccessTokenMethod = UserManagementGrpc.getGetAccessTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetAccessTokenMethod = UserManagementGrpc.getGetAccessTokenMethod) == null) {
-          UserManagementGrpc.getGetAccessTokenMethod = getGetAccessTokenMethod = 
+          UserManagementGrpc.getGetAccessTokenMethod = getGetAccessTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetAccessToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetAccessToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccessToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccessToken"))
+              .build();
         }
-     }
-     return getGetAccessTokenMethod;
+      }
+    }
+    return getGetAccessTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListAccessTokensMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> METHOD_LIST_ACCESS_TOKENS = getListAccessTokensMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListAccessTokens",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethod() {
-    return getListAccessTokensMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> getListAccessTokensMethod;
     if ((getListAccessTokensMethod = UserManagementGrpc.getListAccessTokensMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListAccessTokensMethod = UserManagementGrpc.getListAccessTokensMethod) == null) {
-          UserManagementGrpc.getListAccessTokensMethod = getListAccessTokensMethod = 
+          UserManagementGrpc.getListAccessTokensMethod = getListAccessTokensMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListAccessTokens"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListAccessTokens"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAccessTokens"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAccessTokens"))
+              .build();
         }
-     }
-     return getListAccessTokensMethod;
+      }
+    }
+    return getListAccessTokensMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateScimAccessTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> METHOD_CREATE_SCIM_ACCESS_TOKEN = getCreateScimAccessTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateScimAccessToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethod() {
-    return getCreateScimAccessTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> getCreateScimAccessTokenMethod;
     if ((getCreateScimAccessTokenMethod = UserManagementGrpc.getCreateScimAccessTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateScimAccessTokenMethod = UserManagementGrpc.getCreateScimAccessTokenMethod) == null) {
-          UserManagementGrpc.getCreateScimAccessTokenMethod = getCreateScimAccessTokenMethod = 
+          UserManagementGrpc.getCreateScimAccessTokenMethod = getCreateScimAccessTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateScimAccessToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateScimAccessToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateScimAccessToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateScimAccessToken"))
+              .build();
         }
-     }
-     return getCreateScimAccessTokenMethod;
+      }
+    }
+    return getCreateScimAccessTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteScimAccessTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> METHOD_DELETE_SCIM_ACCESS_TOKEN = getDeleteScimAccessTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteScimAccessToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethod() {
-    return getDeleteScimAccessTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> getDeleteScimAccessTokenMethod;
     if ((getDeleteScimAccessTokenMethod = UserManagementGrpc.getDeleteScimAccessTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteScimAccessTokenMethod = UserManagementGrpc.getDeleteScimAccessTokenMethod) == null) {
-          UserManagementGrpc.getDeleteScimAccessTokenMethod = getDeleteScimAccessTokenMethod = 
+          UserManagementGrpc.getDeleteScimAccessTokenMethod = getDeleteScimAccessTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteScimAccessToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteScimAccessToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteScimAccessToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteScimAccessToken"))
+              .build();
         }
-     }
-     return getDeleteScimAccessTokenMethod;
+      }
+    }
+    return getDeleteScimAccessTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListScimAccessTokensMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> METHOD_LIST_SCIM_ACCESS_TOKENS = getListScimAccessTokensMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListScimAccessTokens",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethod() {
-    return getListScimAccessTokensMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> getListScimAccessTokensMethod;
     if ((getListScimAccessTokensMethod = UserManagementGrpc.getListScimAccessTokensMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListScimAccessTokensMethod = UserManagementGrpc.getListScimAccessTokensMethod) == null) {
-          UserManagementGrpc.getListScimAccessTokensMethod = getListScimAccessTokensMethod = 
+          UserManagementGrpc.getListScimAccessTokensMethod = getListScimAccessTokensMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListScimAccessTokens"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListScimAccessTokens"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListScimAccessTokens"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListScimAccessTokens"))
+              .build();
         }
-     }
-     return getListScimAccessTokensMethod;
+      }
+    }
+    return getListScimAccessTokensMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> METHOD_GET_VERSION = getGetVersionMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetVersion",
+      requestType = com.cloudera.thunderhead.service.common.version.Version.VersionRequest.class,
+      responseType = com.cloudera.thunderhead.service.common.version.Version.VersionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod() {
-    return getGetVersionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
     if ((getGetVersionMethod = UserManagementGrpc.getGetVersionMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetVersionMethod = UserManagementGrpc.getGetVersionMethod) == null) {
-          UserManagementGrpc.getGetVersionMethod = getGetVersionMethod = 
+          UserManagementGrpc.getGetVersionMethod = getGetVersionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetVersion"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetVersion"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetVersion"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetVersion"))
+              .build();
         }
-     }
-     return getGetVersionMethod;
+      }
+    }
+    return getGetVersionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetAccountMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> METHOD_GET_ACCOUNT = getGetAccountMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> getGetAccountMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetAccount",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> getGetAccountMethod() {
-    return getGetAccountMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> getGetAccountMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> getGetAccountMethod;
     if ((getGetAccountMethod = UserManagementGrpc.getGetAccountMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetAccountMethod = UserManagementGrpc.getGetAccountMethod) == null) {
-          UserManagementGrpc.getGetAccountMethod = getGetAccountMethod = 
+          UserManagementGrpc.getGetAccountMethod = getGetAccountMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetAccount"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetAccount"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccount"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAccount"))
+              .build();
         }
-     }
-     return getGetAccountMethod;
+      }
+    }
+    return getGetAccountMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListAccountsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> METHOD_LIST_ACCOUNTS = getListAccountsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> getListAccountsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListAccounts",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> getListAccountsMethod() {
-    return getListAccountsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> getListAccountsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> getListAccountsMethod;
     if ((getListAccountsMethod = UserManagementGrpc.getListAccountsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListAccountsMethod = UserManagementGrpc.getListAccountsMethod) == null) {
-          UserManagementGrpc.getListAccountsMethod = getListAccountsMethod = 
+          UserManagementGrpc.getListAccountsMethod = getListAccountsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListAccounts"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListAccounts"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAccounts"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAccounts"))
+              .build();
         }
-     }
-     return getListAccountsMethod;
+      }
+    }
+    return getListAccountsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetRightsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> METHOD_GET_RIGHTS = getGetRightsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> getGetRightsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetRights",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> getGetRightsMethod() {
-    return getGetRightsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> getGetRightsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> getGetRightsMethod;
     if ((getGetRightsMethod = UserManagementGrpc.getGetRightsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetRightsMethod = UserManagementGrpc.getGetRightsMethod) == null) {
-          UserManagementGrpc.getGetRightsMethod = getGetRightsMethod = 
+          UserManagementGrpc.getGetRightsMethod = getGetRightsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetRights"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetRights"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetRights"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetRights"))
+              .build();
         }
-     }
-     return getGetRightsMethod;
+      }
+    }
+    return getGetRightsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCheckRightsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> METHOD_CHECK_RIGHTS = getCheckRightsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> getCheckRightsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CheckRights",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> getCheckRightsMethod() {
-    return getCheckRightsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> getCheckRightsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> getCheckRightsMethod;
     if ((getCheckRightsMethod = UserManagementGrpc.getCheckRightsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCheckRightsMethod = UserManagementGrpc.getCheckRightsMethod) == null) {
-          UserManagementGrpc.getCheckRightsMethod = getCheckRightsMethod = 
+          UserManagementGrpc.getCheckRightsMethod = getCheckRightsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CheckRights"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CheckRights"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CheckRights"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CheckRights"))
+              .build();
         }
-     }
-     return getCheckRightsMethod;
+      }
+    }
+    return getCheckRightsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateAccountMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> METHOD_CREATE_ACCOUNT = getCreateAccountMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> getCreateAccountMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateAccount",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> getCreateAccountMethod() {
-    return getCreateAccountMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> getCreateAccountMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> getCreateAccountMethod;
     if ((getCreateAccountMethod = UserManagementGrpc.getCreateAccountMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateAccountMethod = UserManagementGrpc.getCreateAccountMethod) == null) {
-          UserManagementGrpc.getCreateAccountMethod = getCreateAccountMethod = 
+          UserManagementGrpc.getCreateAccountMethod = getCreateAccountMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateAccount"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateAccount"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateAccount"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateAccount"))
+              .build();
         }
-     }
-     return getCreateAccountMethod;
+      }
+    }
+    return getCreateAccountMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateTrialAccountMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> METHOD_CREATE_TRIAL_ACCOUNT = getCreateTrialAccountMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateTrialAccount",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethod() {
-    return getCreateTrialAccountMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> getCreateTrialAccountMethod;
     if ((getCreateTrialAccountMethod = UserManagementGrpc.getCreateTrialAccountMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateTrialAccountMethod = UserManagementGrpc.getCreateTrialAccountMethod) == null) {
-          UserManagementGrpc.getCreateTrialAccountMethod = getCreateTrialAccountMethod = 
+          UserManagementGrpc.getCreateTrialAccountMethod = getCreateTrialAccountMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateTrialAccount"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateTrialAccount"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateTrialAccount"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateTrialAccount"))
+              .build();
         }
-     }
-     return getCreateTrialAccountMethod;
+      }
+    }
+    return getCreateTrialAccountMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateC1CAccountMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> METHOD_CREATE_C1CACCOUNT = getCreateC1CAccountMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateC1CAccount",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethod() {
-    return getCreateC1CAccountMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> getCreateC1CAccountMethod;
     if ((getCreateC1CAccountMethod = UserManagementGrpc.getCreateC1CAccountMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateC1CAccountMethod = UserManagementGrpc.getCreateC1CAccountMethod) == null) {
-          UserManagementGrpc.getCreateC1CAccountMethod = getCreateC1CAccountMethod = 
+          UserManagementGrpc.getCreateC1CAccountMethod = getCreateC1CAccountMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateC1CAccount"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateC1CAccount"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateC1CAccount"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateC1CAccount"))
+              .build();
         }
-     }
-     return getCreateC1CAccountMethod;
+      }
+    }
+    return getCreateC1CAccountMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getVerifyC1CEmailMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> METHOD_VERIFY_C1CEMAIL = getVerifyC1CEmailMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "VerifyC1CEmail",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethod() {
-    return getVerifyC1CEmailMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> getVerifyC1CEmailMethod;
     if ((getVerifyC1CEmailMethod = UserManagementGrpc.getVerifyC1CEmailMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getVerifyC1CEmailMethod = UserManagementGrpc.getVerifyC1CEmailMethod) == null) {
-          UserManagementGrpc.getVerifyC1CEmailMethod = getVerifyC1CEmailMethod = 
+          UserManagementGrpc.getVerifyC1CEmailMethod = getVerifyC1CEmailMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "VerifyC1CEmail"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "VerifyC1CEmail"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyC1CEmail"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("VerifyC1CEmail"))
+              .build();
         }
-     }
-     return getVerifyC1CEmailMethod;
+      }
+    }
+    return getVerifyC1CEmailMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGrantEntitlementMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> METHOD_GRANT_ENTITLEMENT = getGrantEntitlementMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> getGrantEntitlementMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GrantEntitlement",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> getGrantEntitlementMethod() {
-    return getGrantEntitlementMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> getGrantEntitlementMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> getGrantEntitlementMethod;
     if ((getGrantEntitlementMethod = UserManagementGrpc.getGrantEntitlementMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGrantEntitlementMethod = UserManagementGrpc.getGrantEntitlementMethod) == null) {
-          UserManagementGrpc.getGrantEntitlementMethod = getGrantEntitlementMethod = 
+          UserManagementGrpc.getGrantEntitlementMethod = getGrantEntitlementMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GrantEntitlement"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GrantEntitlement"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GrantEntitlement"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GrantEntitlement"))
+              .build();
         }
-     }
-     return getGrantEntitlementMethod;
+      }
+    }
+    return getGrantEntitlementMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getRevokeEntitlementMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> METHOD_REVOKE_ENTITLEMENT = getRevokeEntitlementMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> getRevokeEntitlementMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RevokeEntitlement",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> getRevokeEntitlementMethod() {
-    return getRevokeEntitlementMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> getRevokeEntitlementMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> getRevokeEntitlementMethod;
     if ((getRevokeEntitlementMethod = UserManagementGrpc.getRevokeEntitlementMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getRevokeEntitlementMethod = UserManagementGrpc.getRevokeEntitlementMethod) == null) {
-          UserManagementGrpc.getRevokeEntitlementMethod = getRevokeEntitlementMethod = 
+          UserManagementGrpc.getRevokeEntitlementMethod = getRevokeEntitlementMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "RevokeEntitlement"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RevokeEntitlement"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("RevokeEntitlement"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("RevokeEntitlement"))
+              .build();
         }
-     }
-     return getRevokeEntitlementMethod;
+      }
+    }
+    return getRevokeEntitlementMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getEnsureDefaultEntitlementsGrantedMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> METHOD_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED = getEnsureDefaultEntitlementsGrantedMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "EnsureDefaultEntitlementsGranted",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethod() {
-    return getEnsureDefaultEntitlementsGrantedMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> getEnsureDefaultEntitlementsGrantedMethod;
     if ((getEnsureDefaultEntitlementsGrantedMethod = UserManagementGrpc.getEnsureDefaultEntitlementsGrantedMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getEnsureDefaultEntitlementsGrantedMethod = UserManagementGrpc.getEnsureDefaultEntitlementsGrantedMethod) == null) {
-          UserManagementGrpc.getEnsureDefaultEntitlementsGrantedMethod = getEnsureDefaultEntitlementsGrantedMethod = 
+          UserManagementGrpc.getEnsureDefaultEntitlementsGrantedMethod = getEnsureDefaultEntitlementsGrantedMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "EnsureDefaultEntitlementsGranted"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "EnsureDefaultEntitlementsGranted"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("EnsureDefaultEntitlementsGranted"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("EnsureDefaultEntitlementsGranted"))
+              .build();
         }
-     }
-     return getEnsureDefaultEntitlementsGrantedMethod;
+      }
+    }
+    return getEnsureDefaultEntitlementsGrantedMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAssignRoleMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> METHOD_ASSIGN_ROLE = getAssignRoleMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> getAssignRoleMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AssignRole",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> getAssignRoleMethod() {
-    return getAssignRoleMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> getAssignRoleMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> getAssignRoleMethod;
     if ((getAssignRoleMethod = UserManagementGrpc.getAssignRoleMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAssignRoleMethod = UserManagementGrpc.getAssignRoleMethod) == null) {
-          UserManagementGrpc.getAssignRoleMethod = getAssignRoleMethod = 
+          UserManagementGrpc.getAssignRoleMethod = getAssignRoleMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AssignRole"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AssignRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignRole"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignRole"))
+              .build();
         }
-     }
-     return getAssignRoleMethod;
+      }
+    }
+    return getAssignRoleMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUnassignRoleMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> METHOD_UNASSIGN_ROLE = getUnassignRoleMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> getUnassignRoleMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UnassignRole",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> getUnassignRoleMethod() {
-    return getUnassignRoleMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> getUnassignRoleMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> getUnassignRoleMethod;
     if ((getUnassignRoleMethod = UserManagementGrpc.getUnassignRoleMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUnassignRoleMethod = UserManagementGrpc.getUnassignRoleMethod) == null) {
-          UserManagementGrpc.getUnassignRoleMethod = getUnassignRoleMethod = 
+          UserManagementGrpc.getUnassignRoleMethod = getUnassignRoleMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UnassignRole"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UnassignRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignRole"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignRole"))
+              .build();
         }
-     }
-     return getUnassignRoleMethod;
+      }
+    }
+    return getUnassignRoleMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListAssignedRolesMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> METHOD_LIST_ASSIGNED_ROLES = getListAssignedRolesMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> getListAssignedRolesMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListAssignedRoles",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> getListAssignedRolesMethod() {
-    return getListAssignedRolesMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> getListAssignedRolesMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> getListAssignedRolesMethod;
     if ((getListAssignedRolesMethod = UserManagementGrpc.getListAssignedRolesMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListAssignedRolesMethod = UserManagementGrpc.getListAssignedRolesMethod) == null) {
-          UserManagementGrpc.getListAssignedRolesMethod = getListAssignedRolesMethod = 
+          UserManagementGrpc.getListAssignedRolesMethod = getListAssignedRolesMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListAssignedRoles"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListAssignedRoles"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAssignedRoles"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAssignedRoles"))
+              .build();
         }
-     }
-     return getListAssignedRolesMethod;
+      }
+    }
+    return getListAssignedRolesMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAssignResourceRoleMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> METHOD_ASSIGN_RESOURCE_ROLE = getAssignResourceRoleMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> getAssignResourceRoleMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AssignResourceRole",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> getAssignResourceRoleMethod() {
-    return getAssignResourceRoleMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> getAssignResourceRoleMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> getAssignResourceRoleMethod;
     if ((getAssignResourceRoleMethod = UserManagementGrpc.getAssignResourceRoleMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAssignResourceRoleMethod = UserManagementGrpc.getAssignResourceRoleMethod) == null) {
-          UserManagementGrpc.getAssignResourceRoleMethod = getAssignResourceRoleMethod = 
+          UserManagementGrpc.getAssignResourceRoleMethod = getAssignResourceRoleMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AssignResourceRole"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AssignResourceRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignResourceRole"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignResourceRole"))
+              .build();
         }
-     }
-     return getAssignResourceRoleMethod;
+      }
+    }
+    return getAssignResourceRoleMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUnassignResourceRoleMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> METHOD_UNASSIGN_RESOURCE_ROLE = getUnassignResourceRoleMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> getUnassignResourceRoleMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UnassignResourceRole",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> getUnassignResourceRoleMethod() {
-    return getUnassignResourceRoleMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> getUnassignResourceRoleMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> getUnassignResourceRoleMethod;
     if ((getUnassignResourceRoleMethod = UserManagementGrpc.getUnassignResourceRoleMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUnassignResourceRoleMethod = UserManagementGrpc.getUnassignResourceRoleMethod) == null) {
-          UserManagementGrpc.getUnassignResourceRoleMethod = getUnassignResourceRoleMethod = 
+          UserManagementGrpc.getUnassignResourceRoleMethod = getUnassignResourceRoleMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UnassignResourceRole"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UnassignResourceRole"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignResourceRole"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignResourceRole"))
+              .build();
         }
-     }
-     return getUnassignResourceRoleMethod;
+      }
+    }
+    return getUnassignResourceRoleMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListAssignedResourceRolesMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> METHOD_LIST_ASSIGNED_RESOURCE_ROLES = getListAssignedResourceRolesMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> getListAssignedResourceRolesMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListAssignedResourceRoles",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> getListAssignedResourceRolesMethod() {
-    return getListAssignedResourceRolesMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> getListAssignedResourceRolesMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> getListAssignedResourceRolesMethod;
     if ((getListAssignedResourceRolesMethod = UserManagementGrpc.getListAssignedResourceRolesMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListAssignedResourceRolesMethod = UserManagementGrpc.getListAssignedResourceRolesMethod) == null) {
-          UserManagementGrpc.getListAssignedResourceRolesMethod = getListAssignedResourceRolesMethod = 
+          UserManagementGrpc.getListAssignedResourceRolesMethod = getListAssignedResourceRolesMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListAssignedResourceRoles"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListAssignedResourceRoles"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAssignedResourceRoles"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListAssignedResourceRoles"))
+              .build();
         }
-     }
-     return getListAssignedResourceRolesMethod;
+      }
+    }
+    return getListAssignedResourceRolesMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListRolesMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> METHOD_LIST_ROLES = getListRolesMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> getListRolesMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListRoles",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> getListRolesMethod() {
-    return getListRolesMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> getListRolesMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> getListRolesMethod;
     if ((getListRolesMethod = UserManagementGrpc.getListRolesMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListRolesMethod = UserManagementGrpc.getListRolesMethod) == null) {
-          UserManagementGrpc.getListRolesMethod = getListRolesMethod = 
+          UserManagementGrpc.getListRolesMethod = getListRolesMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListRoles"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListRoles"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListRoles"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListRoles"))
+              .build();
         }
-     }
-     return getListRolesMethod;
+      }
+    }
+    return getListRolesMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListResourceRolesMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> METHOD_LIST_RESOURCE_ROLES = getListResourceRolesMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> getListResourceRolesMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListResourceRoles",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> getListResourceRolesMethod() {
-    return getListResourceRolesMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> getListResourceRolesMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> getListResourceRolesMethod;
     if ((getListResourceRolesMethod = UserManagementGrpc.getListResourceRolesMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListResourceRolesMethod = UserManagementGrpc.getListResourceRolesMethod) == null) {
-          UserManagementGrpc.getListResourceRolesMethod = getListResourceRolesMethod = 
+          UserManagementGrpc.getListResourceRolesMethod = getListResourceRolesMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListResourceRoles"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListResourceRoles"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListResourceRoles"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListResourceRoles"))
+              .build();
         }
-     }
-     return getListResourceRolesMethod;
+      }
+    }
+    return getListResourceRolesMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListResourceAssigneesMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> METHOD_LIST_RESOURCE_ASSIGNEES = getListResourceAssigneesMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> getListResourceAssigneesMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListResourceAssignees",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> getListResourceAssigneesMethod() {
-    return getListResourceAssigneesMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> getListResourceAssigneesMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> getListResourceAssigneesMethod;
     if ((getListResourceAssigneesMethod = UserManagementGrpc.getListResourceAssigneesMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListResourceAssigneesMethod = UserManagementGrpc.getListResourceAssigneesMethod) == null) {
-          UserManagementGrpc.getListResourceAssigneesMethod = getListResourceAssigneesMethod = 
+          UserManagementGrpc.getListResourceAssigneesMethod = getListResourceAssigneesMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListResourceAssignees"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListResourceAssignees"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListResourceAssignees"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListResourceAssignees"))
+              .build();
         }
-     }
-     return getListResourceAssigneesMethod;
+      }
+    }
+    return getListResourceAssigneesMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUpdateClouderaManagerLicenseKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> METHOD_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY = getUpdateClouderaManagerLicenseKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> getUpdateClouderaManagerLicenseKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpdateClouderaManagerLicenseKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> getUpdateClouderaManagerLicenseKeyMethod() {
-    return getUpdateClouderaManagerLicenseKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> getUpdateClouderaManagerLicenseKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> getUpdateClouderaManagerLicenseKeyMethod;
     if ((getUpdateClouderaManagerLicenseKeyMethod = UserManagementGrpc.getUpdateClouderaManagerLicenseKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUpdateClouderaManagerLicenseKeyMethod = UserManagementGrpc.getUpdateClouderaManagerLicenseKeyMethod) == null) {
-          UserManagementGrpc.getUpdateClouderaManagerLicenseKeyMethod = getUpdateClouderaManagerLicenseKeyMethod = 
+          UserManagementGrpc.getUpdateClouderaManagerLicenseKeyMethod = getUpdateClouderaManagerLicenseKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UpdateClouderaManagerLicenseKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdateClouderaManagerLicenseKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateClouderaManagerLicenseKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateClouderaManagerLicenseKey"))
+              .build();
         }
-     }
-     return getUpdateClouderaManagerLicenseKeyMethod;
+      }
+    }
+    return getUpdateClouderaManagerLicenseKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getInitiateSupportCaseMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> METHOD_INITIATE_SUPPORT_CASE = getInitiateSupportCaseMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> getInitiateSupportCaseMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "InitiateSupportCase",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> getInitiateSupportCaseMethod() {
-    return getInitiateSupportCaseMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> getInitiateSupportCaseMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> getInitiateSupportCaseMethod;
     if ((getInitiateSupportCaseMethod = UserManagementGrpc.getInitiateSupportCaseMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getInitiateSupportCaseMethod = UserManagementGrpc.getInitiateSupportCaseMethod) == null) {
-          UserManagementGrpc.getInitiateSupportCaseMethod = getInitiateSupportCaseMethod = 
+          UserManagementGrpc.getInitiateSupportCaseMethod = getInitiateSupportCaseMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "InitiateSupportCase"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "InitiateSupportCase"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InitiateSupportCase"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InitiateSupportCase"))
+              .build();
         }
-     }
-     return getInitiateSupportCaseMethod;
+      }
+    }
+    return getInitiateSupportCaseMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getNotifyResourceDeletedMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> METHOD_NOTIFY_RESOURCE_DELETED = getNotifyResourceDeletedMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> getNotifyResourceDeletedMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "NotifyResourceDeleted",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> getNotifyResourceDeletedMethod() {
-    return getNotifyResourceDeletedMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> getNotifyResourceDeletedMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> getNotifyResourceDeletedMethod;
     if ((getNotifyResourceDeletedMethod = UserManagementGrpc.getNotifyResourceDeletedMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getNotifyResourceDeletedMethod = UserManagementGrpc.getNotifyResourceDeletedMethod) == null) {
-          UserManagementGrpc.getNotifyResourceDeletedMethod = getNotifyResourceDeletedMethod = 
+          UserManagementGrpc.getNotifyResourceDeletedMethod = getNotifyResourceDeletedMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "NotifyResourceDeleted"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "NotifyResourceDeleted"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("NotifyResourceDeleted"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("NotifyResourceDeleted"))
+              .build();
         }
-     }
-     return getNotifyResourceDeletedMethod;
+      }
+    }
+    return getNotifyResourceDeletedMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateMachineUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> METHOD_CREATE_MACHINE_USER = getCreateMachineUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> getCreateMachineUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateMachineUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> getCreateMachineUserMethod() {
-    return getCreateMachineUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> getCreateMachineUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> getCreateMachineUserMethod;
     if ((getCreateMachineUserMethod = UserManagementGrpc.getCreateMachineUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateMachineUserMethod = UserManagementGrpc.getCreateMachineUserMethod) == null) {
-          UserManagementGrpc.getCreateMachineUserMethod = getCreateMachineUserMethod = 
+          UserManagementGrpc.getCreateMachineUserMethod = getCreateMachineUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateMachineUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateMachineUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateMachineUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateMachineUser"))
+              .build();
         }
-     }
-     return getCreateMachineUserMethod;
+      }
+    }
+    return getCreateMachineUserMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListMachineUsersMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> METHOD_LIST_MACHINE_USERS = getListMachineUsersMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> getListMachineUsersMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListMachineUsers",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> getListMachineUsersMethod() {
-    return getListMachineUsersMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> getListMachineUsersMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> getListMachineUsersMethod;
     if ((getListMachineUsersMethod = UserManagementGrpc.getListMachineUsersMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListMachineUsersMethod = UserManagementGrpc.getListMachineUsersMethod) == null) {
-          UserManagementGrpc.getListMachineUsersMethod = getListMachineUsersMethod = 
+          UserManagementGrpc.getListMachineUsersMethod = getListMachineUsersMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListMachineUsers"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListMachineUsers"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListMachineUsers"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListMachineUsers"))
+              .build();
         }
-     }
-     return getListMachineUsersMethod;
+      }
+    }
+    return getListMachineUsersMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteMachineUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> METHOD_DELETE_MACHINE_USER = getDeleteMachineUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> getDeleteMachineUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteMachineUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> getDeleteMachineUserMethod() {
-    return getDeleteMachineUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> getDeleteMachineUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> getDeleteMachineUserMethod;
     if ((getDeleteMachineUserMethod = UserManagementGrpc.getDeleteMachineUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteMachineUserMethod = UserManagementGrpc.getDeleteMachineUserMethod) == null) {
-          UserManagementGrpc.getDeleteMachineUserMethod = getDeleteMachineUserMethod = 
+          UserManagementGrpc.getDeleteMachineUserMethod = getDeleteMachineUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteMachineUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteMachineUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteMachineUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteMachineUser"))
+              .build();
         }
-     }
-     return getDeleteMachineUserMethod;
+      }
+    }
+    return getDeleteMachineUserMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListResourceRoleAssignmentsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> METHOD_LIST_RESOURCE_ROLE_ASSIGNMENTS = getListResourceRoleAssignmentsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> getListResourceRoleAssignmentsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListResourceRoleAssignments",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> getListResourceRoleAssignmentsMethod() {
-    return getListResourceRoleAssignmentsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> getListResourceRoleAssignmentsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> getListResourceRoleAssignmentsMethod;
     if ((getListResourceRoleAssignmentsMethod = UserManagementGrpc.getListResourceRoleAssignmentsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListResourceRoleAssignmentsMethod = UserManagementGrpc.getListResourceRoleAssignmentsMethod) == null) {
-          UserManagementGrpc.getListResourceRoleAssignmentsMethod = getListResourceRoleAssignmentsMethod = 
+          UserManagementGrpc.getListResourceRoleAssignmentsMethod = getListResourceRoleAssignmentsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListResourceRoleAssignments"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListResourceRoleAssignments"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListResourceRoleAssignments"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListResourceRoleAssignments"))
+              .build();
         }
-     }
-     return getListResourceRoleAssignmentsMethod;
+      }
+    }
+    return getListResourceRoleAssignmentsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetAccountMessagesMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> METHOD_SET_ACCOUNT_MESSAGES = getSetAccountMessagesMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> getSetAccountMessagesMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetAccountMessages",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> getSetAccountMessagesMethod() {
-    return getSetAccountMessagesMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> getSetAccountMessagesMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> getSetAccountMessagesMethod;
     if ((getSetAccountMessagesMethod = UserManagementGrpc.getSetAccountMessagesMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetAccountMessagesMethod = UserManagementGrpc.getSetAccountMessagesMethod) == null) {
-          UserManagementGrpc.getSetAccountMessagesMethod = getSetAccountMessagesMethod = 
+          UserManagementGrpc.getSetAccountMessagesMethod = getSetAccountMessagesMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetAccountMessages"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetAccountMessages"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetAccountMessages"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetAccountMessages"))
+              .build();
         }
-     }
-     return getSetAccountMessagesMethod;
+      }
+    }
+    return getSetAccountMessagesMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAcceptTermsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> METHOD_ACCEPT_TERMS = getAcceptTermsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> getAcceptTermsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AcceptTerms",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> getAcceptTermsMethod() {
-    return getAcceptTermsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> getAcceptTermsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> getAcceptTermsMethod;
     if ((getAcceptTermsMethod = UserManagementGrpc.getAcceptTermsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAcceptTermsMethod = UserManagementGrpc.getAcceptTermsMethod) == null) {
-          UserManagementGrpc.getAcceptTermsMethod = getAcceptTermsMethod = 
+          UserManagementGrpc.getAcceptTermsMethod = getAcceptTermsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AcceptTerms"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AcceptTerms"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AcceptTerms"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AcceptTerms"))
+              .build();
         }
-     }
-     return getAcceptTermsMethod;
+      }
+    }
+    return getAcceptTermsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getClearAcceptedTermsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> METHOD_CLEAR_ACCEPTED_TERMS = getClearAcceptedTermsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> getClearAcceptedTermsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ClearAcceptedTerms",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> getClearAcceptedTermsMethod() {
-    return getClearAcceptedTermsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> getClearAcceptedTermsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> getClearAcceptedTermsMethod;
     if ((getClearAcceptedTermsMethod = UserManagementGrpc.getClearAcceptedTermsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getClearAcceptedTermsMethod = UserManagementGrpc.getClearAcceptedTermsMethod) == null) {
-          UserManagementGrpc.getClearAcceptedTermsMethod = getClearAcceptedTermsMethod = 
+          UserManagementGrpc.getClearAcceptedTermsMethod = getClearAcceptedTermsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ClearAcceptedTerms"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ClearAcceptedTerms"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ClearAcceptedTerms"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ClearAcceptedTerms"))
+              .build();
         }
-     }
-     return getClearAcceptedTermsMethod;
+      }
+    }
+    return getClearAcceptedTermsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDescribeTermsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> METHOD_DESCRIBE_TERMS = getDescribeTermsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> getDescribeTermsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DescribeTerms",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> getDescribeTermsMethod() {
-    return getDescribeTermsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> getDescribeTermsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> getDescribeTermsMethod;
     if ((getDescribeTermsMethod = UserManagementGrpc.getDescribeTermsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDescribeTermsMethod = UserManagementGrpc.getDescribeTermsMethod) == null) {
-          UserManagementGrpc.getDescribeTermsMethod = getDescribeTermsMethod = 
+          UserManagementGrpc.getDescribeTermsMethod = getDescribeTermsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DescribeTerms"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DescribeTerms"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DescribeTerms"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DescribeTerms"))
+              .build();
         }
-     }
-     return getDescribeTermsMethod;
+      }
+    }
+    return getDescribeTermsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListTermsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> METHOD_LIST_TERMS = getListTermsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> getListTermsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListTerms",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> getListTermsMethod() {
-    return getListTermsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> getListTermsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> getListTermsMethod;
     if ((getListTermsMethod = UserManagementGrpc.getListTermsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListTermsMethod = UserManagementGrpc.getListTermsMethod) == null) {
-          UserManagementGrpc.getListTermsMethod = getListTermsMethod = 
+          UserManagementGrpc.getListTermsMethod = getListTermsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListTerms"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListTerms"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListTerms"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListTerms"))
+              .build();
         }
-     }
-     return getListTermsMethod;
+      }
+    }
+    return getListTermsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListEntitlementsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> METHOD_LIST_ENTITLEMENTS = getListEntitlementsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> getListEntitlementsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListEntitlements",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> getListEntitlementsMethod() {
-    return getListEntitlementsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> getListEntitlementsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> getListEntitlementsMethod;
     if ((getListEntitlementsMethod = UserManagementGrpc.getListEntitlementsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListEntitlementsMethod = UserManagementGrpc.getListEntitlementsMethod) == null) {
-          UserManagementGrpc.getListEntitlementsMethod = getListEntitlementsMethod = 
+          UserManagementGrpc.getListEntitlementsMethod = getListEntitlementsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListEntitlements"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListEntitlements"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListEntitlements"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListEntitlements"))
+              .build();
         }
-     }
-     return getListEntitlementsMethod;
+      }
+    }
+    return getListEntitlementsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetTermsAcceptanceExpiryMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> METHOD_SET_TERMS_ACCEPTANCE_EXPIRY = getSetTermsAcceptanceExpiryMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> getSetTermsAcceptanceExpiryMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetTermsAcceptanceExpiry",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> getSetTermsAcceptanceExpiryMethod() {
-    return getSetTermsAcceptanceExpiryMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> getSetTermsAcceptanceExpiryMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> getSetTermsAcceptanceExpiryMethod;
     if ((getSetTermsAcceptanceExpiryMethod = UserManagementGrpc.getSetTermsAcceptanceExpiryMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetTermsAcceptanceExpiryMethod = UserManagementGrpc.getSetTermsAcceptanceExpiryMethod) == null) {
-          UserManagementGrpc.getSetTermsAcceptanceExpiryMethod = getSetTermsAcceptanceExpiryMethod = 
+          UserManagementGrpc.getSetTermsAcceptanceExpiryMethod = getSetTermsAcceptanceExpiryMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetTermsAcceptanceExpiry"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetTermsAcceptanceExpiry"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetTermsAcceptanceExpiry"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetTermsAcceptanceExpiry"))
+              .build();
         }
-     }
-     return getSetTermsAcceptanceExpiryMethod;
+      }
+    }
+    return getSetTermsAcceptanceExpiryMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getConfirmAzureSubscriptionVerifiedMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> METHOD_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED = getConfirmAzureSubscriptionVerifiedMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> getConfirmAzureSubscriptionVerifiedMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ConfirmAzureSubscriptionVerified",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> getConfirmAzureSubscriptionVerifiedMethod() {
-    return getConfirmAzureSubscriptionVerifiedMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> getConfirmAzureSubscriptionVerifiedMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> getConfirmAzureSubscriptionVerifiedMethod;
     if ((getConfirmAzureSubscriptionVerifiedMethod = UserManagementGrpc.getConfirmAzureSubscriptionVerifiedMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getConfirmAzureSubscriptionVerifiedMethod = UserManagementGrpc.getConfirmAzureSubscriptionVerifiedMethod) == null) {
-          UserManagementGrpc.getConfirmAzureSubscriptionVerifiedMethod = getConfirmAzureSubscriptionVerifiedMethod = 
+          UserManagementGrpc.getConfirmAzureSubscriptionVerifiedMethod = getConfirmAzureSubscriptionVerifiedMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ConfirmAzureSubscriptionVerified"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ConfirmAzureSubscriptionVerified"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ConfirmAzureSubscriptionVerified"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ConfirmAzureSubscriptionVerified"))
+              .build();
         }
-     }
-     return getConfirmAzureSubscriptionVerifiedMethod;
+      }
+    }
+    return getConfirmAzureSubscriptionVerifiedMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getInsertAzureSubscriptionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> METHOD_INSERT_AZURE_SUBSCRIPTION = getInsertAzureSubscriptionMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> getInsertAzureSubscriptionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "InsertAzureSubscription",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> getInsertAzureSubscriptionMethod() {
-    return getInsertAzureSubscriptionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> getInsertAzureSubscriptionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> getInsertAzureSubscriptionMethod;
     if ((getInsertAzureSubscriptionMethod = UserManagementGrpc.getInsertAzureSubscriptionMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getInsertAzureSubscriptionMethod = UserManagementGrpc.getInsertAzureSubscriptionMethod) == null) {
-          UserManagementGrpc.getInsertAzureSubscriptionMethod = getInsertAzureSubscriptionMethod = 
+          UserManagementGrpc.getInsertAzureSubscriptionMethod = getInsertAzureSubscriptionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "InsertAzureSubscription"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "InsertAzureSubscription"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InsertAzureSubscription"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("InsertAzureSubscription"))
+              .build();
         }
-     }
-     return getInsertAzureSubscriptionMethod;
+      }
+    }
+    return getInsertAzureSubscriptionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateGroupMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> METHOD_CREATE_GROUP = getCreateGroupMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> getCreateGroupMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> getCreateGroupMethod() {
-    return getCreateGroupMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> getCreateGroupMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> getCreateGroupMethod;
     if ((getCreateGroupMethod = UserManagementGrpc.getCreateGroupMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateGroupMethod = UserManagementGrpc.getCreateGroupMethod) == null) {
-          UserManagementGrpc.getCreateGroupMethod = getCreateGroupMethod = 
+          UserManagementGrpc.getCreateGroupMethod = getCreateGroupMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateGroup"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateGroup"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateGroup"))
+              .build();
         }
-     }
-     return getCreateGroupMethod;
+      }
+    }
+    return getCreateGroupMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteGroupMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> METHOD_DELETE_GROUP = getDeleteGroupMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> getDeleteGroupMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> getDeleteGroupMethod() {
-    return getDeleteGroupMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> getDeleteGroupMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> getDeleteGroupMethod;
     if ((getDeleteGroupMethod = UserManagementGrpc.getDeleteGroupMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteGroupMethod = UserManagementGrpc.getDeleteGroupMethod) == null) {
-          UserManagementGrpc.getDeleteGroupMethod = getDeleteGroupMethod = 
+          UserManagementGrpc.getDeleteGroupMethod = getDeleteGroupMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteGroup"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteGroup"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteGroup"))
+              .build();
         }
-     }
-     return getDeleteGroupMethod;
+      }
+    }
+    return getDeleteGroupMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetGroupMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> METHOD_GET_GROUP = getGetGroupMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethod() {
-    return getGetGroupMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGetGroupMethod;
     if ((getGetGroupMethod = UserManagementGrpc.getGetGroupMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetGroupMethod = UserManagementGrpc.getGetGroupMethod) == null) {
-          UserManagementGrpc.getGetGroupMethod = getGetGroupMethod = 
+          UserManagementGrpc.getGetGroupMethod = getGetGroupMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetGroup"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetGroup"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetGroup"))
+              .build();
         }
-     }
-     return getGetGroupMethod;
+      }
+    }
+    return getGetGroupMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListGroupsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> METHOD_LIST_GROUPS = getListGroupsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> getListGroupsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListGroups",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> getListGroupsMethod() {
-    return getListGroupsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> getListGroupsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> getListGroupsMethod;
     if ((getListGroupsMethod = UserManagementGrpc.getListGroupsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListGroupsMethod = UserManagementGrpc.getListGroupsMethod) == null) {
-          UserManagementGrpc.getListGroupsMethod = getListGroupsMethod = 
+          UserManagementGrpc.getListGroupsMethod = getListGroupsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListGroups"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListGroups"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListGroups"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListGroups"))
+              .build();
         }
-     }
-     return getListGroupsMethod;
+      }
+    }
+    return getListGroupsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUpdateGroupMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> METHOD_UPDATE_GROUP = getUpdateGroupMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpdateGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethod() {
-    return getUpdateGroupMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> getUpdateGroupMethod;
     if ((getUpdateGroupMethod = UserManagementGrpc.getUpdateGroupMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUpdateGroupMethod = UserManagementGrpc.getUpdateGroupMethod) == null) {
-          UserManagementGrpc.getUpdateGroupMethod = getUpdateGroupMethod = 
+          UserManagementGrpc.getUpdateGroupMethod = getUpdateGroupMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UpdateGroup"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdateGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateGroup"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateGroup"))
+              .build();
         }
-     }
-     return getUpdateGroupMethod;
+      }
+    }
+    return getUpdateGroupMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAddMemberToGroupMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> METHOD_ADD_MEMBER_TO_GROUP = getAddMemberToGroupMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> getAddMemberToGroupMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AddMemberToGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> getAddMemberToGroupMethod() {
-    return getAddMemberToGroupMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> getAddMemberToGroupMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> getAddMemberToGroupMethod;
     if ((getAddMemberToGroupMethod = UserManagementGrpc.getAddMemberToGroupMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAddMemberToGroupMethod = UserManagementGrpc.getAddMemberToGroupMethod) == null) {
-          UserManagementGrpc.getAddMemberToGroupMethod = getAddMemberToGroupMethod = 
+          UserManagementGrpc.getAddMemberToGroupMethod = getAddMemberToGroupMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AddMemberToGroup"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AddMemberToGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AddMemberToGroup"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AddMemberToGroup"))
+              .build();
         }
-     }
-     return getAddMemberToGroupMethod;
+      }
+    }
+    return getAddMemberToGroupMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getRemoveMemberFromGroupMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> METHOD_REMOVE_MEMBER_FROM_GROUP = getRemoveMemberFromGroupMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> getRemoveMemberFromGroupMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "RemoveMemberFromGroup",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> getRemoveMemberFromGroupMethod() {
-    return getRemoveMemberFromGroupMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> getRemoveMemberFromGroupMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> getRemoveMemberFromGroupMethod;
     if ((getRemoveMemberFromGroupMethod = UserManagementGrpc.getRemoveMemberFromGroupMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getRemoveMemberFromGroupMethod = UserManagementGrpc.getRemoveMemberFromGroupMethod) == null) {
-          UserManagementGrpc.getRemoveMemberFromGroupMethod = getRemoveMemberFromGroupMethod = 
+          UserManagementGrpc.getRemoveMemberFromGroupMethod = getRemoveMemberFromGroupMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "RemoveMemberFromGroup"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "RemoveMemberFromGroup"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("RemoveMemberFromGroup"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("RemoveMemberFromGroup"))
+              .build();
         }
-     }
-     return getRemoveMemberFromGroupMethod;
+      }
+    }
+    return getRemoveMemberFromGroupMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListGroupMembersMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> METHOD_LIST_GROUP_MEMBERS = getListGroupMembersMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> getListGroupMembersMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListGroupMembers",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> getListGroupMembersMethod() {
-    return getListGroupMembersMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> getListGroupMembersMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> getListGroupMembersMethod;
     if ((getListGroupMembersMethod = UserManagementGrpc.getListGroupMembersMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListGroupMembersMethod = UserManagementGrpc.getListGroupMembersMethod) == null) {
-          UserManagementGrpc.getListGroupMembersMethod = getListGroupMembersMethod = 
+          UserManagementGrpc.getListGroupMembersMethod = getListGroupMembersMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListGroupMembers"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListGroupMembers"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListGroupMembers"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListGroupMembers"))
+              .build();
         }
-     }
-     return getListGroupMembersMethod;
+      }
+    }
+    return getListGroupMembersMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListGroupsForMemberMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> METHOD_LIST_GROUPS_FOR_MEMBER = getListGroupsForMemberMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> getListGroupsForMemberMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListGroupsForMember",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> getListGroupsForMemberMethod() {
-    return getListGroupsForMemberMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> getListGroupsForMemberMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> getListGroupsForMemberMethod;
     if ((getListGroupsForMemberMethod = UserManagementGrpc.getListGroupsForMemberMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListGroupsForMemberMethod = UserManagementGrpc.getListGroupsForMemberMethod) == null) {
-          UserManagementGrpc.getListGroupsForMemberMethod = getListGroupsForMemberMethod = 
+          UserManagementGrpc.getListGroupsForMemberMethod = getListGroupsForMemberMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListGroupsForMember"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListGroupsForMember"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListGroupsForMember"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListGroupsForMember"))
+              .build();
         }
-     }
-     return getListGroupsForMemberMethod;
+      }
+    }
+    return getListGroupsForMemberMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListWorkloadAdministrationGroupsForMemberMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> METHOD_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER = getListWorkloadAdministrationGroupsForMemberMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListWorkloadAdministrationGroupsForMember",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethod() {
-    return getListWorkloadAdministrationGroupsForMemberMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> getListWorkloadAdministrationGroupsForMemberMethod;
     if ((getListWorkloadAdministrationGroupsForMemberMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsForMemberMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListWorkloadAdministrationGroupsForMemberMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsForMemberMethod) == null) {
-          UserManagementGrpc.getListWorkloadAdministrationGroupsForMemberMethod = getListWorkloadAdministrationGroupsForMemberMethod = 
+          UserManagementGrpc.getListWorkloadAdministrationGroupsForMemberMethod = getListWorkloadAdministrationGroupsForMemberMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListWorkloadAdministrationGroupsForMember"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListWorkloadAdministrationGroupsForMember"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListWorkloadAdministrationGroupsForMember"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListWorkloadAdministrationGroupsForMember"))
+              .build();
         }
-     }
-     return getListWorkloadAdministrationGroupsForMemberMethod;
+      }
+    }
+    return getListWorkloadAdministrationGroupsForMemberMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateClusterSshPrivateKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> METHOD_CREATE_CLUSTER_SSH_PRIVATE_KEY = getCreateClusterSshPrivateKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> getCreateClusterSshPrivateKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateClusterSshPrivateKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> getCreateClusterSshPrivateKeyMethod() {
-    return getCreateClusterSshPrivateKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> getCreateClusterSshPrivateKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> getCreateClusterSshPrivateKeyMethod;
     if ((getCreateClusterSshPrivateKeyMethod = UserManagementGrpc.getCreateClusterSshPrivateKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateClusterSshPrivateKeyMethod = UserManagementGrpc.getCreateClusterSshPrivateKeyMethod) == null) {
-          UserManagementGrpc.getCreateClusterSshPrivateKeyMethod = getCreateClusterSshPrivateKeyMethod = 
+          UserManagementGrpc.getCreateClusterSshPrivateKeyMethod = getCreateClusterSshPrivateKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateClusterSshPrivateKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateClusterSshPrivateKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateClusterSshPrivateKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateClusterSshPrivateKey"))
+              .build();
         }
-     }
-     return getCreateClusterSshPrivateKeyMethod;
+      }
+    }
+    return getCreateClusterSshPrivateKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetClusterSshPrivateKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> METHOD_GET_CLUSTER_SSH_PRIVATE_KEY = getGetClusterSshPrivateKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> getGetClusterSshPrivateKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetClusterSshPrivateKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> getGetClusterSshPrivateKeyMethod() {
-    return getGetClusterSshPrivateKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> getGetClusterSshPrivateKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> getGetClusterSshPrivateKeyMethod;
     if ((getGetClusterSshPrivateKeyMethod = UserManagementGrpc.getGetClusterSshPrivateKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetClusterSshPrivateKeyMethod = UserManagementGrpc.getGetClusterSshPrivateKeyMethod) == null) {
-          UserManagementGrpc.getGetClusterSshPrivateKeyMethod = getGetClusterSshPrivateKeyMethod = 
+          UserManagementGrpc.getGetClusterSshPrivateKeyMethod = getGetClusterSshPrivateKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetClusterSshPrivateKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetClusterSshPrivateKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetClusterSshPrivateKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetClusterSshPrivateKey"))
+              .build();
         }
-     }
-     return getGetClusterSshPrivateKeyMethod;
+      }
+    }
+    return getGetClusterSshPrivateKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetAssigneeAuthorizationInformationMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> METHOD_GET_ASSIGNEE_AUTHORIZATION_INFORMATION = getGetAssigneeAuthorizationInformationMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> getGetAssigneeAuthorizationInformationMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetAssigneeAuthorizationInformation",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> getGetAssigneeAuthorizationInformationMethod() {
-    return getGetAssigneeAuthorizationInformationMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> getGetAssigneeAuthorizationInformationMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> getGetAssigneeAuthorizationInformationMethod;
     if ((getGetAssigneeAuthorizationInformationMethod = UserManagementGrpc.getGetAssigneeAuthorizationInformationMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetAssigneeAuthorizationInformationMethod = UserManagementGrpc.getGetAssigneeAuthorizationInformationMethod) == null) {
-          UserManagementGrpc.getGetAssigneeAuthorizationInformationMethod = getGetAssigneeAuthorizationInformationMethod = 
+          UserManagementGrpc.getGetAssigneeAuthorizationInformationMethod = getGetAssigneeAuthorizationInformationMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetAssigneeAuthorizationInformation"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetAssigneeAuthorizationInformation"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAssigneeAuthorizationInformation"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetAssigneeAuthorizationInformation"))
+              .build();
         }
-     }
-     return getGetAssigneeAuthorizationInformationMethod;
+      }
+    }
+    return getGetAssigneeAuthorizationInformationMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateIdentityProviderConnectorMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> METHOD_CREATE_IDENTITY_PROVIDER_CONNECTOR = getCreateIdentityProviderConnectorMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> getCreateIdentityProviderConnectorMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateIdentityProviderConnector",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> getCreateIdentityProviderConnectorMethod() {
-    return getCreateIdentityProviderConnectorMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> getCreateIdentityProviderConnectorMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> getCreateIdentityProviderConnectorMethod;
     if ((getCreateIdentityProviderConnectorMethod = UserManagementGrpc.getCreateIdentityProviderConnectorMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateIdentityProviderConnectorMethod = UserManagementGrpc.getCreateIdentityProviderConnectorMethod) == null) {
-          UserManagementGrpc.getCreateIdentityProviderConnectorMethod = getCreateIdentityProviderConnectorMethod = 
+          UserManagementGrpc.getCreateIdentityProviderConnectorMethod = getCreateIdentityProviderConnectorMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateIdentityProviderConnector"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateIdentityProviderConnector"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateIdentityProviderConnector"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateIdentityProviderConnector"))
+              .build();
         }
-     }
-     return getCreateIdentityProviderConnectorMethod;
+      }
+    }
+    return getCreateIdentityProviderConnectorMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListIdentityProviderConnectorsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> METHOD_LIST_IDENTITY_PROVIDER_CONNECTORS = getListIdentityProviderConnectorsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> getListIdentityProviderConnectorsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListIdentityProviderConnectors",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> getListIdentityProviderConnectorsMethod() {
-    return getListIdentityProviderConnectorsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> getListIdentityProviderConnectorsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> getListIdentityProviderConnectorsMethod;
     if ((getListIdentityProviderConnectorsMethod = UserManagementGrpc.getListIdentityProviderConnectorsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListIdentityProviderConnectorsMethod = UserManagementGrpc.getListIdentityProviderConnectorsMethod) == null) {
-          UserManagementGrpc.getListIdentityProviderConnectorsMethod = getListIdentityProviderConnectorsMethod = 
+          UserManagementGrpc.getListIdentityProviderConnectorsMethod = getListIdentityProviderConnectorsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListIdentityProviderConnectors"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListIdentityProviderConnectors"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListIdentityProviderConnectors"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListIdentityProviderConnectors"))
+              .build();
         }
-     }
-     return getListIdentityProviderConnectorsMethod;
+      }
+    }
+    return getListIdentityProviderConnectorsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteIdentityProviderConnectorMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> METHOD_DELETE_IDENTITY_PROVIDER_CONNECTOR = getDeleteIdentityProviderConnectorMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> getDeleteIdentityProviderConnectorMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteIdentityProviderConnector",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> getDeleteIdentityProviderConnectorMethod() {
-    return getDeleteIdentityProviderConnectorMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> getDeleteIdentityProviderConnectorMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> getDeleteIdentityProviderConnectorMethod;
     if ((getDeleteIdentityProviderConnectorMethod = UserManagementGrpc.getDeleteIdentityProviderConnectorMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteIdentityProviderConnectorMethod = UserManagementGrpc.getDeleteIdentityProviderConnectorMethod) == null) {
-          UserManagementGrpc.getDeleteIdentityProviderConnectorMethod = getDeleteIdentityProviderConnectorMethod = 
+          UserManagementGrpc.getDeleteIdentityProviderConnectorMethod = getDeleteIdentityProviderConnectorMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteIdentityProviderConnector"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteIdentityProviderConnector"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteIdentityProviderConnector"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteIdentityProviderConnector"))
+              .build();
         }
-     }
-     return getDeleteIdentityProviderConnectorMethod;
+      }
+    }
+    return getDeleteIdentityProviderConnectorMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDescribeIdentityProviderConnectorMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> METHOD_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR = getDescribeIdentityProviderConnectorMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> getDescribeIdentityProviderConnectorMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DescribeIdentityProviderConnector",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> getDescribeIdentityProviderConnectorMethod() {
-    return getDescribeIdentityProviderConnectorMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> getDescribeIdentityProviderConnectorMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> getDescribeIdentityProviderConnectorMethod;
     if ((getDescribeIdentityProviderConnectorMethod = UserManagementGrpc.getDescribeIdentityProviderConnectorMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDescribeIdentityProviderConnectorMethod = UserManagementGrpc.getDescribeIdentityProviderConnectorMethod) == null) {
-          UserManagementGrpc.getDescribeIdentityProviderConnectorMethod = getDescribeIdentityProviderConnectorMethod = 
+          UserManagementGrpc.getDescribeIdentityProviderConnectorMethod = getDescribeIdentityProviderConnectorMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DescribeIdentityProviderConnector"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DescribeIdentityProviderConnector"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DescribeIdentityProviderConnector"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DescribeIdentityProviderConnector"))
+              .build();
         }
-     }
-     return getDescribeIdentityProviderConnectorMethod;
+      }
+    }
+    return getDescribeIdentityProviderConnectorMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUpdateIdentityProviderConnectorMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> METHOD_UPDATE_IDENTITY_PROVIDER_CONNECTOR = getUpdateIdentityProviderConnectorMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> getUpdateIdentityProviderConnectorMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpdateIdentityProviderConnector",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> getUpdateIdentityProviderConnectorMethod() {
-    return getUpdateIdentityProviderConnectorMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> getUpdateIdentityProviderConnectorMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> getUpdateIdentityProviderConnectorMethod;
     if ((getUpdateIdentityProviderConnectorMethod = UserManagementGrpc.getUpdateIdentityProviderConnectorMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUpdateIdentityProviderConnectorMethod = UserManagementGrpc.getUpdateIdentityProviderConnectorMethod) == null) {
-          UserManagementGrpc.getUpdateIdentityProviderConnectorMethod = getUpdateIdentityProviderConnectorMethod = 
+          UserManagementGrpc.getUpdateIdentityProviderConnectorMethod = getUpdateIdentityProviderConnectorMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UpdateIdentityProviderConnector"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdateIdentityProviderConnector"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateIdentityProviderConnector"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateIdentityProviderConnector"))
+              .build();
         }
-     }
-     return getUpdateIdentityProviderConnectorMethod;
+      }
+    }
+    return getUpdateIdentityProviderConnectorMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetClouderaSSOLoginEnabledMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> METHOD_SET_CLOUDERA_SSOLOGIN_ENABLED = getSetClouderaSSOLoginEnabledMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> getSetClouderaSSOLoginEnabledMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetClouderaSSOLoginEnabled",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> getSetClouderaSSOLoginEnabledMethod() {
-    return getSetClouderaSSOLoginEnabledMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> getSetClouderaSSOLoginEnabledMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> getSetClouderaSSOLoginEnabledMethod;
     if ((getSetClouderaSSOLoginEnabledMethod = UserManagementGrpc.getSetClouderaSSOLoginEnabledMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetClouderaSSOLoginEnabledMethod = UserManagementGrpc.getSetClouderaSSOLoginEnabledMethod) == null) {
-          UserManagementGrpc.getSetClouderaSSOLoginEnabledMethod = getSetClouderaSSOLoginEnabledMethod = 
+          UserManagementGrpc.getSetClouderaSSOLoginEnabledMethod = getSetClouderaSSOLoginEnabledMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetClouderaSSOLoginEnabled"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetClouderaSSOLoginEnabled"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetClouderaSSOLoginEnabled"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetClouderaSSOLoginEnabled"))
+              .build();
         }
-     }
-     return getSetClouderaSSOLoginEnabledMethod;
+      }
+    }
+    return getSetClouderaSSOLoginEnabledMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetIdPMetadataForWorkloadSSOMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> METHOD_GET_ID_PMETADATA_FOR_WORKLOAD_SSO = getGetIdPMetadataForWorkloadSSOMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetIdPMetadataForWorkloadSSO",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethod() {
-    return getGetIdPMetadataForWorkloadSSOMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getGetIdPMetadataForWorkloadSSOMethod;
     if ((getGetIdPMetadataForWorkloadSSOMethod = UserManagementGrpc.getGetIdPMetadataForWorkloadSSOMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetIdPMetadataForWorkloadSSOMethod = UserManagementGrpc.getGetIdPMetadataForWorkloadSSOMethod) == null) {
-          UserManagementGrpc.getGetIdPMetadataForWorkloadSSOMethod = getGetIdPMetadataForWorkloadSSOMethod = 
+          UserManagementGrpc.getGetIdPMetadataForWorkloadSSOMethod = getGetIdPMetadataForWorkloadSSOMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetIdPMetadataForWorkloadSSO"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetIdPMetadataForWorkloadSSO"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetIdPMetadataForWorkloadSSO"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetIdPMetadataForWorkloadSSO"))
+              .build();
         }
-     }
-     return getGetIdPMetadataForWorkloadSSOMethod;
+      }
+    }
+    return getGetIdPMetadataForWorkloadSSOMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getProcessWorkloadSSOAuthnReqMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> METHOD_PROCESS_WORKLOAD_SSOAUTHN_REQ = getProcessWorkloadSSOAuthnReqMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ProcessWorkloadSSOAuthnReq",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethod() {
-    return getProcessWorkloadSSOAuthnReqMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> getProcessWorkloadSSOAuthnReqMethod;
     if ((getProcessWorkloadSSOAuthnReqMethod = UserManagementGrpc.getProcessWorkloadSSOAuthnReqMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getProcessWorkloadSSOAuthnReqMethod = UserManagementGrpc.getProcessWorkloadSSOAuthnReqMethod) == null) {
-          UserManagementGrpc.getProcessWorkloadSSOAuthnReqMethod = getProcessWorkloadSSOAuthnReqMethod = 
+          UserManagementGrpc.getProcessWorkloadSSOAuthnReqMethod = getProcessWorkloadSSOAuthnReqMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ProcessWorkloadSSOAuthnReq"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ProcessWorkloadSSOAuthnReq"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ProcessWorkloadSSOAuthnReq"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ProcessWorkloadSSOAuthnReq"))
+              .build();
         }
-     }
-     return getProcessWorkloadSSOAuthnReqMethod;
+      }
+    }
+    return getProcessWorkloadSSOAuthnReqMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGenerateControlPlaneSSOAuthnReqMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> METHOD_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ = getGenerateControlPlaneSSOAuthnReqMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GenerateControlPlaneSSOAuthnReq",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethod() {
-    return getGenerateControlPlaneSSOAuthnReqMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> getGenerateControlPlaneSSOAuthnReqMethod;
     if ((getGenerateControlPlaneSSOAuthnReqMethod = UserManagementGrpc.getGenerateControlPlaneSSOAuthnReqMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGenerateControlPlaneSSOAuthnReqMethod = UserManagementGrpc.getGenerateControlPlaneSSOAuthnReqMethod) == null) {
-          UserManagementGrpc.getGenerateControlPlaneSSOAuthnReqMethod = getGenerateControlPlaneSSOAuthnReqMethod = 
+          UserManagementGrpc.getGenerateControlPlaneSSOAuthnReqMethod = getGenerateControlPlaneSSOAuthnReqMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GenerateControlPlaneSSOAuthnReq"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GenerateControlPlaneSSOAuthnReq"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GenerateControlPlaneSSOAuthnReq"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GenerateControlPlaneSSOAuthnReq"))
+              .build();
         }
-     }
-     return getGenerateControlPlaneSSOAuthnReqMethod;
+      }
+    }
+    return getGenerateControlPlaneSSOAuthnReqMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetWorkloadSubdomainMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> METHOD_SET_WORKLOAD_SUBDOMAIN = getSetWorkloadSubdomainMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetWorkloadSubdomain",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethod() {
-    return getSetWorkloadSubdomainMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> getSetWorkloadSubdomainMethod;
     if ((getSetWorkloadSubdomainMethod = UserManagementGrpc.getSetWorkloadSubdomainMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetWorkloadSubdomainMethod = UserManagementGrpc.getSetWorkloadSubdomainMethod) == null) {
-          UserManagementGrpc.getSetWorkloadSubdomainMethod = getSetWorkloadSubdomainMethod = 
+          UserManagementGrpc.getSetWorkloadSubdomainMethod = getSetWorkloadSubdomainMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetWorkloadSubdomain"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetWorkloadSubdomain"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadSubdomain"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadSubdomain"))
+              .build();
         }
-     }
-     return getSetWorkloadSubdomainMethod;
+      }
+    }
+    return getSetWorkloadSubdomainMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCreateWorkloadMachineUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> METHOD_CREATE_WORKLOAD_MACHINE_USER = getCreateWorkloadMachineUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CreateWorkloadMachineUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethod() {
-    return getCreateWorkloadMachineUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> getCreateWorkloadMachineUserMethod;
     if ((getCreateWorkloadMachineUserMethod = UserManagementGrpc.getCreateWorkloadMachineUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getCreateWorkloadMachineUserMethod = UserManagementGrpc.getCreateWorkloadMachineUserMethod) == null) {
-          UserManagementGrpc.getCreateWorkloadMachineUserMethod = getCreateWorkloadMachineUserMethod = 
+          UserManagementGrpc.getCreateWorkloadMachineUserMethod = getCreateWorkloadMachineUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "CreateWorkloadMachineUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CreateWorkloadMachineUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateWorkloadMachineUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("CreateWorkloadMachineUser"))
+              .build();
         }
-     }
-     return getCreateWorkloadMachineUserMethod;
+      }
+    }
+    return getCreateWorkloadMachineUserMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteWorkloadMachineUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> METHOD_DELETE_WORKLOAD_MACHINE_USER = getDeleteWorkloadMachineUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteWorkloadMachineUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethod() {
-    return getDeleteWorkloadMachineUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> getDeleteWorkloadMachineUserMethod;
     if ((getDeleteWorkloadMachineUserMethod = UserManagementGrpc.getDeleteWorkloadMachineUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteWorkloadMachineUserMethod = UserManagementGrpc.getDeleteWorkloadMachineUserMethod) == null) {
-          UserManagementGrpc.getDeleteWorkloadMachineUserMethod = getDeleteWorkloadMachineUserMethod = 
+          UserManagementGrpc.getDeleteWorkloadMachineUserMethod = getDeleteWorkloadMachineUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteWorkloadMachineUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteWorkloadMachineUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteWorkloadMachineUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteWorkloadMachineUser"))
+              .build();
         }
-     }
-     return getDeleteWorkloadMachineUserMethod;
+      }
+    }
+    return getDeleteWorkloadMachineUserMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetWorkloadAdministrationGroupNameMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> METHOD_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME = getGetWorkloadAdministrationGroupNameMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetWorkloadAdministrationGroupName",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethod() {
-    return getGetWorkloadAdministrationGroupNameMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getGetWorkloadAdministrationGroupNameMethod;
     if ((getGetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getGetWorkloadAdministrationGroupNameMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getGetWorkloadAdministrationGroupNameMethod) == null) {
-          UserManagementGrpc.getGetWorkloadAdministrationGroupNameMethod = getGetWorkloadAdministrationGroupNameMethod = 
+          UserManagementGrpc.getGetWorkloadAdministrationGroupNameMethod = getGetWorkloadAdministrationGroupNameMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetWorkloadAdministrationGroupName"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetWorkloadAdministrationGroupName"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetWorkloadAdministrationGroupName"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetWorkloadAdministrationGroupName"))
+              .build();
         }
-     }
-     return getGetWorkloadAdministrationGroupNameMethod;
+      }
+    }
+    return getGetWorkloadAdministrationGroupNameMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetWorkloadAdministrationGroupNameMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> METHOD_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME = getSetWorkloadAdministrationGroupNameMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetWorkloadAdministrationGroupName",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethod() {
-    return getSetWorkloadAdministrationGroupNameMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> getSetWorkloadAdministrationGroupNameMethod;
     if ((getSetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getSetWorkloadAdministrationGroupNameMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getSetWorkloadAdministrationGroupNameMethod) == null) {
-          UserManagementGrpc.getSetWorkloadAdministrationGroupNameMethod = getSetWorkloadAdministrationGroupNameMethod = 
+          UserManagementGrpc.getSetWorkloadAdministrationGroupNameMethod = getSetWorkloadAdministrationGroupNameMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetWorkloadAdministrationGroupName"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetWorkloadAdministrationGroupName"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadAdministrationGroupName"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadAdministrationGroupName"))
+              .build();
         }
-     }
-     return getSetWorkloadAdministrationGroupNameMethod;
+      }
+    }
+    return getSetWorkloadAdministrationGroupNameMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteWorkloadAdministrationGroupNameMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> METHOD_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME = getDeleteWorkloadAdministrationGroupNameMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteWorkloadAdministrationGroupName",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethod() {
-    return getDeleteWorkloadAdministrationGroupNameMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> getDeleteWorkloadAdministrationGroupNameMethod;
     if ((getDeleteWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getDeleteWorkloadAdministrationGroupNameMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteWorkloadAdministrationGroupNameMethod = UserManagementGrpc.getDeleteWorkloadAdministrationGroupNameMethod) == null) {
-          UserManagementGrpc.getDeleteWorkloadAdministrationGroupNameMethod = getDeleteWorkloadAdministrationGroupNameMethod = 
+          UserManagementGrpc.getDeleteWorkloadAdministrationGroupNameMethod = getDeleteWorkloadAdministrationGroupNameMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteWorkloadAdministrationGroupName"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteWorkloadAdministrationGroupName"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteWorkloadAdministrationGroupName"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteWorkloadAdministrationGroupName"))
+              .build();
         }
-     }
-     return getDeleteWorkloadAdministrationGroupNameMethod;
+      }
+    }
+    return getDeleteWorkloadAdministrationGroupNameMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListWorkloadAdministrationGroupsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> METHOD_LIST_WORKLOAD_ADMINISTRATION_GROUPS = getListWorkloadAdministrationGroupsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListWorkloadAdministrationGroups",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethod() {
-    return getListWorkloadAdministrationGroupsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> getListWorkloadAdministrationGroupsMethod;
     if ((getListWorkloadAdministrationGroupsMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListWorkloadAdministrationGroupsMethod = UserManagementGrpc.getListWorkloadAdministrationGroupsMethod) == null) {
-          UserManagementGrpc.getListWorkloadAdministrationGroupsMethod = getListWorkloadAdministrationGroupsMethod = 
+          UserManagementGrpc.getListWorkloadAdministrationGroupsMethod = getListWorkloadAdministrationGroupsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListWorkloadAdministrationGroups"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListWorkloadAdministrationGroups"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListWorkloadAdministrationGroups"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListWorkloadAdministrationGroups"))
+              .build();
         }
-     }
-     return getListWorkloadAdministrationGroupsMethod;
+      }
+    }
+    return getListWorkloadAdministrationGroupsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetActorWorkloadCredentialsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> METHOD_SET_ACTOR_WORKLOAD_CREDENTIALS = getSetActorWorkloadCredentialsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetActorWorkloadCredentials",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethod() {
-    return getSetActorWorkloadCredentialsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> getSetActorWorkloadCredentialsMethod;
     if ((getSetActorWorkloadCredentialsMethod = UserManagementGrpc.getSetActorWorkloadCredentialsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetActorWorkloadCredentialsMethod = UserManagementGrpc.getSetActorWorkloadCredentialsMethod) == null) {
-          UserManagementGrpc.getSetActorWorkloadCredentialsMethod = getSetActorWorkloadCredentialsMethod = 
+          UserManagementGrpc.getSetActorWorkloadCredentialsMethod = getSetActorWorkloadCredentialsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetActorWorkloadCredentials"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetActorWorkloadCredentials"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetActorWorkloadCredentials"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetActorWorkloadCredentials"))
+              .build();
         }
-     }
-     return getSetActorWorkloadCredentialsMethod;
+      }
+    }
+    return getSetActorWorkloadCredentialsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getValidateActorWorkloadCredentialsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> METHOD_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS = getValidateActorWorkloadCredentialsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ValidateActorWorkloadCredentials",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethod() {
-    return getValidateActorWorkloadCredentialsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> getValidateActorWorkloadCredentialsMethod;
     if ((getValidateActorWorkloadCredentialsMethod = UserManagementGrpc.getValidateActorWorkloadCredentialsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getValidateActorWorkloadCredentialsMethod = UserManagementGrpc.getValidateActorWorkloadCredentialsMethod) == null) {
-          UserManagementGrpc.getValidateActorWorkloadCredentialsMethod = getValidateActorWorkloadCredentialsMethod = 
+          UserManagementGrpc.getValidateActorWorkloadCredentialsMethod = getValidateActorWorkloadCredentialsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ValidateActorWorkloadCredentials"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ValidateActorWorkloadCredentials"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ValidateActorWorkloadCredentials"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ValidateActorWorkloadCredentials"))
+              .build();
         }
-     }
-     return getValidateActorWorkloadCredentialsMethod;
+      }
+    }
+    return getValidateActorWorkloadCredentialsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetActorWorkloadCredentialsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> METHOD_GET_ACTOR_WORKLOAD_CREDENTIALS = getGetActorWorkloadCredentialsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetActorWorkloadCredentials",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethod() {
-    return getGetActorWorkloadCredentialsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getGetActorWorkloadCredentialsMethod;
     if ((getGetActorWorkloadCredentialsMethod = UserManagementGrpc.getGetActorWorkloadCredentialsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetActorWorkloadCredentialsMethod = UserManagementGrpc.getGetActorWorkloadCredentialsMethod) == null) {
-          UserManagementGrpc.getGetActorWorkloadCredentialsMethod = getGetActorWorkloadCredentialsMethod = 
+          UserManagementGrpc.getGetActorWorkloadCredentialsMethod = getGetActorWorkloadCredentialsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetActorWorkloadCredentials"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetActorWorkloadCredentials"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetActorWorkloadCredentials"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetActorWorkloadCredentials"))
+              .build();
         }
-     }
-     return getGetActorWorkloadCredentialsMethod;
+      }
+    }
+    return getGetActorWorkloadCredentialsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetEventGenerationIdsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> METHOD_GET_EVENT_GENERATION_IDS = getGetEventGenerationIdsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetEventGenerationIds",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethod() {
-    return getGetEventGenerationIdsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getGetEventGenerationIdsMethod;
     if ((getGetEventGenerationIdsMethod = UserManagementGrpc.getGetEventGenerationIdsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetEventGenerationIdsMethod = UserManagementGrpc.getGetEventGenerationIdsMethod) == null) {
-          UserManagementGrpc.getGetEventGenerationIdsMethod = getGetEventGenerationIdsMethod = 
+          UserManagementGrpc.getGetEventGenerationIdsMethod = getGetEventGenerationIdsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetEventGenerationIds"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetEventGenerationIds"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetEventGenerationIds"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetEventGenerationIds"))
+              .build();
         }
-     }
-     return getGetEventGenerationIdsMethod;
+      }
+    }
+    return getGetEventGenerationIdsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAddActorSshPublicKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> METHOD_ADD_ACTOR_SSH_PUBLIC_KEY = getAddActorSshPublicKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AddActorSshPublicKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethod() {
-    return getAddActorSshPublicKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> getAddActorSshPublicKeyMethod;
     if ((getAddActorSshPublicKeyMethod = UserManagementGrpc.getAddActorSshPublicKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAddActorSshPublicKeyMethod = UserManagementGrpc.getAddActorSshPublicKeyMethod) == null) {
-          UserManagementGrpc.getAddActorSshPublicKeyMethod = getAddActorSshPublicKeyMethod = 
+          UserManagementGrpc.getAddActorSshPublicKeyMethod = getAddActorSshPublicKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AddActorSshPublicKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AddActorSshPublicKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AddActorSshPublicKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AddActorSshPublicKey"))
+              .build();
         }
-     }
-     return getAddActorSshPublicKeyMethod;
+      }
+    }
+    return getAddActorSshPublicKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListActorSshPublicKeysMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> METHOD_LIST_ACTOR_SSH_PUBLIC_KEYS = getListActorSshPublicKeysMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListActorSshPublicKeys",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethod() {
-    return getListActorSshPublicKeysMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> getListActorSshPublicKeysMethod;
     if ((getListActorSshPublicKeysMethod = UserManagementGrpc.getListActorSshPublicKeysMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListActorSshPublicKeysMethod = UserManagementGrpc.getListActorSshPublicKeysMethod) == null) {
-          UserManagementGrpc.getListActorSshPublicKeysMethod = getListActorSshPublicKeysMethod = 
+          UserManagementGrpc.getListActorSshPublicKeysMethod = getListActorSshPublicKeysMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListActorSshPublicKeys"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListActorSshPublicKeys"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListActorSshPublicKeys"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListActorSshPublicKeys"))
+              .build();
         }
-     }
-     return getListActorSshPublicKeysMethod;
+      }
+    }
+    return getListActorSshPublicKeysMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDescribeActorSshPublicKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> METHOD_DESCRIBE_ACTOR_SSH_PUBLIC_KEY = getDescribeActorSshPublicKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DescribeActorSshPublicKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethod() {
-    return getDescribeActorSshPublicKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> getDescribeActorSshPublicKeyMethod;
     if ((getDescribeActorSshPublicKeyMethod = UserManagementGrpc.getDescribeActorSshPublicKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDescribeActorSshPublicKeyMethod = UserManagementGrpc.getDescribeActorSshPublicKeyMethod) == null) {
-          UserManagementGrpc.getDescribeActorSshPublicKeyMethod = getDescribeActorSshPublicKeyMethod = 
+          UserManagementGrpc.getDescribeActorSshPublicKeyMethod = getDescribeActorSshPublicKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DescribeActorSshPublicKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DescribeActorSshPublicKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DescribeActorSshPublicKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DescribeActorSshPublicKey"))
+              .build();
         }
-     }
-     return getDescribeActorSshPublicKeyMethod;
+      }
+    }
+    return getDescribeActorSshPublicKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getDeleteActorSshPublicKeyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> METHOD_DELETE_ACTOR_SSH_PUBLIC_KEY = getDeleteActorSshPublicKeyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "DeleteActorSshPublicKey",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethod() {
-    return getDeleteActorSshPublicKeyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> getDeleteActorSshPublicKeyMethod;
     if ((getDeleteActorSshPublicKeyMethod = UserManagementGrpc.getDeleteActorSshPublicKeyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getDeleteActorSshPublicKeyMethod = UserManagementGrpc.getDeleteActorSshPublicKeyMethod) == null) {
-          UserManagementGrpc.getDeleteActorSshPublicKeyMethod = getDeleteActorSshPublicKeyMethod = 
+          UserManagementGrpc.getDeleteActorSshPublicKeyMethod = getDeleteActorSshPublicKeyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "DeleteActorSshPublicKey"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "DeleteActorSshPublicKey"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteActorSshPublicKey"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("DeleteActorSshPublicKey"))
+              .build();
         }
-     }
-     return getDeleteActorSshPublicKeyMethod;
+      }
+    }
+    return getDeleteActorSshPublicKeyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetWorkloadPasswordPolicyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> METHOD_SET_WORKLOAD_PASSWORD_POLICY = getSetWorkloadPasswordPolicyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetWorkloadPasswordPolicy",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethod() {
-    return getSetWorkloadPasswordPolicyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> getSetWorkloadPasswordPolicyMethod;
     if ((getSetWorkloadPasswordPolicyMethod = UserManagementGrpc.getSetWorkloadPasswordPolicyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetWorkloadPasswordPolicyMethod = UserManagementGrpc.getSetWorkloadPasswordPolicyMethod) == null) {
-          UserManagementGrpc.getSetWorkloadPasswordPolicyMethod = getSetWorkloadPasswordPolicyMethod = 
+          UserManagementGrpc.getSetWorkloadPasswordPolicyMethod = getSetWorkloadPasswordPolicyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetWorkloadPasswordPolicy"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetWorkloadPasswordPolicy"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadPasswordPolicy"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetWorkloadPasswordPolicy"))
+              .build();
         }
-     }
-     return getSetWorkloadPasswordPolicyMethod;
+      }
+    }
+    return getSetWorkloadPasswordPolicyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUnsetWorkloadPasswordPolicyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> METHOD_UNSET_WORKLOAD_PASSWORD_POLICY = getUnsetWorkloadPasswordPolicyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UnsetWorkloadPasswordPolicy",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethod() {
-    return getUnsetWorkloadPasswordPolicyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> getUnsetWorkloadPasswordPolicyMethod;
     if ((getUnsetWorkloadPasswordPolicyMethod = UserManagementGrpc.getUnsetWorkloadPasswordPolicyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUnsetWorkloadPasswordPolicyMethod = UserManagementGrpc.getUnsetWorkloadPasswordPolicyMethod) == null) {
-          UserManagementGrpc.getUnsetWorkloadPasswordPolicyMethod = getUnsetWorkloadPasswordPolicyMethod = 
+          UserManagementGrpc.getUnsetWorkloadPasswordPolicyMethod = getUnsetWorkloadPasswordPolicyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UnsetWorkloadPasswordPolicy"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UnsetWorkloadPasswordPolicy"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnsetWorkloadPasswordPolicy"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnsetWorkloadPasswordPolicy"))
+              .build();
         }
-     }
-     return getUnsetWorkloadPasswordPolicyMethod;
+      }
+    }
+    return getUnsetWorkloadPasswordPolicyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetAuthenticationPolicyMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> METHOD_SET_AUTHENTICATION_POLICY = getSetAuthenticationPolicyMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetAuthenticationPolicy",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethod() {
-    return getSetAuthenticationPolicyMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> getSetAuthenticationPolicyMethod;
     if ((getSetAuthenticationPolicyMethod = UserManagementGrpc.getSetAuthenticationPolicyMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetAuthenticationPolicyMethod = UserManagementGrpc.getSetAuthenticationPolicyMethod) == null) {
-          UserManagementGrpc.getSetAuthenticationPolicyMethod = getSetAuthenticationPolicyMethod = 
+          UserManagementGrpc.getSetAuthenticationPolicyMethod = getSetAuthenticationPolicyMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetAuthenticationPolicy"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetAuthenticationPolicy"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetAuthenticationPolicy"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetAuthenticationPolicy"))
+              .build();
         }
-     }
-     return getSetAuthenticationPolicyMethod;
+      }
+    }
+    return getSetAuthenticationPolicyMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAssignCloudIdentityMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> METHOD_ASSIGN_CLOUD_IDENTITY = getAssignCloudIdentityMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AssignCloudIdentity",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethod() {
-    return getAssignCloudIdentityMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> getAssignCloudIdentityMethod;
     if ((getAssignCloudIdentityMethod = UserManagementGrpc.getAssignCloudIdentityMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAssignCloudIdentityMethod = UserManagementGrpc.getAssignCloudIdentityMethod) == null) {
-          UserManagementGrpc.getAssignCloudIdentityMethod = getAssignCloudIdentityMethod = 
+          UserManagementGrpc.getAssignCloudIdentityMethod = getAssignCloudIdentityMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AssignCloudIdentity"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AssignCloudIdentity"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignCloudIdentity"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignCloudIdentity"))
+              .build();
         }
-     }
-     return getAssignCloudIdentityMethod;
+      }
+    }
+    return getAssignCloudIdentityMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUnassignCloudIdentityMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> METHOD_UNASSIGN_CLOUD_IDENTITY = getUnassignCloudIdentityMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UnassignCloudIdentity",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethod() {
-    return getUnassignCloudIdentityMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> getUnassignCloudIdentityMethod;
     if ((getUnassignCloudIdentityMethod = UserManagementGrpc.getUnassignCloudIdentityMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUnassignCloudIdentityMethod = UserManagementGrpc.getUnassignCloudIdentityMethod) == null) {
-          UserManagementGrpc.getUnassignCloudIdentityMethod = getUnassignCloudIdentityMethod = 
+          UserManagementGrpc.getUnassignCloudIdentityMethod = getUnassignCloudIdentityMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UnassignCloudIdentity"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UnassignCloudIdentity"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignCloudIdentity"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignCloudIdentity"))
+              .build();
         }
-     }
-     return getUnassignCloudIdentityMethod;
+      }
+    }
+    return getUnassignCloudIdentityMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getAssignServicePrincipalCloudIdentityMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> METHOD_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = getAssignServicePrincipalCloudIdentityMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "AssignServicePrincipalCloudIdentity",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethod() {
-    return getAssignServicePrincipalCloudIdentityMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> getAssignServicePrincipalCloudIdentityMethod;
     if ((getAssignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getAssignServicePrincipalCloudIdentityMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getAssignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getAssignServicePrincipalCloudIdentityMethod) == null) {
-          UserManagementGrpc.getAssignServicePrincipalCloudIdentityMethod = getAssignServicePrincipalCloudIdentityMethod = 
+          UserManagementGrpc.getAssignServicePrincipalCloudIdentityMethod = getAssignServicePrincipalCloudIdentityMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "AssignServicePrincipalCloudIdentity"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "AssignServicePrincipalCloudIdentity"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignServicePrincipalCloudIdentity"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("AssignServicePrincipalCloudIdentity"))
+              .build();
         }
-     }
-     return getAssignServicePrincipalCloudIdentityMethod;
+      }
+    }
+    return getAssignServicePrincipalCloudIdentityMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUnassignServicePrincipalCloudIdentityMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> METHOD_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY = getUnassignServicePrincipalCloudIdentityMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UnassignServicePrincipalCloudIdentity",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethod() {
-    return getUnassignServicePrincipalCloudIdentityMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> getUnassignServicePrincipalCloudIdentityMethod;
     if ((getUnassignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getUnassignServicePrincipalCloudIdentityMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUnassignServicePrincipalCloudIdentityMethod = UserManagementGrpc.getUnassignServicePrincipalCloudIdentityMethod) == null) {
-          UserManagementGrpc.getUnassignServicePrincipalCloudIdentityMethod = getUnassignServicePrincipalCloudIdentityMethod = 
+          UserManagementGrpc.getUnassignServicePrincipalCloudIdentityMethod = getUnassignServicePrincipalCloudIdentityMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UnassignServicePrincipalCloudIdentity"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UnassignServicePrincipalCloudIdentity"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignServicePrincipalCloudIdentity"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UnassignServicePrincipalCloudIdentity"))
+              .build();
         }
-     }
-     return getUnassignServicePrincipalCloudIdentityMethod;
+      }
+    }
+    return getUnassignServicePrincipalCloudIdentityMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListServicePrincipalCloudIdentitiesMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> METHOD_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES = getListServicePrincipalCloudIdentitiesMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListServicePrincipalCloudIdentities",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethod() {
-    return getListServicePrincipalCloudIdentitiesMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> getListServicePrincipalCloudIdentitiesMethod;
     if ((getListServicePrincipalCloudIdentitiesMethod = UserManagementGrpc.getListServicePrincipalCloudIdentitiesMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListServicePrincipalCloudIdentitiesMethod = UserManagementGrpc.getListServicePrincipalCloudIdentitiesMethod) == null) {
-          UserManagementGrpc.getListServicePrincipalCloudIdentitiesMethod = getListServicePrincipalCloudIdentitiesMethod = 
+          UserManagementGrpc.getListServicePrincipalCloudIdentitiesMethod = getListServicePrincipalCloudIdentitiesMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListServicePrincipalCloudIdentities"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListServicePrincipalCloudIdentities"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListServicePrincipalCloudIdentities"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListServicePrincipalCloudIdentities"))
+              .build();
         }
-     }
-     return getListServicePrincipalCloudIdentitiesMethod;
+      }
+    }
+    return getListServicePrincipalCloudIdentitiesMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetDefaultIdentityProviderConnectorMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> METHOD_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = getGetDefaultIdentityProviderConnectorMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetDefaultIdentityProviderConnector",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethod() {
-    return getGetDefaultIdentityProviderConnectorMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getGetDefaultIdentityProviderConnectorMethod;
     if ((getGetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getGetDefaultIdentityProviderConnectorMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getGetDefaultIdentityProviderConnectorMethod) == null) {
-          UserManagementGrpc.getGetDefaultIdentityProviderConnectorMethod = getGetDefaultIdentityProviderConnectorMethod = 
+          UserManagementGrpc.getGetDefaultIdentityProviderConnectorMethod = getGetDefaultIdentityProviderConnectorMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetDefaultIdentityProviderConnector"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetDefaultIdentityProviderConnector"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetDefaultIdentityProviderConnector"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetDefaultIdentityProviderConnector"))
+              .build();
         }
-     }
-     return getGetDefaultIdentityProviderConnectorMethod;
+      }
+    }
+    return getGetDefaultIdentityProviderConnectorMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getSetDefaultIdentityProviderConnectorMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> METHOD_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR = getSetDefaultIdentityProviderConnectorMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "SetDefaultIdentityProviderConnector",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethod() {
-    return getSetDefaultIdentityProviderConnectorMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> getSetDefaultIdentityProviderConnectorMethod;
     if ((getSetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getSetDefaultIdentityProviderConnectorMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getSetDefaultIdentityProviderConnectorMethod = UserManagementGrpc.getSetDefaultIdentityProviderConnectorMethod) == null) {
-          UserManagementGrpc.getSetDefaultIdentityProviderConnectorMethod = getSetDefaultIdentityProviderConnectorMethod = 
+          UserManagementGrpc.getSetDefaultIdentityProviderConnectorMethod = getSetDefaultIdentityProviderConnectorMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "SetDefaultIdentityProviderConnector"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "SetDefaultIdentityProviderConnector"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetDefaultIdentityProviderConnector"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("SetDefaultIdentityProviderConnector"))
+              .build();
         }
-     }
-     return getSetDefaultIdentityProviderConnectorMethod;
+      }
+    }
+    return getSetDefaultIdentityProviderConnectorMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetUserSyncStateModelMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> METHOD_GET_USER_SYNC_STATE_MODEL = getGetUserSyncStateModelMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetUserSyncStateModel",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethod() {
-    return getGetUserSyncStateModelMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getGetUserSyncStateModelMethod;
     if ((getGetUserSyncStateModelMethod = UserManagementGrpc.getGetUserSyncStateModelMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetUserSyncStateModelMethod = UserManagementGrpc.getGetUserSyncStateModelMethod) == null) {
-          UserManagementGrpc.getGetUserSyncStateModelMethod = getGetUserSyncStateModelMethod = 
+          UserManagementGrpc.getGetUserSyncStateModelMethod = getGetUserSyncStateModelMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetUserSyncStateModel"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetUserSyncStateModel"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetUserSyncStateModel"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetUserSyncStateModel"))
+              .build();
         }
-     }
-     return getGetUserSyncStateModelMethod;
+      }
+    }
+    return getGetUserSyncStateModelMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getListRoleAssignmentsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> METHOD_LIST_ROLE_ASSIGNMENTS = getListRoleAssignmentsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "ListRoleAssignments",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethod() {
-    return getListRoleAssignmentsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> getListRoleAssignmentsMethod;
     if ((getListRoleAssignmentsMethod = UserManagementGrpc.getListRoleAssignmentsMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getListRoleAssignmentsMethod = UserManagementGrpc.getListRoleAssignmentsMethod) == null) {
-          UserManagementGrpc.getListRoleAssignmentsMethod = getListRoleAssignmentsMethod = 
+          UserManagementGrpc.getListRoleAssignmentsMethod = getListRoleAssignmentsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "ListRoleAssignments"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "ListRoleAssignments"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListRoleAssignments"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("ListRoleAssignments"))
+              .build();
         }
-     }
-     return getListRoleAssignmentsMethod;
+      }
+    }
+    return getListRoleAssignmentsMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGenerateWorkloadAuthTokenMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> METHOD_GENERATE_WORKLOAD_AUTH_TOKEN = getGenerateWorkloadAuthTokenMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GenerateWorkloadAuthToken",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethod() {
-    return getGenerateWorkloadAuthTokenMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> getGenerateWorkloadAuthTokenMethod;
     if ((getGenerateWorkloadAuthTokenMethod = UserManagementGrpc.getGenerateWorkloadAuthTokenMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGenerateWorkloadAuthTokenMethod = UserManagementGrpc.getGenerateWorkloadAuthTokenMethod) == null) {
-          UserManagementGrpc.getGenerateWorkloadAuthTokenMethod = getGenerateWorkloadAuthTokenMethod = 
+          UserManagementGrpc.getGenerateWorkloadAuthTokenMethod = getGenerateWorkloadAuthTokenMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GenerateWorkloadAuthToken"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GenerateWorkloadAuthToken"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GenerateWorkloadAuthToken"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GenerateWorkloadAuthToken"))
+              .build();
         }
-     }
-     return getGenerateWorkloadAuthTokenMethod;
+      }
+    }
+    return getGenerateWorkloadAuthTokenMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetWorkloadAuthConfigurationMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> METHOD_GET_WORKLOAD_AUTH_CONFIGURATION = getGetWorkloadAuthConfigurationMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetWorkloadAuthConfiguration",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethod() {
-    return getGetWorkloadAuthConfigurationMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getGetWorkloadAuthConfigurationMethod;
     if ((getGetWorkloadAuthConfigurationMethod = UserManagementGrpc.getGetWorkloadAuthConfigurationMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getGetWorkloadAuthConfigurationMethod = UserManagementGrpc.getGetWorkloadAuthConfigurationMethod) == null) {
-          UserManagementGrpc.getGetWorkloadAuthConfigurationMethod = getGetWorkloadAuthConfigurationMethod = 
+          UserManagementGrpc.getGetWorkloadAuthConfigurationMethod = getGetWorkloadAuthConfigurationMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "GetWorkloadAuthConfiguration"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetWorkloadAuthConfiguration"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetWorkloadAuthConfiguration"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("GetWorkloadAuthConfiguration"))
+              .build();
         }
-     }
-     return getGetWorkloadAuthConfigurationMethod;
+      }
+    }
+    return getGetWorkloadAuthConfigurationMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getUpdateUserMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> METHOD_UPDATE_USER = getUpdateUserMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "UpdateUser",
+      requestType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest.class,
+      responseType = com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
       com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethod() {
-    return getUpdateUserMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
-      com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> getUpdateUserMethod;
     if ((getUpdateUserMethod = UserManagementGrpc.getUpdateUserMethod) == null) {
       synchronized (UserManagementGrpc.class) {
         if ((getUpdateUserMethod = UserManagementGrpc.getUpdateUserMethod) == null) {
-          UserManagementGrpc.getUpdateUserMethod = getUpdateUserMethod = 
+          UserManagementGrpc.getUpdateUserMethod = getUpdateUserMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest, com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "usermanagement.UserManagement", "UpdateUser"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "UpdateUser"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateUser"))
-                  .build();
-          }
+              .setSchemaDescriptor(new UserManagementMethodDescriptorSupplier("UpdateUser"))
+              .build();
         }
-     }
-     return getUpdateUserMethod;
+      }
+    }
+    return getUpdateUserMethod;
   }
 
   /**
    * Creates a new async stub that supports all call types for the service
    */
   public static UserManagementStub newStub(io.grpc.Channel channel) {
-    return new UserManagementStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<UserManagementStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<UserManagementStub>() {
+        @java.lang.Override
+        public UserManagementStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new UserManagementStub(channel, callOptions);
+        }
+      };
+    return UserManagementStub.newStub(factory, channel);
   }
 
   /**
@@ -4373,7 +3665,14 @@ public final class UserManagementGrpc {
    */
   public static UserManagementBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new UserManagementBlockingStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<UserManagementBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<UserManagementBlockingStub>() {
+        @java.lang.Override
+        public UserManagementBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new UserManagementBlockingStub(channel, callOptions);
+        }
+      };
+    return UserManagementBlockingStub.newStub(factory, channel);
   }
 
   /**
@@ -4381,7 +3680,14 @@ public final class UserManagementGrpc {
    */
   public static UserManagementFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new UserManagementFutureStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<UserManagementFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<UserManagementFutureStub>() {
+        @java.lang.Override
+        public UserManagementFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new UserManagementFutureStub(channel, callOptions);
+        }
+      };
+    return UserManagementFutureStub.newStub(factory, channel);
   }
 
   /**
@@ -4401,7 +3707,7 @@ public final class UserManagementGrpc {
      */
     public void interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getInteractiveLoginMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLoginMethod(), responseObserver);
     }
 
     /**
@@ -4413,7 +3719,7 @@ public final class UserManagementGrpc {
      */
     public void interactiveLogin3rdParty(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getInteractiveLogin3rdPartyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLogin3rdPartyMethod(), responseObserver);
     }
 
     /**
@@ -4424,7 +3730,7 @@ public final class UserManagementGrpc {
      */
     public void interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getInteractiveLoginLocalMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInteractiveLoginLocalMethod(), responseObserver);
     }
 
     /**
@@ -4434,7 +3740,7 @@ public final class UserManagementGrpc {
      */
     public void deleteAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteAccountMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteAccountMethod(), responseObserver);
     }
 
     /**
@@ -4444,7 +3750,7 @@ public final class UserManagementGrpc {
      */
     public void deleteActor(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteActorMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteActorMethod(), responseObserver);
     }
 
     /**
@@ -4454,7 +3760,7 @@ public final class UserManagementGrpc {
      */
     public void deleteTrialUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteTrialUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteTrialUserMethod(), responseObserver);
     }
 
     /**
@@ -4465,7 +3771,7 @@ public final class UserManagementGrpc {
      */
     public void getAccessKeyVerificationData(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetAccessKeyVerificationDataMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccessKeyVerificationDataMethod(), responseObserver);
     }
 
     /**
@@ -4477,7 +3783,7 @@ public final class UserManagementGrpc {
      */
     public void verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getVerifyInteractiveUserSessionTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getVerifyInteractiveUserSessionTokenMethod(), responseObserver);
     }
 
     /**
@@ -4489,7 +3795,7 @@ public final class UserManagementGrpc {
      */
     public void verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getVerifyAccessTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getVerifyAccessTokenMethod(), responseObserver);
     }
 
     /**
@@ -4500,7 +3806,7 @@ public final class UserManagementGrpc {
      */
     public void authenticate(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAuthenticateMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAuthenticateMethod(), responseObserver);
     }
 
     /**
@@ -4511,7 +3817,7 @@ public final class UserManagementGrpc {
      */
     public void accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAccessKeyUsageMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAccessKeyUsageMethod(), responseObserver);
     }
 
     /**
@@ -4522,7 +3828,7 @@ public final class UserManagementGrpc {
      */
     public void createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateUserMethod(), responseObserver);
     }
 
     /**
@@ -4532,7 +3838,7 @@ public final class UserManagementGrpc {
      */
     public void getUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUserMethod(), responseObserver);
     }
 
     /**
@@ -4542,7 +3848,7 @@ public final class UserManagementGrpc {
      */
     public void listUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListUsersMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListUsersMethod(), responseObserver);
     }
 
     /**
@@ -4552,7 +3858,7 @@ public final class UserManagementGrpc {
      */
     public void findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getFindUsersByEmailMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindUsersByEmailMethod(), responseObserver);
     }
 
     /**
@@ -4562,7 +3868,7 @@ public final class UserManagementGrpc {
      */
     public void findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getFindUsersMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getFindUsersMethod(), responseObserver);
     }
 
     /**
@@ -4572,7 +3878,7 @@ public final class UserManagementGrpc {
      */
     public void createAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateAccessKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAccessKeyMethod(), responseObserver);
     }
 
     /**
@@ -4582,7 +3888,7 @@ public final class UserManagementGrpc {
      */
     public void updateAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUpdateAccessKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateAccessKeyMethod(), responseObserver);
     }
 
     /**
@@ -4592,7 +3898,7 @@ public final class UserManagementGrpc {
      */
     public void deleteAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteAccessKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteAccessKeyMethod(), responseObserver);
     }
 
     /**
@@ -4602,7 +3908,7 @@ public final class UserManagementGrpc {
      */
     public void getAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetAccessKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccessKeyMethod(), responseObserver);
     }
 
     /**
@@ -4612,7 +3918,7 @@ public final class UserManagementGrpc {
      */
     public void listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListAccessKeysMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAccessKeysMethod(), responseObserver);
     }
 
     /**
@@ -4622,7 +3928,7 @@ public final class UserManagementGrpc {
      */
     public void createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateAccessTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAccessTokenMethod(), responseObserver);
     }
 
     /**
@@ -4632,7 +3938,7 @@ public final class UserManagementGrpc {
      */
     public void deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteAccessTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteAccessTokenMethod(), responseObserver);
     }
 
     /**
@@ -4642,7 +3948,7 @@ public final class UserManagementGrpc {
      */
     public void getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetAccessTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccessTokenMethod(), responseObserver);
     }
 
     /**
@@ -4652,7 +3958,7 @@ public final class UserManagementGrpc {
      */
     public void listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListAccessTokensMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAccessTokensMethod(), responseObserver);
     }
 
     /**
@@ -4662,7 +3968,7 @@ public final class UserManagementGrpc {
      */
     public void createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateScimAccessTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateScimAccessTokenMethod(), responseObserver);
     }
 
     /**
@@ -4672,7 +3978,7 @@ public final class UserManagementGrpc {
      */
     public void deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteScimAccessTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteScimAccessTokenMethod(), responseObserver);
     }
 
     /**
@@ -4682,7 +3988,7 @@ public final class UserManagementGrpc {
      */
     public void listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListScimAccessTokensMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListScimAccessTokensMethod(), responseObserver);
     }
 
     /**
@@ -4692,7 +3998,7 @@ public final class UserManagementGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetVersionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
@@ -4702,7 +4008,7 @@ public final class UserManagementGrpc {
      */
     public void getAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetAccountMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAccountMethod(), responseObserver);
     }
 
     /**
@@ -4712,7 +4018,7 @@ public final class UserManagementGrpc {
      */
     public void listAccounts(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListAccountsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAccountsMethod(), responseObserver);
     }
 
     /**
@@ -4722,7 +4028,7 @@ public final class UserManagementGrpc {
      */
     public void getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetRightsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetRightsMethod(), responseObserver);
     }
 
     /**
@@ -4732,7 +4038,7 @@ public final class UserManagementGrpc {
      */
     public void checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCheckRightsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckRightsMethod(), responseObserver);
     }
 
     /**
@@ -4742,7 +4048,7 @@ public final class UserManagementGrpc {
      */
     public void createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateAccountMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateAccountMethod(), responseObserver);
     }
 
     /**
@@ -4752,7 +4058,7 @@ public final class UserManagementGrpc {
      */
     public void createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateTrialAccountMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateTrialAccountMethod(), responseObserver);
     }
 
     /**
@@ -4762,7 +4068,7 @@ public final class UserManagementGrpc {
      */
     public void createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateC1CAccountMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateC1CAccountMethod(), responseObserver);
     }
 
     /**
@@ -4773,7 +4079,7 @@ public final class UserManagementGrpc {
      */
     public void verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getVerifyC1CEmailMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getVerifyC1CEmailMethod(), responseObserver);
     }
 
     /**
@@ -4783,7 +4089,7 @@ public final class UserManagementGrpc {
      */
     public void grantEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGrantEntitlementMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGrantEntitlementMethod(), responseObserver);
     }
 
     /**
@@ -4793,7 +4099,7 @@ public final class UserManagementGrpc {
      */
     public void revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getRevokeEntitlementMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRevokeEntitlementMethod(), responseObserver);
     }
 
     /**
@@ -4803,7 +4109,7 @@ public final class UserManagementGrpc {
      */
     public void ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getEnsureDefaultEntitlementsGrantedMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getEnsureDefaultEntitlementsGrantedMethod(), responseObserver);
     }
 
     /**
@@ -4813,7 +4119,7 @@ public final class UserManagementGrpc {
      */
     public void assignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAssignRoleMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignRoleMethod(), responseObserver);
     }
 
     /**
@@ -4823,7 +4129,7 @@ public final class UserManagementGrpc {
      */
     public void unassignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUnassignRoleMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignRoleMethod(), responseObserver);
     }
 
     /**
@@ -4833,7 +4139,7 @@ public final class UserManagementGrpc {
      */
     public void listAssignedRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListAssignedRolesMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAssignedRolesMethod(), responseObserver);
     }
 
     /**
@@ -4843,7 +4149,7 @@ public final class UserManagementGrpc {
      */
     public void assignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAssignResourceRoleMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignResourceRoleMethod(), responseObserver);
     }
 
     /**
@@ -4853,7 +4159,7 @@ public final class UserManagementGrpc {
      */
     public void unassignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUnassignResourceRoleMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignResourceRoleMethod(), responseObserver);
     }
 
     /**
@@ -4863,7 +4169,7 @@ public final class UserManagementGrpc {
      */
     public void listAssignedResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListAssignedResourceRolesMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListAssignedResourceRolesMethod(), responseObserver);
     }
 
     /**
@@ -4873,7 +4179,7 @@ public final class UserManagementGrpc {
      */
     public void listRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListRolesMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListRolesMethod(), responseObserver);
     }
 
     /**
@@ -4883,7 +4189,7 @@ public final class UserManagementGrpc {
      */
     public void listResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListResourceRolesMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListResourceRolesMethod(), responseObserver);
     }
 
     /**
@@ -4893,7 +4199,7 @@ public final class UserManagementGrpc {
      */
     public void listResourceAssignees(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListResourceAssigneesMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListResourceAssigneesMethod(), responseObserver);
     }
 
     /**
@@ -4903,7 +4209,7 @@ public final class UserManagementGrpc {
      */
     public void updateClouderaManagerLicenseKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUpdateClouderaManagerLicenseKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateClouderaManagerLicenseKeyMethod(), responseObserver);
     }
 
     /**
@@ -4913,7 +4219,7 @@ public final class UserManagementGrpc {
      */
     public void initiateSupportCase(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getInitiateSupportCaseMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInitiateSupportCaseMethod(), responseObserver);
     }
 
     /**
@@ -4924,7 +4230,7 @@ public final class UserManagementGrpc {
      */
     public void notifyResourceDeleted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getNotifyResourceDeletedMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getNotifyResourceDeletedMethod(), responseObserver);
     }
 
     /**
@@ -4934,7 +4240,7 @@ public final class UserManagementGrpc {
      */
     public void createMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateMachineUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateMachineUserMethod(), responseObserver);
     }
 
     /**
@@ -4944,7 +4250,7 @@ public final class UserManagementGrpc {
      */
     public void listMachineUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListMachineUsersMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListMachineUsersMethod(), responseObserver);
     }
 
     /**
@@ -4954,14 +4260,14 @@ public final class UserManagementGrpc {
      */
     public void deleteMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteMachineUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteMachineUserMethod(), responseObserver);
     }
 
     /**
      */
     public void listResourceRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListResourceRoleAssignmentsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListResourceRoleAssignmentsMethod(), responseObserver);
     }
 
     /**
@@ -4971,7 +4277,7 @@ public final class UserManagementGrpc {
      */
     public void setAccountMessages(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetAccountMessagesMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetAccountMessagesMethod(), responseObserver);
     }
 
     /**
@@ -4981,7 +4287,7 @@ public final class UserManagementGrpc {
      */
     public void acceptTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAcceptTermsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAcceptTermsMethod(), responseObserver);
     }
 
     /**
@@ -4992,7 +4298,7 @@ public final class UserManagementGrpc {
      */
     public void clearAcceptedTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getClearAcceptedTermsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getClearAcceptedTermsMethod(), responseObserver);
     }
 
     /**
@@ -5002,7 +4308,7 @@ public final class UserManagementGrpc {
      */
     public void describeTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDescribeTermsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeTermsMethod(), responseObserver);
     }
 
     /**
@@ -5012,7 +4318,7 @@ public final class UserManagementGrpc {
      */
     public void listTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListTermsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListTermsMethod(), responseObserver);
     }
 
     /**
@@ -5022,7 +4328,7 @@ public final class UserManagementGrpc {
      */
     public void listEntitlements(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListEntitlementsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListEntitlementsMethod(), responseObserver);
     }
 
     /**
@@ -5032,7 +4338,7 @@ public final class UserManagementGrpc {
      */
     public void setTermsAcceptanceExpiry(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetTermsAcceptanceExpiryMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetTermsAcceptanceExpiryMethod(), responseObserver);
     }
 
     /**
@@ -5042,7 +4348,7 @@ public final class UserManagementGrpc {
      */
     public void confirmAzureSubscriptionVerified(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getConfirmAzureSubscriptionVerifiedMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getConfirmAzureSubscriptionVerifiedMethod(), responseObserver);
     }
 
     /**
@@ -5052,7 +4358,7 @@ public final class UserManagementGrpc {
      */
     public void insertAzureSubscription(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getInsertAzureSubscriptionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getInsertAzureSubscriptionMethod(), responseObserver);
     }
 
     /**
@@ -5062,7 +4368,7 @@ public final class UserManagementGrpc {
      */
     public void createGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateGroupMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateGroupMethod(), responseObserver);
     }
 
     /**
@@ -5072,7 +4378,7 @@ public final class UserManagementGrpc {
      */
     public void deleteGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteGroupMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteGroupMethod(), responseObserver);
     }
 
     /**
@@ -5082,7 +4388,7 @@ public final class UserManagementGrpc {
      */
     public void getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetGroupMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetGroupMethod(), responseObserver);
     }
 
     /**
@@ -5092,7 +4398,7 @@ public final class UserManagementGrpc {
      */
     public void listGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListGroupsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListGroupsMethod(), responseObserver);
     }
 
     /**
@@ -5102,7 +4408,7 @@ public final class UserManagementGrpc {
      */
     public void updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUpdateGroupMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateGroupMethod(), responseObserver);
     }
 
     /**
@@ -5112,7 +4418,7 @@ public final class UserManagementGrpc {
      */
     public void addMemberToGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAddMemberToGroupMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddMemberToGroupMethod(), responseObserver);
     }
 
     /**
@@ -5122,7 +4428,7 @@ public final class UserManagementGrpc {
      */
     public void removeMemberFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getRemoveMemberFromGroupMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getRemoveMemberFromGroupMethod(), responseObserver);
     }
 
     /**
@@ -5132,7 +4438,7 @@ public final class UserManagementGrpc {
      */
     public void listGroupMembers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListGroupMembersMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListGroupMembersMethod(), responseObserver);
     }
 
     /**
@@ -5142,7 +4448,7 @@ public final class UserManagementGrpc {
      */
     public void listGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListGroupsForMemberMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListGroupsForMemberMethod(), responseObserver);
     }
 
     /**
@@ -5152,7 +4458,7 @@ public final class UserManagementGrpc {
      */
     public void listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsForMemberMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsForMemberMethod(), responseObserver);
     }
 
     /**
@@ -5162,7 +4468,7 @@ public final class UserManagementGrpc {
      */
     public void createClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateClusterSshPrivateKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateClusterSshPrivateKeyMethod(), responseObserver);
     }
 
     /**
@@ -5172,7 +4478,7 @@ public final class UserManagementGrpc {
      */
     public void getClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetClusterSshPrivateKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetClusterSshPrivateKeyMethod(), responseObserver);
     }
 
     /**
@@ -5182,7 +4488,7 @@ public final class UserManagementGrpc {
      */
     public void getAssigneeAuthorizationInformation(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetAssigneeAuthorizationInformationMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetAssigneeAuthorizationInformationMethod(), responseObserver);
     }
 
     /**
@@ -5192,7 +4498,7 @@ public final class UserManagementGrpc {
      */
     public void createIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateIdentityProviderConnectorMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateIdentityProviderConnectorMethod(), responseObserver);
     }
 
     /**
@@ -5202,7 +4508,7 @@ public final class UserManagementGrpc {
      */
     public void listIdentityProviderConnectors(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListIdentityProviderConnectorsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListIdentityProviderConnectorsMethod(), responseObserver);
     }
 
     /**
@@ -5212,7 +4518,7 @@ public final class UserManagementGrpc {
      */
     public void deleteIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteIdentityProviderConnectorMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteIdentityProviderConnectorMethod(), responseObserver);
     }
 
     /**
@@ -5222,7 +4528,7 @@ public final class UserManagementGrpc {
      */
     public void describeIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDescribeIdentityProviderConnectorMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeIdentityProviderConnectorMethod(), responseObserver);
     }
 
     /**
@@ -5232,7 +4538,7 @@ public final class UserManagementGrpc {
      */
     public void updateIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUpdateIdentityProviderConnectorMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateIdentityProviderConnectorMethod(), responseObserver);
     }
 
     /**
@@ -5242,7 +4548,7 @@ public final class UserManagementGrpc {
      */
     public void setClouderaSSOLoginEnabled(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetClouderaSSOLoginEnabledMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetClouderaSSOLoginEnabledMethod(), responseObserver);
     }
 
     /**
@@ -5253,7 +4559,7 @@ public final class UserManagementGrpc {
      */
     public void getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetIdPMetadataForWorkloadSSOMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetIdPMetadataForWorkloadSSOMethod(), responseObserver);
     }
 
     /**
@@ -5266,7 +4572,7 @@ public final class UserManagementGrpc {
      */
     public void processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getProcessWorkloadSSOAuthnReqMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getProcessWorkloadSSOAuthnReqMethod(), responseObserver);
     }
 
     /**
@@ -5276,7 +4582,7 @@ public final class UserManagementGrpc {
      */
     public void generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGenerateControlPlaneSSOAuthnReqMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenerateControlPlaneSSOAuthnReqMethod(), responseObserver);
     }
 
     /**
@@ -5287,7 +4593,7 @@ public final class UserManagementGrpc {
      */
     public void setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetWorkloadSubdomainMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetWorkloadSubdomainMethod(), responseObserver);
     }
 
     /**
@@ -5301,7 +4607,7 @@ public final class UserManagementGrpc {
      */
     public void createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCreateWorkloadMachineUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCreateWorkloadMachineUserMethod(), responseObserver);
     }
 
     /**
@@ -5313,7 +4619,7 @@ public final class UserManagementGrpc {
      */
     public void deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteWorkloadMachineUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteWorkloadMachineUserMethod(), responseObserver);
     }
 
     /**
@@ -5325,7 +4631,7 @@ public final class UserManagementGrpc {
      */
     public void getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetWorkloadAdministrationGroupNameMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetWorkloadAdministrationGroupNameMethod(), responseObserver);
     }
 
     /**
@@ -5338,7 +4644,7 @@ public final class UserManagementGrpc {
      */
     public void setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetWorkloadAdministrationGroupNameMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetWorkloadAdministrationGroupNameMethod(), responseObserver);
     }
 
     /**
@@ -5350,7 +4656,7 @@ public final class UserManagementGrpc {
      */
     public void deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteWorkloadAdministrationGroupNameMethod(), responseObserver);
     }
 
     /**
@@ -5360,7 +4666,7 @@ public final class UserManagementGrpc {
      */
     public void listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListWorkloadAdministrationGroupsMethod(), responseObserver);
     }
 
     /**
@@ -5371,7 +4677,7 @@ public final class UserManagementGrpc {
      */
     public void setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetActorWorkloadCredentialsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetActorWorkloadCredentialsMethod(), responseObserver);
     }
 
     /**
@@ -5381,7 +4687,7 @@ public final class UserManagementGrpc {
      */
     public void validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getValidateActorWorkloadCredentialsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getValidateActorWorkloadCredentialsMethod(), responseObserver);
     }
 
     /**
@@ -5391,7 +4697,7 @@ public final class UserManagementGrpc {
      */
     public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetActorWorkloadCredentialsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetActorWorkloadCredentialsMethod(), responseObserver);
     }
 
     /**
@@ -5409,7 +4715,7 @@ public final class UserManagementGrpc {
      */
     public void getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetEventGenerationIdsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetEventGenerationIdsMethod(), responseObserver);
     }
 
     /**
@@ -5419,7 +4725,7 @@ public final class UserManagementGrpc {
      */
     public void addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAddActorSshPublicKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAddActorSshPublicKeyMethod(), responseObserver);
     }
 
     /**
@@ -5429,7 +4735,7 @@ public final class UserManagementGrpc {
      */
     public void listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListActorSshPublicKeysMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListActorSshPublicKeysMethod(), responseObserver);
     }
 
     /**
@@ -5439,7 +4745,7 @@ public final class UserManagementGrpc {
      */
     public void describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDescribeActorSshPublicKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDescribeActorSshPublicKeyMethod(), responseObserver);
     }
 
     /**
@@ -5449,7 +4755,7 @@ public final class UserManagementGrpc {
      */
     public void deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getDeleteActorSshPublicKeyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getDeleteActorSshPublicKeyMethod(), responseObserver);
     }
 
     /**
@@ -5459,7 +4765,7 @@ public final class UserManagementGrpc {
      */
     public void setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetWorkloadPasswordPolicyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetWorkloadPasswordPolicyMethod(), responseObserver);
     }
 
     /**
@@ -5469,7 +4775,7 @@ public final class UserManagementGrpc {
      */
     public void unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUnsetWorkloadPasswordPolicyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnsetWorkloadPasswordPolicyMethod(), responseObserver);
     }
 
     /**
@@ -5479,7 +4785,7 @@ public final class UserManagementGrpc {
      */
     public void setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetAuthenticationPolicyMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetAuthenticationPolicyMethod(), responseObserver);
     }
 
     /**
@@ -5489,7 +4795,7 @@ public final class UserManagementGrpc {
      */
     public void assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAssignCloudIdentityMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignCloudIdentityMethod(), responseObserver);
     }
 
     /**
@@ -5499,7 +4805,7 @@ public final class UserManagementGrpc {
      */
     public void unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUnassignCloudIdentityMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignCloudIdentityMethod(), responseObserver);
     }
 
     /**
@@ -5509,7 +4815,7 @@ public final class UserManagementGrpc {
      */
     public void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getAssignServicePrincipalCloudIdentityMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getAssignServicePrincipalCloudIdentityMethod(), responseObserver);
     }
 
     /**
@@ -5519,7 +4825,7 @@ public final class UserManagementGrpc {
      */
     public void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUnassignServicePrincipalCloudIdentityMethod(), responseObserver);
     }
 
     /**
@@ -5529,7 +4835,7 @@ public final class UserManagementGrpc {
      */
     public void listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListServicePrincipalCloudIdentitiesMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListServicePrincipalCloudIdentitiesMethod(), responseObserver);
     }
 
     /**
@@ -5539,7 +4845,7 @@ public final class UserManagementGrpc {
      */
     public void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetDefaultIdentityProviderConnectorMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetDefaultIdentityProviderConnectorMethod(), responseObserver);
     }
 
     /**
@@ -5549,7 +4855,7 @@ public final class UserManagementGrpc {
      */
     public void setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getSetDefaultIdentityProviderConnectorMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getSetDefaultIdentityProviderConnectorMethod(), responseObserver);
     }
 
     /**
@@ -5559,7 +4865,7 @@ public final class UserManagementGrpc {
      */
     public void getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetUserSyncStateModelMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetUserSyncStateModelMethod(), responseObserver);
     }
 
     /**
@@ -5569,7 +4875,7 @@ public final class UserManagementGrpc {
      */
     public void listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getListRoleAssignmentsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getListRoleAssignmentsMethod(), responseObserver);
     }
 
     /**
@@ -5579,7 +4885,7 @@ public final class UserManagementGrpc {
      */
     public void generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGenerateWorkloadAuthTokenMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGenerateWorkloadAuthTokenMethod(), responseObserver);
     }
 
     /**
@@ -5589,7 +4895,7 @@ public final class UserManagementGrpc {
      */
     public void getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetWorkloadAuthConfigurationMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetWorkloadAuthConfigurationMethod(), responseObserver);
     }
 
     /**
@@ -5599,826 +4905,826 @@ public final class UserManagementGrpc {
      */
     public void updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getUpdateUserMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getUpdateUserMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getInteractiveLoginMethodHelper(),
-            asyncUnaryCall(
+            getInteractiveLoginMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse>(
                   this, METHODID_INTERACTIVE_LOGIN)))
           .addMethod(
-            getInteractiveLogin3rdPartyMethodHelper(),
-            asyncUnaryCall(
+            getInteractiveLogin3rdPartyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse>(
                   this, METHODID_INTERACTIVE_LOGIN3RD_PARTY)))
           .addMethod(
-            getInteractiveLoginLocalMethodHelper(),
-            asyncUnaryCall(
+            getInteractiveLoginLocalMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse>(
                   this, METHODID_INTERACTIVE_LOGIN_LOCAL)))
           .addMethod(
-            getDeleteAccountMethodHelper(),
-            asyncUnaryCall(
+            getDeleteAccountMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse>(
                   this, METHODID_DELETE_ACCOUNT)))
           .addMethod(
-            getDeleteActorMethodHelper(),
-            asyncUnaryCall(
+            getDeleteActorMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse>(
                   this, METHODID_DELETE_ACTOR)))
           .addMethod(
-            getDeleteTrialUserMethodHelper(),
-            asyncUnaryCall(
+            getDeleteTrialUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse>(
                   this, METHODID_DELETE_TRIAL_USER)))
           .addMethod(
-            getGetAccessKeyVerificationDataMethodHelper(),
-            asyncUnaryCall(
+            getGetAccessKeyVerificationDataMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse>(
                   this, METHODID_GET_ACCESS_KEY_VERIFICATION_DATA)))
           .addMethod(
-            getVerifyInteractiveUserSessionTokenMethodHelper(),
-            asyncUnaryCall(
+            getVerifyInteractiveUserSessionTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse>(
                   this, METHODID_VERIFY_INTERACTIVE_USER_SESSION_TOKEN)))
           .addMethod(
-            getVerifyAccessTokenMethodHelper(),
-            asyncUnaryCall(
+            getVerifyAccessTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse>(
                   this, METHODID_VERIFY_ACCESS_TOKEN)))
           .addMethod(
-            getAuthenticateMethodHelper(),
-            asyncUnaryCall(
+            getAuthenticateMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse>(
                   this, METHODID_AUTHENTICATE)))
           .addMethod(
-            getAccessKeyUsageMethodHelper(),
-            asyncUnaryCall(
+            getAccessKeyUsageMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse>(
                   this, METHODID_ACCESS_KEY_USAGE)))
           .addMethod(
-            getCreateUserMethodHelper(),
-            asyncUnaryCall(
+            getCreateUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse>(
                   this, METHODID_CREATE_USER)))
           .addMethod(
-            getGetUserMethodHelper(),
-            asyncUnaryCall(
+            getGetUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse>(
                   this, METHODID_GET_USER)))
           .addMethod(
-            getListUsersMethodHelper(),
-            asyncUnaryCall(
+            getListUsersMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse>(
                   this, METHODID_LIST_USERS)))
           .addMethod(
-            getFindUsersByEmailMethodHelper(),
-            asyncUnaryCall(
+            getFindUsersByEmailMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse>(
                   this, METHODID_FIND_USERS_BY_EMAIL)))
           .addMethod(
-            getFindUsersMethodHelper(),
-            asyncUnaryCall(
+            getFindUsersMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse>(
                   this, METHODID_FIND_USERS)))
           .addMethod(
-            getCreateAccessKeyMethodHelper(),
-            asyncUnaryCall(
+            getCreateAccessKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse>(
                   this, METHODID_CREATE_ACCESS_KEY)))
           .addMethod(
-            getUpdateAccessKeyMethodHelper(),
-            asyncUnaryCall(
+            getUpdateAccessKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse>(
                   this, METHODID_UPDATE_ACCESS_KEY)))
           .addMethod(
-            getDeleteAccessKeyMethodHelper(),
-            asyncUnaryCall(
+            getDeleteAccessKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse>(
                   this, METHODID_DELETE_ACCESS_KEY)))
           .addMethod(
-            getGetAccessKeyMethodHelper(),
-            asyncUnaryCall(
+            getGetAccessKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse>(
                   this, METHODID_GET_ACCESS_KEY)))
           .addMethod(
-            getListAccessKeysMethodHelper(),
-            asyncUnaryCall(
+            getListAccessKeysMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse>(
                   this, METHODID_LIST_ACCESS_KEYS)))
           .addMethod(
-            getCreateAccessTokenMethodHelper(),
-            asyncUnaryCall(
+            getCreateAccessTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse>(
                   this, METHODID_CREATE_ACCESS_TOKEN)))
           .addMethod(
-            getDeleteAccessTokenMethodHelper(),
-            asyncUnaryCall(
+            getDeleteAccessTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse>(
                   this, METHODID_DELETE_ACCESS_TOKEN)))
           .addMethod(
-            getGetAccessTokenMethodHelper(),
-            asyncUnaryCall(
+            getGetAccessTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse>(
                   this, METHODID_GET_ACCESS_TOKEN)))
           .addMethod(
-            getListAccessTokensMethodHelper(),
-            asyncUnaryCall(
+            getListAccessTokensMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse>(
                   this, METHODID_LIST_ACCESS_TOKENS)))
           .addMethod(
-            getCreateScimAccessTokenMethodHelper(),
-            asyncUnaryCall(
+            getCreateScimAccessTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse>(
                   this, METHODID_CREATE_SCIM_ACCESS_TOKEN)))
           .addMethod(
-            getDeleteScimAccessTokenMethodHelper(),
-            asyncUnaryCall(
+            getDeleteScimAccessTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse>(
                   this, METHODID_DELETE_SCIM_ACCESS_TOKEN)))
           .addMethod(
-            getListScimAccessTokensMethodHelper(),
-            asyncUnaryCall(
+            getListScimAccessTokensMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse>(
                   this, METHODID_LIST_SCIM_ACCESS_TOKENS)))
           .addMethod(
-            getGetVersionMethodHelper(),
-            asyncUnaryCall(
+            getGetVersionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
                 com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
                   this, METHODID_GET_VERSION)))
           .addMethod(
-            getGetAccountMethodHelper(),
-            asyncUnaryCall(
+            getGetAccountMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse>(
                   this, METHODID_GET_ACCOUNT)))
           .addMethod(
-            getListAccountsMethodHelper(),
-            asyncUnaryCall(
+            getListAccountsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse>(
                   this, METHODID_LIST_ACCOUNTS)))
           .addMethod(
-            getGetRightsMethodHelper(),
-            asyncUnaryCall(
+            getGetRightsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse>(
                   this, METHODID_GET_RIGHTS)))
           .addMethod(
-            getCheckRightsMethodHelper(),
-            asyncUnaryCall(
+            getCheckRightsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse>(
                   this, METHODID_CHECK_RIGHTS)))
           .addMethod(
-            getCreateAccountMethodHelper(),
-            asyncUnaryCall(
+            getCreateAccountMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse>(
                   this, METHODID_CREATE_ACCOUNT)))
           .addMethod(
-            getCreateTrialAccountMethodHelper(),
-            asyncUnaryCall(
+            getCreateTrialAccountMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse>(
                   this, METHODID_CREATE_TRIAL_ACCOUNT)))
           .addMethod(
-            getCreateC1CAccountMethodHelper(),
-            asyncUnaryCall(
+            getCreateC1CAccountMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse>(
                   this, METHODID_CREATE_C1CACCOUNT)))
           .addMethod(
-            getVerifyC1CEmailMethodHelper(),
-            asyncUnaryCall(
+            getVerifyC1CEmailMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse>(
                   this, METHODID_VERIFY_C1CEMAIL)))
           .addMethod(
-            getGrantEntitlementMethodHelper(),
-            asyncUnaryCall(
+            getGrantEntitlementMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse>(
                   this, METHODID_GRANT_ENTITLEMENT)))
           .addMethod(
-            getRevokeEntitlementMethodHelper(),
-            asyncUnaryCall(
+            getRevokeEntitlementMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse>(
                   this, METHODID_REVOKE_ENTITLEMENT)))
           .addMethod(
-            getEnsureDefaultEntitlementsGrantedMethodHelper(),
-            asyncUnaryCall(
+            getEnsureDefaultEntitlementsGrantedMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse>(
                   this, METHODID_ENSURE_DEFAULT_ENTITLEMENTS_GRANTED)))
           .addMethod(
-            getAssignRoleMethodHelper(),
-            asyncUnaryCall(
+            getAssignRoleMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse>(
                   this, METHODID_ASSIGN_ROLE)))
           .addMethod(
-            getUnassignRoleMethodHelper(),
-            asyncUnaryCall(
+            getUnassignRoleMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse>(
                   this, METHODID_UNASSIGN_ROLE)))
           .addMethod(
-            getListAssignedRolesMethodHelper(),
-            asyncUnaryCall(
+            getListAssignedRolesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse>(
                   this, METHODID_LIST_ASSIGNED_ROLES)))
           .addMethod(
-            getAssignResourceRoleMethodHelper(),
-            asyncUnaryCall(
+            getAssignResourceRoleMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse>(
                   this, METHODID_ASSIGN_RESOURCE_ROLE)))
           .addMethod(
-            getUnassignResourceRoleMethodHelper(),
-            asyncUnaryCall(
+            getUnassignResourceRoleMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse>(
                   this, METHODID_UNASSIGN_RESOURCE_ROLE)))
           .addMethod(
-            getListAssignedResourceRolesMethodHelper(),
-            asyncUnaryCall(
+            getListAssignedResourceRolesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse>(
                   this, METHODID_LIST_ASSIGNED_RESOURCE_ROLES)))
           .addMethod(
-            getListRolesMethodHelper(),
-            asyncUnaryCall(
+            getListRolesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse>(
                   this, METHODID_LIST_ROLES)))
           .addMethod(
-            getListResourceRolesMethodHelper(),
-            asyncUnaryCall(
+            getListResourceRolesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse>(
                   this, METHODID_LIST_RESOURCE_ROLES)))
           .addMethod(
-            getListResourceAssigneesMethodHelper(),
-            asyncUnaryCall(
+            getListResourceAssigneesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse>(
                   this, METHODID_LIST_RESOURCE_ASSIGNEES)))
           .addMethod(
-            getUpdateClouderaManagerLicenseKeyMethodHelper(),
-            asyncUnaryCall(
+            getUpdateClouderaManagerLicenseKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse>(
                   this, METHODID_UPDATE_CLOUDERA_MANAGER_LICENSE_KEY)))
           .addMethod(
-            getInitiateSupportCaseMethodHelper(),
-            asyncUnaryCall(
+            getInitiateSupportCaseMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse>(
                   this, METHODID_INITIATE_SUPPORT_CASE)))
           .addMethod(
-            getNotifyResourceDeletedMethodHelper(),
-            asyncUnaryCall(
+            getNotifyResourceDeletedMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse>(
                   this, METHODID_NOTIFY_RESOURCE_DELETED)))
           .addMethod(
-            getCreateMachineUserMethodHelper(),
-            asyncUnaryCall(
+            getCreateMachineUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse>(
                   this, METHODID_CREATE_MACHINE_USER)))
           .addMethod(
-            getListMachineUsersMethodHelper(),
-            asyncUnaryCall(
+            getListMachineUsersMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse>(
                   this, METHODID_LIST_MACHINE_USERS)))
           .addMethod(
-            getDeleteMachineUserMethodHelper(),
-            asyncUnaryCall(
+            getDeleteMachineUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse>(
                   this, METHODID_DELETE_MACHINE_USER)))
           .addMethod(
-            getListResourceRoleAssignmentsMethodHelper(),
-            asyncUnaryCall(
+            getListResourceRoleAssignmentsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse>(
                   this, METHODID_LIST_RESOURCE_ROLE_ASSIGNMENTS)))
           .addMethod(
-            getSetAccountMessagesMethodHelper(),
-            asyncUnaryCall(
+            getSetAccountMessagesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse>(
                   this, METHODID_SET_ACCOUNT_MESSAGES)))
           .addMethod(
-            getAcceptTermsMethodHelper(),
-            asyncUnaryCall(
+            getAcceptTermsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse>(
                   this, METHODID_ACCEPT_TERMS)))
           .addMethod(
-            getClearAcceptedTermsMethodHelper(),
-            asyncUnaryCall(
+            getClearAcceptedTermsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse>(
                   this, METHODID_CLEAR_ACCEPTED_TERMS)))
           .addMethod(
-            getDescribeTermsMethodHelper(),
-            asyncUnaryCall(
+            getDescribeTermsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse>(
                   this, METHODID_DESCRIBE_TERMS)))
           .addMethod(
-            getListTermsMethodHelper(),
-            asyncUnaryCall(
+            getListTermsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse>(
                   this, METHODID_LIST_TERMS)))
           .addMethod(
-            getListEntitlementsMethodHelper(),
-            asyncUnaryCall(
+            getListEntitlementsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse>(
                   this, METHODID_LIST_ENTITLEMENTS)))
           .addMethod(
-            getSetTermsAcceptanceExpiryMethodHelper(),
-            asyncUnaryCall(
+            getSetTermsAcceptanceExpiryMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse>(
                   this, METHODID_SET_TERMS_ACCEPTANCE_EXPIRY)))
           .addMethod(
-            getConfirmAzureSubscriptionVerifiedMethodHelper(),
-            asyncUnaryCall(
+            getConfirmAzureSubscriptionVerifiedMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse>(
                   this, METHODID_CONFIRM_AZURE_SUBSCRIPTION_VERIFIED)))
           .addMethod(
-            getInsertAzureSubscriptionMethodHelper(),
-            asyncUnaryCall(
+            getInsertAzureSubscriptionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse>(
                   this, METHODID_INSERT_AZURE_SUBSCRIPTION)))
           .addMethod(
-            getCreateGroupMethodHelper(),
-            asyncUnaryCall(
+            getCreateGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse>(
                   this, METHODID_CREATE_GROUP)))
           .addMethod(
-            getDeleteGroupMethodHelper(),
-            asyncUnaryCall(
+            getDeleteGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse>(
                   this, METHODID_DELETE_GROUP)))
           .addMethod(
-            getGetGroupMethodHelper(),
-            asyncUnaryCall(
+            getGetGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse>(
                   this, METHODID_GET_GROUP)))
           .addMethod(
-            getListGroupsMethodHelper(),
-            asyncUnaryCall(
+            getListGroupsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse>(
                   this, METHODID_LIST_GROUPS)))
           .addMethod(
-            getUpdateGroupMethodHelper(),
-            asyncUnaryCall(
+            getUpdateGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse>(
                   this, METHODID_UPDATE_GROUP)))
           .addMethod(
-            getAddMemberToGroupMethodHelper(),
-            asyncUnaryCall(
+            getAddMemberToGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse>(
                   this, METHODID_ADD_MEMBER_TO_GROUP)))
           .addMethod(
-            getRemoveMemberFromGroupMethodHelper(),
-            asyncUnaryCall(
+            getRemoveMemberFromGroupMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse>(
                   this, METHODID_REMOVE_MEMBER_FROM_GROUP)))
           .addMethod(
-            getListGroupMembersMethodHelper(),
-            asyncUnaryCall(
+            getListGroupMembersMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse>(
                   this, METHODID_LIST_GROUP_MEMBERS)))
           .addMethod(
-            getListGroupsForMemberMethodHelper(),
-            asyncUnaryCall(
+            getListGroupsForMemberMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse>(
                   this, METHODID_LIST_GROUPS_FOR_MEMBER)))
           .addMethod(
-            getListWorkloadAdministrationGroupsForMemberMethodHelper(),
-            asyncUnaryCall(
+            getListWorkloadAdministrationGroupsForMemberMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse>(
                   this, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS_FOR_MEMBER)))
           .addMethod(
-            getCreateClusterSshPrivateKeyMethodHelper(),
-            asyncUnaryCall(
+            getCreateClusterSshPrivateKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse>(
                   this, METHODID_CREATE_CLUSTER_SSH_PRIVATE_KEY)))
           .addMethod(
-            getGetClusterSshPrivateKeyMethodHelper(),
-            asyncUnaryCall(
+            getGetClusterSshPrivateKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse>(
                   this, METHODID_GET_CLUSTER_SSH_PRIVATE_KEY)))
           .addMethod(
-            getGetAssigneeAuthorizationInformationMethodHelper(),
-            asyncUnaryCall(
+            getGetAssigneeAuthorizationInformationMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse>(
                   this, METHODID_GET_ASSIGNEE_AUTHORIZATION_INFORMATION)))
           .addMethod(
-            getCreateIdentityProviderConnectorMethodHelper(),
-            asyncUnaryCall(
+            getCreateIdentityProviderConnectorMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse>(
                   this, METHODID_CREATE_IDENTITY_PROVIDER_CONNECTOR)))
           .addMethod(
-            getListIdentityProviderConnectorsMethodHelper(),
-            asyncUnaryCall(
+            getListIdentityProviderConnectorsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse>(
                   this, METHODID_LIST_IDENTITY_PROVIDER_CONNECTORS)))
           .addMethod(
-            getDeleteIdentityProviderConnectorMethodHelper(),
-            asyncUnaryCall(
+            getDeleteIdentityProviderConnectorMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse>(
                   this, METHODID_DELETE_IDENTITY_PROVIDER_CONNECTOR)))
           .addMethod(
-            getDescribeIdentityProviderConnectorMethodHelper(),
-            asyncUnaryCall(
+            getDescribeIdentityProviderConnectorMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse>(
                   this, METHODID_DESCRIBE_IDENTITY_PROVIDER_CONNECTOR)))
           .addMethod(
-            getUpdateIdentityProviderConnectorMethodHelper(),
-            asyncUnaryCall(
+            getUpdateIdentityProviderConnectorMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse>(
                   this, METHODID_UPDATE_IDENTITY_PROVIDER_CONNECTOR)))
           .addMethod(
-            getSetClouderaSSOLoginEnabledMethodHelper(),
-            asyncUnaryCall(
+            getSetClouderaSSOLoginEnabledMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse>(
                   this, METHODID_SET_CLOUDERA_SSOLOGIN_ENABLED)))
           .addMethod(
-            getGetIdPMetadataForWorkloadSSOMethodHelper(),
-            asyncUnaryCall(
+            getGetIdPMetadataForWorkloadSSOMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse>(
                   this, METHODID_GET_ID_PMETADATA_FOR_WORKLOAD_SSO)))
           .addMethod(
-            getProcessWorkloadSSOAuthnReqMethodHelper(),
-            asyncUnaryCall(
+            getProcessWorkloadSSOAuthnReqMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse>(
                   this, METHODID_PROCESS_WORKLOAD_SSOAUTHN_REQ)))
           .addMethod(
-            getGenerateControlPlaneSSOAuthnReqMethodHelper(),
-            asyncUnaryCall(
+            getGenerateControlPlaneSSOAuthnReqMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse>(
                   this, METHODID_GENERATE_CONTROL_PLANE_SSOAUTHN_REQ)))
           .addMethod(
-            getSetWorkloadSubdomainMethodHelper(),
-            asyncUnaryCall(
+            getSetWorkloadSubdomainMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse>(
                   this, METHODID_SET_WORKLOAD_SUBDOMAIN)))
           .addMethod(
-            getCreateWorkloadMachineUserMethodHelper(),
-            asyncUnaryCall(
+            getCreateWorkloadMachineUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse>(
                   this, METHODID_CREATE_WORKLOAD_MACHINE_USER)))
           .addMethod(
-            getDeleteWorkloadMachineUserMethodHelper(),
-            asyncUnaryCall(
+            getDeleteWorkloadMachineUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse>(
                   this, METHODID_DELETE_WORKLOAD_MACHINE_USER)))
           .addMethod(
-            getGetWorkloadAdministrationGroupNameMethodHelper(),
-            asyncUnaryCall(
+            getGetWorkloadAdministrationGroupNameMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse>(
                   this, METHODID_GET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
           .addMethod(
-            getSetWorkloadAdministrationGroupNameMethodHelper(),
-            asyncUnaryCall(
+            getSetWorkloadAdministrationGroupNameMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse>(
                   this, METHODID_SET_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
           .addMethod(
-            getDeleteWorkloadAdministrationGroupNameMethodHelper(),
-            asyncUnaryCall(
+            getDeleteWorkloadAdministrationGroupNameMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse>(
                   this, METHODID_DELETE_WORKLOAD_ADMINISTRATION_GROUP_NAME)))
           .addMethod(
-            getListWorkloadAdministrationGroupsMethodHelper(),
-            asyncUnaryCall(
+            getListWorkloadAdministrationGroupsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse>(
                   this, METHODID_LIST_WORKLOAD_ADMINISTRATION_GROUPS)))
           .addMethod(
-            getSetActorWorkloadCredentialsMethodHelper(),
-            asyncUnaryCall(
+            getSetActorWorkloadCredentialsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse>(
                   this, METHODID_SET_ACTOR_WORKLOAD_CREDENTIALS)))
           .addMethod(
-            getValidateActorWorkloadCredentialsMethodHelper(),
-            asyncUnaryCall(
+            getValidateActorWorkloadCredentialsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse>(
                   this, METHODID_VALIDATE_ACTOR_WORKLOAD_CREDENTIALS)))
           .addMethod(
-            getGetActorWorkloadCredentialsMethodHelper(),
-            asyncUnaryCall(
+            getGetActorWorkloadCredentialsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse>(
                   this, METHODID_GET_ACTOR_WORKLOAD_CREDENTIALS)))
           .addMethod(
-            getGetEventGenerationIdsMethodHelper(),
-            asyncUnaryCall(
+            getGetEventGenerationIdsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse>(
                   this, METHODID_GET_EVENT_GENERATION_IDS)))
           .addMethod(
-            getAddActorSshPublicKeyMethodHelper(),
-            asyncUnaryCall(
+            getAddActorSshPublicKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse>(
                   this, METHODID_ADD_ACTOR_SSH_PUBLIC_KEY)))
           .addMethod(
-            getListActorSshPublicKeysMethodHelper(),
-            asyncUnaryCall(
+            getListActorSshPublicKeysMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse>(
                   this, METHODID_LIST_ACTOR_SSH_PUBLIC_KEYS)))
           .addMethod(
-            getDescribeActorSshPublicKeyMethodHelper(),
-            asyncUnaryCall(
+            getDescribeActorSshPublicKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse>(
                   this, METHODID_DESCRIBE_ACTOR_SSH_PUBLIC_KEY)))
           .addMethod(
-            getDeleteActorSshPublicKeyMethodHelper(),
-            asyncUnaryCall(
+            getDeleteActorSshPublicKeyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse>(
                   this, METHODID_DELETE_ACTOR_SSH_PUBLIC_KEY)))
           .addMethod(
-            getSetWorkloadPasswordPolicyMethodHelper(),
-            asyncUnaryCall(
+            getSetWorkloadPasswordPolicyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse>(
                   this, METHODID_SET_WORKLOAD_PASSWORD_POLICY)))
           .addMethod(
-            getUnsetWorkloadPasswordPolicyMethodHelper(),
-            asyncUnaryCall(
+            getUnsetWorkloadPasswordPolicyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse>(
                   this, METHODID_UNSET_WORKLOAD_PASSWORD_POLICY)))
           .addMethod(
-            getSetAuthenticationPolicyMethodHelper(),
-            asyncUnaryCall(
+            getSetAuthenticationPolicyMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse>(
                   this, METHODID_SET_AUTHENTICATION_POLICY)))
           .addMethod(
-            getAssignCloudIdentityMethodHelper(),
-            asyncUnaryCall(
+            getAssignCloudIdentityMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse>(
                   this, METHODID_ASSIGN_CLOUD_IDENTITY)))
           .addMethod(
-            getUnassignCloudIdentityMethodHelper(),
-            asyncUnaryCall(
+            getUnassignCloudIdentityMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse>(
                   this, METHODID_UNASSIGN_CLOUD_IDENTITY)))
           .addMethod(
-            getAssignServicePrincipalCloudIdentityMethodHelper(),
-            asyncUnaryCall(
+            getAssignServicePrincipalCloudIdentityMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse>(
                   this, METHODID_ASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
           .addMethod(
-            getUnassignServicePrincipalCloudIdentityMethodHelper(),
-            asyncUnaryCall(
+            getUnassignServicePrincipalCloudIdentityMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse>(
                   this, METHODID_UNASSIGN_SERVICE_PRINCIPAL_CLOUD_IDENTITY)))
           .addMethod(
-            getListServicePrincipalCloudIdentitiesMethodHelper(),
-            asyncUnaryCall(
+            getListServicePrincipalCloudIdentitiesMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse>(
                   this, METHODID_LIST_SERVICE_PRINCIPAL_CLOUD_IDENTITIES)))
           .addMethod(
-            getGetDefaultIdentityProviderConnectorMethodHelper(),
-            asyncUnaryCall(
+            getGetDefaultIdentityProviderConnectorMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse>(
                   this, METHODID_GET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
           .addMethod(
-            getSetDefaultIdentityProviderConnectorMethodHelper(),
-            asyncUnaryCall(
+            getSetDefaultIdentityProviderConnectorMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse>(
                   this, METHODID_SET_DEFAULT_IDENTITY_PROVIDER_CONNECTOR)))
           .addMethod(
-            getGetUserSyncStateModelMethodHelper(),
-            asyncUnaryCall(
+            getGetUserSyncStateModelMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse>(
                   this, METHODID_GET_USER_SYNC_STATE_MODEL)))
           .addMethod(
-            getListRoleAssignmentsMethodHelper(),
-            asyncUnaryCall(
+            getListRoleAssignmentsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse>(
                   this, METHODID_LIST_ROLE_ASSIGNMENTS)))
           .addMethod(
-            getGenerateWorkloadAuthTokenMethodHelper(),
-            asyncUnaryCall(
+            getGenerateWorkloadAuthTokenMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse>(
                   this, METHODID_GENERATE_WORKLOAD_AUTH_TOKEN)))
           .addMethod(
-            getGetWorkloadAuthConfigurationMethodHelper(),
-            asyncUnaryCall(
+            getGetWorkloadAuthConfigurationMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse>(
                   this, METHODID_GET_WORKLOAD_AUTH_CONFIGURATION)))
           .addMethod(
-            getUpdateUserMethodHelper(),
-            asyncUnaryCall(
+            getUpdateUserMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest,
                 com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse>(
@@ -6433,19 +5739,15 @@ public final class UserManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class UserManagementStub extends io.grpc.stub.AbstractStub<UserManagementStub> {
-    private UserManagementStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private UserManagementStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class UserManagementStub extends io.grpc.stub.AbstractAsyncStub<UserManagementStub> {
+    private UserManagementStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected UserManagementStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected UserManagementStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new UserManagementStub(channel, callOptions);
     }
 
@@ -6458,8 +5760,8 @@ public final class UserManagementGrpc {
      */
     public void interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getInteractiveLoginMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getInteractiveLoginMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6471,8 +5773,8 @@ public final class UserManagementGrpc {
      */
     public void interactiveLogin3rdParty(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getInteractiveLogin3rdPartyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getInteractiveLogin3rdPartyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6483,8 +5785,8 @@ public final class UserManagementGrpc {
      */
     public void interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getInteractiveLoginLocalMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getInteractiveLoginLocalMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6494,8 +5796,8 @@ public final class UserManagementGrpc {
      */
     public void deleteAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteAccountMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteAccountMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6505,8 +5807,8 @@ public final class UserManagementGrpc {
      */
     public void deleteActor(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteActorMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteActorMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6516,8 +5818,8 @@ public final class UserManagementGrpc {
      */
     public void deleteTrialUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteTrialUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteTrialUserMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6528,8 +5830,8 @@ public final class UserManagementGrpc {
      */
     public void getAccessKeyVerificationData(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetAccessKeyVerificationDataMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetAccessKeyVerificationDataMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6541,8 +5843,8 @@ public final class UserManagementGrpc {
      */
     public void verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getVerifyInteractiveUserSessionTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getVerifyInteractiveUserSessionTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6554,8 +5856,8 @@ public final class UserManagementGrpc {
      */
     public void verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getVerifyAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getVerifyAccessTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6566,8 +5868,8 @@ public final class UserManagementGrpc {
      */
     public void authenticate(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAuthenticateMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAuthenticateMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6578,8 +5880,8 @@ public final class UserManagementGrpc {
      */
     public void accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAccessKeyUsageMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAccessKeyUsageMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6590,8 +5892,8 @@ public final class UserManagementGrpc {
      */
     public void createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateUserMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6601,8 +5903,8 @@ public final class UserManagementGrpc {
      */
     public void getUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetUserMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6612,8 +5914,8 @@ public final class UserManagementGrpc {
      */
     public void listUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListUsersMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListUsersMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6623,8 +5925,8 @@ public final class UserManagementGrpc {
      */
     public void findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getFindUsersByEmailMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getFindUsersByEmailMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6634,8 +5936,8 @@ public final class UserManagementGrpc {
      */
     public void findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getFindUsersMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getFindUsersMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6645,8 +5947,8 @@ public final class UserManagementGrpc {
      */
     public void createAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateAccessKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateAccessKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6656,8 +5958,8 @@ public final class UserManagementGrpc {
      */
     public void updateAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUpdateAccessKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateAccessKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6667,8 +5969,8 @@ public final class UserManagementGrpc {
      */
     public void deleteAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteAccessKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteAccessKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6678,8 +5980,8 @@ public final class UserManagementGrpc {
      */
     public void getAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetAccessKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetAccessKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6689,8 +5991,8 @@ public final class UserManagementGrpc {
      */
     public void listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListAccessKeysMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListAccessKeysMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6700,8 +6002,8 @@ public final class UserManagementGrpc {
      */
     public void createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateAccessTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6711,8 +6013,8 @@ public final class UserManagementGrpc {
      */
     public void deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteAccessTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6722,8 +6024,8 @@ public final class UserManagementGrpc {
      */
     public void getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetAccessTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6733,8 +6035,8 @@ public final class UserManagementGrpc {
      */
     public void listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListAccessTokensMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListAccessTokensMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6744,8 +6046,8 @@ public final class UserManagementGrpc {
      */
     public void createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateScimAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateScimAccessTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6755,8 +6057,8 @@ public final class UserManagementGrpc {
      */
     public void deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteScimAccessTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteScimAccessTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6766,8 +6068,8 @@ public final class UserManagementGrpc {
      */
     public void listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListScimAccessTokensMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListScimAccessTokensMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6777,8 +6079,8 @@ public final class UserManagementGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6788,8 +6090,8 @@ public final class UserManagementGrpc {
      */
     public void getAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetAccountMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetAccountMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6799,8 +6101,8 @@ public final class UserManagementGrpc {
      */
     public void listAccounts(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListAccountsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListAccountsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6810,8 +6112,8 @@ public final class UserManagementGrpc {
      */
     public void getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetRightsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetRightsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6821,8 +6123,8 @@ public final class UserManagementGrpc {
      */
     public void checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCheckRightsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCheckRightsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6832,8 +6134,8 @@ public final class UserManagementGrpc {
      */
     public void createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateAccountMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateAccountMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6843,8 +6145,8 @@ public final class UserManagementGrpc {
      */
     public void createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateTrialAccountMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateTrialAccountMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6854,8 +6156,8 @@ public final class UserManagementGrpc {
      */
     public void createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateC1CAccountMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateC1CAccountMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6866,8 +6168,8 @@ public final class UserManagementGrpc {
      */
     public void verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getVerifyC1CEmailMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getVerifyC1CEmailMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6877,8 +6179,8 @@ public final class UserManagementGrpc {
      */
     public void grantEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGrantEntitlementMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGrantEntitlementMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6888,8 +6190,8 @@ public final class UserManagementGrpc {
      */
     public void revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getRevokeEntitlementMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRevokeEntitlementMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6899,8 +6201,8 @@ public final class UserManagementGrpc {
      */
     public void ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getEnsureDefaultEntitlementsGrantedMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getEnsureDefaultEntitlementsGrantedMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6910,8 +6212,8 @@ public final class UserManagementGrpc {
      */
     public void assignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAssignRoleMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAssignRoleMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6921,8 +6223,8 @@ public final class UserManagementGrpc {
      */
     public void unassignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUnassignRoleMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUnassignRoleMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6932,8 +6234,8 @@ public final class UserManagementGrpc {
      */
     public void listAssignedRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListAssignedRolesMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListAssignedRolesMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6943,8 +6245,8 @@ public final class UserManagementGrpc {
      */
     public void assignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAssignResourceRoleMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAssignResourceRoleMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6954,8 +6256,8 @@ public final class UserManagementGrpc {
      */
     public void unassignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUnassignResourceRoleMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUnassignResourceRoleMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6965,8 +6267,8 @@ public final class UserManagementGrpc {
      */
     public void listAssignedResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListAssignedResourceRolesMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListAssignedResourceRolesMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6976,8 +6278,8 @@ public final class UserManagementGrpc {
      */
     public void listRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListRolesMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListRolesMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6987,8 +6289,8 @@ public final class UserManagementGrpc {
      */
     public void listResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListResourceRolesMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListResourceRolesMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -6998,8 +6300,8 @@ public final class UserManagementGrpc {
      */
     public void listResourceAssignees(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListResourceAssigneesMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListResourceAssigneesMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7009,8 +6311,8 @@ public final class UserManagementGrpc {
      */
     public void updateClouderaManagerLicenseKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUpdateClouderaManagerLicenseKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateClouderaManagerLicenseKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7020,8 +6322,8 @@ public final class UserManagementGrpc {
      */
     public void initiateSupportCase(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getInitiateSupportCaseMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getInitiateSupportCaseMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7032,8 +6334,8 @@ public final class UserManagementGrpc {
      */
     public void notifyResourceDeleted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getNotifyResourceDeletedMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getNotifyResourceDeletedMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7043,8 +6345,8 @@ public final class UserManagementGrpc {
      */
     public void createMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateMachineUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateMachineUserMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7054,8 +6356,8 @@ public final class UserManagementGrpc {
      */
     public void listMachineUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListMachineUsersMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListMachineUsersMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7065,16 +6367,16 @@ public final class UserManagementGrpc {
      */
     public void deleteMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteMachineUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteMachineUserMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
      */
     public void listResourceRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListResourceRoleAssignmentsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListResourceRoleAssignmentsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7084,8 +6386,8 @@ public final class UserManagementGrpc {
      */
     public void setAccountMessages(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetAccountMessagesMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetAccountMessagesMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7095,8 +6397,8 @@ public final class UserManagementGrpc {
      */
     public void acceptTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAcceptTermsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAcceptTermsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7107,8 +6409,8 @@ public final class UserManagementGrpc {
      */
     public void clearAcceptedTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getClearAcceptedTermsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getClearAcceptedTermsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7118,8 +6420,8 @@ public final class UserManagementGrpc {
      */
     public void describeTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDescribeTermsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDescribeTermsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7129,8 +6431,8 @@ public final class UserManagementGrpc {
      */
     public void listTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListTermsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListTermsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7140,8 +6442,8 @@ public final class UserManagementGrpc {
      */
     public void listEntitlements(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListEntitlementsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListEntitlementsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7151,8 +6453,8 @@ public final class UserManagementGrpc {
      */
     public void setTermsAcceptanceExpiry(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetTermsAcceptanceExpiryMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetTermsAcceptanceExpiryMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7162,8 +6464,8 @@ public final class UserManagementGrpc {
      */
     public void confirmAzureSubscriptionVerified(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getConfirmAzureSubscriptionVerifiedMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getConfirmAzureSubscriptionVerifiedMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7173,8 +6475,8 @@ public final class UserManagementGrpc {
      */
     public void insertAzureSubscription(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getInsertAzureSubscriptionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getInsertAzureSubscriptionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7184,8 +6486,8 @@ public final class UserManagementGrpc {
      */
     public void createGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateGroupMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateGroupMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7195,8 +6497,8 @@ public final class UserManagementGrpc {
      */
     public void deleteGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteGroupMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteGroupMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7206,8 +6508,8 @@ public final class UserManagementGrpc {
      */
     public void getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetGroupMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetGroupMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7217,8 +6519,8 @@ public final class UserManagementGrpc {
      */
     public void listGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListGroupsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListGroupsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7228,8 +6530,8 @@ public final class UserManagementGrpc {
      */
     public void updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUpdateGroupMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateGroupMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7239,8 +6541,8 @@ public final class UserManagementGrpc {
      */
     public void addMemberToGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAddMemberToGroupMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAddMemberToGroupMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7250,8 +6552,8 @@ public final class UserManagementGrpc {
      */
     public void removeMemberFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getRemoveMemberFromGroupMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getRemoveMemberFromGroupMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7261,8 +6563,8 @@ public final class UserManagementGrpc {
      */
     public void listGroupMembers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListGroupMembersMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListGroupMembersMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7272,8 +6574,8 @@ public final class UserManagementGrpc {
      */
     public void listGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListGroupsForMemberMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListGroupsForMemberMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7283,8 +6585,8 @@ public final class UserManagementGrpc {
      */
     public void listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListWorkloadAdministrationGroupsForMemberMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsForMemberMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7294,8 +6596,8 @@ public final class UserManagementGrpc {
      */
     public void createClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateClusterSshPrivateKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateClusterSshPrivateKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7305,8 +6607,8 @@ public final class UserManagementGrpc {
      */
     public void getClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetClusterSshPrivateKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetClusterSshPrivateKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7316,8 +6618,8 @@ public final class UserManagementGrpc {
      */
     public void getAssigneeAuthorizationInformation(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetAssigneeAuthorizationInformationMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetAssigneeAuthorizationInformationMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7327,8 +6629,8 @@ public final class UserManagementGrpc {
      */
     public void createIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateIdentityProviderConnectorMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7338,8 +6640,8 @@ public final class UserManagementGrpc {
      */
     public void listIdentityProviderConnectors(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListIdentityProviderConnectorsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListIdentityProviderConnectorsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7349,8 +6651,8 @@ public final class UserManagementGrpc {
      */
     public void deleteIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteIdentityProviderConnectorMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7360,8 +6662,8 @@ public final class UserManagementGrpc {
      */
     public void describeIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDescribeIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDescribeIdentityProviderConnectorMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7371,8 +6673,8 @@ public final class UserManagementGrpc {
      */
     public void updateIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUpdateIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateIdentityProviderConnectorMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7382,8 +6684,8 @@ public final class UserManagementGrpc {
      */
     public void setClouderaSSOLoginEnabled(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetClouderaSSOLoginEnabledMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetClouderaSSOLoginEnabledMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7394,8 +6696,8 @@ public final class UserManagementGrpc {
      */
     public void getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetIdPMetadataForWorkloadSSOMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetIdPMetadataForWorkloadSSOMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7408,8 +6710,8 @@ public final class UserManagementGrpc {
      */
     public void processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getProcessWorkloadSSOAuthnReqMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getProcessWorkloadSSOAuthnReqMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7419,8 +6721,8 @@ public final class UserManagementGrpc {
      */
     public void generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGenerateControlPlaneSSOAuthnReqMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGenerateControlPlaneSSOAuthnReqMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7431,8 +6733,8 @@ public final class UserManagementGrpc {
      */
     public void setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetWorkloadSubdomainMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetWorkloadSubdomainMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7446,8 +6748,8 @@ public final class UserManagementGrpc {
      */
     public void createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCreateWorkloadMachineUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCreateWorkloadMachineUserMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7459,8 +6761,8 @@ public final class UserManagementGrpc {
      */
     public void deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteWorkloadMachineUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteWorkloadMachineUserMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7472,8 +6774,8 @@ public final class UserManagementGrpc {
      */
     public void getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetWorkloadAdministrationGroupNameMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7486,8 +6788,8 @@ public final class UserManagementGrpc {
      */
     public void setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetWorkloadAdministrationGroupNameMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7499,8 +6801,8 @@ public final class UserManagementGrpc {
      */
     public void deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7510,8 +6812,8 @@ public final class UserManagementGrpc {
      */
     public void listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListWorkloadAdministrationGroupsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7522,8 +6824,8 @@ public final class UserManagementGrpc {
      */
     public void setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetActorWorkloadCredentialsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7533,8 +6835,8 @@ public final class UserManagementGrpc {
      */
     public void validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getValidateActorWorkloadCredentialsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getValidateActorWorkloadCredentialsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7544,8 +6846,8 @@ public final class UserManagementGrpc {
      */
     public void getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetActorWorkloadCredentialsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7563,8 +6865,8 @@ public final class UserManagementGrpc {
      */
     public void getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetEventGenerationIdsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetEventGenerationIdsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7574,8 +6876,8 @@ public final class UserManagementGrpc {
      */
     public void addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAddActorSshPublicKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAddActorSshPublicKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7585,8 +6887,8 @@ public final class UserManagementGrpc {
      */
     public void listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListActorSshPublicKeysMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListActorSshPublicKeysMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7596,8 +6898,8 @@ public final class UserManagementGrpc {
      */
     public void describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDescribeActorSshPublicKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDescribeActorSshPublicKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7607,8 +6909,8 @@ public final class UserManagementGrpc {
      */
     public void deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getDeleteActorSshPublicKeyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getDeleteActorSshPublicKeyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7618,8 +6920,8 @@ public final class UserManagementGrpc {
      */
     public void setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetWorkloadPasswordPolicyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7629,8 +6931,8 @@ public final class UserManagementGrpc {
      */
     public void unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUnsetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUnsetWorkloadPasswordPolicyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7640,8 +6942,8 @@ public final class UserManagementGrpc {
      */
     public void setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetAuthenticationPolicyMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetAuthenticationPolicyMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7651,8 +6953,8 @@ public final class UserManagementGrpc {
      */
     public void assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAssignCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAssignCloudIdentityMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7662,8 +6964,8 @@ public final class UserManagementGrpc {
      */
     public void unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUnassignCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUnassignCloudIdentityMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7673,8 +6975,8 @@ public final class UserManagementGrpc {
      */
     public void assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getAssignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getAssignServicePrincipalCloudIdentityMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7684,8 +6986,8 @@ public final class UserManagementGrpc {
      */
     public void unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7695,8 +6997,8 @@ public final class UserManagementGrpc {
      */
     public void listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListServicePrincipalCloudIdentitiesMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7706,8 +7008,8 @@ public final class UserManagementGrpc {
      */
     public void getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetDefaultIdentityProviderConnectorMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7717,8 +7019,8 @@ public final class UserManagementGrpc {
      */
     public void setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getSetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getSetDefaultIdentityProviderConnectorMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7728,8 +7030,8 @@ public final class UserManagementGrpc {
      */
     public void getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetUserSyncStateModelMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetUserSyncStateModelMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7739,8 +7041,8 @@ public final class UserManagementGrpc {
      */
     public void listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getListRoleAssignmentsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getListRoleAssignmentsMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7750,8 +7052,8 @@ public final class UserManagementGrpc {
      */
     public void generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGenerateWorkloadAuthTokenMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGenerateWorkloadAuthTokenMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7761,8 +7063,8 @@ public final class UserManagementGrpc {
      */
     public void getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetWorkloadAuthConfigurationMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -7772,8 +7074,8 @@ public final class UserManagementGrpc {
      */
     public void updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getUpdateUserMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getUpdateUserMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -7783,19 +7085,15 @@ public final class UserManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class UserManagementBlockingStub extends io.grpc.stub.AbstractStub<UserManagementBlockingStub> {
-    private UserManagementBlockingStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private UserManagementBlockingStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class UserManagementBlockingStub extends io.grpc.stub.AbstractBlockingStub<UserManagementBlockingStub> {
+    private UserManagementBlockingStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected UserManagementBlockingStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected UserManagementBlockingStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new UserManagementBlockingStub(channel, callOptions);
     }
 
@@ -7807,8 +7105,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse interactiveLogin(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getInteractiveLoginMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getInteractiveLoginMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7819,8 +7117,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse interactiveLogin3rdParty(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getInteractiveLogin3rdPartyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getInteractiveLogin3rdPartyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7830,8 +7128,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse interactiveLoginLocal(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getInteractiveLoginLocalMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getInteractiveLoginLocalMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7840,8 +7138,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse deleteAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteAccountMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteAccountMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7850,8 +7148,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse deleteActor(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteActorMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteActorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7860,8 +7158,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse deleteTrialUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteTrialUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteTrialUserMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7871,8 +7169,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse getAccessKeyVerificationData(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetAccessKeyVerificationDataMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetAccessKeyVerificationDataMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7883,8 +7181,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse verifyInteractiveUserSessionToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getVerifyInteractiveUserSessionTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getVerifyInteractiveUserSessionTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7895,8 +7193,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse verifyAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getVerifyAccessTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getVerifyAccessTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7906,8 +7204,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse authenticate(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAuthenticateMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAuthenticateMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7917,8 +7215,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse accessKeyUsage(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAccessKeyUsageMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAccessKeyUsageMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7928,8 +7226,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse createUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateUserMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7938,8 +7236,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse getUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetUserMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7948,8 +7246,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse listUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListUsersMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListUsersMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7958,8 +7256,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse findUsersByEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getFindUsersByEmailMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getFindUsersByEmailMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7968,8 +7266,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse findUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getFindUsersMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getFindUsersMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7978,8 +7276,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse createAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateAccessKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateAccessKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7988,8 +7286,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse updateAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUpdateAccessKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateAccessKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -7998,8 +7296,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse deleteAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteAccessKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteAccessKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8008,8 +7306,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse getAccessKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetAccessKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetAccessKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8018,8 +7316,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse listAccessKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListAccessKeysMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListAccessKeysMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8028,8 +7326,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse createAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateAccessTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateAccessTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8038,8 +7336,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse deleteAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteAccessTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteAccessTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8048,8 +7346,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse getAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetAccessTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetAccessTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8058,8 +7356,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse listAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListAccessTokensMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListAccessTokensMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8068,8 +7366,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse createScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateScimAccessTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateScimAccessTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8078,8 +7376,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse deleteScimAccessToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteScimAccessTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteScimAccessTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8088,8 +7386,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse listScimAccessTokens(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListScimAccessTokensMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListScimAccessTokensMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8098,8 +7396,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetVersionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8108,8 +7406,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse getAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetAccountMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetAccountMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8118,8 +7416,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse listAccounts(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListAccountsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListAccountsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8128,8 +7426,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse getRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetRightsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetRightsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8138,8 +7436,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse checkRights(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCheckRightsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCheckRightsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8148,8 +7446,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse createAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateAccountMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateAccountMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8158,8 +7456,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse createTrialAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateTrialAccountMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateTrialAccountMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8168,8 +7466,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse createC1CAccount(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateC1CAccountMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateC1CAccountMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8179,8 +7477,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse verifyC1CEmail(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getVerifyC1CEmailMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getVerifyC1CEmailMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8189,8 +7487,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse grantEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGrantEntitlementMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGrantEntitlementMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8199,8 +7497,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse revokeEntitlement(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getRevokeEntitlementMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRevokeEntitlementMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8209,8 +7507,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse ensureDefaultEntitlementsGranted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getEnsureDefaultEntitlementsGrantedMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getEnsureDefaultEntitlementsGrantedMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8219,8 +7517,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse assignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAssignRoleMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAssignRoleMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8229,8 +7527,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse unassignRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUnassignRoleMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUnassignRoleMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8239,8 +7537,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse listAssignedRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListAssignedRolesMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListAssignedRolesMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8249,8 +7547,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse assignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAssignResourceRoleMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAssignResourceRoleMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8259,8 +7557,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse unassignResourceRole(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUnassignResourceRoleMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUnassignResourceRoleMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8269,8 +7567,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse listAssignedResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListAssignedResourceRolesMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListAssignedResourceRolesMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8279,8 +7577,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse listRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListRolesMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListRolesMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8289,8 +7587,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse listResourceRoles(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListResourceRolesMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListResourceRolesMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8299,8 +7597,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse listResourceAssignees(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListResourceAssigneesMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListResourceAssigneesMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8309,8 +7607,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse updateClouderaManagerLicenseKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUpdateClouderaManagerLicenseKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateClouderaManagerLicenseKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8319,8 +7617,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse initiateSupportCase(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getInitiateSupportCaseMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getInitiateSupportCaseMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8330,8 +7628,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse notifyResourceDeleted(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getNotifyResourceDeletedMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getNotifyResourceDeletedMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8340,8 +7638,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse createMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateMachineUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateMachineUserMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8350,8 +7648,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse listMachineUsers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListMachineUsersMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListMachineUsersMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8360,15 +7658,15 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse deleteMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteMachineUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteMachineUserMethod(), getCallOptions(), request);
     }
 
     /**
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse listResourceRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListResourceRoleAssignmentsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListResourceRoleAssignmentsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8377,8 +7675,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse setAccountMessages(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetAccountMessagesMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetAccountMessagesMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8387,8 +7685,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse acceptTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAcceptTermsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAcceptTermsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8398,8 +7696,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse clearAcceptedTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getClearAcceptedTermsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getClearAcceptedTermsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8408,8 +7706,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse describeTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDescribeTermsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDescribeTermsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8418,8 +7716,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse listTerms(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListTermsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListTermsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8428,8 +7726,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse listEntitlements(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListEntitlementsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListEntitlementsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8438,8 +7736,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse setTermsAcceptanceExpiry(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetTermsAcceptanceExpiryMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetTermsAcceptanceExpiryMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8448,8 +7746,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse confirmAzureSubscriptionVerified(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getConfirmAzureSubscriptionVerifiedMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getConfirmAzureSubscriptionVerifiedMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8458,8 +7756,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse insertAzureSubscription(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getInsertAzureSubscriptionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getInsertAzureSubscriptionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8468,8 +7766,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse createGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateGroupMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateGroupMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8478,8 +7776,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse deleteGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteGroupMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteGroupMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8488,8 +7786,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse getGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetGroupMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetGroupMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8498,8 +7796,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse listGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListGroupsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListGroupsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8508,8 +7806,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse updateGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUpdateGroupMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateGroupMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8518,8 +7816,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse addMemberToGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAddMemberToGroupMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAddMemberToGroupMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8528,8 +7826,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse removeMemberFromGroup(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getRemoveMemberFromGroupMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getRemoveMemberFromGroupMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8538,8 +7836,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse listGroupMembers(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListGroupMembersMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListGroupMembersMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8548,8 +7846,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse listGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListGroupsForMemberMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListGroupsForMemberMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8558,8 +7856,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse listWorkloadAdministrationGroupsForMember(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListWorkloadAdministrationGroupsForMemberMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListWorkloadAdministrationGroupsForMemberMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8568,8 +7866,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse createClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateClusterSshPrivateKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateClusterSshPrivateKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8578,8 +7876,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse getClusterSshPrivateKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetClusterSshPrivateKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetClusterSshPrivateKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8588,8 +7886,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse getAssigneeAuthorizationInformation(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetAssigneeAuthorizationInformationMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetAssigneeAuthorizationInformationMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8598,8 +7896,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse createIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateIdentityProviderConnectorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8608,8 +7906,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse listIdentityProviderConnectors(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListIdentityProviderConnectorsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListIdentityProviderConnectorsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8618,8 +7916,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse deleteIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteIdentityProviderConnectorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8628,8 +7926,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse describeIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDescribeIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDescribeIdentityProviderConnectorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8638,8 +7936,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse updateIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUpdateIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateIdentityProviderConnectorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8648,8 +7946,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse setClouderaSSOLoginEnabled(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetClouderaSSOLoginEnabledMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetClouderaSSOLoginEnabledMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8659,8 +7957,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse getIdPMetadataForWorkloadSSO(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetIdPMetadataForWorkloadSSOMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetIdPMetadataForWorkloadSSOMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8672,8 +7970,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse processWorkloadSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getProcessWorkloadSSOAuthnReqMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getProcessWorkloadSSOAuthnReqMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8682,8 +7980,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse generateControlPlaneSSOAuthnReq(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGenerateControlPlaneSSOAuthnReqMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGenerateControlPlaneSSOAuthnReqMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8693,8 +7991,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse setWorkloadSubdomain(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetWorkloadSubdomainMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetWorkloadSubdomainMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8707,8 +8005,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse createWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCreateWorkloadMachineUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCreateWorkloadMachineUserMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8719,8 +8017,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse deleteWorkloadMachineUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteWorkloadMachineUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteWorkloadMachineUserMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8731,8 +8029,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse getWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetWorkloadAdministrationGroupNameMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8744,8 +8042,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse setWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetWorkloadAdministrationGroupNameMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8756,8 +8054,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse deleteWorkloadAdministrationGroupName(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteWorkloadAdministrationGroupNameMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8766,8 +8064,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse listWorkloadAdministrationGroups(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListWorkloadAdministrationGroupsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListWorkloadAdministrationGroupsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8777,8 +8075,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse setActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetActorWorkloadCredentialsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetActorWorkloadCredentialsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8787,8 +8085,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse validateActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getValidateActorWorkloadCredentialsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getValidateActorWorkloadCredentialsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8797,8 +8095,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse getActorWorkloadCredentials(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetActorWorkloadCredentialsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetActorWorkloadCredentialsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8815,8 +8113,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse getEventGenerationIds(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetEventGenerationIdsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetEventGenerationIdsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8825,8 +8123,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse addActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAddActorSshPublicKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAddActorSshPublicKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8835,8 +8133,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse listActorSshPublicKeys(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListActorSshPublicKeysMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListActorSshPublicKeysMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8845,8 +8143,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse describeActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDescribeActorSshPublicKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDescribeActorSshPublicKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8855,8 +8153,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse deleteActorSshPublicKey(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getDeleteActorSshPublicKeyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getDeleteActorSshPublicKeyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8865,8 +8163,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse setWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetWorkloadPasswordPolicyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8875,8 +8173,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse unsetWorkloadPasswordPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUnsetWorkloadPasswordPolicyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUnsetWorkloadPasswordPolicyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8885,8 +8183,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse setAuthenticationPolicy(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetAuthenticationPolicyMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetAuthenticationPolicyMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8895,8 +8193,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse assignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAssignCloudIdentityMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAssignCloudIdentityMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8905,8 +8203,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse unassignCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUnassignCloudIdentityMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUnassignCloudIdentityMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8915,8 +8213,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse assignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getAssignServicePrincipalCloudIdentityMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getAssignServicePrincipalCloudIdentityMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8925,8 +8223,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse unassignServicePrincipalCloudIdentity(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUnassignServicePrincipalCloudIdentityMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8935,8 +8233,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse listServicePrincipalCloudIdentities(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListServicePrincipalCloudIdentitiesMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8945,8 +8243,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse getDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetDefaultIdentityProviderConnectorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8955,8 +8253,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse setDefaultIdentityProviderConnector(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getSetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getSetDefaultIdentityProviderConnectorMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8965,8 +8263,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse getUserSyncStateModel(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetUserSyncStateModelMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetUserSyncStateModelMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8975,8 +8273,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse listRoleAssignments(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getListRoleAssignmentsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getListRoleAssignmentsMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8985,8 +8283,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse generateWorkloadAuthToken(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGenerateWorkloadAuthTokenMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGenerateWorkloadAuthTokenMethod(), getCallOptions(), request);
     }
 
     /**
@@ -8995,8 +8293,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse getWorkloadAuthConfiguration(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetWorkloadAuthConfigurationMethod(), getCallOptions(), request);
     }
 
     /**
@@ -9005,8 +8303,8 @@ public final class UserManagementGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse updateUser(com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getUpdateUserMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getUpdateUserMethod(), getCallOptions(), request);
     }
   }
 
@@ -9016,19 +8314,15 @@ public final class UserManagementGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class UserManagementFutureStub extends io.grpc.stub.AbstractStub<UserManagementFutureStub> {
-    private UserManagementFutureStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private UserManagementFutureStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class UserManagementFutureStub extends io.grpc.stub.AbstractFutureStub<UserManagementFutureStub> {
+    private UserManagementFutureStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected UserManagementFutureStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected UserManagementFutureStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new UserManagementFutureStub(channel, callOptions);
     }
 
@@ -9041,8 +8335,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginResponse> interactiveLogin(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getInteractiveLoginMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getInteractiveLoginMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9054,8 +8348,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyResponse> interactiveLogin3rdParty(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLogin3rdPartyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getInteractiveLogin3rdPartyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getInteractiveLogin3rdPartyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9066,8 +8360,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalResponse> interactiveLoginLocal(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InteractiveLoginLocalRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getInteractiveLoginLocalMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getInteractiveLoginLocalMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9077,8 +8371,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountResponse> deleteAccount(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccountRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteAccountMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteAccountMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9088,8 +8382,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorResponse> deleteActor(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteActorMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteActorMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9099,8 +8393,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserResponse> deleteTrialUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteTrialUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteTrialUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteTrialUserMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9111,8 +8405,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataResponse> getAccessKeyVerificationData(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyVerificationDataRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetAccessKeyVerificationDataMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetAccessKeyVerificationDataMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9124,8 +8418,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenResponse> verifyInteractiveUserSessionToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyInteractiveUserSessionTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getVerifyInteractiveUserSessionTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getVerifyInteractiveUserSessionTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9137,8 +8431,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenResponse> verifyAccessToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyAccessTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getVerifyAccessTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getVerifyAccessTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9149,8 +8443,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateResponse> authenticate(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AuthenticateRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAuthenticateMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAuthenticateMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9161,8 +8455,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageResponse> accessKeyUsage(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AccessKeyUsageRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAccessKeyUsageMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAccessKeyUsageMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9173,8 +8467,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserResponse> createUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateUserMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9184,8 +8478,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserResponse> getUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetUserMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9195,8 +8489,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersResponse> listUsers(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListUsersRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListUsersMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListUsersMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9206,8 +8500,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailResponse> findUsersByEmail(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersByEmailRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getFindUsersByEmailMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getFindUsersByEmailMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9217,8 +8511,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersResponse> findUsers(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.FindUsersRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getFindUsersMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getFindUsersMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9228,8 +8522,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyResponse> createAccessKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateAccessKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateAccessKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9239,8 +8533,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyResponse> updateAccessKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateAccessKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUpdateAccessKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateAccessKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9250,8 +8544,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyResponse> deleteAccessKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteAccessKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteAccessKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9261,8 +8555,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyResponse> getAccessKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetAccessKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetAccessKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9272,8 +8566,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysResponse> listAccessKeys(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessKeysRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListAccessKeysMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListAccessKeysMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9283,8 +8577,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenResponse> createAccessToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccessTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateAccessTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateAccessTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9294,8 +8588,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenResponse> deleteAccessToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteAccessTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteAccessTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteAccessTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9305,8 +8599,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenResponse> getAccessToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccessTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetAccessTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetAccessTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9316,8 +8610,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensResponse> listAccessTokens(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccessTokensRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListAccessTokensMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListAccessTokensMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9327,8 +8621,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenResponse> createScimAccessToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateScimAccessTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateScimAccessTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateScimAccessTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9338,8 +8632,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenResponse> deleteScimAccessToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteScimAccessTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteScimAccessTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteScimAccessTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9349,8 +8643,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensResponse> listScimAccessTokens(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListScimAccessTokensRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListScimAccessTokensMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListScimAccessTokensMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9360,8 +8654,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getVersion(
         com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9371,8 +8665,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountResponse> getAccount(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAccountRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetAccountMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetAccountMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9382,8 +8676,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsResponse> listAccounts(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAccountsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListAccountsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListAccountsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9393,8 +8687,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsResponse> getRights(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetRightsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetRightsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetRightsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9404,8 +8698,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsResponse> checkRights(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CheckRightsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCheckRightsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCheckRightsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9415,8 +8709,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountResponse> createAccount(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateAccountRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateAccountMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateAccountMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9426,8 +8720,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountResponse> createTrialAccount(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateTrialAccountRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateTrialAccountMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateTrialAccountMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9437,8 +8731,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountResponse> createC1CAccount(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateC1CAccountRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateC1CAccountMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateC1CAccountMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9449,8 +8743,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailResponse> verifyC1CEmail(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.VerifyC1CEmailRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getVerifyC1CEmailMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getVerifyC1CEmailMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9460,8 +8754,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementResponse> grantEntitlement(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GrantEntitlementRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGrantEntitlementMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGrantEntitlementMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9471,8 +8765,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementResponse> revokeEntitlement(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RevokeEntitlementRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getRevokeEntitlementMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRevokeEntitlementMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9482,8 +8776,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedResponse> ensureDefaultEntitlementsGranted(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.EnsureDefaultEntitlementsGrantedRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getEnsureDefaultEntitlementsGrantedMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getEnsureDefaultEntitlementsGrantedMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9493,8 +8787,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleResponse> assignRole(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignRoleRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAssignRoleMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAssignRoleMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9504,8 +8798,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleResponse> unassignRole(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignRoleRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUnassignRoleMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUnassignRoleMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9515,8 +8809,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesResponse> listAssignedRoles(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedRolesRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListAssignedRolesMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListAssignedRolesMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9526,8 +8820,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleResponse> assignResourceRole(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignResourceRoleRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAssignResourceRoleMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAssignResourceRoleMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9537,8 +8831,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleResponse> unassignResourceRole(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignResourceRoleRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUnassignResourceRoleMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUnassignResourceRoleMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9548,8 +8842,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesResponse> listAssignedResourceRoles(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListAssignedResourceRolesRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListAssignedResourceRolesMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListAssignedResourceRolesMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9559,8 +8853,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesResponse> listRoles(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRolesRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListRolesMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListRolesMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9570,8 +8864,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesResponse> listResourceRoles(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRolesRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListResourceRolesMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListResourceRolesMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9581,8 +8875,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesResponse> listResourceAssignees(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceAssigneesRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListResourceAssigneesMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListResourceAssigneesMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9592,8 +8886,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyResponse> updateClouderaManagerLicenseKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateClouderaManagerLicenseKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUpdateClouderaManagerLicenseKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateClouderaManagerLicenseKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9603,8 +8897,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseResponse> initiateSupportCase(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InitiateSupportCaseRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getInitiateSupportCaseMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getInitiateSupportCaseMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9615,8 +8909,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedResponse> notifyResourceDeleted(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.NotifyResourceDeletedRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getNotifyResourceDeletedMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getNotifyResourceDeletedMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9626,8 +8920,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserResponse> createMachineUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateMachineUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateMachineUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateMachineUserMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9637,8 +8931,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersResponse> listMachineUsers(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListMachineUsersRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListMachineUsersMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListMachineUsersMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9648,16 +8942,16 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserResponse> deleteMachineUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteMachineUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteMachineUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteMachineUserMethod(), getCallOptions()), request);
     }
 
     /**
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsResponse> listResourceRoleAssignments(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListResourceRoleAssignmentsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListResourceRoleAssignmentsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListResourceRoleAssignmentsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9667,8 +8961,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesResponse> setAccountMessages(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAccountMessagesRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetAccountMessagesMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetAccountMessagesMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9678,8 +8972,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsResponse> acceptTerms(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AcceptTermsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAcceptTermsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAcceptTermsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9690,8 +8984,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsResponse> clearAcceptedTerms(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ClearAcceptedTermsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getClearAcceptedTermsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getClearAcceptedTermsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9701,8 +8995,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsResponse> describeTerms(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeTermsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDescribeTermsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDescribeTermsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9712,8 +9006,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsResponse> listTerms(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListTermsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListTermsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListTermsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9723,8 +9017,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsResponse> listEntitlements(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListEntitlementsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListEntitlementsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListEntitlementsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9734,8 +9028,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryResponse> setTermsAcceptanceExpiry(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetTermsAcceptanceExpiryRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetTermsAcceptanceExpiryMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetTermsAcceptanceExpiryMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9745,8 +9039,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedResponse> confirmAzureSubscriptionVerified(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ConfirmAzureSubscriptionVerifiedRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getConfirmAzureSubscriptionVerifiedMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getConfirmAzureSubscriptionVerifiedMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9756,8 +9050,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationResponse> insertAzureSubscription(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.InsertAzureSubscriptionInformationRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getInsertAzureSubscriptionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getInsertAzureSubscriptionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9767,8 +9061,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupResponse> createGroup(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateGroupRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateGroupMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateGroupMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9778,8 +9072,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupResponse> deleteGroup(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteGroupRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteGroupMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteGroupMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9789,8 +9083,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupResponse> getGroup(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetGroupRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetGroupMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetGroupMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9800,8 +9094,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsResponse> listGroups(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListGroupsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListGroupsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9811,8 +9105,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupResponse> updateGroup(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateGroupRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUpdateGroupMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateGroupMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9822,8 +9116,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupResponse> addMemberToGroup(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddMemberToGroupRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAddMemberToGroupMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAddMemberToGroupMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9833,8 +9127,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupResponse> removeMemberFromGroup(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.RemoveMemberFromGroupRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getRemoveMemberFromGroupMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getRemoveMemberFromGroupMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9844,8 +9138,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersResponse> listGroupMembers(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupMembersRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListGroupMembersMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListGroupMembersMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9855,8 +9149,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberResponse> listGroupsForMember(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListGroupsForMemberRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListGroupsForMemberMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListGroupsForMemberMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9866,8 +9160,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberResponse> listWorkloadAdministrationGroupsForMember(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsForMemberRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListWorkloadAdministrationGroupsForMemberMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsForMemberMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9877,8 +9171,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyResponse> createClusterSshPrivateKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateClusterSshPrivateKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateClusterSshPrivateKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateClusterSshPrivateKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9888,8 +9182,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyResponse> getClusterSshPrivateKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetClusterSshPrivateKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetClusterSshPrivateKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetClusterSshPrivateKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9899,8 +9193,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationResponse> getAssigneeAuthorizationInformation(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetAssigneeAuthorizationInformationRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetAssigneeAuthorizationInformationMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetAssigneeAuthorizationInformationMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9910,8 +9204,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorResponse> createIdentityProviderConnector(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateIdentityProviderConnectorRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateIdentityProviderConnectorMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9921,8 +9215,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsResponse> listIdentityProviderConnectors(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListIdentityProviderConnectorsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListIdentityProviderConnectorsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListIdentityProviderConnectorsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9932,8 +9226,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorResponse> deleteIdentityProviderConnector(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteIdentityProviderConnectorRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteIdentityProviderConnectorMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9943,8 +9237,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorResponse> describeIdentityProviderConnector(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeIdentityProviderConnectorRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDescribeIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDescribeIdentityProviderConnectorMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9954,8 +9248,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorResponse> updateIdentityProviderConnector(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateIdentityProviderConnectorRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUpdateIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateIdentityProviderConnectorMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9965,8 +9259,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledResponse> setClouderaSSOLoginEnabled(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetClouderaSSOLoginEnabledRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetClouderaSSOLoginEnabledMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetClouderaSSOLoginEnabledMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9977,8 +9271,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSOResponse> getIdPMetadataForWorkloadSSO(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetIdPMetadataForWorkloadSSORequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetIdPMetadataForWorkloadSSOMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetIdPMetadataForWorkloadSSOMethod(), getCallOptions()), request);
     }
 
     /**
@@ -9991,8 +9285,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqResponse> processWorkloadSSOAuthnReq(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ProcessWorkloadSSOAuthnReqRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getProcessWorkloadSSOAuthnReqMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getProcessWorkloadSSOAuthnReqMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10002,8 +9296,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqResponse> generateControlPlaneSSOAuthnReq(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateControlPlaneSSOAuthnReqRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGenerateControlPlaneSSOAuthnReqMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGenerateControlPlaneSSOAuthnReqMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10014,8 +9308,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainResponse> setWorkloadSubdomain(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadSubdomainRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetWorkloadSubdomainMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetWorkloadSubdomainMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10029,8 +9323,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserResponse> createWorkloadMachineUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CreateWorkloadMachineUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCreateWorkloadMachineUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCreateWorkloadMachineUserMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10042,8 +9336,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserResponse> deleteWorkloadMachineUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadMachineUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteWorkloadMachineUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteWorkloadMachineUserMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10055,8 +9349,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameResponse> getWorkloadAdministrationGroupName(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAdministrationGroupNameRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetWorkloadAdministrationGroupNameMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10069,8 +9363,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameResponse> setWorkloadAdministrationGroupName(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadAdministrationGroupNameRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetWorkloadAdministrationGroupNameMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10082,8 +9376,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameResponse> deleteWorkloadAdministrationGroupName(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteWorkloadAdministrationGroupNameRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteWorkloadAdministrationGroupNameMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10093,8 +9387,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsResponse> listWorkloadAdministrationGroups(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListWorkloadAdministrationGroupsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListWorkloadAdministrationGroupsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListWorkloadAdministrationGroupsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10105,8 +9399,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsResponse> setActorWorkloadCredentials(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetActorWorkloadCredentialsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetActorWorkloadCredentialsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10116,8 +9410,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsResponse> validateActorWorkloadCredentials(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ValidateActorWorkloadCredentialsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getValidateActorWorkloadCredentialsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getValidateActorWorkloadCredentialsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10127,8 +9421,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsResponse> getActorWorkloadCredentials(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetActorWorkloadCredentialsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetActorWorkloadCredentialsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetActorWorkloadCredentialsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10146,8 +9440,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsResponse> getEventGenerationIds(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetEventGenerationIdsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetEventGenerationIdsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetEventGenerationIdsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10157,8 +9451,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyResponse> addActorSshPublicKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AddActorSshPublicKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAddActorSshPublicKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAddActorSshPublicKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10168,8 +9462,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysResponse> listActorSshPublicKeys(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListActorSshPublicKeysRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListActorSshPublicKeysMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListActorSshPublicKeysMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10179,8 +9473,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyResponse> describeActorSshPublicKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DescribeActorSshPublicKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDescribeActorSshPublicKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDescribeActorSshPublicKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10190,8 +9484,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyResponse> deleteActorSshPublicKey(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.DeleteActorSshPublicKeyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getDeleteActorSshPublicKeyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getDeleteActorSshPublicKeyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10201,8 +9495,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyResponse> setWorkloadPasswordPolicy(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetWorkloadPasswordPolicyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetWorkloadPasswordPolicyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10212,8 +9506,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyResponse> unsetWorkloadPasswordPolicy(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnsetWorkloadPasswordPolicyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUnsetWorkloadPasswordPolicyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUnsetWorkloadPasswordPolicyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10223,8 +9517,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyResponse> setAuthenticationPolicy(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetAuthenticationPolicyRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetAuthenticationPolicyMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetAuthenticationPolicyMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10234,8 +9528,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityResponse> assignCloudIdentity(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignCloudIdentityRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAssignCloudIdentityMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAssignCloudIdentityMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10245,8 +9539,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityResponse> unassignCloudIdentity(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignCloudIdentityRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUnassignCloudIdentityMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUnassignCloudIdentityMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10256,8 +9550,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityResponse> assignServicePrincipalCloudIdentity(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.AssignServicePrincipalCloudIdentityRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getAssignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getAssignServicePrincipalCloudIdentityMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10267,8 +9561,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityResponse> unassignServicePrincipalCloudIdentity(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UnassignServicePrincipalCloudIdentityRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUnassignServicePrincipalCloudIdentityMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10278,8 +9572,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesResponse> listServicePrincipalCloudIdentities(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListServicePrincipalCloudIdentitiesRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListServicePrincipalCloudIdentitiesMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListServicePrincipalCloudIdentitiesMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10289,8 +9583,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorResponse> getDefaultIdentityProviderConnector(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetDefaultIdentityProviderConnectorRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetDefaultIdentityProviderConnectorMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10300,8 +9594,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorResponse> setDefaultIdentityProviderConnector(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.SetDefaultIdentityProviderConnectorRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getSetDefaultIdentityProviderConnectorMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getSetDefaultIdentityProviderConnectorMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10311,8 +9605,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelResponse> getUserSyncStateModel(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetUserSyncStateModelRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetUserSyncStateModelMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetUserSyncStateModelMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10322,8 +9616,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsResponse> listRoleAssignments(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ListRoleAssignmentsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getListRoleAssignmentsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getListRoleAssignmentsMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10333,8 +9627,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenResponse> generateWorkloadAuthToken(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GenerateWorkloadAuthTokenRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGenerateWorkloadAuthTokenMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGenerateWorkloadAuthTokenMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10344,8 +9638,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationResponse> getWorkloadAuthConfiguration(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.GetWorkloadAuthConfigurationRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetWorkloadAuthConfigurationMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetWorkloadAuthConfigurationMethod(), getCallOptions()), request);
     }
 
     /**
@@ -10355,8 +9649,8 @@ public final class UserManagementGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserResponse> updateUser(
         com.cloudera.thunderhead.service.usermanagement.UserManagementProto.UpdateUserRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getUpdateUserMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getUpdateUserMethod(), getCallOptions()), request);
     }
   }
 
@@ -11024,123 +10318,123 @@ public final class UserManagementGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new UserManagementFileDescriptorSupplier())
-              .addMethod(getInteractiveLoginMethodHelper())
-              .addMethod(getInteractiveLogin3rdPartyMethodHelper())
-              .addMethod(getInteractiveLoginLocalMethodHelper())
-              .addMethod(getDeleteAccountMethodHelper())
-              .addMethod(getDeleteActorMethodHelper())
-              .addMethod(getDeleteTrialUserMethodHelper())
-              .addMethod(getGetAccessKeyVerificationDataMethodHelper())
-              .addMethod(getVerifyInteractiveUserSessionTokenMethodHelper())
-              .addMethod(getVerifyAccessTokenMethodHelper())
-              .addMethod(getAuthenticateMethodHelper())
-              .addMethod(getAccessKeyUsageMethodHelper())
-              .addMethod(getCreateUserMethodHelper())
-              .addMethod(getGetUserMethodHelper())
-              .addMethod(getListUsersMethodHelper())
-              .addMethod(getFindUsersByEmailMethodHelper())
-              .addMethod(getFindUsersMethodHelper())
-              .addMethod(getCreateAccessKeyMethodHelper())
-              .addMethod(getUpdateAccessKeyMethodHelper())
-              .addMethod(getDeleteAccessKeyMethodHelper())
-              .addMethod(getGetAccessKeyMethodHelper())
-              .addMethod(getListAccessKeysMethodHelper())
-              .addMethod(getCreateAccessTokenMethodHelper())
-              .addMethod(getDeleteAccessTokenMethodHelper())
-              .addMethod(getGetAccessTokenMethodHelper())
-              .addMethod(getListAccessTokensMethodHelper())
-              .addMethod(getCreateScimAccessTokenMethodHelper())
-              .addMethod(getDeleteScimAccessTokenMethodHelper())
-              .addMethod(getListScimAccessTokensMethodHelper())
-              .addMethod(getGetVersionMethodHelper())
-              .addMethod(getGetAccountMethodHelper())
-              .addMethod(getListAccountsMethodHelper())
-              .addMethod(getGetRightsMethodHelper())
-              .addMethod(getCheckRightsMethodHelper())
-              .addMethod(getCreateAccountMethodHelper())
-              .addMethod(getCreateTrialAccountMethodHelper())
-              .addMethod(getCreateC1CAccountMethodHelper())
-              .addMethod(getVerifyC1CEmailMethodHelper())
-              .addMethod(getGrantEntitlementMethodHelper())
-              .addMethod(getRevokeEntitlementMethodHelper())
-              .addMethod(getEnsureDefaultEntitlementsGrantedMethodHelper())
-              .addMethod(getAssignRoleMethodHelper())
-              .addMethod(getUnassignRoleMethodHelper())
-              .addMethod(getListAssignedRolesMethodHelper())
-              .addMethod(getAssignResourceRoleMethodHelper())
-              .addMethod(getUnassignResourceRoleMethodHelper())
-              .addMethod(getListAssignedResourceRolesMethodHelper())
-              .addMethod(getListRolesMethodHelper())
-              .addMethod(getListResourceRolesMethodHelper())
-              .addMethod(getListResourceAssigneesMethodHelper())
-              .addMethod(getUpdateClouderaManagerLicenseKeyMethodHelper())
-              .addMethod(getInitiateSupportCaseMethodHelper())
-              .addMethod(getNotifyResourceDeletedMethodHelper())
-              .addMethod(getCreateMachineUserMethodHelper())
-              .addMethod(getListMachineUsersMethodHelper())
-              .addMethod(getDeleteMachineUserMethodHelper())
-              .addMethod(getListResourceRoleAssignmentsMethodHelper())
-              .addMethod(getSetAccountMessagesMethodHelper())
-              .addMethod(getAcceptTermsMethodHelper())
-              .addMethod(getClearAcceptedTermsMethodHelper())
-              .addMethod(getDescribeTermsMethodHelper())
-              .addMethod(getListTermsMethodHelper())
-              .addMethod(getListEntitlementsMethodHelper())
-              .addMethod(getSetTermsAcceptanceExpiryMethodHelper())
-              .addMethod(getConfirmAzureSubscriptionVerifiedMethodHelper())
-              .addMethod(getInsertAzureSubscriptionMethodHelper())
-              .addMethod(getCreateGroupMethodHelper())
-              .addMethod(getDeleteGroupMethodHelper())
-              .addMethod(getGetGroupMethodHelper())
-              .addMethod(getListGroupsMethodHelper())
-              .addMethod(getUpdateGroupMethodHelper())
-              .addMethod(getAddMemberToGroupMethodHelper())
-              .addMethod(getRemoveMemberFromGroupMethodHelper())
-              .addMethod(getListGroupMembersMethodHelper())
-              .addMethod(getListGroupsForMemberMethodHelper())
-              .addMethod(getListWorkloadAdministrationGroupsForMemberMethodHelper())
-              .addMethod(getCreateClusterSshPrivateKeyMethodHelper())
-              .addMethod(getGetClusterSshPrivateKeyMethodHelper())
-              .addMethod(getGetAssigneeAuthorizationInformationMethodHelper())
-              .addMethod(getCreateIdentityProviderConnectorMethodHelper())
-              .addMethod(getListIdentityProviderConnectorsMethodHelper())
-              .addMethod(getDeleteIdentityProviderConnectorMethodHelper())
-              .addMethod(getDescribeIdentityProviderConnectorMethodHelper())
-              .addMethod(getUpdateIdentityProviderConnectorMethodHelper())
-              .addMethod(getSetClouderaSSOLoginEnabledMethodHelper())
-              .addMethod(getGetIdPMetadataForWorkloadSSOMethodHelper())
-              .addMethod(getProcessWorkloadSSOAuthnReqMethodHelper())
-              .addMethod(getGenerateControlPlaneSSOAuthnReqMethodHelper())
-              .addMethod(getSetWorkloadSubdomainMethodHelper())
-              .addMethod(getCreateWorkloadMachineUserMethodHelper())
-              .addMethod(getDeleteWorkloadMachineUserMethodHelper())
-              .addMethod(getGetWorkloadAdministrationGroupNameMethodHelper())
-              .addMethod(getSetWorkloadAdministrationGroupNameMethodHelper())
-              .addMethod(getDeleteWorkloadAdministrationGroupNameMethodHelper())
-              .addMethod(getListWorkloadAdministrationGroupsMethodHelper())
-              .addMethod(getSetActorWorkloadCredentialsMethodHelper())
-              .addMethod(getValidateActorWorkloadCredentialsMethodHelper())
-              .addMethod(getGetActorWorkloadCredentialsMethodHelper())
-              .addMethod(getGetEventGenerationIdsMethodHelper())
-              .addMethod(getAddActorSshPublicKeyMethodHelper())
-              .addMethod(getListActorSshPublicKeysMethodHelper())
-              .addMethod(getDescribeActorSshPublicKeyMethodHelper())
-              .addMethod(getDeleteActorSshPublicKeyMethodHelper())
-              .addMethod(getSetWorkloadPasswordPolicyMethodHelper())
-              .addMethod(getUnsetWorkloadPasswordPolicyMethodHelper())
-              .addMethod(getSetAuthenticationPolicyMethodHelper())
-              .addMethod(getAssignCloudIdentityMethodHelper())
-              .addMethod(getUnassignCloudIdentityMethodHelper())
-              .addMethod(getAssignServicePrincipalCloudIdentityMethodHelper())
-              .addMethod(getUnassignServicePrincipalCloudIdentityMethodHelper())
-              .addMethod(getListServicePrincipalCloudIdentitiesMethodHelper())
-              .addMethod(getGetDefaultIdentityProviderConnectorMethodHelper())
-              .addMethod(getSetDefaultIdentityProviderConnectorMethodHelper())
-              .addMethod(getGetUserSyncStateModelMethodHelper())
-              .addMethod(getListRoleAssignmentsMethodHelper())
-              .addMethod(getGenerateWorkloadAuthTokenMethodHelper())
-              .addMethod(getGetWorkloadAuthConfigurationMethodHelper())
-              .addMethod(getUpdateUserMethodHelper())
+              .addMethod(getInteractiveLoginMethod())
+              .addMethod(getInteractiveLogin3rdPartyMethod())
+              .addMethod(getInteractiveLoginLocalMethod())
+              .addMethod(getDeleteAccountMethod())
+              .addMethod(getDeleteActorMethod())
+              .addMethod(getDeleteTrialUserMethod())
+              .addMethod(getGetAccessKeyVerificationDataMethod())
+              .addMethod(getVerifyInteractiveUserSessionTokenMethod())
+              .addMethod(getVerifyAccessTokenMethod())
+              .addMethod(getAuthenticateMethod())
+              .addMethod(getAccessKeyUsageMethod())
+              .addMethod(getCreateUserMethod())
+              .addMethod(getGetUserMethod())
+              .addMethod(getListUsersMethod())
+              .addMethod(getFindUsersByEmailMethod())
+              .addMethod(getFindUsersMethod())
+              .addMethod(getCreateAccessKeyMethod())
+              .addMethod(getUpdateAccessKeyMethod())
+              .addMethod(getDeleteAccessKeyMethod())
+              .addMethod(getGetAccessKeyMethod())
+              .addMethod(getListAccessKeysMethod())
+              .addMethod(getCreateAccessTokenMethod())
+              .addMethod(getDeleteAccessTokenMethod())
+              .addMethod(getGetAccessTokenMethod())
+              .addMethod(getListAccessTokensMethod())
+              .addMethod(getCreateScimAccessTokenMethod())
+              .addMethod(getDeleteScimAccessTokenMethod())
+              .addMethod(getListScimAccessTokensMethod())
+              .addMethod(getGetVersionMethod())
+              .addMethod(getGetAccountMethod())
+              .addMethod(getListAccountsMethod())
+              .addMethod(getGetRightsMethod())
+              .addMethod(getCheckRightsMethod())
+              .addMethod(getCreateAccountMethod())
+              .addMethod(getCreateTrialAccountMethod())
+              .addMethod(getCreateC1CAccountMethod())
+              .addMethod(getVerifyC1CEmailMethod())
+              .addMethod(getGrantEntitlementMethod())
+              .addMethod(getRevokeEntitlementMethod())
+              .addMethod(getEnsureDefaultEntitlementsGrantedMethod())
+              .addMethod(getAssignRoleMethod())
+              .addMethod(getUnassignRoleMethod())
+              .addMethod(getListAssignedRolesMethod())
+              .addMethod(getAssignResourceRoleMethod())
+              .addMethod(getUnassignResourceRoleMethod())
+              .addMethod(getListAssignedResourceRolesMethod())
+              .addMethod(getListRolesMethod())
+              .addMethod(getListResourceRolesMethod())
+              .addMethod(getListResourceAssigneesMethod())
+              .addMethod(getUpdateClouderaManagerLicenseKeyMethod())
+              .addMethod(getInitiateSupportCaseMethod())
+              .addMethod(getNotifyResourceDeletedMethod())
+              .addMethod(getCreateMachineUserMethod())
+              .addMethod(getListMachineUsersMethod())
+              .addMethod(getDeleteMachineUserMethod())
+              .addMethod(getListResourceRoleAssignmentsMethod())
+              .addMethod(getSetAccountMessagesMethod())
+              .addMethod(getAcceptTermsMethod())
+              .addMethod(getClearAcceptedTermsMethod())
+              .addMethod(getDescribeTermsMethod())
+              .addMethod(getListTermsMethod())
+              .addMethod(getListEntitlementsMethod())
+              .addMethod(getSetTermsAcceptanceExpiryMethod())
+              .addMethod(getConfirmAzureSubscriptionVerifiedMethod())
+              .addMethod(getInsertAzureSubscriptionMethod())
+              .addMethod(getCreateGroupMethod())
+              .addMethod(getDeleteGroupMethod())
+              .addMethod(getGetGroupMethod())
+              .addMethod(getListGroupsMethod())
+              .addMethod(getUpdateGroupMethod())
+              .addMethod(getAddMemberToGroupMethod())
+              .addMethod(getRemoveMemberFromGroupMethod())
+              .addMethod(getListGroupMembersMethod())
+              .addMethod(getListGroupsForMemberMethod())
+              .addMethod(getListWorkloadAdministrationGroupsForMemberMethod())
+              .addMethod(getCreateClusterSshPrivateKeyMethod())
+              .addMethod(getGetClusterSshPrivateKeyMethod())
+              .addMethod(getGetAssigneeAuthorizationInformationMethod())
+              .addMethod(getCreateIdentityProviderConnectorMethod())
+              .addMethod(getListIdentityProviderConnectorsMethod())
+              .addMethod(getDeleteIdentityProviderConnectorMethod())
+              .addMethod(getDescribeIdentityProviderConnectorMethod())
+              .addMethod(getUpdateIdentityProviderConnectorMethod())
+              .addMethod(getSetClouderaSSOLoginEnabledMethod())
+              .addMethod(getGetIdPMetadataForWorkloadSSOMethod())
+              .addMethod(getProcessWorkloadSSOAuthnReqMethod())
+              .addMethod(getGenerateControlPlaneSSOAuthnReqMethod())
+              .addMethod(getSetWorkloadSubdomainMethod())
+              .addMethod(getCreateWorkloadMachineUserMethod())
+              .addMethod(getDeleteWorkloadMachineUserMethod())
+              .addMethod(getGetWorkloadAdministrationGroupNameMethod())
+              .addMethod(getSetWorkloadAdministrationGroupNameMethod())
+              .addMethod(getDeleteWorkloadAdministrationGroupNameMethod())
+              .addMethod(getListWorkloadAdministrationGroupsMethod())
+              .addMethod(getSetActorWorkloadCredentialsMethod())
+              .addMethod(getValidateActorWorkloadCredentialsMethod())
+              .addMethod(getGetActorWorkloadCredentialsMethod())
+              .addMethod(getGetEventGenerationIdsMethod())
+              .addMethod(getAddActorSshPublicKeyMethod())
+              .addMethod(getListActorSshPublicKeysMethod())
+              .addMethod(getDescribeActorSshPublicKeyMethod())
+              .addMethod(getDeleteActorSshPublicKeyMethod())
+              .addMethod(getSetWorkloadPasswordPolicyMethod())
+              .addMethod(getUnsetWorkloadPasswordPolicyMethod())
+              .addMethod(getSetAuthenticationPolicyMethod())
+              .addMethod(getAssignCloudIdentityMethod())
+              .addMethod(getUnassignCloudIdentityMethod())
+              .addMethod(getAssignServicePrincipalCloudIdentityMethod())
+              .addMethod(getUnassignServicePrincipalCloudIdentityMethod())
+              .addMethod(getListServicePrincipalCloudIdentitiesMethod())
+              .addMethod(getGetDefaultIdentityProviderConnectorMethod())
+              .addMethod(getSetDefaultIdentityProviderConnectorMethod())
+              .addMethod(getGetUserSyncStateModelMethod())
+              .addMethod(getListRoleAssignmentsMethod())
+              .addMethod(getGenerateWorkloadAuthTokenMethod())
+              .addMethod(getGetWorkloadAuthConfigurationMethod())
+              .addMethod(getUpdateUserMethod())
               .build();
         }
       }

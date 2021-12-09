@@ -1,19 +1,6 @@
 package com.cloudera.thunderhead.service.authorization;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -22,8 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.12.0)",
+    value = "by gRPC proto compiler (version 1.42.1)",
     comments = "Source: authorization.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class AuthorizationGrpc {
 
   private AuthorizationGrpc() {}
@@ -31,123 +19,111 @@ public final class AuthorizationGrpc {
   public static final String SERVICE_NAME = "authorization.Authorization";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> METHOD_GET_VERSION = getGetVersionMethodHelper();
-
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetVersion",
+      requestType = com.cloudera.thunderhead.service.common.version.Version.VersionRequest.class,
+      responseType = com.cloudera.thunderhead.service.common.version.Version.VersionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod() {
-    return getGetVersionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
     if ((getGetVersionMethod = AuthorizationGrpc.getGetVersionMethod) == null) {
       synchronized (AuthorizationGrpc.class) {
         if ((getGetVersionMethod = AuthorizationGrpc.getGetVersionMethod) == null) {
-          AuthorizationGrpc.getGetVersionMethod = getGetVersionMethod = 
+          AuthorizationGrpc.getGetVersionMethod = getGetVersionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "authorization.Authorization", "GetVersion"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetVersion"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuthorizationMethodDescriptorSupplier("GetVersion"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuthorizationMethodDescriptorSupplier("GetVersion"))
+              .build();
         }
-     }
-     return getGetVersionMethod;
+      }
+    }
+    return getGetVersionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getCheckRightMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest,
-      com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> METHOD_CHECK_RIGHT = getCheckRightMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest,
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> getCheckRightMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "CheckRight",
+      requestType = com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest.class,
+      responseType = com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest,
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> getCheckRightMethod() {
-    return getCheckRightMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest,
-      com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> getCheckRightMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest, com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> getCheckRightMethod;
     if ((getCheckRightMethod = AuthorizationGrpc.getCheckRightMethod) == null) {
       synchronized (AuthorizationGrpc.class) {
         if ((getCheckRightMethod = AuthorizationGrpc.getCheckRightMethod) == null) {
-          AuthorizationGrpc.getCheckRightMethod = getCheckRightMethod = 
+          AuthorizationGrpc.getCheckRightMethod = getCheckRightMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest, com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "authorization.Authorization", "CheckRight"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "CheckRight"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuthorizationMethodDescriptorSupplier("CheckRight"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuthorizationMethodDescriptorSupplier("CheckRight"))
+              .build();
         }
-     }
-     return getCheckRightMethod;
+      }
+    }
+    return getCheckRightMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getHasRightsMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest,
-      com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> METHOD_HAS_RIGHTS = getHasRightsMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest,
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> getHasRightsMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "HasRights",
+      requestType = com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest.class,
+      responseType = com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest,
       com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> getHasRightsMethod() {
-    return getHasRightsMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest,
-      com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> getHasRightsMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest, com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> getHasRightsMethod;
     if ((getHasRightsMethod = AuthorizationGrpc.getHasRightsMethod) == null) {
       synchronized (AuthorizationGrpc.class) {
         if ((getHasRightsMethod = AuthorizationGrpc.getHasRightsMethod) == null) {
-          AuthorizationGrpc.getHasRightsMethod = getHasRightsMethod = 
+          AuthorizationGrpc.getHasRightsMethod = getHasRightsMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest, com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "authorization.Authorization", "HasRights"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "HasRights"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new AuthorizationMethodDescriptorSupplier("HasRights"))
-                  .build();
-          }
+              .setSchemaDescriptor(new AuthorizationMethodDescriptorSupplier("HasRights"))
+              .build();
         }
-     }
-     return getHasRightsMethod;
+      }
+    }
+    return getHasRightsMethod;
   }
 
   /**
    * Creates a new async stub that supports all call types for the service
    */
   public static AuthorizationStub newStub(io.grpc.Channel channel) {
-    return new AuthorizationStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<AuthorizationStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuthorizationStub>() {
+        @java.lang.Override
+        public AuthorizationStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuthorizationStub(channel, callOptions);
+        }
+      };
+    return AuthorizationStub.newStub(factory, channel);
   }
 
   /**
@@ -155,7 +131,14 @@ public final class AuthorizationGrpc {
    */
   public static AuthorizationBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new AuthorizationBlockingStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<AuthorizationBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuthorizationBlockingStub>() {
+        @java.lang.Override
+        public AuthorizationBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuthorizationBlockingStub(channel, callOptions);
+        }
+      };
+    return AuthorizationBlockingStub.newStub(factory, channel);
   }
 
   /**
@@ -163,7 +146,14 @@ public final class AuthorizationGrpc {
    */
   public static AuthorizationFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new AuthorizationFutureStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<AuthorizationFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<AuthorizationFutureStub>() {
+        @java.lang.Override
+        public AuthorizationFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new AuthorizationFutureStub(channel, callOptions);
+        }
+      };
+    return AuthorizationFutureStub.newStub(factory, channel);
   }
 
   /**
@@ -181,7 +171,7 @@ public final class AuthorizationGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetVersionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
@@ -192,7 +182,7 @@ public final class AuthorizationGrpc {
      */
     public void checkRight(com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getCheckRightMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getCheckRightMethod(), responseObserver);
     }
 
     /**
@@ -206,28 +196,28 @@ public final class AuthorizationGrpc {
      */
     public void hasRights(com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getHasRightsMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getHasRightsMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getGetVersionMethodHelper(),
-            asyncUnaryCall(
+            getGetVersionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
                 com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
                   this, METHODID_GET_VERSION)))
           .addMethod(
-            getCheckRightMethodHelper(),
-            asyncUnaryCall(
+            getCheckRightMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest,
                 com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse>(
                   this, METHODID_CHECK_RIGHT)))
           .addMethod(
-            getHasRightsMethodHelper(),
-            asyncUnaryCall(
+            getHasRightsMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest,
                 com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse>(
@@ -242,19 +232,15 @@ public final class AuthorizationGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuthorizationStub extends io.grpc.stub.AbstractStub<AuthorizationStub> {
-    private AuthorizationStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private AuthorizationStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class AuthorizationStub extends io.grpc.stub.AbstractAsyncStub<AuthorizationStub> {
+    private AuthorizationStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected AuthorizationStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected AuthorizationStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AuthorizationStub(channel, callOptions);
     }
 
@@ -265,8 +251,8 @@ public final class AuthorizationGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -277,8 +263,8 @@ public final class AuthorizationGrpc {
      */
     public void checkRight(com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getCheckRightMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getCheckRightMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -292,8 +278,8 @@ public final class AuthorizationGrpc {
      */
     public void hasRights(com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getHasRightsMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getHasRightsMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -303,19 +289,15 @@ public final class AuthorizationGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuthorizationBlockingStub extends io.grpc.stub.AbstractStub<AuthorizationBlockingStub> {
-    private AuthorizationBlockingStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private AuthorizationBlockingStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class AuthorizationBlockingStub extends io.grpc.stub.AbstractBlockingStub<AuthorizationBlockingStub> {
+    private AuthorizationBlockingStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected AuthorizationBlockingStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected AuthorizationBlockingStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AuthorizationBlockingStub(channel, callOptions);
     }
 
@@ -325,8 +307,8 @@ public final class AuthorizationGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetVersionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -336,8 +318,8 @@ public final class AuthorizationGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse checkRight(com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getCheckRightMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getCheckRightMethod(), getCallOptions(), request);
     }
 
     /**
@@ -350,8 +332,8 @@ public final class AuthorizationGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse hasRights(com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getHasRightsMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getHasRightsMethod(), getCallOptions(), request);
     }
   }
 
@@ -361,19 +343,15 @@ public final class AuthorizationGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class AuthorizationFutureStub extends io.grpc.stub.AbstractStub<AuthorizationFutureStub> {
-    private AuthorizationFutureStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private AuthorizationFutureStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class AuthorizationFutureStub extends io.grpc.stub.AbstractFutureStub<AuthorizationFutureStub> {
+    private AuthorizationFutureStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected AuthorizationFutureStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected AuthorizationFutureStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new AuthorizationFutureStub(channel, callOptions);
     }
 
@@ -384,8 +362,8 @@ public final class AuthorizationGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getVersion(
         com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -396,8 +374,8 @@ public final class AuthorizationGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightResponse> checkRight(
         com.cloudera.thunderhead.service.authorization.AuthorizationProto.CheckRightRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getCheckRightMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getCheckRightMethod(), getCallOptions()), request);
     }
 
     /**
@@ -411,8 +389,8 @@ public final class AuthorizationGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsResponse> hasRights(
         com.cloudera.thunderhead.service.authorization.AuthorizationProto.HasRightsRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getHasRightsMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getHasRightsMethod(), getCallOptions()), request);
     }
   }
 
@@ -510,9 +488,9 @@ public final class AuthorizationGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new AuthorizationFileDescriptorSupplier())
-              .addMethod(getGetVersionMethodHelper())
-              .addMethod(getCheckRightMethodHelper())
-              .addMethod(getHasRightsMethodHelper())
+              .addMethod(getGetVersionMethod())
+              .addMethod(getCheckRightMethod())
+              .addMethod(getHasRightsMethod())
               .build();
         }
       }

@@ -24,6 +24,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterCrn = 1;</code>
+     * @return The clusterCrn.
      */
     java.lang.String getClusterCrn();
     /**
@@ -32,6 +33,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterCrn = 1;</code>
+     * @return The bytes for clusterCrn.
      */
     com.google.protobuf.ByteString
         getClusterCrnBytes();
@@ -42,6 +44,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -50,6 +53,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -60,6 +64,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string environmentCrn = 3;</code>
+     * @return The environmentCrn.
      */
     java.lang.String getEnvironmentCrn();
     /**
@@ -68,6 +73,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string environmentCrn = 3;</code>
+     * @return The bytes for environmentCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentCrnBytes();
@@ -78,6 +84,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>int64 timestamp = 4;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -87,6 +94,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterName = 5;</code>
+     * @return The clusterName.
      */
     java.lang.String getClusterName();
     /**
@@ -95,6 +103,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterName = 5;</code>
+     * @return The bytes for clusterName.
      */
     com.google.protobuf.ByteString
         getClusterNameBytes();
@@ -166,6 +175,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowState = 6;</code>
+     * @return The flowState.
      */
     java.lang.String getFlowState();
     /**
@@ -235,6 +245,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowState = 6;</code>
+     * @return The bytes for flowState.
      */
     com.google.protobuf.ByteString
         getFlowStateBytes();
@@ -245,6 +256,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowId = 7;</code>
+     * @return The flowId.
      */
     java.lang.String getFlowId();
     /**
@@ -253,6 +265,7 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowId = 7;</code>
+     * @return The bytes for flowId.
      */
     com.google.protobuf.ByteString
         getFlowIdBytes();
@@ -265,7 +278,7 @@ public final class AuditEventDetailsProto {
    *
    * Protobuf type {@code audit.cb.AuditEventDetails}
    */
-  public  static final class AuditEventDetails extends
+  public static final class AuditEventDetails extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.cb.AuditEventDetails)
       AuditEventDetailsOrBuilder {
@@ -278,10 +291,16 @@ public final class AuditEventDetailsProto {
       clusterCrn_ = "";
       userCrn_ = "";
       environmentCrn_ = "";
-      timestamp_ = 0L;
       clusterName_ = "";
       flowState_ = "";
       flowId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AuditEventDetails();
     }
 
     @java.lang.Override
@@ -297,7 +316,6 @@ public final class AuditEventDetailsProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -350,7 +368,7 @@ public final class AuditEventDetailsProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -389,7 +407,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterCrn = 1;</code>
+     * @return The clusterCrn.
      */
+    @java.lang.Override
     public java.lang.String getClusterCrn() {
       java.lang.Object ref = clusterCrn_;
       if (ref instanceof java.lang.String) {
@@ -408,7 +428,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterCrn = 1;</code>
+     * @return The bytes for clusterCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getClusterCrnBytes() {
       java.lang.Object ref = clusterCrn_;
@@ -431,7 +453,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -450,7 +474,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -473,7 +499,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string environmentCrn = 3;</code>
+     * @return The environmentCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentCrn() {
       java.lang.Object ref = environmentCrn_;
       if (ref instanceof java.lang.String) {
@@ -492,7 +520,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string environmentCrn = 3;</code>
+     * @return The bytes for environmentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentCrnBytes() {
       java.lang.Object ref = environmentCrn_;
@@ -515,7 +545,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>int64 timestamp = 4;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -528,7 +560,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterName = 5;</code>
+     * @return The clusterName.
      */
+    @java.lang.Override
     public java.lang.String getClusterName() {
       java.lang.Object ref = clusterName_;
       if (ref instanceof java.lang.String) {
@@ -547,7 +581,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string clusterName = 5;</code>
+     * @return The bytes for clusterName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getClusterNameBytes() {
       java.lang.Object ref = clusterName_;
@@ -631,7 +667,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowState = 6;</code>
+     * @return The flowState.
      */
+    @java.lang.Override
     public java.lang.String getFlowState() {
       java.lang.Object ref = flowState_;
       if (ref instanceof java.lang.String) {
@@ -711,7 +749,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowState = 6;</code>
+     * @return The bytes for flowState.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFlowStateBytes() {
       java.lang.Object ref = flowState_;
@@ -734,7 +774,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowId = 7;</code>
+     * @return The flowId.
      */
+    @java.lang.Override
     public java.lang.String getFlowId() {
       java.lang.Object ref = flowId_;
       if (ref instanceof java.lang.String) {
@@ -753,7 +795,9 @@ public final class AuditEventDetailsProto {
      * </pre>
      *
      * <code>string flowId = 7;</code>
+     * @return The bytes for flowId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFlowIdBytes() {
       java.lang.Object ref = flowId_;
@@ -782,25 +826,25 @@ public final class AuditEventDetailsProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getClusterCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, clusterCrn_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, userCrn_);
       }
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, environmentCrn_);
       }
       if (timestamp_ != 0L) {
         output.writeInt64(4, timestamp_);
       }
-      if (!getClusterNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, clusterName_);
       }
-      if (!getFlowStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(flowState_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, flowState_);
       }
-      if (!getFlowIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(flowId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, flowId_);
       }
       unknownFields.writeTo(output);
@@ -812,26 +856,26 @@ public final class AuditEventDetailsProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getClusterCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, clusterCrn_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, userCrn_);
       }
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, environmentCrn_);
       }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(4, timestamp_);
       }
-      if (!getClusterNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(clusterName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, clusterName_);
       }
-      if (!getFlowStateBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(flowState_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, flowState_);
       }
-      if (!getFlowIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(flowId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, flowId_);
       }
       size += unknownFields.getSerializedSize();
@@ -849,23 +893,22 @@ public final class AuditEventDetailsProto {
       }
       com.sequenceiq.cloudbreak.audit.converter.AuditEventDetailsProto.AuditEventDetails other = (com.sequenceiq.cloudbreak.audit.converter.AuditEventDetailsProto.AuditEventDetails) obj;
 
-      boolean result = true;
-      result = result && getClusterCrn()
-          .equals(other.getClusterCrn());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && getEnvironmentCrn()
-          .equals(other.getEnvironmentCrn());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && getClusterName()
-          .equals(other.getClusterName());
-      result = result && getFlowState()
-          .equals(other.getFlowState());
-      result = result && getFlowId()
-          .equals(other.getFlowId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getClusterCrn()
+          .equals(other.getClusterCrn())) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!getClusterName()
+          .equals(other.getClusterName())) return false;
+      if (!getFlowState()
+          .equals(other.getFlowState())) return false;
+      if (!getFlowId()
+          .equals(other.getFlowId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1081,35 +1124,35 @@ public final class AuditEventDetailsProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1186,6 +1229,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterCrn = 1;</code>
+       * @return The clusterCrn.
        */
       public java.lang.String getClusterCrn() {
         java.lang.Object ref = clusterCrn_;
@@ -1205,6 +1249,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterCrn = 1;</code>
+       * @return The bytes for clusterCrn.
        */
       public com.google.protobuf.ByteString
           getClusterCrnBytes() {
@@ -1225,6 +1270,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterCrn = 1;</code>
+       * @param value The clusterCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setClusterCrn(
           java.lang.String value) {
@@ -1242,6 +1289,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearClusterCrn() {
         
@@ -1255,6 +1303,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterCrn = 1;</code>
+       * @param value The bytes for clusterCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setClusterCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -1275,6 +1325,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -1294,6 +1345,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -1314,6 +1366,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -1331,6 +1385,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -1344,6 +1399,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -1364,6 +1421,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string environmentCrn = 3;</code>
+       * @return The environmentCrn.
        */
       public java.lang.String getEnvironmentCrn() {
         java.lang.Object ref = environmentCrn_;
@@ -1383,6 +1441,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string environmentCrn = 3;</code>
+       * @return The bytes for environmentCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentCrnBytes() {
@@ -1403,6 +1462,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string environmentCrn = 3;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrn(
           java.lang.String value) {
@@ -1420,6 +1481,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string environmentCrn = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentCrn() {
         
@@ -1433,6 +1495,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string environmentCrn = 3;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -1453,7 +1517,9 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>int64 timestamp = 4;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -1463,6 +1529,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>int64 timestamp = 4;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -1476,6 +1544,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>int64 timestamp = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -1491,6 +1560,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterName = 5;</code>
+       * @return The clusterName.
        */
       public java.lang.String getClusterName() {
         java.lang.Object ref = clusterName_;
@@ -1510,6 +1580,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterName = 5;</code>
+       * @return The bytes for clusterName.
        */
       public com.google.protobuf.ByteString
           getClusterNameBytes() {
@@ -1530,6 +1601,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterName = 5;</code>
+       * @param value The clusterName to set.
+       * @return This builder for chaining.
        */
       public Builder setClusterName(
           java.lang.String value) {
@@ -1547,6 +1620,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterName = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearClusterName() {
         
@@ -1560,6 +1634,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string clusterName = 5;</code>
+       * @param value The bytes for clusterName to set.
+       * @return This builder for chaining.
        */
       public Builder setClusterNameBytes(
           com.google.protobuf.ByteString value) {
@@ -1641,6 +1717,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowState = 6;</code>
+       * @return The flowState.
        */
       public java.lang.String getFlowState() {
         java.lang.Object ref = flowState_;
@@ -1721,6 +1798,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowState = 6;</code>
+       * @return The bytes for flowState.
        */
       public com.google.protobuf.ByteString
           getFlowStateBytes() {
@@ -1802,6 +1880,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowState = 6;</code>
+       * @param value The flowState to set.
+       * @return This builder for chaining.
        */
       public Builder setFlowState(
           java.lang.String value) {
@@ -1880,6 +1960,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowState = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFlowState() {
         
@@ -1954,6 +2035,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowState = 6;</code>
+       * @param value The bytes for flowState to set.
+       * @return This builder for chaining.
        */
       public Builder setFlowStateBytes(
           com.google.protobuf.ByteString value) {
@@ -1974,6 +2057,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowId = 7;</code>
+       * @return The flowId.
        */
       public java.lang.String getFlowId() {
         java.lang.Object ref = flowId_;
@@ -1993,6 +2077,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowId = 7;</code>
+       * @return The bytes for flowId.
        */
       public com.google.protobuf.ByteString
           getFlowIdBytes() {
@@ -2013,6 +2098,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowId = 7;</code>
+       * @param value The flowId to set.
+       * @return This builder for chaining.
        */
       public Builder setFlowId(
           java.lang.String value) {
@@ -2030,6 +2117,7 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowId = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFlowId() {
         
@@ -2043,6 +2131,8 @@ public final class AuditEventDetailsProto {
        * </pre>
        *
        * <code>string flowId = 7;</code>
+       * @param value The bytes for flowId to set.
+       * @return This builder for chaining.
        */
       public Builder setFlowIdBytes(
           com.google.protobuf.ByteString value) {
@@ -2058,7 +2148,7 @@ public final class AuditEventDetailsProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2130,18 +2220,10 @@ public final class AuditEventDetailsProto {
       "m.sequenceiq.cloudbreak.audit.converterB" +
       "\026AuditEventDetailsProtob\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_audit_cb_AuditEventDetails_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_audit_cb_AuditEventDetails_fieldAccessorTable = new

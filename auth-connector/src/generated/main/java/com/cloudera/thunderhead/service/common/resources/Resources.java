@@ -20,20 +20,24 @@ public final class Resources {
 
     /**
      * <code>string name = 1;</code>
+     * @return The name.
      */
     java.lang.String getName();
     /**
      * <code>string name = 1;</code>
+     * @return The bytes for name.
      */
     com.google.protobuf.ByteString
         getNameBytes();
 
     /**
      * <code>string id = 2;</code>
+     * @return The id.
      */
     java.lang.String getId();
     /**
      * <code>string id = 2;</code>
+     * @return The bytes for id.
      */
     com.google.protobuf.ByteString
         getIdBytes();
@@ -54,7 +58,7 @@ public final class Resources {
    *
    * Protobuf type {@code resources.Id}
    */
-  public  static final class Id extends
+  public static final class Id extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:resources.Id)
       IdOrBuilder {
@@ -66,6 +70,13 @@ public final class Resources {
     private Id() {
       name_ = "";
       id_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new Id();
     }
 
     @java.lang.Override
@@ -81,7 +92,6 @@ public final class Resources {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -105,7 +115,7 @@ public final class Resources {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -140,7 +150,9 @@ public final class Resources {
     private volatile java.lang.Object name_;
     /**
      * <code>string name = 1;</code>
+     * @return The name.
      */
+    @java.lang.Override
     public java.lang.String getName() {
       java.lang.Object ref = name_;
       if (ref instanceof java.lang.String) {
@@ -155,7 +167,9 @@ public final class Resources {
     }
     /**
      * <code>string name = 1;</code>
+     * @return The bytes for name.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNameBytes() {
       java.lang.Object ref = name_;
@@ -174,7 +188,9 @@ public final class Resources {
     private volatile java.lang.Object id_;
     /**
      * <code>string id = 2;</code>
+     * @return The id.
      */
+    @java.lang.Override
     public java.lang.String getId() {
       java.lang.Object ref = id_;
       if (ref instanceof java.lang.String) {
@@ -189,7 +205,9 @@ public final class Resources {
     }
     /**
      * <code>string id = 2;</code>
+     * @return The bytes for id.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdBytes() {
       java.lang.Object ref = id_;
@@ -218,10 +236,10 @@ public final class Resources {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, name_);
       }
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, id_);
       }
       unknownFields.writeTo(output);
@@ -233,10 +251,10 @@ public final class Resources {
       if (size != -1) return size;
 
       size = 0;
-      if (!getNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(name_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, name_);
       }
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, id_);
       }
       size += unknownFields.getSerializedSize();
@@ -254,13 +272,12 @@ public final class Resources {
       }
       com.cloudera.thunderhead.service.common.resources.Resources.Id other = (com.cloudera.thunderhead.service.common.resources.Resources.Id) obj;
 
-      boolean result = true;
-      result = result && getName()
-          .equals(other.getName());
-      result = result && getId()
-          .equals(other.getId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getName()
+          .equals(other.getName())) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -458,35 +475,35 @@ public final class Resources {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -540,6 +557,7 @@ public final class Resources {
       private java.lang.Object name_ = "";
       /**
        * <code>string name = 1;</code>
+       * @return The name.
        */
       public java.lang.String getName() {
         java.lang.Object ref = name_;
@@ -555,6 +573,7 @@ public final class Resources {
       }
       /**
        * <code>string name = 1;</code>
+       * @return The bytes for name.
        */
       public com.google.protobuf.ByteString
           getNameBytes() {
@@ -571,6 +590,8 @@ public final class Resources {
       }
       /**
        * <code>string name = 1;</code>
+       * @param value The name to set.
+       * @return This builder for chaining.
        */
       public Builder setName(
           java.lang.String value) {
@@ -584,6 +605,7 @@ public final class Resources {
       }
       /**
        * <code>string name = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearName() {
         
@@ -593,6 +615,8 @@ public final class Resources {
       }
       /**
        * <code>string name = 1;</code>
+       * @param value The bytes for name to set.
+       * @return This builder for chaining.
        */
       public Builder setNameBytes(
           com.google.protobuf.ByteString value) {
@@ -609,6 +633,7 @@ public final class Resources {
       private java.lang.Object id_ = "";
       /**
        * <code>string id = 2;</code>
+       * @return The id.
        */
       public java.lang.String getId() {
         java.lang.Object ref = id_;
@@ -624,6 +649,7 @@ public final class Resources {
       }
       /**
        * <code>string id = 2;</code>
+       * @return The bytes for id.
        */
       public com.google.protobuf.ByteString
           getIdBytes() {
@@ -640,6 +666,8 @@ public final class Resources {
       }
       /**
        * <code>string id = 2;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
        */
       public Builder setId(
           java.lang.String value) {
@@ -653,6 +681,7 @@ public final class Resources {
       }
       /**
        * <code>string id = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearId() {
         
@@ -662,6 +691,8 @@ public final class Resources {
       }
       /**
        * <code>string id = 2;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
        */
       public Builder setIdBytes(
           com.google.protobuf.ByteString value) {
@@ -677,7 +708,7 @@ public final class Resources {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -733,10 +764,12 @@ public final class Resources {
 
     /**
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -777,7 +810,7 @@ public final class Resources {
    *
    * Protobuf type {@code resources.IdsWithinAccount}
    */
-  public  static final class IdsWithinAccount extends
+  public static final class IdsWithinAccount extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:resources.IdsWithinAccount)
       IdsWithinAccountOrBuilder {
@@ -789,6 +822,13 @@ public final class Resources {
     private IdsWithinAccount() {
       accountId_ = "";
       id_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new IdsWithinAccount();
     }
 
     @java.lang.Override
@@ -822,16 +862,16 @@ public final class Resources {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 id_ = new java.util.ArrayList<com.cloudera.thunderhead.service.common.resources.Resources.Id>();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               id_.add(
                   input.readMessage(com.cloudera.thunderhead.service.common.resources.Resources.Id.parser(), extensionRegistry));
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -845,7 +885,7 @@ public final class Resources {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           id_ = java.util.Collections.unmodifiableList(id_);
         }
         this.unknownFields = unknownFields.build();
@@ -865,12 +905,13 @@ public final class Resources {
               com.cloudera.thunderhead.service.common.resources.Resources.IdsWithinAccount.class, com.cloudera.thunderhead.service.common.resources.Resources.IdsWithinAccount.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ACCOUNTID_FIELD_NUMBER = 1;
     private volatile java.lang.Object accountId_;
     /**
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -885,7 +926,9 @@ public final class Resources {
     }
     /**
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -905,12 +948,14 @@ public final class Resources {
     /**
      * <code>repeated .resources.Id id = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.service.common.resources.Resources.Id> getIdList() {
       return id_;
     }
     /**
      * <code>repeated .resources.Id id = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.common.resources.Resources.IdOrBuilder> 
         getIdOrBuilderList() {
       return id_;
@@ -918,18 +963,21 @@ public final class Resources {
     /**
      * <code>repeated .resources.Id id = 2;</code>
      */
+    @java.lang.Override
     public int getIdCount() {
       return id_.size();
     }
     /**
      * <code>repeated .resources.Id id = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.common.resources.Resources.Id getId(int index) {
       return id_.get(index);
     }
     /**
      * <code>repeated .resources.Id id = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.common.resources.Resources.IdOrBuilder getIdOrBuilder(
         int index) {
       return id_.get(index);
@@ -949,7 +997,7 @@ public final class Resources {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
       for (int i = 0; i < id_.size(); i++) {
@@ -964,7 +1012,7 @@ public final class Resources {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
       for (int i = 0; i < id_.size(); i++) {
@@ -986,13 +1034,12 @@ public final class Resources {
       }
       com.cloudera.thunderhead.service.common.resources.Resources.IdsWithinAccount other = (com.cloudera.thunderhead.service.common.resources.Resources.IdsWithinAccount) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getIdList()
-          .equals(other.getIdList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getIdList()
+          .equals(other.getIdList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1155,7 +1202,7 @@ public final class Resources {
 
         if (idBuilder_ == null) {
           id_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           idBuilder_.clear();
         }
@@ -1186,53 +1233,51 @@ public final class Resources {
       public com.cloudera.thunderhead.service.common.resources.Resources.IdsWithinAccount buildPartial() {
         com.cloudera.thunderhead.service.common.resources.Resources.IdsWithinAccount result = new com.cloudera.thunderhead.service.common.resources.Resources.IdsWithinAccount(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.accountId_ = accountId_;
         if (idBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             id_ = java.util.Collections.unmodifiableList(id_);
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.id_ = id_;
         } else {
           result.id_ = idBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1254,7 +1299,7 @@ public final class Resources {
           if (!other.id_.isEmpty()) {
             if (id_.isEmpty()) {
               id_ = other.id_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureIdIsMutable();
               id_.addAll(other.id_);
@@ -1267,7 +1312,7 @@ public final class Resources {
               idBuilder_.dispose();
               idBuilder_ = null;
               id_ = other.id_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
               idBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getIdFieldBuilder() : null;
@@ -1309,6 +1354,7 @@ public final class Resources {
       private java.lang.Object accountId_ = "";
       /**
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -1324,6 +1370,7 @@ public final class Resources {
       }
       /**
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -1340,6 +1387,8 @@ public final class Resources {
       }
       /**
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -1353,6 +1402,7 @@ public final class Resources {
       }
       /**
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -1362,6 +1412,8 @@ public final class Resources {
       }
       /**
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -1378,9 +1430,9 @@ public final class Resources {
       private java.util.List<com.cloudera.thunderhead.service.common.resources.Resources.Id> id_ =
         java.util.Collections.emptyList();
       private void ensureIdIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           id_ = new java.util.ArrayList<com.cloudera.thunderhead.service.common.resources.Resources.Id>(id_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
          }
       }
 
@@ -1530,7 +1582,7 @@ public final class Resources {
       public Builder clearId() {
         if (idBuilder_ == null) {
           id_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           idBuilder_.clear();
@@ -1607,7 +1659,7 @@ public final class Resources {
           idBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.common.resources.Resources.Id, com.cloudera.thunderhead.service.common.resources.Resources.Id.Builder, com.cloudera.thunderhead.service.common.resources.Resources.IdOrBuilder>(
                   id_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           id_ = null;
@@ -1617,7 +1669,7 @@ public final class Resources {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1692,18 +1744,10 @@ public final class Resources {
       "ces.IdB>\n1com.cloudera.thunderhead.servi" +
       "ce.common.resourcesB\tResourcesb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
-        }, assigner);
+        });
     internal_static_resources_Id_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_resources_Id_fieldAccessorTable = new

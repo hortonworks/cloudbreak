@@ -1,19 +1,6 @@
 package com.cloudera.thunderhead.service.minasshd;
 
 import static io.grpc.MethodDescriptor.generateFullMethodName;
-import static io.grpc.stub.ClientCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ClientCalls.asyncUnaryCall;
-import static io.grpc.stub.ClientCalls.blockingServerStreamingCall;
-import static io.grpc.stub.ClientCalls.blockingUnaryCall;
-import static io.grpc.stub.ClientCalls.futureUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncBidiStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncClientStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncServerStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnaryCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedStreamingCall;
-import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
 
 /**
  * <pre>
@@ -22,8 +9,9 @@ import static io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall;
  * </pre>
  */
 @javax.annotation.Generated(
-    value = "by gRPC proto compiler (version 1.12.0)",
+    value = "by gRPC proto compiler (version 1.42.1)",
     comments = "Source: minasshd.proto")
+@io.grpc.stub.annotations.GrpcGenerated
 public final class MinaSshdGrpc {
 
   private MinaSshdGrpc() {}
@@ -31,86 +19,80 @@ public final class MinaSshdGrpc {
   public static final String SERVICE_NAME = "minasshd.MinaSshd";
 
   // Static method descriptors that strictly reflect the proto.
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetVersionMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> METHOD_GET_VERSION = getGetVersionMethodHelper();
-
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetVersion",
+      requestType = com.cloudera.thunderhead.service.common.version.Version.VersionRequest.class,
+      responseType = com.cloudera.thunderhead.service.common.version.Version.VersionResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
       com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod() {
-    return getGetVersionMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
-      com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getGetVersionMethod;
     if ((getGetVersionMethod = MinaSshdGrpc.getGetVersionMethod) == null) {
       synchronized (MinaSshdGrpc.class) {
         if ((getGetVersionMethod = MinaSshdGrpc.getGetVersionMethod) == null) {
-          MinaSshdGrpc.getGetVersionMethod = getGetVersionMethod = 
+          MinaSshdGrpc.getGetVersionMethod = getGetVersionMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.common.version.Version.VersionRequest, com.cloudera.thunderhead.service.common.version.Version.VersionResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "minasshd.MinaSshd", "GetVersion"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetVersion"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.common.version.Version.VersionResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new MinaSshdMethodDescriptorSupplier("GetVersion"))
-                  .build();
-          }
+              .setSchemaDescriptor(new MinaSshdMethodDescriptorSupplier("GetVersion"))
+              .build();
         }
-     }
-     return getGetVersionMethod;
+      }
+    }
+    return getGetVersionMethod;
   }
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
-  @java.lang.Deprecated // Use {@link #getGetServiceEndpointMethod()} instead. 
-  public static final io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest,
-      com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> METHOD_GET_SERVICE_ENDPOINT = getGetServiceEndpointMethodHelper();
 
   private static volatile io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest,
       com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> getGetServiceEndpointMethod;
 
-  @io.grpc.ExperimentalApi("https://github.com/grpc/grpc-java/issues/1901")
+  @io.grpc.stub.annotations.RpcMethod(
+      fullMethodName = SERVICE_NAME + '/' + "GetServiceEndpoint",
+      requestType = com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest.class,
+      responseType = com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse.class,
+      methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest,
       com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> getGetServiceEndpointMethod() {
-    return getGetServiceEndpointMethodHelper();
-  }
-
-  private static io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest,
-      com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> getGetServiceEndpointMethodHelper() {
     io.grpc.MethodDescriptor<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest, com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> getGetServiceEndpointMethod;
     if ((getGetServiceEndpointMethod = MinaSshdGrpc.getGetServiceEndpointMethod) == null) {
       synchronized (MinaSshdGrpc.class) {
         if ((getGetServiceEndpointMethod = MinaSshdGrpc.getGetServiceEndpointMethod) == null) {
-          MinaSshdGrpc.getGetServiceEndpointMethod = getGetServiceEndpointMethod = 
+          MinaSshdGrpc.getGetServiceEndpointMethod = getGetServiceEndpointMethod =
               io.grpc.MethodDescriptor.<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest, com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
-              .setFullMethodName(generateFullMethodName(
-                  "minasshd.MinaSshd", "GetServiceEndpoint"))
+              .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetServiceEndpoint"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse.getDefaultInstance()))
-                  .setSchemaDescriptor(new MinaSshdMethodDescriptorSupplier("GetServiceEndpoint"))
-                  .build();
-          }
+              .setSchemaDescriptor(new MinaSshdMethodDescriptorSupplier("GetServiceEndpoint"))
+              .build();
         }
-     }
-     return getGetServiceEndpointMethod;
+      }
+    }
+    return getGetServiceEndpointMethod;
   }
 
   /**
    * Creates a new async stub that supports all call types for the service
    */
   public static MinaSshdStub newStub(io.grpc.Channel channel) {
-    return new MinaSshdStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<MinaSshdStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<MinaSshdStub>() {
+        @java.lang.Override
+        public MinaSshdStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new MinaSshdStub(channel, callOptions);
+        }
+      };
+    return MinaSshdStub.newStub(factory, channel);
   }
 
   /**
@@ -118,7 +100,14 @@ public final class MinaSshdGrpc {
    */
   public static MinaSshdBlockingStub newBlockingStub(
       io.grpc.Channel channel) {
-    return new MinaSshdBlockingStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<MinaSshdBlockingStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<MinaSshdBlockingStub>() {
+        @java.lang.Override
+        public MinaSshdBlockingStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new MinaSshdBlockingStub(channel, callOptions);
+        }
+      };
+    return MinaSshdBlockingStub.newStub(factory, channel);
   }
 
   /**
@@ -126,7 +115,14 @@ public final class MinaSshdGrpc {
    */
   public static MinaSshdFutureStub newFutureStub(
       io.grpc.Channel channel) {
-    return new MinaSshdFutureStub(channel);
+    io.grpc.stub.AbstractStub.StubFactory<MinaSshdFutureStub> factory =
+      new io.grpc.stub.AbstractStub.StubFactory<MinaSshdFutureStub>() {
+        @java.lang.Override
+        public MinaSshdFutureStub newStub(io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
+          return new MinaSshdFutureStub(channel, callOptions);
+        }
+      };
+    return MinaSshdFutureStub.newStub(factory, channel);
   }
 
   /**
@@ -144,7 +140,7 @@ public final class MinaSshdGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetVersionMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetVersionMethod(), responseObserver);
     }
 
     /**
@@ -154,21 +150,21 @@ public final class MinaSshdGrpc {
      */
     public void getServiceEndpoint(com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> responseObserver) {
-      asyncUnimplementedUnaryCall(getGetServiceEndpointMethodHelper(), responseObserver);
+      io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetServiceEndpointMethod(), responseObserver);
     }
 
     @java.lang.Override public final io.grpc.ServerServiceDefinition bindService() {
       return io.grpc.ServerServiceDefinition.builder(getServiceDescriptor())
           .addMethod(
-            getGetVersionMethodHelper(),
-            asyncUnaryCall(
+            getGetVersionMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.common.version.Version.VersionRequest,
                 com.cloudera.thunderhead.service.common.version.Version.VersionResponse>(
                   this, METHODID_GET_VERSION)))
           .addMethod(
-            getGetServiceEndpointMethodHelper(),
-            asyncUnaryCall(
+            getGetServiceEndpointMethod(),
+            io.grpc.stub.ServerCalls.asyncUnaryCall(
               new MethodHandlers<
                 com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest,
                 com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse>(
@@ -183,19 +179,15 @@ public final class MinaSshdGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdStub extends io.grpc.stub.AbstractStub<MinaSshdStub> {
-    private MinaSshdStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private MinaSshdStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class MinaSshdStub extends io.grpc.stub.AbstractAsyncStub<MinaSshdStub> {
+    private MinaSshdStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected MinaSshdStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected MinaSshdStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new MinaSshdStub(channel, callOptions);
     }
 
@@ -206,8 +198,8 @@ public final class MinaSshdGrpc {
      */
     public void getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request, responseObserver);
     }
 
     /**
@@ -217,8 +209,8 @@ public final class MinaSshdGrpc {
      */
     public void getServiceEndpoint(com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest request,
         io.grpc.stub.StreamObserver<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> responseObserver) {
-      asyncUnaryCall(
-          getChannel().newCall(getGetServiceEndpointMethodHelper(), getCallOptions()), request, responseObserver);
+      io.grpc.stub.ClientCalls.asyncUnaryCall(
+          getChannel().newCall(getGetServiceEndpointMethod(), getCallOptions()), request, responseObserver);
     }
   }
 
@@ -228,19 +220,15 @@ public final class MinaSshdGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdBlockingStub extends io.grpc.stub.AbstractStub<MinaSshdBlockingStub> {
-    private MinaSshdBlockingStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private MinaSshdBlockingStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class MinaSshdBlockingStub extends io.grpc.stub.AbstractBlockingStub<MinaSshdBlockingStub> {
+    private MinaSshdBlockingStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected MinaSshdBlockingStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected MinaSshdBlockingStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new MinaSshdBlockingStub(channel, callOptions);
     }
 
@@ -250,8 +238,8 @@ public final class MinaSshdGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.common.version.Version.VersionResponse getVersion(com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetVersionMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetVersionMethod(), getCallOptions(), request);
     }
 
     /**
@@ -260,8 +248,8 @@ public final class MinaSshdGrpc {
      * </pre>
      */
     public com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse getServiceEndpoint(com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest request) {
-      return blockingUnaryCall(
-          getChannel(), getGetServiceEndpointMethodHelper(), getCallOptions(), request);
+      return io.grpc.stub.ClientCalls.blockingUnaryCall(
+          getChannel(), getGetServiceEndpointMethod(), getCallOptions(), request);
     }
   }
 
@@ -271,19 +259,15 @@ public final class MinaSshdGrpc {
    * even if there is initially no content for these messages.
    * </pre>
    */
-  public static final class MinaSshdFutureStub extends io.grpc.stub.AbstractStub<MinaSshdFutureStub> {
-    private MinaSshdFutureStub(io.grpc.Channel channel) {
-      super(channel);
-    }
-
-    private MinaSshdFutureStub(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+  public static final class MinaSshdFutureStub extends io.grpc.stub.AbstractFutureStub<MinaSshdFutureStub> {
+    private MinaSshdFutureStub(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       super(channel, callOptions);
     }
 
     @java.lang.Override
-    protected MinaSshdFutureStub build(io.grpc.Channel channel,
-        io.grpc.CallOptions callOptions) {
+    protected MinaSshdFutureStub build(
+        io.grpc.Channel channel, io.grpc.CallOptions callOptions) {
       return new MinaSshdFutureStub(channel, callOptions);
     }
 
@@ -294,8 +278,8 @@ public final class MinaSshdGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.common.version.Version.VersionResponse> getVersion(
         com.cloudera.thunderhead.service.common.version.Version.VersionRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetVersionMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetVersionMethod(), getCallOptions()), request);
     }
 
     /**
@@ -305,8 +289,8 @@ public final class MinaSshdGrpc {
      */
     public com.google.common.util.concurrent.ListenableFuture<com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointResponse> getServiceEndpoint(
         com.cloudera.thunderhead.service.minasshd.MinaSshdProto.GetServiceEndpointRequest request) {
-      return futureUnaryCall(
-          getChannel().newCall(getGetServiceEndpointMethodHelper(), getCallOptions()), request);
+      return io.grpc.stub.ClientCalls.futureUnaryCall(
+          getChannel().newCall(getGetServiceEndpointMethod(), getCallOptions()), request);
     }
   }
 
@@ -399,8 +383,8 @@ public final class MinaSshdGrpc {
         if (result == null) {
           serviceDescriptor = result = io.grpc.ServiceDescriptor.newBuilder(SERVICE_NAME)
               .setSchemaDescriptor(new MinaSshdFileDescriptorSupplier())
-              .addMethod(getGetVersionMethodHelper())
-              .addMethod(getGetServiceEndpointMethodHelper())
+              .addMethod(getGetVersionMethod())
+              .addMethod(getGetServiceEndpointMethod())
               .build();
         }
       }

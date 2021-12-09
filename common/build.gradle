@@ -18,7 +18,10 @@ jar {
 dependencies {
   api project(':common-model')
 
-  api ("io.grpc:grpc-api:1.22.0")
+  api ("io.grpc:grpc-api:$grpcVersion")
+
+  implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion
+
   implementation group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'ch.qos.logback.contrib',                name: 'logback-json-classic',           version: logbackJsonClassicVersion
   implementation group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion

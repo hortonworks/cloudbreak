@@ -24,6 +24,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string dnsName = 1;</code>
+     * @return The dnsName.
      */
     java.lang.String getDnsName();
     /**
@@ -32,6 +33,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string dnsName = 1;</code>
+     * @return The bytes for dnsName.
      */
     com.google.protobuf.ByteString
         getDnsNameBytes();
@@ -42,6 +44,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string hostedZoneId = 2;</code>
+     * @return The hostedZoneId.
      */
     java.lang.String getHostedZoneId();
     /**
@@ -50,6 +53,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string hostedZoneId = 2;</code>
+     * @return The bytes for hostedZoneId.
      */
     com.google.protobuf.ByteString
         getHostedZoneIdBytes();
@@ -57,7 +61,7 @@ public final class PublicEndpointManagementProto {
   /**
    * Protobuf type {@code publicendpointmanagement.AWSElbDnsTarget}
    */
-  public  static final class AWSElbDnsTarget extends
+  public static final class AWSElbDnsTarget extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.AWSElbDnsTarget)
       AWSElbDnsTargetOrBuilder {
@@ -69,6 +73,13 @@ public final class PublicEndpointManagementProto {
     private AWSElbDnsTarget() {
       dnsName_ = "";
       hostedZoneId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AWSElbDnsTarget();
     }
 
     @java.lang.Override
@@ -84,7 +95,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -108,7 +118,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -147,7 +157,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string dnsName = 1;</code>
+     * @return The dnsName.
      */
+    @java.lang.Override
     public java.lang.String getDnsName() {
       java.lang.Object ref = dnsName_;
       if (ref instanceof java.lang.String) {
@@ -166,7 +178,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string dnsName = 1;</code>
+     * @return The bytes for dnsName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDnsNameBytes() {
       java.lang.Object ref = dnsName_;
@@ -189,7 +203,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string hostedZoneId = 2;</code>
+     * @return The hostedZoneId.
      */
+    @java.lang.Override
     public java.lang.String getHostedZoneId() {
       java.lang.Object ref = hostedZoneId_;
       if (ref instanceof java.lang.String) {
@@ -208,7 +224,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string hostedZoneId = 2;</code>
+     * @return The bytes for hostedZoneId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getHostedZoneIdBytes() {
       java.lang.Object ref = hostedZoneId_;
@@ -237,10 +255,10 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getDnsNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dnsName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, dnsName_);
       }
-      if (!getHostedZoneIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostedZoneId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, hostedZoneId_);
       }
       unknownFields.writeTo(output);
@@ -252,10 +270,10 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getDnsNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dnsName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, dnsName_);
       }
-      if (!getHostedZoneIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(hostedZoneId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, hostedZoneId_);
       }
       size += unknownFields.getSerializedSize();
@@ -273,13 +291,12 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget) obj;
 
-      boolean result = true;
-      result = result && getDnsName()
-          .equals(other.getDnsName());
-      result = result && getHostedZoneId()
-          .equals(other.getHostedZoneId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDnsName()
+          .equals(other.getDnsName())) return false;
+      if (!getHostedZoneId()
+          .equals(other.getHostedZoneId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -464,35 +481,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -550,6 +567,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string dnsName = 1;</code>
+       * @return The dnsName.
        */
       public java.lang.String getDnsName() {
         java.lang.Object ref = dnsName_;
@@ -569,6 +587,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string dnsName = 1;</code>
+       * @return The bytes for dnsName.
        */
       public com.google.protobuf.ByteString
           getDnsNameBytes() {
@@ -589,6 +608,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string dnsName = 1;</code>
+       * @param value The dnsName to set.
+       * @return This builder for chaining.
        */
       public Builder setDnsName(
           java.lang.String value) {
@@ -606,6 +627,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string dnsName = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDnsName() {
         
@@ -619,6 +641,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string dnsName = 1;</code>
+       * @param value The bytes for dnsName to set.
+       * @return This builder for chaining.
        */
       public Builder setDnsNameBytes(
           com.google.protobuf.ByteString value) {
@@ -639,6 +663,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string hostedZoneId = 2;</code>
+       * @return The hostedZoneId.
        */
       public java.lang.String getHostedZoneId() {
         java.lang.Object ref = hostedZoneId_;
@@ -658,6 +683,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string hostedZoneId = 2;</code>
+       * @return The bytes for hostedZoneId.
        */
       public com.google.protobuf.ByteString
           getHostedZoneIdBytes() {
@@ -678,6 +704,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string hostedZoneId = 2;</code>
+       * @param value The hostedZoneId to set.
+       * @return This builder for chaining.
        */
       public Builder setHostedZoneId(
           java.lang.String value) {
@@ -695,6 +723,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string hostedZoneId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearHostedZoneId() {
         
@@ -708,6 +737,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string hostedZoneId = 2;</code>
+       * @param value The bytes for hostedZoneId to set.
+       * @return This builder for chaining.
        */
       public Builder setHostedZoneIdBytes(
           com.google.protobuf.ByteString value) {
@@ -723,7 +754,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -779,19 +810,25 @@ public final class PublicEndpointManagementProto {
 
     /**
      * <code>repeated string IP = 1;</code>
+     * @return A list containing the iP.
      */
     java.util.List<java.lang.String>
         getIPList();
     /**
      * <code>repeated string IP = 1;</code>
+     * @return The count of iP.
      */
     int getIPCount();
     /**
      * <code>repeated string IP = 1;</code>
+     * @param index The index of the element to return.
+     * @return The iP at the given index.
      */
     java.lang.String getIP(int index);
     /**
      * <code>repeated string IP = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the iP at the given index.
      */
     com.google.protobuf.ByteString
         getIPBytes(int index);
@@ -799,7 +836,7 @@ public final class PublicEndpointManagementProto {
   /**
    * Protobuf type {@code publicendpointmanagement.IPs}
    */
-  public  static final class IPs extends
+  public static final class IPs extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.IPs)
       IPsOrBuilder {
@@ -810,6 +847,13 @@ public final class PublicEndpointManagementProto {
     }
     private IPs() {
       iP_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new IPs();
     }
 
     @java.lang.Override
@@ -838,7 +882,7 @@ public final class PublicEndpointManagementProto {
               break;
             case 10: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 iP_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -846,7 +890,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -860,7 +904,7 @@ public final class PublicEndpointManagementProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           iP_ = iP_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -884,6 +928,7 @@ public final class PublicEndpointManagementProto {
     private com.google.protobuf.LazyStringList iP_;
     /**
      * <code>repeated string IP = 1;</code>
+     * @return A list containing the iP.
      */
     public com.google.protobuf.ProtocolStringList
         getIPList() {
@@ -891,18 +936,23 @@ public final class PublicEndpointManagementProto {
     }
     /**
      * <code>repeated string IP = 1;</code>
+     * @return The count of iP.
      */
     public int getIPCount() {
       return iP_.size();
     }
     /**
      * <code>repeated string IP = 1;</code>
+     * @param index The index of the element to return.
+     * @return The iP at the given index.
      */
     public java.lang.String getIP(int index) {
       return iP_.get(index);
     }
     /**
      * <code>repeated string IP = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the iP at the given index.
      */
     public com.google.protobuf.ByteString
         getIPBytes(int index) {
@@ -958,11 +1008,10 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs) obj;
 
-      boolean result = true;
-      result = result && getIPList()
-          .equals(other.getIPList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getIPList()
+          .equals(other.getIPList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1138,7 +1187,7 @@ public final class PublicEndpointManagementProto {
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs buildPartial() {
         com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs(this);
         int from_bitField0_ = bitField0_;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           iP_ = iP_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
@@ -1149,35 +1198,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1233,13 +1282,14 @@ public final class PublicEndpointManagementProto {
 
       private com.google.protobuf.LazyStringList iP_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureIPIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           iP_ = new com.google.protobuf.LazyStringArrayList(iP_);
           bitField0_ |= 0x00000001;
          }
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @return A list containing the iP.
        */
       public com.google.protobuf.ProtocolStringList
           getIPList() {
@@ -1247,18 +1297,23 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @return The count of iP.
        */
       public int getIPCount() {
         return iP_.size();
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @param index The index of the element to return.
+       * @return The iP at the given index.
        */
       public java.lang.String getIP(int index) {
         return iP_.get(index);
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the iP at the given index.
        */
       public com.google.protobuf.ByteString
           getIPBytes(int index) {
@@ -1266,6 +1321,9 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The iP to set.
+       * @return This builder for chaining.
        */
       public Builder setIP(
           int index, java.lang.String value) {
@@ -1279,6 +1337,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @param value The iP to add.
+       * @return This builder for chaining.
        */
       public Builder addIP(
           java.lang.String value) {
@@ -1292,6 +1352,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @param values The iP to add.
+       * @return This builder for chaining.
        */
       public Builder addAllIP(
           java.lang.Iterable<java.lang.String> values) {
@@ -1303,6 +1365,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIP() {
         iP_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -1312,6 +1375,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string IP = 1;</code>
+       * @param value The bytes of the iP to add.
+       * @return This builder for chaining.
        */
       public Builder addIPBytes(
           com.google.protobuf.ByteString value) {
@@ -1327,7 +1392,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1388,6 +1453,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
+     * @return Whether the targetIPs field is set.
      */
     boolean hasTargetIPs();
     /**
@@ -1397,6 +1463,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
+     * @return The targetIPs.
      */
     com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs getTargetIPs();
     /**
@@ -1411,20 +1478,29 @@ public final class PublicEndpointManagementProto {
 
     /**
      * <code>string targetCname = 2;</code>
+     * @return Whether the targetCname field is set.
+     */
+    boolean hasTargetCname();
+    /**
+     * <code>string targetCname = 2;</code>
+     * @return The targetCname.
      */
     java.lang.String getTargetCname();
     /**
      * <code>string targetCname = 2;</code>
+     * @return The bytes for targetCname.
      */
     com.google.protobuf.ByteString
         getTargetCnameBytes();
 
     /**
      * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
+     * @return Whether the targetAWSELBDns field is set.
      */
     boolean hasTargetAWSELBDns();
     /**
      * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
+     * @return The targetAWSELBDns.
      */
     com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget getTargetAWSELBDns();
     /**
@@ -1437,7 +1513,7 @@ public final class PublicEndpointManagementProto {
   /**
    * Protobuf type {@code publicendpointmanagement.DnsTarget}
    */
-  public  static final class DnsTarget extends
+  public static final class DnsTarget extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.DnsTarget)
       DnsTargetOrBuilder {
@@ -1447,6 +1523,13 @@ public final class PublicEndpointManagementProto {
       super(builder);
     }
     private DnsTarget() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DnsTarget();
     }
 
     @java.lang.Override
@@ -1462,7 +1545,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1508,7 +1590,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1542,7 +1624,8 @@ public final class PublicEndpointManagementProto {
     private int targetCase_ = 0;
     private java.lang.Object target_;
     public enum TargetCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       TARGETIPS(1),
       TARGETCNAME(2),
       TARGETAWSELBDNS(3),
@@ -1552,6 +1635,8 @@ public final class PublicEndpointManagementProto {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -1587,7 +1672,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
+     * @return Whether the targetIPs field is set.
      */
+    @java.lang.Override
     public boolean hasTargetIPs() {
       return targetCase_ == 1;
     }
@@ -1598,7 +1685,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
+     * @return The targetIPs.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs getTargetIPs() {
       if (targetCase_ == 1) {
          return (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs) target_;
@@ -1613,6 +1702,7 @@ public final class PublicEndpointManagementProto {
      *
      * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPsOrBuilder getTargetIPsOrBuilder() {
       if (targetCase_ == 1) {
          return (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs) target_;
@@ -1623,6 +1713,14 @@ public final class PublicEndpointManagementProto {
     public static final int TARGETCNAME_FIELD_NUMBER = 2;
     /**
      * <code>string targetCname = 2;</code>
+     * @return Whether the targetCname field is set.
+     */
+    public boolean hasTargetCname() {
+      return targetCase_ == 2;
+    }
+    /**
+     * <code>string targetCname = 2;</code>
+     * @return The targetCname.
      */
     public java.lang.String getTargetCname() {
       java.lang.Object ref = "";
@@ -1643,6 +1741,7 @@ public final class PublicEndpointManagementProto {
     }
     /**
      * <code>string targetCname = 2;</code>
+     * @return The bytes for targetCname.
      */
     public com.google.protobuf.ByteString
         getTargetCnameBytes() {
@@ -1666,13 +1765,17 @@ public final class PublicEndpointManagementProto {
     public static final int TARGETAWSELBDNS_FIELD_NUMBER = 3;
     /**
      * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
+     * @return Whether the targetAWSELBDns field is set.
      */
+    @java.lang.Override
     public boolean hasTargetAWSELBDns() {
       return targetCase_ == 3;
     }
     /**
      * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
+     * @return The targetAWSELBDns.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget getTargetAWSELBDns() {
       if (targetCase_ == 3) {
          return (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget) target_;
@@ -1682,6 +1785,7 @@ public final class PublicEndpointManagementProto {
     /**
      * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTargetOrBuilder getTargetAWSELBDnsOrBuilder() {
       if (targetCase_ == 3) {
          return (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget) target_;
@@ -1747,28 +1851,25 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget) obj;
 
-      boolean result = true;
-      result = result && getTargetCase().equals(
-          other.getTargetCase());
-      if (!result) return false;
+      if (!getTargetCase().equals(other.getTargetCase())) return false;
       switch (targetCase_) {
         case 1:
-          result = result && getTargetIPs()
-              .equals(other.getTargetIPs());
+          if (!getTargetIPs()
+              .equals(other.getTargetIPs())) return false;
           break;
         case 2:
-          result = result && getTargetCname()
-              .equals(other.getTargetCname());
+          if (!getTargetCname()
+              .equals(other.getTargetCname())) return false;
           break;
         case 3:
-          result = result && getTargetAWSELBDns()
-              .equals(other.getTargetAWSELBDns());
+          if (!getTargetAWSELBDns()
+              .equals(other.getTargetAWSELBDns())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1979,35 +2080,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2093,7 +2194,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
+       * @return Whether the targetIPs field is set.
        */
+      @java.lang.Override
       public boolean hasTargetIPs() {
         return targetCase_ == 1;
       }
@@ -2104,7 +2207,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
+       * @return The targetIPs.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPs getTargetIPs() {
         if (targetIPsBuilder_ == null) {
           if (targetCase_ == 1) {
@@ -2228,6 +2333,7 @@ public final class PublicEndpointManagementProto {
        *
        * <code>.publicendpointmanagement.IPs targetIPs = 1;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.IPsOrBuilder getTargetIPsOrBuilder() {
         if ((targetCase_ == 1) && (targetIPsBuilder_ != null)) {
           return targetIPsBuilder_.getMessageOrBuilder();
@@ -2267,7 +2373,17 @@ public final class PublicEndpointManagementProto {
 
       /**
        * <code>string targetCname = 2;</code>
+       * @return Whether the targetCname field is set.
        */
+      @java.lang.Override
+      public boolean hasTargetCname() {
+        return targetCase_ == 2;
+      }
+      /**
+       * <code>string targetCname = 2;</code>
+       * @return The targetCname.
+       */
+      @java.lang.Override
       public java.lang.String getTargetCname() {
         java.lang.Object ref = "";
         if (targetCase_ == 2) {
@@ -2287,7 +2403,9 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string targetCname = 2;</code>
+       * @return The bytes for targetCname.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getTargetCnameBytes() {
         java.lang.Object ref = "";
@@ -2308,6 +2426,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string targetCname = 2;</code>
+       * @param value The targetCname to set.
+       * @return This builder for chaining.
        */
       public Builder setTargetCname(
           java.lang.String value) {
@@ -2321,6 +2441,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string targetCname = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTargetCname() {
         if (targetCase_ == 2) {
@@ -2332,6 +2453,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string targetCname = 2;</code>
+       * @param value The bytes for targetCname to set.
+       * @return This builder for chaining.
        */
       public Builder setTargetCnameBytes(
           com.google.protobuf.ByteString value) {
@@ -2349,13 +2472,17 @@ public final class PublicEndpointManagementProto {
           com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget.Builder, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTargetOrBuilder> targetAWSELBDnsBuilder_;
       /**
        * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
+       * @return Whether the targetAWSELBDns field is set.
        */
+      @java.lang.Override
       public boolean hasTargetAWSELBDns() {
         return targetCase_ == 3;
       }
       /**
        * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
+       * @return The targetAWSELBDns.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTarget getTargetAWSELBDns() {
         if (targetAWSELBDnsBuilder_ == null) {
           if (targetCase_ == 3) {
@@ -2449,6 +2576,7 @@ public final class PublicEndpointManagementProto {
       /**
        * <code>.publicendpointmanagement.AWSElbDnsTarget targetAWSELBDns = 3;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.AWSElbDnsTargetOrBuilder getTargetAWSELBDnsOrBuilder() {
         if ((targetCase_ == 3) && (targetAWSELBDnsBuilder_ != null)) {
           return targetAWSELBDnsBuilder_.getMessageOrBuilder();
@@ -2483,7 +2611,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2543,6 +2671,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -2551,6 +2680,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -2561,6 +2691,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The environment.
      */
     java.lang.String getEnvironment();
     /**
@@ -2569,6 +2700,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
     com.google.protobuf.ByteString
         getEnvironmentBytes();
@@ -2579,6 +2711,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The endpoint.
      */
     java.lang.String getEndpoint();
     /**
@@ -2587,6 +2720,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The bytes for endpoint.
      */
     com.google.protobuf.ByteString
         getEndpointBytes();
@@ -2597,6 +2731,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bool addWildcard = 4;</code>
+     * @return The addWildcard.
      */
     boolean getAddWildcard();
 
@@ -2606,6 +2741,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return Whether the dnsTarget field is set.
      */
     boolean hasDnsTarget();
     /**
@@ -2614,6 +2750,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return The dnsTarget.
      */
     com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget getDnsTarget();
     /**
@@ -2632,7 +2769,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.CreateDnsEntryRequest}
    */
-  public  static final class CreateDnsEntryRequest extends
+  public static final class CreateDnsEntryRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.CreateDnsEntryRequest)
       CreateDnsEntryRequestOrBuilder {
@@ -2645,7 +2782,13 @@ public final class PublicEndpointManagementProto {
       accountId_ = "";
       environment_ = "";
       endpoint_ = "";
-      addWildcard_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateDnsEntryRequest();
     }
 
     @java.lang.Override
@@ -2661,7 +2804,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2709,7 +2851,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2748,7 +2890,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -2767,7 +2911,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -2790,7 +2936,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The environment.
      */
+    @java.lang.Override
     public java.lang.String getEnvironment() {
       java.lang.Object ref = environment_;
       if (ref instanceof java.lang.String) {
@@ -2809,7 +2957,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentBytes() {
       java.lang.Object ref = environment_;
@@ -2832,7 +2982,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The endpoint.
      */
+    @java.lang.Override
     public java.lang.String getEndpoint() {
       java.lang.Object ref = endpoint_;
       if (ref instanceof java.lang.String) {
@@ -2851,7 +3003,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The bytes for endpoint.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndpointBytes() {
       java.lang.Object ref = endpoint_;
@@ -2874,7 +3028,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bool addWildcard = 4;</code>
+     * @return The addWildcard.
      */
+    @java.lang.Override
     public boolean getAddWildcard() {
       return addWildcard_;
     }
@@ -2887,7 +3043,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return Whether the dnsTarget field is set.
      */
+    @java.lang.Override
     public boolean hasDnsTarget() {
       return dnsTarget_ != null;
     }
@@ -2897,7 +3055,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return The dnsTarget.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget getDnsTarget() {
       return dnsTarget_ == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget.getDefaultInstance() : dnsTarget_;
     }
@@ -2908,6 +3068,7 @@ public final class PublicEndpointManagementProto {
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTargetOrBuilder getDnsTargetOrBuilder() {
       return getDnsTarget();
     }
@@ -2926,13 +3087,13 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environment_);
       }
-      if (!getEndpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpoint_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, endpoint_);
       }
       if (addWildcard_ != false) {
@@ -2950,13 +3111,13 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environment_);
       }
-      if (!getEndpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpoint_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, endpoint_);
       }
       if (addWildcard_ != false) {
@@ -2982,22 +3143,21 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironment()
-          .equals(other.getEnvironment());
-      result = result && getEndpoint()
-          .equals(other.getEndpoint());
-      result = result && (getAddWildcard()
-          == other.getAddWildcard());
-      result = result && (hasDnsTarget() == other.hasDnsTarget());
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironment()
+          .equals(other.getEnvironment())) return false;
+      if (!getEndpoint()
+          .equals(other.getEndpoint())) return false;
+      if (getAddWildcard()
+          != other.getAddWildcard()) return false;
+      if (hasDnsTarget() != other.hasDnsTarget()) return false;
       if (hasDnsTarget()) {
-        result = result && getDnsTarget()
-            .equals(other.getDnsTarget());
+        if (!getDnsTarget()
+            .equals(other.getDnsTarget())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3212,35 +3372,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3308,6 +3468,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -3327,6 +3488,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -3347,6 +3509,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -3364,6 +3528,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -3377,6 +3542,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -3397,6 +3564,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return The environment.
        */
       public java.lang.String getEnvironment() {
         java.lang.Object ref = environment_;
@@ -3416,6 +3584,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return The bytes for environment.
        */
       public com.google.protobuf.ByteString
           getEnvironmentBytes() {
@@ -3436,6 +3605,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @param value The environment to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironment(
           java.lang.String value) {
@@ -3453,6 +3624,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironment() {
         
@@ -3466,6 +3638,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @param value The bytes for environment to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentBytes(
           com.google.protobuf.ByteString value) {
@@ -3486,6 +3660,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return The endpoint.
        */
       public java.lang.String getEndpoint() {
         java.lang.Object ref = endpoint_;
@@ -3505,6 +3680,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return The bytes for endpoint.
        */
       public com.google.protobuf.ByteString
           getEndpointBytes() {
@@ -3525,6 +3701,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @param value The endpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpoint(
           java.lang.String value) {
@@ -3542,6 +3720,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndpoint() {
         
@@ -3555,6 +3734,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @param value The bytes for endpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpointBytes(
           com.google.protobuf.ByteString value) {
@@ -3575,7 +3756,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool addWildcard = 4;</code>
+       * @return The addWildcard.
        */
+      @java.lang.Override
       public boolean getAddWildcard() {
         return addWildcard_;
       }
@@ -3585,6 +3768,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool addWildcard = 4;</code>
+       * @param value The addWildcard to set.
+       * @return This builder for chaining.
        */
       public Builder setAddWildcard(boolean value) {
         
@@ -3598,6 +3783,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool addWildcard = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAddWildcard() {
         
@@ -3606,7 +3792,7 @@ public final class PublicEndpointManagementProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget dnsTarget_ = null;
+      private com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget dnsTarget_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget.Builder, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTargetOrBuilder> dnsTargetBuilder_;
       /**
@@ -3615,6 +3801,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+       * @return Whether the dnsTarget field is set.
        */
       public boolean hasDnsTarget() {
         return dnsTargetBuilder_ != null || dnsTarget_ != null;
@@ -3625,6 +3812,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+       * @return The dnsTarget.
        */
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget getDnsTarget() {
         if (dnsTargetBuilder_ == null) {
@@ -3761,7 +3949,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3822,7 +4010,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.CreateDnsEntryResponse}
    */
-  public  static final class CreateDnsEntryResponse extends
+  public static final class CreateDnsEntryResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.CreateDnsEntryResponse)
       CreateDnsEntryResponseOrBuilder {
@@ -3832,6 +4020,13 @@ public final class PublicEndpointManagementProto {
       super(builder);
     }
     private CreateDnsEntryResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateDnsEntryResponse();
     }
 
     @java.lang.Override
@@ -3858,7 +4053,7 @@ public final class PublicEndpointManagementProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3927,9 +4122,8 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateDnsEntryResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4108,35 +4302,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4181,7 +4375,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4241,6 +4435,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -4249,6 +4444,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -4259,6 +4455,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The environment.
      */
     java.lang.String getEnvironment();
     /**
@@ -4267,6 +4464,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
     com.google.protobuf.ByteString
         getEnvironmentBytes();
@@ -4277,6 +4475,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The endpoint.
      */
     java.lang.String getEndpoint();
     /**
@@ -4285,6 +4484,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The bytes for endpoint.
      */
     com.google.protobuf.ByteString
         getEndpointBytes();
@@ -4295,6 +4495,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bool removeWildcard = 4;</code>
+     * @return The removeWildcard.
      */
     boolean getRemoveWildcard();
 
@@ -4304,6 +4505,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return Whether the dnsTarget field is set.
      */
     boolean hasDnsTarget();
     /**
@@ -4312,6 +4514,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return The dnsTarget.
      */
     com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget getDnsTarget();
     /**
@@ -4330,7 +4533,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.DeleteDnsEntryRequest}
    */
-  public  static final class DeleteDnsEntryRequest extends
+  public static final class DeleteDnsEntryRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.DeleteDnsEntryRequest)
       DeleteDnsEntryRequestOrBuilder {
@@ -4343,7 +4546,13 @@ public final class PublicEndpointManagementProto {
       accountId_ = "";
       environment_ = "";
       endpoint_ = "";
-      removeWildcard_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteDnsEntryRequest();
     }
 
     @java.lang.Override
@@ -4359,7 +4568,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4407,7 +4615,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4446,7 +4654,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -4465,7 +4675,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -4488,7 +4700,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The environment.
      */
+    @java.lang.Override
     public java.lang.String getEnvironment() {
       java.lang.Object ref = environment_;
       if (ref instanceof java.lang.String) {
@@ -4507,7 +4721,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentBytes() {
       java.lang.Object ref = environment_;
@@ -4530,7 +4746,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The endpoint.
      */
+    @java.lang.Override
     public java.lang.String getEndpoint() {
       java.lang.Object ref = endpoint_;
       if (ref instanceof java.lang.String) {
@@ -4549,7 +4767,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The bytes for endpoint.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndpointBytes() {
       java.lang.Object ref = endpoint_;
@@ -4572,7 +4792,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bool removeWildcard = 4;</code>
+     * @return The removeWildcard.
      */
+    @java.lang.Override
     public boolean getRemoveWildcard() {
       return removeWildcard_;
     }
@@ -4585,7 +4807,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return Whether the dnsTarget field is set.
      */
+    @java.lang.Override
     public boolean hasDnsTarget() {
       return dnsTarget_ != null;
     }
@@ -4595,7 +4819,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+     * @return The dnsTarget.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget getDnsTarget() {
       return dnsTarget_ == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget.getDefaultInstance() : dnsTarget_;
     }
@@ -4606,6 +4832,7 @@ public final class PublicEndpointManagementProto {
      *
      * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTargetOrBuilder getDnsTargetOrBuilder() {
       return getDnsTarget();
     }
@@ -4624,13 +4851,13 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environment_);
       }
-      if (!getEndpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpoint_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, endpoint_);
       }
       if (removeWildcard_ != false) {
@@ -4648,13 +4875,13 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environment_);
       }
-      if (!getEndpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpoint_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, endpoint_);
       }
       if (removeWildcard_ != false) {
@@ -4680,22 +4907,21 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironment()
-          .equals(other.getEnvironment());
-      result = result && getEndpoint()
-          .equals(other.getEndpoint());
-      result = result && (getRemoveWildcard()
-          == other.getRemoveWildcard());
-      result = result && (hasDnsTarget() == other.hasDnsTarget());
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironment()
+          .equals(other.getEnvironment())) return false;
+      if (!getEndpoint()
+          .equals(other.getEndpoint())) return false;
+      if (getRemoveWildcard()
+          != other.getRemoveWildcard()) return false;
+      if (hasDnsTarget() != other.hasDnsTarget()) return false;
       if (hasDnsTarget()) {
-        result = result && getDnsTarget()
-            .equals(other.getDnsTarget());
+        if (!getDnsTarget()
+            .equals(other.getDnsTarget())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4910,35 +5136,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5006,6 +5232,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -5025,6 +5252,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -5045,6 +5273,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -5062,6 +5292,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -5075,6 +5306,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -5095,6 +5328,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return The environment.
        */
       public java.lang.String getEnvironment() {
         java.lang.Object ref = environment_;
@@ -5114,6 +5348,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return The bytes for environment.
        */
       public com.google.protobuf.ByteString
           getEnvironmentBytes() {
@@ -5134,6 +5369,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @param value The environment to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironment(
           java.lang.String value) {
@@ -5151,6 +5388,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironment() {
         
@@ -5164,6 +5402,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @param value The bytes for environment to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentBytes(
           com.google.protobuf.ByteString value) {
@@ -5184,6 +5424,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return The endpoint.
        */
       public java.lang.String getEndpoint() {
         java.lang.Object ref = endpoint_;
@@ -5203,6 +5444,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return The bytes for endpoint.
        */
       public com.google.protobuf.ByteString
           getEndpointBytes() {
@@ -5223,6 +5465,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @param value The endpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpoint(
           java.lang.String value) {
@@ -5240,6 +5484,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndpoint() {
         
@@ -5253,6 +5498,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @param value The bytes for endpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpointBytes(
           com.google.protobuf.ByteString value) {
@@ -5273,7 +5520,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool removeWildcard = 4;</code>
+       * @return The removeWildcard.
        */
+      @java.lang.Override
       public boolean getRemoveWildcard() {
         return removeWildcard_;
       }
@@ -5283,6 +5532,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool removeWildcard = 4;</code>
+       * @param value The removeWildcard to set.
+       * @return This builder for chaining.
        */
       public Builder setRemoveWildcard(boolean value) {
         
@@ -5296,6 +5547,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool removeWildcard = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRemoveWildcard() {
         
@@ -5304,7 +5556,7 @@ public final class PublicEndpointManagementProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget dnsTarget_ = null;
+      private com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget dnsTarget_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget.Builder, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTargetOrBuilder> dnsTargetBuilder_;
       /**
@@ -5313,6 +5565,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+       * @return Whether the dnsTarget field is set.
        */
       public boolean hasDnsTarget() {
         return dnsTargetBuilder_ != null || dnsTarget_ != null;
@@ -5323,6 +5576,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.DnsTarget dnsTarget = 5;</code>
+       * @return The dnsTarget.
        */
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DnsTarget getDnsTarget() {
         if (dnsTargetBuilder_ == null) {
@@ -5459,7 +5713,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5520,7 +5774,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.DeleteDnsEntryResponse}
    */
-  public  static final class DeleteDnsEntryResponse extends
+  public static final class DeleteDnsEntryResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.DeleteDnsEntryResponse)
       DeleteDnsEntryResponseOrBuilder {
@@ -5530,6 +5784,13 @@ public final class PublicEndpointManagementProto {
       super(builder);
     }
     private DeleteDnsEntryResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteDnsEntryResponse();
     }
 
     @java.lang.Override
@@ -5556,7 +5817,7 @@ public final class PublicEndpointManagementProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5625,9 +5886,8 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.DeleteDnsEntryResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5806,35 +6066,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5879,7 +6139,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5939,6 +6199,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -5947,6 +6208,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -5957,6 +6219,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The environment.
      */
     java.lang.String getEnvironment();
     /**
@@ -5965,6 +6228,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
     com.google.protobuf.ByteString
         getEnvironmentBytes();
@@ -5975,6 +6239,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The endpoint.
      */
     java.lang.String getEndpoint();
     /**
@@ -5983,6 +6248,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The bytes for endpoint.
      */
     com.google.protobuf.ByteString
         getEndpointBytes();
@@ -5993,6 +6259,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bool addWildcard = 4;</code>
+     * @return The addWildcard.
      */
     boolean getAddWildcard();
 
@@ -6003,6 +6270,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bytes csr = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The csr.
      */
     com.google.protobuf.ByteString getCsr();
   }
@@ -6013,7 +6281,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.CreateCertificateRequest}
    */
-  public  static final class CreateCertificateRequest extends
+  public static final class CreateCertificateRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.CreateCertificateRequest)
       CreateCertificateRequestOrBuilder {
@@ -6026,8 +6294,14 @@ public final class PublicEndpointManagementProto {
       accountId_ = "";
       environment_ = "";
       endpoint_ = "";
-      addWildcard_ = false;
       csr_ = com.google.protobuf.ByteString.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateCertificateRequest();
     }
 
     @java.lang.Override
@@ -6043,7 +6317,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6083,7 +6356,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6122,7 +6395,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -6141,7 +6416,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -6164,7 +6441,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The environment.
      */
+    @java.lang.Override
     public java.lang.String getEnvironment() {
       java.lang.Object ref = environment_;
       if (ref instanceof java.lang.String) {
@@ -6183,7 +6462,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environment = 2;</code>
+     * @return The bytes for environment.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentBytes() {
       java.lang.Object ref = environment_;
@@ -6206,7 +6487,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The endpoint.
      */
+    @java.lang.Override
     public java.lang.String getEndpoint() {
       java.lang.Object ref = endpoint_;
       if (ref instanceof java.lang.String) {
@@ -6225,7 +6508,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string endpoint = 3;</code>
+     * @return The bytes for endpoint.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEndpointBytes() {
       java.lang.Object ref = endpoint_;
@@ -6248,7 +6533,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bool addWildcard = 4;</code>
+     * @return The addWildcard.
      */
+    @java.lang.Override
     public boolean getAddWildcard() {
       return addWildcard_;
     }
@@ -6262,7 +6549,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bytes csr = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The csr.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getCsr() {
       return csr_;
     }
@@ -6281,13 +6570,13 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environment_);
       }
-      if (!getEndpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpoint_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, endpoint_);
       }
       if (addWildcard_ != false) {
@@ -6305,13 +6594,13 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environment_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environment_);
       }
-      if (!getEndpointBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(endpoint_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, endpoint_);
       }
       if (addWildcard_ != false) {
@@ -6337,19 +6626,18 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironment()
-          .equals(other.getEnvironment());
-      result = result && getEndpoint()
-          .equals(other.getEndpoint());
-      result = result && (getAddWildcard()
-          == other.getAddWildcard());
-      result = result && getCsr()
-          .equals(other.getCsr());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironment()
+          .equals(other.getEnvironment())) return false;
+      if (!getEndpoint()
+          .equals(other.getEndpoint())) return false;
+      if (getAddWildcard()
+          != other.getAddWildcard()) return false;
+      if (!getCsr()
+          .equals(other.getCsr())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6554,35 +6842,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6650,6 +6938,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -6669,6 +6958,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -6689,6 +6979,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -6706,6 +6998,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -6719,6 +7012,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -6739,6 +7034,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return The environment.
        */
       public java.lang.String getEnvironment() {
         java.lang.Object ref = environment_;
@@ -6758,6 +7054,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return The bytes for environment.
        */
       public com.google.protobuf.ByteString
           getEnvironmentBytes() {
@@ -6778,6 +7075,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @param value The environment to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironment(
           java.lang.String value) {
@@ -6795,6 +7094,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironment() {
         
@@ -6808,6 +7108,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environment = 2;</code>
+       * @param value The bytes for environment to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentBytes(
           com.google.protobuf.ByteString value) {
@@ -6828,6 +7130,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return The endpoint.
        */
       public java.lang.String getEndpoint() {
         java.lang.Object ref = endpoint_;
@@ -6847,6 +7150,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return The bytes for endpoint.
        */
       public com.google.protobuf.ByteString
           getEndpointBytes() {
@@ -6867,6 +7171,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @param value The endpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpoint(
           java.lang.String value) {
@@ -6884,6 +7190,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndpoint() {
         
@@ -6897,6 +7204,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string endpoint = 3;</code>
+       * @param value The bytes for endpoint to set.
+       * @return This builder for chaining.
        */
       public Builder setEndpointBytes(
           com.google.protobuf.ByteString value) {
@@ -6917,7 +7226,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool addWildcard = 4;</code>
+       * @return The addWildcard.
        */
+      @java.lang.Override
       public boolean getAddWildcard() {
         return addWildcard_;
       }
@@ -6927,6 +7238,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool addWildcard = 4;</code>
+       * @param value The addWildcard to set.
+       * @return This builder for chaining.
        */
       public Builder setAddWildcard(boolean value) {
         
@@ -6940,6 +7253,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bool addWildcard = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAddWildcard() {
         
@@ -6956,7 +7270,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bytes csr = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The csr.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getCsr() {
         return csr_;
       }
@@ -6967,6 +7283,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bytes csr = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The csr to set.
+       * @return This builder for chaining.
        */
       public Builder setCsr(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -6984,6 +7302,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bytes csr = 5 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCsr() {
         
@@ -6994,7 +7313,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7054,6 +7373,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string requestId = 1;</code>
+     * @return The requestId.
      */
     java.lang.String getRequestId();
     /**
@@ -7062,6 +7382,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string requestId = 1;</code>
+     * @return The bytes for requestId.
      */
     com.google.protobuf.ByteString
         getRequestIdBytes();
@@ -7073,7 +7394,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.CreateCertificateResponse}
    */
-  public  static final class CreateCertificateResponse extends
+  public static final class CreateCertificateResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.CreateCertificateResponse)
       CreateCertificateResponseOrBuilder {
@@ -7084,6 +7405,13 @@ public final class PublicEndpointManagementProto {
     }
     private CreateCertificateResponse() {
       requestId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateCertificateResponse();
     }
 
     @java.lang.Override
@@ -7099,7 +7427,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7117,7 +7444,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7156,7 +7483,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string requestId = 1;</code>
+     * @return The requestId.
      */
+    @java.lang.Override
     public java.lang.String getRequestId() {
       java.lang.Object ref = requestId_;
       if (ref instanceof java.lang.String) {
@@ -7175,7 +7504,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string requestId = 1;</code>
+     * @return The bytes for requestId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRequestIdBytes() {
       java.lang.Object ref = requestId_;
@@ -7204,7 +7535,7 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
       unknownFields.writeTo(output);
@@ -7216,7 +7547,7 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
       size += unknownFields.getSerializedSize();
@@ -7234,11 +7565,10 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CreateCertificateResponse) obj;
 
-      boolean result = true;
-      result = result && getRequestId()
-          .equals(other.getRequestId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getRequestId()
+          .equals(other.getRequestId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7422,35 +7752,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7504,6 +7834,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string requestId = 1;</code>
+       * @return The requestId.
        */
       public java.lang.String getRequestId() {
         java.lang.Object ref = requestId_;
@@ -7523,6 +7854,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string requestId = 1;</code>
+       * @return The bytes for requestId.
        */
       public com.google.protobuf.ByteString
           getRequestIdBytes() {
@@ -7543,6 +7875,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string requestId = 1;</code>
+       * @param value The requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestId(
           java.lang.String value) {
@@ -7560,6 +7894,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string requestId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRequestId() {
         
@@ -7573,6 +7908,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string requestId = 1;</code>
+       * @param value The bytes for requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestIdBytes(
           com.google.protobuf.ByteString value) {
@@ -7588,7 +7925,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7644,10 +7981,12 @@ public final class PublicEndpointManagementProto {
 
     /**
      * <code>string requestId = 1;</code>
+     * @return The requestId.
      */
     java.lang.String getRequestId();
     /**
      * <code>string requestId = 1;</code>
+     * @return The bytes for requestId.
      */
     com.google.protobuf.ByteString
         getRequestIdBytes();
@@ -7655,7 +7994,7 @@ public final class PublicEndpointManagementProto {
   /**
    * Protobuf type {@code publicendpointmanagement.PollCertificateCreationRequest}
    */
-  public  static final class PollCertificateCreationRequest extends
+  public static final class PollCertificateCreationRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.PollCertificateCreationRequest)
       PollCertificateCreationRequestOrBuilder {
@@ -7666,6 +8005,13 @@ public final class PublicEndpointManagementProto {
     }
     private PollCertificateCreationRequest() {
       requestId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PollCertificateCreationRequest();
     }
 
     @java.lang.Override
@@ -7681,7 +8027,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7699,7 +8044,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7734,7 +8079,9 @@ public final class PublicEndpointManagementProto {
     private volatile java.lang.Object requestId_;
     /**
      * <code>string requestId = 1;</code>
+     * @return The requestId.
      */
+    @java.lang.Override
     public java.lang.String getRequestId() {
       java.lang.Object ref = requestId_;
       if (ref instanceof java.lang.String) {
@@ -7749,7 +8096,9 @@ public final class PublicEndpointManagementProto {
     }
     /**
      * <code>string requestId = 1;</code>
+     * @return The bytes for requestId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRequestIdBytes() {
       java.lang.Object ref = requestId_;
@@ -7778,7 +8127,7 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestId_);
       }
       unknownFields.writeTo(output);
@@ -7790,7 +8139,7 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestId_);
       }
       size += unknownFields.getSerializedSize();
@@ -7808,11 +8157,10 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationRequest) obj;
 
-      boolean result = true;
-      result = result && getRequestId()
-          .equals(other.getRequestId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getRequestId()
+          .equals(other.getRequestId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7992,35 +8340,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8070,6 +8418,7 @@ public final class PublicEndpointManagementProto {
       private java.lang.Object requestId_ = "";
       /**
        * <code>string requestId = 1;</code>
+       * @return The requestId.
        */
       public java.lang.String getRequestId() {
         java.lang.Object ref = requestId_;
@@ -8085,6 +8434,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string requestId = 1;</code>
+       * @return The bytes for requestId.
        */
       public com.google.protobuf.ByteString
           getRequestIdBytes() {
@@ -8101,6 +8451,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string requestId = 1;</code>
+       * @param value The requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestId(
           java.lang.String value) {
@@ -8114,6 +8466,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string requestId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRequestId() {
         
@@ -8123,6 +8476,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string requestId = 1;</code>
+       * @param value The bytes for requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestIdBytes(
           com.google.protobuf.ByteString value) {
@@ -8138,7 +8493,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8194,39 +8549,49 @@ public final class PublicEndpointManagementProto {
 
     /**
      * <code>string status = 1;</code>
+     * @return The status.
      */
     java.lang.String getStatus();
     /**
      * <code>string status = 1;</code>
+     * @return The bytes for status.
      */
     com.google.protobuf.ByteString
         getStatusBytes();
 
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
     java.lang.String getError();
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
     com.google.protobuf.ByteString
         getErrorBytes();
 
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     java.util.List<java.lang.String>
         getCertificatesList();
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     int getCertificatesCount();
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     java.lang.String getCertificates(int index);
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     com.google.protobuf.ByteString
         getCertificatesBytes(int index);
@@ -8234,7 +8599,7 @@ public final class PublicEndpointManagementProto {
   /**
    * Protobuf type {@code publicendpointmanagement.PollCertificateCreationResponse}
    */
-  public  static final class PollCertificateCreationResponse extends
+  public static final class PollCertificateCreationResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.PollCertificateCreationResponse)
       PollCertificateCreationResponseOrBuilder {
@@ -8247,6 +8612,13 @@ public final class PublicEndpointManagementProto {
       status_ = "";
       error_ = "";
       certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PollCertificateCreationResponse();
     }
 
     @java.lang.Override
@@ -8287,15 +8659,15 @@ public final class PublicEndpointManagementProto {
             }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 certificates_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               certificates_.add(s);
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8309,7 +8681,7 @@ public final class PublicEndpointManagementProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -8329,12 +8701,13 @@ public final class PublicEndpointManagementProto {
               com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int STATUS_FIELD_NUMBER = 1;
     private volatile java.lang.Object status_;
     /**
      * <code>string status = 1;</code>
+     * @return The status.
      */
+    @java.lang.Override
     public java.lang.String getStatus() {
       java.lang.Object ref = status_;
       if (ref instanceof java.lang.String) {
@@ -8349,7 +8722,9 @@ public final class PublicEndpointManagementProto {
     }
     /**
      * <code>string status = 1;</code>
+     * @return The bytes for status.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStatusBytes() {
       java.lang.Object ref = status_;
@@ -8368,7 +8743,9 @@ public final class PublicEndpointManagementProto {
     private volatile java.lang.Object error_;
     /**
      * <code>string error = 2;</code>
+     * @return The error.
      */
+    @java.lang.Override
     public java.lang.String getError() {
       java.lang.Object ref = error_;
       if (ref instanceof java.lang.String) {
@@ -8383,7 +8760,9 @@ public final class PublicEndpointManagementProto {
     }
     /**
      * <code>string error = 2;</code>
+     * @return The bytes for error.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorBytes() {
       java.lang.Object ref = error_;
@@ -8402,6 +8781,7 @@ public final class PublicEndpointManagementProto {
     private com.google.protobuf.LazyStringList certificates_;
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     public com.google.protobuf.ProtocolStringList
         getCertificatesList() {
@@ -8409,18 +8789,23 @@ public final class PublicEndpointManagementProto {
     }
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     public int getCertificatesCount() {
       return certificates_.size();
     }
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     public java.lang.String getCertificates(int index) {
       return certificates_.get(index);
     }
     /**
      * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     public com.google.protobuf.ByteString
         getCertificatesBytes(int index) {
@@ -8441,10 +8826,10 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getStatusBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, status_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, error_);
       }
       for (int i = 0; i < certificates_.size(); i++) {
@@ -8459,10 +8844,10 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getStatusBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(status_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, status_);
       }
-      if (!getErrorBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(error_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, error_);
       }
       {
@@ -8488,15 +8873,14 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse) obj;
 
-      boolean result = true;
-      result = result && getStatus()
-          .equals(other.getStatus());
-      result = result && getError()
-          .equals(other.getError());
-      result = result && getCertificatesList()
-          .equals(other.getCertificatesList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getStatus()
+          .equals(other.getStatus())) return false;
+      if (!getError()
+          .equals(other.getError())) return false;
+      if (!getCertificatesList()
+          .equals(other.getCertificatesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8652,7 +9036,7 @@ public final class PublicEndpointManagementProto {
         error_ = "";
 
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -8680,50 +9064,48 @@ public final class PublicEndpointManagementProto {
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse buildPartial() {
         com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateCreationResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.status_ = status_;
         result.error_ = error_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.certificates_ = certificates_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8748,7 +9130,7 @@ public final class PublicEndpointManagementProto {
         if (!other.certificates_.isEmpty()) {
           if (certificates_.isEmpty()) {
             certificates_ = other.certificates_;
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureCertificatesIsMutable();
             certificates_.addAll(other.certificates_);
@@ -8788,6 +9170,7 @@ public final class PublicEndpointManagementProto {
       private java.lang.Object status_ = "";
       /**
        * <code>string status = 1;</code>
+       * @return The status.
        */
       public java.lang.String getStatus() {
         java.lang.Object ref = status_;
@@ -8803,6 +9186,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string status = 1;</code>
+       * @return The bytes for status.
        */
       public com.google.protobuf.ByteString
           getStatusBytes() {
@@ -8819,6 +9203,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatus(
           java.lang.String value) {
@@ -8832,6 +9218,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string status = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStatus() {
         
@@ -8841,6 +9228,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string status = 1;</code>
+       * @param value The bytes for status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusBytes(
           com.google.protobuf.ByteString value) {
@@ -8857,6 +9246,7 @@ public final class PublicEndpointManagementProto {
       private java.lang.Object error_ = "";
       /**
        * <code>string error = 2;</code>
+       * @return The error.
        */
       public java.lang.String getError() {
         java.lang.Object ref = error_;
@@ -8872,6 +9262,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string error = 2;</code>
+       * @return The bytes for error.
        */
       public com.google.protobuf.ByteString
           getErrorBytes() {
@@ -8888,6 +9279,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The error to set.
+       * @return This builder for chaining.
        */
       public Builder setError(
           java.lang.String value) {
@@ -8901,6 +9294,7 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string error = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearError() {
         
@@ -8910,6 +9304,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>string error = 2;</code>
+       * @param value The bytes for error to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorBytes(
           com.google.protobuf.ByteString value) {
@@ -8925,13 +9321,14 @@ public final class PublicEndpointManagementProto {
 
       private com.google.protobuf.LazyStringList certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureCertificatesIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           certificates_ = new com.google.protobuf.LazyStringArrayList(certificates_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return A list containing the certificates.
        */
       public com.google.protobuf.ProtocolStringList
           getCertificatesList() {
@@ -8939,18 +9336,23 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The count of certificates.
        */
       public int getCertificatesCount() {
         return certificates_.size();
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the element to return.
+       * @return The certificates at the given index.
        */
       public java.lang.String getCertificates(int index) {
         return certificates_.get(index);
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the certificates at the given index.
        */
       public com.google.protobuf.ByteString
           getCertificatesBytes(int index) {
@@ -8958,6 +9360,9 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index to set the value at.
+       * @param value The certificates to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificates(
           int index, java.lang.String value) {
@@ -8971,6 +9376,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificates(
           java.lang.String value) {
@@ -8984,6 +9391,8 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param values The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addAllCertificates(
           java.lang.Iterable<java.lang.String> values) {
@@ -8995,15 +9404,18 @@ public final class PublicEndpointManagementProto {
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCertificates() {
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
       /**
        * <code>repeated string certificates = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The bytes of the certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificatesBytes(
           com.google.protobuf.ByteString value) {
@@ -9019,7 +9431,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9079,6 +9491,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -9087,6 +9500,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -9099,6 +9513,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The environmentName.
      */
     java.lang.String getEnvironmentName();
     /**
@@ -9109,6 +9524,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The bytes for environmentName.
      */
     com.google.protobuf.ByteString
         getEnvironmentNameBytes();
@@ -9121,6 +9537,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @return A list containing the subdomains.
      */
     java.util.List<java.lang.String>
         getSubdomainsList();
@@ -9132,6 +9549,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @return The count of subdomains.
      */
     int getSubdomainsCount();
     /**
@@ -9142,6 +9560,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @param index The index of the element to return.
+     * @return The subdomains at the given index.
      */
     java.lang.String getSubdomains(int index);
     /**
@@ -9152,6 +9572,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the subdomains at the given index.
      */
     com.google.protobuf.ByteString
         getSubdomainsBytes(int index);
@@ -9163,7 +9585,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.GenerateManagedDomainNamesRequest}
    */
-  public  static final class GenerateManagedDomainNamesRequest extends
+  public static final class GenerateManagedDomainNamesRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.GenerateManagedDomainNamesRequest)
       GenerateManagedDomainNamesRequestOrBuilder {
@@ -9176,6 +9598,13 @@ public final class PublicEndpointManagementProto {
       accountId_ = "";
       environmentName_ = "";
       subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GenerateManagedDomainNamesRequest();
     }
 
     @java.lang.Override
@@ -9216,15 +9645,15 @@ public final class PublicEndpointManagementProto {
             }
             case 26: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 subdomains_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               subdomains_.add(s);
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9238,7 +9667,7 @@ public final class PublicEndpointManagementProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           subdomains_ = subdomains_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -9258,7 +9687,6 @@ public final class PublicEndpointManagementProto {
               com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.class, com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ACCOUNTID_FIELD_NUMBER = 1;
     private volatile java.lang.Object accountId_;
     /**
@@ -9267,7 +9695,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -9286,7 +9716,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -9311,7 +9743,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The environmentName.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentName() {
       java.lang.Object ref = environmentName_;
       if (ref instanceof java.lang.String) {
@@ -9332,7 +9766,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The bytes for environmentName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentNameBytes() {
       java.lang.Object ref = environmentName_;
@@ -9357,6 +9793,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @return A list containing the subdomains.
      */
     public com.google.protobuf.ProtocolStringList
         getSubdomainsList() {
@@ -9370,6 +9807,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @return The count of subdomains.
      */
     public int getSubdomainsCount() {
       return subdomains_.size();
@@ -9382,6 +9820,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @param index The index of the element to return.
+     * @return The subdomains at the given index.
      */
     public java.lang.String getSubdomains(int index) {
       return subdomains_.get(index);
@@ -9394,6 +9834,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string subdomains = 3;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the subdomains at the given index.
      */
     public com.google.protobuf.ByteString
         getSubdomainsBytes(int index) {
@@ -9414,10 +9856,10 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentName_);
       }
       for (int i = 0; i < subdomains_.size(); i++) {
@@ -9432,10 +9874,10 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentName_);
       }
       {
@@ -9461,15 +9903,14 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironmentName()
-          .equals(other.getEnvironmentName());
-      result = result && getSubdomainsList()
-          .equals(other.getSubdomainsList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironmentName()
+          .equals(other.getEnvironmentName())) return false;
+      if (!getSubdomainsList()
+          .equals(other.getSubdomainsList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9629,7 +10070,7 @@ public final class PublicEndpointManagementProto {
         environmentName_ = "";
 
         subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -9657,50 +10098,48 @@ public final class PublicEndpointManagementProto {
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest buildPartial() {
         com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.accountId_ = accountId_;
         result.environmentName_ = environmentName_;
-        if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           subdomains_ = subdomains_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000004);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.subdomains_ = subdomains_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9725,7 +10164,7 @@ public final class PublicEndpointManagementProto {
         if (!other.subdomains_.isEmpty()) {
           if (subdomains_.isEmpty()) {
             subdomains_ = other.subdomains_;
-            bitField0_ = (bitField0_ & ~0x00000004);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureSubdomainsIsMutable();
             subdomains_.addAll(other.subdomains_);
@@ -9769,6 +10208,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -9788,6 +10228,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -9808,6 +10249,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -9825,6 +10268,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -9838,6 +10282,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -9860,6 +10306,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @return The environmentName.
        */
       public java.lang.String getEnvironmentName() {
         java.lang.Object ref = environmentName_;
@@ -9881,6 +10328,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @return The bytes for environmentName.
        */
       public com.google.protobuf.ByteString
           getEnvironmentNameBytes() {
@@ -9903,6 +10351,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @param value The environmentName to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentName(
           java.lang.String value) {
@@ -9922,6 +10372,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentName() {
         
@@ -9937,6 +10388,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @param value The bytes for environmentName to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameBytes(
           com.google.protobuf.ByteString value) {
@@ -9952,9 +10405,9 @@ public final class PublicEndpointManagementProto {
 
       private com.google.protobuf.LazyStringList subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureSubdomainsIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           subdomains_ = new com.google.protobuf.LazyStringArrayList(subdomains_);
-          bitField0_ |= 0x00000004;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -9965,6 +10418,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @return A list containing the subdomains.
        */
       public com.google.protobuf.ProtocolStringList
           getSubdomainsList() {
@@ -9978,6 +10432,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @return The count of subdomains.
        */
       public int getSubdomainsCount() {
         return subdomains_.size();
@@ -9990,6 +10445,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @param index The index of the element to return.
+       * @return The subdomains at the given index.
        */
       public java.lang.String getSubdomains(int index) {
         return subdomains_.get(index);
@@ -10002,6 +10459,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the subdomains at the given index.
        */
       public com.google.protobuf.ByteString
           getSubdomainsBytes(int index) {
@@ -10015,6 +10474,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @param index The index to set the value at.
+       * @param value The subdomains to set.
+       * @return This builder for chaining.
        */
       public Builder setSubdomains(
           int index, java.lang.String value) {
@@ -10034,6 +10496,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @param value The subdomains to add.
+       * @return This builder for chaining.
        */
       public Builder addSubdomains(
           java.lang.String value) {
@@ -10053,6 +10517,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @param values The subdomains to add.
+       * @return This builder for chaining.
        */
       public Builder addAllSubdomains(
           java.lang.Iterable<java.lang.String> values) {
@@ -10070,10 +10536,11 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSubdomains() {
         subdomains_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000004);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -10085,6 +10552,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string subdomains = 3;</code>
+       * @param value The bytes of the subdomains to add.
+       * @return This builder for chaining.
        */
       public Builder addSubdomainsBytes(
           com.google.protobuf.ByteString value) {
@@ -10100,7 +10569,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10220,7 +10689,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.GenerateManagedDomainNamesResponse}
    */
-  public  static final class GenerateManagedDomainNamesResponse extends
+  public static final class GenerateManagedDomainNamesResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.GenerateManagedDomainNamesResponse)
       GenerateManagedDomainNamesResponseOrBuilder {
@@ -10230,6 +10699,13 @@ public final class PublicEndpointManagementProto {
       super(builder);
     }
     private GenerateManagedDomainNamesResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GenerateManagedDomainNamesResponse();
     }
 
     @java.lang.Override
@@ -10257,7 +10733,7 @@ public final class PublicEndpointManagementProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 domains_ = com.google.protobuf.MapField.newMapField(
                     DomainsDefaultEntryHolder.defaultEntry);
                 mutable_bitField0_ |= 0x00000001;
@@ -10270,7 +10746,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10348,14 +10824,16 @@ public final class PublicEndpointManagementProto {
      * <code>map&lt;string, string&gt; domains = 1;</code>
      */
 
+    @java.lang.Override
     public boolean containsDomains(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetDomains().getMap().containsKey(key);
     }
     /**
      * Use {@link #getDomainsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getDomains() {
       return getDomainsMap();
@@ -10368,6 +10846,7 @@ public final class PublicEndpointManagementProto {
      *
      * <code>map&lt;string, string&gt; domains = 1;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getDomainsMap() {
       return internalGetDomains().getMap();
@@ -10380,11 +10859,12 @@ public final class PublicEndpointManagementProto {
      *
      * <code>map&lt;string, string&gt; domains = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getDomainsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetDomains().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -10397,10 +10877,11 @@ public final class PublicEndpointManagementProto {
      *
      * <code>map&lt;string, string&gt; domains = 1;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getDomainsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetDomains().getMap();
       if (!map.containsKey(key)) {
@@ -10463,11 +10944,10 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse) obj;
 
-      boolean result = true;
-      result = result && internalGetDomains().equals(
-          other.internalGetDomains());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!internalGetDomains().equals(
+          other.internalGetDomains())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10676,35 +11156,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10785,14 +11265,16 @@ public final class PublicEndpointManagementProto {
        * <code>map&lt;string, string&gt; domains = 1;</code>
        */
 
+      @java.lang.Override
       public boolean containsDomains(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetDomains().getMap().containsKey(key);
       }
       /**
        * Use {@link #getDomainsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getDomains() {
         return getDomainsMap();
@@ -10805,6 +11287,7 @@ public final class PublicEndpointManagementProto {
        *
        * <code>map&lt;string, string&gt; domains = 1;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getDomainsMap() {
         return internalGetDomains().getMap();
@@ -10817,11 +11300,12 @@ public final class PublicEndpointManagementProto {
        *
        * <code>map&lt;string, string&gt; domains = 1;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getDomainsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetDomains().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -10834,10 +11318,11 @@ public final class PublicEndpointManagementProto {
        *
        * <code>map&lt;string, string&gt; domains = 1;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getDomainsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetDomains().getMap();
         if (!map.containsKey(key)) {
@@ -10862,7 +11347,7 @@ public final class PublicEndpointManagementProto {
 
       public Builder removeDomains(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableDomains().getMutableMap()
             .remove(key);
         return this;
@@ -10886,8 +11371,11 @@ public final class PublicEndpointManagementProto {
       public Builder putDomains(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableDomains().getMutableMap()
             .put(key, value);
         return this;
@@ -10910,7 +11398,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10970,6 +11458,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -10978,6 +11467,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -10990,6 +11480,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The environmentName.
      */
     java.lang.String getEnvironmentName();
     /**
@@ -11000,6 +11491,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The bytes for environmentName.
      */
     com.google.protobuf.ByteString
         getEnvironmentNameBytes();
@@ -11013,6 +11505,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The csr.
      */
     com.google.protobuf.ByteString getCsr();
   }
@@ -11023,7 +11516,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.CertificateSigningRequest}
    */
-  public  static final class CertificateSigningRequest extends
+  public static final class CertificateSigningRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.CertificateSigningRequest)
       CertificateSigningRequestOrBuilder {
@@ -11039,6 +11532,13 @@ public final class PublicEndpointManagementProto {
     }
 
     @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CertificateSigningRequest();
+    }
+
+    @java.lang.Override
     public final com.google.protobuf.UnknownFieldSet
     getUnknownFields() {
       return this.unknownFields;
@@ -11051,7 +11551,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -11080,7 +11579,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11119,7 +11618,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -11138,7 +11639,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -11163,7 +11666,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The environmentName.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentName() {
       java.lang.Object ref = environmentName_;
       if (ref instanceof java.lang.String) {
@@ -11184,7 +11689,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string environmentName = 2;</code>
+     * @return The bytes for environmentName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentNameBytes() {
       java.lang.Object ref = environmentName_;
@@ -11210,7 +11717,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The csr.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString getCsr() {
       return csr_;
     }
@@ -11229,10 +11738,10 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentName_);
       }
       if (!csr_.isEmpty()) {
@@ -11247,10 +11756,10 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentName_);
       }
       if (!csr_.isEmpty()) {
@@ -11272,15 +11781,14 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironmentName()
-          .equals(other.getEnvironmentName());
-      result = result && getCsr()
-          .equals(other.getCsr());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironmentName()
+          .equals(other.getEnvironmentName())) return false;
+      if (!getCsr()
+          .equals(other.getCsr())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -11474,35 +11982,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11563,6 +12071,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -11582,6 +12091,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -11602,6 +12112,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -11619,6 +12131,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -11632,6 +12145,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -11654,6 +12169,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @return The environmentName.
        */
       public java.lang.String getEnvironmentName() {
         java.lang.Object ref = environmentName_;
@@ -11675,6 +12191,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @return The bytes for environmentName.
        */
       public com.google.protobuf.ByteString
           getEnvironmentNameBytes() {
@@ -11697,6 +12214,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @param value The environmentName to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentName(
           java.lang.String value) {
@@ -11716,6 +12235,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentName() {
         
@@ -11731,6 +12251,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string environmentName = 2;</code>
+       * @param value The bytes for environmentName to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameBytes(
           com.google.protobuf.ByteString value) {
@@ -11754,7 +12276,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The csr.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString getCsr() {
         return csr_;
       }
@@ -11767,6 +12291,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The csr to set.
+       * @return This builder for chaining.
        */
       public Builder setCsr(com.google.protobuf.ByteString value) {
         if (value == null) {
@@ -11786,6 +12312,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>bytes csr = 3 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCsr() {
         
@@ -11796,7 +12323,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -11856,6 +12383,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The workflowId.
      */
     java.lang.String getWorkflowId();
     /**
@@ -11864,6 +12392,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The bytes for workflowId.
      */
     com.google.protobuf.ByteString
         getWorkflowIdBytes();
@@ -11875,7 +12404,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.CertificateSigningResponse}
    */
-  public  static final class CertificateSigningResponse extends
+  public static final class CertificateSigningResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.CertificateSigningResponse)
       CertificateSigningResponseOrBuilder {
@@ -11886,6 +12415,13 @@ public final class PublicEndpointManagementProto {
     }
     private CertificateSigningResponse() {
       workflowId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CertificateSigningResponse();
     }
 
     @java.lang.Override
@@ -11901,7 +12437,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -11919,7 +12454,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11958,7 +12493,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The workflowId.
      */
+    @java.lang.Override
     public java.lang.String getWorkflowId() {
       java.lang.Object ref = workflowId_;
       if (ref instanceof java.lang.String) {
@@ -11977,7 +12514,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The bytes for workflowId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getWorkflowIdBytes() {
       java.lang.Object ref = workflowId_;
@@ -12006,7 +12545,7 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getWorkflowIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workflowId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, workflowId_);
       }
       unknownFields.writeTo(output);
@@ -12018,7 +12557,7 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getWorkflowIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workflowId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, workflowId_);
       }
       size += unknownFields.getSerializedSize();
@@ -12036,11 +12575,10 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.CertificateSigningResponse) obj;
 
-      boolean result = true;
-      result = result && getWorkflowId()
-          .equals(other.getWorkflowId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getWorkflowId()
+          .equals(other.getWorkflowId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12224,35 +12762,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12306,6 +12844,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @return The workflowId.
        */
       public java.lang.String getWorkflowId() {
         java.lang.Object ref = workflowId_;
@@ -12325,6 +12864,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @return The bytes for workflowId.
        */
       public com.google.protobuf.ByteString
           getWorkflowIdBytes() {
@@ -12345,6 +12885,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @param value The workflowId to set.
+       * @return This builder for chaining.
        */
       public Builder setWorkflowId(
           java.lang.String value) {
@@ -12362,6 +12904,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWorkflowId() {
         
@@ -12375,6 +12918,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @param value The bytes for workflowId to set.
+       * @return This builder for chaining.
        */
       public Builder setWorkflowIdBytes(
           com.google.protobuf.ByteString value) {
@@ -12390,7 +12935,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12451,6 +12996,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The workflowId.
      */
     java.lang.String getWorkflowId();
     /**
@@ -12460,6 +13006,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The bytes for workflowId.
      */
     com.google.protobuf.ByteString
         getWorkflowIdBytes();
@@ -12471,7 +13018,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.PollCertificateSigningRequest}
    */
-  public  static final class PollCertificateSigningRequest extends
+  public static final class PollCertificateSigningRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.PollCertificateSigningRequest)
       PollCertificateSigningRequestOrBuilder {
@@ -12482,6 +13029,13 @@ public final class PublicEndpointManagementProto {
     }
     private PollCertificateSigningRequest() {
       workflowId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PollCertificateSigningRequest();
     }
 
     @java.lang.Override
@@ -12497,7 +13051,6 @@ public final class PublicEndpointManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -12515,7 +13068,7 @@ public final class PublicEndpointManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -12555,7 +13108,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The workflowId.
      */
+    @java.lang.Override
     public java.lang.String getWorkflowId() {
       java.lang.Object ref = workflowId_;
       if (ref instanceof java.lang.String) {
@@ -12575,7 +13130,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>string workflowId = 1;</code>
+     * @return The bytes for workflowId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getWorkflowIdBytes() {
       java.lang.Object ref = workflowId_;
@@ -12604,7 +13161,7 @@ public final class PublicEndpointManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getWorkflowIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workflowId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, workflowId_);
       }
       unknownFields.writeTo(output);
@@ -12616,7 +13173,7 @@ public final class PublicEndpointManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getWorkflowIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(workflowId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, workflowId_);
       }
       size += unknownFields.getSerializedSize();
@@ -12634,11 +13191,10 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest) obj;
 
-      boolean result = true;
-      result = result && getWorkflowId()
-          .equals(other.getWorkflowId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getWorkflowId()
+          .equals(other.getWorkflowId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12822,35 +13378,35 @@ public final class PublicEndpointManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -12905,6 +13461,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @return The workflowId.
        */
       public java.lang.String getWorkflowId() {
         java.lang.Object ref = workflowId_;
@@ -12925,6 +13482,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @return The bytes for workflowId.
        */
       public com.google.protobuf.ByteString
           getWorkflowIdBytes() {
@@ -12946,6 +13504,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @param value The workflowId to set.
+       * @return This builder for chaining.
        */
       public Builder setWorkflowId(
           java.lang.String value) {
@@ -12964,6 +13524,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearWorkflowId() {
         
@@ -12978,6 +13539,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>string workflowId = 1;</code>
+       * @param value The bytes for workflowId to set.
+       * @return This builder for chaining.
        */
       public Builder setWorkflowIdBytes(
           com.google.protobuf.ByteString value) {
@@ -12993,7 +13556,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -13053,6 +13616,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+     * @return The enum numeric value on the wire for status.
      */
     int getStatusValue();
     /**
@@ -13061,6 +13625,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+     * @return The status.
      */
     com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus getStatus();
 
@@ -13074,6 +13639,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     java.util.List<java.lang.String>
         getCertificatesList();
@@ -13087,6 +13653,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     int getCertificatesCount();
     /**
@@ -13099,6 +13666,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     java.lang.String getCertificates(int index);
     /**
@@ -13111,6 +13680,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     com.google.protobuf.ByteString
         getCertificatesBytes(int index);
@@ -13122,7 +13693,7 @@ public final class PublicEndpointManagementProto {
    *
    * Protobuf type {@code publicendpointmanagement.PollCertificateSigningResponse}
    */
-  public  static final class PollCertificateSigningResponse extends
+  public static final class PollCertificateSigningResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:publicendpointmanagement.PollCertificateSigningResponse)
       PollCertificateSigningResponseOrBuilder {
@@ -13134,6 +13705,13 @@ public final class PublicEndpointManagementProto {
     private PollCertificateSigningResponse() {
       status_ = 0;
       certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new PollCertificateSigningResponse();
     }
 
     @java.lang.Override
@@ -13168,15 +13746,15 @@ public final class PublicEndpointManagementProto {
             }
             case 18: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 certificates_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               certificates_.add(s);
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -13190,7 +13768,7 @@ public final class PublicEndpointManagementProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -13266,6 +13844,8 @@ public final class PublicEndpointManagementProto {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -13273,6 +13853,10 @@ public final class PublicEndpointManagementProto {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static SigningStatus forNumber(int value) {
         switch (value) {
           case 0: return UNSET;
@@ -13297,6 +13881,10 @@ public final class PublicEndpointManagementProto {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -13331,7 +13919,6 @@ public final class PublicEndpointManagementProto {
       // @@protoc_insertion_point(enum_scope:publicendpointmanagement.PollCertificateSigningResponse.SigningStatus)
     }
 
-    private int bitField0_;
     public static final int STATUS_FIELD_NUMBER = 1;
     private int status_;
     /**
@@ -13340,8 +13927,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+     * @return The enum numeric value on the wire for status.
      */
-    public int getStatusValue() {
+    @java.lang.Override public int getStatusValue() {
       return status_;
     }
     /**
@@ -13350,8 +13938,9 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+     * @return The status.
      */
-    public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus getStatus() {
+    @java.lang.Override public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus getStatus() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.valueOf(status_);
       return result == null ? com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.UNRECOGNIZED : result;
@@ -13369,6 +13958,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return A list containing the certificates.
      */
     public com.google.protobuf.ProtocolStringList
         getCertificatesList() {
@@ -13384,6 +13974,7 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @return The count of certificates.
      */
     public int getCertificatesCount() {
       return certificates_.size();
@@ -13398,6 +13989,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the element to return.
+     * @return The certificates at the given index.
      */
     public java.lang.String getCertificates(int index) {
       return certificates_.get(index);
@@ -13412,6 +14005,8 @@ public final class PublicEndpointManagementProto {
      * </pre>
      *
      * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the certificates at the given index.
      */
     public com.google.protobuf.ByteString
         getCertificatesBytes(int index) {
@@ -13474,12 +14069,11 @@ public final class PublicEndpointManagementProto {
       }
       com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse other = (com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse) obj;
 
-      boolean result = true;
-      result = result && status_ == other.status_;
-      result = result && getCertificatesList()
-          .equals(other.getCertificatesList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (status_ != other.status_) return false;
+      if (!getCertificatesList()
+          .equals(other.getCertificatesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -13635,7 +14229,7 @@ public final class PublicEndpointManagementProto {
         status_ = 0;
 
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         return this;
       }
 
@@ -13663,49 +14257,47 @@ public final class PublicEndpointManagementProto {
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse buildPartial() {
         com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse result = new com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.status_ = status_;
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           certificates_ = certificates_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.certificates_ = certificates_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13725,7 +14317,7 @@ public final class PublicEndpointManagementProto {
         if (!other.certificates_.isEmpty()) {
           if (certificates_.isEmpty()) {
             certificates_ = other.certificates_;
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureCertificatesIsMutable();
             certificates_.addAll(other.certificates_);
@@ -13769,8 +14361,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+       * @return The enum numeric value on the wire for status.
        */
-      public int getStatusValue() {
+      @java.lang.Override public int getStatusValue() {
         return status_;
       }
       /**
@@ -13779,8 +14372,11 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusValue(int value) {
+        
         status_ = value;
         onChanged();
         return this;
@@ -13791,7 +14387,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+       * @return The status.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus getStatus() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus result = com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus.valueOf(status_);
@@ -13803,6 +14401,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatus(com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse.SigningStatus value) {
         if (value == null) {
@@ -13819,6 +14419,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>.publicendpointmanagement.PollCertificateSigningResponse.SigningStatus status = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStatus() {
         
@@ -13829,9 +14430,9 @@ public final class PublicEndpointManagementProto {
 
       private com.google.protobuf.LazyStringList certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureCertificatesIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           certificates_ = new com.google.protobuf.LazyStringArrayList(certificates_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -13844,6 +14445,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return A list containing the certificates.
        */
       public com.google.protobuf.ProtocolStringList
           getCertificatesList() {
@@ -13859,6 +14461,7 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return The count of certificates.
        */
       public int getCertificatesCount() {
         return certificates_.size();
@@ -13873,6 +14476,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the element to return.
+       * @return The certificates at the given index.
        */
       public java.lang.String getCertificates(int index) {
         return certificates_.get(index);
@@ -13887,6 +14492,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the certificates at the given index.
        */
       public com.google.protobuf.ByteString
           getCertificatesBytes(int index) {
@@ -13902,6 +14509,9 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param index The index to set the value at.
+       * @param value The certificates to set.
+       * @return This builder for chaining.
        */
       public Builder setCertificates(
           int index, java.lang.String value) {
@@ -13923,6 +14533,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificates(
           java.lang.String value) {
@@ -13944,6 +14556,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param values The certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addAllCertificates(
           java.lang.Iterable<java.lang.String> values) {
@@ -13963,10 +14577,11 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @return This builder for chaining.
        */
       public Builder clearCertificates() {
         certificates_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -13980,6 +14595,8 @@ public final class PublicEndpointManagementProto {
        * </pre>
        *
        * <code>repeated string certificates = 2 [(.options.FieldExtension.skipLogging) = true];</code>
+       * @param value The bytes of the certificates to add.
+       * @return This builder for chaining.
        */
       public Builder addCertificatesBytes(
           com.google.protobuf.ByteString value) {
@@ -13995,7 +14612,7 @@ public final class PublicEndpointManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -14218,20 +14835,12 @@ public final class PublicEndpointManagementProto {
       "ointManagementProtoZ\031com/cloudera/cdp/pr" +
       "otobufb\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
           com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
-        }, assigner);
+        });
     internal_static_publicendpointmanagement_AWSElbDnsTarget_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_publicendpointmanagement_AWSElbDnsTarget_fieldAccessorTable = new

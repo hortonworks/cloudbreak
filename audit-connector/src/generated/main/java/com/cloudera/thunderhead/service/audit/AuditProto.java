@@ -24,6 +24,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The storageLocation.
      */
     java.lang.String getStorageLocation();
     /**
@@ -32,6 +33,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The bytes for storageLocation.
      */
     com.google.protobuf.ByteString
         getStorageLocationBytes();
@@ -42,6 +44,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The credentialName.
      */
     java.lang.String getCredentialName();
     /**
@@ -50,6 +53,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The bytes for credentialName.
      */
     com.google.protobuf.ByteString
         getCredentialNameBytes();
@@ -60,6 +64,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool enabled = 3;</code>
+     * @return The enabled.
      */
     boolean getEnabled();
 
@@ -69,6 +74,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The storageRegion.
      */
     java.lang.String getStorageRegion();
     /**
@@ -77,6 +83,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The bytes for storageRegion.
      */
     com.google.protobuf.ByteString
         getStorageRegionBytes();
@@ -89,7 +96,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ArchivingConfigInfo}
    */
-  public  static final class ArchivingConfigInfo extends
+  public static final class ArchivingConfigInfo extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ArchivingConfigInfo)
       ArchivingConfigInfoOrBuilder {
@@ -101,8 +108,14 @@ public final class AuditProto {
     private ArchivingConfigInfo() {
       storageLocation_ = "";
       credentialName_ = "";
-      enabled_ = false;
       storageRegion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ArchivingConfigInfo();
     }
 
     @java.lang.Override
@@ -118,7 +131,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -153,7 +165,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -192,7 +204,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The storageLocation.
      */
+    @java.lang.Override
     public java.lang.String getStorageLocation() {
       java.lang.Object ref = storageLocation_;
       if (ref instanceof java.lang.String) {
@@ -211,7 +225,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The bytes for storageLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStorageLocationBytes() {
       java.lang.Object ref = storageLocation_;
@@ -234,7 +250,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The credentialName.
      */
+    @java.lang.Override
     public java.lang.String getCredentialName() {
       java.lang.Object ref = credentialName_;
       if (ref instanceof java.lang.String) {
@@ -253,7 +271,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The bytes for credentialName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCredentialNameBytes() {
       java.lang.Object ref = credentialName_;
@@ -276,7 +296,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool enabled = 3;</code>
+     * @return The enabled.
      */
+    @java.lang.Override
     public boolean getEnabled() {
       return enabled_;
     }
@@ -289,7 +311,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The storageRegion.
      */
+    @java.lang.Override
     public java.lang.String getStorageRegion() {
       java.lang.Object ref = storageRegion_;
       if (ref instanceof java.lang.String) {
@@ -308,7 +332,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The bytes for storageRegion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStorageRegionBytes() {
       java.lang.Object ref = storageRegion_;
@@ -337,16 +363,16 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getStorageLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, storageLocation_);
       }
-      if (!getCredentialNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, credentialName_);
       }
       if (enabled_ != false) {
         output.writeBool(3, enabled_);
       }
-      if (!getStorageRegionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRegion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, storageRegion_);
       }
       unknownFields.writeTo(output);
@@ -358,17 +384,17 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getStorageLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, storageLocation_);
       }
-      if (!getCredentialNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, credentialName_);
       }
       if (enabled_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, enabled_);
       }
-      if (!getStorageRegionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRegion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, storageRegion_);
       }
       size += unknownFields.getSerializedSize();
@@ -386,17 +412,16 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo other = (com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo) obj;
 
-      boolean result = true;
-      result = result && getStorageLocation()
-          .equals(other.getStorageLocation());
-      result = result && getCredentialName()
-          .equals(other.getCredentialName());
-      result = result && (getEnabled()
-          == other.getEnabled());
-      result = result && getStorageRegion()
-          .equals(other.getStorageRegion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getStorageLocation()
+          .equals(other.getStorageLocation())) return false;
+      if (!getCredentialName()
+          .equals(other.getCredentialName())) return false;
+      if (getEnabled()
+          != other.getEnabled()) return false;
+      if (!getStorageRegion()
+          .equals(other.getStorageRegion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -597,35 +622,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -690,6 +715,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @return The storageLocation.
        */
       public java.lang.String getStorageLocation() {
         java.lang.Object ref = storageLocation_;
@@ -709,6 +735,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @return The bytes for storageLocation.
        */
       public com.google.protobuf.ByteString
           getStorageLocationBytes() {
@@ -729,6 +756,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @param value The storageLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageLocation(
           java.lang.String value) {
@@ -746,6 +775,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStorageLocation() {
         
@@ -759,6 +789,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @param value The bytes for storageLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -779,6 +811,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @return The credentialName.
        */
       public java.lang.String getCredentialName() {
         java.lang.Object ref = credentialName_;
@@ -798,6 +831,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @return The bytes for credentialName.
        */
       public com.google.protobuf.ByteString
           getCredentialNameBytes() {
@@ -818,6 +852,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @param value The credentialName to set.
+       * @return This builder for chaining.
        */
       public Builder setCredentialName(
           java.lang.String value) {
@@ -835,6 +871,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCredentialName() {
         
@@ -848,6 +885,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @param value The bytes for credentialName to set.
+       * @return This builder for chaining.
        */
       public Builder setCredentialNameBytes(
           com.google.protobuf.ByteString value) {
@@ -868,7 +907,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool enabled = 3;</code>
+       * @return The enabled.
        */
+      @java.lang.Override
       public boolean getEnabled() {
         return enabled_;
       }
@@ -878,6 +919,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool enabled = 3;</code>
+       * @param value The enabled to set.
+       * @return This builder for chaining.
        */
       public Builder setEnabled(boolean value) {
         
@@ -891,6 +934,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool enabled = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnabled() {
         
@@ -906,6 +950,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @return The storageRegion.
        */
       public java.lang.String getStorageRegion() {
         java.lang.Object ref = storageRegion_;
@@ -925,6 +970,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @return The bytes for storageRegion.
        */
       public com.google.protobuf.ByteString
           getStorageRegionBytes() {
@@ -945,6 +991,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @param value The storageRegion to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageRegion(
           java.lang.String value) {
@@ -962,6 +1010,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStorageRegion() {
         
@@ -975,6 +1024,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @param value The bytes for storageRegion to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageRegionBytes(
           com.google.protobuf.ByteString value) {
@@ -990,7 +1041,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -1050,6 +1101,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The storageLocation.
      */
     java.lang.String getStorageLocation();
     /**
@@ -1058,6 +1110,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The bytes for storageLocation.
      */
     com.google.protobuf.ByteString
         getStorageLocationBytes();
@@ -1068,6 +1121,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The credentialName.
      */
     java.lang.String getCredentialName();
     /**
@@ -1076,6 +1130,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The bytes for credentialName.
      */
     com.google.protobuf.ByteString
         getCredentialNameBytes();
@@ -1086,6 +1141,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool enabled = 3;</code>
+     * @return The enabled.
      */
     boolean getEnabled();
 
@@ -1095,6 +1151,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The storageRegion.
      */
     java.lang.String getStorageRegion();
     /**
@@ -1103,6 +1160,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The bytes for storageRegion.
      */
     com.google.protobuf.ByteString
         getStorageRegionBytes();
@@ -1113,6 +1171,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool verifyOnly = 5;</code>
+     * @return The verifyOnly.
      */
     boolean getVerifyOnly();
   }
@@ -1124,7 +1183,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ConfigureArchivingRequest}
    */
-  public  static final class ConfigureArchivingRequest extends
+  public static final class ConfigureArchivingRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ConfigureArchivingRequest)
       ConfigureArchivingRequestOrBuilder {
@@ -1136,9 +1195,14 @@ public final class AuditProto {
     private ConfigureArchivingRequest() {
       storageLocation_ = "";
       credentialName_ = "";
-      enabled_ = false;
       storageRegion_ = "";
-      verifyOnly_ = false;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConfigureArchivingRequest();
     }
 
     @java.lang.Override
@@ -1154,7 +1218,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -1194,7 +1257,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1233,7 +1296,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The storageLocation.
      */
+    @java.lang.Override
     public java.lang.String getStorageLocation() {
       java.lang.Object ref = storageLocation_;
       if (ref instanceof java.lang.String) {
@@ -1252,7 +1317,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageLocation = 1;</code>
+     * @return The bytes for storageLocation.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStorageLocationBytes() {
       java.lang.Object ref = storageLocation_;
@@ -1275,7 +1342,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The credentialName.
      */
+    @java.lang.Override
     public java.lang.String getCredentialName() {
       java.lang.Object ref = credentialName_;
       if (ref instanceof java.lang.String) {
@@ -1294,7 +1363,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string credentialName = 2;</code>
+     * @return The bytes for credentialName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getCredentialNameBytes() {
       java.lang.Object ref = credentialName_;
@@ -1317,7 +1388,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool enabled = 3;</code>
+     * @return The enabled.
      */
+    @java.lang.Override
     public boolean getEnabled() {
       return enabled_;
     }
@@ -1330,7 +1403,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The storageRegion.
      */
+    @java.lang.Override
     public java.lang.String getStorageRegion() {
       java.lang.Object ref = storageRegion_;
       if (ref instanceof java.lang.String) {
@@ -1349,7 +1424,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string storageRegion = 4;</code>
+     * @return The bytes for storageRegion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getStorageRegionBytes() {
       java.lang.Object ref = storageRegion_;
@@ -1372,7 +1449,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool verifyOnly = 5;</code>
+     * @return The verifyOnly.
      */
+    @java.lang.Override
     public boolean getVerifyOnly() {
       return verifyOnly_;
     }
@@ -1391,16 +1470,16 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getStorageLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageLocation_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, storageLocation_);
       }
-      if (!getCredentialNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, credentialName_);
       }
       if (enabled_ != false) {
         output.writeBool(3, enabled_);
       }
-      if (!getStorageRegionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRegion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, storageRegion_);
       }
       if (verifyOnly_ != false) {
@@ -1415,17 +1494,17 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getStorageLocationBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageLocation_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, storageLocation_);
       }
-      if (!getCredentialNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(credentialName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, credentialName_);
       }
       if (enabled_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, enabled_);
       }
-      if (!getStorageRegionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(storageRegion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, storageRegion_);
       }
       if (verifyOnly_ != false) {
@@ -1447,19 +1526,18 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingRequest) obj;
 
-      boolean result = true;
-      result = result && getStorageLocation()
-          .equals(other.getStorageLocation());
-      result = result && getCredentialName()
-          .equals(other.getCredentialName());
-      result = result && (getEnabled()
-          == other.getEnabled());
-      result = result && getStorageRegion()
-          .equals(other.getStorageRegion());
-      result = result && (getVerifyOnly()
-          == other.getVerifyOnly());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getStorageLocation()
+          .equals(other.getStorageLocation())) return false;
+      if (!getCredentialName()
+          .equals(other.getCredentialName())) return false;
+      if (getEnabled()
+          != other.getEnabled()) return false;
+      if (!getStorageRegion()
+          .equals(other.getStorageRegion())) return false;
+      if (getVerifyOnly()
+          != other.getVerifyOnly()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1666,35 +1744,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1762,6 +1840,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @return The storageLocation.
        */
       public java.lang.String getStorageLocation() {
         java.lang.Object ref = storageLocation_;
@@ -1781,6 +1860,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @return The bytes for storageLocation.
        */
       public com.google.protobuf.ByteString
           getStorageLocationBytes() {
@@ -1801,6 +1881,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @param value The storageLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageLocation(
           java.lang.String value) {
@@ -1818,6 +1900,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStorageLocation() {
         
@@ -1831,6 +1914,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageLocation = 1;</code>
+       * @param value The bytes for storageLocation to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageLocationBytes(
           com.google.protobuf.ByteString value) {
@@ -1851,6 +1936,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @return The credentialName.
        */
       public java.lang.String getCredentialName() {
         java.lang.Object ref = credentialName_;
@@ -1870,6 +1956,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @return The bytes for credentialName.
        */
       public com.google.protobuf.ByteString
           getCredentialNameBytes() {
@@ -1890,6 +1977,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @param value The credentialName to set.
+       * @return This builder for chaining.
        */
       public Builder setCredentialName(
           java.lang.String value) {
@@ -1907,6 +1996,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearCredentialName() {
         
@@ -1920,6 +2010,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string credentialName = 2;</code>
+       * @param value The bytes for credentialName to set.
+       * @return This builder for chaining.
        */
       public Builder setCredentialNameBytes(
           com.google.protobuf.ByteString value) {
@@ -1940,7 +2032,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool enabled = 3;</code>
+       * @return The enabled.
        */
+      @java.lang.Override
       public boolean getEnabled() {
         return enabled_;
       }
@@ -1950,6 +2044,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool enabled = 3;</code>
+       * @param value The enabled to set.
+       * @return This builder for chaining.
        */
       public Builder setEnabled(boolean value) {
         
@@ -1963,6 +2059,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool enabled = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnabled() {
         
@@ -1978,6 +2075,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @return The storageRegion.
        */
       public java.lang.String getStorageRegion() {
         java.lang.Object ref = storageRegion_;
@@ -1997,6 +2095,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @return The bytes for storageRegion.
        */
       public com.google.protobuf.ByteString
           getStorageRegionBytes() {
@@ -2017,6 +2116,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @param value The storageRegion to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageRegion(
           java.lang.String value) {
@@ -2034,6 +2135,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStorageRegion() {
         
@@ -2047,6 +2149,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string storageRegion = 4;</code>
+       * @param value The bytes for storageRegion to set.
+       * @return This builder for chaining.
        */
       public Builder setStorageRegionBytes(
           com.google.protobuf.ByteString value) {
@@ -2067,7 +2171,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool verifyOnly = 5;</code>
+       * @return The verifyOnly.
        */
+      @java.lang.Override
       public boolean getVerifyOnly() {
         return verifyOnly_;
       }
@@ -2077,6 +2183,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool verifyOnly = 5;</code>
+       * @param value The verifyOnly to set.
+       * @return This builder for chaining.
        */
       public Builder setVerifyOnly(boolean value) {
         
@@ -2090,6 +2198,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool verifyOnly = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVerifyOnly() {
         
@@ -2100,7 +2209,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2160,6 +2269,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return Whether the configuration field is set.
      */
     boolean hasConfiguration();
     /**
@@ -2168,6 +2278,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return The configuration.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration();
     /**
@@ -2187,7 +2298,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ConfigureArchivingResponse}
    */
-  public  static final class ConfigureArchivingResponse extends
+  public static final class ConfigureArchivingResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ConfigureArchivingResponse)
       ConfigureArchivingResponseOrBuilder {
@@ -2197,6 +2308,13 @@ public final class AuditProto {
       super(builder);
     }
     private ConfigureArchivingResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ConfigureArchivingResponse();
     }
 
     @java.lang.Override
@@ -2212,7 +2330,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -2237,7 +2354,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2276,7 +2393,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return Whether the configuration field is set.
      */
+    @java.lang.Override
     public boolean hasConfiguration() {
       return configuration_ != null;
     }
@@ -2286,7 +2405,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return The configuration.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
       return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
     }
@@ -2297,6 +2418,7 @@ public final class AuditProto {
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder() {
       return getConfiguration();
     }
@@ -2346,14 +2468,13 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.ConfigureArchivingResponse) obj;
 
-      boolean result = true;
-      result = result && (hasConfiguration() == other.hasConfiguration());
+      if (hasConfiguration() != other.hasConfiguration()) return false;
       if (hasConfiguration()) {
-        result = result && getConfiguration()
-            .equals(other.getConfiguration());
+        if (!getConfiguration()
+            .equals(other.getConfiguration())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2548,35 +2669,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2622,7 +2743,7 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder> configurationBuilder_;
       /**
@@ -2631,6 +2752,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+       * @return Whether the configuration field is set.
        */
       public boolean hasConfiguration() {
         return configurationBuilder_ != null || configuration_ != null;
@@ -2641,6 +2763,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+       * @return The configuration.
        */
       public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
         if (configurationBuilder_ == null) {
@@ -2777,7 +2900,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2839,7 +2962,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.GetArchivingConfigRequest}
    */
-  public  static final class GetArchivingConfigRequest extends
+  public static final class GetArchivingConfigRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.GetArchivingConfigRequest)
       GetArchivingConfigRequestOrBuilder {
@@ -2849,6 +2972,13 @@ public final class AuditProto {
       super(builder);
     }
     private GetArchivingConfigRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetArchivingConfigRequest();
     }
 
     @java.lang.Override
@@ -2875,7 +3005,7 @@ public final class AuditProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2944,9 +3074,8 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigRequest) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3126,35 +3255,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3199,7 +3328,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3259,6 +3388,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return Whether the configuration field is set.
      */
     boolean hasConfiguration();
     /**
@@ -3267,6 +3397,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return The configuration.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration();
     /**
@@ -3286,7 +3417,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.GetArchivingConfigResponse}
    */
-  public  static final class GetArchivingConfigResponse extends
+  public static final class GetArchivingConfigResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.GetArchivingConfigResponse)
       GetArchivingConfigResponseOrBuilder {
@@ -3296,6 +3427,13 @@ public final class AuditProto {
       super(builder);
     }
     private GetArchivingConfigResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetArchivingConfigResponse();
     }
 
     @java.lang.Override
@@ -3311,7 +3449,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -3336,7 +3473,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3375,7 +3512,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return Whether the configuration field is set.
      */
+    @java.lang.Override
     public boolean hasConfiguration() {
       return configuration_ != null;
     }
@@ -3385,7 +3524,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+     * @return The configuration.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
       return configuration_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.getDefaultInstance() : configuration_;
     }
@@ -3396,6 +3537,7 @@ public final class AuditProto {
      *
      * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder getConfigurationOrBuilder() {
       return getConfiguration();
     }
@@ -3445,14 +3587,13 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.GetArchivingConfigResponse) obj;
 
-      boolean result = true;
-      result = result && (hasConfiguration() == other.hasConfiguration());
+      if (hasConfiguration() != other.hasConfiguration()) return false;
       if (hasConfiguration()) {
-        result = result && getConfiguration()
-            .equals(other.getConfiguration());
+        if (!getConfiguration()
+            .equals(other.getConfiguration())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -3647,35 +3788,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -3721,7 +3862,7 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo configuration_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfoOrBuilder> configurationBuilder_;
       /**
@@ -3730,6 +3871,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+       * @return Whether the configuration field is set.
        */
       public boolean hasConfiguration() {
         return configurationBuilder_ != null || configuration_ != null;
@@ -3740,6 +3882,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ArchivingConfigInfo configuration = 1;</code>
+       * @return The configuration.
        */
       public com.cloudera.thunderhead.service.audit.AuditProto.ArchivingConfigInfo getConfiguration() {
         if (configurationBuilder_ == null) {
@@ -3876,7 +4019,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3932,10 +4075,12 @@ public final class AuditProto {
 
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return Whether the auditEvent field is set.
      */
     boolean hasAuditEvent();
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return The auditEvent.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent getAuditEvent();
     /**
@@ -3950,7 +4095,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.CreateAuditEventRequest}
    */
-  public  static final class CreateAuditEventRequest extends
+  public static final class CreateAuditEventRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.CreateAuditEventRequest)
       CreateAuditEventRequestOrBuilder {
@@ -3960,6 +4105,13 @@ public final class AuditProto {
       super(builder);
     }
     private CreateAuditEventRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateAuditEventRequest();
     }
 
     @java.lang.Override
@@ -3975,7 +4127,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4000,7 +4151,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4035,19 +4186,24 @@ public final class AuditProto {
     private com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent auditEvent_;
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return Whether the auditEvent field is set.
      */
+    @java.lang.Override
     public boolean hasAuditEvent() {
       return auditEvent_ != null;
     }
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return The auditEvent.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent getAuditEvent() {
       return auditEvent_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.getDefaultInstance() : auditEvent_;
     }
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.AuditEventOrBuilder getAuditEventOrBuilder() {
       return getAuditEvent();
     }
@@ -4097,14 +4253,13 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventRequest) obj;
 
-      boolean result = true;
-      result = result && (hasAuditEvent() == other.hasAuditEvent());
+      if (hasAuditEvent() != other.hasAuditEvent()) return false;
       if (hasAuditEvent()) {
-        result = result && getAuditEvent()
-            .equals(other.getAuditEvent());
+        if (!getAuditEvent()
+            .equals(other.getAuditEvent())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4298,35 +4453,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4372,17 +4527,19 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent auditEvent_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent auditEvent_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent, com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.Builder, com.cloudera.thunderhead.service.audit.AuditProto.AuditEventOrBuilder> auditEventBuilder_;
       /**
        * <code>.audit.AuditEvent auditEvent = 1;</code>
+       * @return Whether the auditEvent field is set.
        */
       public boolean hasAuditEvent() {
         return auditEventBuilder_ != null || auditEvent_ != null;
       }
       /**
        * <code>.audit.AuditEvent auditEvent = 1;</code>
+       * @return The auditEvent.
        */
       public com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent getAuditEvent() {
         if (auditEventBuilder_ == null) {
@@ -4491,7 +4648,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4552,7 +4709,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.CreateAuditEventResponse}
    */
-  public  static final class CreateAuditEventResponse extends
+  public static final class CreateAuditEventResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.CreateAuditEventResponse)
       CreateAuditEventResponseOrBuilder {
@@ -4562,6 +4719,13 @@ public final class AuditProto {
       super(builder);
     }
     private CreateAuditEventResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateAuditEventResponse();
     }
 
     @java.lang.Override
@@ -4588,7 +4752,7 @@ public final class AuditProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4657,9 +4821,8 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAuditEventResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4838,35 +5001,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4911,7 +5074,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4967,10 +5130,12 @@ public final class AuditProto {
 
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return Whether the auditEvent field is set.
      */
     boolean hasAuditEvent();
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return The auditEvent.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent getAuditEvent();
     /**
@@ -4985,7 +5150,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.CreateAttemptAuditEventRequest}
    */
-  public  static final class CreateAttemptAuditEventRequest extends
+  public static final class CreateAttemptAuditEventRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.CreateAttemptAuditEventRequest)
       CreateAttemptAuditEventRequestOrBuilder {
@@ -4995,6 +5160,13 @@ public final class AuditProto {
       super(builder);
     }
     private CreateAttemptAuditEventRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateAttemptAuditEventRequest();
     }
 
     @java.lang.Override
@@ -5010,7 +5182,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -5035,7 +5206,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5070,19 +5241,24 @@ public final class AuditProto {
     private com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent auditEvent_;
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return Whether the auditEvent field is set.
      */
+    @java.lang.Override
     public boolean hasAuditEvent() {
       return auditEvent_ != null;
     }
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
+     * @return The auditEvent.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent getAuditEvent() {
       return auditEvent_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.getDefaultInstance() : auditEvent_;
     }
     /**
      * <code>.audit.AuditEvent auditEvent = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.AuditEventOrBuilder getAuditEventOrBuilder() {
       return getAuditEvent();
     }
@@ -5132,14 +5308,13 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventRequest) obj;
 
-      boolean result = true;
-      result = result && (hasAuditEvent() == other.hasAuditEvent());
+      if (hasAuditEvent() != other.hasAuditEvent()) return false;
       if (hasAuditEvent()) {
-        result = result && getAuditEvent()
-            .equals(other.getAuditEvent());
+        if (!getAuditEvent()
+            .equals(other.getAuditEvent())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5333,35 +5508,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5407,17 +5582,19 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent auditEvent_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent auditEvent_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent, com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent.Builder, com.cloudera.thunderhead.service.audit.AuditProto.AuditEventOrBuilder> auditEventBuilder_;
       /**
        * <code>.audit.AuditEvent auditEvent = 1;</code>
+       * @return Whether the auditEvent field is set.
        */
       public boolean hasAuditEvent() {
         return auditEventBuilder_ != null || auditEvent_ != null;
       }
       /**
        * <code>.audit.AuditEvent auditEvent = 1;</code>
+       * @return The auditEvent.
        */
       public com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent getAuditEvent() {
         if (auditEventBuilder_ == null) {
@@ -5526,7 +5703,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5587,7 +5764,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.CreateAttemptAuditEventResponse}
    */
-  public  static final class CreateAttemptAuditEventResponse extends
+  public static final class CreateAttemptAuditEventResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.CreateAttemptAuditEventResponse)
       CreateAttemptAuditEventResponseOrBuilder {
@@ -5597,6 +5774,13 @@ public final class AuditProto {
       super(builder);
     }
     private CreateAttemptAuditEventResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CreateAttemptAuditEventResponse();
     }
 
     @java.lang.Override
@@ -5623,7 +5807,7 @@ public final class AuditProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5692,9 +5876,8 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.CreateAttemptAuditEventResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5873,35 +6056,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5946,7 +6129,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6002,10 +6185,12 @@ public final class AuditProto {
 
     /**
      * <code>.audit.AttemptAuditEventResult result = 1;</code>
+     * @return Whether the result field is set.
      */
     boolean hasResult();
     /**
      * <code>.audit.AttemptAuditEventResult result = 1;</code>
+     * @return The result.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult getResult();
     /**
@@ -6020,7 +6205,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.UpdateAttemptAuditEventWithResultRequest}
    */
-  public  static final class UpdateAttemptAuditEventWithResultRequest extends
+  public static final class UpdateAttemptAuditEventWithResultRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.UpdateAttemptAuditEventWithResultRequest)
       UpdateAttemptAuditEventWithResultRequestOrBuilder {
@@ -6030,6 +6215,13 @@ public final class AuditProto {
       super(builder);
     }
     private UpdateAttemptAuditEventWithResultRequest() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UpdateAttemptAuditEventWithResultRequest();
     }
 
     @java.lang.Override
@@ -6045,7 +6237,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -6070,7 +6261,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6105,19 +6296,24 @@ public final class AuditProto {
     private com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult result_;
     /**
      * <code>.audit.AttemptAuditEventResult result = 1;</code>
+     * @return Whether the result field is set.
      */
+    @java.lang.Override
     public boolean hasResult() {
       return result_ != null;
     }
     /**
      * <code>.audit.AttemptAuditEventResult result = 1;</code>
+     * @return The result.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult getResult() {
       return result_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult.getDefaultInstance() : result_;
     }
     /**
      * <code>.audit.AttemptAuditEventResult result = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResultOrBuilder getResultOrBuilder() {
       return getResult();
     }
@@ -6167,14 +6363,13 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultRequest) obj;
 
-      boolean result = true;
-      result = result && (hasResult() == other.hasResult());
+      if (hasResult() != other.hasResult()) return false;
       if (hasResult()) {
-        result = result && getResult()
-            .equals(other.getResult());
+        if (!getResult()
+            .equals(other.getResult())) return false;
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6368,35 +6563,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6442,17 +6637,19 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult result_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult result_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult, com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult.Builder, com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResultOrBuilder> resultBuilder_;
       /**
        * <code>.audit.AttemptAuditEventResult result = 1;</code>
+       * @return Whether the result field is set.
        */
       public boolean hasResult() {
         return resultBuilder_ != null || result_ != null;
       }
       /**
        * <code>.audit.AttemptAuditEventResult result = 1;</code>
+       * @return The result.
        */
       public com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult getResult() {
         if (resultBuilder_ == null) {
@@ -6561,7 +6758,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6622,7 +6819,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.UpdateAttemptAuditEventWithResultResponse}
    */
-  public  static final class UpdateAttemptAuditEventWithResultResponse extends
+  public static final class UpdateAttemptAuditEventWithResultResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.UpdateAttemptAuditEventWithResultResponse)
       UpdateAttemptAuditEventWithResultResponseOrBuilder {
@@ -6632,6 +6829,13 @@ public final class AuditProto {
       super(builder);
     }
     private UpdateAttemptAuditEventWithResultResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new UpdateAttemptAuditEventWithResultResponse();
     }
 
     @java.lang.Override
@@ -6658,7 +6862,7 @@ public final class AuditProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6727,9 +6931,8 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.UpdateAttemptAuditEventWithResultResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6908,35 +7111,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6981,7 +7184,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7042,6 +7245,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 fromTimestamp = 1;</code>
+     * @return The fromTimestamp.
      */
     long getFromTimestamp();
 
@@ -7052,6 +7256,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 toTimestamp = 2;</code>
+     * @return The toTimestamp.
      */
     long getToTimestamp();
 
@@ -7061,6 +7266,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -7069,6 +7275,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -7079,6 +7286,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int32 pageSize = 4;</code>
+     * @return The pageSize.
      */
     int getPageSize();
 
@@ -7088,6 +7296,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string pageToken = 5;</code>
+     * @return The pageToken.
      */
     java.lang.String getPageToken();
     /**
@@ -7096,6 +7305,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string pageToken = 5;</code>
+     * @return The bytes for pageToken.
      */
     com.google.protobuf.ByteString
         getPageTokenBytes();
@@ -7107,6 +7317,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 6;</code>
+     * @return The requestId.
      */
     java.lang.String getRequestId();
     /**
@@ -7116,6 +7327,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 6;</code>
+     * @return The bytes for requestId.
      */
     com.google.protobuf.ByteString
         getRequestIdBytes();
@@ -7128,6 +7340,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 7;</code>
+     * @return The eventSource.
      */
     java.lang.String getEventSource();
     /**
@@ -7138,6 +7351,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 7;</code>
+     * @return The bytes for eventSource.
      */
     com.google.protobuf.ByteString
         getEventSourceBytes();
@@ -7149,7 +7363,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ListEventsRequest}
    */
-  public  static final class ListEventsRequest extends
+  public static final class ListEventsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ListEventsRequest)
       ListEventsRequestOrBuilder {
@@ -7159,13 +7373,17 @@ public final class AuditProto {
       super(builder);
     }
     private ListEventsRequest() {
-      fromTimestamp_ = 0L;
-      toTimestamp_ = 0L;
       accountId_ = "";
-      pageSize_ = 0;
       pageToken_ = "";
       requestId_ = "";
       eventSource_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListEventsRequest();
     }
 
     @java.lang.Override
@@ -7181,7 +7399,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7232,7 +7449,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7272,7 +7489,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 fromTimestamp = 1;</code>
+     * @return The fromTimestamp.
      */
+    @java.lang.Override
     public long getFromTimestamp() {
       return fromTimestamp_;
     }
@@ -7286,7 +7505,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 toTimestamp = 2;</code>
+     * @return The toTimestamp.
      */
+    @java.lang.Override
     public long getToTimestamp() {
       return toTimestamp_;
     }
@@ -7299,7 +7520,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -7318,7 +7541,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -7341,7 +7566,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int32 pageSize = 4;</code>
+     * @return The pageSize.
      */
+    @java.lang.Override
     public int getPageSize() {
       return pageSize_;
     }
@@ -7354,7 +7581,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string pageToken = 5;</code>
+     * @return The pageToken.
      */
+    @java.lang.Override
     public java.lang.String getPageToken() {
       java.lang.Object ref = pageToken_;
       if (ref instanceof java.lang.String) {
@@ -7373,7 +7602,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string pageToken = 5;</code>
+     * @return The bytes for pageToken.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getPageTokenBytes() {
       java.lang.Object ref = pageToken_;
@@ -7397,7 +7628,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 6;</code>
+     * @return The requestId.
      */
+    @java.lang.Override
     public java.lang.String getRequestId() {
       java.lang.Object ref = requestId_;
       if (ref instanceof java.lang.String) {
@@ -7417,7 +7650,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 6;</code>
+     * @return The bytes for requestId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRequestIdBytes() {
       java.lang.Object ref = requestId_;
@@ -7442,7 +7677,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 7;</code>
+     * @return The eventSource.
      */
+    @java.lang.Override
     public java.lang.String getEventSource() {
       java.lang.Object ref = eventSource_;
       if (ref instanceof java.lang.String) {
@@ -7463,7 +7700,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 7;</code>
+     * @return The bytes for eventSource.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventSourceBytes() {
       java.lang.Object ref = eventSource_;
@@ -7498,19 +7737,19 @@ public final class AuditProto {
       if (toTimestamp_ != 0L) {
         output.writeInt64(2, toTimestamp_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
       if (pageSize_ != 0) {
         output.writeInt32(4, pageSize_);
       }
-      if (!getPageTokenBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, pageToken_);
       }
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, requestId_);
       }
-      if (!getEventSourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, eventSource_);
       }
       unknownFields.writeTo(output);
@@ -7530,20 +7769,20 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, toTimestamp_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
       if (pageSize_ != 0) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt32Size(4, pageSize_);
       }
-      if (!getPageTokenBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(pageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, pageToken_);
       }
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, requestId_);
       }
-      if (!getEventSourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, eventSource_);
       }
       size += unknownFields.getSerializedSize();
@@ -7561,23 +7800,22 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.ListEventsRequest) obj;
 
-      boolean result = true;
-      result = result && (getFromTimestamp()
-          == other.getFromTimestamp());
-      result = result && (getToTimestamp()
-          == other.getToTimestamp());
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && (getPageSize()
-          == other.getPageSize());
-      result = result && getPageToken()
-          .equals(other.getPageToken());
-      result = result && getRequestId()
-          .equals(other.getRequestId());
-      result = result && getEventSource()
-          .equals(other.getEventSource());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getFromTimestamp()
+          != other.getFromTimestamp()) return false;
+      if (getToTimestamp()
+          != other.getToTimestamp()) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (getPageSize()
+          != other.getPageSize()) return false;
+      if (!getPageToken()
+          .equals(other.getPageToken())) return false;
+      if (!getRequestId()
+          .equals(other.getRequestId())) return false;
+      if (!getEventSource()
+          .equals(other.getEventSource())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7793,35 +8031,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7897,7 +8135,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
+       * @return The fromTimestamp.
        */
+      @java.lang.Override
       public long getFromTimestamp() {
         return fromTimestamp_;
       }
@@ -7908,6 +8148,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
+       * @param value The fromTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setFromTimestamp(long value) {
         
@@ -7922,6 +8164,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFromTimestamp() {
         
@@ -7938,7 +8181,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
+       * @return The toTimestamp.
        */
+      @java.lang.Override
       public long getToTimestamp() {
         return toTimestamp_;
       }
@@ -7949,6 +8194,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
+       * @param value The toTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setToTimestamp(long value) {
         
@@ -7963,6 +8210,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearToTimestamp() {
         
@@ -7978,6 +8226,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -7997,6 +8246,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -8017,6 +8267,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -8034,6 +8286,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -8047,6 +8300,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -8067,7 +8322,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int32 pageSize = 4;</code>
+       * @return The pageSize.
        */
+      @java.lang.Override
       public int getPageSize() {
         return pageSize_;
       }
@@ -8077,6 +8334,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int32 pageSize = 4;</code>
+       * @param value The pageSize to set.
+       * @return This builder for chaining.
        */
       public Builder setPageSize(int value) {
         
@@ -8090,6 +8349,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int32 pageSize = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPageSize() {
         
@@ -8105,6 +8365,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string pageToken = 5;</code>
+       * @return The pageToken.
        */
       public java.lang.String getPageToken() {
         java.lang.Object ref = pageToken_;
@@ -8124,6 +8385,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string pageToken = 5;</code>
+       * @return The bytes for pageToken.
        */
       public com.google.protobuf.ByteString
           getPageTokenBytes() {
@@ -8144,6 +8406,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string pageToken = 5;</code>
+       * @param value The pageToken to set.
+       * @return This builder for chaining.
        */
       public Builder setPageToken(
           java.lang.String value) {
@@ -8161,6 +8425,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string pageToken = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearPageToken() {
         
@@ -8174,6 +8439,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string pageToken = 5;</code>
+       * @param value The bytes for pageToken to set.
+       * @return This builder for chaining.
        */
       public Builder setPageTokenBytes(
           com.google.protobuf.ByteString value) {
@@ -8195,6 +8462,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 6;</code>
+       * @return The requestId.
        */
       public java.lang.String getRequestId() {
         java.lang.Object ref = requestId_;
@@ -8215,6 +8483,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 6;</code>
+       * @return The bytes for requestId.
        */
       public com.google.protobuf.ByteString
           getRequestIdBytes() {
@@ -8236,6 +8505,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 6;</code>
+       * @param value The requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestId(
           java.lang.String value) {
@@ -8254,6 +8525,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRequestId() {
         
@@ -8268,6 +8540,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 6;</code>
+       * @param value The bytes for requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestIdBytes(
           com.google.protobuf.ByteString value) {
@@ -8290,6 +8564,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 7;</code>
+       * @return The eventSource.
        */
       public java.lang.String getEventSource() {
         java.lang.Object ref = eventSource_;
@@ -8311,6 +8586,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 7;</code>
+       * @return The bytes for eventSource.
        */
       public com.google.protobuf.ByteString
           getEventSourceBytes() {
@@ -8333,6 +8609,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 7;</code>
+       * @param value The eventSource to set.
+       * @return This builder for chaining.
        */
       public Builder setEventSource(
           java.lang.String value) {
@@ -8352,6 +8630,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventSource() {
         
@@ -8367,6 +8646,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 7;</code>
+       * @param value The bytes for eventSource to set.
+       * @return This builder for chaining.
        */
       public Builder setEventSourceBytes(
           com.google.protobuf.ByteString value) {
@@ -8382,7 +8663,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8486,6 +8767,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string nextPageToken = 2;</code>
+     * @return The nextPageToken.
      */
     java.lang.String getNextPageToken();
     /**
@@ -8494,6 +8776,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string nextPageToken = 2;</code>
+     * @return The bytes for nextPageToken.
      */
     com.google.protobuf.ByteString
         getNextPageTokenBytes();
@@ -8505,7 +8788,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ListEventsResponse}
    */
-  public  static final class ListEventsResponse extends
+  public static final class ListEventsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ListEventsResponse)
       ListEventsResponseOrBuilder {
@@ -8517,6 +8800,13 @@ public final class AuditProto {
     private ListEventsResponse() {
       auditEvent_ = java.util.Collections.emptyList();
       nextPageToken_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ListEventsResponse();
     }
 
     @java.lang.Override
@@ -8544,7 +8834,7 @@ public final class AuditProto {
               done = true;
               break;
             case 10: {
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 auditEvent_ = new java.util.ArrayList<com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent>();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -8559,7 +8849,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8573,7 +8863,7 @@ public final class AuditProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           auditEvent_ = java.util.Collections.unmodifiableList(auditEvent_);
         }
         this.unknownFields = unknownFields.build();
@@ -8593,7 +8883,6 @@ public final class AuditProto {
               com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int AUDITEVENT_FIELD_NUMBER = 1;
     private java.util.List<com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent> auditEvent_;
     /**
@@ -8603,6 +8892,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.CdpAuditEvent auditEvent = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent> getAuditEventList() {
       return auditEvent_;
     }
@@ -8613,6 +8903,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.CdpAuditEvent auditEvent = 1;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEventOrBuilder> 
         getAuditEventOrBuilderList() {
       return auditEvent_;
@@ -8624,6 +8915,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.CdpAuditEvent auditEvent = 1;</code>
      */
+    @java.lang.Override
     public int getAuditEventCount() {
       return auditEvent_.size();
     }
@@ -8634,6 +8926,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.CdpAuditEvent auditEvent = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent getAuditEvent(int index) {
       return auditEvent_.get(index);
     }
@@ -8644,6 +8937,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.CdpAuditEvent auditEvent = 1;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEventOrBuilder getAuditEventOrBuilder(
         int index) {
       return auditEvent_.get(index);
@@ -8657,7 +8951,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string nextPageToken = 2;</code>
+     * @return The nextPageToken.
      */
+    @java.lang.Override
     public java.lang.String getNextPageToken() {
       java.lang.Object ref = nextPageToken_;
       if (ref instanceof java.lang.String) {
@@ -8676,7 +8972,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string nextPageToken = 2;</code>
+     * @return The bytes for nextPageToken.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getNextPageTokenBytes() {
       java.lang.Object ref = nextPageToken_;
@@ -8708,7 +9006,7 @@ public final class AuditProto {
       for (int i = 0; i < auditEvent_.size(); i++) {
         output.writeMessage(1, auditEvent_.get(i));
       }
-      if (!getNextPageTokenBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, nextPageToken_);
       }
       unknownFields.writeTo(output);
@@ -8724,7 +9022,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(1, auditEvent_.get(i));
       }
-      if (!getNextPageTokenBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(nextPageToken_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, nextPageToken_);
       }
       size += unknownFields.getSerializedSize();
@@ -8742,13 +9040,12 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse) obj;
 
-      boolean result = true;
-      result = result && getAuditEventList()
-          .equals(other.getAuditEventList());
-      result = result && getNextPageToken()
-          .equals(other.getNextPageToken());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAuditEventList()
+          .equals(other.getAuditEventList())) return false;
+      if (!getNextPageToken()
+          .equals(other.getNextPageToken())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8937,9 +9234,8 @@ public final class AuditProto {
       public com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse buildPartial() {
         com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse result = new com.cloudera.thunderhead.service.audit.AuditProto.ListEventsResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         if (auditEventBuilder_ == null) {
-          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             auditEvent_ = java.util.Collections.unmodifiableList(auditEvent_);
             bitField0_ = (bitField0_ & ~0x00000001);
           }
@@ -8948,42 +9244,41 @@ public final class AuditProto {
           result.auditEvent_ = auditEventBuilder_.build();
         }
         result.nextPageToken_ = nextPageToken_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9060,7 +9355,7 @@ public final class AuditProto {
       private java.util.List<com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent> auditEvent_ =
         java.util.Collections.emptyList();
       private void ensureAuditEventIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           auditEvent_ = new java.util.ArrayList<com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent>(auditEvent_);
           bitField0_ |= 0x00000001;
          }
@@ -9361,7 +9656,7 @@ public final class AuditProto {
           auditEventBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent, com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent.Builder, com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEventOrBuilder>(
                   auditEvent_,
-                  ((bitField0_ & 0x00000001) == 0x00000001),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           auditEvent_ = null;
@@ -9376,6 +9671,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string nextPageToken = 2;</code>
+       * @return The nextPageToken.
        */
       public java.lang.String getNextPageToken() {
         java.lang.Object ref = nextPageToken_;
@@ -9395,6 +9691,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string nextPageToken = 2;</code>
+       * @return The bytes for nextPageToken.
        */
       public com.google.protobuf.ByteString
           getNextPageTokenBytes() {
@@ -9415,6 +9712,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string nextPageToken = 2;</code>
+       * @param value The nextPageToken to set.
+       * @return This builder for chaining.
        */
       public Builder setNextPageToken(
           java.lang.String value) {
@@ -9432,6 +9731,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string nextPageToken = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearNextPageToken() {
         
@@ -9445,6 +9745,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string nextPageToken = 2;</code>
+       * @param value The bytes for nextPageToken to set.
+       * @return This builder for chaining.
        */
       public Builder setNextPageTokenBytes(
           com.google.protobuf.ByteString value) {
@@ -9460,7 +9762,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9520,6 +9822,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The id.
      */
     java.lang.String getId();
     /**
@@ -9528,6 +9831,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The bytes for id.
      */
     com.google.protobuf.ByteString
         getIdBytes();
@@ -9538,6 +9842,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -9547,6 +9852,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -9555,6 +9861,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -9565,6 +9872,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 5;</code>
+     * @return The requestId.
      */
     java.lang.String getRequestId();
     /**
@@ -9573,6 +9881,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 5;</code>
+     * @return The bytes for requestId.
      */
     com.google.protobuf.ByteString
         getRequestIdBytes();
@@ -9583,6 +9892,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 6;</code>
+     * @return The eventName.
      */
     java.lang.String getEventName();
     /**
@@ -9591,6 +9901,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 6;</code>
+     * @return The bytes for eventName.
      */
     com.google.protobuf.ByteString
         getEventNameBytes();
@@ -9601,6 +9912,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 8;</code>
+     * @return The sourceIPAddress.
      */
     java.lang.String getSourceIPAddress();
     /**
@@ -9609,6 +9921,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 8;</code>
+     * @return The bytes for sourceIPAddress.
      */
     com.google.protobuf.ByteString
         getSourceIPAddressBytes();
@@ -9620,6 +9933,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 9;</code>
+     * @return The eventSource.
      */
     java.lang.String getEventSource();
     /**
@@ -9629,6 +9943,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 9;</code>
+     * @return The bytes for eventSource.
      */
     com.google.protobuf.ByteString
         getEventSourceBytes();
@@ -9639,6 +9954,16 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 4;</code>
+     * @return Whether the actorCrn field is set.
+     */
+    boolean hasActorCrn();
+    /**
+     * <pre>
+     * The CRN of the actor who initiated this event.
+     * </pre>
+     *
+     * <code>string actorCrn = 4;</code>
+     * @return The actorCrn.
      */
     java.lang.String getActorCrn();
     /**
@@ -9647,6 +9972,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 4;</code>
+     * @return The bytes for actorCrn.
      */
     com.google.protobuf.ByteString
         getActorCrnBytes();
@@ -9658,6 +9984,17 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 10;</code>
+     * @return Whether the actorServiceName field is set.
+     */
+    boolean hasActorServiceName();
+    /**
+     * <pre>
+     * The name of the service that initiated this event. It must be the name
+     * of a service as enumerated in the CRN definition.
+     * </pre>
+     *
+     * <code>string actorServiceName = 10;</code>
+     * @return The actorServiceName.
      */
     java.lang.String getActorServiceName();
     /**
@@ -9667,6 +10004,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 10;</code>
+     * @return The bytes for actorServiceName.
      */
     com.google.protobuf.ByteString
         getActorServiceNameBytes();
@@ -9677,6 +10015,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestData apiRequestData = 11;</code>
+     * @return Whether the apiRequestData field is set.
      */
     boolean hasApiRequestData();
     /**
@@ -9685,6 +10024,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestData apiRequestData = 11;</code>
+     * @return The apiRequestData.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData getApiRequestData();
     /**
@@ -9702,6 +10042,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ServiceEventData serviceEventData = 12;</code>
+     * @return Whether the serviceEventData field is set.
      */
     boolean hasServiceEventData();
     /**
@@ -9710,6 +10051,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ServiceEventData serviceEventData = 12;</code>
+     * @return The serviceEventData.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData getServiceEventData();
     /**
@@ -9727,6 +10069,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
+     * @return Whether the interactiveLoginEventData field is set.
      */
     boolean hasInteractiveLoginEventData();
     /**
@@ -9735,6 +10078,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
+     * @return The interactiveLoginEventData.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData getInteractiveLoginEventData();
     /**
@@ -9761,7 +10105,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.AuditEvent}
    */
-  public  static final class AuditEvent extends
+  public static final class AuditEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.AuditEvent)
       AuditEventOrBuilder {
@@ -9772,12 +10116,18 @@ public final class AuditProto {
     }
     private AuditEvent() {
       id_ = "";
-      timestamp_ = 0L;
       accountId_ = "";
       requestId_ = "";
       eventName_ = "";
       sourceIPAddress_ = "";
       eventSource_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AuditEvent();
     }
 
     @java.lang.Override
@@ -9793,7 +10143,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -9900,7 +10249,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9934,7 +10283,8 @@ public final class AuditProto {
     private int actorCase_ = 0;
     private java.lang.Object actor_;
     public enum ActorCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       ACTORCRN(4),
       ACTORSERVICENAME(10),
       ACTOR_NOT_SET(0);
@@ -9943,6 +10293,8 @@ public final class AuditProto {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -9972,7 +10324,8 @@ public final class AuditProto {
     private int eventTypeCase_ = 0;
     private java.lang.Object eventType_;
     public enum EventTypeCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       APIREQUESTDATA(11),
       SERVICEEVENTDATA(12),
       INTERACTIVELOGINEVENTDATA(13),
@@ -9982,6 +10335,8 @@ public final class AuditProto {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -10017,7 +10372,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The id.
      */
+    @java.lang.Override
     public java.lang.String getId() {
       java.lang.Object ref = id_;
       if (ref instanceof java.lang.String) {
@@ -10036,7 +10393,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The bytes for id.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdBytes() {
       java.lang.Object ref = id_;
@@ -10059,7 +10418,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 timestamp = 2;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -10072,7 +10433,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -10091,7 +10454,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -10114,7 +10479,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 5;</code>
+     * @return The requestId.
      */
+    @java.lang.Override
     public java.lang.String getRequestId() {
       java.lang.Object ref = requestId_;
       if (ref instanceof java.lang.String) {
@@ -10133,7 +10500,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 5;</code>
+     * @return The bytes for requestId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRequestIdBytes() {
       java.lang.Object ref = requestId_;
@@ -10156,7 +10525,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 6;</code>
+     * @return The eventName.
      */
+    @java.lang.Override
     public java.lang.String getEventName() {
       java.lang.Object ref = eventName_;
       if (ref instanceof java.lang.String) {
@@ -10175,7 +10546,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 6;</code>
+     * @return The bytes for eventName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventNameBytes() {
       java.lang.Object ref = eventName_;
@@ -10198,7 +10571,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 8;</code>
+     * @return The sourceIPAddress.
      */
+    @java.lang.Override
     public java.lang.String getSourceIPAddress() {
       java.lang.Object ref = sourceIPAddress_;
       if (ref instanceof java.lang.String) {
@@ -10217,7 +10592,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 8;</code>
+     * @return The bytes for sourceIPAddress.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSourceIPAddressBytes() {
       java.lang.Object ref = sourceIPAddress_;
@@ -10241,7 +10618,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 9;</code>
+     * @return The eventSource.
      */
+    @java.lang.Override
     public java.lang.String getEventSource() {
       java.lang.Object ref = eventSource_;
       if (ref instanceof java.lang.String) {
@@ -10261,7 +10640,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 9;</code>
+     * @return The bytes for eventSource.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventSourceBytes() {
       java.lang.Object ref = eventSource_;
@@ -10283,6 +10664,18 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 4;</code>
+     * @return Whether the actorCrn field is set.
+     */
+    public boolean hasActorCrn() {
+      return actorCase_ == 4;
+    }
+    /**
+     * <pre>
+     * The CRN of the actor who initiated this event.
+     * </pre>
+     *
+     * <code>string actorCrn = 4;</code>
+     * @return The actorCrn.
      */
     public java.lang.String getActorCrn() {
       java.lang.Object ref = "";
@@ -10307,6 +10700,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 4;</code>
+     * @return The bytes for actorCrn.
      */
     public com.google.protobuf.ByteString
         getActorCrnBytes() {
@@ -10335,6 +10729,19 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 10;</code>
+     * @return Whether the actorServiceName field is set.
+     */
+    public boolean hasActorServiceName() {
+      return actorCase_ == 10;
+    }
+    /**
+     * <pre>
+     * The name of the service that initiated this event. It must be the name
+     * of a service as enumerated in the CRN definition.
+     * </pre>
+     *
+     * <code>string actorServiceName = 10;</code>
+     * @return The actorServiceName.
      */
     public java.lang.String getActorServiceName() {
       java.lang.Object ref = "";
@@ -10360,6 +10767,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 10;</code>
+     * @return The bytes for actorServiceName.
      */
     public com.google.protobuf.ByteString
         getActorServiceNameBytes() {
@@ -10387,7 +10795,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestData apiRequestData = 11;</code>
+     * @return Whether the apiRequestData field is set.
      */
+    @java.lang.Override
     public boolean hasApiRequestData() {
       return eventTypeCase_ == 11;
     }
@@ -10397,7 +10807,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestData apiRequestData = 11;</code>
+     * @return The apiRequestData.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData getApiRequestData() {
       if (eventTypeCase_ == 11) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData) eventType_;
@@ -10411,6 +10823,7 @@ public final class AuditProto {
      *
      * <code>.audit.ApiRequestData apiRequestData = 11;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestDataOrBuilder getApiRequestDataOrBuilder() {
       if (eventTypeCase_ == 11) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData) eventType_;
@@ -10425,7 +10838,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ServiceEventData serviceEventData = 12;</code>
+     * @return Whether the serviceEventData field is set.
      */
+    @java.lang.Override
     public boolean hasServiceEventData() {
       return eventTypeCase_ == 12;
     }
@@ -10435,7 +10850,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ServiceEventData serviceEventData = 12;</code>
+     * @return The serviceEventData.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData getServiceEventData() {
       if (eventTypeCase_ == 12) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData) eventType_;
@@ -10449,6 +10866,7 @@ public final class AuditProto {
      *
      * <code>.audit.ServiceEventData serviceEventData = 12;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventDataOrBuilder getServiceEventDataOrBuilder() {
       if (eventTypeCase_ == 12) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData) eventType_;
@@ -10463,7 +10881,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
+     * @return Whether the interactiveLoginEventData field is set.
      */
+    @java.lang.Override
     public boolean hasInteractiveLoginEventData() {
       return eventTypeCase_ == 13;
     }
@@ -10473,7 +10893,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
+     * @return The interactiveLoginEventData.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData getInteractiveLoginEventData() {
       if (eventTypeCase_ == 13) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) eventType_;
@@ -10487,6 +10909,7 @@ public final class AuditProto {
      *
      * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventDataOrBuilder getInteractiveLoginEventDataOrBuilder() {
       if (eventTypeCase_ == 13) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) eventType_;
@@ -10508,28 +10931,28 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
       }
       if (timestamp_ != 0L) {
         output.writeInt64(2, timestamp_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
       if (actorCase_ == 4) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, actor_);
       }
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, requestId_);
       }
-      if (!getEventNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, eventName_);
       }
-      if (!getSourceIPAddressBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sourceIPAddress_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, sourceIPAddress_);
       }
-      if (!getEventSourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, eventSource_);
       }
       if (actorCase_ == 10) {
@@ -10553,29 +10976,29 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
       }
       if (timestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, timestamp_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
       if (actorCase_ == 4) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, actor_);
       }
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, requestId_);
       }
-      if (!getEventNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, eventName_);
       }
-      if (!getSourceIPAddressBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sourceIPAddress_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, sourceIPAddress_);
       }
-      if (!getEventSourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, eventSource_);
       }
       if (actorCase_ == 10) {
@@ -10608,57 +11031,52 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent other = (com.cloudera.thunderhead.service.audit.AuditProto.AuditEvent) obj;
 
-      boolean result = true;
-      result = result && getId()
-          .equals(other.getId());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getRequestId()
-          .equals(other.getRequestId());
-      result = result && getEventName()
-          .equals(other.getEventName());
-      result = result && getSourceIPAddress()
-          .equals(other.getSourceIPAddress());
-      result = result && getEventSource()
-          .equals(other.getEventSource());
-      result = result && getActorCase().equals(
-          other.getActorCase());
-      if (!result) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getRequestId()
+          .equals(other.getRequestId())) return false;
+      if (!getEventName()
+          .equals(other.getEventName())) return false;
+      if (!getSourceIPAddress()
+          .equals(other.getSourceIPAddress())) return false;
+      if (!getEventSource()
+          .equals(other.getEventSource())) return false;
+      if (!getActorCase().equals(other.getActorCase())) return false;
       switch (actorCase_) {
         case 4:
-          result = result && getActorCrn()
-              .equals(other.getActorCrn());
+          if (!getActorCrn()
+              .equals(other.getActorCrn())) return false;
           break;
         case 10:
-          result = result && getActorServiceName()
-              .equals(other.getActorServiceName());
+          if (!getActorServiceName()
+              .equals(other.getActorServiceName())) return false;
           break;
         case 0:
         default:
       }
-      result = result && getEventTypeCase().equals(
-          other.getEventTypeCase());
-      if (!result) return false;
+      if (!getEventTypeCase().equals(other.getEventTypeCase())) return false;
       switch (eventTypeCase_) {
         case 11:
-          result = result && getApiRequestData()
-              .equals(other.getApiRequestData());
+          if (!getApiRequestData()
+              .equals(other.getApiRequestData())) return false;
           break;
         case 12:
-          result = result && getServiceEventData()
-              .equals(other.getServiceEventData());
+          if (!getServiceEventData()
+              .equals(other.getServiceEventData())) return false;
           break;
         case 13:
-          result = result && getInteractiveLoginEventData()
-              .equals(other.getInteractiveLoginEventData());
+          if (!getInteractiveLoginEventData()
+              .equals(other.getInteractiveLoginEventData())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10938,35 +11356,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11107,6 +11525,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @return The id.
        */
       public java.lang.String getId() {
         java.lang.Object ref = id_;
@@ -11126,6 +11545,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @return The bytes for id.
        */
       public com.google.protobuf.ByteString
           getIdBytes() {
@@ -11146,6 +11566,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
        */
       public Builder setId(
           java.lang.String value) {
@@ -11163,6 +11585,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearId() {
         
@@ -11176,6 +11599,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
        */
       public Builder setIdBytes(
           com.google.protobuf.ByteString value) {
@@ -11196,7 +11621,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -11206,6 +11633,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -11219,6 +11648,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 timestamp = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -11234,6 +11664,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -11253,6 +11684,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -11273,6 +11705,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -11290,6 +11724,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -11303,6 +11738,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -11323,6 +11760,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 5;</code>
+       * @return The requestId.
        */
       public java.lang.String getRequestId() {
         java.lang.Object ref = requestId_;
@@ -11342,6 +11780,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 5;</code>
+       * @return The bytes for requestId.
        */
       public com.google.protobuf.ByteString
           getRequestIdBytes() {
@@ -11362,6 +11801,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 5;</code>
+       * @param value The requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestId(
           java.lang.String value) {
@@ -11379,6 +11820,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRequestId() {
         
@@ -11392,6 +11834,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 5;</code>
+       * @param value The bytes for requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestIdBytes(
           com.google.protobuf.ByteString value) {
@@ -11412,6 +11856,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 6;</code>
+       * @return The eventName.
        */
       public java.lang.String getEventName() {
         java.lang.Object ref = eventName_;
@@ -11431,6 +11876,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 6;</code>
+       * @return The bytes for eventName.
        */
       public com.google.protobuf.ByteString
           getEventNameBytes() {
@@ -11451,6 +11897,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 6;</code>
+       * @param value The eventName to set.
+       * @return This builder for chaining.
        */
       public Builder setEventName(
           java.lang.String value) {
@@ -11468,6 +11916,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventName() {
         
@@ -11481,6 +11930,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 6;</code>
+       * @param value The bytes for eventName to set.
+       * @return This builder for chaining.
        */
       public Builder setEventNameBytes(
           com.google.protobuf.ByteString value) {
@@ -11501,6 +11952,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 8;</code>
+       * @return The sourceIPAddress.
        */
       public java.lang.String getSourceIPAddress() {
         java.lang.Object ref = sourceIPAddress_;
@@ -11520,6 +11972,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 8;</code>
+       * @return The bytes for sourceIPAddress.
        */
       public com.google.protobuf.ByteString
           getSourceIPAddressBytes() {
@@ -11540,6 +11993,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 8;</code>
+       * @param value The sourceIPAddress to set.
+       * @return This builder for chaining.
        */
       public Builder setSourceIPAddress(
           java.lang.String value) {
@@ -11557,6 +12012,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSourceIPAddress() {
         
@@ -11570,6 +12026,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 8;</code>
+       * @param value The bytes for sourceIPAddress to set.
+       * @return This builder for chaining.
        */
       public Builder setSourceIPAddressBytes(
           com.google.protobuf.ByteString value) {
@@ -11591,6 +12049,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 9;</code>
+       * @return The eventSource.
        */
       public java.lang.String getEventSource() {
         java.lang.Object ref = eventSource_;
@@ -11611,6 +12070,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 9;</code>
+       * @return The bytes for eventSource.
        */
       public com.google.protobuf.ByteString
           getEventSourceBytes() {
@@ -11632,6 +12092,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 9;</code>
+       * @param value The eventSource to set.
+       * @return This builder for chaining.
        */
       public Builder setEventSource(
           java.lang.String value) {
@@ -11650,6 +12112,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventSource() {
         
@@ -11664,6 +12127,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 9;</code>
+       * @param value The bytes for eventSource to set.
+       * @return This builder for chaining.
        */
       public Builder setEventSourceBytes(
           com.google.protobuf.ByteString value) {
@@ -11683,7 +12148,21 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 4;</code>
+       * @return Whether the actorCrn field is set.
        */
+      @java.lang.Override
+      public boolean hasActorCrn() {
+        return actorCase_ == 4;
+      }
+      /**
+       * <pre>
+       * The CRN of the actor who initiated this event.
+       * </pre>
+       *
+       * <code>string actorCrn = 4;</code>
+       * @return The actorCrn.
+       */
+      @java.lang.Override
       public java.lang.String getActorCrn() {
         java.lang.Object ref = "";
         if (actorCase_ == 4) {
@@ -11707,7 +12186,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 4;</code>
+       * @return The bytes for actorCrn.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getActorCrnBytes() {
         java.lang.Object ref = "";
@@ -11732,6 +12213,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 4;</code>
+       * @param value The actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrn(
           java.lang.String value) {
@@ -11749,6 +12232,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActorCrn() {
         if (actorCase_ == 4) {
@@ -11764,6 +12248,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 4;</code>
+       * @param value The bytes for actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -11784,7 +12270,22 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 10;</code>
+       * @return Whether the actorServiceName field is set.
        */
+      @java.lang.Override
+      public boolean hasActorServiceName() {
+        return actorCase_ == 10;
+      }
+      /**
+       * <pre>
+       * The name of the service that initiated this event. It must be the name
+       * of a service as enumerated in the CRN definition.
+       * </pre>
+       *
+       * <code>string actorServiceName = 10;</code>
+       * @return The actorServiceName.
+       */
+      @java.lang.Override
       public java.lang.String getActorServiceName() {
         java.lang.Object ref = "";
         if (actorCase_ == 10) {
@@ -11809,7 +12310,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 10;</code>
+       * @return The bytes for actorServiceName.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getActorServiceNameBytes() {
         java.lang.Object ref = "";
@@ -11835,6 +12338,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 10;</code>
+       * @param value The actorServiceName to set.
+       * @return This builder for chaining.
        */
       public Builder setActorServiceName(
           java.lang.String value) {
@@ -11853,6 +12358,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActorServiceName() {
         if (actorCase_ == 10) {
@@ -11869,6 +12375,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 10;</code>
+       * @param value The bytes for actorServiceName to set.
+       * @return This builder for chaining.
        */
       public Builder setActorServiceNameBytes(
           com.google.protobuf.ByteString value) {
@@ -11890,7 +12398,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ApiRequestData apiRequestData = 11;</code>
+       * @return Whether the apiRequestData field is set.
        */
+      @java.lang.Override
       public boolean hasApiRequestData() {
         return eventTypeCase_ == 11;
       }
@@ -11900,7 +12410,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ApiRequestData apiRequestData = 11;</code>
+       * @return The apiRequestData.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData getApiRequestData() {
         if (apiRequestDataBuilder_ == null) {
           if (eventTypeCase_ == 11) {
@@ -12018,6 +12530,7 @@ public final class AuditProto {
        *
        * <code>.audit.ApiRequestData apiRequestData = 11;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestDataOrBuilder getApiRequestDataOrBuilder() {
         if ((eventTypeCase_ == 11) && (apiRequestDataBuilder_ != null)) {
           return apiRequestDataBuilder_.getMessageOrBuilder();
@@ -12062,7 +12575,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ServiceEventData serviceEventData = 12;</code>
+       * @return Whether the serviceEventData field is set.
        */
+      @java.lang.Override
       public boolean hasServiceEventData() {
         return eventTypeCase_ == 12;
       }
@@ -12072,7 +12587,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ServiceEventData serviceEventData = 12;</code>
+       * @return The serviceEventData.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData getServiceEventData() {
         if (serviceEventDataBuilder_ == null) {
           if (eventTypeCase_ == 12) {
@@ -12190,6 +12707,7 @@ public final class AuditProto {
        *
        * <code>.audit.ServiceEventData serviceEventData = 12;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventDataOrBuilder getServiceEventDataOrBuilder() {
         if ((eventTypeCase_ == 12) && (serviceEventDataBuilder_ != null)) {
           return serviceEventDataBuilder_.getMessageOrBuilder();
@@ -12234,7 +12752,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
+       * @return Whether the interactiveLoginEventData field is set.
        */
+      @java.lang.Override
       public boolean hasInteractiveLoginEventData() {
         return eventTypeCase_ == 13;
       }
@@ -12244,7 +12764,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
+       * @return The interactiveLoginEventData.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData getInteractiveLoginEventData() {
         if (interactiveLoginEventDataBuilder_ == null) {
           if (eventTypeCase_ == 13) {
@@ -12362,6 +12884,7 @@ public final class AuditProto {
        *
        * <code>.audit.InteractiveLoginEventData interactiveLoginEventData = 13;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventDataOrBuilder getInteractiveLoginEventDataOrBuilder() {
         if ((eventTypeCase_ == 13) && (interactiveLoginEventDataBuilder_ != null)) {
           return interactiveLoginEventDataBuilder_.getMessageOrBuilder();
@@ -12400,7 +12923,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12461,6 +12984,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 1;</code>
+     * @return The detailsVersion.
      */
     java.lang.String getDetailsVersion();
     /**
@@ -12470,6 +12994,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 1;</code>
+     * @return The bytes for detailsVersion.
      */
     com.google.protobuf.ByteString
         getDetailsVersionBytes();
@@ -12485,6 +13010,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventDetails = 2;</code>
+     * @return The eventDetails.
      */
     java.lang.String getEventDetails();
     /**
@@ -12498,6 +13024,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventDetails = 2;</code>
+     * @return The bytes for eventDetails.
      */
     com.google.protobuf.ByteString
         getEventDetailsBytes();
@@ -12511,7 +13038,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ServiceEventData}
    */
-  public  static final class ServiceEventData extends
+  public static final class ServiceEventData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ServiceEventData)
       ServiceEventDataOrBuilder {
@@ -12523,6 +13050,13 @@ public final class AuditProto {
     private ServiceEventData() {
       detailsVersion_ = "";
       eventDetails_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ServiceEventData();
     }
 
     @java.lang.Override
@@ -12538,7 +13072,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -12562,7 +13095,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -12602,7 +13135,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 1;</code>
+     * @return The detailsVersion.
      */
+    @java.lang.Override
     public java.lang.String getDetailsVersion() {
       java.lang.Object ref = detailsVersion_;
       if (ref instanceof java.lang.String) {
@@ -12622,7 +13157,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 1;</code>
+     * @return The bytes for detailsVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDetailsVersionBytes() {
       java.lang.Object ref = detailsVersion_;
@@ -12650,7 +13187,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventDetails = 2;</code>
+     * @return The eventDetails.
      */
+    @java.lang.Override
     public java.lang.String getEventDetails() {
       java.lang.Object ref = eventDetails_;
       if (ref instanceof java.lang.String) {
@@ -12674,7 +13213,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventDetails = 2;</code>
+     * @return The bytes for eventDetails.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventDetailsBytes() {
       java.lang.Object ref = eventDetails_;
@@ -12703,10 +13244,10 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getDetailsVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(detailsVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, detailsVersion_);
       }
-      if (!getEventDetailsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventDetails_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, eventDetails_);
       }
       unknownFields.writeTo(output);
@@ -12718,10 +13259,10 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getDetailsVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(detailsVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, detailsVersion_);
       }
-      if (!getEventDetailsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventDetails_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, eventDetails_);
       }
       size += unknownFields.getSerializedSize();
@@ -12739,13 +13280,12 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData other = (com.cloudera.thunderhead.service.audit.AuditProto.ServiceEventData) obj;
 
-      boolean result = true;
-      result = result && getDetailsVersion()
-          .equals(other.getDetailsVersion());
-      result = result && getEventDetails()
-          .equals(other.getEventDetails());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getDetailsVersion()
+          .equals(other.getDetailsVersion())) return false;
+      if (!getEventDetails()
+          .equals(other.getEventDetails())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -12936,35 +13476,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13023,6 +13563,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 1;</code>
+       * @return The detailsVersion.
        */
       public java.lang.String getDetailsVersion() {
         java.lang.Object ref = detailsVersion_;
@@ -13043,6 +13584,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 1;</code>
+       * @return The bytes for detailsVersion.
        */
       public com.google.protobuf.ByteString
           getDetailsVersionBytes() {
@@ -13064,6 +13606,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 1;</code>
+       * @param value The detailsVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setDetailsVersion(
           java.lang.String value) {
@@ -13082,6 +13626,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDetailsVersion() {
         
@@ -13096,6 +13641,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 1;</code>
+       * @param value The bytes for detailsVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setDetailsVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -13121,6 +13668,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventDetails = 2;</code>
+       * @return The eventDetails.
        */
       public java.lang.String getEventDetails() {
         java.lang.Object ref = eventDetails_;
@@ -13145,6 +13693,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventDetails = 2;</code>
+       * @return The bytes for eventDetails.
        */
       public com.google.protobuf.ByteString
           getEventDetailsBytes() {
@@ -13170,6 +13719,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventDetails = 2;</code>
+       * @param value The eventDetails to set.
+       * @return This builder for chaining.
        */
       public Builder setEventDetails(
           java.lang.String value) {
@@ -13192,6 +13743,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventDetails = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventDetails() {
         
@@ -13210,6 +13762,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventDetails = 2;</code>
+       * @param value The bytes for eventDetails to set.
+       * @return This builder for chaining.
        */
       public Builder setEventDetailsBytes(
           com.google.protobuf.ByteString value) {
@@ -13225,7 +13779,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -13285,6 +13839,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The requestParameters.
      */
     java.lang.String getRequestParameters();
     /**
@@ -13293,6 +13848,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The bytes for requestParameters.
      */
     com.google.protobuf.ByteString
         getRequestParametersBytes();
@@ -13303,6 +13859,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool mutating = 2;</code>
+     * @return The mutating.
      */
     boolean getMutating();
 
@@ -13312,6 +13869,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 3;</code>
+     * @return The apiVersion.
      */
     java.lang.String getApiVersion();
     /**
@@ -13320,6 +13878,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 3;</code>
+     * @return The bytes for apiVersion.
      */
     com.google.protobuf.ByteString
         getApiVersionBytes();
@@ -13330,6 +13889,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 4;</code>
+     * @return The userAgent.
      */
     java.lang.String getUserAgent();
     /**
@@ -13338,6 +13898,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 4;</code>
+     * @return The bytes for userAgent.
      */
     com.google.protobuf.ByteString
         getUserAgentBytes();
@@ -13350,7 +13911,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ApiRequestData}
    */
-  public  static final class ApiRequestData extends
+  public static final class ApiRequestData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ApiRequestData)
       ApiRequestDataOrBuilder {
@@ -13361,9 +13922,15 @@ public final class AuditProto {
     }
     private ApiRequestData() {
       requestParameters_ = "";
-      mutating_ = false;
       apiVersion_ = "";
       userAgent_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ApiRequestData();
     }
 
     @java.lang.Override
@@ -13379,7 +13946,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -13414,7 +13980,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -13453,7 +14019,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The requestParameters.
      */
+    @java.lang.Override
     public java.lang.String getRequestParameters() {
       java.lang.Object ref = requestParameters_;
       if (ref instanceof java.lang.String) {
@@ -13472,7 +14040,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The bytes for requestParameters.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRequestParametersBytes() {
       java.lang.Object ref = requestParameters_;
@@ -13495,7 +14065,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool mutating = 2;</code>
+     * @return The mutating.
      */
+    @java.lang.Override
     public boolean getMutating() {
       return mutating_;
     }
@@ -13508,7 +14080,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 3;</code>
+     * @return The apiVersion.
      */
+    @java.lang.Override
     public java.lang.String getApiVersion() {
       java.lang.Object ref = apiVersion_;
       if (ref instanceof java.lang.String) {
@@ -13527,7 +14101,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 3;</code>
+     * @return The bytes for apiVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getApiVersionBytes() {
       java.lang.Object ref = apiVersion_;
@@ -13550,7 +14126,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 4;</code>
+     * @return The userAgent.
      */
+    @java.lang.Override
     public java.lang.String getUserAgent() {
       java.lang.Object ref = userAgent_;
       if (ref instanceof java.lang.String) {
@@ -13569,7 +14147,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 4;</code>
+     * @return The bytes for userAgent.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserAgentBytes() {
       java.lang.Object ref = userAgent_;
@@ -13598,16 +14178,16 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getRequestParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestParameters_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestParameters_);
       }
       if (mutating_ != false) {
         output.writeBool(2, mutating_);
       }
-      if (!getApiVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(apiVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, apiVersion_);
       }
-      if (!getUserAgentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, userAgent_);
       }
       unknownFields.writeTo(output);
@@ -13619,17 +14199,17 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getRequestParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestParameters_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestParameters_);
       }
       if (mutating_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(2, mutating_);
       }
-      if (!getApiVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(apiVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, apiVersion_);
       }
-      if (!getUserAgentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, userAgent_);
       }
       size += unknownFields.getSerializedSize();
@@ -13647,17 +14227,16 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData other = (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestData) obj;
 
-      boolean result = true;
-      result = result && getRequestParameters()
-          .equals(other.getRequestParameters());
-      result = result && (getMutating()
-          == other.getMutating());
-      result = result && getApiVersion()
-          .equals(other.getApiVersion());
-      result = result && getUserAgent()
-          .equals(other.getUserAgent());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getRequestParameters()
+          .equals(other.getRequestParameters())) return false;
+      if (getMutating()
+          != other.getMutating()) return false;
+      if (!getApiVersion()
+          .equals(other.getApiVersion())) return false;
+      if (!getUserAgent()
+          .equals(other.getUserAgent())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -13858,35 +14437,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -13951,6 +14530,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @return The requestParameters.
        */
       public java.lang.String getRequestParameters() {
         java.lang.Object ref = requestParameters_;
@@ -13970,6 +14550,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @return The bytes for requestParameters.
        */
       public com.google.protobuf.ByteString
           getRequestParametersBytes() {
@@ -13990,6 +14571,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @param value The requestParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestParameters(
           java.lang.String value) {
@@ -14007,6 +14590,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRequestParameters() {
         
@@ -14020,6 +14604,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @param value The bytes for requestParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestParametersBytes(
           com.google.protobuf.ByteString value) {
@@ -14040,7 +14626,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool mutating = 2;</code>
+       * @return The mutating.
        */
+      @java.lang.Override
       public boolean getMutating() {
         return mutating_;
       }
@@ -14050,6 +14638,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool mutating = 2;</code>
+       * @param value The mutating to set.
+       * @return This builder for chaining.
        */
       public Builder setMutating(boolean value) {
         
@@ -14063,6 +14653,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool mutating = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMutating() {
         
@@ -14078,6 +14669,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 3;</code>
+       * @return The apiVersion.
        */
       public java.lang.String getApiVersion() {
         java.lang.Object ref = apiVersion_;
@@ -14097,6 +14689,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 3;</code>
+       * @return The bytes for apiVersion.
        */
       public com.google.protobuf.ByteString
           getApiVersionBytes() {
@@ -14117,6 +14710,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 3;</code>
+       * @param value The apiVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setApiVersion(
           java.lang.String value) {
@@ -14134,6 +14729,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearApiVersion() {
         
@@ -14147,6 +14743,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 3;</code>
+       * @param value The bytes for apiVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setApiVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -14167,6 +14765,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 4;</code>
+       * @return The userAgent.
        */
       public java.lang.String getUserAgent() {
         java.lang.Object ref = userAgent_;
@@ -14186,6 +14785,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 4;</code>
+       * @return The bytes for userAgent.
        */
       public com.google.protobuf.ByteString
           getUserAgentBytes() {
@@ -14206,6 +14806,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 4;</code>
+       * @param value The userAgent to set.
+       * @return This builder for chaining.
        */
       public Builder setUserAgent(
           java.lang.String value) {
@@ -14223,6 +14825,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserAgent() {
         
@@ -14236,6 +14839,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 4;</code>
+       * @param value The bytes for userAgent to set.
+       * @return This builder for chaining.
        */
       public Builder setUserAgentBytes(
           com.google.protobuf.ByteString value) {
@@ -14251,7 +14856,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -14313,6 +14918,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The identityProviderCrn.
      */
     java.lang.String getIdentityProviderCrn();
     /**
@@ -14323,6 +14929,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The bytes for identityProviderCrn.
      */
     com.google.protobuf.ByteString
         getIdentityProviderCrnBytes();
@@ -14335,6 +14942,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The identityProviderSessionId.
      */
     java.lang.String getIdentityProviderSessionId();
     /**
@@ -14345,6 +14953,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The bytes for identityProviderSessionId.
      */
     com.google.protobuf.ByteString
         getIdentityProviderSessionIdBytes();
@@ -14357,6 +14966,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The identityProviderUserId.
      */
     java.lang.String getIdentityProviderUserId();
     /**
@@ -14367,6 +14977,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The bytes for identityProviderUserId.
      */
     com.google.protobuf.ByteString
         getIdentityProviderUserIdBytes();
@@ -14377,6 +14988,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The email.
      */
     java.lang.String getEmail();
     /**
@@ -14385,6 +14997,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The bytes for email.
      */
     com.google.protobuf.ByteString
         getEmailBytes();
@@ -14395,6 +15008,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The firstName.
      */
     java.lang.String getFirstName();
     /**
@@ -14403,6 +15017,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The bytes for firstName.
      */
     com.google.protobuf.ByteString
         getFirstNameBytes();
@@ -14413,6 +15028,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The lastName.
      */
     java.lang.String getLastName();
     /**
@@ -14421,6 +15037,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The bytes for lastName.
      */
     com.google.protobuf.ByteString
         getLastNameBytes();
@@ -14432,6 +15049,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @return A list containing the groups.
      */
     java.util.List<java.lang.String>
         getGroupsList();
@@ -14442,6 +15060,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @return The count of groups.
      */
     int getGroupsCount();
     /**
@@ -14451,6 +15070,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @param index The index of the element to return.
+     * @return The groups at the given index.
      */
     java.lang.String getGroups(int index);
     /**
@@ -14460,6 +15081,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the groups at the given index.
      */
     com.google.protobuf.ByteString
         getGroupsBytes(int index);
@@ -14470,6 +15093,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string azureObjectId = 9;</code>
+     * @return The azureObjectId.
      */
     java.lang.String getAzureObjectId();
     /**
@@ -14478,6 +15102,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string azureObjectId = 9;</code>
+     * @return The bytes for azureObjectId.
      */
     com.google.protobuf.ByteString
         getAzureObjectIdBytes();
@@ -14490,7 +15115,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.InteractiveLoginEventData}
    */
-  public  static final class InteractiveLoginEventData extends
+  public static final class InteractiveLoginEventData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.InteractiveLoginEventData)
       InteractiveLoginEventDataOrBuilder {
@@ -14508,6 +15133,13 @@ public final class AuditProto {
       lastName_ = "";
       groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       azureObjectId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new InteractiveLoginEventData();
     }
 
     @java.lang.Override
@@ -14572,9 +15204,9 @@ public final class AuditProto {
             }
             case 66: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 groups_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000040;
+                mutable_bitField0_ |= 0x00000001;
               }
               groups_.add(s);
               break;
@@ -14586,7 +15218,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -14600,7 +15232,7 @@ public final class AuditProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000040) == 0x00000040)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           groups_ = groups_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -14620,7 +15252,6 @@ public final class AuditProto {
               com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData.class, com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData.Builder.class);
     }
 
-    private int bitField0_;
     public static final int IDENTITYPROVIDERCRN_FIELD_NUMBER = 1;
     private volatile java.lang.Object identityProviderCrn_;
     /**
@@ -14631,7 +15262,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The identityProviderCrn.
      */
+    @java.lang.Override
     public java.lang.String getIdentityProviderCrn() {
       java.lang.Object ref = identityProviderCrn_;
       if (ref instanceof java.lang.String) {
@@ -14652,7 +15285,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The bytes for identityProviderCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdentityProviderCrnBytes() {
       java.lang.Object ref = identityProviderCrn_;
@@ -14677,7 +15312,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The identityProviderSessionId.
      */
+    @java.lang.Override
     public java.lang.String getIdentityProviderSessionId() {
       java.lang.Object ref = identityProviderSessionId_;
       if (ref instanceof java.lang.String) {
@@ -14698,7 +15335,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The bytes for identityProviderSessionId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdentityProviderSessionIdBytes() {
       java.lang.Object ref = identityProviderSessionId_;
@@ -14723,7 +15362,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The identityProviderUserId.
      */
+    @java.lang.Override
     public java.lang.String getIdentityProviderUserId() {
       java.lang.Object ref = identityProviderUserId_;
       if (ref instanceof java.lang.String) {
@@ -14744,7 +15385,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The bytes for identityProviderUserId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdentityProviderUserIdBytes() {
       java.lang.Object ref = identityProviderUserId_;
@@ -14767,7 +15410,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The email.
      */
+    @java.lang.Override
     public java.lang.String getEmail() {
       java.lang.Object ref = email_;
       if (ref instanceof java.lang.String) {
@@ -14786,7 +15431,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The bytes for email.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEmailBytes() {
       java.lang.Object ref = email_;
@@ -14809,7 +15456,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The firstName.
      */
+    @java.lang.Override
     public java.lang.String getFirstName() {
       java.lang.Object ref = firstName_;
       if (ref instanceof java.lang.String) {
@@ -14828,7 +15477,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The bytes for firstName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFirstNameBytes() {
       java.lang.Object ref = firstName_;
@@ -14851,7 +15502,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The lastName.
      */
+    @java.lang.Override
     public java.lang.String getLastName() {
       java.lang.Object ref = lastName_;
       if (ref instanceof java.lang.String) {
@@ -14870,7 +15523,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The bytes for lastName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getLastNameBytes() {
       java.lang.Object ref = lastName_;
@@ -14894,6 +15549,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @return A list containing the groups.
      */
     public com.google.protobuf.ProtocolStringList
         getGroupsList() {
@@ -14906,6 +15562,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @return The count of groups.
      */
     public int getGroupsCount() {
       return groups_.size();
@@ -14917,6 +15574,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @param index The index of the element to return.
+     * @return The groups at the given index.
      */
     public java.lang.String getGroups(int index) {
       return groups_.get(index);
@@ -14928,6 +15587,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 8;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the groups at the given index.
      */
     public com.google.protobuf.ByteString
         getGroupsBytes(int index) {
@@ -14942,7 +15603,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string azureObjectId = 9;</code>
+     * @return The azureObjectId.
      */
+    @java.lang.Override
     public java.lang.String getAzureObjectId() {
       java.lang.Object ref = azureObjectId_;
       if (ref instanceof java.lang.String) {
@@ -14961,7 +15624,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string azureObjectId = 9;</code>
+     * @return The bytes for azureObjectId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAzureObjectIdBytes() {
       java.lang.Object ref = azureObjectId_;
@@ -14990,28 +15655,28 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getIdentityProviderCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, identityProviderCrn_);
       }
-      if (!getIdentityProviderSessionIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderSessionId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, identityProviderSessionId_);
       }
-      if (!getIdentityProviderUserIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderUserId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, identityProviderUserId_);
       }
-      if (!getEmailBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(email_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, email_);
       }
-      if (!getFirstNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(firstName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, firstName_);
       }
-      if (!getLastNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lastName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, lastName_);
       }
       for (int i = 0; i < groups_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, groups_.getRaw(i));
       }
-      if (!getAzureObjectIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(azureObjectId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, azureObjectId_);
       }
       unknownFields.writeTo(output);
@@ -15023,22 +15688,22 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getIdentityProviderCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, identityProviderCrn_);
       }
-      if (!getIdentityProviderSessionIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderSessionId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, identityProviderSessionId_);
       }
-      if (!getIdentityProviderUserIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderUserId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, identityProviderUserId_);
       }
-      if (!getEmailBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(email_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, email_);
       }
-      if (!getFirstNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(firstName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, firstName_);
       }
-      if (!getLastNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lastName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, lastName_);
       }
       {
@@ -15049,7 +15714,7 @@ public final class AuditProto {
         size += dataSize;
         size += 1 * getGroupsList().size();
       }
-      if (!getAzureObjectIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(azureObjectId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, azureObjectId_);
       }
       size += unknownFields.getSerializedSize();
@@ -15067,25 +15732,24 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData other = (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData) obj;
 
-      boolean result = true;
-      result = result && getIdentityProviderCrn()
-          .equals(other.getIdentityProviderCrn());
-      result = result && getIdentityProviderSessionId()
-          .equals(other.getIdentityProviderSessionId());
-      result = result && getIdentityProviderUserId()
-          .equals(other.getIdentityProviderUserId());
-      result = result && getEmail()
-          .equals(other.getEmail());
-      result = result && getFirstName()
-          .equals(other.getFirstName());
-      result = result && getLastName()
-          .equals(other.getLastName());
-      result = result && getGroupsList()
-          .equals(other.getGroupsList());
-      result = result && getAzureObjectId()
-          .equals(other.getAzureObjectId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getIdentityProviderCrn()
+          .equals(other.getIdentityProviderCrn())) return false;
+      if (!getIdentityProviderSessionId()
+          .equals(other.getIdentityProviderSessionId())) return false;
+      if (!getIdentityProviderUserId()
+          .equals(other.getIdentityProviderUserId())) return false;
+      if (!getEmail()
+          .equals(other.getEmail())) return false;
+      if (!getFirstName()
+          .equals(other.getFirstName())) return false;
+      if (!getLastName()
+          .equals(other.getLastName())) return false;
+      if (!getGroupsList()
+          .equals(other.getGroupsList())) return false;
+      if (!getAzureObjectId()
+          .equals(other.getAzureObjectId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -15264,7 +15928,7 @@ public final class AuditProto {
         lastName_ = "";
 
         groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000001);
         azureObjectId_ = "";
 
         return this;
@@ -15294,55 +15958,53 @@ public final class AuditProto {
       public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData buildPartial() {
         com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData result = new com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventData(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.identityProviderCrn_ = identityProviderCrn_;
         result.identityProviderSessionId_ = identityProviderSessionId_;
         result.identityProviderUserId_ = identityProviderUserId_;
         result.email_ = email_;
         result.firstName_ = firstName_;
         result.lastName_ = lastName_;
-        if (((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           groups_ = groups_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000040);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.groups_ = groups_;
         result.azureObjectId_ = azureObjectId_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -15383,7 +16045,7 @@ public final class AuditProto {
         if (!other.groups_.isEmpty()) {
           if (groups_.isEmpty()) {
             groups_ = other.groups_;
-            bitField0_ = (bitField0_ & ~0x00000040);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureGroupsIsMutable();
             groups_.addAll(other.groups_);
@@ -15433,6 +16095,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @return The identityProviderCrn.
        */
       public java.lang.String getIdentityProviderCrn() {
         java.lang.Object ref = identityProviderCrn_;
@@ -15454,6 +16117,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @return The bytes for identityProviderCrn.
        */
       public com.google.protobuf.ByteString
           getIdentityProviderCrnBytes() {
@@ -15476,6 +16140,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @param value The identityProviderCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderCrn(
           java.lang.String value) {
@@ -15495,6 +16161,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIdentityProviderCrn() {
         
@@ -15510,6 +16177,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @param value The bytes for identityProviderCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -15532,6 +16201,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @return The identityProviderSessionId.
        */
       public java.lang.String getIdentityProviderSessionId() {
         java.lang.Object ref = identityProviderSessionId_;
@@ -15553,6 +16223,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @return The bytes for identityProviderSessionId.
        */
       public com.google.protobuf.ByteString
           getIdentityProviderSessionIdBytes() {
@@ -15575,6 +16246,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @param value The identityProviderSessionId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderSessionId(
           java.lang.String value) {
@@ -15594,6 +16267,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIdentityProviderSessionId() {
         
@@ -15609,6 +16283,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @param value The bytes for identityProviderSessionId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderSessionIdBytes(
           com.google.protobuf.ByteString value) {
@@ -15631,6 +16307,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @return The identityProviderUserId.
        */
       public java.lang.String getIdentityProviderUserId() {
         java.lang.Object ref = identityProviderUserId_;
@@ -15652,6 +16329,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @return The bytes for identityProviderUserId.
        */
       public com.google.protobuf.ByteString
           getIdentityProviderUserIdBytes() {
@@ -15674,6 +16352,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @param value The identityProviderUserId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderUserId(
           java.lang.String value) {
@@ -15693,6 +16373,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIdentityProviderUserId() {
         
@@ -15708,6 +16389,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @param value The bytes for identityProviderUserId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderUserIdBytes(
           com.google.protobuf.ByteString value) {
@@ -15728,6 +16411,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @return The email.
        */
       public java.lang.String getEmail() {
         java.lang.Object ref = email_;
@@ -15747,6 +16431,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @return The bytes for email.
        */
       public com.google.protobuf.ByteString
           getEmailBytes() {
@@ -15767,6 +16452,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @param value The email to set.
+       * @return This builder for chaining.
        */
       public Builder setEmail(
           java.lang.String value) {
@@ -15784,6 +16471,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEmail() {
         
@@ -15797,6 +16485,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @param value The bytes for email to set.
+       * @return This builder for chaining.
        */
       public Builder setEmailBytes(
           com.google.protobuf.ByteString value) {
@@ -15817,6 +16507,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @return The firstName.
        */
       public java.lang.String getFirstName() {
         java.lang.Object ref = firstName_;
@@ -15836,6 +16527,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @return The bytes for firstName.
        */
       public com.google.protobuf.ByteString
           getFirstNameBytes() {
@@ -15856,6 +16548,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @param value The firstName to set.
+       * @return This builder for chaining.
        */
       public Builder setFirstName(
           java.lang.String value) {
@@ -15873,6 +16567,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFirstName() {
         
@@ -15886,6 +16581,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @param value The bytes for firstName to set.
+       * @return This builder for chaining.
        */
       public Builder setFirstNameBytes(
           com.google.protobuf.ByteString value) {
@@ -15906,6 +16603,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @return The lastName.
        */
       public java.lang.String getLastName() {
         java.lang.Object ref = lastName_;
@@ -15925,6 +16623,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @return The bytes for lastName.
        */
       public com.google.protobuf.ByteString
           getLastNameBytes() {
@@ -15945,6 +16644,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @param value The lastName to set.
+       * @return This builder for chaining.
        */
       public Builder setLastName(
           java.lang.String value) {
@@ -15962,6 +16663,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLastName() {
         
@@ -15975,6 +16677,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @param value The bytes for lastName to set.
+       * @return This builder for chaining.
        */
       public Builder setLastNameBytes(
           com.google.protobuf.ByteString value) {
@@ -15990,9 +16694,9 @@ public final class AuditProto {
 
       private com.google.protobuf.LazyStringList groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureGroupsIsMutable() {
-        if (!((bitField0_ & 0x00000040) == 0x00000040)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           groups_ = new com.google.protobuf.LazyStringArrayList(groups_);
-          bitField0_ |= 0x00000040;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -16002,6 +16706,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @return A list containing the groups.
        */
       public com.google.protobuf.ProtocolStringList
           getGroupsList() {
@@ -16014,6 +16719,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @return The count of groups.
        */
       public int getGroupsCount() {
         return groups_.size();
@@ -16025,6 +16731,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @param index The index of the element to return.
+       * @return The groups at the given index.
        */
       public java.lang.String getGroups(int index) {
         return groups_.get(index);
@@ -16036,6 +16744,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the groups at the given index.
        */
       public com.google.protobuf.ByteString
           getGroupsBytes(int index) {
@@ -16048,6 +16758,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @param index The index to set the value at.
+       * @param value The groups to set.
+       * @return This builder for chaining.
        */
       public Builder setGroups(
           int index, java.lang.String value) {
@@ -16066,6 +16779,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @param value The groups to add.
+       * @return This builder for chaining.
        */
       public Builder addGroups(
           java.lang.String value) {
@@ -16084,6 +16799,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @param values The groups to add.
+       * @return This builder for chaining.
        */
       public Builder addAllGroups(
           java.lang.Iterable<java.lang.String> values) {
@@ -16100,10 +16817,11 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGroups() {
         groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000040);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -16114,6 +16832,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 8;</code>
+       * @param value The bytes of the groups to add.
+       * @return This builder for chaining.
        */
       public Builder addGroupsBytes(
           com.google.protobuf.ByteString value) {
@@ -16134,6 +16854,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string azureObjectId = 9;</code>
+       * @return The azureObjectId.
        */
       public java.lang.String getAzureObjectId() {
         java.lang.Object ref = azureObjectId_;
@@ -16153,6 +16874,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string azureObjectId = 9;</code>
+       * @return The bytes for azureObjectId.
        */
       public com.google.protobuf.ByteString
           getAzureObjectIdBytes() {
@@ -16173,6 +16895,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string azureObjectId = 9;</code>
+       * @param value The azureObjectId to set.
+       * @return This builder for chaining.
        */
       public Builder setAzureObjectId(
           java.lang.String value) {
@@ -16190,6 +16914,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string azureObjectId = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAzureObjectId() {
         
@@ -16203,6 +16928,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string azureObjectId = 9;</code>
+       * @param value The bytes for azureObjectId to set.
+       * @return This builder for chaining.
        */
       public Builder setAzureObjectIdBytes(
           com.google.protobuf.ByteString value) {
@@ -16218,7 +16945,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -16278,6 +17005,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The id.
      */
     java.lang.String getId();
     /**
@@ -16286,6 +17014,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The bytes for id.
      */
     com.google.protobuf.ByteString
         getIdBytes();
@@ -16296,6 +17025,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 resultTimestamp = 11;</code>
+     * @return The resultTimestamp.
      */
     long getResultTimestamp();
 
@@ -16305,6 +17035,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 12;</code>
+     * @return The resultCode.
      */
     java.lang.String getResultCode();
     /**
@@ -16313,6 +17044,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 12;</code>
+     * @return The bytes for resultCode.
      */
     com.google.protobuf.ByteString
         getResultCodeBytes();
@@ -16324,6 +17056,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 14;</code>
+     * @return The resultMessage.
      */
     java.lang.String getResultMessage();
     /**
@@ -16333,6 +17066,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 14;</code>
+     * @return The bytes for resultMessage.
      */
     com.google.protobuf.ByteString
         getResultMessageBytes();
@@ -16343,6 +17077,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
+     * @return Whether the resultApiRequestData field is set.
      */
     boolean hasResultApiRequestData();
     /**
@@ -16351,6 +17086,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
+     * @return The resultApiRequestData.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData getResultApiRequestData();
     /**
@@ -16368,6 +17104,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
+     * @return Whether the resultServiceEventData field is set.
      */
     boolean hasResultServiceEventData();
     /**
@@ -16376,6 +17113,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
+     * @return The resultServiceEventData.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData getResultServiceEventData();
     /**
@@ -16393,6 +17131,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
+     * @return Whether the resultInteractiveLoginEventData field is set.
      */
     boolean hasResultInteractiveLoginEventData();
     /**
@@ -16401,6 +17140,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
+     * @return The resultInteractiveLoginEventData.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData getResultInteractiveLoginEventData();
     /**
@@ -16421,7 +17161,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.AttemptAuditEventResult}
    */
-  public  static final class AttemptAuditEventResult extends
+  public static final class AttemptAuditEventResult extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.AttemptAuditEventResult)
       AttemptAuditEventResultOrBuilder {
@@ -16432,9 +17172,15 @@ public final class AuditProto {
     }
     private AttemptAuditEventResult() {
       id_ = "";
-      resultTimestamp_ = 0L;
       resultCode_ = "";
       resultMessage_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new AttemptAuditEventResult();
     }
 
     @java.lang.Override
@@ -16450,7 +17196,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -16527,7 +17272,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -16561,7 +17306,8 @@ public final class AuditProto {
     private int eventTypeCase_ = 0;
     private java.lang.Object eventType_;
     public enum EventTypeCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       RESULTAPIREQUESTDATA(15),
       RESULTSERVICEEVENTDATA(16),
       RESULTINTERACTIVELOGINEVENTDATA(17),
@@ -16571,6 +17317,8 @@ public final class AuditProto {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -16606,7 +17354,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The id.
      */
+    @java.lang.Override
     public java.lang.String getId() {
       java.lang.Object ref = id_;
       if (ref instanceof java.lang.String) {
@@ -16625,7 +17375,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 1;</code>
+     * @return The bytes for id.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdBytes() {
       java.lang.Object ref = id_;
@@ -16648,7 +17400,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 resultTimestamp = 11;</code>
+     * @return The resultTimestamp.
      */
+    @java.lang.Override
     public long getResultTimestamp() {
       return resultTimestamp_;
     }
@@ -16661,7 +17415,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 12;</code>
+     * @return The resultCode.
      */
+    @java.lang.Override
     public java.lang.String getResultCode() {
       java.lang.Object ref = resultCode_;
       if (ref instanceof java.lang.String) {
@@ -16680,7 +17436,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 12;</code>
+     * @return The bytes for resultCode.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResultCodeBytes() {
       java.lang.Object ref = resultCode_;
@@ -16704,7 +17462,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 14;</code>
+     * @return The resultMessage.
      */
+    @java.lang.Override
     public java.lang.String getResultMessage() {
       java.lang.Object ref = resultMessage_;
       if (ref instanceof java.lang.String) {
@@ -16724,7 +17484,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 14;</code>
+     * @return The bytes for resultMessage.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResultMessageBytes() {
       java.lang.Object ref = resultMessage_;
@@ -16746,7 +17508,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
+     * @return Whether the resultApiRequestData field is set.
      */
+    @java.lang.Override
     public boolean hasResultApiRequestData() {
       return eventTypeCase_ == 15;
     }
@@ -16756,7 +17520,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
+     * @return The resultApiRequestData.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData getResultApiRequestData() {
       if (eventTypeCase_ == 15) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData) eventType_;
@@ -16770,6 +17536,7 @@ public final class AuditProto {
      *
      * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestDataOrBuilder getResultApiRequestDataOrBuilder() {
       if (eventTypeCase_ == 15) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData) eventType_;
@@ -16784,7 +17551,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
+     * @return Whether the resultServiceEventData field is set.
      */
+    @java.lang.Override
     public boolean hasResultServiceEventData() {
       return eventTypeCase_ == 16;
     }
@@ -16794,7 +17563,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
+     * @return The resultServiceEventData.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData getResultServiceEventData() {
       if (eventTypeCase_ == 16) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData) eventType_;
@@ -16808,6 +17579,7 @@ public final class AuditProto {
      *
      * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventDataOrBuilder getResultServiceEventDataOrBuilder() {
       if (eventTypeCase_ == 16) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData) eventType_;
@@ -16822,7 +17594,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
+     * @return Whether the resultInteractiveLoginEventData field is set.
      */
+    @java.lang.Override
     public boolean hasResultInteractiveLoginEventData() {
       return eventTypeCase_ == 17;
     }
@@ -16832,7 +17606,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
+     * @return The resultInteractiveLoginEventData.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData getResultInteractiveLoginEventData() {
       if (eventTypeCase_ == 17) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) eventType_;
@@ -16846,6 +17622,7 @@ public final class AuditProto {
      *
      * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventDataOrBuilder getResultInteractiveLoginEventDataOrBuilder() {
       if (eventTypeCase_ == 17) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) eventType_;
@@ -16867,16 +17644,16 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, id_);
       }
       if (resultTimestamp_ != 0L) {
         output.writeInt64(11, resultTimestamp_);
       }
-      if (!getResultCodeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultCode_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 12, resultCode_);
       }
-      if (!getResultMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultMessage_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 14, resultMessage_);
       }
       if (eventTypeCase_ == 15) {
@@ -16897,17 +17674,17 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, id_);
       }
       if (resultTimestamp_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(11, resultTimestamp_);
       }
-      if (!getResultCodeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultCode_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(12, resultCode_);
       }
-      if (!getResultMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultMessage_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, resultMessage_);
       }
       if (eventTypeCase_ == 15) {
@@ -16937,36 +17714,33 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult other = (com.cloudera.thunderhead.service.audit.AuditProto.AttemptAuditEventResult) obj;
 
-      boolean result = true;
-      result = result && getId()
-          .equals(other.getId());
-      result = result && (getResultTimestamp()
-          == other.getResultTimestamp());
-      result = result && getResultCode()
-          .equals(other.getResultCode());
-      result = result && getResultMessage()
-          .equals(other.getResultMessage());
-      result = result && getEventTypeCase().equals(
-          other.getEventTypeCase());
-      if (!result) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (getResultTimestamp()
+          != other.getResultTimestamp()) return false;
+      if (!getResultCode()
+          .equals(other.getResultCode())) return false;
+      if (!getResultMessage()
+          .equals(other.getResultMessage())) return false;
+      if (!getEventTypeCase().equals(other.getEventTypeCase())) return false;
       switch (eventTypeCase_) {
         case 15:
-          result = result && getResultApiRequestData()
-              .equals(other.getResultApiRequestData());
+          if (!getResultApiRequestData()
+              .equals(other.getResultApiRequestData())) return false;
           break;
         case 16:
-          result = result && getResultServiceEventData()
-              .equals(other.getResultServiceEventData());
+          if (!getResultServiceEventData()
+              .equals(other.getResultServiceEventData())) return false;
           break;
         case 17:
-          result = result && getResultInteractiveLoginEventData()
-              .equals(other.getResultInteractiveLoginEventData());
+          if (!getResultInteractiveLoginEventData()
+              .equals(other.getResultInteractiveLoginEventData())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -17206,35 +17980,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -17331,6 +18105,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @return The id.
        */
       public java.lang.String getId() {
         java.lang.Object ref = id_;
@@ -17350,6 +18125,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @return The bytes for id.
        */
       public com.google.protobuf.ByteString
           getIdBytes() {
@@ -17370,6 +18146,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
        */
       public Builder setId(
           java.lang.String value) {
@@ -17387,6 +18165,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearId() {
         
@@ -17400,6 +18179,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 1;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
        */
       public Builder setIdBytes(
           com.google.protobuf.ByteString value) {
@@ -17420,7 +18201,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 resultTimestamp = 11;</code>
+       * @return The resultTimestamp.
        */
+      @java.lang.Override
       public long getResultTimestamp() {
         return resultTimestamp_;
       }
@@ -17430,6 +18213,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 resultTimestamp = 11;</code>
+       * @param value The resultTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setResultTimestamp(long value) {
         
@@ -17443,6 +18228,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 resultTimestamp = 11;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResultTimestamp() {
         
@@ -17458,6 +18244,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 12;</code>
+       * @return The resultCode.
        */
       public java.lang.String getResultCode() {
         java.lang.Object ref = resultCode_;
@@ -17477,6 +18264,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 12;</code>
+       * @return The bytes for resultCode.
        */
       public com.google.protobuf.ByteString
           getResultCodeBytes() {
@@ -17497,6 +18285,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 12;</code>
+       * @param value The resultCode to set.
+       * @return This builder for chaining.
        */
       public Builder setResultCode(
           java.lang.String value) {
@@ -17514,6 +18304,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 12;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResultCode() {
         
@@ -17527,6 +18318,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 12;</code>
+       * @param value The bytes for resultCode to set.
+       * @return This builder for chaining.
        */
       public Builder setResultCodeBytes(
           com.google.protobuf.ByteString value) {
@@ -17548,6 +18341,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 14;</code>
+       * @return The resultMessage.
        */
       public java.lang.String getResultMessage() {
         java.lang.Object ref = resultMessage_;
@@ -17568,6 +18362,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 14;</code>
+       * @return The bytes for resultMessage.
        */
       public com.google.protobuf.ByteString
           getResultMessageBytes() {
@@ -17589,6 +18384,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 14;</code>
+       * @param value The resultMessage to set.
+       * @return This builder for chaining.
        */
       public Builder setResultMessage(
           java.lang.String value) {
@@ -17607,6 +18404,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResultMessage() {
         
@@ -17621,6 +18419,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 14;</code>
+       * @param value The bytes for resultMessage to set.
+       * @return This builder for chaining.
        */
       public Builder setResultMessageBytes(
           com.google.protobuf.ByteString value) {
@@ -17642,7 +18442,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
+       * @return Whether the resultApiRequestData field is set.
        */
+      @java.lang.Override
       public boolean hasResultApiRequestData() {
         return eventTypeCase_ == 15;
       }
@@ -17652,7 +18454,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
+       * @return The resultApiRequestData.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData getResultApiRequestData() {
         if (resultApiRequestDataBuilder_ == null) {
           if (eventTypeCase_ == 15) {
@@ -17770,6 +18574,7 @@ public final class AuditProto {
        *
        * <code>.audit.ResultApiRequestData resultApiRequestData = 15;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestDataOrBuilder getResultApiRequestDataOrBuilder() {
         if ((eventTypeCase_ == 15) && (resultApiRequestDataBuilder_ != null)) {
           return resultApiRequestDataBuilder_.getMessageOrBuilder();
@@ -17814,7 +18619,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
+       * @return Whether the resultServiceEventData field is set.
        */
+      @java.lang.Override
       public boolean hasResultServiceEventData() {
         return eventTypeCase_ == 16;
       }
@@ -17824,7 +18631,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
+       * @return The resultServiceEventData.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData getResultServiceEventData() {
         if (resultServiceEventDataBuilder_ == null) {
           if (eventTypeCase_ == 16) {
@@ -17942,6 +18751,7 @@ public final class AuditProto {
        *
        * <code>.audit.ResultServiceEventData resultServiceEventData = 16;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventDataOrBuilder getResultServiceEventDataOrBuilder() {
         if ((eventTypeCase_ == 16) && (resultServiceEventDataBuilder_ != null)) {
           return resultServiceEventDataBuilder_.getMessageOrBuilder();
@@ -17986,7 +18796,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
+       * @return Whether the resultInteractiveLoginEventData field is set.
        */
+      @java.lang.Override
       public boolean hasResultInteractiveLoginEventData() {
         return eventTypeCase_ == 17;
       }
@@ -17996,7 +18808,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
+       * @return The resultInteractiveLoginEventData.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData getResultInteractiveLoginEventData() {
         if (resultInteractiveLoginEventDataBuilder_ == null) {
           if (eventTypeCase_ == 17) {
@@ -18114,6 +18928,7 @@ public final class AuditProto {
        *
        * <code>.audit.ResultInteractiveLoginEventData resultInteractiveLoginEventData = 17;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventDataOrBuilder getResultInteractiveLoginEventDataOrBuilder() {
         if ((eventTypeCase_ == 17) && (resultInteractiveLoginEventDataBuilder_ != null)) {
           return resultInteractiveLoginEventDataBuilder_.getMessageOrBuilder();
@@ -18152,7 +18967,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -18212,6 +19027,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 1;</code>
+     * @return The responseParameters.
      */
     java.lang.String getResponseParameters();
     /**
@@ -18220,6 +19036,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 1;</code>
+     * @return The bytes for responseParameters.
      */
     com.google.protobuf.ByteString
         getResponseParametersBytes();
@@ -18232,7 +19049,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ResultApiRequestData}
    */
-  public  static final class ResultApiRequestData extends
+  public static final class ResultApiRequestData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ResultApiRequestData)
       ResultApiRequestDataOrBuilder {
@@ -18243,6 +19060,13 @@ public final class AuditProto {
     }
     private ResultApiRequestData() {
       responseParameters_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ResultApiRequestData();
     }
 
     @java.lang.Override
@@ -18258,7 +19082,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -18276,7 +19099,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -18315,7 +19138,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 1;</code>
+     * @return The responseParameters.
      */
+    @java.lang.Override
     public java.lang.String getResponseParameters() {
       java.lang.Object ref = responseParameters_;
       if (ref instanceof java.lang.String) {
@@ -18334,7 +19159,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 1;</code>
+     * @return The bytes for responseParameters.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResponseParametersBytes() {
       java.lang.Object ref = responseParameters_;
@@ -18363,7 +19190,7 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getResponseParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(responseParameters_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, responseParameters_);
       }
       unknownFields.writeTo(output);
@@ -18375,7 +19202,7 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getResponseParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(responseParameters_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, responseParameters_);
       }
       size += unknownFields.getSerializedSize();
@@ -18393,11 +19220,10 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData other = (com.cloudera.thunderhead.service.audit.AuditProto.ResultApiRequestData) obj;
 
-      boolean result = true;
-      result = result && getResponseParameters()
-          .equals(other.getResponseParameters());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getResponseParameters()
+          .equals(other.getResponseParameters())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -18582,35 +19408,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -18664,6 +19490,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 1;</code>
+       * @return The responseParameters.
        */
       public java.lang.String getResponseParameters() {
         java.lang.Object ref = responseParameters_;
@@ -18683,6 +19510,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 1;</code>
+       * @return The bytes for responseParameters.
        */
       public com.google.protobuf.ByteString
           getResponseParametersBytes() {
@@ -18703,6 +19531,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 1;</code>
+       * @param value The responseParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setResponseParameters(
           java.lang.String value) {
@@ -18720,6 +19550,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResponseParameters() {
         
@@ -18733,6 +19564,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 1;</code>
+       * @param value The bytes for responseParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setResponseParametersBytes(
           com.google.protobuf.ByteString value) {
@@ -18748,7 +19581,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -18808,6 +19641,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @return A list containing the resourceCrn.
      */
     java.util.List<java.lang.String>
         getResourceCrnList();
@@ -18817,6 +19651,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @return The count of resourceCrn.
      */
     int getResourceCrnCount();
     /**
@@ -18825,6 +19660,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @param index The index of the element to return.
+     * @return The resourceCrn at the given index.
      */
     java.lang.String getResourceCrn(int index);
     /**
@@ -18833,6 +19670,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the resourceCrn at the given index.
      */
     com.google.protobuf.ByteString
         getResourceCrnBytes(int index);
@@ -18850,6 +19689,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultDetails = 2;</code>
+     * @return The resultDetails.
      */
     java.lang.String getResultDetails();
     /**
@@ -18865,6 +19705,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultDetails = 2;</code>
+     * @return The bytes for resultDetails.
      */
     com.google.protobuf.ByteString
         getResultDetailsBytes();
@@ -18878,7 +19719,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ResultServiceEventData}
    */
-  public  static final class ResultServiceEventData extends
+  public static final class ResultServiceEventData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ResultServiceEventData)
       ResultServiceEventDataOrBuilder {
@@ -18890,6 +19731,13 @@ public final class AuditProto {
     private ResultServiceEventData() {
       resourceCrn_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       resultDetails_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ResultServiceEventData();
     }
 
     @java.lang.Override
@@ -18918,7 +19766,7 @@ public final class AuditProto {
               break;
             case 10: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 resourceCrn_ = new com.google.protobuf.LazyStringArrayList();
                 mutable_bitField0_ |= 0x00000001;
               }
@@ -18932,7 +19780,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -18946,7 +19794,7 @@ public final class AuditProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           resourceCrn_ = resourceCrn_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -18966,7 +19814,6 @@ public final class AuditProto {
               com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData.class, com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData.Builder.class);
     }
 
-    private int bitField0_;
     public static final int RESOURCECRN_FIELD_NUMBER = 1;
     private com.google.protobuf.LazyStringList resourceCrn_;
     /**
@@ -18975,6 +19822,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @return A list containing the resourceCrn.
      */
     public com.google.protobuf.ProtocolStringList
         getResourceCrnList() {
@@ -18986,6 +19834,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @return The count of resourceCrn.
      */
     public int getResourceCrnCount() {
       return resourceCrn_.size();
@@ -18996,6 +19845,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @param index The index of the element to return.
+     * @return The resourceCrn at the given index.
      */
     public java.lang.String getResourceCrn(int index) {
       return resourceCrn_.get(index);
@@ -19006,6 +19857,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 1;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the resourceCrn at the given index.
      */
     public com.google.protobuf.ByteString
         getResourceCrnBytes(int index) {
@@ -19027,7 +19880,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultDetails = 2;</code>
+     * @return The resultDetails.
      */
+    @java.lang.Override
     public java.lang.String getResultDetails() {
       java.lang.Object ref = resultDetails_;
       if (ref instanceof java.lang.String) {
@@ -19053,7 +19908,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultDetails = 2;</code>
+     * @return The bytes for resultDetails.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResultDetailsBytes() {
       java.lang.Object ref = resultDetails_;
@@ -19085,7 +19942,7 @@ public final class AuditProto {
       for (int i = 0; i < resourceCrn_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, resourceCrn_.getRaw(i));
       }
-      if (!getResultDetailsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultDetails_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resultDetails_);
       }
       unknownFields.writeTo(output);
@@ -19105,7 +19962,7 @@ public final class AuditProto {
         size += dataSize;
         size += 1 * getResourceCrnList().size();
       }
-      if (!getResultDetailsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultDetails_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, resultDetails_);
       }
       size += unknownFields.getSerializedSize();
@@ -19123,13 +19980,12 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData other = (com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData) obj;
 
-      boolean result = true;
-      result = result && getResourceCrnList()
-          .equals(other.getResourceCrnList());
-      result = result && getResultDetails()
-          .equals(other.getResultDetails());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getResourceCrnList()
+          .equals(other.getResourceCrnList())) return false;
+      if (!getResultDetails()
+          .equals(other.getResultDetails())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -19315,49 +20171,47 @@ public final class AuditProto {
       public com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData buildPartial() {
         com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData result = new com.cloudera.thunderhead.service.audit.AuditProto.ResultServiceEventData(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           resourceCrn_ = resourceCrn_.getUnmodifiableView();
           bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.resourceCrn_ = resourceCrn_;
         result.resultDetails_ = resultDetails_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -19417,7 +20271,7 @@ public final class AuditProto {
 
       private com.google.protobuf.LazyStringList resourceCrn_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureResourceCrnIsMutable() {
-        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           resourceCrn_ = new com.google.protobuf.LazyStringArrayList(resourceCrn_);
           bitField0_ |= 0x00000001;
          }
@@ -19428,6 +20282,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @return A list containing the resourceCrn.
        */
       public com.google.protobuf.ProtocolStringList
           getResourceCrnList() {
@@ -19439,6 +20294,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @return The count of resourceCrn.
        */
       public int getResourceCrnCount() {
         return resourceCrn_.size();
@@ -19449,6 +20305,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @param index The index of the element to return.
+       * @return The resourceCrn at the given index.
        */
       public java.lang.String getResourceCrn(int index) {
         return resourceCrn_.get(index);
@@ -19459,6 +20317,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the resourceCrn at the given index.
        */
       public com.google.protobuf.ByteString
           getResourceCrnBytes(int index) {
@@ -19470,6 +20330,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @param index The index to set the value at.
+       * @param value The resourceCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setResourceCrn(
           int index, java.lang.String value) {
@@ -19487,6 +20350,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @param value The resourceCrn to add.
+       * @return This builder for chaining.
        */
       public Builder addResourceCrn(
           java.lang.String value) {
@@ -19504,6 +20369,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @param values The resourceCrn to add.
+       * @return This builder for chaining.
        */
       public Builder addAllResourceCrn(
           java.lang.Iterable<java.lang.String> values) {
@@ -19519,6 +20386,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResourceCrn() {
         resourceCrn_ = com.google.protobuf.LazyStringArrayList.EMPTY;
@@ -19532,6 +20400,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 1;</code>
+       * @param value The bytes of the resourceCrn to add.
+       * @return This builder for chaining.
        */
       public Builder addResourceCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -19559,6 +20429,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultDetails = 2;</code>
+       * @return The resultDetails.
        */
       public java.lang.String getResultDetails() {
         java.lang.Object ref = resultDetails_;
@@ -19585,6 +20456,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultDetails = 2;</code>
+       * @return The bytes for resultDetails.
        */
       public com.google.protobuf.ByteString
           getResultDetailsBytes() {
@@ -19612,6 +20484,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultDetails = 2;</code>
+       * @param value The resultDetails to set.
+       * @return This builder for chaining.
        */
       public Builder setResultDetails(
           java.lang.String value) {
@@ -19636,6 +20510,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultDetails = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResultDetails() {
         
@@ -19656,6 +20531,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultDetails = 2;</code>
+       * @param value The bytes for resultDetails to set.
+       * @return This builder for chaining.
        */
       public Builder setResultDetailsBytes(
           com.google.protobuf.ByteString value) {
@@ -19671,7 +20548,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -19732,6 +20609,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool accountAdmin = 1;</code>
+     * @return The accountAdmin.
      */
     boolean getAccountAdmin();
 
@@ -19741,6 +20619,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -19749,6 +20628,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -19761,7 +20641,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ResultInteractiveLoginEventData}
    */
-  public  static final class ResultInteractiveLoginEventData extends
+  public static final class ResultInteractiveLoginEventData extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ResultInteractiveLoginEventData)
       ResultInteractiveLoginEventDataOrBuilder {
@@ -19771,8 +20651,14 @@ public final class AuditProto {
       super(builder);
     }
     private ResultInteractiveLoginEventData() {
-      accountAdmin_ = false;
       userCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ResultInteractiveLoginEventData();
     }
 
     @java.lang.Override
@@ -19788,7 +20674,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -19811,7 +20696,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -19851,7 +20736,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool accountAdmin = 1;</code>
+     * @return The accountAdmin.
      */
+    @java.lang.Override
     public boolean getAccountAdmin() {
       return accountAdmin_;
     }
@@ -19864,7 +20751,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -19883,7 +20772,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 2;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -19915,7 +20806,7 @@ public final class AuditProto {
       if (accountAdmin_ != false) {
         output.writeBool(1, accountAdmin_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, userCrn_);
       }
       unknownFields.writeTo(output);
@@ -19931,7 +20822,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(1, accountAdmin_);
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, userCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -19949,13 +20840,12 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData other = (com.cloudera.thunderhead.service.audit.AuditProto.ResultInteractiveLoginEventData) obj;
 
-      boolean result = true;
-      result = result && (getAccountAdmin()
-          == other.getAccountAdmin());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getAccountAdmin()
+          != other.getAccountAdmin()) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -20146,35 +21036,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -20232,7 +21122,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool accountAdmin = 1;</code>
+       * @return The accountAdmin.
        */
+      @java.lang.Override
       public boolean getAccountAdmin() {
         return accountAdmin_;
       }
@@ -20243,6 +21135,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool accountAdmin = 1;</code>
+       * @param value The accountAdmin to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountAdmin(boolean value) {
         
@@ -20257,6 +21151,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool accountAdmin = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountAdmin() {
         
@@ -20272,6 +21167,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -20291,6 +21187,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -20311,6 +21208,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -20328,6 +21227,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -20341,6 +21241,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 2;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -20356,7 +21258,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -20416,6 +21318,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The requestParameters.
      */
     java.lang.String getRequestParameters();
     /**
@@ -20424,6 +21327,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The bytes for requestParameters.
      */
     com.google.protobuf.ByteString
         getRequestParametersBytes();
@@ -20434,6 +21338,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 2;</code>
+     * @return The responseParameters.
      */
     java.lang.String getResponseParameters();
     /**
@@ -20442,6 +21347,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 2;</code>
+     * @return The bytes for responseParameters.
      */
     com.google.protobuf.ByteString
         getResponseParametersBytes();
@@ -20452,6 +21358,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool mutating = 3;</code>
+     * @return The mutating.
      */
     boolean getMutating();
 
@@ -20461,6 +21368,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 4;</code>
+     * @return The apiVersion.
      */
     java.lang.String getApiVersion();
     /**
@@ -20469,6 +21377,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 4;</code>
+     * @return The bytes for apiVersion.
      */
     com.google.protobuf.ByteString
         getApiVersionBytes();
@@ -20479,6 +21388,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The sourceIPAddress.
      */
     java.lang.String getSourceIPAddress();
     /**
@@ -20487,6 +21397,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The bytes for sourceIPAddress.
      */
     com.google.protobuf.ByteString
         getSourceIPAddressBytes();
@@ -20497,6 +21408,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 6;</code>
+     * @return The userAgent.
      */
     java.lang.String getUserAgent();
     /**
@@ -20505,6 +21417,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 6;</code>
+     * @return The bytes for userAgent.
      */
     com.google.protobuf.ByteString
         getUserAgentBytes();
@@ -20518,7 +21431,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ApiRequestEvent}
    */
-  public  static final class ApiRequestEvent extends
+  public static final class ApiRequestEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ApiRequestEvent)
       ApiRequestEventOrBuilder {
@@ -20530,10 +21443,16 @@ public final class AuditProto {
     private ApiRequestEvent() {
       requestParameters_ = "";
       responseParameters_ = "";
-      mutating_ = false;
       apiVersion_ = "";
       sourceIPAddress_ = "";
       userAgent_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ApiRequestEvent();
     }
 
     @java.lang.Override
@@ -20549,7 +21468,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -20596,7 +21514,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -20635,7 +21553,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The requestParameters.
      */
+    @java.lang.Override
     public java.lang.String getRequestParameters() {
       java.lang.Object ref = requestParameters_;
       if (ref instanceof java.lang.String) {
@@ -20654,7 +21574,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestParameters = 1;</code>
+     * @return The bytes for requestParameters.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRequestParametersBytes() {
       java.lang.Object ref = requestParameters_;
@@ -20677,7 +21599,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 2;</code>
+     * @return The responseParameters.
      */
+    @java.lang.Override
     public java.lang.String getResponseParameters() {
       java.lang.Object ref = responseParameters_;
       if (ref instanceof java.lang.String) {
@@ -20696,7 +21620,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string responseParameters = 2;</code>
+     * @return The bytes for responseParameters.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResponseParametersBytes() {
       java.lang.Object ref = responseParameters_;
@@ -20719,7 +21645,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool mutating = 3;</code>
+     * @return The mutating.
      */
+    @java.lang.Override
     public boolean getMutating() {
       return mutating_;
     }
@@ -20732,7 +21660,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 4;</code>
+     * @return The apiVersion.
      */
+    @java.lang.Override
     public java.lang.String getApiVersion() {
       java.lang.Object ref = apiVersion_;
       if (ref instanceof java.lang.String) {
@@ -20751,7 +21681,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string apiVersion = 4;</code>
+     * @return The bytes for apiVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getApiVersionBytes() {
       java.lang.Object ref = apiVersion_;
@@ -20774,7 +21706,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The sourceIPAddress.
      */
+    @java.lang.Override
     public java.lang.String getSourceIPAddress() {
       java.lang.Object ref = sourceIPAddress_;
       if (ref instanceof java.lang.String) {
@@ -20793,7 +21727,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The bytes for sourceIPAddress.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSourceIPAddressBytes() {
       java.lang.Object ref = sourceIPAddress_;
@@ -20816,7 +21752,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 6;</code>
+     * @return The userAgent.
      */
+    @java.lang.Override
     public java.lang.String getUserAgent() {
       java.lang.Object ref = userAgent_;
       if (ref instanceof java.lang.String) {
@@ -20835,7 +21773,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userAgent = 6;</code>
+     * @return The bytes for userAgent.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserAgentBytes() {
       java.lang.Object ref = userAgent_;
@@ -20864,22 +21804,22 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getRequestParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestParameters_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, requestParameters_);
       }
-      if (!getResponseParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(responseParameters_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, responseParameters_);
       }
       if (mutating_ != false) {
         output.writeBool(3, mutating_);
       }
-      if (!getApiVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(apiVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, apiVersion_);
       }
-      if (!getSourceIPAddressBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sourceIPAddress_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, sourceIPAddress_);
       }
-      if (!getUserAgentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, userAgent_);
       }
       unknownFields.writeTo(output);
@@ -20891,23 +21831,23 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getRequestParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestParameters_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, requestParameters_);
       }
-      if (!getResponseParametersBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(responseParameters_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, responseParameters_);
       }
       if (mutating_ != false) {
         size += com.google.protobuf.CodedOutputStream
           .computeBoolSize(3, mutating_);
       }
-      if (!getApiVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(apiVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, apiVersion_);
       }
-      if (!getSourceIPAddressBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sourceIPAddress_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, sourceIPAddress_);
       }
-      if (!getUserAgentBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userAgent_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, userAgent_);
       }
       size += unknownFields.getSerializedSize();
@@ -20925,21 +21865,20 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent other = (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent) obj;
 
-      boolean result = true;
-      result = result && getRequestParameters()
-          .equals(other.getRequestParameters());
-      result = result && getResponseParameters()
-          .equals(other.getResponseParameters());
-      result = result && (getMutating()
-          == other.getMutating());
-      result = result && getApiVersion()
-          .equals(other.getApiVersion());
-      result = result && getSourceIPAddress()
-          .equals(other.getSourceIPAddress());
-      result = result && getUserAgent()
-          .equals(other.getUserAgent());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getRequestParameters()
+          .equals(other.getRequestParameters())) return false;
+      if (!getResponseParameters()
+          .equals(other.getResponseParameters())) return false;
+      if (getMutating()
+          != other.getMutating()) return false;
+      if (!getApiVersion()
+          .equals(other.getApiVersion())) return false;
+      if (!getSourceIPAddress()
+          .equals(other.getSourceIPAddress())) return false;
+      if (!getUserAgent()
+          .equals(other.getUserAgent())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -21151,35 +22090,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -21252,6 +22191,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @return The requestParameters.
        */
       public java.lang.String getRequestParameters() {
         java.lang.Object ref = requestParameters_;
@@ -21271,6 +22211,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @return The bytes for requestParameters.
        */
       public com.google.protobuf.ByteString
           getRequestParametersBytes() {
@@ -21291,6 +22232,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @param value The requestParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestParameters(
           java.lang.String value) {
@@ -21308,6 +22251,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRequestParameters() {
         
@@ -21321,6 +22265,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestParameters = 1;</code>
+       * @param value The bytes for requestParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestParametersBytes(
           com.google.protobuf.ByteString value) {
@@ -21341,6 +22287,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 2;</code>
+       * @return The responseParameters.
        */
       public java.lang.String getResponseParameters() {
         java.lang.Object ref = responseParameters_;
@@ -21360,6 +22307,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 2;</code>
+       * @return The bytes for responseParameters.
        */
       public com.google.protobuf.ByteString
           getResponseParametersBytes() {
@@ -21380,6 +22328,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 2;</code>
+       * @param value The responseParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setResponseParameters(
           java.lang.String value) {
@@ -21397,6 +22347,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResponseParameters() {
         
@@ -21410,6 +22361,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string responseParameters = 2;</code>
+       * @param value The bytes for responseParameters to set.
+       * @return This builder for chaining.
        */
       public Builder setResponseParametersBytes(
           com.google.protobuf.ByteString value) {
@@ -21430,7 +22383,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool mutating = 3;</code>
+       * @return The mutating.
        */
+      @java.lang.Override
       public boolean getMutating() {
         return mutating_;
       }
@@ -21440,6 +22395,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool mutating = 3;</code>
+       * @param value The mutating to set.
+       * @return This builder for chaining.
        */
       public Builder setMutating(boolean value) {
         
@@ -21453,6 +22410,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool mutating = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMutating() {
         
@@ -21468,6 +22426,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 4;</code>
+       * @return The apiVersion.
        */
       public java.lang.String getApiVersion() {
         java.lang.Object ref = apiVersion_;
@@ -21487,6 +22446,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 4;</code>
+       * @return The bytes for apiVersion.
        */
       public com.google.protobuf.ByteString
           getApiVersionBytes() {
@@ -21507,6 +22467,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 4;</code>
+       * @param value The apiVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setApiVersion(
           java.lang.String value) {
@@ -21524,6 +22486,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearApiVersion() {
         
@@ -21537,6 +22500,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string apiVersion = 4;</code>
+       * @param value The bytes for apiVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setApiVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -21557,6 +22522,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @return The sourceIPAddress.
        */
       public java.lang.String getSourceIPAddress() {
         java.lang.Object ref = sourceIPAddress_;
@@ -21576,6 +22542,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @return The bytes for sourceIPAddress.
        */
       public com.google.protobuf.ByteString
           getSourceIPAddressBytes() {
@@ -21596,6 +22563,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @param value The sourceIPAddress to set.
+       * @return This builder for chaining.
        */
       public Builder setSourceIPAddress(
           java.lang.String value) {
@@ -21613,6 +22582,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSourceIPAddress() {
         
@@ -21626,6 +22596,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @param value The bytes for sourceIPAddress to set.
+       * @return This builder for chaining.
        */
       public Builder setSourceIPAddressBytes(
           com.google.protobuf.ByteString value) {
@@ -21646,6 +22618,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 6;</code>
+       * @return The userAgent.
        */
       public java.lang.String getUserAgent() {
         java.lang.Object ref = userAgent_;
@@ -21665,6 +22638,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 6;</code>
+       * @return The bytes for userAgent.
        */
       public com.google.protobuf.ByteString
           getUserAgentBytes() {
@@ -21685,6 +22659,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 6;</code>
+       * @param value The userAgent to set.
+       * @return This builder for chaining.
        */
       public Builder setUserAgent(
           java.lang.String value) {
@@ -21702,6 +22678,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserAgent() {
         
@@ -21715,6 +22692,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userAgent = 6;</code>
+       * @param value The bytes for userAgent to set.
+       * @return This builder for chaining.
        */
       public Builder setUserAgentBytes(
           com.google.protobuf.ByteString value) {
@@ -21730,7 +22709,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -21793,6 +22772,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string additionalServiceEventDetails = 1;</code>
+     * @return The additionalServiceEventDetails.
      */
     java.lang.String getAdditionalServiceEventDetails();
     /**
@@ -21804,6 +22784,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string additionalServiceEventDetails = 1;</code>
+     * @return The bytes for additionalServiceEventDetails.
      */
     com.google.protobuf.ByteString
         getAdditionalServiceEventDetailsBytes();
@@ -21814,6 +22795,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @return A list containing the resourceCrn.
      */
     java.util.List<java.lang.String>
         getResourceCrnList();
@@ -21823,6 +22805,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @return The count of resourceCrn.
      */
     int getResourceCrnCount();
     /**
@@ -21831,6 +22814,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @param index The index of the element to return.
+     * @return The resourceCrn at the given index.
      */
     java.lang.String getResourceCrn(int index);
     /**
@@ -21839,6 +22824,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the resourceCrn at the given index.
      */
     com.google.protobuf.ByteString
         getResourceCrnBytes(int index);
@@ -21850,6 +22837,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 3;</code>
+     * @return The detailsVersion.
      */
     java.lang.String getDetailsVersion();
     /**
@@ -21859,6 +22847,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 3;</code>
+     * @return The bytes for detailsVersion.
      */
     com.google.protobuf.ByteString
         getDetailsVersionBytes();
@@ -21873,7 +22862,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.CdpServiceEvent}
    */
-  public  static final class CdpServiceEvent extends
+  public static final class CdpServiceEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.CdpServiceEvent)
       CdpServiceEventOrBuilder {
@@ -21886,6 +22875,13 @@ public final class AuditProto {
       additionalServiceEventDetails_ = "";
       resourceCrn_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       detailsVersion_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CdpServiceEvent();
     }
 
     @java.lang.Override
@@ -21920,9 +22916,9 @@ public final class AuditProto {
             }
             case 18: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 resourceCrn_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               resourceCrn_.add(s);
               break;
@@ -21934,7 +22930,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -21948,7 +22944,7 @@ public final class AuditProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           resourceCrn_ = resourceCrn_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -21968,7 +22964,6 @@ public final class AuditProto {
               com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent.class, com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ADDITIONALSERVICEEVENTDETAILS_FIELD_NUMBER = 1;
     private volatile java.lang.Object additionalServiceEventDetails_;
     /**
@@ -21980,7 +22975,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string additionalServiceEventDetails = 1;</code>
+     * @return The additionalServiceEventDetails.
      */
+    @java.lang.Override
     public java.lang.String getAdditionalServiceEventDetails() {
       java.lang.Object ref = additionalServiceEventDetails_;
       if (ref instanceof java.lang.String) {
@@ -22002,7 +22999,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string additionalServiceEventDetails = 1;</code>
+     * @return The bytes for additionalServiceEventDetails.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAdditionalServiceEventDetailsBytes() {
       java.lang.Object ref = additionalServiceEventDetails_;
@@ -22025,6 +23024,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @return A list containing the resourceCrn.
      */
     public com.google.protobuf.ProtocolStringList
         getResourceCrnList() {
@@ -22036,6 +23036,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @return The count of resourceCrn.
      */
     public int getResourceCrnCount() {
       return resourceCrn_.size();
@@ -22046,6 +23047,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @param index The index of the element to return.
+     * @return The resourceCrn at the given index.
      */
     public java.lang.String getResourceCrn(int index) {
       return resourceCrn_.get(index);
@@ -22056,6 +23059,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string resourceCrn = 2;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the resourceCrn at the given index.
      */
     public com.google.protobuf.ByteString
         getResourceCrnBytes(int index) {
@@ -22071,7 +23076,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 3;</code>
+     * @return The detailsVersion.
      */
+    @java.lang.Override
     public java.lang.String getDetailsVersion() {
       java.lang.Object ref = detailsVersion_;
       if (ref instanceof java.lang.String) {
@@ -22091,7 +23098,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string detailsVersion = 3;</code>
+     * @return The bytes for detailsVersion.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDetailsVersionBytes() {
       java.lang.Object ref = detailsVersion_;
@@ -22120,13 +23129,13 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAdditionalServiceEventDetailsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(additionalServiceEventDetails_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, additionalServiceEventDetails_);
       }
       for (int i = 0; i < resourceCrn_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, resourceCrn_.getRaw(i));
       }
-      if (!getDetailsVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(detailsVersion_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, detailsVersion_);
       }
       unknownFields.writeTo(output);
@@ -22138,7 +23147,7 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAdditionalServiceEventDetailsBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(additionalServiceEventDetails_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, additionalServiceEventDetails_);
       }
       {
@@ -22149,7 +23158,7 @@ public final class AuditProto {
         size += dataSize;
         size += 1 * getResourceCrnList().size();
       }
-      if (!getDetailsVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(detailsVersion_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, detailsVersion_);
       }
       size += unknownFields.getSerializedSize();
@@ -22167,15 +23176,14 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent other = (com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent) obj;
 
-      boolean result = true;
-      result = result && getAdditionalServiceEventDetails()
-          .equals(other.getAdditionalServiceEventDetails());
-      result = result && getResourceCrnList()
-          .equals(other.getResourceCrnList());
-      result = result && getDetailsVersion()
-          .equals(other.getDetailsVersion());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAdditionalServiceEventDetails()
+          .equals(other.getAdditionalServiceEventDetails())) return false;
+      if (!getResourceCrnList()
+          .equals(other.getResourceCrnList())) return false;
+      if (!getDetailsVersion()
+          .equals(other.getDetailsVersion())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -22336,7 +23344,7 @@ public final class AuditProto {
         additionalServiceEventDetails_ = "";
 
         resourceCrn_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         detailsVersion_ = "";
 
         return this;
@@ -22366,50 +23374,48 @@ public final class AuditProto {
       public com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent buildPartial() {
         com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent result = new com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.additionalServiceEventDetails_ = additionalServiceEventDetails_;
-        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           resourceCrn_ = resourceCrn_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.resourceCrn_ = resourceCrn_;
         result.detailsVersion_ = detailsVersion_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -22430,7 +23436,7 @@ public final class AuditProto {
         if (!other.resourceCrn_.isEmpty()) {
           if (resourceCrn_.isEmpty()) {
             resourceCrn_ = other.resourceCrn_;
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureResourceCrnIsMutable();
             resourceCrn_.addAll(other.resourceCrn_);
@@ -22481,6 +23487,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string additionalServiceEventDetails = 1;</code>
+       * @return The additionalServiceEventDetails.
        */
       public java.lang.String getAdditionalServiceEventDetails() {
         java.lang.Object ref = additionalServiceEventDetails_;
@@ -22503,6 +23510,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string additionalServiceEventDetails = 1;</code>
+       * @return The bytes for additionalServiceEventDetails.
        */
       public com.google.protobuf.ByteString
           getAdditionalServiceEventDetailsBytes() {
@@ -22526,6 +23534,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string additionalServiceEventDetails = 1;</code>
+       * @param value The additionalServiceEventDetails to set.
+       * @return This builder for chaining.
        */
       public Builder setAdditionalServiceEventDetails(
           java.lang.String value) {
@@ -22546,6 +23556,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string additionalServiceEventDetails = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAdditionalServiceEventDetails() {
         
@@ -22562,6 +23573,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string additionalServiceEventDetails = 1;</code>
+       * @param value The bytes for additionalServiceEventDetails to set.
+       * @return This builder for chaining.
        */
       public Builder setAdditionalServiceEventDetailsBytes(
           com.google.protobuf.ByteString value) {
@@ -22577,9 +23590,9 @@ public final class AuditProto {
 
       private com.google.protobuf.LazyStringList resourceCrn_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureResourceCrnIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           resourceCrn_ = new com.google.protobuf.LazyStringArrayList(resourceCrn_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -22588,6 +23601,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @return A list containing the resourceCrn.
        */
       public com.google.protobuf.ProtocolStringList
           getResourceCrnList() {
@@ -22599,6 +23613,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @return The count of resourceCrn.
        */
       public int getResourceCrnCount() {
         return resourceCrn_.size();
@@ -22609,6 +23624,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @param index The index of the element to return.
+       * @return The resourceCrn at the given index.
        */
       public java.lang.String getResourceCrn(int index) {
         return resourceCrn_.get(index);
@@ -22619,6 +23636,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the resourceCrn at the given index.
        */
       public com.google.protobuf.ByteString
           getResourceCrnBytes(int index) {
@@ -22630,6 +23649,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @param index The index to set the value at.
+       * @param value The resourceCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setResourceCrn(
           int index, java.lang.String value) {
@@ -22647,6 +23669,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @param value The resourceCrn to add.
+       * @return This builder for chaining.
        */
       public Builder addResourceCrn(
           java.lang.String value) {
@@ -22664,6 +23688,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @param values The resourceCrn to add.
+       * @return This builder for chaining.
        */
       public Builder addAllResourceCrn(
           java.lang.Iterable<java.lang.String> values) {
@@ -22679,10 +23705,11 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResourceCrn() {
         resourceCrn_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000002);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -22692,6 +23719,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string resourceCrn = 2;</code>
+       * @param value The bytes of the resourceCrn to add.
+       * @return This builder for chaining.
        */
       public Builder addResourceCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -22713,6 +23742,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 3;</code>
+       * @return The detailsVersion.
        */
       public java.lang.String getDetailsVersion() {
         java.lang.Object ref = detailsVersion_;
@@ -22733,6 +23763,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 3;</code>
+       * @return The bytes for detailsVersion.
        */
       public com.google.protobuf.ByteString
           getDetailsVersionBytes() {
@@ -22754,6 +23785,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 3;</code>
+       * @param value The detailsVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setDetailsVersion(
           java.lang.String value) {
@@ -22772,6 +23805,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDetailsVersion() {
         
@@ -22786,6 +23820,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string detailsVersion = 3;</code>
+       * @param value The bytes for detailsVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setDetailsVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -22801,7 +23837,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -22863,6 +23899,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The identityProviderCrn.
      */
     java.lang.String getIdentityProviderCrn();
     /**
@@ -22873,6 +23910,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The bytes for identityProviderCrn.
      */
     com.google.protobuf.ByteString
         getIdentityProviderCrnBytes();
@@ -22885,6 +23923,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The identityProviderSessionId.
      */
     java.lang.String getIdentityProviderSessionId();
     /**
@@ -22895,6 +23934,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The bytes for identityProviderSessionId.
      */
     com.google.protobuf.ByteString
         getIdentityProviderSessionIdBytes();
@@ -22907,6 +23947,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The identityProviderUserId.
      */
     java.lang.String getIdentityProviderUserId();
     /**
@@ -22917,6 +23958,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The bytes for identityProviderUserId.
      */
     com.google.protobuf.ByteString
         getIdentityProviderUserIdBytes();
@@ -22927,6 +23969,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The email.
      */
     java.lang.String getEmail();
     /**
@@ -22935,6 +23978,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The bytes for email.
      */
     com.google.protobuf.ByteString
         getEmailBytes();
@@ -22945,6 +23989,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The sourceIPAddress.
      */
     java.lang.String getSourceIPAddress();
     /**
@@ -22953,6 +23998,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The bytes for sourceIPAddress.
      */
     com.google.protobuf.ByteString
         getSourceIPAddressBytes();
@@ -22963,6 +24009,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The firstName.
      */
     java.lang.String getFirstName();
     /**
@@ -22971,6 +24018,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The bytes for firstName.
      */
     com.google.protobuf.ByteString
         getFirstNameBytes();
@@ -22981,6 +24029,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The lastName.
      */
     java.lang.String getLastName();
     /**
@@ -22989,6 +24038,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The bytes for lastName.
      */
     com.google.protobuf.ByteString
         getLastNameBytes();
@@ -23000,6 +24050,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool accountAdmin = 8;</code>
+     * @return The accountAdmin.
      */
     boolean getAccountAdmin();
 
@@ -23010,6 +24061,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @return A list containing the groups.
      */
     java.util.List<java.lang.String>
         getGroupsList();
@@ -23020,6 +24072,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @return The count of groups.
      */
     int getGroupsCount();
     /**
@@ -23029,6 +24082,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @param index The index of the element to return.
+     * @return The groups at the given index.
      */
     java.lang.String getGroups(int index);
     /**
@@ -23038,6 +24093,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the groups at the given index.
      */
     com.google.protobuf.ByteString
         getGroupsBytes(int index);
@@ -23048,6 +24105,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 10;</code>
+     * @return The userCrn.
      */
     java.lang.String getUserCrn();
     /**
@@ -23056,6 +24114,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 10;</code>
+     * @return The bytes for userCrn.
      */
     com.google.protobuf.ByteString
         getUserCrnBytes();
@@ -23071,7 +24130,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.InteractiveLoginEvent}
    */
-  public  static final class InteractiveLoginEvent extends
+  public static final class InteractiveLoginEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.InteractiveLoginEvent)
       InteractiveLoginEventOrBuilder {
@@ -23088,9 +24147,15 @@ public final class AuditProto {
       sourceIPAddress_ = "";
       firstName_ = "";
       lastName_ = "";
-      accountAdmin_ = false;
       groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       userCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new InteractiveLoginEvent();
     }
 
     @java.lang.Override
@@ -23166,9 +24231,9 @@ public final class AuditProto {
             }
             case 74: {
               java.lang.String s = input.readStringRequireUtf8();
-              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 groups_ = new com.google.protobuf.LazyStringArrayList();
-                mutable_bitField0_ |= 0x00000100;
+                mutable_bitField0_ |= 0x00000001;
               }
               groups_.add(s);
               break;
@@ -23180,7 +24245,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -23194,7 +24259,7 @@ public final class AuditProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           groups_ = groups_.getUnmodifiableView();
         }
         this.unknownFields = unknownFields.build();
@@ -23214,7 +24279,6 @@ public final class AuditProto {
               com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent.class, com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent.Builder.class);
     }
 
-    private int bitField0_;
     public static final int IDENTITYPROVIDERCRN_FIELD_NUMBER = 1;
     private volatile java.lang.Object identityProviderCrn_;
     /**
@@ -23225,7 +24289,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The identityProviderCrn.
      */
+    @java.lang.Override
     public java.lang.String getIdentityProviderCrn() {
       java.lang.Object ref = identityProviderCrn_;
       if (ref instanceof java.lang.String) {
@@ -23246,7 +24312,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderCrn = 1;</code>
+     * @return The bytes for identityProviderCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdentityProviderCrnBytes() {
       java.lang.Object ref = identityProviderCrn_;
@@ -23271,7 +24339,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The identityProviderSessionId.
      */
+    @java.lang.Override
     public java.lang.String getIdentityProviderSessionId() {
       java.lang.Object ref = identityProviderSessionId_;
       if (ref instanceof java.lang.String) {
@@ -23292,7 +24362,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderSessionId = 2;</code>
+     * @return The bytes for identityProviderSessionId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdentityProviderSessionIdBytes() {
       java.lang.Object ref = identityProviderSessionId_;
@@ -23317,7 +24389,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The identityProviderUserId.
      */
+    @java.lang.Override
     public java.lang.String getIdentityProviderUserId() {
       java.lang.Object ref = identityProviderUserId_;
       if (ref instanceof java.lang.String) {
@@ -23338,7 +24412,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string identityProviderUserId = 3;</code>
+     * @return The bytes for identityProviderUserId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdentityProviderUserIdBytes() {
       java.lang.Object ref = identityProviderUserId_;
@@ -23361,7 +24437,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The email.
      */
+    @java.lang.Override
     public java.lang.String getEmail() {
       java.lang.Object ref = email_;
       if (ref instanceof java.lang.String) {
@@ -23380,7 +24458,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string email = 4;</code>
+     * @return The bytes for email.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEmailBytes() {
       java.lang.Object ref = email_;
@@ -23403,7 +24483,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The sourceIPAddress.
      */
+    @java.lang.Override
     public java.lang.String getSourceIPAddress() {
       java.lang.Object ref = sourceIPAddress_;
       if (ref instanceof java.lang.String) {
@@ -23422,7 +24504,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string sourceIPAddress = 5;</code>
+     * @return The bytes for sourceIPAddress.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getSourceIPAddressBytes() {
       java.lang.Object ref = sourceIPAddress_;
@@ -23445,7 +24529,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The firstName.
      */
+    @java.lang.Override
     public java.lang.String getFirstName() {
       java.lang.Object ref = firstName_;
       if (ref instanceof java.lang.String) {
@@ -23464,7 +24550,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string firstName = 6;</code>
+     * @return The bytes for firstName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getFirstNameBytes() {
       java.lang.Object ref = firstName_;
@@ -23487,7 +24575,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The lastName.
      */
+    @java.lang.Override
     public java.lang.String getLastName() {
       java.lang.Object ref = lastName_;
       if (ref instanceof java.lang.String) {
@@ -23506,7 +24596,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string lastName = 7;</code>
+     * @return The bytes for lastName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getLastNameBytes() {
       java.lang.Object ref = lastName_;
@@ -23530,7 +24622,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>bool accountAdmin = 8;</code>
+     * @return The accountAdmin.
      */
+    @java.lang.Override
     public boolean getAccountAdmin() {
       return accountAdmin_;
     }
@@ -23544,6 +24638,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @return A list containing the groups.
      */
     public com.google.protobuf.ProtocolStringList
         getGroupsList() {
@@ -23556,6 +24651,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @return The count of groups.
      */
     public int getGroupsCount() {
       return groups_.size();
@@ -23567,6 +24663,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @param index The index of the element to return.
+     * @return The groups at the given index.
      */
     public java.lang.String getGroups(int index) {
       return groups_.get(index);
@@ -23578,6 +24676,8 @@ public final class AuditProto {
      * </pre>
      *
      * <code>repeated string groups = 9;</code>
+     * @param index The index of the value to return.
+     * @return The bytes of the groups at the given index.
      */
     public com.google.protobuf.ByteString
         getGroupsBytes(int index) {
@@ -23592,7 +24692,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 10;</code>
+     * @return The userCrn.
      */
+    @java.lang.Override
     public java.lang.String getUserCrn() {
       java.lang.Object ref = userCrn_;
       if (ref instanceof java.lang.String) {
@@ -23611,7 +24713,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string userCrn = 10;</code>
+     * @return The bytes for userCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getUserCrnBytes() {
       java.lang.Object ref = userCrn_;
@@ -23640,25 +24744,25 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getIdentityProviderCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, identityProviderCrn_);
       }
-      if (!getIdentityProviderSessionIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderSessionId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, identityProviderSessionId_);
       }
-      if (!getIdentityProviderUserIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderUserId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, identityProviderUserId_);
       }
-      if (!getEmailBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(email_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, email_);
       }
-      if (!getSourceIPAddressBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sourceIPAddress_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, sourceIPAddress_);
       }
-      if (!getFirstNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(firstName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 6, firstName_);
       }
-      if (!getLastNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lastName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, lastName_);
       }
       if (accountAdmin_ != false) {
@@ -23667,7 +24771,7 @@ public final class AuditProto {
       for (int i = 0; i < groups_.size(); i++) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, groups_.getRaw(i));
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, userCrn_);
       }
       unknownFields.writeTo(output);
@@ -23679,25 +24783,25 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getIdentityProviderCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, identityProviderCrn_);
       }
-      if (!getIdentityProviderSessionIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderSessionId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, identityProviderSessionId_);
       }
-      if (!getIdentityProviderUserIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(identityProviderUserId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, identityProviderUserId_);
       }
-      if (!getEmailBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(email_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, email_);
       }
-      if (!getSourceIPAddressBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(sourceIPAddress_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, sourceIPAddress_);
       }
-      if (!getFirstNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(firstName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(6, firstName_);
       }
-      if (!getLastNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(lastName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, lastName_);
       }
       if (accountAdmin_ != false) {
@@ -23712,7 +24816,7 @@ public final class AuditProto {
         size += dataSize;
         size += 1 * getGroupsList().size();
       }
-      if (!getUserCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(userCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, userCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -23730,29 +24834,28 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent other = (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) obj;
 
-      boolean result = true;
-      result = result && getIdentityProviderCrn()
-          .equals(other.getIdentityProviderCrn());
-      result = result && getIdentityProviderSessionId()
-          .equals(other.getIdentityProviderSessionId());
-      result = result && getIdentityProviderUserId()
-          .equals(other.getIdentityProviderUserId());
-      result = result && getEmail()
-          .equals(other.getEmail());
-      result = result && getSourceIPAddress()
-          .equals(other.getSourceIPAddress());
-      result = result && getFirstName()
-          .equals(other.getFirstName());
-      result = result && getLastName()
-          .equals(other.getLastName());
-      result = result && (getAccountAdmin()
-          == other.getAccountAdmin());
-      result = result && getGroupsList()
-          .equals(other.getGroupsList());
-      result = result && getUserCrn()
-          .equals(other.getUserCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getIdentityProviderCrn()
+          .equals(other.getIdentityProviderCrn())) return false;
+      if (!getIdentityProviderSessionId()
+          .equals(other.getIdentityProviderSessionId())) return false;
+      if (!getIdentityProviderUserId()
+          .equals(other.getIdentityProviderUserId())) return false;
+      if (!getEmail()
+          .equals(other.getEmail())) return false;
+      if (!getSourceIPAddress()
+          .equals(other.getSourceIPAddress())) return false;
+      if (!getFirstName()
+          .equals(other.getFirstName())) return false;
+      if (!getLastName()
+          .equals(other.getLastName())) return false;
+      if (getAccountAdmin()
+          != other.getAccountAdmin()) return false;
+      if (!getGroupsList()
+          .equals(other.getGroupsList())) return false;
+      if (!getUserCrn()
+          .equals(other.getUserCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -23943,7 +25046,7 @@ public final class AuditProto {
         accountAdmin_ = false;
 
         groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000001);
         userCrn_ = "";
 
         return this;
@@ -23973,7 +25076,6 @@ public final class AuditProto {
       public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent buildPartial() {
         com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent result = new com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.identityProviderCrn_ = identityProviderCrn_;
         result.identityProviderSessionId_ = identityProviderSessionId_;
         result.identityProviderUserId_ = identityProviderUserId_;
@@ -23982,48 +25084,47 @@ public final class AuditProto {
         result.firstName_ = firstName_;
         result.lastName_ = lastName_;
         result.accountAdmin_ = accountAdmin_;
-        if (((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (((bitField0_ & 0x00000001) != 0)) {
           groups_ = groups_.getUnmodifiableView();
-          bitField0_ = (bitField0_ & ~0x00000100);
+          bitField0_ = (bitField0_ & ~0x00000001);
         }
         result.groups_ = groups_;
         result.userCrn_ = userCrn_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -24071,7 +25172,7 @@ public final class AuditProto {
         if (!other.groups_.isEmpty()) {
           if (groups_.isEmpty()) {
             groups_ = other.groups_;
-            bitField0_ = (bitField0_ & ~0x00000100);
+            bitField0_ = (bitField0_ & ~0x00000001);
           } else {
             ensureGroupsIsMutable();
             groups_.addAll(other.groups_);
@@ -24121,6 +25222,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @return The identityProviderCrn.
        */
       public java.lang.String getIdentityProviderCrn() {
         java.lang.Object ref = identityProviderCrn_;
@@ -24142,6 +25244,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @return The bytes for identityProviderCrn.
        */
       public com.google.protobuf.ByteString
           getIdentityProviderCrnBytes() {
@@ -24164,6 +25267,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @param value The identityProviderCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderCrn(
           java.lang.String value) {
@@ -24183,6 +25288,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIdentityProviderCrn() {
         
@@ -24198,6 +25304,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderCrn = 1;</code>
+       * @param value The bytes for identityProviderCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -24220,6 +25328,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @return The identityProviderSessionId.
        */
       public java.lang.String getIdentityProviderSessionId() {
         java.lang.Object ref = identityProviderSessionId_;
@@ -24241,6 +25350,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @return The bytes for identityProviderSessionId.
        */
       public com.google.protobuf.ByteString
           getIdentityProviderSessionIdBytes() {
@@ -24263,6 +25373,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @param value The identityProviderSessionId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderSessionId(
           java.lang.String value) {
@@ -24282,6 +25394,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIdentityProviderSessionId() {
         
@@ -24297,6 +25410,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderSessionId = 2;</code>
+       * @param value The bytes for identityProviderSessionId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderSessionIdBytes(
           com.google.protobuf.ByteString value) {
@@ -24319,6 +25434,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @return The identityProviderUserId.
        */
       public java.lang.String getIdentityProviderUserId() {
         java.lang.Object ref = identityProviderUserId_;
@@ -24340,6 +25456,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @return The bytes for identityProviderUserId.
        */
       public com.google.protobuf.ByteString
           getIdentityProviderUserIdBytes() {
@@ -24362,6 +25479,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @param value The identityProviderUserId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderUserId(
           java.lang.String value) {
@@ -24381,6 +25500,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearIdentityProviderUserId() {
         
@@ -24396,6 +25516,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string identityProviderUserId = 3;</code>
+       * @param value The bytes for identityProviderUserId to set.
+       * @return This builder for chaining.
        */
       public Builder setIdentityProviderUserIdBytes(
           com.google.protobuf.ByteString value) {
@@ -24416,6 +25538,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @return The email.
        */
       public java.lang.String getEmail() {
         java.lang.Object ref = email_;
@@ -24435,6 +25558,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @return The bytes for email.
        */
       public com.google.protobuf.ByteString
           getEmailBytes() {
@@ -24455,6 +25579,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @param value The email to set.
+       * @return This builder for chaining.
        */
       public Builder setEmail(
           java.lang.String value) {
@@ -24472,6 +25598,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEmail() {
         
@@ -24485,6 +25612,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string email = 4;</code>
+       * @param value The bytes for email to set.
+       * @return This builder for chaining.
        */
       public Builder setEmailBytes(
           com.google.protobuf.ByteString value) {
@@ -24505,6 +25634,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @return The sourceIPAddress.
        */
       public java.lang.String getSourceIPAddress() {
         java.lang.Object ref = sourceIPAddress_;
@@ -24524,6 +25654,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @return The bytes for sourceIPAddress.
        */
       public com.google.protobuf.ByteString
           getSourceIPAddressBytes() {
@@ -24544,6 +25675,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @param value The sourceIPAddress to set.
+       * @return This builder for chaining.
        */
       public Builder setSourceIPAddress(
           java.lang.String value) {
@@ -24561,6 +25694,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSourceIPAddress() {
         
@@ -24574,6 +25708,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string sourceIPAddress = 5;</code>
+       * @param value The bytes for sourceIPAddress to set.
+       * @return This builder for chaining.
        */
       public Builder setSourceIPAddressBytes(
           com.google.protobuf.ByteString value) {
@@ -24594,6 +25730,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @return The firstName.
        */
       public java.lang.String getFirstName() {
         java.lang.Object ref = firstName_;
@@ -24613,6 +25750,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @return The bytes for firstName.
        */
       public com.google.protobuf.ByteString
           getFirstNameBytes() {
@@ -24633,6 +25771,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @param value The firstName to set.
+       * @return This builder for chaining.
        */
       public Builder setFirstName(
           java.lang.String value) {
@@ -24650,6 +25790,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFirstName() {
         
@@ -24663,6 +25804,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string firstName = 6;</code>
+       * @param value The bytes for firstName to set.
+       * @return This builder for chaining.
        */
       public Builder setFirstNameBytes(
           com.google.protobuf.ByteString value) {
@@ -24683,6 +25826,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @return The lastName.
        */
       public java.lang.String getLastName() {
         java.lang.Object ref = lastName_;
@@ -24702,6 +25846,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @return The bytes for lastName.
        */
       public com.google.protobuf.ByteString
           getLastNameBytes() {
@@ -24722,6 +25867,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @param value The lastName to set.
+       * @return This builder for chaining.
        */
       public Builder setLastName(
           java.lang.String value) {
@@ -24739,6 +25886,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearLastName() {
         
@@ -24752,6 +25900,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string lastName = 7;</code>
+       * @param value The bytes for lastName to set.
+       * @return This builder for chaining.
        */
       public Builder setLastNameBytes(
           com.google.protobuf.ByteString value) {
@@ -24773,7 +25923,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool accountAdmin = 8;</code>
+       * @return The accountAdmin.
        */
+      @java.lang.Override
       public boolean getAccountAdmin() {
         return accountAdmin_;
       }
@@ -24784,6 +25936,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool accountAdmin = 8;</code>
+       * @param value The accountAdmin to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountAdmin(boolean value) {
         
@@ -24798,6 +25952,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>bool accountAdmin = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountAdmin() {
         
@@ -24808,9 +25963,9 @@ public final class AuditProto {
 
       private com.google.protobuf.LazyStringList groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
       private void ensureGroupsIsMutable() {
-        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           groups_ = new com.google.protobuf.LazyStringArrayList(groups_);
-          bitField0_ |= 0x00000100;
+          bitField0_ |= 0x00000001;
          }
       }
       /**
@@ -24820,6 +25975,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @return A list containing the groups.
        */
       public com.google.protobuf.ProtocolStringList
           getGroupsList() {
@@ -24832,6 +25988,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @return The count of groups.
        */
       public int getGroupsCount() {
         return groups_.size();
@@ -24843,6 +26000,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @param index The index of the element to return.
+       * @return The groups at the given index.
        */
       public java.lang.String getGroups(int index) {
         return groups_.get(index);
@@ -24854,6 +26013,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @param index The index of the value to return.
+       * @return The bytes of the groups at the given index.
        */
       public com.google.protobuf.ByteString
           getGroupsBytes(int index) {
@@ -24866,6 +26027,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @param index The index to set the value at.
+       * @param value The groups to set.
+       * @return This builder for chaining.
        */
       public Builder setGroups(
           int index, java.lang.String value) {
@@ -24884,6 +26048,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @param value The groups to add.
+       * @return This builder for chaining.
        */
       public Builder addGroups(
           java.lang.String value) {
@@ -24902,6 +26068,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @param values The groups to add.
+       * @return This builder for chaining.
        */
       public Builder addAllGroups(
           java.lang.Iterable<java.lang.String> values) {
@@ -24918,10 +26086,11 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGroups() {
         groups_ = com.google.protobuf.LazyStringArrayList.EMPTY;
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000001);
         onChanged();
         return this;
       }
@@ -24932,6 +26101,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>repeated string groups = 9;</code>
+       * @param value The bytes of the groups to add.
+       * @return This builder for chaining.
        */
       public Builder addGroupsBytes(
           com.google.protobuf.ByteString value) {
@@ -24952,6 +26123,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 10;</code>
+       * @return The userCrn.
        */
       public java.lang.String getUserCrn() {
         java.lang.Object ref = userCrn_;
@@ -24971,6 +26143,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 10;</code>
+       * @return The bytes for userCrn.
        */
       public com.google.protobuf.ByteString
           getUserCrnBytes() {
@@ -24991,6 +26164,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 10;</code>
+       * @param value The userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrn(
           java.lang.String value) {
@@ -25008,6 +26183,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearUserCrn() {
         
@@ -25021,6 +26197,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string userCrn = 10;</code>
+       * @param value The bytes for userCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setUserCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -25036,7 +26214,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -25096,6 +26274,16 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return Whether the actorCrn field is set.
+     */
+    boolean hasActorCrn();
+    /**
+     * <pre>
+     * The CRN of the actor who initiated this event.
+     * </pre>
+     *
+     * <code>string actorCrn = 1;</code>
+     * @return The actorCrn.
      */
     java.lang.String getActorCrn();
     /**
@@ -25104,6 +26292,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The bytes for actorCrn.
      */
     com.google.protobuf.ByteString
         getActorCrnBytes();
@@ -25115,6 +26304,17 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 2;</code>
+     * @return Whether the actorServiceName field is set.
+     */
+    boolean hasActorServiceName();
+    /**
+     * <pre>
+     * The name of the service that initiated this event. It must be the name
+     * of a service as enumerated in the CRN definition.
+     * </pre>
+     *
+     * <code>string actorServiceName = 2;</code>
+     * @return The actorServiceName.
      */
     java.lang.String getActorServiceName();
     /**
@@ -25124,6 +26324,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 2;</code>
+     * @return The bytes for actorServiceName.
      */
     com.google.protobuf.ByteString
         getActorServiceNameBytes();
@@ -25139,7 +26340,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ActorIdentity}
    */
-  public  static final class ActorIdentity extends
+  public static final class ActorIdentity extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ActorIdentity)
       ActorIdentityOrBuilder {
@@ -25149,6 +26350,13 @@ public final class AuditProto {
       super(builder);
     }
     private ActorIdentity() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ActorIdentity();
     }
 
     @java.lang.Override
@@ -25164,7 +26372,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -25188,7 +26395,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -25222,7 +26429,8 @@ public final class AuditProto {
     private int actorTypeCase_ = 0;
     private java.lang.Object actorType_;
     public enum ActorTypeCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       ACTORCRN(1),
       ACTORSERVICENAME(2),
       ACTORTYPE_NOT_SET(0);
@@ -25231,6 +26439,8 @@ public final class AuditProto {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -25264,6 +26474,18 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return Whether the actorCrn field is set.
+     */
+    public boolean hasActorCrn() {
+      return actorTypeCase_ == 1;
+    }
+    /**
+     * <pre>
+     * The CRN of the actor who initiated this event.
+     * </pre>
+     *
+     * <code>string actorCrn = 1;</code>
+     * @return The actorCrn.
      */
     public java.lang.String getActorCrn() {
       java.lang.Object ref = "";
@@ -25288,6 +26510,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorCrn = 1;</code>
+     * @return The bytes for actorCrn.
      */
     public com.google.protobuf.ByteString
         getActorCrnBytes() {
@@ -25316,6 +26539,19 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 2;</code>
+     * @return Whether the actorServiceName field is set.
+     */
+    public boolean hasActorServiceName() {
+      return actorTypeCase_ == 2;
+    }
+    /**
+     * <pre>
+     * The name of the service that initiated this event. It must be the name
+     * of a service as enumerated in the CRN definition.
+     * </pre>
+     *
+     * <code>string actorServiceName = 2;</code>
+     * @return The actorServiceName.
      */
     public java.lang.String getActorServiceName() {
       java.lang.Object ref = "";
@@ -25341,6 +26577,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string actorServiceName = 2;</code>
+     * @return The bytes for actorServiceName.
      */
     public com.google.protobuf.ByteString
         getActorServiceNameBytes() {
@@ -25411,24 +26648,21 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity other = (com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity) obj;
 
-      boolean result = true;
-      result = result && getActorTypeCase().equals(
-          other.getActorTypeCase());
-      if (!result) return false;
+      if (!getActorTypeCase().equals(other.getActorTypeCase())) return false;
       switch (actorTypeCase_) {
         case 1:
-          result = result && getActorCrn()
-              .equals(other.getActorCrn());
+          if (!getActorCrn()
+              .equals(other.getActorCrn())) return false;
           break;
         case 2:
-          result = result && getActorServiceName()
-              .equals(other.getActorServiceName());
+          if (!getActorServiceName()
+              .equals(other.getActorServiceName())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -25630,35 +26864,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -25739,7 +26973,21 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return Whether the actorCrn field is set.
        */
+      @java.lang.Override
+      public boolean hasActorCrn() {
+        return actorTypeCase_ == 1;
+      }
+      /**
+       * <pre>
+       * The CRN of the actor who initiated this event.
+       * </pre>
+       *
+       * <code>string actorCrn = 1;</code>
+       * @return The actorCrn.
+       */
+      @java.lang.Override
       public java.lang.String getActorCrn() {
         java.lang.Object ref = "";
         if (actorTypeCase_ == 1) {
@@ -25763,7 +27011,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return The bytes for actorCrn.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getActorCrnBytes() {
         java.lang.Object ref = "";
@@ -25788,6 +27038,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @param value The actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrn(
           java.lang.String value) {
@@ -25805,6 +27057,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActorCrn() {
         if (actorTypeCase_ == 1) {
@@ -25820,6 +27073,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorCrn = 1;</code>
+       * @param value The bytes for actorCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setActorCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -25840,7 +27095,22 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 2;</code>
+       * @return Whether the actorServiceName field is set.
        */
+      @java.lang.Override
+      public boolean hasActorServiceName() {
+        return actorTypeCase_ == 2;
+      }
+      /**
+       * <pre>
+       * The name of the service that initiated this event. It must be the name
+       * of a service as enumerated in the CRN definition.
+       * </pre>
+       *
+       * <code>string actorServiceName = 2;</code>
+       * @return The actorServiceName.
+       */
+      @java.lang.Override
       public java.lang.String getActorServiceName() {
         java.lang.Object ref = "";
         if (actorTypeCase_ == 2) {
@@ -25865,7 +27135,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 2;</code>
+       * @return The bytes for actorServiceName.
        */
+      @java.lang.Override
       public com.google.protobuf.ByteString
           getActorServiceNameBytes() {
         java.lang.Object ref = "";
@@ -25891,6 +27163,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 2;</code>
+       * @param value The actorServiceName to set.
+       * @return This builder for chaining.
        */
       public Builder setActorServiceName(
           java.lang.String value) {
@@ -25909,6 +27183,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearActorServiceName() {
         if (actorTypeCase_ == 2) {
@@ -25925,6 +27200,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string actorServiceName = 2;</code>
+       * @param value The bytes for actorServiceName to set.
+       * @return This builder for chaining.
        */
       public Builder setActorServiceNameBytes(
           com.google.protobuf.ByteString value) {
@@ -25940,7 +27217,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -26000,6 +27277,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string version = 1;</code>
+     * @return The version.
      */
     java.lang.String getVersion();
     /**
@@ -26008,6 +27286,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string version = 1;</code>
+     * @return The bytes for version.
      */
     com.google.protobuf.ByteString
         getVersionBytes();
@@ -26018,6 +27297,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 2;</code>
+     * @return The id.
      */
     java.lang.String getId();
     /**
@@ -26026,6 +27306,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 2;</code>
+     * @return The bytes for id.
      */
     com.google.protobuf.ByteString
         getIdBytes();
@@ -26037,6 +27318,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 3;</code>
+     * @return The eventSource.
      */
     java.lang.String getEventSource();
     /**
@@ -26046,6 +27328,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 3;</code>
+     * @return The bytes for eventSource.
      */
     com.google.protobuf.ByteString
         getEventSourceBytes();
@@ -26057,6 +27340,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 4;</code>
+     * @return The eventName.
      */
     java.lang.String getEventName();
     /**
@@ -26066,6 +27350,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 4;</code>
+     * @return The bytes for eventName.
      */
     com.google.protobuf.ByteString
         getEventNameBytes();
@@ -26076,6 +27361,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
     long getTimestamp();
 
@@ -26085,6 +27371,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ActorIdentity actorIdentity = 6;</code>
+     * @return Whether the actorIdentity field is set.
      */
     boolean hasActorIdentity();
     /**
@@ -26093,6 +27380,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ActorIdentity actorIdentity = 6;</code>
+     * @return The actorIdentity.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity getActorIdentity();
     /**
@@ -26110,6 +27398,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 7;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -26118,6 +27407,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 7;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -26128,6 +27418,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 8;</code>
+     * @return The requestId.
      */
     java.lang.String getRequestId();
     /**
@@ -26136,6 +27427,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 8;</code>
+     * @return The bytes for requestId.
      */
     com.google.protobuf.ByteString
         getRequestIdBytes();
@@ -26146,6 +27438,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 9;</code>
+     * @return The resultCode.
      */
     java.lang.String getResultCode();
     /**
@@ -26154,6 +27447,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 9;</code>
+     * @return The bytes for resultCode.
      */
     com.google.protobuf.ByteString
         getResultCodeBytes();
@@ -26165,6 +27459,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 10;</code>
+     * @return The resultMessage.
      */
     java.lang.String getResultMessage();
     /**
@@ -26174,6 +27469,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 10;</code>
+     * @return The bytes for resultMessage.
      */
     com.google.protobuf.ByteString
         getResultMessageBytes();
@@ -26184,6 +27480,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
+     * @return Whether the apiRequestEvent field is set.
      */
     boolean hasApiRequestEvent();
     /**
@@ -26192,6 +27489,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
+     * @return The apiRequestEvent.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent getApiRequestEvent();
     /**
@@ -26209,6 +27507,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
+     * @return Whether the cdpServiceEvent field is set.
      */
     boolean hasCdpServiceEvent();
     /**
@@ -26217,6 +27516,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
+     * @return The cdpServiceEvent.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent getCdpServiceEvent();
     /**
@@ -26234,6 +27534,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
+     * @return Whether the interactiveLoginEvent field is set.
      */
     boolean hasInteractiveLoginEvent();
     /**
@@ -26242,6 +27543,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
+     * @return The interactiveLoginEvent.
      */
     com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent getInteractiveLoginEvent();
     /**
@@ -26260,6 +27562,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 14;</code>
+     * @return The archiveId.
      */
     java.lang.String getArchiveId();
     /**
@@ -26269,6 +27572,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 14;</code>
+     * @return The bytes for archiveId.
      */
     com.google.protobuf.ByteString
         getArchiveIdBytes();
@@ -26282,7 +27586,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.CdpAuditEvent}
    */
-  public  static final class CdpAuditEvent extends
+  public static final class CdpAuditEvent extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.CdpAuditEvent)
       CdpAuditEventOrBuilder {
@@ -26296,12 +27600,18 @@ public final class AuditProto {
       id_ = "";
       eventSource_ = "";
       eventName_ = "";
-      timestamp_ = 0L;
       accountId_ = "";
       requestId_ = "";
       resultCode_ = "";
       resultMessage_ = "";
       archiveId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new CdpAuditEvent();
     }
 
     @java.lang.Override
@@ -26317,7 +27627,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -26443,7 +27752,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -26477,7 +27786,8 @@ public final class AuditProto {
     private int eventTypeCase_ = 0;
     private java.lang.Object eventType_;
     public enum EventTypeCase
-        implements com.google.protobuf.Internal.EnumLite {
+        implements com.google.protobuf.Internal.EnumLite,
+            com.google.protobuf.AbstractMessage.InternalOneOfEnum {
       APIREQUESTEVENT(11),
       CDPSERVICEEVENT(12),
       INTERACTIVELOGINEVENT(13),
@@ -26487,6 +27797,8 @@ public final class AuditProto {
         this.value = value;
       }
       /**
+       * @param value The number of the enum to look for.
+       * @return The enum associated with the given number.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -26522,7 +27834,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string version = 1;</code>
+     * @return The version.
      */
+    @java.lang.Override
     public java.lang.String getVersion() {
       java.lang.Object ref = version_;
       if (ref instanceof java.lang.String) {
@@ -26541,7 +27855,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string version = 1;</code>
+     * @return The bytes for version.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getVersionBytes() {
       java.lang.Object ref = version_;
@@ -26564,7 +27880,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 2;</code>
+     * @return The id.
      */
+    @java.lang.Override
     public java.lang.String getId() {
       java.lang.Object ref = id_;
       if (ref instanceof java.lang.String) {
@@ -26583,7 +27901,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string id = 2;</code>
+     * @return The bytes for id.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getIdBytes() {
       java.lang.Object ref = id_;
@@ -26607,7 +27927,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 3;</code>
+     * @return The eventSource.
      */
+    @java.lang.Override
     public java.lang.String getEventSource() {
       java.lang.Object ref = eventSource_;
       if (ref instanceof java.lang.String) {
@@ -26627,7 +27949,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventSource = 3;</code>
+     * @return The bytes for eventSource.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventSourceBytes() {
       java.lang.Object ref = eventSource_;
@@ -26651,7 +27975,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 4;</code>
+     * @return The eventName.
      */
+    @java.lang.Override
     public java.lang.String getEventName() {
       java.lang.Object ref = eventName_;
       if (ref instanceof java.lang.String) {
@@ -26671,7 +27997,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string eventName = 4;</code>
+     * @return The bytes for eventName.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEventNameBytes() {
       java.lang.Object ref = eventName_;
@@ -26694,7 +28022,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 timestamp = 5;</code>
+     * @return The timestamp.
      */
+    @java.lang.Override
     public long getTimestamp() {
       return timestamp_;
     }
@@ -26707,7 +28037,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ActorIdentity actorIdentity = 6;</code>
+     * @return Whether the actorIdentity field is set.
      */
+    @java.lang.Override
     public boolean hasActorIdentity() {
       return actorIdentity_ != null;
     }
@@ -26717,7 +28049,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ActorIdentity actorIdentity = 6;</code>
+     * @return The actorIdentity.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity getActorIdentity() {
       return actorIdentity_ == null ? com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity.getDefaultInstance() : actorIdentity_;
     }
@@ -26728,6 +28062,7 @@ public final class AuditProto {
      *
      * <code>.audit.ActorIdentity actorIdentity = 6;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentityOrBuilder getActorIdentityOrBuilder() {
       return getActorIdentity();
     }
@@ -26740,7 +28075,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 7;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -26759,7 +28096,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 7;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -26782,7 +28121,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 8;</code>
+     * @return The requestId.
      */
+    @java.lang.Override
     public java.lang.String getRequestId() {
       java.lang.Object ref = requestId_;
       if (ref instanceof java.lang.String) {
@@ -26801,7 +28142,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string requestId = 8;</code>
+     * @return The bytes for requestId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getRequestIdBytes() {
       java.lang.Object ref = requestId_;
@@ -26824,7 +28167,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 9;</code>
+     * @return The resultCode.
      */
+    @java.lang.Override
     public java.lang.String getResultCode() {
       java.lang.Object ref = resultCode_;
       if (ref instanceof java.lang.String) {
@@ -26843,7 +28188,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultCode = 9;</code>
+     * @return The bytes for resultCode.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResultCodeBytes() {
       java.lang.Object ref = resultCode_;
@@ -26867,7 +28214,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 10;</code>
+     * @return The resultMessage.
      */
+    @java.lang.Override
     public java.lang.String getResultMessage() {
       java.lang.Object ref = resultMessage_;
       if (ref instanceof java.lang.String) {
@@ -26887,7 +28236,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string resultMessage = 10;</code>
+     * @return The bytes for resultMessage.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getResultMessageBytes() {
       java.lang.Object ref = resultMessage_;
@@ -26909,7 +28260,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
+     * @return Whether the apiRequestEvent field is set.
      */
+    @java.lang.Override
     public boolean hasApiRequestEvent() {
       return eventTypeCase_ == 11;
     }
@@ -26919,7 +28272,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
+     * @return The apiRequestEvent.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent getApiRequestEvent() {
       if (eventTypeCase_ == 11) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent) eventType_;
@@ -26933,6 +28288,7 @@ public final class AuditProto {
      *
      * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEventOrBuilder getApiRequestEventOrBuilder() {
       if (eventTypeCase_ == 11) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent) eventType_;
@@ -26947,7 +28303,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
+     * @return Whether the cdpServiceEvent field is set.
      */
+    @java.lang.Override
     public boolean hasCdpServiceEvent() {
       return eventTypeCase_ == 12;
     }
@@ -26957,7 +28315,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
+     * @return The cdpServiceEvent.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent getCdpServiceEvent() {
       if (eventTypeCase_ == 12) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent) eventType_;
@@ -26971,6 +28331,7 @@ public final class AuditProto {
      *
      * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEventOrBuilder getCdpServiceEventOrBuilder() {
       if (eventTypeCase_ == 12) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent) eventType_;
@@ -26985,7 +28346,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
+     * @return Whether the interactiveLoginEvent field is set.
      */
+    @java.lang.Override
     public boolean hasInteractiveLoginEvent() {
       return eventTypeCase_ == 13;
     }
@@ -26995,7 +28358,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
+     * @return The interactiveLoginEvent.
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent getInteractiveLoginEvent() {
       if (eventTypeCase_ == 13) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) eventType_;
@@ -27009,6 +28374,7 @@ public final class AuditProto {
      *
      * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventOrBuilder getInteractiveLoginEventOrBuilder() {
       if (eventTypeCase_ == 13) {
          return (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) eventType_;
@@ -27025,7 +28391,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 14;</code>
+     * @return The archiveId.
      */
+    @java.lang.Override
     public java.lang.String getArchiveId() {
       java.lang.Object ref = archiveId_;
       if (ref instanceof java.lang.String) {
@@ -27045,7 +28413,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 14;</code>
+     * @return The bytes for archiveId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getArchiveIdBytes() {
       java.lang.Object ref = archiveId_;
@@ -27074,16 +28444,16 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, version_);
       }
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, id_);
       }
-      if (!getEventSourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, eventSource_);
       }
-      if (!getEventNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventName_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, eventName_);
       }
       if (timestamp_ != 0L) {
@@ -27092,16 +28462,16 @@ public final class AuditProto {
       if (actorIdentity_ != null) {
         output.writeMessage(6, getActorIdentity());
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 7, accountId_);
       }
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 8, requestId_);
       }
-      if (!getResultCodeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultCode_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 9, resultCode_);
       }
-      if (!getResultMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultMessage_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 10, resultMessage_);
       }
       if (eventTypeCase_ == 11) {
@@ -27113,7 +28483,7 @@ public final class AuditProto {
       if (eventTypeCase_ == 13) {
         output.writeMessage(13, (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) eventType_);
       }
-      if (!getArchiveIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(archiveId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 14, archiveId_);
       }
       unknownFields.writeTo(output);
@@ -27125,16 +28495,16 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getVersionBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(version_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, version_);
       }
-      if (!getIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(id_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, id_);
       }
-      if (!getEventSourceBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventSource_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, eventSource_);
       }
-      if (!getEventNameBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(eventName_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, eventName_);
       }
       if (timestamp_ != 0L) {
@@ -27145,16 +28515,16 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(6, getActorIdentity());
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(7, accountId_);
       }
-      if (!getRequestIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(requestId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(8, requestId_);
       }
-      if (!getResultCodeBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultCode_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(9, resultCode_);
       }
-      if (!getResultMessageBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(resultMessage_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(10, resultMessage_);
       }
       if (eventTypeCase_ == 11) {
@@ -27169,7 +28539,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(13, (com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent) eventType_);
       }
-      if (!getArchiveIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(archiveId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(14, archiveId_);
       }
       size += unknownFields.getSerializedSize();
@@ -27187,53 +28557,50 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent other = (com.cloudera.thunderhead.service.audit.AuditProto.CdpAuditEvent) obj;
 
-      boolean result = true;
-      result = result && getVersion()
-          .equals(other.getVersion());
-      result = result && getId()
-          .equals(other.getId());
-      result = result && getEventSource()
-          .equals(other.getEventSource());
-      result = result && getEventName()
-          .equals(other.getEventName());
-      result = result && (getTimestamp()
-          == other.getTimestamp());
-      result = result && (hasActorIdentity() == other.hasActorIdentity());
+      if (!getVersion()
+          .equals(other.getVersion())) return false;
+      if (!getId()
+          .equals(other.getId())) return false;
+      if (!getEventSource()
+          .equals(other.getEventSource())) return false;
+      if (!getEventName()
+          .equals(other.getEventName())) return false;
+      if (getTimestamp()
+          != other.getTimestamp()) return false;
+      if (hasActorIdentity() != other.hasActorIdentity()) return false;
       if (hasActorIdentity()) {
-        result = result && getActorIdentity()
-            .equals(other.getActorIdentity());
+        if (!getActorIdentity()
+            .equals(other.getActorIdentity())) return false;
       }
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getRequestId()
-          .equals(other.getRequestId());
-      result = result && getResultCode()
-          .equals(other.getResultCode());
-      result = result && getResultMessage()
-          .equals(other.getResultMessage());
-      result = result && getArchiveId()
-          .equals(other.getArchiveId());
-      result = result && getEventTypeCase().equals(
-          other.getEventTypeCase());
-      if (!result) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getRequestId()
+          .equals(other.getRequestId())) return false;
+      if (!getResultCode()
+          .equals(other.getResultCode())) return false;
+      if (!getResultMessage()
+          .equals(other.getResultMessage())) return false;
+      if (!getArchiveId()
+          .equals(other.getArchiveId())) return false;
+      if (!getEventTypeCase().equals(other.getEventTypeCase())) return false;
       switch (eventTypeCase_) {
         case 11:
-          result = result && getApiRequestEvent()
-              .equals(other.getApiRequestEvent());
+          if (!getApiRequestEvent()
+              .equals(other.getApiRequestEvent())) return false;
           break;
         case 12:
-          result = result && getCdpServiceEvent()
-              .equals(other.getCdpServiceEvent());
+          if (!getCdpServiceEvent()
+              .equals(other.getCdpServiceEvent())) return false;
           break;
         case 13:
-          result = result && getInteractiveLoginEvent()
-              .equals(other.getInteractiveLoginEvent());
+          if (!getInteractiveLoginEvent()
+              .equals(other.getInteractiveLoginEvent())) return false;
           break;
         case 0:
         default:
       }
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -27518,35 +28885,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -27670,6 +29037,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string version = 1;</code>
+       * @return The version.
        */
       public java.lang.String getVersion() {
         java.lang.Object ref = version_;
@@ -27689,6 +29057,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string version = 1;</code>
+       * @return The bytes for version.
        */
       public com.google.protobuf.ByteString
           getVersionBytes() {
@@ -27709,6 +29078,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string version = 1;</code>
+       * @param value The version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersion(
           java.lang.String value) {
@@ -27726,6 +29097,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string version = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearVersion() {
         
@@ -27739,6 +29111,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string version = 1;</code>
+       * @param value The bytes for version to set.
+       * @return This builder for chaining.
        */
       public Builder setVersionBytes(
           com.google.protobuf.ByteString value) {
@@ -27759,6 +29133,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 2;</code>
+       * @return The id.
        */
       public java.lang.String getId() {
         java.lang.Object ref = id_;
@@ -27778,6 +29153,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 2;</code>
+       * @return The bytes for id.
        */
       public com.google.protobuf.ByteString
           getIdBytes() {
@@ -27798,6 +29174,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 2;</code>
+       * @param value The id to set.
+       * @return This builder for chaining.
        */
       public Builder setId(
           java.lang.String value) {
@@ -27815,6 +29193,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearId() {
         
@@ -27828,6 +29207,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string id = 2;</code>
+       * @param value The bytes for id to set.
+       * @return This builder for chaining.
        */
       public Builder setIdBytes(
           com.google.protobuf.ByteString value) {
@@ -27849,6 +29230,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 3;</code>
+       * @return The eventSource.
        */
       public java.lang.String getEventSource() {
         java.lang.Object ref = eventSource_;
@@ -27869,6 +29251,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 3;</code>
+       * @return The bytes for eventSource.
        */
       public com.google.protobuf.ByteString
           getEventSourceBytes() {
@@ -27890,6 +29273,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 3;</code>
+       * @param value The eventSource to set.
+       * @return This builder for chaining.
        */
       public Builder setEventSource(
           java.lang.String value) {
@@ -27908,6 +29293,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventSource() {
         
@@ -27922,6 +29308,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventSource = 3;</code>
+       * @param value The bytes for eventSource to set.
+       * @return This builder for chaining.
        */
       public Builder setEventSourceBytes(
           com.google.protobuf.ByteString value) {
@@ -27943,6 +29331,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 4;</code>
+       * @return The eventName.
        */
       public java.lang.String getEventName() {
         java.lang.Object ref = eventName_;
@@ -27963,6 +29352,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 4;</code>
+       * @return The bytes for eventName.
        */
       public com.google.protobuf.ByteString
           getEventNameBytes() {
@@ -27984,6 +29374,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 4;</code>
+       * @param value The eventName to set.
+       * @return This builder for chaining.
        */
       public Builder setEventName(
           java.lang.String value) {
@@ -28002,6 +29394,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventName() {
         
@@ -28016,6 +29409,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string eventName = 4;</code>
+       * @param value The bytes for eventName to set.
+       * @return This builder for chaining.
        */
       public Builder setEventNameBytes(
           com.google.protobuf.ByteString value) {
@@ -28036,7 +29431,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return The timestamp.
        */
+      @java.lang.Override
       public long getTimestamp() {
         return timestamp_;
       }
@@ -28046,6 +29443,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @param value The timestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setTimestamp(long value) {
         
@@ -28059,6 +29458,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 timestamp = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearTimestamp() {
         
@@ -28067,7 +29467,7 @@ public final class AuditProto {
         return this;
       }
 
-      private com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity actorIdentity_ = null;
+      private com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity actorIdentity_;
       private com.google.protobuf.SingleFieldBuilderV3<
           com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity, com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentityOrBuilder> actorIdentityBuilder_;
       /**
@@ -28076,6 +29476,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ActorIdentity actorIdentity = 6;</code>
+       * @return Whether the actorIdentity field is set.
        */
       public boolean hasActorIdentity() {
         return actorIdentityBuilder_ != null || actorIdentity_ != null;
@@ -28086,6 +29487,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ActorIdentity actorIdentity = 6;</code>
+       * @return The actorIdentity.
        */
       public com.cloudera.thunderhead.service.audit.AuditProto.ActorIdentity getActorIdentity() {
         if (actorIdentityBuilder_ == null) {
@@ -28227,6 +29629,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 7;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -28246,6 +29649,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 7;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -28266,6 +29670,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 7;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -28283,6 +29689,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 7;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -28296,6 +29703,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 7;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -28316,6 +29725,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 8;</code>
+       * @return The requestId.
        */
       public java.lang.String getRequestId() {
         java.lang.Object ref = requestId_;
@@ -28335,6 +29745,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 8;</code>
+       * @return The bytes for requestId.
        */
       public com.google.protobuf.ByteString
           getRequestIdBytes() {
@@ -28355,6 +29766,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 8;</code>
+       * @param value The requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestId(
           java.lang.String value) {
@@ -28372,6 +29785,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 8;</code>
+       * @return This builder for chaining.
        */
       public Builder clearRequestId() {
         
@@ -28385,6 +29799,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string requestId = 8;</code>
+       * @param value The bytes for requestId to set.
+       * @return This builder for chaining.
        */
       public Builder setRequestIdBytes(
           com.google.protobuf.ByteString value) {
@@ -28405,6 +29821,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 9;</code>
+       * @return The resultCode.
        */
       public java.lang.String getResultCode() {
         java.lang.Object ref = resultCode_;
@@ -28424,6 +29841,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 9;</code>
+       * @return The bytes for resultCode.
        */
       public com.google.protobuf.ByteString
           getResultCodeBytes() {
@@ -28444,6 +29862,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 9;</code>
+       * @param value The resultCode to set.
+       * @return This builder for chaining.
        */
       public Builder setResultCode(
           java.lang.String value) {
@@ -28461,6 +29881,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 9;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResultCode() {
         
@@ -28474,6 +29895,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultCode = 9;</code>
+       * @param value The bytes for resultCode to set.
+       * @return This builder for chaining.
        */
       public Builder setResultCodeBytes(
           com.google.protobuf.ByteString value) {
@@ -28495,6 +29918,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 10;</code>
+       * @return The resultMessage.
        */
       public java.lang.String getResultMessage() {
         java.lang.Object ref = resultMessage_;
@@ -28515,6 +29939,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 10;</code>
+       * @return The bytes for resultMessage.
        */
       public com.google.protobuf.ByteString
           getResultMessageBytes() {
@@ -28536,6 +29961,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 10;</code>
+       * @param value The resultMessage to set.
+       * @return This builder for chaining.
        */
       public Builder setResultMessage(
           java.lang.String value) {
@@ -28554,6 +29981,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 10;</code>
+       * @return This builder for chaining.
        */
       public Builder clearResultMessage() {
         
@@ -28568,6 +29996,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string resultMessage = 10;</code>
+       * @param value The bytes for resultMessage to set.
+       * @return This builder for chaining.
        */
       public Builder setResultMessageBytes(
           com.google.protobuf.ByteString value) {
@@ -28589,7 +30019,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
+       * @return Whether the apiRequestEvent field is set.
        */
+      @java.lang.Override
       public boolean hasApiRequestEvent() {
         return eventTypeCase_ == 11;
       }
@@ -28599,7 +30031,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
+       * @return The apiRequestEvent.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEvent getApiRequestEvent() {
         if (apiRequestEventBuilder_ == null) {
           if (eventTypeCase_ == 11) {
@@ -28717,6 +30151,7 @@ public final class AuditProto {
        *
        * <code>.audit.ApiRequestEvent apiRequestEvent = 11;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.ApiRequestEventOrBuilder getApiRequestEventOrBuilder() {
         if ((eventTypeCase_ == 11) && (apiRequestEventBuilder_ != null)) {
           return apiRequestEventBuilder_.getMessageOrBuilder();
@@ -28761,7 +30196,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
+       * @return Whether the cdpServiceEvent field is set.
        */
+      @java.lang.Override
       public boolean hasCdpServiceEvent() {
         return eventTypeCase_ == 12;
       }
@@ -28771,7 +30208,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
+       * @return The cdpServiceEvent.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEvent getCdpServiceEvent() {
         if (cdpServiceEventBuilder_ == null) {
           if (eventTypeCase_ == 12) {
@@ -28889,6 +30328,7 @@ public final class AuditProto {
        *
        * <code>.audit.CdpServiceEvent cdpServiceEvent = 12;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.CdpServiceEventOrBuilder getCdpServiceEventOrBuilder() {
         if ((eventTypeCase_ == 12) && (cdpServiceEventBuilder_ != null)) {
           return cdpServiceEventBuilder_.getMessageOrBuilder();
@@ -28933,7 +30373,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
+       * @return Whether the interactiveLoginEvent field is set.
        */
+      @java.lang.Override
       public boolean hasInteractiveLoginEvent() {
         return eventTypeCase_ == 13;
       }
@@ -28943,7 +30385,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
+       * @return The interactiveLoginEvent.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEvent getInteractiveLoginEvent() {
         if (interactiveLoginEventBuilder_ == null) {
           if (eventTypeCase_ == 13) {
@@ -29061,6 +30505,7 @@ public final class AuditProto {
        *
        * <code>.audit.InteractiveLoginEvent interactiveLoginEvent = 13;</code>
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.audit.AuditProto.InteractiveLoginEventOrBuilder getInteractiveLoginEventOrBuilder() {
         if ((eventTypeCase_ == 13) && (interactiveLoginEventBuilder_ != null)) {
           return interactiveLoginEventBuilder_.getMessageOrBuilder();
@@ -29105,6 +30550,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 14;</code>
+       * @return The archiveId.
        */
       public java.lang.String getArchiveId() {
         java.lang.Object ref = archiveId_;
@@ -29125,6 +30571,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 14;</code>
+       * @return The bytes for archiveId.
        */
       public com.google.protobuf.ByteString
           getArchiveIdBytes() {
@@ -29146,6 +30593,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 14;</code>
+       * @param value The archiveId to set.
+       * @return This builder for chaining.
        */
       public Builder setArchiveId(
           java.lang.String value) {
@@ -29164,6 +30613,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 14;</code>
+       * @return This builder for chaining.
        */
       public Builder clearArchiveId() {
         
@@ -29178,6 +30628,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 14;</code>
+       * @param value The bytes for archiveId to set.
+       * @return This builder for chaining.
        */
       public Builder setArchiveIdBytes(
           com.google.protobuf.ByteString value) {
@@ -29193,7 +30645,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -29253,6 +30705,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 fromTimestamp = 1;</code>
+     * @return The fromTimestamp.
      */
     long getFromTimestamp();
 
@@ -29262,6 +30715,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 toTimestamp = 2;</code>
+     * @return The toTimestamp.
      */
     long getToTimestamp();
 
@@ -29271,6 +30725,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -29279,6 +30734,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -29290,7 +30746,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ArchiveAuditEventsRequest}
    */
-  public  static final class ArchiveAuditEventsRequest extends
+  public static final class ArchiveAuditEventsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ArchiveAuditEventsRequest)
       ArchiveAuditEventsRequestOrBuilder {
@@ -29300,9 +30756,14 @@ public final class AuditProto {
       super(builder);
     }
     private ArchiveAuditEventsRequest() {
-      fromTimestamp_ = 0L;
-      toTimestamp_ = 0L;
       accountId_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ArchiveAuditEventsRequest();
     }
 
     @java.lang.Override
@@ -29318,7 +30779,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -29346,7 +30806,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -29385,7 +30845,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 fromTimestamp = 1;</code>
+     * @return The fromTimestamp.
      */
+    @java.lang.Override
     public long getFromTimestamp() {
       return fromTimestamp_;
     }
@@ -29398,7 +30860,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 toTimestamp = 2;</code>
+     * @return The toTimestamp.
      */
+    @java.lang.Override
     public long getToTimestamp() {
       return toTimestamp_;
     }
@@ -29411,7 +30875,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -29430,7 +30896,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 3;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -29465,7 +30933,7 @@ public final class AuditProto {
       if (toTimestamp_ != 0L) {
         output.writeInt64(2, toTimestamp_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, accountId_);
       }
       unknownFields.writeTo(output);
@@ -29485,7 +30953,7 @@ public final class AuditProto {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, toTimestamp_);
       }
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, accountId_);
       }
       size += unknownFields.getSerializedSize();
@@ -29503,15 +30971,14 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest other = (com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsRequest) obj;
 
-      boolean result = true;
-      result = result && (getFromTimestamp()
-          == other.getFromTimestamp());
-      result = result && (getToTimestamp()
-          == other.getToTimestamp());
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getFromTimestamp()
+          != other.getFromTimestamp()) return false;
+      if (getToTimestamp()
+          != other.getToTimestamp()) return false;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -29707,35 +31174,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -29795,7 +31262,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
+       * @return The fromTimestamp.
        */
+      @java.lang.Override
       public long getFromTimestamp() {
         return fromTimestamp_;
       }
@@ -29805,6 +31274,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
+       * @param value The fromTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setFromTimestamp(long value) {
         
@@ -29818,6 +31289,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 fromTimestamp = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearFromTimestamp() {
         
@@ -29833,7 +31305,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
+       * @return The toTimestamp.
        */
+      @java.lang.Override
       public long getToTimestamp() {
         return toTimestamp_;
       }
@@ -29843,6 +31317,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
+       * @param value The toTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setToTimestamp(long value) {
         
@@ -29856,6 +31332,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 toTimestamp = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearToTimestamp() {
         
@@ -29871,6 +31348,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -29890,6 +31368,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -29910,6 +31389,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -29927,6 +31408,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -29940,6 +31422,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 3;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -29955,7 +31439,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -30015,6 +31499,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 eventCount = 1;</code>
+     * @return The eventCount.
      */
     long getEventCount();
 
@@ -30069,7 +31554,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ArchiveAuditEventsResponse}
    */
-  public  static final class ArchiveAuditEventsResponse extends
+  public static final class ArchiveAuditEventsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ArchiveAuditEventsResponse)
       ArchiveAuditEventsResponseOrBuilder {
@@ -30079,8 +31564,14 @@ public final class AuditProto {
       super(builder);
     }
     private ArchiveAuditEventsResponse() {
-      eventCount_ = 0L;
       eventBatches_ = java.util.Collections.emptyList();
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ArchiveAuditEventsResponse();
     }
 
     @java.lang.Override
@@ -30113,16 +31604,16 @@ public final class AuditProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 eventBatches_ = new java.util.ArrayList<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse>();
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               eventBatches_.add(
                   input.readMessage(com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse.parser(), extensionRegistry));
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -30136,7 +31627,7 @@ public final class AuditProto {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+        if (((mutable_bitField0_ & 0x00000001) != 0)) {
           eventBatches_ = java.util.Collections.unmodifiableList(eventBatches_);
         }
         this.unknownFields = unknownFields.build();
@@ -30156,7 +31647,6 @@ public final class AuditProto {
               com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse.class, com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int EVENTCOUNT_FIELD_NUMBER = 1;
     private long eventCount_;
     /**
@@ -30165,7 +31655,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 eventCount = 1;</code>
+     * @return The eventCount.
      */
+    @java.lang.Override
     public long getEventCount() {
       return eventCount_;
     }
@@ -30179,6 +31671,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.ArchiveAuditEventsBatchResponse eventBatches = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse> getEventBatchesList() {
       return eventBatches_;
     }
@@ -30189,6 +31682,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.ArchiveAuditEventsBatchResponse eventBatches = 2;</code>
      */
+    @java.lang.Override
     public java.util.List<? extends com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponseOrBuilder> 
         getEventBatchesOrBuilderList() {
       return eventBatches_;
@@ -30200,6 +31694,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.ArchiveAuditEventsBatchResponse eventBatches = 2;</code>
      */
+    @java.lang.Override
     public int getEventBatchesCount() {
       return eventBatches_.size();
     }
@@ -30210,6 +31705,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.ArchiveAuditEventsBatchResponse eventBatches = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse getEventBatches(int index) {
       return eventBatches_.get(index);
     }
@@ -30220,6 +31716,7 @@ public final class AuditProto {
      *
      * <code>repeated .audit.ArchiveAuditEventsBatchResponse eventBatches = 2;</code>
      */
+    @java.lang.Override
     public com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponseOrBuilder getEventBatchesOrBuilder(
         int index) {
       return eventBatches_.get(index);
@@ -30277,13 +31774,12 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse) obj;
 
-      boolean result = true;
-      result = result && (getEventCount()
-          == other.getEventCount());
-      result = result && getEventBatchesList()
-          .equals(other.getEventBatchesList());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getEventCount()
+          != other.getEventCount()) return false;
+      if (!getEventBatchesList()
+          .equals(other.getEventBatchesList())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -30442,7 +31938,7 @@ public final class AuditProto {
 
         if (eventBatchesBuilder_ == null) {
           eventBatches_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
           eventBatchesBuilder_.clear();
         }
@@ -30473,53 +31969,51 @@ public final class AuditProto {
       public com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse buildPartial() {
         com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse result = new com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.eventCount_ = eventCount_;
         if (eventBatchesBuilder_ == null) {
-          if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          if (((bitField0_ & 0x00000001) != 0)) {
             eventBatches_ = java.util.Collections.unmodifiableList(eventBatches_);
-            bitField0_ = (bitField0_ & ~0x00000002);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
           result.eventBatches_ = eventBatches_;
         } else {
           result.eventBatches_ = eventBatchesBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -30540,7 +32034,7 @@ public final class AuditProto {
           if (!other.eventBatches_.isEmpty()) {
             if (eventBatches_.isEmpty()) {
               eventBatches_ = other.eventBatches_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
               ensureEventBatchesIsMutable();
               eventBatches_.addAll(other.eventBatches_);
@@ -30553,7 +32047,7 @@ public final class AuditProto {
               eventBatchesBuilder_.dispose();
               eventBatchesBuilder_ = null;
               eventBatches_ = other.eventBatches_;
-              bitField0_ = (bitField0_ & ~0x00000002);
+              bitField0_ = (bitField0_ & ~0x00000001);
               eventBatchesBuilder_ = 
                 com.google.protobuf.GeneratedMessageV3.alwaysUseFieldBuilders ?
                    getEventBatchesFieldBuilder() : null;
@@ -30599,7 +32093,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 eventCount = 1;</code>
+       * @return The eventCount.
        */
+      @java.lang.Override
       public long getEventCount() {
         return eventCount_;
       }
@@ -30609,6 +32105,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 eventCount = 1;</code>
+       * @param value The eventCount to set.
+       * @return This builder for chaining.
        */
       public Builder setEventCount(long value) {
         
@@ -30622,6 +32120,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 eventCount = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventCount() {
         
@@ -30633,9 +32132,9 @@ public final class AuditProto {
       private java.util.List<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse> eventBatches_ =
         java.util.Collections.emptyList();
       private void ensureEventBatchesIsMutable() {
-        if (!((bitField0_ & 0x00000002) == 0x00000002)) {
+        if (!((bitField0_ & 0x00000001) != 0)) {
           eventBatches_ = new java.util.ArrayList<com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse>(eventBatches_);
-          bitField0_ |= 0x00000002;
+          bitField0_ |= 0x00000001;
          }
       }
 
@@ -30829,7 +32328,7 @@ public final class AuditProto {
       public Builder clearEventBatches() {
         if (eventBatchesBuilder_ == null) {
           eventBatches_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000002);
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
           eventBatchesBuilder_.clear();
@@ -30934,7 +32433,7 @@ public final class AuditProto {
           eventBatchesBuilder_ = new com.google.protobuf.RepeatedFieldBuilderV3<
               com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse, com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse.Builder, com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponseOrBuilder>(
                   eventBatches_,
-                  ((bitField0_ & 0x00000002) == 0x00000002),
+                  ((bitField0_ & 0x00000001) != 0),
                   getParentForChildren(),
                   isClean());
           eventBatches_ = null;
@@ -30944,7 +32443,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -31004,6 +32503,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -31012,6 +32512,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -31022,6 +32523,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 eventCount = 2;</code>
+     * @return The eventCount.
      */
     long getEventCount();
 
@@ -31031,6 +32533,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 3;</code>
+     * @return The archiveId.
      */
     java.lang.String getArchiveId();
     /**
@@ -31039,6 +32542,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 3;</code>
+     * @return The bytes for archiveId.
      */
     com.google.protobuf.ByteString
         getArchiveIdBytes();
@@ -31049,6 +32553,7 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 archiveTimestamp = 4;</code>
+     * @return The archiveTimestamp.
      */
     long getArchiveTimestamp();
   }
@@ -31059,7 +32564,7 @@ public final class AuditProto {
    *
    * Protobuf type {@code audit.ArchiveAuditEventsBatchResponse}
    */
-  public  static final class ArchiveAuditEventsBatchResponse extends
+  public static final class ArchiveAuditEventsBatchResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:audit.ArchiveAuditEventsBatchResponse)
       ArchiveAuditEventsBatchResponseOrBuilder {
@@ -31070,9 +32575,14 @@ public final class AuditProto {
     }
     private ArchiveAuditEventsBatchResponse() {
       accountId_ = "";
-      eventCount_ = 0L;
       archiveId_ = "";
-      archiveTimestamp_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new ArchiveAuditEventsBatchResponse();
     }
 
     @java.lang.Override
@@ -31088,7 +32598,6 @@ public final class AuditProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -31122,7 +32631,7 @@ public final class AuditProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -31161,7 +32670,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -31180,7 +32691,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -31203,7 +32716,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 eventCount = 2;</code>
+     * @return The eventCount.
      */
+    @java.lang.Override
     public long getEventCount() {
       return eventCount_;
     }
@@ -31216,7 +32731,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 3;</code>
+     * @return The archiveId.
      */
+    @java.lang.Override
     public java.lang.String getArchiveId() {
       java.lang.Object ref = archiveId_;
       if (ref instanceof java.lang.String) {
@@ -31235,7 +32752,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>string archiveId = 3;</code>
+     * @return The bytes for archiveId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getArchiveIdBytes() {
       java.lang.Object ref = archiveId_;
@@ -31258,7 +32777,9 @@ public final class AuditProto {
      * </pre>
      *
      * <code>int64 archiveTimestamp = 4;</code>
+     * @return The archiveTimestamp.
      */
+    @java.lang.Override
     public long getArchiveTimestamp() {
       return archiveTimestamp_;
     }
@@ -31277,13 +32798,13 @@ public final class AuditProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
       if (eventCount_ != 0L) {
         output.writeInt64(2, eventCount_);
       }
-      if (!getArchiveIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(archiveId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, archiveId_);
       }
       if (archiveTimestamp_ != 0L) {
@@ -31298,14 +32819,14 @@ public final class AuditProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
       if (eventCount_ != 0L) {
         size += com.google.protobuf.CodedOutputStream
           .computeInt64Size(2, eventCount_);
       }
-      if (!getArchiveIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(archiveId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, archiveId_);
       }
       if (archiveTimestamp_ != 0L) {
@@ -31327,17 +32848,16 @@ public final class AuditProto {
       }
       com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse other = (com.cloudera.thunderhead.service.audit.AuditProto.ArchiveAuditEventsBatchResponse) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && (getEventCount()
-          == other.getEventCount());
-      result = result && getArchiveId()
-          .equals(other.getArchiveId());
-      result = result && (getArchiveTimestamp()
-          == other.getArchiveTimestamp());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (getEventCount()
+          != other.getEventCount()) return false;
+      if (!getArchiveId()
+          .equals(other.getArchiveId())) return false;
+      if (getArchiveTimestamp()
+          != other.getArchiveTimestamp()) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -31538,35 +33058,35 @@ public final class AuditProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -31630,6 +33150,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -31649,6 +33170,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -31669,6 +33191,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -31686,6 +33210,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -31699,6 +33224,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -31719,7 +33246,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 eventCount = 2;</code>
+       * @return The eventCount.
        */
+      @java.lang.Override
       public long getEventCount() {
         return eventCount_;
       }
@@ -31729,6 +33258,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 eventCount = 2;</code>
+       * @param value The eventCount to set.
+       * @return This builder for chaining.
        */
       public Builder setEventCount(long value) {
         
@@ -31742,6 +33273,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 eventCount = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEventCount() {
         
@@ -31757,6 +33289,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 3;</code>
+       * @return The archiveId.
        */
       public java.lang.String getArchiveId() {
         java.lang.Object ref = archiveId_;
@@ -31776,6 +33309,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 3;</code>
+       * @return The bytes for archiveId.
        */
       public com.google.protobuf.ByteString
           getArchiveIdBytes() {
@@ -31796,6 +33330,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 3;</code>
+       * @param value The archiveId to set.
+       * @return This builder for chaining.
        */
       public Builder setArchiveId(
           java.lang.String value) {
@@ -31813,6 +33349,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearArchiveId() {
         
@@ -31826,6 +33363,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>string archiveId = 3;</code>
+       * @param value The bytes for archiveId to set.
+       * @return This builder for chaining.
        */
       public Builder setArchiveIdBytes(
           com.google.protobuf.ByteString value) {
@@ -31846,7 +33385,9 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 archiveTimestamp = 4;</code>
+       * @return The archiveTimestamp.
        */
+      @java.lang.Override
       public long getArchiveTimestamp() {
         return archiveTimestamp_;
       }
@@ -31856,6 +33397,8 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 archiveTimestamp = 4;</code>
+       * @param value The archiveTimestamp to set.
+       * @return This builder for chaining.
        */
       public Builder setArchiveTimestamp(long value) {
         
@@ -31869,6 +33412,7 @@ public final class AuditProto {
        * </pre>
        *
        * <code>int64 archiveTimestamp = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearArchiveTimestamp() {
         
@@ -31879,7 +33423,7 @@ public final class AuditProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -32200,20 +33744,12 @@ public final class AuditProto {
       "itEventsResponse\"\000B4\n&com.cloudera.thund" +
       "erhead.service.auditB\nAuditProtob\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.options.Options.getDescriptor(),
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
-        }, assigner);
+        });
     internal_static_audit_ArchivingConfigInfo_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_audit_ArchivingConfigInfo_fieldAccessorTable = new

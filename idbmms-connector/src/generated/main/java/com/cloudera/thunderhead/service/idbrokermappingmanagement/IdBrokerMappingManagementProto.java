@@ -24,6 +24,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -32,6 +33,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -42,6 +44,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
     java.lang.String getEnvironmentNameOrCrn();
     /**
@@ -50,6 +53,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes();
@@ -57,7 +61,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsRequest}
    */
-  public  static final class GetMappingsRequest extends
+  public static final class GetMappingsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.GetMappingsRequest)
       GetMappingsRequestOrBuilder {
@@ -69,6 +73,13 @@ public final class IdBrokerMappingManagementProto {
     private GetMappingsRequest() {
       accountId_ = "";
       environmentNameOrCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetMappingsRequest();
     }
 
     @java.lang.Override
@@ -84,7 +95,6 @@ public final class IdBrokerMappingManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -108,7 +118,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -147,7 +157,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -166,7 +178,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -189,7 +203,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentNameOrCrn() {
       java.lang.Object ref = environmentNameOrCrn_;
       if (ref instanceof java.lang.String) {
@@ -208,7 +224,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes() {
       java.lang.Object ref = environmentNameOrCrn_;
@@ -237,10 +255,10 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentNameOrCrn_);
       }
       unknownFields.writeTo(output);
@@ -252,10 +270,10 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentNameOrCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -273,13 +291,12 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsRequest other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironmentNameOrCrn()
-          .equals(other.getEnvironmentNameOrCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironmentNameOrCrn()
+          .equals(other.getEnvironmentNameOrCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -464,35 +481,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -550,6 +567,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -569,6 +587,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -589,6 +608,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -606,6 +627,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -619,6 +641,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -639,6 +663,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The environmentNameOrCrn.
        */
       public java.lang.String getEnvironmentNameOrCrn() {
         java.lang.Object ref = environmentNameOrCrn_;
@@ -658,6 +683,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The bytes for environmentNameOrCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentNameOrCrnBytes() {
@@ -678,6 +704,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrn(
           java.lang.String value) {
@@ -695,6 +723,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentNameOrCrn() {
         
@@ -708,6 +737,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The bytes for environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -723,7 +754,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -783,6 +814,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>int64 mappingsVersion = 1;</code>
+     * @return The mappingsVersion.
      */
     long getMappingsVersion();
 
@@ -852,6 +884,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The dataAccessRole.
      */
     java.lang.String getDataAccessRole();
     /**
@@ -861,6 +894,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The bytes for dataAccessRole.
      */
     com.google.protobuf.ByteString
         getDataAccessRoleBytes();
@@ -873,6 +907,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The baselineRole.
      */
     java.lang.String getBaselineRole();
     /**
@@ -883,6 +918,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The bytes for baselineRole.
      */
     com.google.protobuf.ByteString
         getBaselineRoleBytes();
@@ -890,7 +926,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsResponse}
    */
-  public  static final class GetMappingsResponse extends
+  public static final class GetMappingsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.GetMappingsResponse)
       GetMappingsResponseOrBuilder {
@@ -900,9 +936,15 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private GetMappingsResponse() {
-      mappingsVersion_ = 0L;
       dataAccessRole_ = "";
       baselineRole_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetMappingsResponse();
     }
 
     @java.lang.Override
@@ -935,10 +977,10 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 mappings_ = com.google.protobuf.MapField.newMapField(
                     MappingsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
               mappings__ = input.readMessage(
@@ -960,7 +1002,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -1003,7 +1045,6 @@ public final class IdBrokerMappingManagementProto {
               com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse.class, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int MAPPINGSVERSION_FIELD_NUMBER = 1;
     private long mappingsVersion_;
     /**
@@ -1012,7 +1053,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>int64 mappingsVersion = 1;</code>
+     * @return The mappingsVersion.
      */
+    @java.lang.Override
     public long getMappingsVersion() {
       return mappingsVersion_;
     }
@@ -1052,14 +1095,16 @@ public final class IdBrokerMappingManagementProto {
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsMappings(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetMappings().getMap().containsKey(key);
     }
     /**
      * Use {@link #getMappingsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getMappings() {
       return getMappingsMap();
@@ -1072,6 +1117,7 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getMappingsMap() {
       return internalGetMappings().getMap();
@@ -1084,11 +1130,12 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getMappingsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetMappings().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -1101,10 +1148,11 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getMappingsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetMappings().getMap();
       if (!map.containsKey(key)) {
@@ -1122,7 +1170,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The dataAccessRole.
      */
+    @java.lang.Override
     public java.lang.String getDataAccessRole() {
       java.lang.Object ref = dataAccessRole_;
       if (ref instanceof java.lang.String) {
@@ -1142,7 +1192,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The bytes for dataAccessRole.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDataAccessRoleBytes() {
       java.lang.Object ref = dataAccessRole_;
@@ -1167,7 +1219,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The baselineRole.
      */
+    @java.lang.Override
     public java.lang.String getBaselineRole() {
       java.lang.Object ref = baselineRole_;
       if (ref instanceof java.lang.String) {
@@ -1188,7 +1242,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The bytes for baselineRole.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBaselineRoleBytes() {
       java.lang.Object ref = baselineRole_;
@@ -1226,10 +1282,10 @@ public final class IdBrokerMappingManagementProto {
           internalGetMappings(),
           MappingsDefaultEntryHolder.defaultEntry,
           2);
-      if (!getDataAccessRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dataAccessRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, dataAccessRole_);
       }
-      if (!getBaselineRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, baselineRole_);
       }
       unknownFields.writeTo(output);
@@ -1255,10 +1311,10 @@ public final class IdBrokerMappingManagementProto {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(2, mappings__);
       }
-      if (!getDataAccessRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dataAccessRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, dataAccessRole_);
       }
-      if (!getBaselineRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, baselineRole_);
       }
       size += unknownFields.getSerializedSize();
@@ -1276,17 +1332,16 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse) obj;
 
-      boolean result = true;
-      result = result && (getMappingsVersion()
-          == other.getMappingsVersion());
-      result = result && internalGetMappings().equals(
-          other.internalGetMappings());
-      result = result && getDataAccessRole()
-          .equals(other.getDataAccessRole());
-      result = result && getBaselineRole()
-          .equals(other.getBaselineRole());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getMappingsVersion()
+          != other.getMappingsVersion()) return false;
+      if (!internalGetMappings().equals(
+          other.internalGetMappings())) return false;
+      if (!getDataAccessRole()
+          .equals(other.getDataAccessRole())) return false;
+      if (!getBaselineRole()
+          .equals(other.getBaselineRole())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -1496,48 +1551,46 @@ public final class IdBrokerMappingManagementProto {
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse buildPartial() {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.mappingsVersion_ = mappingsVersion_;
         result.mappings_ = internalGetMappings();
         result.mappings_.makeImmutable();
         result.dataAccessRole_ = dataAccessRole_;
         result.baselineRole_ = baselineRole_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -1601,7 +1654,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @return The mappingsVersion.
        */
+      @java.lang.Override
       public long getMappingsVersion() {
         return mappingsVersion_;
       }
@@ -1611,6 +1666,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @param value The mappingsVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setMappingsVersion(long value) {
         
@@ -1624,6 +1681,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMappingsVersion() {
         
@@ -1667,14 +1725,16 @@ public final class IdBrokerMappingManagementProto {
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
 
+      @java.lang.Override
       public boolean containsMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetMappings().getMap().containsKey(key);
       }
       /**
        * Use {@link #getMappingsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getMappings() {
         return getMappingsMap();
@@ -1687,6 +1747,7 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getMappingsMap() {
         return internalGetMappings().getMap();
@@ -1699,11 +1760,12 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getMappingsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetMappings().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -1716,10 +1778,11 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getMappingsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetMappings().getMap();
         if (!map.containsKey(key)) {
@@ -1744,7 +1807,7 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder removeMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableMappings().getMutableMap()
             .remove(key);
         return this;
@@ -1768,8 +1831,11 @@ public final class IdBrokerMappingManagementProto {
       public Builder putMappings(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableMappings().getMutableMap()
             .put(key, value);
         return this;
@@ -1798,6 +1864,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @return The dataAccessRole.
        */
       public java.lang.String getDataAccessRole() {
         java.lang.Object ref = dataAccessRole_;
@@ -1818,6 +1885,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @return The bytes for dataAccessRole.
        */
       public com.google.protobuf.ByteString
           getDataAccessRoleBytes() {
@@ -1839,6 +1907,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @param value The dataAccessRole to set.
+       * @return This builder for chaining.
        */
       public Builder setDataAccessRole(
           java.lang.String value) {
@@ -1857,6 +1927,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDataAccessRole() {
         
@@ -1871,6 +1942,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @param value The bytes for dataAccessRole to set.
+       * @return This builder for chaining.
        */
       public Builder setDataAccessRoleBytes(
           com.google.protobuf.ByteString value) {
@@ -1893,6 +1966,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @return The baselineRole.
        */
       public java.lang.String getBaselineRole() {
         java.lang.Object ref = baselineRole_;
@@ -1914,6 +1988,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @return The bytes for baselineRole.
        */
       public com.google.protobuf.ByteString
           getBaselineRoleBytes() {
@@ -1936,6 +2011,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @param value The baselineRole to set.
+       * @return This builder for chaining.
        */
       public Builder setBaselineRole(
           java.lang.String value) {
@@ -1955,6 +2032,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBaselineRole() {
         
@@ -1970,6 +2048,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @param value The bytes for baselineRole to set.
+       * @return This builder for chaining.
        */
       public Builder setBaselineRoleBytes(
           com.google.protobuf.ByteString value) {
@@ -1985,7 +2065,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -2045,6 +2125,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -2053,6 +2134,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -2063,6 +2145,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
     java.lang.String getEnvironmentNameOrCrn();
     /**
@@ -2071,6 +2154,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes();
@@ -2141,6 +2225,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
+     * @return The dataAccessRole.
      */
     java.lang.String getDataAccessRole();
     /**
@@ -2150,6 +2235,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
+     * @return The bytes for dataAccessRole.
      */
     com.google.protobuf.ByteString
         getDataAccessRoleBytes();
@@ -2162,6 +2248,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
+     * @return The baselineRole.
      */
     java.lang.String getBaselineRole();
     /**
@@ -2172,6 +2259,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
+     * @return The bytes for baselineRole.
      */
     com.google.protobuf.ByteString
         getBaselineRoleBytes();
@@ -2179,7 +2267,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.SetMappingsRequest}
    */
-  public  static final class SetMappingsRequest extends
+  public static final class SetMappingsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.SetMappingsRequest)
       SetMappingsRequestOrBuilder {
@@ -2193,6 +2281,13 @@ public final class IdBrokerMappingManagementProto {
       environmentNameOrCrn_ = "";
       dataAccessRole_ = "";
       baselineRole_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetMappingsRequest();
     }
 
     @java.lang.Override
@@ -2232,10 +2327,10 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 mappings_ = com.google.protobuf.MapField.newMapField(
                     MappingsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
               mappings__ = input.readMessage(
@@ -2257,7 +2352,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -2300,7 +2395,6 @@ public final class IdBrokerMappingManagementProto {
               com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest.class, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest.Builder.class);
     }
 
-    private int bitField0_;
     public static final int ACCOUNTID_FIELD_NUMBER = 1;
     private volatile java.lang.Object accountId_;
     /**
@@ -2309,7 +2403,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -2328,7 +2424,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -2351,7 +2449,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentNameOrCrn() {
       java.lang.Object ref = environmentNameOrCrn_;
       if (ref instanceof java.lang.String) {
@@ -2370,7 +2470,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes() {
       java.lang.Object ref = environmentNameOrCrn_;
@@ -2420,14 +2522,16 @@ public final class IdBrokerMappingManagementProto {
      * <code>map&lt;string, string&gt; mappings = 3;</code>
      */
 
+    @java.lang.Override
     public boolean containsMappings(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetMappings().getMap().containsKey(key);
     }
     /**
      * Use {@link #getMappingsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getMappings() {
       return getMappingsMap();
@@ -2440,6 +2544,7 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 3;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getMappingsMap() {
       return internalGetMappings().getMap();
@@ -2452,11 +2557,12 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 3;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getMappingsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetMappings().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -2469,10 +2575,11 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 3;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getMappingsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetMappings().getMap();
       if (!map.containsKey(key)) {
@@ -2490,7 +2597,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
+     * @return The dataAccessRole.
      */
+    @java.lang.Override
     public java.lang.String getDataAccessRole() {
       java.lang.Object ref = dataAccessRole_;
       if (ref instanceof java.lang.String) {
@@ -2510,7 +2619,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 4;</code>
+     * @return The bytes for dataAccessRole.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDataAccessRoleBytes() {
       java.lang.Object ref = dataAccessRole_;
@@ -2535,7 +2646,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
+     * @return The baselineRole.
      */
+    @java.lang.Override
     public java.lang.String getBaselineRole() {
       java.lang.Object ref = baselineRole_;
       if (ref instanceof java.lang.String) {
@@ -2556,7 +2669,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 5;</code>
+     * @return The bytes for baselineRole.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBaselineRoleBytes() {
       java.lang.Object ref = baselineRole_;
@@ -2585,10 +2700,10 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentNameOrCrn_);
       }
       com.google.protobuf.GeneratedMessageV3
@@ -2597,10 +2712,10 @@ public final class IdBrokerMappingManagementProto {
           internalGetMappings(),
           MappingsDefaultEntryHolder.defaultEntry,
           3);
-      if (!getDataAccessRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dataAccessRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, dataAccessRole_);
       }
-      if (!getBaselineRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 5, baselineRole_);
       }
       unknownFields.writeTo(output);
@@ -2612,10 +2727,10 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentNameOrCrn_);
       }
       for (java.util.Map.Entry<java.lang.String, java.lang.String> entry
@@ -2628,10 +2743,10 @@ public final class IdBrokerMappingManagementProto {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(3, mappings__);
       }
-      if (!getDataAccessRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dataAccessRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, dataAccessRole_);
       }
-      if (!getBaselineRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(5, baselineRole_);
       }
       size += unknownFields.getSerializedSize();
@@ -2649,19 +2764,18 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironmentNameOrCrn()
-          .equals(other.getEnvironmentNameOrCrn());
-      result = result && internalGetMappings().equals(
-          other.internalGetMappings());
-      result = result && getDataAccessRole()
-          .equals(other.getDataAccessRole());
-      result = result && getBaselineRole()
-          .equals(other.getBaselineRole());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironmentNameOrCrn()
+          .equals(other.getEnvironmentNameOrCrn())) return false;
+      if (!internalGetMappings().equals(
+          other.internalGetMappings())) return false;
+      if (!getDataAccessRole()
+          .equals(other.getDataAccessRole())) return false;
+      if (!getBaselineRole()
+          .equals(other.getBaselineRole())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -2874,49 +2988,47 @@ public final class IdBrokerMappingManagementProto {
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest buildPartial() {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsRequest(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.accountId_ = accountId_;
         result.environmentNameOrCrn_ = environmentNameOrCrn_;
         result.mappings_ = internalGetMappings();
         result.mappings_.makeImmutable();
         result.dataAccessRole_ = dataAccessRole_;
         result.baselineRole_ = baselineRole_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -2985,6 +3097,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -3004,6 +3117,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -3024,6 +3138,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -3041,6 +3157,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -3054,6 +3171,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -3074,6 +3193,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The environmentNameOrCrn.
        */
       public java.lang.String getEnvironmentNameOrCrn() {
         java.lang.Object ref = environmentNameOrCrn_;
@@ -3093,6 +3213,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The bytes for environmentNameOrCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentNameOrCrnBytes() {
@@ -3113,6 +3234,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrn(
           java.lang.String value) {
@@ -3130,6 +3253,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentNameOrCrn() {
         
@@ -3143,6 +3267,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The bytes for environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -3191,14 +3317,16 @@ public final class IdBrokerMappingManagementProto {
        * <code>map&lt;string, string&gt; mappings = 3;</code>
        */
 
+      @java.lang.Override
       public boolean containsMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetMappings().getMap().containsKey(key);
       }
       /**
        * Use {@link #getMappingsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getMappings() {
         return getMappingsMap();
@@ -3211,6 +3339,7 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 3;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getMappingsMap() {
         return internalGetMappings().getMap();
@@ -3223,11 +3352,12 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 3;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getMappingsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetMappings().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -3240,10 +3370,11 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 3;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getMappingsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetMappings().getMap();
         if (!map.containsKey(key)) {
@@ -3268,7 +3399,7 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder removeMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableMappings().getMutableMap()
             .remove(key);
         return this;
@@ -3292,8 +3423,11 @@ public final class IdBrokerMappingManagementProto {
       public Builder putMappings(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableMappings().getMutableMap()
             .put(key, value);
         return this;
@@ -3322,6 +3456,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
+       * @return The dataAccessRole.
        */
       public java.lang.String getDataAccessRole() {
         java.lang.Object ref = dataAccessRole_;
@@ -3342,6 +3477,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
+       * @return The bytes for dataAccessRole.
        */
       public com.google.protobuf.ByteString
           getDataAccessRoleBytes() {
@@ -3363,6 +3499,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
+       * @param value The dataAccessRole to set.
+       * @return This builder for chaining.
        */
       public Builder setDataAccessRole(
           java.lang.String value) {
@@ -3381,6 +3519,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDataAccessRole() {
         
@@ -3395,6 +3534,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 4;</code>
+       * @param value The bytes for dataAccessRole to set.
+       * @return This builder for chaining.
        */
       public Builder setDataAccessRoleBytes(
           com.google.protobuf.ByteString value) {
@@ -3417,6 +3558,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
+       * @return The baselineRole.
        */
       public java.lang.String getBaselineRole() {
         java.lang.Object ref = baselineRole_;
@@ -3438,6 +3580,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
+       * @return The bytes for baselineRole.
        */
       public com.google.protobuf.ByteString
           getBaselineRoleBytes() {
@@ -3460,6 +3603,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
+       * @param value The baselineRole to set.
+       * @return This builder for chaining.
        */
       public Builder setBaselineRole(
           java.lang.String value) {
@@ -3479,6 +3624,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBaselineRole() {
         
@@ -3494,6 +3640,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 5;</code>
+       * @param value The bytes for baselineRole to set.
+       * @return This builder for chaining.
        */
       public Builder setBaselineRoleBytes(
           com.google.protobuf.ByteString value) {
@@ -3509,7 +3657,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -3569,6 +3717,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>int64 mappingsVersion = 1;</code>
+     * @return The mappingsVersion.
      */
     long getMappingsVersion();
 
@@ -3638,6 +3787,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The dataAccessRole.
      */
     java.lang.String getDataAccessRole();
     /**
@@ -3647,6 +3797,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The bytes for dataAccessRole.
      */
     com.google.protobuf.ByteString
         getDataAccessRoleBytes();
@@ -3659,6 +3810,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The baselineRole.
      */
     java.lang.String getBaselineRole();
     /**
@@ -3669,6 +3821,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The bytes for baselineRole.
      */
     com.google.protobuf.ByteString
         getBaselineRoleBytes();
@@ -3676,7 +3829,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.SetMappingsResponse}
    */
-  public  static final class SetMappingsResponse extends
+  public static final class SetMappingsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.SetMappingsResponse)
       SetMappingsResponseOrBuilder {
@@ -3686,9 +3839,15 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private SetMappingsResponse() {
-      mappingsVersion_ = 0L;
       dataAccessRole_ = "";
       baselineRole_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SetMappingsResponse();
     }
 
     @java.lang.Override
@@ -3721,10 +3880,10 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 mappings_ = com.google.protobuf.MapField.newMapField(
                     MappingsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
               mappings__ = input.readMessage(
@@ -3746,7 +3905,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -3789,7 +3948,6 @@ public final class IdBrokerMappingManagementProto {
               com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse.class, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int MAPPINGSVERSION_FIELD_NUMBER = 1;
     private long mappingsVersion_;
     /**
@@ -3798,7 +3956,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>int64 mappingsVersion = 1;</code>
+     * @return The mappingsVersion.
      */
+    @java.lang.Override
     public long getMappingsVersion() {
       return mappingsVersion_;
     }
@@ -3838,14 +3998,16 @@ public final class IdBrokerMappingManagementProto {
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsMappings(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetMappings().getMap().containsKey(key);
     }
     /**
      * Use {@link #getMappingsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getMappings() {
       return getMappingsMap();
@@ -3858,6 +4020,7 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getMappingsMap() {
       return internalGetMappings().getMap();
@@ -3870,11 +4033,12 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getMappingsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetMappings().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -3887,10 +4051,11 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; mappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getMappingsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetMappings().getMap();
       if (!map.containsKey(key)) {
@@ -3908,7 +4073,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The dataAccessRole.
      */
+    @java.lang.Override
     public java.lang.String getDataAccessRole() {
       java.lang.Object ref = dataAccessRole_;
       if (ref instanceof java.lang.String) {
@@ -3928,7 +4095,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string dataAccessRole = 3;</code>
+     * @return The bytes for dataAccessRole.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getDataAccessRoleBytes() {
       java.lang.Object ref = dataAccessRole_;
@@ -3953,7 +4122,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The baselineRole.
      */
+    @java.lang.Override
     public java.lang.String getBaselineRole() {
       java.lang.Object ref = baselineRole_;
       if (ref instanceof java.lang.String) {
@@ -3974,7 +4145,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string baselineRole = 4;</code>
+     * @return The bytes for baselineRole.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getBaselineRoleBytes() {
       java.lang.Object ref = baselineRole_;
@@ -4012,10 +4185,10 @@ public final class IdBrokerMappingManagementProto {
           internalGetMappings(),
           MappingsDefaultEntryHolder.defaultEntry,
           2);
-      if (!getDataAccessRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dataAccessRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 3, dataAccessRole_);
       }
-      if (!getBaselineRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, baselineRole_);
       }
       unknownFields.writeTo(output);
@@ -4041,10 +4214,10 @@ public final class IdBrokerMappingManagementProto {
         size += com.google.protobuf.CodedOutputStream
             .computeMessageSize(2, mappings__);
       }
-      if (!getDataAccessRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(dataAccessRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(3, dataAccessRole_);
       }
-      if (!getBaselineRoleBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(baselineRole_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, baselineRole_);
       }
       size += unknownFields.getSerializedSize();
@@ -4062,17 +4235,16 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse) obj;
 
-      boolean result = true;
-      result = result && (getMappingsVersion()
-          == other.getMappingsVersion());
-      result = result && internalGetMappings().equals(
-          other.internalGetMappings());
-      result = result && getDataAccessRole()
-          .equals(other.getDataAccessRole());
-      result = result && getBaselineRole()
-          .equals(other.getBaselineRole());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getMappingsVersion()
+          != other.getMappingsVersion()) return false;
+      if (!internalGetMappings().equals(
+          other.internalGetMappings())) return false;
+      if (!getDataAccessRole()
+          .equals(other.getDataAccessRole())) return false;
+      if (!getBaselineRole()
+          .equals(other.getBaselineRole())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -4282,48 +4454,46 @@ public final class IdBrokerMappingManagementProto {
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse buildPartial() {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SetMappingsResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.mappingsVersion_ = mappingsVersion_;
         result.mappings_ = internalGetMappings();
         result.mappings_.makeImmutable();
         result.dataAccessRole_ = dataAccessRole_;
         result.baselineRole_ = baselineRole_;
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -4387,7 +4557,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @return The mappingsVersion.
        */
+      @java.lang.Override
       public long getMappingsVersion() {
         return mappingsVersion_;
       }
@@ -4397,6 +4569,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @param value The mappingsVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setMappingsVersion(long value) {
         
@@ -4410,6 +4584,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMappingsVersion() {
         
@@ -4453,14 +4628,16 @@ public final class IdBrokerMappingManagementProto {
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
 
+      @java.lang.Override
       public boolean containsMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetMappings().getMap().containsKey(key);
       }
       /**
        * Use {@link #getMappingsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getMappings() {
         return getMappingsMap();
@@ -4473,6 +4650,7 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getMappingsMap() {
         return internalGetMappings().getMap();
@@ -4485,11 +4663,12 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getMappingsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetMappings().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -4502,10 +4681,11 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; mappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getMappingsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetMappings().getMap();
         if (!map.containsKey(key)) {
@@ -4530,7 +4710,7 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder removeMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableMappings().getMutableMap()
             .remove(key);
         return this;
@@ -4554,8 +4734,11 @@ public final class IdBrokerMappingManagementProto {
       public Builder putMappings(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableMappings().getMutableMap()
             .put(key, value);
         return this;
@@ -4584,6 +4767,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @return The dataAccessRole.
        */
       public java.lang.String getDataAccessRole() {
         java.lang.Object ref = dataAccessRole_;
@@ -4604,6 +4788,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @return The bytes for dataAccessRole.
        */
       public com.google.protobuf.ByteString
           getDataAccessRoleBytes() {
@@ -4625,6 +4810,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @param value The dataAccessRole to set.
+       * @return This builder for chaining.
        */
       public Builder setDataAccessRole(
           java.lang.String value) {
@@ -4643,6 +4830,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearDataAccessRole() {
         
@@ -4657,6 +4845,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string dataAccessRole = 3;</code>
+       * @param value The bytes for dataAccessRole to set.
+       * @return This builder for chaining.
        */
       public Builder setDataAccessRoleBytes(
           com.google.protobuf.ByteString value) {
@@ -4679,6 +4869,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @return The baselineRole.
        */
       public java.lang.String getBaselineRole() {
         java.lang.Object ref = baselineRole_;
@@ -4700,6 +4891,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @return The bytes for baselineRole.
        */
       public com.google.protobuf.ByteString
           getBaselineRoleBytes() {
@@ -4722,6 +4914,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @param value The baselineRole to set.
+       * @return This builder for chaining.
        */
       public Builder setBaselineRole(
           java.lang.String value) {
@@ -4741,6 +4935,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearBaselineRole() {
         
@@ -4756,6 +4951,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string baselineRole = 4;</code>
+       * @param value The bytes for baselineRole to set.
+       * @return This builder for chaining.
        */
       public Builder setBaselineRoleBytes(
           com.google.protobuf.ByteString value) {
@@ -4771,7 +4968,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -4831,6 +5028,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 2;</code>
+     * @return The environmentCrn.
      */
     java.lang.String getEnvironmentCrn();
     /**
@@ -4839,6 +5037,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 2;</code>
+     * @return The bytes for environmentCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentCrnBytes();
@@ -4846,7 +5045,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.DeleteMappingsRequest}
    */
-  public  static final class DeleteMappingsRequest extends
+  public static final class DeleteMappingsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.DeleteMappingsRequest)
       DeleteMappingsRequestOrBuilder {
@@ -4857,6 +5056,13 @@ public final class IdBrokerMappingManagementProto {
     }
     private DeleteMappingsRequest() {
       environmentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteMappingsRequest();
     }
 
     @java.lang.Override
@@ -4872,7 +5078,6 @@ public final class IdBrokerMappingManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -4890,7 +5095,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -4929,7 +5134,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 2;</code>
+     * @return The environmentCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentCrn() {
       java.lang.Object ref = environmentCrn_;
       if (ref instanceof java.lang.String) {
@@ -4948,7 +5155,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 2;</code>
+     * @return The bytes for environmentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentCrnBytes() {
       java.lang.Object ref = environmentCrn_;
@@ -4977,7 +5186,7 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentCrn_);
       }
       unknownFields.writeTo(output);
@@ -4989,7 +5198,7 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -5007,11 +5216,10 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsRequest) obj;
 
-      boolean result = true;
-      result = result && getEnvironmentCrn()
-          .equals(other.getEnvironmentCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5191,35 +5399,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5273,6 +5481,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 2;</code>
+       * @return The environmentCrn.
        */
       public java.lang.String getEnvironmentCrn() {
         java.lang.Object ref = environmentCrn_;
@@ -5292,6 +5501,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 2;</code>
+       * @return The bytes for environmentCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentCrnBytes() {
@@ -5312,6 +5522,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 2;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrn(
           java.lang.String value) {
@@ -5329,6 +5541,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentCrn() {
         
@@ -5342,6 +5555,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 2;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -5357,7 +5572,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5414,7 +5629,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.DeleteMappingsResponse}
    */
-  public  static final class DeleteMappingsResponse extends
+  public static final class DeleteMappingsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.DeleteMappingsResponse)
       DeleteMappingsResponseOrBuilder {
@@ -5424,6 +5639,13 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private DeleteMappingsResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new DeleteMappingsResponse();
     }
 
     @java.lang.Override
@@ -5450,7 +5672,7 @@ public final class IdBrokerMappingManagementProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5519,9 +5741,8 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.DeleteMappingsResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -5696,35 +5917,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -5769,7 +5990,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -5829,6 +6050,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -5837,6 +6059,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -5847,6 +6070,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
     java.lang.String getEnvironmentNameOrCrn();
     /**
@@ -5855,6 +6079,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes();
@@ -5862,7 +6087,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.SyncMappingsRequest}
    */
-  public  static final class SyncMappingsRequest extends
+  public static final class SyncMappingsRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.SyncMappingsRequest)
       SyncMappingsRequestOrBuilder {
@@ -5874,6 +6099,13 @@ public final class IdBrokerMappingManagementProto {
     private SyncMappingsRequest() {
       accountId_ = "";
       environmentNameOrCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SyncMappingsRequest();
     }
 
     @java.lang.Override
@@ -5889,7 +6121,6 @@ public final class IdBrokerMappingManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -5913,7 +6144,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -5952,7 +6183,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -5971,7 +6204,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -5994,7 +6229,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentNameOrCrn() {
       java.lang.Object ref = environmentNameOrCrn_;
       if (ref instanceof java.lang.String) {
@@ -6013,7 +6250,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes() {
       java.lang.Object ref = environmentNameOrCrn_;
@@ -6042,10 +6281,10 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentNameOrCrn_);
       }
       unknownFields.writeTo(output);
@@ -6057,10 +6296,10 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentNameOrCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -6078,13 +6317,12 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsRequest other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironmentNameOrCrn()
-          .equals(other.getEnvironmentNameOrCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironmentNameOrCrn()
+          .equals(other.getEnvironmentNameOrCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6269,35 +6507,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6355,6 +6593,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -6374,6 +6613,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -6394,6 +6634,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -6411,6 +6653,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -6424,6 +6667,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -6444,6 +6689,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The environmentNameOrCrn.
        */
       public java.lang.String getEnvironmentNameOrCrn() {
         java.lang.Object ref = environmentNameOrCrn_;
@@ -6463,6 +6709,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The bytes for environmentNameOrCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentNameOrCrnBytes() {
@@ -6483,6 +6730,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrn(
           java.lang.String value) {
@@ -6500,6 +6749,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentNameOrCrn() {
         
@@ -6513,6 +6763,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The bytes for environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -6528,7 +6780,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -6585,7 +6837,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.SyncMappingsResponse}
    */
-  public  static final class SyncMappingsResponse extends
+  public static final class SyncMappingsResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.SyncMappingsResponse)
       SyncMappingsResponseOrBuilder {
@@ -6595,6 +6847,13 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private SyncMappingsResponse() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SyncMappingsResponse();
     }
 
     @java.lang.Override
@@ -6621,7 +6880,7 @@ public final class IdBrokerMappingManagementProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -6690,9 +6949,8 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncMappingsResponse) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -6867,35 +7125,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -6940,7 +7198,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7000,6 +7258,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
     java.lang.String getAccountId();
     /**
@@ -7008,6 +7267,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
     com.google.protobuf.ByteString
         getAccountIdBytes();
@@ -7018,6 +7278,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
     java.lang.String getEnvironmentNameOrCrn();
     /**
@@ -7026,6 +7287,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes();
@@ -7033,7 +7295,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsSyncStatusRequest}
    */
-  public  static final class GetMappingsSyncStatusRequest extends
+  public static final class GetMappingsSyncStatusRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.GetMappingsSyncStatusRequest)
       GetMappingsSyncStatusRequestOrBuilder {
@@ -7045,6 +7307,13 @@ public final class IdBrokerMappingManagementProto {
     private GetMappingsSyncStatusRequest() {
       accountId_ = "";
       environmentNameOrCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetMappingsSyncStatusRequest();
     }
 
     @java.lang.Override
@@ -7060,7 +7329,6 @@ public final class IdBrokerMappingManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -7084,7 +7352,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7123,7 +7391,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The accountId.
      */
+    @java.lang.Override
     public java.lang.String getAccountId() {
       java.lang.Object ref = accountId_;
       if (ref instanceof java.lang.String) {
@@ -7142,7 +7412,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string accountId = 1;</code>
+     * @return The bytes for accountId.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getAccountIdBytes() {
       java.lang.Object ref = accountId_;
@@ -7165,7 +7437,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The environmentNameOrCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentNameOrCrn() {
       java.lang.Object ref = environmentNameOrCrn_;
       if (ref instanceof java.lang.String) {
@@ -7184,7 +7458,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentNameOrCrn = 2;</code>
+     * @return The bytes for environmentNameOrCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentNameOrCrnBytes() {
       java.lang.Object ref = environmentNameOrCrn_;
@@ -7213,10 +7489,10 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 2, environmentNameOrCrn_);
       }
       unknownFields.writeTo(output);
@@ -7228,10 +7504,10 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getAccountIdBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(accountId_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, accountId_);
       }
-      if (!getEnvironmentNameOrCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentNameOrCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(2, environmentNameOrCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -7249,13 +7525,12 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusRequest) obj;
 
-      boolean result = true;
-      result = result && getAccountId()
-          .equals(other.getAccountId());
-      result = result && getEnvironmentNameOrCrn()
-          .equals(other.getEnvironmentNameOrCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getAccountId()
+          .equals(other.getAccountId())) return false;
+      if (!getEnvironmentNameOrCrn()
+          .equals(other.getEnvironmentNameOrCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -7440,35 +7715,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -7526,6 +7801,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The accountId.
        */
       public java.lang.String getAccountId() {
         java.lang.Object ref = accountId_;
@@ -7545,6 +7821,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return The bytes for accountId.
        */
       public com.google.protobuf.ByteString
           getAccountIdBytes() {
@@ -7565,6 +7842,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountId(
           java.lang.String value) {
@@ -7582,6 +7861,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearAccountId() {
         
@@ -7595,6 +7875,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string accountId = 1;</code>
+       * @param value The bytes for accountId to set.
+       * @return This builder for chaining.
        */
       public Builder setAccountIdBytes(
           com.google.protobuf.ByteString value) {
@@ -7615,6 +7897,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The environmentNameOrCrn.
        */
       public java.lang.String getEnvironmentNameOrCrn() {
         java.lang.Object ref = environmentNameOrCrn_;
@@ -7634,6 +7917,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return The bytes for environmentNameOrCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentNameOrCrnBytes() {
@@ -7654,6 +7938,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrn(
           java.lang.String value) {
@@ -7671,6 +7957,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentNameOrCrn() {
         
@@ -7684,6 +7971,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentNameOrCrn = 2;</code>
+       * @param value The bytes for environmentNameOrCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentNameOrCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -7699,7 +7988,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -7759,6 +8048,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>bool syncNeeded = 2;</code>
+     * @return The syncNeeded.
      */
     boolean getSyncNeeded();
 
@@ -7768,6 +8058,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+     * @return The enum numeric value on the wire for globalStatus.
      */
     int getGlobalStatusValue();
     /**
@@ -7776,6 +8067,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+     * @return The globalStatus.
      */
     com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getGlobalStatus();
 
@@ -7841,7 +8133,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsSyncStatusResponse}
    */
-  public  static final class GetMappingsSyncStatusResponse extends
+  public static final class GetMappingsSyncStatusResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.GetMappingsSyncStatusResponse)
       GetMappingsSyncStatusResponseOrBuilder {
@@ -7851,8 +8143,14 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private GetMappingsSyncStatusResponse() {
-      syncNeeded_ = false;
       globalStatus_ = 0;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetMappingsSyncStatusResponse();
     }
 
     @java.lang.Override
@@ -7891,10 +8189,10 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             case 34: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 statuses_ = com.google.protobuf.MapField.newMapField(
                     StatusesDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000001;
               }
               com.google.protobuf.MapEntry<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails>
               statuses__ = input.readMessage(
@@ -7904,7 +8202,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -7947,7 +8245,6 @@ public final class IdBrokerMappingManagementProto {
               com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse.class, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int SYNCNEEDED_FIELD_NUMBER = 2;
     private boolean syncNeeded_;
     /**
@@ -7956,7 +8253,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>bool syncNeeded = 2;</code>
+     * @return The syncNeeded.
      */
+    @java.lang.Override
     public boolean getSyncNeeded() {
       return syncNeeded_;
     }
@@ -7969,8 +8268,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+     * @return The enum numeric value on the wire for globalStatus.
      */
-    public int getGlobalStatusValue() {
+    @java.lang.Override public int getGlobalStatusValue() {
       return globalStatus_;
     }
     /**
@@ -7979,8 +8279,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+     * @return The globalStatus.
      */
-    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getGlobalStatus() {
+    @java.lang.Override public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getGlobalStatus() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value result = com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.valueOf(globalStatus_);
       return result == null ? com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.UNRECOGNIZED : result;
@@ -8021,14 +8322,16 @@ public final class IdBrokerMappingManagementProto {
      * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
      */
 
+    @java.lang.Override
     public boolean containsStatuses(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetStatuses().getMap().containsKey(key);
     }
     /**
      * Use {@link #getStatusesMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> getStatuses() {
       return getStatusesMap();
@@ -8041,6 +8344,7 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> getStatusesMap() {
       return internalGetStatuses().getMap();
@@ -8053,11 +8357,12 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
      */
+    @java.lang.Override
 
     public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails getStatusesOrDefault(
         java.lang.String key,
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> map =
           internalGetStatuses().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -8070,10 +8375,11 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
      */
+    @java.lang.Override
 
     public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails getStatusesOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> map =
           internalGetStatuses().getMap();
       if (!map.containsKey(key)) {
@@ -8150,14 +8456,13 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse) obj;
 
-      boolean result = true;
-      result = result && (getSyncNeeded()
-          == other.getSyncNeeded());
-      result = result && globalStatus_ == other.globalStatus_;
-      result = result && internalGetStatuses().equals(
-          other.internalGetStatuses());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getSyncNeeded()
+          != other.getSyncNeeded()) return false;
+      if (globalStatus_ != other.globalStatus_) return false;
+      if (!internalGetStatuses().equals(
+          other.internalGetStatuses())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -8363,47 +8668,45 @@ public final class IdBrokerMappingManagementProto {
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse buildPartial() {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsSyncStatusResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.syncNeeded_ = syncNeeded_;
         result.globalStatus_ = globalStatus_;
         result.statuses_ = internalGetStatuses();
         result.statuses_.makeImmutable();
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -8462,7 +8765,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>bool syncNeeded = 2;</code>
+       * @return The syncNeeded.
        */
+      @java.lang.Override
       public boolean getSyncNeeded() {
         return syncNeeded_;
       }
@@ -8472,6 +8777,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>bool syncNeeded = 2;</code>
+       * @param value The syncNeeded to set.
+       * @return This builder for chaining.
        */
       public Builder setSyncNeeded(boolean value) {
         
@@ -8485,6 +8792,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>bool syncNeeded = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearSyncNeeded() {
         
@@ -8500,8 +8808,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+       * @return The enum numeric value on the wire for globalStatus.
        */
-      public int getGlobalStatusValue() {
+      @java.lang.Override public int getGlobalStatusValue() {
         return globalStatus_;
       }
       /**
@@ -8510,8 +8819,11 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+       * @param value The enum numeric value on the wire for globalStatus to set.
+       * @return This builder for chaining.
        */
       public Builder setGlobalStatusValue(int value) {
+        
         globalStatus_ = value;
         onChanged();
         return this;
@@ -8522,7 +8834,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+       * @return The globalStatus.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getGlobalStatus() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value result = com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.valueOf(globalStatus_);
@@ -8534,6 +8848,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+       * @param value The globalStatus to set.
+       * @return This builder for chaining.
        */
       public Builder setGlobalStatus(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value value) {
         if (value == null) {
@@ -8550,6 +8866,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value globalStatus = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearGlobalStatus() {
         
@@ -8593,14 +8910,16 @@ public final class IdBrokerMappingManagementProto {
        * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
        */
 
+      @java.lang.Override
       public boolean containsStatuses(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetStatuses().getMap().containsKey(key);
       }
       /**
        * Use {@link #getStatusesMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> getStatuses() {
         return getStatusesMap();
@@ -8613,6 +8932,7 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> getStatusesMap() {
         return internalGetStatuses().getMap();
@@ -8625,11 +8945,12 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
        */
+      @java.lang.Override
 
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails getStatusesOrDefault(
           java.lang.String key,
           com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> map =
             internalGetStatuses().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -8642,10 +8963,11 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, .idbrokermappingmanagement.SyncStatusDetails&gt; statuses = 4;</code>
        */
+      @java.lang.Override
 
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails getStatusesOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails> map =
             internalGetStatuses().getMap();
         if (!map.containsKey(key)) {
@@ -8670,7 +8992,7 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder removeStatuses(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableStatuses().getMutableMap()
             .remove(key);
         return this;
@@ -8694,8 +9016,11 @@ public final class IdBrokerMappingManagementProto {
       public Builder putStatuses(
           java.lang.String key,
           com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableStatuses().getMutableMap()
             .put(key, value);
         return this;
@@ -8718,7 +9043,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -8778,6 +9103,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+     * @return The enum numeric value on the wire for status.
      */
     int getStatusValue();
     /**
@@ -8786,6 +9112,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+     * @return The status.
      */
     com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getStatus();
 
@@ -8796,6 +9123,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>uint64 startDateMs = 2;</code>
+     * @return The startDateMs.
      */
     long getStartDateMs();
 
@@ -8806,6 +9134,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>uint64 endDateMs = 3;</code>
+     * @return The endDateMs.
      */
     long getEndDateMs();
 
@@ -8815,6 +9144,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string errorDetail = 4;</code>
+     * @return The errorDetail.
      */
     java.lang.String getErrorDetail();
     /**
@@ -8823,6 +9153,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string errorDetail = 4;</code>
+     * @return The bytes for errorDetail.
      */
     com.google.protobuf.ByteString
         getErrorDetailBytes();
@@ -8830,7 +9161,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.SyncStatusDetails}
    */
-  public  static final class SyncStatusDetails extends
+  public static final class SyncStatusDetails extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.SyncStatusDetails)
       SyncStatusDetailsOrBuilder {
@@ -8841,9 +9172,14 @@ public final class IdBrokerMappingManagementProto {
     }
     private SyncStatusDetails() {
       status_ = 0;
-      startDateMs_ = 0L;
-      endDateMs_ = 0L;
       errorDetail_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SyncStatusDetails();
     }
 
     @java.lang.Override
@@ -8859,7 +9195,6 @@ public final class IdBrokerMappingManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -8893,7 +9228,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -8932,8 +9267,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+     * @return The enum numeric value on the wire for status.
      */
-    public int getStatusValue() {
+    @java.lang.Override public int getStatusValue() {
       return status_;
     }
     /**
@@ -8942,8 +9278,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+     * @return The status.
      */
-    public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getStatus() {
+    @java.lang.Override public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getStatus() {
       @SuppressWarnings("deprecation")
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value result = com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.valueOf(status_);
       return result == null ? com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.UNRECOGNIZED : result;
@@ -8958,7 +9295,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>uint64 startDateMs = 2;</code>
+     * @return The startDateMs.
      */
+    @java.lang.Override
     public long getStartDateMs() {
       return startDateMs_;
     }
@@ -8972,7 +9311,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>uint64 endDateMs = 3;</code>
+     * @return The endDateMs.
      */
+    @java.lang.Override
     public long getEndDateMs() {
       return endDateMs_;
     }
@@ -8985,7 +9326,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string errorDetail = 4;</code>
+     * @return The errorDetail.
      */
+    @java.lang.Override
     public java.lang.String getErrorDetail() {
       java.lang.Object ref = errorDetail_;
       if (ref instanceof java.lang.String) {
@@ -9004,7 +9347,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string errorDetail = 4;</code>
+     * @return The bytes for errorDetail.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getErrorDetailBytes() {
       java.lang.Object ref = errorDetail_;
@@ -9042,7 +9387,7 @@ public final class IdBrokerMappingManagementProto {
       if (endDateMs_ != 0L) {
         output.writeUInt64(3, endDateMs_);
       }
-      if (!getErrorDetailBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(errorDetail_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 4, errorDetail_);
       }
       unknownFields.writeTo(output);
@@ -9066,7 +9411,7 @@ public final class IdBrokerMappingManagementProto {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt64Size(3, endDateMs_);
       }
-      if (!getErrorDetailBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(errorDetail_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(4, errorDetail_);
       }
       size += unknownFields.getSerializedSize();
@@ -9084,16 +9429,15 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatusDetails) obj;
 
-      boolean result = true;
-      result = result && status_ == other.status_;
-      result = result && (getStartDateMs()
-          == other.getStartDateMs());
-      result = result && (getEndDateMs()
-          == other.getEndDateMs());
-      result = result && getErrorDetail()
-          .equals(other.getErrorDetail());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (status_ != other.status_) return false;
+      if (getStartDateMs()
+          != other.getStartDateMs()) return false;
+      if (getEndDateMs()
+          != other.getEndDateMs()) return false;
+      if (!getErrorDetail()
+          .equals(other.getErrorDetail())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -9290,35 +9634,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -9381,8 +9725,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+       * @return The enum numeric value on the wire for status.
        */
-      public int getStatusValue() {
+      @java.lang.Override public int getStatusValue() {
         return status_;
       }
       /**
@@ -9391,8 +9736,11 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+       * @param value The enum numeric value on the wire for status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatusValue(int value) {
+        
         status_ = value;
         onChanged();
         return this;
@@ -9403,7 +9751,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+       * @return The status.
        */
+      @java.lang.Override
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value getStatus() {
         @SuppressWarnings("deprecation")
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value result = com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value.valueOf(status_);
@@ -9415,6 +9765,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+       * @param value The status to set.
+       * @return This builder for chaining.
        */
       public Builder setStatus(com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus.Value value) {
         if (value == null) {
@@ -9431,6 +9783,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>.idbrokermappingmanagement.SyncStatus.Value status = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStatus() {
         
@@ -9447,7 +9800,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>uint64 startDateMs = 2;</code>
+       * @return The startDateMs.
        */
+      @java.lang.Override
       public long getStartDateMs() {
         return startDateMs_;
       }
@@ -9458,6 +9813,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>uint64 startDateMs = 2;</code>
+       * @param value The startDateMs to set.
+       * @return This builder for chaining.
        */
       public Builder setStartDateMs(long value) {
         
@@ -9472,6 +9829,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>uint64 startDateMs = 2;</code>
+       * @return This builder for chaining.
        */
       public Builder clearStartDateMs() {
         
@@ -9488,7 +9846,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>uint64 endDateMs = 3;</code>
+       * @return The endDateMs.
        */
+      @java.lang.Override
       public long getEndDateMs() {
         return endDateMs_;
       }
@@ -9499,6 +9859,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>uint64 endDateMs = 3;</code>
+       * @param value The endDateMs to set.
+       * @return This builder for chaining.
        */
       public Builder setEndDateMs(long value) {
         
@@ -9513,6 +9875,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>uint64 endDateMs = 3;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEndDateMs() {
         
@@ -9528,6 +9891,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string errorDetail = 4;</code>
+       * @return The errorDetail.
        */
       public java.lang.String getErrorDetail() {
         java.lang.Object ref = errorDetail_;
@@ -9547,6 +9911,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string errorDetail = 4;</code>
+       * @return The bytes for errorDetail.
        */
       public com.google.protobuf.ByteString
           getErrorDetailBytes() {
@@ -9567,6 +9932,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string errorDetail = 4;</code>
+       * @param value The errorDetail to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorDetail(
           java.lang.String value) {
@@ -9584,6 +9951,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string errorDetail = 4;</code>
+       * @return This builder for chaining.
        */
       public Builder clearErrorDetail() {
         
@@ -9597,6 +9965,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string errorDetail = 4;</code>
+       * @param value The bytes for errorDetail to set.
+       * @return This builder for chaining.
        */
       public Builder setErrorDetailBytes(
           com.google.protobuf.ByteString value) {
@@ -9612,7 +9982,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -9669,7 +10039,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.SyncStatus}
    */
-  public  static final class SyncStatus extends
+  public static final class SyncStatus extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.SyncStatus)
       SyncStatusOrBuilder {
@@ -9679,6 +10049,13 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private SyncStatus() {
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new SyncStatus();
     }
 
     @java.lang.Override
@@ -9705,7 +10082,7 @@ public final class IdBrokerMappingManagementProto {
               done = true;
               break;
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -9835,6 +10212,8 @@ public final class IdBrokerMappingManagementProto {
       }
 
       /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
        * @deprecated Use {@link #forNumber(int)} instead.
        */
       @java.lang.Deprecated
@@ -9842,6 +10221,10 @@ public final class IdBrokerMappingManagementProto {
         return forNumber(value);
       }
 
+      /**
+       * @param value The numeric wire value of the corresponding enum entry.
+       * @return The enum associated with the given numeric wire value.
+       */
       public static Value forNumber(int value) {
         switch (value) {
           case 0: return UNSET;
@@ -9867,6 +10250,10 @@ public final class IdBrokerMappingManagementProto {
 
       public final com.google.protobuf.Descriptors.EnumValueDescriptor
           getValueDescriptor() {
+        if (this == UNRECOGNIZED) {
+          throw new java.lang.IllegalStateException(
+              "Can't get the descriptor of an unrecognized enum value.");
+        }
         return getDescriptor().getValues().get(ordinal());
       }
       public final com.google.protobuf.Descriptors.EnumDescriptor
@@ -9939,9 +10326,8 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.SyncStatus) obj;
 
-      boolean result = true;
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10116,35 +10502,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10189,7 +10575,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10249,6 +10635,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 1;</code>
+     * @return The environmentCrn.
      */
     java.lang.String getEnvironmentCrn();
     /**
@@ -10257,6 +10644,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 1;</code>
+     * @return The bytes for environmentCrn.
      */
     com.google.protobuf.ByteString
         getEnvironmentCrnBytes();
@@ -10264,7 +10652,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsConfigRequest}
    */
-  public  static final class GetMappingsConfigRequest extends
+  public static final class GetMappingsConfigRequest extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.GetMappingsConfigRequest)
       GetMappingsConfigRequestOrBuilder {
@@ -10275,6 +10663,13 @@ public final class IdBrokerMappingManagementProto {
     }
     private GetMappingsConfigRequest() {
       environmentCrn_ = "";
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetMappingsConfigRequest();
     }
 
     @java.lang.Override
@@ -10290,7 +10685,6 @@ public final class IdBrokerMappingManagementProto {
       if (extensionRegistry == null) {
         throw new java.lang.NullPointerException();
       }
-      int mutable_bitField0_ = 0;
       com.google.protobuf.UnknownFieldSet.Builder unknownFields =
           com.google.protobuf.UnknownFieldSet.newBuilder();
       try {
@@ -10308,7 +10702,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -10347,7 +10741,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 1;</code>
+     * @return The environmentCrn.
      */
+    @java.lang.Override
     public java.lang.String getEnvironmentCrn() {
       java.lang.Object ref = environmentCrn_;
       if (ref instanceof java.lang.String) {
@@ -10366,7 +10762,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>string environmentCrn = 1;</code>
+     * @return The bytes for environmentCrn.
      */
+    @java.lang.Override
     public com.google.protobuf.ByteString
         getEnvironmentCrnBytes() {
       java.lang.Object ref = environmentCrn_;
@@ -10395,7 +10793,7 @@ public final class IdBrokerMappingManagementProto {
     @java.lang.Override
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         com.google.protobuf.GeneratedMessageV3.writeString(output, 1, environmentCrn_);
       }
       unknownFields.writeTo(output);
@@ -10407,7 +10805,7 @@ public final class IdBrokerMappingManagementProto {
       if (size != -1) return size;
 
       size = 0;
-      if (!getEnvironmentCrnBytes().isEmpty()) {
+      if (!com.google.protobuf.GeneratedMessageV3.isStringEmpty(environmentCrn_)) {
         size += com.google.protobuf.GeneratedMessageV3.computeStringSize(1, environmentCrn_);
       }
       size += unknownFields.getSerializedSize();
@@ -10425,11 +10823,10 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigRequest other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigRequest) obj;
 
-      boolean result = true;
-      result = result && getEnvironmentCrn()
-          .equals(other.getEnvironmentCrn());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (!getEnvironmentCrn()
+          .equals(other.getEnvironmentCrn())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -10609,35 +11006,35 @@ public final class IdBrokerMappingManagementProto {
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -10691,6 +11088,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 1;</code>
+       * @return The environmentCrn.
        */
       public java.lang.String getEnvironmentCrn() {
         java.lang.Object ref = environmentCrn_;
@@ -10710,6 +11108,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 1;</code>
+       * @return The bytes for environmentCrn.
        */
       public com.google.protobuf.ByteString
           getEnvironmentCrnBytes() {
@@ -10730,6 +11129,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 1;</code>
+       * @param value The environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrn(
           java.lang.String value) {
@@ -10747,6 +11148,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearEnvironmentCrn() {
         
@@ -10760,6 +11162,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>string environmentCrn = 1;</code>
+       * @param value The bytes for environmentCrn to set.
+       * @return This builder for chaining.
        */
       public Builder setEnvironmentCrnBytes(
           com.google.protobuf.ByteString value) {
@@ -10775,7 +11179,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -10835,6 +11239,7 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>int64 mappingsVersion = 1;</code>
+     * @return The mappingsVersion.
      */
     long getMappingsVersion();
 
@@ -10954,7 +11359,7 @@ public final class IdBrokerMappingManagementProto {
   /**
    * Protobuf type {@code idbrokermappingmanagement.GetMappingsConfigResponse}
    */
-  public  static final class GetMappingsConfigResponse extends
+  public static final class GetMappingsConfigResponse extends
       com.google.protobuf.GeneratedMessageV3 implements
       // @@protoc_insertion_point(message_implements:idbrokermappingmanagement.GetMappingsConfigResponse)
       GetMappingsConfigResponseOrBuilder {
@@ -10964,7 +11369,13 @@ public final class IdBrokerMappingManagementProto {
       super(builder);
     }
     private GetMappingsConfigResponse() {
-      mappingsVersion_ = 0L;
+    }
+
+    @java.lang.Override
+    @SuppressWarnings({"unused"})
+    protected java.lang.Object newInstance(
+        UnusedPrivateParameter unused) {
+      return new GetMappingsConfigResponse();
     }
 
     @java.lang.Override
@@ -10997,10 +11408,10 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             case 18: {
-              if (!((mutable_bitField0_ & 0x00000002) == 0x00000002)) {
+              if (!((mutable_bitField0_ & 0x00000001) != 0)) {
                 actorMappings_ = com.google.protobuf.MapField.newMapField(
                     ActorMappingsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000002;
+                mutable_bitField0_ |= 0x00000001;
               }
               com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
               actorMappings__ = input.readMessage(
@@ -11010,10 +11421,10 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
+              if (!((mutable_bitField0_ & 0x00000002) != 0)) {
                 groupMappings_ = com.google.protobuf.MapField.newMapField(
                     GroupMappingsDefaultEntryHolder.defaultEntry);
-                mutable_bitField0_ |= 0x00000004;
+                mutable_bitField0_ |= 0x00000002;
               }
               com.google.protobuf.MapEntry<java.lang.String, java.lang.String>
               groupMappings__ = input.readMessage(
@@ -11023,7 +11434,7 @@ public final class IdBrokerMappingManagementProto {
               break;
             }
             default: {
-              if (!parseUnknownFieldProto3(
+              if (!parseUnknownField(
                   input, unknownFields, extensionRegistry, tag)) {
                 done = true;
               }
@@ -11068,7 +11479,6 @@ public final class IdBrokerMappingManagementProto {
               com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse.class, com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse.Builder.class);
     }
 
-    private int bitField0_;
     public static final int MAPPINGSVERSION_FIELD_NUMBER = 1;
     private long mappingsVersion_;
     /**
@@ -11077,7 +11487,9 @@ public final class IdBrokerMappingManagementProto {
      * </pre>
      *
      * <code>int64 mappingsVersion = 1;</code>
+     * @return The mappingsVersion.
      */
+    @java.lang.Override
     public long getMappingsVersion() {
       return mappingsVersion_;
     }
@@ -11117,14 +11529,16 @@ public final class IdBrokerMappingManagementProto {
      * <code>map&lt;string, string&gt; actorMappings = 2;</code>
      */
 
+    @java.lang.Override
     public boolean containsActorMappings(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetActorMappings().getMap().containsKey(key);
     }
     /**
      * Use {@link #getActorMappingsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getActorMappings() {
       return getActorMappingsMap();
@@ -11137,6 +11551,7 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; actorMappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getActorMappingsMap() {
       return internalGetActorMappings().getMap();
@@ -11149,11 +11564,12 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; actorMappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getActorMappingsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetActorMappings().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -11166,10 +11582,11 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; actorMappings = 2;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getActorMappingsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetActorMappings().getMap();
       if (!map.containsKey(key)) {
@@ -11212,14 +11629,16 @@ public final class IdBrokerMappingManagementProto {
      * <code>map&lt;string, string&gt; groupMappings = 3;</code>
      */
 
+    @java.lang.Override
     public boolean containsGroupMappings(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       return internalGetGroupMappings().getMap().containsKey(key);
     }
     /**
      * Use {@link #getGroupMappingsMap()} instead.
      */
+    @java.lang.Override
     @java.lang.Deprecated
     public java.util.Map<java.lang.String, java.lang.String> getGroupMappings() {
       return getGroupMappingsMap();
@@ -11231,6 +11650,7 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; groupMappings = 3;</code>
      */
+    @java.lang.Override
 
     public java.util.Map<java.lang.String, java.lang.String> getGroupMappingsMap() {
       return internalGetGroupMappings().getMap();
@@ -11242,11 +11662,12 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; groupMappings = 3;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getGroupMappingsOrDefault(
         java.lang.String key,
         java.lang.String defaultValue) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetGroupMappings().getMap();
       return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -11258,10 +11679,11 @@ public final class IdBrokerMappingManagementProto {
      *
      * <code>map&lt;string, string&gt; groupMappings = 3;</code>
      */
+    @java.lang.Override
 
     public java.lang.String getGroupMappingsOrThrow(
         java.lang.String key) {
-      if (key == null) { throw new java.lang.NullPointerException(); }
+      if (key == null) { throw new NullPointerException("map key"); }
       java.util.Map<java.lang.String, java.lang.String> map =
           internalGetGroupMappings().getMap();
       if (!map.containsKey(key)) {
@@ -11347,15 +11769,14 @@ public final class IdBrokerMappingManagementProto {
       }
       com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse other = (com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse) obj;
 
-      boolean result = true;
-      result = result && (getMappingsVersion()
-          == other.getMappingsVersion());
-      result = result && internalGetActorMappings().equals(
-          other.internalGetActorMappings());
-      result = result && internalGetGroupMappings().equals(
-          other.internalGetGroupMappings());
-      result = result && unknownFields.equals(other.unknownFields);
-      return result;
+      if (getMappingsVersion()
+          != other.getMappingsVersion()) return false;
+      if (!internalGetActorMappings().equals(
+          other.internalGetActorMappings())) return false;
+      if (!internalGetGroupMappings().equals(
+          other.internalGetGroupMappings())) return false;
+      if (!unknownFields.equals(other.unknownFields)) return false;
+      return true;
     }
 
     @java.lang.Override
@@ -11566,48 +11987,46 @@ public final class IdBrokerMappingManagementProto {
       public com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse buildPartial() {
         com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse result = new com.cloudera.thunderhead.service.idbrokermappingmanagement.IdBrokerMappingManagementProto.GetMappingsConfigResponse(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
         result.mappingsVersion_ = mappingsVersion_;
         result.actorMappings_ = internalGetActorMappings();
         result.actorMappings_.makeImmutable();
         result.groupMappings_ = internalGetGroupMappings();
         result.groupMappings_.makeImmutable();
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
 
       @java.lang.Override
       public Builder clone() {
-        return (Builder) super.clone();
+        return super.clone();
       }
       @java.lang.Override
       public Builder setField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.setField(field, value);
+        return super.setField(field, value);
       }
       @java.lang.Override
       public Builder clearField(
           com.google.protobuf.Descriptors.FieldDescriptor field) {
-        return (Builder) super.clearField(field);
+        return super.clearField(field);
       }
       @java.lang.Override
       public Builder clearOneof(
           com.google.protobuf.Descriptors.OneofDescriptor oneof) {
-        return (Builder) super.clearOneof(oneof);
+        return super.clearOneof(oneof);
       }
       @java.lang.Override
       public Builder setRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           int index, java.lang.Object value) {
-        return (Builder) super.setRepeatedField(field, index, value);
+        return super.setRepeatedField(field, index, value);
       }
       @java.lang.Override
       public Builder addRepeatedField(
           com.google.protobuf.Descriptors.FieldDescriptor field,
           java.lang.Object value) {
-        return (Builder) super.addRepeatedField(field, value);
+        return super.addRepeatedField(field, value);
       }
       @java.lang.Override
       public Builder mergeFrom(com.google.protobuf.Message other) {
@@ -11665,7 +12084,9 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @return The mappingsVersion.
        */
+      @java.lang.Override
       public long getMappingsVersion() {
         return mappingsVersion_;
       }
@@ -11675,6 +12096,8 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @param value The mappingsVersion to set.
+       * @return This builder for chaining.
        */
       public Builder setMappingsVersion(long value) {
         
@@ -11688,6 +12111,7 @@ public final class IdBrokerMappingManagementProto {
        * </pre>
        *
        * <code>int64 mappingsVersion = 1;</code>
+       * @return This builder for chaining.
        */
       public Builder clearMappingsVersion() {
         
@@ -11731,14 +12155,16 @@ public final class IdBrokerMappingManagementProto {
        * <code>map&lt;string, string&gt; actorMappings = 2;</code>
        */
 
+      @java.lang.Override
       public boolean containsActorMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetActorMappings().getMap().containsKey(key);
       }
       /**
        * Use {@link #getActorMappingsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getActorMappings() {
         return getActorMappingsMap();
@@ -11751,6 +12177,7 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; actorMappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getActorMappingsMap() {
         return internalGetActorMappings().getMap();
@@ -11763,11 +12190,12 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; actorMappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getActorMappingsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetActorMappings().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -11780,10 +12208,11 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; actorMappings = 2;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getActorMappingsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetActorMappings().getMap();
         if (!map.containsKey(key)) {
@@ -11808,7 +12237,7 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder removeActorMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableActorMappings().getMutableMap()
             .remove(key);
         return this;
@@ -11832,8 +12261,11 @@ public final class IdBrokerMappingManagementProto {
       public Builder putActorMappings(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableActorMappings().getMutableMap()
             .put(key, value);
         return this;
@@ -11888,14 +12320,16 @@ public final class IdBrokerMappingManagementProto {
        * <code>map&lt;string, string&gt; groupMappings = 3;</code>
        */
 
+      @java.lang.Override
       public boolean containsGroupMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         return internalGetGroupMappings().getMap().containsKey(key);
       }
       /**
        * Use {@link #getGroupMappingsMap()} instead.
        */
+      @java.lang.Override
       @java.lang.Deprecated
       public java.util.Map<java.lang.String, java.lang.String> getGroupMappings() {
         return getGroupMappingsMap();
@@ -11907,6 +12341,7 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; groupMappings = 3;</code>
        */
+      @java.lang.Override
 
       public java.util.Map<java.lang.String, java.lang.String> getGroupMappingsMap() {
         return internalGetGroupMappings().getMap();
@@ -11918,11 +12353,12 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; groupMappings = 3;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getGroupMappingsOrDefault(
           java.lang.String key,
           java.lang.String defaultValue) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetGroupMappings().getMap();
         return map.containsKey(key) ? map.get(key) : defaultValue;
@@ -11934,10 +12370,11 @@ public final class IdBrokerMappingManagementProto {
        *
        * <code>map&lt;string, string&gt; groupMappings = 3;</code>
        */
+      @java.lang.Override
 
       public java.lang.String getGroupMappingsOrThrow(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         java.util.Map<java.lang.String, java.lang.String> map =
             internalGetGroupMappings().getMap();
         if (!map.containsKey(key)) {
@@ -11961,7 +12398,7 @@ public final class IdBrokerMappingManagementProto {
 
       public Builder removeGroupMappings(
           java.lang.String key) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
         internalGetMutableGroupMappings().getMutableMap()
             .remove(key);
         return this;
@@ -11984,8 +12421,11 @@ public final class IdBrokerMappingManagementProto {
       public Builder putGroupMappings(
           java.lang.String key,
           java.lang.String value) {
-        if (key == null) { throw new java.lang.NullPointerException(); }
-        if (value == null) { throw new java.lang.NullPointerException(); }
+        if (key == null) { throw new NullPointerException("map key"); }
+        if (value == null) {
+  throw new NullPointerException("map value");
+}
+
         internalGetMutableGroupMappings().getMutableMap()
             .put(key, value);
         return this;
@@ -12007,7 +12447,7 @@ public final class IdBrokerMappingManagementProto {
       @java.lang.Override
       public final Builder setUnknownFields(
           final com.google.protobuf.UnknownFieldSet unknownFields) {
-        return super.setUnknownFieldsProto3(unknownFields);
+        return super.setUnknownFields(unknownFields);
       }
 
       @java.lang.Override
@@ -12242,19 +12682,11 @@ public final class IdBrokerMappingManagementProto {
       "brokermappingmanagementB\036IdBrokerMapping" +
       "ManagementProtob\006proto3"
     };
-    com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
-        new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
-          public com.google.protobuf.ExtensionRegistry assignDescriptors(
-              com.google.protobuf.Descriptors.FileDescriptor root) {
-            descriptor = root;
-            return null;
-          }
-        };
-    com.google.protobuf.Descriptors.FileDescriptor
+    descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
           com.cloudera.thunderhead.service.common.version.Version.getDescriptor(),
-        }, assigner);
+        });
     internal_static_idbrokermappingmanagement_GetMappingsRequest_descriptor =
       getDescriptor().getMessageTypes().get(0);
     internal_static_idbrokermappingmanagement_GetMappingsRequest_fieldAccessorTable = new

@@ -18,9 +18,9 @@ dependencies {
   implementation     group: 'org.apache.kudu',                     name: 'kudu-client',                    version: '1.7.0'
   implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
   implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.10.11'
-  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util',             version: '3.6.1'
+  implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util',             version: protobufVersion
 
-  implementation ("io.grpc:grpc-all:1.22.0") {
+  implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
   }
   testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
