@@ -72,6 +72,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .awaitForDeletedInstancesOnProvider()
+                .await(SdxClusterStatusResponse.CLUSTER_UNREACHABLE, Set.of(SdxClusterStatusResponse.NODE_FAILURE),
+                        key(sdx).withWaitForFlow(Boolean.FALSE))
                 .when(sdxTestClient.repair(MASTER.getName(), IDBROKER.getName()), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE),
                         key(sdx).withWaitForFlow(Boolean.FALSE))
@@ -155,6 +157,8 @@ public class SdxRepairTests extends PreconditionSdxE2ETest {
                     return testDto;
                 })
                 .awaitForHostGroups(List.of("gateway", "idbroker"), InstanceStatus.DELETED_ON_PROVIDER_SIDE)
+                .await(SdxClusterStatusResponse.CLUSTER_UNREACHABLE, Set.of(SdxClusterStatusResponse.NODE_FAILURE),
+                        key(sdx).withWaitForFlow(Boolean.FALSE))
                 .when(sdxTestClient.repair("gateway", "idbroker"), key(sdx))
                 .await(SdxClusterStatusResponse.REPAIR_IN_PROGRESS, Set.of(SdxClusterStatusResponse.CLUSTER_UNREACHABLE),
                         key(sdx).withWaitForFlow(Boolean.FALSE))
