@@ -47,7 +47,6 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.clustertemplate.ClusterTemplateTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
-import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
@@ -78,12 +77,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     @Override
     public DistroXTestDtoBase<DistroXTestDto> valid() {
-        DistroXTestDtoBase<DistroXTestDto> valid = super.valid();
-        EnvironmentTestDto environmentTestDto = getTestContext().get(EnvironmentTestDto.class);
-        if (environmentTestDto != null && environmentTestDto.getResponse() != null) {
-            valid.withEnvironmentName(environmentTestDto.getName());
-        }
-        return valid;
+        return super.valid().withEnvironment();
     }
 
     @Override

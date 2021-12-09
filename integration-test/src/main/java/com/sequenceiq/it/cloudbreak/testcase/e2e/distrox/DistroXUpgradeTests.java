@@ -61,7 +61,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         testContext
                 .given(distroXName, DistroXTestDto.class)
                 .withTemplate(String.format(commonClusterManagerProperties.getInternalDistroXBlueprintType(), currentRuntimeVersion))
-                .withPreferredSubnetsForInstanceNetworkIfMultiAzEnabledOrJustFirst()
+                .when(distroXTestClient.fetchPreferredSubnetForInstanceNetworkIfMultiAzEnabled())
                 .when(distroXTestClient.create(), key(distroXName))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
