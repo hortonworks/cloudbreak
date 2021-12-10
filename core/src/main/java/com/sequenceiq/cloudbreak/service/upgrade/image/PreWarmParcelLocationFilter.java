@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.service.upgrade.image;
 
+import static org.springframework.util.StringUtils.hasText;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -7,6 +9,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,41 +61,50 @@ public class PreWarmParcelLocationFilter implements PackageLocationFilter {
     private boolean isEligibleForUpgrade(Image image, Set<String> requiredParcels) {
         Map<String, Set<String>> preWarmParcelsByParcelName = getPreWarmParcelsByParcelName(image, requiredParcels);
         LOGGER.debug("Available pre warm parcels: {} on image: {}", preWarmParcelsByParcelName, image.getUuid());
-        return !preWarmParcelsByParcelName.isEmpty() && allRequiredPreWarmParcelAvailable(preWarmParcelsByParcelName)
-                && allRequiredPreWarmParcelUrlLocationEligible(preWarmParcelsByParcelName);
+        return allAvailableRequiredPreWarmParcelHasValue(preWarmParcelsByParcelName)
+                && allAvailableRequiredPreWarmParcelUrlLocationIsValid(preWarmParcelsByParcelName);
     }
 
     private Map<String, Set<String>> getPreWarmParcelsByParcelName(Image image, Set<String> requiredParcels) {
         List<List<String>> imagePreWarmParcels = image.getPreWarmParcels();
         LOGGER.debug("Available preWarmParcels: {}", imagePreWarmParcels);
         return requiredParcels.stream()
+                .filter(parcel -> isParcelExistsOnImage(image, parcel))
                 .collect(Collectors.toMap(
                         parcelName -> parcelName,
                         parcelName -> filterUrlsByStackRelatedParcel(image, parcelName)));
     }
 
-    private boolean allRequiredPreWarmParcelAvailable(Map<String, Set<String>> preWarmParcelsByParcelName) {
+    private boolean allAvailableRequiredPreWarmParcelHasValue(Map<String, Set<String>> preWarmParcelsByParcelName) {
         return preWarmParcelsByParcelName.entrySet().stream().noneMatch(parcels -> parcels.getValue().isEmpty());
     }
 
-    private boolean allRequiredPreWarmParcelUrlLocationEligible(Map<String, Set<String>> preWarmParcelsByParcelName) {
+    private boolean allAvailableRequiredPreWarmParcelUrlLocationIsValid(Map<String, Set<String>> preWarmParcelsByParcelName) {
         return preWarmParcelsByParcelName.entrySet().stream()
                 .allMatch(parcels -> parcels.getValue().stream()
                         .allMatch(parcelUrl -> URL_PATTERN.matcher(parcelUrl).find()));
     }
 
+    private boolean isParcelExistsOnImage(Image image, String requiredParcel) {
+        return getMatchingParcelStreamFromImage(image, requiredParcel).anyMatch(StringUtils::hasText);
+    }
+
     private Set<String> filterUrlsByStackRelatedParcel(Image image, String requiredParcel) {
+        return getMatchingParcelStreamFromImage(image, requiredParcel)
+                .filter(parcel -> hasText(parcel) && parcel.startsWith(URL_PREFIX))
+                .collect(Collectors.toSet());
+    }
+
+    private Stream<String> getMatchingParcelStreamFromImage(Image image, String requiredParcel) {
         return Optional.ofNullable(image)
                 .map(Image::getPreWarmParcels).orElse(Collections.emptyList())
                 .stream()
                 .filter(filterByStackRelatedParcel(requiredParcel))
-                .flatMap(List::stream)
-                .filter(parcel -> StringUtils.hasText(parcel) && parcel.startsWith(URL_PREFIX))
-                .collect(Collectors.toSet());
+                .flatMap(List::stream);
     }
 
     private Predicate<List<String>> filterByStackRelatedParcel(String requiredParcel) {
         return parcelList -> parcelList.stream()
-                .anyMatch(relatedParcel -> StringUtils.hasText(relatedParcel) && relatedParcel.toLowerCase().startsWith(requiredParcel.toLowerCase()));
+                .anyMatch(relatedParcel -> hasText(relatedParcel) && relatedParcel.toLowerCase().startsWith(requiredParcel.toLowerCase()));
     }
 }
