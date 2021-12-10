@@ -56,9 +56,9 @@ public class ClouderaManagerCommissioner {
      */
     public Set<String> recommissionNodes(Stack stack, Map<String, InstanceMetaData> hostsToRecommission, ApiClient client) {
 
-        // TODO CB-14929: Check status of target nodes / previously issued commands - in case of pod restarts etc.
+        // TODO CB-15132: Check status of target nodes / previously issued commands - in case of pod restarts etc.
         //  Ideally without needing to persist anything (commandId etc)
-        // TODO CB-14929: Deal with situations where CM itself is unavailable. Go back and STOP resources on the cloud-provider.
+        // TODO CB-15132: Deal with situations where CM itself is unavailable. Go back and STOP resources on the cloud-provider.
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
             ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
@@ -94,7 +94,7 @@ public class ClouderaManagerCommissioner {
                 String warningMessage = "Cloudera Manager recommission host command {} polling timed out, " +
                         "thus we are aborting the recommission operation.";
                 abortRecommissionWithWarnMessage(apiCommand, client, warningMessage);
-                // TODO CB-149292: What corrective action can be taken in this scenario? We have no idea whether any of the nodes
+                // TODO CB-15132: What corrective action can be taken in this scenario? We have no idea whether any of the nodes
                 //  were recommissioned. Could try checking the status from CM, and take corrective action.
                 //  - Could collect list of nodes which are in the expected list and exclude them from corrective action.
                 //    (However, this is not trivial since the SERVICE needs to have the nodes recommissioned and that may have failed)
@@ -108,7 +108,7 @@ public class ClouderaManagerCommissioner {
                     .map(InstanceMetaData::getDiscoveryFQDN)
                     .collect(Collectors.toSet());
         } catch (ApiException e) {
-            // TODO CB-14929: Evaluate whether it is possible to figure out if a partial commission succeeded.
+            // TODO CB-15132: Evaluate whether it is possible to figure out if a partial commission succeeded.
             //  Retry / STOP other nodes where it may have failed.
             LOGGER.error("Failed to recommission hosts: {}", hostsToRecommission.keySet(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
@@ -119,7 +119,7 @@ public class ClouderaManagerCommissioner {
         Set<InstanceMetaData> hostsInHostGroup = hostGroup.getInstanceGroup().getNotTerminatedInstanceMetaDataSet();
         Map<String, InstanceMetaData> hostsToCommission = hostsInHostGroup.stream()
                 .filter(hostMetadata -> hostNames.contains(hostMetadata.getDiscoveryFQDN()))
-                // TODO CB-14929: Add additional checks to make sure the hosts are in the expected state. Even better,
+                // TODO CB-15132: Add additional checks to make sure the hosts are in the expected state. Even better,
                 //  in addition to the incoming list, get additional hosts which may be in a 'strange' state in CM,
                 //  and see if these can be made part of the upscale operation.
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, hostMetadata -> hostMetadata));

@@ -2,9 +2,7 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -21,46 +19,39 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
-public class ClouderaManagerHostStatusChecker2 extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerHostStatusChecker2.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerHostHealthyStatusChecker.class);
 
     private static final String VIEW_TYPE = "FULL";
 
     private final Instant start;
 
+    private final int initialNodeCount;
+
     private final Set<String> hostnamesToCheckFor;
 
-    public ClouderaManagerHostStatusChecker2(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
+    public ClouderaManagerHostHealthyStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
             ClusterEventService clusterEventService, Set<String> hostnamesToCheckFor) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
-        // TODO CB-14929: Introduce a threshold on this polling. Return hosts which have moed into a good state within a time window.
+        // TODO CB-15132: Introduce a threshold on this polling. Return hosts which have moved into a good state within a time window.
         start = Instant.now();
         this.hostnamesToCheckFor = new HashSet<>(hostnamesToCheckFor);
-        LOGGER.info("ZZZ: Initialized ClouderaManagerHostStatusChecker2 with start={}, hostNamesToCheckFor.size()={}", start, hostnamesToCheckFor.size());
+        initialNodeCount = hostnamesToCheckFor.size();
+        LOGGER.info("Initialized ClouderaManagerHostHealthyStatusChecker with start={}, hostNamesToCheckFor.size()={}", start, hostnamesToCheckFor.size());
     }
 
     @Override
     protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
         Set<String> goodHostsFromManager = fetchGoodHostsFromManager(pollerObject);
 
-        LOGGER.info("ZZZ: Filtering hostlist");
         int pre = hostnamesToCheckFor.size();
         hostnamesToCheckFor.stream().filter(h -> goodHostsFromManager.contains(h)).forEach(hostnamesToCheckFor::remove);
         int post = hostnamesToCheckFor.size();
-        LOGGER.info("ZZZ: hostsToCheckFor presize={}, postSize={}", pre, post);
+        LOGGER.debug("NumHostsFoundToBeHealthy={}, pendingHostCount={}", post - pre, post);
 
         return hostnamesToCheckFor.size() == 0;
-    }
-
-    private List<InstanceMetaData> collectNotKnownInstancesByManager(ClouderaManagerCommandPollerObject pollerObject, List<String> hostIpsFromManager) {
-        return pollerObject.getStack().getInstanceMetaDataAsList().stream()
-                .filter(metaData -> metaData.getDiscoveryFQDN() != null)
-                .filter(InstanceMetaData::isReachable)
-                .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
-                .collect(Collectors.toList());
     }
 
     private Set<String> fetchGoodHostsFromManager(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
@@ -71,7 +62,6 @@ public class ClouderaManagerHostStatusChecker2 extends AbstractClouderaManagerCo
 
     private Set<String> filterForHealthy(ApiHostList hostList) {
         // Recent heartbeat, GOOD_HEALTH
-        // TODO CB-14929: fqdn being null will break this. Protect against such scenarios.
         Set<String> goodHealthSet = new HashSet<>();
         for (ApiHost apiHost : hostList.getItems()) {
             String hostname = apiHost.getHostname();
@@ -82,14 +72,14 @@ public class ClouderaManagerHostStatusChecker2 extends AbstractClouderaManagerCo
             ApiHealthSummary healthSummary = apiHost.getHealthSummary();
             boolean inMaintenance = apiHost.getMaintenanceMode();
             ApiCommissionState commissionState = apiHost.getCommissionState();
-            LOGGER.debug("ZZZ: CM info for: [{}]: lastHeatbeat={}, lastHeartbeatInstant={}, healthSummary={}, commissionState={}, maint={}",
+            LOGGER.trace("CM info for: [{}]: lastHeatbeat={}, lastHeartbeatInstant={}, healthSummary={}, commissionState={}, maint={}",
                     hostname, apiHost.getLastHeartbeat(), lastheatbeat, healthSummary, commissionState, inMaintenance);
 
             if (lastheatbeat != null && start.isBefore(lastheatbeat) && healthSummary == ApiHealthSummary.GOOD) {
                 goodHealthSet.add(hostname);
             }
         }
-        LOGGER.info("ZZZ: Found good host count={}", goodHealthSet.size());
+        LOGGER.info("Found good host count={}", goodHealthSet.size());
         return goodHealthSet;
     }
 
@@ -100,12 +90,14 @@ public class ClouderaManagerHostStatusChecker2 extends AbstractClouderaManagerCo
 
     @Override
     public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
-        throw new ClouderaManagerOperationFailedException("Operation timed out. Failed to check cloudera manager startup.");
+        throw new ClouderaManagerOperationFailedException(
+                String.format("Operation timed out. Failed while waiting for %d nodes to move into health state. MissingNodeCount=%d, MissingNodes=[%s]",
+                        initialNodeCount, hostnamesToCheckFor.size(), hostnamesToCheckFor));
     }
 
     @Override
     public String successMessage(ClouderaManagerCommandPollerObject pollerObject) {
-        return String.format("Cloudera Manager client found all hosts for stack '%s'", pollerObject.getStack().getId());
+        return String.format("Hosts (count=%d)moved into healthy state for stack '%s'", initialNodeCount, pollerObject.getStack().getId());
     }
 
 }
