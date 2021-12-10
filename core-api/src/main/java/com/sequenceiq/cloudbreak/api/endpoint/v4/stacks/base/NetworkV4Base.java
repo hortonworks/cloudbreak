@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription.MOCK_PARAMETERS;
+import static com.sequenceiq.cloudbreak.doc.ModelDescriptions.NetworkModelDescription.YARN_PARAMETERS;
+import static java.util.Objects.nonNull;
+
+import java.lang.reflect.Field;
 import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.parameter.network.AwsNetworkV4Parameters;
@@ -35,10 +40,10 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
     @Deprecated
     private OpenStackNetworkV4Parameters openstack;
 
-    @ApiModelProperty(hidden = false)
+    @ApiModelProperty(MOCK_PARAMETERS)
     private MockNetworkV4Parameters mock;
 
-    @ApiModelProperty(hidden = true)
+    @ApiModelProperty(hidden = true, value = YARN_PARAMETERS)
     private YarnNetworkV4Parameters yarn;
 
     @Override
@@ -135,4 +140,30 @@ public class NetworkV4Base extends ProviderParametersBase implements JsonEntity 
     public YarnNetworkV4Parameters getYarn() {
         return yarn;
     }
+
+    public boolean isEmpty() {
+        for (Field declaredField : NetworkV4Base.class.getDeclaredFields()) {
+            try {
+                if (nonNull(declaredField.get(this))) {
+                    return false;
+                }
+            } catch (IllegalAccessException ignored) {
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public String toString() {
+        return "NetworkV4Base{" +
+                "subnetCIDR='" + subnetCIDR + '\'' +
+                ", aws=" + aws +
+                ", gcp=" + gcp +
+                ", azure=" + azure +
+                ", openstack=" + openstack +
+                ", mock=" + mock +
+                ", yarn=" + yarn +
+                '}';
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -50,4 +51,16 @@ class NetworkV4BaseTest {
 
         assertTrue(underTest.isNoPublicIp().isEmpty());
     }
+
+    @Test
+    void testIsEmptyShouldReturnTrueForNewUntouchedInstance() {
+        assertTrue(underTest.isEmpty());
+    }
+
+    @Test
+    void testIsEmptyShouldReturnFalseForEditedInstance() {
+        underTest.setAws(new AwsNetworkV4Parameters());
+        assertFalse(underTest.isEmpty());
+    }
+
 }
