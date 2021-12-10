@@ -15,6 +15,7 @@ public class AnonymizerUtil {
             //common PW
             new ReplacePattern("(?i)("
                     + "password:[\"']|password=[\"']|password=|password\":\"|password:|password |"
+                    + "credentialJson:[\"']|credentialJson=[\"']|credentialJson=|credentialJson\":\"|credentialJson:|credentialJson |"
                     + "pass:[\"']|pass=[\"']|pass=|pass\":\"|pass:|pass |"
                     + "secret:[\"']|secret=[\"']|secret=|secret\":\"|secret:|secret |"
                     + "key:[\"']|key=[\"']|key=|key\":\"|key:|key |"
