@@ -26,7 +26,7 @@ import com.sequenceiq.cloudbreak.cm.polling.task.AbstractClouderaManagerCommandL
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerBatchCommandsListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerDefaultListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker;
-import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostStatusChecker2;
+import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerHostHealthyStatusChecker;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelActivationListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelDeletedListenerTask;
 import com.sequenceiq.cloudbreak.cm.polling.task.ClouderaManagerParcelStatusListenerTask;
@@ -80,11 +80,11 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerStartupListenerTask(clouderaManagerApiPojoFactory, clusterEventService));
     }
 
-    public PollingResult startPollingCmHostStatusGood(Stack stack, ApiClient apiClient, Set<String> hostnamesToWaitFor) {
-        LOGGER.debug("ZZZ: Waiting for Cloudera Manager hosts to connect and become health. NodeCount={} [Server address: {}]",
-                hostnamesToWaitFor, stack.getClusterManagerIp());
+    public PollingResult startPollingCmHostStatusHealthy(Stack stack, ApiClient apiClient, Set<String> hostnamesToWaitFor) {
+        LOGGER.debug("Waiting for Cloudera Manager hosts to connect and become healthy. NodeCount={}, Nodes=[{}], [Server address: {}]",
+                hostnamesToWaitFor.size(), hostnamesToWaitFor, stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, null, POLL_FOR_5_MINUTES,
-                new ClouderaManagerHostStatusChecker2(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToWaitFor));
+                new ClouderaManagerHostHealthyStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, hostnamesToWaitFor));
     }
 
     public PollingResult startPollingCmHostStatus(Stack stack, ApiClient apiClient) {

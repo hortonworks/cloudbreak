@@ -8,18 +8,27 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScale
 
 public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScaleRequest {
 
-    private List<InstanceMetaData> instancesToCommission;
+    private final List<InstanceMetaData> startedInstancesToCommission;
+
+    private final List<InstanceMetaData> servicesNotRunningInstancesToCommission;
 
     private final Stack stack;
 
-    public StopStartUpscaleCommissionViaCMRequest(Stack stack, String hostGroupName, List<InstanceMetaData> instanceList) {
+    public StopStartUpscaleCommissionViaCMRequest(Stack stack, String hostGroupName,
+            List<InstanceMetaData> startedInstancesToCommission,
+            List<InstanceMetaData> servicesNotRunningInstancesToCommission) {
         super(stack.getId(), hostGroupName);
         this.stack = stack;
-        this.instancesToCommission = instanceList;
+        this.startedInstancesToCommission = startedInstancesToCommission;
+        this.servicesNotRunningInstancesToCommission = servicesNotRunningInstancesToCommission;
     }
 
-    public List<InstanceMetaData> getInstancesToCommission() {
-        return instancesToCommission;
+    public List<InstanceMetaData> getStartedInstancesToCommission() {
+        return startedInstancesToCommission;
+    }
+
+    public List<InstanceMetaData> getServicesNotRunningInstancesToCommission() {
+        return servicesNotRunningInstancesToCommission;
     }
 
     public Stack getStack() {
@@ -29,7 +38,8 @@ public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScale
     @Override
     public String toString() {
         return "StopStartUpscaleCommissionViaCMRequest{" +
-                "instancesToCommission=" + instancesToCommission +
+                "startedInstancesToCommissionCount=" + startedInstancesToCommission.size() +
+                ", servicesNotRunningInstancesToCommissionCount=" + servicesNotRunningInstancesToCommission.size() +
                 ", stack=" + stack +
                 '}';
     }
