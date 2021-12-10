@@ -363,7 +363,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
-    public void waitForHosts2(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
+    public void waitForHostsHealthy(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
         Cluster cluster = stack.getCluster();
         String user = cluster.getCloudbreakAmbariUser();
         String password = cluster.getCloudbreakAmbariPassword();
@@ -373,8 +373,7 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
         } catch (ClouderaManagerClientInitException e) {
             throw new ClusterClientInitException(e);
         }
-        // TODO CB-14929: Timebound this polling - in case we need to cancel the upscale.
-        clouderaManagerPollingServiceProvider.startPollingCmHostStatusGood(
+        clouderaManagerPollingServiceProvider.startPollingCmHostStatusHealthy(
                 stack, client, hostsInCluster.stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet()));
     }
 
