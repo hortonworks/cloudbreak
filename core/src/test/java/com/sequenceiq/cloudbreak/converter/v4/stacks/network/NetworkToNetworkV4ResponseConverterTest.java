@@ -112,4 +112,15 @@ public class NetworkToNetworkV4ResponseConverterTest {
         assertNotNull(result);
         assertEquals(DEFAULT_CIDR, result.getSubnetCIDR());
     }
+
+    @Test
+    void testWhenInputIsNullThenNullShouldReturn() {
+        assertNull(underTest.convert(null));
+    }
+
+    @Test
+    void testWhenInputNetworkIsNullThenNullShouldReturn() {
+        assertNull(underTest.convert(new Stack()));
+    }
+
 }
