@@ -68,10 +68,10 @@ public class CsdLocationFilterTest {
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenTheImageDoesNotContainsCsdFromTheStackRelatedParcels() {
+    public void testFilterImageShouldReturnTrueWhenTheImageDoesNotContainsCsdFromTheStackRelatedParcels() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(Map.of("spark", ""))));
+        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("spark", ""))));
     }
 
     @Test
@@ -96,10 +96,10 @@ public class CsdLocationFilterTest {
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThereAreNoCsdAvailableForAllRequiresParcels() {
+    public void testFilterImageShouldReturnTrueWhenThereAreNoCsdAvailableForAllRequiresParcels() {
         List<String> preWarmCsd = List.of(ARCHIVE_URL);
         Image image = createImage(preWarmCsd);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", "", "spark", ""))));
+        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", "", "spark", ""))));
     }
 
     private Image createImage(List<String> preWarmCsd) {
