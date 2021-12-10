@@ -52,8 +52,7 @@ public interface ClusterSetupService {
 
     void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 
-    // TODO CB-14929: Move this out into a ClusterMonitoringService of some kind, and fix the name
-    void waitForHosts2(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
+    void waitForHostsHealthy(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 
     void waitForServices(int requestId) throws CloudbreakException;
 

@@ -7,15 +7,22 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 
 public class StopStartUpscaleStartInstancesResult extends CloudPlatformResult {
 
-    // TODO CB-14929: Make sure someone processes the CloudVMInstanceStatus to determine which instances were actually started.
-    private final List<CloudVmInstanceStatus> startedInstances;
+    private final StopStartUpscaleStartInstancesRequest startInstanceRequest;
 
-    public StopStartUpscaleStartInstancesResult(Long resourceId, List<CloudVmInstanceStatus> startedInstances) {
+    private final List<CloudVmInstanceStatus> affectedInstanceStatuses;
+
+    public StopStartUpscaleStartInstancesResult(Long resourceId, StopStartUpscaleStartInstancesRequest request,
+            List<CloudVmInstanceStatus> affectedInstanceStatuses) {
         super(resourceId);
-        this.startedInstances = startedInstances;
+        this.startInstanceRequest = request;
+        this.affectedInstanceStatuses = affectedInstanceStatuses;
     }
 
-    public List<CloudVmInstanceStatus> getStartedInstances() {
-        return startedInstances;
+    public StopStartUpscaleStartInstancesRequest getStartInstanceRequest() {
+        return startInstanceRequest;
+    }
+
+    public List<CloudVmInstanceStatus> getAffectedInstanceStatuses() {
+        return affectedInstanceStatuses;
     }
 }
