@@ -32,6 +32,8 @@ public class MockProperties {
 
     private final Cloudstorage cloudstorage = new Cloudstorage();
 
+    private final DiskEncryption diskEncryption = new DiskEncryption();
+
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -94,6 +96,10 @@ public class MockProperties {
 
     public Cloudstorage getCloudStorage() {
         return cloudstorage;
+    }
+
+    public DiskEncryption getDiskEncryption() {
+        return diskEncryption;
     }
 
     public String getInternetGateway() {
@@ -313,6 +319,29 @@ public class MockProperties {
             public void setInstanceProfile(String instanceProfile) {
                 this.instanceProfile = instanceProfile;
             }
+        }
+    }
+
+    public static class DiskEncryption {
+
+        private String environmentKey;
+
+        private String datahubKey;
+
+        public String getEnvironmentKey() {
+            return environmentKey;
+        }
+
+        public void setEnvironmentKey(String environmentKey) {
+            this.environmentKey = environmentKey;
+        }
+
+        public String getDatahubKey() {
+            return datahubKey;
+        }
+
+        public void setDatahubKey(String datahubKey) {
+            this.datahubKey = datahubKey;
         }
     }
 }

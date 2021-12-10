@@ -6,6 +6,7 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
@@ -24,6 +25,11 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public List<String> listInstanceVolumeIds(String clusterName, List<String> instanceIds) {
         return azureClientActions.listInstanceVolumeIds(clusterName, instanceIds);
+    }
+
+    @Override
+    public List<String> listVolumeKmsKeyIds(List<String> instanceIds) {
+        throw new NotImplementedException("Not yet implemented on Azure");
     }
 
     @Override

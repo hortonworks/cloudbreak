@@ -23,6 +23,8 @@ public class YarnProperties {
 
     private final Baseimage baseimage = new Baseimage();
 
+    private final DiskEncryption diskEncryption = new DiskEncryption();
+
     public String getAvailabilityZone() {
         return availabilityZone;
     }
@@ -73,6 +75,10 @@ public class YarnProperties {
 
     public Baseimage getBaseimage() {
         return baseimage;
+    }
+
+    public DiskEncryption getDiskEncryption() {
+        return diskEncryption;
     }
 
     public static class Credential {
@@ -148,6 +154,29 @@ public class YarnProperties {
 
         public void setImageId(String imageId) {
             this.imageId = imageId;
+        }
+    }
+
+    public static class DiskEncryption {
+
+        private String environmentKey;
+
+        private String datahubKey;
+
+        public String getEnvironmentKey() {
+            return environmentKey;
+        }
+
+        public void setEnvironmentKey(String environmentKey) {
+            this.environmentKey = environmentKey;
+        }
+
+        public String getDatahubKey() {
+            return datahubKey;
+        }
+
+        public void setDatahubKey(String datahubKey) {
+            this.datahubKey = datahubKey;
         }
     }
 }

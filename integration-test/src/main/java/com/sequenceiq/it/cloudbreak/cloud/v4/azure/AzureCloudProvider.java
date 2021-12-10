@@ -32,6 +32,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AppBa
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAzureParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceGroup;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.ResourceGroupUsage;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.AzureNetworkParameters;
@@ -471,5 +472,32 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return azureProperties.getFreeipa().getUpgrade().getCatalog();
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
+        return environmentTestDto.withAzure(AzureEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                        .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName(true))
+                        .withEncryptionKeyUrl(getEncryptionKeyUrl(true))
+                        .build())
+                .build());
+    }
+
+    @Override
+    public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
+        return distroXTestDtoBase;
+    }
+
+    public String getEncryptionResourceGroupName(boolean environmentEncryption) {
+        return environmentEncryption
+                ? azureProperties.getDiskEncryption().getEnvironmentKey().getResourceGroupName()
+                : azureProperties.getDiskEncryption().getDatahubKey().getResourceGroupName();
+    }
+
+    public String getEncryptionKeyUrl(boolean environmentEncryption) {
+        return environmentEncryption
+                ? azureProperties.getDiskEncryption().getEnvironmentKey().getEncryptionKeyUrl()
+                : azureProperties.getDiskEncryption().getDatahubKey().getEncryptionKeyUrl();
     }
 }

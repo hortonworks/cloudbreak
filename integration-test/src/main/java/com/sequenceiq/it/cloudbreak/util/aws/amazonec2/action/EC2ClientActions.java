@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.util.aws.amazonec2.action;
 
 import static java.lang.String.format;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.DescribeInstancesRequest;
 import com.amazonaws.services.ec2.model.DescribeInstancesResult;
+import com.amazonaws.services.ec2.model.DescribeVolumesRequest;
+import com.amazonaws.services.ec2.model.DescribeVolumesResult;
 import com.amazonaws.services.ec2.model.EbsInstanceBlockDevice;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.ec2.model.InstanceBlockDeviceMapping;
@@ -28,6 +31,7 @@ import com.amazonaws.services.ec2.model.StopInstancesResult;
 import com.amazonaws.services.ec2.model.Tag;
 import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
 import com.amazonaws.services.ec2.model.TerminateInstancesResult;
+import com.amazonaws.services.ec2.model.Volume;
 import com.amazonaws.services.lambda.model.EC2UnexpectedException;
 import com.amazonaws.waiters.FixedDelayStrategy;
 import com.amazonaws.waiters.MaxAttemptsRetryStrategy;
@@ -185,5 +189,17 @@ public class EC2ClientActions extends EC2Client {
     private Map<String, String> getTagsForInstance(Instance instance) {
         return instance.getTags().stream()
                 .collect(Collectors.toMap(Tag::getKey, Tag::getValue));
+    }
+
+    public List<String> getVolumesKmsKeys(List<String> instanceIds) {
+        AmazonEC2 ec2Client = buildEC2Client();
+        List<String> volumeIds = getInstanceVolumeIds(instanceIds);
+        DescribeVolumesResult describeVolumesResult = ec2Client.describeVolumes(new DescribeVolumesRequest().withVolumeIds(volumeIds));
+        Map<String, String> volumeIdKmsIdMap = describeVolumesResult.getVolumes()
+                .stream()
+                .collect(Collectors.toMap(Volume::getVolumeId, Volume::getKmsKeyId));
+        volumeIdKmsIdMap.forEach((volumeId, kmsKeyId) -> Log.log(LOGGER, format(" Following KMS Key IDs are available: [%s] for '%s' EC2 volume. ",
+                kmsKeyId, volumeId)));
+        return new ArrayList<>(volumeIdKmsIdMap.values());
     }
 }

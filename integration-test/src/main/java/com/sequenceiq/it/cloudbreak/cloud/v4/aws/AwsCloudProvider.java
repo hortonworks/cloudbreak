@@ -37,6 +37,7 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.KeyBase
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.RoleBasedParameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkAwsParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.AttachedFreeIpaRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsFreeIpaSpotParameters;
@@ -513,5 +514,25 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return awsProperties.getFreeipa().getUpgrade().getCatalog();
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
+        return environmentTestDto.withAws(AwsEnvironmentParameters.builder()
+                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParameters.builder()
+                        .withEncryptionKeyArn(getEncryptionKeyArn(true))
+                        .build())
+                .build());
+    }
+
+    @Override
+    public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
+        return distroXTestDtoBase;
+    }
+
+    public String getEncryptionKeyArn(boolean environmentEncryption) {
+        return environmentEncryption
+                ? awsProperties.getDiskEncryption().getEnvironmentKey()
+                : awsProperties.getDiskEncryption().getDatahubKey();
     }
 }

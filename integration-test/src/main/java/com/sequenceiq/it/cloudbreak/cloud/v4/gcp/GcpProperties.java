@@ -31,6 +31,8 @@ public class GcpProperties {
 
     private final Network network = new Network();
 
+    private final DiskEncryption diskEncryption = new DiskEncryption();
+
     private FreeIpaProperties freeipa = new FreeIpaProperties();
 
     public FreeIpaProperties getFreeipa() {
@@ -98,6 +100,10 @@ public class GcpProperties {
 
     public Network getNetwork() {
         return network;
+    }
+
+    public DiskEncryption getDiskEncryption() {
+        return diskEncryption;
     }
 
     public static class Baseimage {
@@ -370,6 +376,29 @@ public class GcpProperties {
             public void setServiceAccountEmail(String serviceAccountEmail) {
                 this.serviceAccountEmail = serviceAccountEmail;
             }
+        }
+    }
+
+    public static class DiskEncryption {
+
+        private String environmentKey;
+
+        private String datahubKey;
+
+        public String getEnvironmentKey() {
+            return environmentKey;
+        }
+
+        public void setEnvironmentKey(String environmentKey) {
+            this.environmentKey = environmentKey;
+        }
+
+        public String getDatahubKey() {
+            return datahubKey;
+        }
+
+        public void setDatahubKey(String datahubKey) {
+            this.datahubKey = datahubKey;
         }
     }
 }

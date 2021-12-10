@@ -100,7 +100,6 @@ integrationtest:
     region: eu-central-1
     location: eu-central-1
     availabilityZone: eu-central-1a
-    diskEncryptionKey:
     vpcId: vpc-0fc0a422f82ea8eec
     subnetIds:
       - subnet-025e39ebeb6efeca8
@@ -137,6 +136,9 @@ integrationtest:
       upgrade:
         imageId: 9c1c8959-86a7-4b7d-af5a-be252f8b395d
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
+    diskEncryption:
+      environmentKey:
+      datahubKey:
 
   # azure parameters
   azure:
@@ -191,6 +193,13 @@ integrationtest:
       upgrade:
         imageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
+    diskEncryption:
+      environmentKey:
+        encryptionKeyUrl:
+        resourceGroupName:
+      datahubKey:
+        encryptionKeyUrl:
+        resourceGroupName:
 
   # gcp parameters
   gcp:
@@ -232,6 +241,9 @@ integrationtest:
       upgrade:
         imageId: bbc059cd-d7c7-4938-bb34-5c7fc09f1204
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
+    diskEncryption:
+      environmentKey:
+      datahubKey:
 
   # yarn parameters
   yarn:
@@ -251,6 +263,9 @@ integrationtest:
     networkCidr: 172.27.0.0/16
     baseimage:
       imageId:
+    diskEncryption:
+      environmentKey:
+      datahubKey:
 
   # mock parameters
   mock:
@@ -283,6 +298,9 @@ integrationtest:
         instanceProfile: "arn:aws:iam::1234567890:instance-profile/mock.testing.instance.profile"
       baseLocation: "s3a://mock-test"
       fileSystemType: S3
+    diskEncryption:
+      environmentKey:
+      datahubKey:
 
   cleanup:
       retryCount: 3
