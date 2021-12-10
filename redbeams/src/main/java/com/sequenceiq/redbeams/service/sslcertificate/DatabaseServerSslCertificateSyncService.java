@@ -75,7 +75,8 @@ public class DatabaseServerSslCertificateSyncService {
             // Always sync CloudProviderIdentifier; this may result in an "SSL certificate outdated" status for the DB server registration.
             sslConfig.setSslCertificateActiveCloudProviderIdentifier(activeSslCertificateIdentifier);
             SslCertificateEntry activeSslCertificateEntry =
-                    databaseServerSslCertificateConfig.getCertByPlatformAndCloudProviderIdentifier(cloudPlatform, activeSslCertificateIdentifier);
+                    databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(cloudPlatform, dbStack.getRegion(),
+                            activeSslCertificateIdentifier);
             if (activeSslCertificateEntry == null) {
                 // This is only possible if the newly launched DB server uses a super-recent SSL root certificate that is yet unknown to CB,
                 // or if the DB server SSL root certificate is too old and has already been removed from CB.

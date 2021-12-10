@@ -24,8 +24,8 @@ import org.springframework.stereotype.Component;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DatabaseVendor;
 import com.sequenceiq.cloudbreak.auth.CrnUser;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.security.CrnUserDetailsService;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.StackTags;
@@ -36,7 +36,6 @@ import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.tag.CostTagging;
 import com.sequenceiq.cloudbreak.tag.request.CDPTagGenerationRequest;
-import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SecurityAccessResponse;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.requests.AllocateDatabaseServerV4Request;
@@ -64,7 +63,6 @@ import com.sequenceiq.redbeams.service.crn.CrnService;
 import com.sequenceiq.redbeams.service.network.NetworkParameterAdder;
 import com.sequenceiq.redbeams.service.network.SubnetChooserService;
 import com.sequenceiq.redbeams.service.network.SubnetListerService;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 
 @Component
 public class AllocateDatabaseServerV4RequestToDBStackConverter {
@@ -125,12 +123,6 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private AccountTagService accountTagService;
 
     @Inject
-    private SdxEndpoint sdxEndpoint;
-
-    @Inject
-    private DistroXV1Endpoint distroXV1Endpoint;
-
-    @Inject
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
     @PostConstruct
@@ -154,7 +146,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         setRegion(dbStack, environment);
 
         if (source.getDatabaseServer() != null) {
-            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), cloudPlatform, source.getName(), ownerCrn,
+            dbStack.setDatabaseServer(buildDatabaseServer(source.getDatabaseServer(), cloudPlatform, ownerCrn,
                     environment.getSecurityAccess()));
         }
 
@@ -179,28 +171,29 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         SslConfig sslConfig = new SslConfig();
         if (sslEnabled && source.getSslConfig() != null && SslMode.isEnabled(source.getSslConfig().getSslMode())) {
             String cloudPlatform = dbStack.getCloudPlatform();
+            String region = dbStack.getRegion();
             // TODO Determine the highest available SSL cert version for GCP; update sslCertificateActiveVersion during provisioning
-            int maxVersion = databaseServerSslCertificateConfig.getMaxVersionByPlatform(cloudPlatform);
+            int maxVersion = databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region);
             sslConfig.setSslCertificateActiveVersion(maxVersion);
             // TODO Add SslConfig.sslCertificateMaxVersion and keep it up-to-date (mostly for GCP)
 
             Set<String> certs;
             String cloudProviderIdentifier;
-            int numberOfCerts = databaseServerSslCertificateConfig.getNumberOfCertsByPlatform(cloudPlatform);
+            int numberOfCerts = databaseServerSslCertificateConfig.getNumberOfCertsByCloudPlatformAndRegion(cloudPlatform, region);
             if (numberOfCerts == 0) {
                 // TODO Initialize SSL cert & CloudProviderIdentifier for GCP
                 // This is possible for cloud platforms where SSL is supported, but the certs are not pre-registered in CB; see e.g. GCP
                 certs = Collections.emptySet();
                 cloudProviderIdentifier = null;
             } else if (numberOfCerts == 1 || !CloudPlatform.AZURE.equals(source.getCloudPlatform())) {
-                SslCertificateEntry cert = databaseServerSslCertificateConfig.getCertByPlatformAndVersion(cloudPlatform, maxVersion);
+                SslCertificateEntry cert = databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndVersion(cloudPlatform, region, maxVersion);
                 validateCert(cloudPlatform, maxVersion, cert);
                 certs = Collections.singleton(cert.getCertPem());
                 cloudProviderIdentifier = cert.getCloudProviderIdentifier();
             } else {
                 // In Azure and for > 1 certs, include both the most recent cert and the preceding one
                 Set<SslCertificateEntry> certsTemp =
-                        databaseServerSslCertificateConfig.getCertsByPlatformAndVersions(cloudPlatform, maxVersion - 1, maxVersion)
+                        databaseServerSslCertificateConfig.getCertsByCloudPlatformAndRegionAndVersions(cloudPlatform, region, maxVersion - 1, maxVersion)
                                 .stream()
                                 .filter(Objects::nonNull)
                                 .collect(Collectors.toSet());
@@ -288,18 +281,14 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         Map<String, String> defaultTags = costTagging.prepareDefaultTags(request);
         Map<String, String> environmentUserTags = Objects.requireNonNullElse(environment.getTags().getUserDefined(), new HashMap<>());
-        defaultTags.forEach((key, value) -> {
-            resultTags.put(key, value);
-        });
-        environmentUserTags.forEach((key, value) -> {
-            resultTags.putIfAbsent(key, value);
-        });
+        resultTags.putAll(defaultTags);
+        environmentUserTags.forEach(resultTags::putIfAbsent);
 
         return new Json(new StackTags(resultTags, new HashMap<>(), defaultTags));
     }
 
     private Map<String, String> getTags(Map<String, String> tags) {
-        return Objects.requireNonNullElse(tags, new HashMap<>());
+        return tags != null ? new HashMap<>(tags) : new HashMap<>();
     }
 
     private void setRegion(DBStack dbStack, DetailedEnvironmentResponse environment) {
@@ -351,18 +340,18 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
     private Map<String, Object> getSubnetsFromEnvironment(DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
             DBStack dbStack) {
         List<CloudSubnet> subnets = subnetListerService.listSubnets(environmentResponse, cloudPlatform);
-        List<CloudSubnet> choosenSubnet = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack);
+        List<CloudSubnet> chosenSubnet = subnetChooserService.chooseSubnets(subnets, cloudPlatform, dbStack);
 
-        List<String> chosenSubnetIds = choosenSubnet
+        List<String> chosenSubnetIds = chosenSubnet
                 .stream()
                 .map(CloudSubnet::getId)
                 .collect(Collectors.toList());
-        List<String> choosenAzs = choosenSubnet
+        List<String> chosenAzs = chosenSubnet
                 .stream()
                 .map(CloudSubnet::getAvailabilityZone)
                 .collect(Collectors.toList());
 
-        return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, choosenAzs, cloudPlatform);
+        return networkParameterAdder.addSubnetIds(new HashMap<>(), chosenSubnetIds, chosenAzs, cloudPlatform);
     }
 
     private Network buildNetwork(NetworkV4StackRequest source, DetailedEnvironmentResponse environmentResponse, CloudPlatform cloudPlatform,
@@ -386,7 +375,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
         return network;
     }
 
-    private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, CloudPlatform cloudPlatform, String name, Crn ownerCrn,
+    private DatabaseServer buildDatabaseServer(DatabaseServerV4StackRequest source, CloudPlatform cloudPlatform, Crn ownerCrn,
             SecurityAccessResponse securityAccessResponse) {
         DatabaseServer server = new DatabaseServer();
         server.setAccountId(ownerCrn.getAccountId());
@@ -417,9 +406,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
     private void setDbVersion(Map<String, Object> parameters, CloudPlatform cloudPlatform) {
         String dbVersionKey = getDbVersionKey(cloudPlatform);
-        if (parameters.get(dbVersionKey) == null) {
-            parameters.put(dbVersionKey, redbeamsDbMajorVersion);
-        }
+        parameters.computeIfAbsent(dbVersionKey, k -> redbeamsDbMajorVersion);
     }
 
     private String getDbVersionKey(CloudPlatform cloudPlatform) {
