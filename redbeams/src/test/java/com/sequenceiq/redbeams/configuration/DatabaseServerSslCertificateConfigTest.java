@@ -1,5 +1,6 @@
 package com.sequenceiq.redbeams.configuration;
 
+import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -126,6 +127,10 @@ class DatabaseServerSslCertificateConfigTest {
                     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890" +
                     "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890";
 
+    private static final String REGION_1 = "myRegion1";
+
+    private static final String REGION_2 = "myRegion2";
+
     private DatabaseServerSslCertificateConfig underTest;
 
     @BeforeEach
@@ -149,20 +154,20 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of());
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform(CloudPlatform.AZURE.name())).isEmpty();
-        assertThat(underTest.getCertsByPlatform("Azure")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("aZure")).isEmpty();
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).isEmpty();
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform(CloudPlatform.AWS.name())).isEmpty();
-        assertThat(underTest.getCertsByPlatform("aws")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("Aws")).isEmpty();
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).isEmpty();
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
     }
 
     @Test
@@ -173,23 +178,23 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("azure"));
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), 1, VERSION_0, VERSION_0);
-        Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
         assertThat(certsAzure).hasSize(1);
         assertThat(certsAzure).doesNotContainNull();
         verifyCertEntry(certsAzure, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
-        assertThat(underTest.getCertsByPlatform("Azure")).hasSize(1);
-        assertThat(underTest.getCertsByPlatform("aZure")).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).hasSize(1);
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform(CloudPlatform.AWS.name())).isEmpty();
-        assertThat(underTest.getCertsByPlatform("aws")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("Aws")).isEmpty();
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).isEmpty();
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
     }
 
     private void initCerts(Map<String, String> certs) {
@@ -198,10 +203,10 @@ class DatabaseServerSslCertificateConfigTest {
         underTest.setupCertsCache();
     }
 
-    private void verifyCertStatistics(String cloudPlatform, int numCerts, int minVersion, int maxVersion) {
-        assertThat(underTest.getNumberOfCertsByPlatform(cloudPlatform)).isEqualTo(numCerts);
-        assertThat(underTest.getMinVersionByPlatform(cloudPlatform)).isEqualTo(minVersion);
-        assertThat(underTest.getMaxVersionByPlatform(cloudPlatform)).isEqualTo(maxVersion);
+    private void verifyCertStatistics(String cloudPlatform, String region, int numCerts, int minVersion, int maxVersion) {
+        assertThat(underTest.getNumberOfCertsByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(numCerts);
+        assertThat(underTest.getMinVersionByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(minVersion);
+        assertThat(underTest.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(maxVersion);
     }
 
     private void verifyCertEntry(Set<SslCertificateEntry> certs, int version, String cloudProviderIdentifierExpected, String certPemExpected,
@@ -231,23 +236,23 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("azure"));
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), 1, VERSION_0, VERSION_0);
-        Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
         assertThat(certsAzure).hasSize(1);
         assertThat(certsAzure).doesNotContainNull();
         verifyCertEntry(certsAzure, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
-        assertThat(underTest.getCertsByPlatform("Azure")).hasSize(1);
-        assertThat(underTest.getCertsByPlatform("aZure")).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).hasSize(1);
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform(CloudPlatform.AWS.name())).isEmpty();
-        assertThat(underTest.getCertsByPlatform("aws")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("Aws")).isEmpty();
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).isEmpty();
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
     }
 
     @Test
@@ -259,24 +264,92 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws"));
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), 2, VERSION_1, VERSION_2);
-        Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
-        assertThat(certsAws).hasSize(2);
-        assertThat(certsAws).doesNotContainNull();
-        verifyCertEntry(certsAws, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
-        verifyCertEntry(certsAws, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
-        assertThat(underTest.getCertsByPlatform("aws")).hasSize(2);
-        assertThat(underTest.getCertsByPlatform("Aws")).hasSize(2);
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAwsGlobal = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null);
+        assertThat(certsAwsGlobal).hasSize(2);
+        assertThat(certsAwsGlobal).doesNotContainNull();
+        verifyCertEntry(certsAwsGlobal, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAwsGlobal, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).hasSize(2);
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform(CloudPlatform.AZURE.name())).isEmpty();
-        assertThat(underTest.getCertsByPlatform("Azure")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("aZure")).isEmpty();
+        verifyCertStatistics(CloudPlatform.AWS.name(), REGION_1, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAwsRegion1 = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_1);
+        assertThat(certsAwsRegion1).hasSize(2);
+        assertThat(certsAwsRegion1).doesNotContainNull();
+        verifyCertEntry(certsAwsRegion1, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAwsRegion1, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", REGION_1)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", REGION_1)).hasSize(2);
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics(CloudPlatform.AWS.name(), REGION_2, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAwsRegion2 = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_2);
+        assertThat(certsAwsRegion2).hasSize(2);
+        assertThat(certsAwsRegion2).doesNotContainNull();
+        verifyCertEntry(certsAwsRegion2, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAwsRegion2, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", REGION_2)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", REGION_2)).hasSize(2);
+
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).isEmpty();
+
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+    }
+
+    @Test
+    void configReadTestWhenAwsHasTwoGlobalCertsAndOneRegionalCertShouldReturnThreeCerts() {
+        Map<String, String> certs = Map.ofEntries(
+                entry("aws",
+                        certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3))),
+                entry("aws." + REGION_1,
+                        certList(certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1)))
+        );
+        initCerts(certs);
+
+        assertThat(underTest.getCerts()).isEqualTo(certs);
+        assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "aws." + REGION_1.toLowerCase()));
+
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAwsGlobal = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null);
+        assertThat(certsAwsGlobal).hasSize(2);
+        assertThat(certsAwsGlobal).doesNotContainNull();
+        verifyCertEntry(certsAwsGlobal, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAwsGlobal, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).hasSize(2);
+
+        verifyCertStatistics(CloudPlatform.AWS.name(), REGION_1, 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAwsRegion1 = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_1);
+        assertThat(certsAwsRegion1).hasSize(1);
+        assertThat(certsAwsRegion1).doesNotContainNull();
+        verifyCertEntry(certsAwsRegion1, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", REGION_1)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", REGION_1)).hasSize(1);
+
+        verifyCertStatistics(CloudPlatform.AWS.name(), REGION_2, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAwsRegion2 = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), REGION_2);
+        assertThat(certsAwsRegion2).hasSize(2);
+        assertThat(certsAwsRegion2).doesNotContainNull();
+        verifyCertEntry(certsAwsRegion2, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAwsRegion2, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", REGION_2)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", REGION_2)).hasSize(2);
+
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).isEmpty();
+
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
     }
 
     @Test
@@ -289,27 +362,60 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "azure"));
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), 1, VERSION_0, VERSION_0);
-        Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAws = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null);
         assertThat(certsAws).hasSize(1);
         assertThat(certsAws).doesNotContainNull();
         verifyCertEntry(certsAws, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
-        assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
-        assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).hasSize(1);
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), 2, VERSION_1, VERSION_2);
-        Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
         assertThat(certsAzure).hasSize(2);
         assertThat(certsAzure).doesNotContainNull();
         verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
         verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
-        assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
-        assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).hasSize(2);
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+    }
+
+    @Test
+    void configReadTestWhenAwsHasOneCertAndAzureHasTwoCertsAndUppercaseIdentifiersShouldReturnThreeCerts() {
+        Map<String, String> certs = Map.of("AWS", certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1),
+                "AZURE", certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2),
+                        certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
+        initCerts(certs);
+
+        assertThat(underTest.getCerts()).isEqualTo(certs);
+        assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "azure"));
+
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAws = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null);
+        assertThat(certsAws).hasSize(1);
+        assertThat(certsAws).doesNotContainNull();
+        verifyCertEntry(certsAws, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).hasSize(1);
+
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
+        assertThat(certsAzure).hasSize(2);
+        assertThat(certsAzure).doesNotContainNull();
+        verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
+        verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).hasSize(2);
+
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
     }
 
     @Test
@@ -322,27 +428,27 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "azure"));
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), 1, VERSION_0, VERSION_0);
-        Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAws = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null);
         assertThat(certsAws).hasSize(1);
         assertThat(certsAws).doesNotContainNull();
         verifyCertEntry(certsAws, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
-        assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
-        assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).hasSize(1);
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), 2, VERSION_1, VERSION_2);
-        Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
         assertThat(certsAzure).hasSize(2);
         assertThat(certsAzure).doesNotContainNull();
         verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
         verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
-        assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
-        assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).hasSize(2);
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
     }
 
     @Test
@@ -355,27 +461,27 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "azure"));
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), 1, VERSION_1, VERSION_1);
-        Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, 1, VERSION_1, VERSION_1);
+        Set<SslCertificateEntry> certsAws = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null);
         assertThat(certsAws).hasSize(1);
         assertThat(certsAws).doesNotContainNull();
         verifyCertEntry(certsAws, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
-        assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
-        assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).hasSize(1);
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), 2, VERSION_1, VERSION_2);
-        Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
         assertThat(certsAzure).hasSize(2);
         assertThat(certsAzure).doesNotContainNull();
         verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2, CERT_ISSUER_2);
         verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
-        assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
-        assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).hasSize(2);
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
     }
 
     @Test
@@ -388,27 +494,51 @@ class DatabaseServerSslCertificateConfigTest {
         assertThat(underTest.getCerts()).isEqualTo(certs);
         assertThat(underTest.getSupportedPlatformsForCerts()).isEqualTo(Set.of("aws", "azure"));
 
-        verifyCertStatistics(CloudPlatform.AWS.name(), 1, VERSION_0, VERSION_0);
-        Set<SslCertificateEntry> certsAws = underTest.getCertsByPlatform(CloudPlatform.AWS.name());
+        verifyCertStatistics(CloudPlatform.AWS.name(), null, 1, VERSION_0, VERSION_0);
+        Set<SslCertificateEntry> certsAws = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AWS.name(), null);
         assertThat(certsAws).hasSize(1);
         assertThat(certsAws).doesNotContainNull();
         verifyCertEntry(certsAws, VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1, CERT_ISSUER_1);
-        assertThat(underTest.getCertsByPlatform("aws")).hasSize(1);
-        assertThat(underTest.getCertsByPlatform("Aws")).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aws", null)).hasSize(1);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Aws", null)).hasSize(1);
 
-        verifyCertStatistics(CloudPlatform.AZURE.name(), 2, VERSION_1, VERSION_2);
-        Set<SslCertificateEntry> certsAzure = underTest.getCertsByPlatform(CloudPlatform.AZURE.name());
+        verifyCertStatistics(CloudPlatform.AZURE.name(), null, 2, VERSION_1, VERSION_2);
+        Set<SslCertificateEntry> certsAzure = underTest.getCertsByCloudPlatformAndRegion(CloudPlatform.AZURE.name(), null);
         assertThat(certsAzure).hasSize(2);
         assertThat(certsAzure).doesNotContainNull();
         verifyCertEntry(certsAzure, VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_2, CERT_ISSUER_2);
         verifyCertEntry(certsAzure, VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3, CERT_ISSUER_3);
-        assertThat(underTest.getCertsByPlatform("Azure")).hasSize(2);
-        assertThat(underTest.getCertsByPlatform("aZure")).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("Azure", null)).hasSize(2);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("aZure", null)).hasSize(2);
 
-        verifyCertStatistics("", NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
-        assertThat(underTest.getCertsByPlatform("")).isEmpty();
-        assertThat(underTest.getCertsByPlatform("cloud")).isEmpty();
-        assertThat(underTest.getCertsByPlatform(null)).isEmpty();
+        verifyCertStatistics("", null, NO_CERTS, DUMMY_VERSION, DUMMY_VERSION);
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion("cloud", null)).isEmpty();
+        assertThat(underTest.getCertsByCloudPlatformAndRegion(null, null)).isEmpty();
+    }
+
+    @Test
+    void setupCertsCacheTestWhenErrorMalformedCloudPlatformGarbage() {
+        Map<String, String> certs = Map.of("$uper", certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2)));
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed cloud platform \"$uper (malformed)\".");
+    }
+
+    @Test
+    void setupCertsCacheTestWhenErrorMalformedCloudPlatformMultipleRegions() {
+        Map<String, String> certs = Map.of("aws.region1.region2", certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2)));
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed cloud platform \"aws.region1.region2 (malformed)\".");
+    }
+
+    @Test
+    void setupCertsCacheTestWhenErrorUnsupportedCloudPlatform() {
+        Map<String, String> certs = Map.of("gcp", certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2)));
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed cloud platform \"gcp (malformed)\".");
     }
 
     @Test
@@ -416,7 +546,15 @@ class DatabaseServerSslCertificateConfigTest {
         Map<String, String> certs = Map.of("aws", certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), "broken-entry"));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws\": \"");
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws (global)\": \"");
+    }
+
+    @Test
+    void setupCertsCacheTestWhenErrorMalformedEntryGarbageRegional() {
+        Map<String, String> certs = Map.of("aws.region1", certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), "broken-entry"));
+
+        IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws (region region1)\": \"");
     }
 
     @Test
@@ -426,7 +564,7 @@ class DatabaseServerSslCertificateConfigTest {
                         certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2) + ":foo"));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws\": \"");
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws (global)\": \"");
     }
 
     @Test
@@ -434,7 +572,7 @@ class DatabaseServerSslCertificateConfigTest {
         Map<String, String> certs = Map.of("aws", certList("", certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws\": \"");
+        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate entry for cloud platform \"aws (global)\": \"");
     }
 
     @Test
@@ -443,7 +581,8 @@ class DatabaseServerSslCertificateConfigTest {
                 certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1), certEntry(VERSION_2, LONG_CLOUD_PROVIDER_IDENTIFIER, CERT_PEM_2)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessageStartingWith("Malformed SSL certificate CloudProviderIdentifier for cloud platform \"aws\": \"");
+        assertThat(illegalArgumentException)
+                .hasMessageStartingWith("Malformed SSL certificate CloudProviderIdentifier for cloud platform \"aws (global)\": \"");
     }
 
     @Test
@@ -452,7 +591,7 @@ class DatabaseServerSslCertificateConfigTest {
                 certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, "broken-pem")));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessageStartingWith("Error parsing SSL certificate PEM for cloud platform \"aws\": \"");
+        assertThat(illegalArgumentException).hasMessageStartingWith("Error parsing SSL certificate PEM for cloud platform \"aws (global)\": \"");
     }
 
     @Test
@@ -461,7 +600,7 @@ class DatabaseServerSslCertificateConfigTest {
                 certList(certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessage("Duplicated SSL certificate version 2 for cloud platform \"aws\"");
+        assertThat(illegalArgumentException).hasMessage("Duplicated SSL certificate version 2 for cloud platform \"aws (global)\"");
     }
 
     @Test
@@ -471,7 +610,7 @@ class DatabaseServerSslCertificateConfigTest {
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
         assertThat(illegalArgumentException)
-                .hasMessage("Duplicated SSL certificate CloudProviderIdentifier for cloud platform \"aws\": \"SwissSign-Platinum-CA-G2\"");
+                .hasMessage("Duplicated SSL certificate CloudProviderIdentifier for cloud platform \"aws (global)\": \"SwissSign-Platinum-CA-G2\"");
     }
 
     @Test
@@ -480,7 +619,7 @@ class DatabaseServerSslCertificateConfigTest {
                 certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_2)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessageStartingWith("Duplicated SSL certificate PEM for cloud platform \"aws\": \"");
+        assertThat(illegalArgumentException).hasMessageStartingWith("Duplicated SSL certificate PEM for cloud platform \"aws (global)\": \"");
     }
 
     @Test
@@ -489,86 +628,105 @@ class DatabaseServerSslCertificateConfigTest {
                 certList(certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
 
         IllegalArgumentException illegalArgumentException = assertThrows(IllegalArgumentException.class, () -> initCerts(certs));
-        assertThat(illegalArgumentException).hasMessage("SSL certificate versions are not contiguous for cloud platform \"aws\"");
+        assertThat(illegalArgumentException).hasMessage("SSL certificate versions are not contiguous for cloud platform \"aws (global)\"");
     }
 
     static Object[][] getLegacyMaxVersionByPlatformDataProvider() {
         return new Object[][]{
-                // testCaseName cloudPlatform legacyMaxVersionExpected
-                {"null", null, DUMMY_VERSION},
-                {"empty", "", DUMMY_VERSION},
-                {"AWS", CloudPlatform.AWS.name(), 0},
-                {"aws", "aws", 0},
-                {"Aws", "Aws", 0},
-                {"AZURE", CloudPlatform.AZURE.name(), 1},
-                {"Azure", "Azure", 1},
-                {"aZure", "aZure", 1},
-                {"GCP", CloudPlatform.GCP.name(), DUMMY_VERSION},
-                {"MOCK", CloudPlatform.MOCK.name(), DUMMY_VERSION},
-                {"YARN", CloudPlatform.YARN.name(), DUMMY_VERSION},
+                // testCaseName cloudPlatform region legacyMaxVersionExpected
+                {"null, null", null, null, DUMMY_VERSION},
+                {"empty, null", "", null, DUMMY_VERSION},
+                {"AWS, null", CloudPlatform.AWS.name(), null, 0},
+                {"AWS, eu-south-1", CloudPlatform.AWS.name(), "eu-south-1", 0},
+                {"AWS, af-south-1", CloudPlatform.AWS.name(), "af-south-1", 0},
+                {"AWS, me-south-1", CloudPlatform.AWS.name(), "me-south-1", 0},
+                {"aws, null", "aws", null, 0},
+                {"Aws, null", "Aws", null, 0},
+                {"AZURE, null", CloudPlatform.AZURE.name(), null, 1},
+                {"Azure, null", "Azure", null, 1},
+                {"aZure, null", "aZure", null, 1},
+                {"GCP, null", CloudPlatform.GCP.name(), null, DUMMY_VERSION},
+                {"MOCK, null", CloudPlatform.MOCK.name(), null, DUMMY_VERSION},
+                {"YARN, null", CloudPlatform.YARN.name(), null, DUMMY_VERSION},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getLegacyMaxVersionByPlatformDataProvider")
-    void getLegacyMaxVersionByPlatformTest(String testCaseName, String cloudPlatform, int legacyMaxVersionExpected) {
-        assertThat(underTest.getLegacyMaxVersionByPlatform(cloudPlatform)).isEqualTo(legacyMaxVersionExpected);
+    void getLegacyMaxVersionByPlatformTest(String testCaseName, String cloudPlatform, String region, int legacyMaxVersionExpected) {
+        assertThat(underTest.getLegacyMaxVersionByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(legacyMaxVersionExpected);
     }
 
     static Object[][] getLegacyCloudProviderIdentifierByPlatformDataProvider() {
         return new Object[][]{
-                // testCaseName cloudPlatform legacyCloudProviderIdentifierExpected
-                {"null", null, null},
-                {"empty", "", null},
-                {"AWS", CloudPlatform.AWS.name(), RDS_CA_2019},
-                {"aws", "aws", RDS_CA_2019},
-                {"Aws", "Aws", RDS_CA_2019},
-                {"AZURE", CloudPlatform.AZURE.name(), DIGI_CERT_GLOBAL_ROOT_G_2},
-                {"Azure", "Azure", DIGI_CERT_GLOBAL_ROOT_G_2},
-                {"aZure", "aZure", DIGI_CERT_GLOBAL_ROOT_G_2},
-                {"GCP", CloudPlatform.GCP.name(), null},
-                {"MOCK", CloudPlatform.MOCK.name(), null},
-                {"YARN", CloudPlatform.YARN.name(), null},
+                // testCaseName cloudPlatform region legacyCloudProviderIdentifierExpected
+                {"null, null", null, null, null},
+                {"empty, null", "", null, null},
+                {"AWS, null", CloudPlatform.AWS.name(), null, RDS_CA_2019},
+                {"AWS, eu-south-1", CloudPlatform.AWS.name(), "eu-south-1", "rds-ca-2019-eu-south-1"},
+                {"AWS, af-south-1", CloudPlatform.AWS.name(), "af-south-1", "rds-ca-2019-af-south-1"},
+                {"AWS, me-south-1", CloudPlatform.AWS.name(), "me-south-1", "rds-ca-2019-me-south-1"},
+                {"aws, null", "aws", null, RDS_CA_2019},
+                {"Aws, null", "Aws", null, RDS_CA_2019},
+                {"AZURE, null", CloudPlatform.AZURE.name(), null, DIGI_CERT_GLOBAL_ROOT_G_2},
+                {"Azure, null", "Azure", null, DIGI_CERT_GLOBAL_ROOT_G_2},
+                {"aZure, null", "aZure", null, DIGI_CERT_GLOBAL_ROOT_G_2},
+                {"GCP, null", CloudPlatform.GCP.name(), null, null},
+                {"MOCK, null", CloudPlatform.MOCK.name(), null, null},
+                {"YARN, null", CloudPlatform.YARN.name(), null, null},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getLegacyCloudProviderIdentifierByPlatformDataProvider")
-    void getLegacyCloudProviderIdentifierByPlatformTest(String testCaseName, String cloudPlatform, String legacyCloudProviderIdentifierExpected) {
-        assertThat(underTest.getLegacyCloudProviderIdentifierByPlatform(cloudPlatform)).isEqualTo(legacyCloudProviderIdentifierExpected);
+    void getLegacyCloudProviderIdentifierByPlatformTest(String testCaseName, String cloudPlatform, String region,
+            String legacyCloudProviderIdentifierExpected) {
+        assertThat(underTest.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(cloudPlatform, region)).isEqualTo(legacyCloudProviderIdentifierExpected);
     }
 
     @Test
     void getSupportedPlatformsForLegacyMaxVersionTest() {
-        assertThat(underTest.getSupportedPlatformsForLegacyMaxVersion()).isEqualTo(Set.of("aws", "azure"));
+        assertThat(underTest.getSupportedPlatformsForLegacyMaxVersion())
+                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "azure"));
     }
 
     @Test
     void getSupportedPlatformsForLegacyCloudProviderIdentifierTest() {
-        assertThat(underTest.getSupportedPlatformsForLegacyCloudProviderIdentifier()).isEqualTo(Set.of("aws", "azure"));
+        assertThat(underTest.getSupportedPlatformsForLegacyCloudProviderIdentifier())
+                .isEqualTo(Set.of("aws", "aws.eu-south-1", "aws.af-south-1", "aws.me-south-1", "azure"));
     }
 
     static Object[][] getCertByPlatformAndVersionDataProvider() {
         return new Object[][]{
-                // testCaseName cloudPlatform version certFoundExpected
-                {"AWS, vDummy", CloudPlatform.AWS.name(), DUMMY_VERSION, false},
-                {"AWS, v0", CloudPlatform.AWS.name(), VERSION_0, false},
-                {"AWS, v1", CloudPlatform.AWS.name(), VERSION_1, true},
-                {"AWS, v2", CloudPlatform.AWS.name(), VERSION_2, true},
-                {"AZURE, v0", CloudPlatform.AZURE.name(), VERSION_0, false},
-                {"AZURE, v1", CloudPlatform.AZURE.name(), VERSION_1, false},
-                {"AZURE, v2", CloudPlatform.AZURE.name(), VERSION_2, false},
+                // testCaseName cloudPlatform region version certFoundExpected
+                {"AWS, null, vDummy", CloudPlatform.AWS.name(), null, DUMMY_VERSION, false},
+                {"AWS, null, v0", CloudPlatform.AWS.name(), null, VERSION_0, false},
+                {"AWS, null, v1", CloudPlatform.AWS.name(), null, VERSION_1, true},
+                {"AWS, null, v2", CloudPlatform.AWS.name(), null, VERSION_2, true},
+                {"AWS, REGION_1, v0", CloudPlatform.AWS.name(), REGION_1, VERSION_0, true},
+                {"AWS, REGION_1, v1", CloudPlatform.AWS.name(), REGION_1, VERSION_1, false},
+                {"AWS, REGION_1, v2", CloudPlatform.AWS.name(), REGION_1, VERSION_2, false},
+                {"AWS, REGION_2, v0", CloudPlatform.AWS.name(), REGION_2, VERSION_0, false},
+                {"AWS, REGION_2, v1", CloudPlatform.AWS.name(), REGION_2, VERSION_1, true},
+                {"AWS, REGION_2, v2", CloudPlatform.AWS.name(), REGION_2, VERSION_2, true},
+                {"AZURE, null, v0", CloudPlatform.AZURE.name(), null, VERSION_0, false},
+                {"AZURE, null, v1", CloudPlatform.AZURE.name(), null, VERSION_1, false},
+                {"AZURE, null, v2", CloudPlatform.AZURE.name(), null, VERSION_2, false},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getCertByPlatformAndVersionDataProvider")
-    void getCertByPlatformAndVersionTest(String testCaseName, String cloudPlatform, int version, boolean certFoundExpected) {
-        Map<String, String> certs = Map.of("aws",
-                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
+    void getCertByPlatformAndVersionTest(String testCaseName, String cloudPlatform, String region, int version, boolean certFoundExpected) {
+        Map<String, String> certs = Map.ofEntries(
+                entry("aws",
+                        certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3))),
+                entry("aws." + REGION_1,
+                        certList(certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1)))
+        );
         initCerts(certs);
 
-        SslCertificateEntry result = underTest.getCertByPlatformAndVersion(cloudPlatform, version);
+        SslCertificateEntry result = underTest.getCertByCloudPlatformAndRegionAndVersion(cloudPlatform, region, version);
         if (certFoundExpected) {
             assertThat(result).isNotNull();
             assertThat(result.getVersion()).isEqualTo(version);
@@ -579,29 +737,56 @@ class DatabaseServerSslCertificateConfigTest {
 
     static Object[][] getCertsByPlatformAndVersionsDataProvider() {
         return new Object[][]{
-                // testCaseName cloudPlatform versions versionsExpected
-                {"AWS, null", CloudPlatform.AWS.name(), null, Set.of()},
-                {"AWS, []", CloudPlatform.AWS.name(), new int[]{}, Set.of()},
-                {"AWS, [vDummy]", CloudPlatform.AWS.name(), new int[]{DUMMY_VERSION}, Set.of()},
-                {"AWS, [v0]", CloudPlatform.AWS.name(), new int[]{VERSION_0}, Set.of()},
-                {"AWS, [v2]", CloudPlatform.AWS.name(), new int[]{VERSION_2}, Set.of(VERSION_2)},
-                {"AWS, [v2, v0]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_0}, Set.of(VERSION_2)},
-                {"AWS, [v2, v1]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
-                {"AWS, [v2, v0, v1]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_0, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
-                {"AWS, [v2, v2, v1]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
-                {"AWS, [v2, v0, v2, v1]", CloudPlatform.AWS.name(), new int[]{VERSION_2, VERSION_0, VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
-                {"AZURE, [v0, v2, v1]", CloudPlatform.AZURE.name(), new int[]{VERSION_0, VERSION_2, VERSION_1}, Set.of()},
+                // testCaseName cloudPlatform region versions versionsExpected
+                {"AWS, null, null", CloudPlatform.AWS.name(), null, null, Set.of()},
+                {"AWS, null, []", CloudPlatform.AWS.name(), null, new int[]{}, Set.of()},
+                {"AWS, null, [vDummy]", CloudPlatform.AWS.name(), null, new int[]{DUMMY_VERSION}, Set.of()},
+                {"AWS, null, [v0]", CloudPlatform.AWS.name(), null, new int[]{VERSION_0}, Set.of()},
+                {"AWS, null, [v2]", CloudPlatform.AWS.name(), null, new int[]{VERSION_2}, Set.of(VERSION_2)},
+                {"AWS, null, [v2, v0]", CloudPlatform.AWS.name(), null, new int[]{VERSION_2, VERSION_0}, Set.of(VERSION_2)},
+                {"AWS, null, [v2, v1]", CloudPlatform.AWS.name(), null, new int[]{VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
+                {"AWS, null, [v2, v0, v1]", CloudPlatform.AWS.name(), null, new int[]{VERSION_2, VERSION_0, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
+                {"AWS, null, [v2, v2, v1]", CloudPlatform.AWS.name(), null, new int[]{VERSION_2, VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
+                {"AWS, null, [v2, v0, v2, v1]", CloudPlatform.AWS.name(), null, new int[]{VERSION_2, VERSION_0, VERSION_2, VERSION_1},
+                        Set.of(VERSION_1, VERSION_2)},
+                {"AWS, REGION_1, null", CloudPlatform.AWS.name(), REGION_1, null, Set.of()},
+                {"AWS, REGION_1, []", CloudPlatform.AWS.name(), REGION_1, new int[]{}, Set.of()},
+                {"AWS, REGION_1, [vDummy]", CloudPlatform.AWS.name(), REGION_1, new int[]{DUMMY_VERSION}, Set.of()},
+                {"AWS, REGION_1, [v0]", CloudPlatform.AWS.name(), REGION_1, new int[]{VERSION_0}, Set.of(VERSION_0)},
+                {"AWS, REGION_1, [v2]", CloudPlatform.AWS.name(), REGION_1, new int[]{VERSION_2}, Set.of()},
+                {"AWS, REGION_1, [v2, v0]", CloudPlatform.AWS.name(), REGION_1, new int[]{VERSION_2, VERSION_0}, Set.of(VERSION_0)},
+                {"AWS, REGION_1, [v2, v1]", CloudPlatform.AWS.name(), REGION_1, new int[]{VERSION_2, VERSION_1}, Set.of()},
+                {"AWS, REGION_1, [v2, v0, v1]", CloudPlatform.AWS.name(), REGION_1, new int[]{VERSION_2, VERSION_0, VERSION_1}, Set.of(VERSION_0)},
+                {"AWS, REGION_1, [v2, v2, v1]", CloudPlatform.AWS.name(), REGION_1, new int[]{VERSION_2, VERSION_2, VERSION_1}, Set.of()},
+                {"AWS, REGION_1, [v2, v0, v2, v1]", CloudPlatform.AWS.name(), REGION_1, new int[]{VERSION_2, VERSION_0, VERSION_2, VERSION_1},
+                        Set.of(VERSION_0)},
+                {"AWS, REGION_2, null", CloudPlatform.AWS.name(), REGION_2, null, Set.of()},
+                {"AWS, REGION_2, []", CloudPlatform.AWS.name(), REGION_2, new int[]{}, Set.of()},
+                {"AWS, REGION_2, [vDummy]", CloudPlatform.AWS.name(), REGION_2, new int[]{DUMMY_VERSION}, Set.of()},
+                {"AWS, REGION_2, [v0]", CloudPlatform.AWS.name(), REGION_2, new int[]{VERSION_0}, Set.of()},
+                {"AWS, REGION_2, [v2]", CloudPlatform.AWS.name(), REGION_2, new int[]{VERSION_2}, Set.of(VERSION_2)},
+                {"AWS, REGION_2, [v2, v0]", CloudPlatform.AWS.name(), REGION_2, new int[]{VERSION_2, VERSION_0}, Set.of(VERSION_2)},
+                {"AWS, REGION_2, [v2, v1]", CloudPlatform.AWS.name(), REGION_2, new int[]{VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
+                {"AWS, REGION_2, [v2, v0, v1]", CloudPlatform.AWS.name(), REGION_2, new int[]{VERSION_2, VERSION_0, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
+                {"AWS, REGION_2, [v2, v2, v1]", CloudPlatform.AWS.name(), REGION_2, new int[]{VERSION_2, VERSION_2, VERSION_1}, Set.of(VERSION_1, VERSION_2)},
+                {"AWS, REGION_2, [v2, v0, v2, v1]", CloudPlatform.AWS.name(), REGION_2, new int[]{VERSION_2, VERSION_0, VERSION_2, VERSION_1},
+                        Set.of(VERSION_1, VERSION_2)},
+                {"AZURE, null, [v0, v2, v1]", CloudPlatform.AZURE.name(), null, new int[]{VERSION_0, VERSION_2, VERSION_1}, Set.of()},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getCertsByPlatformAndVersionsDataProvider")
-    void getCertsByPlatformAndVersionsTest(String testCaseName, String cloudPlatform, int[] versions, Set<Integer> versionsExpected) {
-        Map<String, String> certs = Map.of("aws",
-                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
+    void getCertsByPlatformAndVersionsTest(String testCaseName, String cloudPlatform, String region, int[] versions, Set<Integer> versionsExpected) {
+        Map<String, String> certs = Map.ofEntries(
+                entry("aws",
+                        certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3))),
+                entry("aws." + REGION_1,
+                        certList(certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1)))
+        );
         initCerts(certs);
 
-        Set<SslCertificateEntry> result = underTest.getCertsByPlatformAndVersions(cloudPlatform, versions);
+        Set<SslCertificateEntry> result = underTest.getCertsByCloudPlatformAndRegionAndVersions(cloudPlatform, region, versions);
         assertThat(result).isNotNull();
         assertThat(result).doesNotContainNull();
         Set<Integer> versionsFound = result.stream()
@@ -612,26 +797,41 @@ class DatabaseServerSslCertificateConfigTest {
 
     static Object[][] getCertByPlatformAndCloudProviderIdentifierDataProvider() {
         return new Object[][]{
-                // testCaseName cloudPlatform cloudProviderIdentifier certFoundExpected
-                {"AWS, null", CloudPlatform.AWS.name(), null, false},
-                {"AWS, empty", CloudPlatform.AWS.name(), "", false},
-                {"AWS, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AWS.name(), CLOUD_PROVIDER_IDENTIFIER_1, false},
-                {"AWS, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AWS.name(), CLOUD_PROVIDER_IDENTIFIER_2, true},
-                {"AWS, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AWS.name(), CLOUD_PROVIDER_IDENTIFIER_3, true},
-                {"AZURE, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_1, false},
-                {"AZURE, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_2, false},
-                {"AZURE, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AZURE.name(), CLOUD_PROVIDER_IDENTIFIER_3, false},
+                // testCaseName cloudPlatform region cloudProviderIdentifier certFoundExpected
+                {"AWS, null, null", CloudPlatform.AWS.name(), null, null, false},
+                {"AWS, null, empty", CloudPlatform.AWS.name(), null, "", false},
+                {"AWS, null, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AWS.name(), null, CLOUD_PROVIDER_IDENTIFIER_1, false},
+                {"AWS, null, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AWS.name(), null, CLOUD_PROVIDER_IDENTIFIER_2, true},
+                {"AWS, null, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AWS.name(), null, CLOUD_PROVIDER_IDENTIFIER_3, true},
+                {"AWS, REGION_1, null", CloudPlatform.AWS.name(), REGION_1, null, false},
+                {"AWS, REGION_1, empty", CloudPlatform.AWS.name(), REGION_1, "", false},
+                {"AWS, REGION_1, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AWS.name(), REGION_1, CLOUD_PROVIDER_IDENTIFIER_1, true},
+                {"AWS, REGION_1, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AWS.name(), REGION_1, CLOUD_PROVIDER_IDENTIFIER_2, false},
+                {"AWS, REGION_1, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AWS.name(), REGION_1, CLOUD_PROVIDER_IDENTIFIER_3, false},
+                {"AWS, REGION_2, null", CloudPlatform.AWS.name(), REGION_2, null, false},
+                {"AWS, REGION_2, empty", CloudPlatform.AWS.name(), REGION_2, "", false},
+                {"AWS, REGION_2, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AWS.name(), REGION_2, CLOUD_PROVIDER_IDENTIFIER_1, false},
+                {"AWS, REGION_2, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AWS.name(), REGION_2, CLOUD_PROVIDER_IDENTIFIER_2, true},
+                {"AWS, REGION_2, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AWS.name(), REGION_2, CLOUD_PROVIDER_IDENTIFIER_3, true},
+                {"AZURE, null, CLOUD_PROVIDER_IDENTIFIER_1", CloudPlatform.AZURE.name(), null, CLOUD_PROVIDER_IDENTIFIER_1, false},
+                {"AZURE, null, CLOUD_PROVIDER_IDENTIFIER_2", CloudPlatform.AZURE.name(), null, CLOUD_PROVIDER_IDENTIFIER_2, false},
+                {"AZURE, null, CLOUD_PROVIDER_IDENTIFIER_3", CloudPlatform.AZURE.name(), null, CLOUD_PROVIDER_IDENTIFIER_3, false},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("getCertByPlatformAndCloudProviderIdentifierDataProvider")
-    void getCertByPlatformAndCloudProviderIdentifierTest(String testCaseName, String cloudPlatform, String cloudProviderIdentifier, boolean certFoundExpected) {
-        Map<String, String> certs = Map.of("aws",
-                certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3)));
+    void getCertByPlatformAndCloudProviderIdentifierTest(String testCaseName, String cloudPlatform, String region, String cloudProviderIdentifier,
+            boolean certFoundExpected) {
+        Map<String, String> certs = Map.ofEntries(
+                entry("aws",
+                        certList(certEntry(VERSION_1, CLOUD_PROVIDER_IDENTIFIER_2, CERT_PEM_2), certEntry(VERSION_2, CLOUD_PROVIDER_IDENTIFIER_3, CERT_PEM_3))),
+                entry("aws." + REGION_1,
+                        certList(certEntry(VERSION_0, CLOUD_PROVIDER_IDENTIFIER_1, CERT_PEM_1)))
+        );
         initCerts(certs);
 
-        SslCertificateEntry result = underTest.getCertByPlatformAndCloudProviderIdentifier(cloudPlatform, cloudProviderIdentifier);
+        SslCertificateEntry result = underTest.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(cloudPlatform, region, cloudProviderIdentifier);
         if (certFoundExpected) {
             assertThat(result).isNotNull();
             assertThat(result.getCloudProviderIdentifier()).isEqualTo(cloudProviderIdentifier);
