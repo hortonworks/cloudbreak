@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilit
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
-import static java.util.stream.Collectors.toList;
 
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -24,6 +23,8 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
+import com.sequenceiq.cloudbreak.converter.CloudInstanceIdToInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.StackToCloudStackConverter;
 import com.sequenceiq.cloudbreak.core.flow2.AbstractStackAction;
@@ -42,11 +44,9 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesResult;
 import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -66,6 +66,9 @@ public class StopStartDownscaleActions {
 
     @Inject
     private InstanceMetaDataToCloudInstanceConverter instanceMetaDataToCloudInstanceConverter;
+
+    @Inject
+    private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
 
     // TODO CB-14929: Figure out the transitions that need to be made / DB persistence of various states after each action.
 
@@ -153,13 +156,8 @@ public class StopStartDownscaleActions {
                 Set<String> cloudInstanceIds = cloudVmInstanceStatusList.stream().map(
                         x -> x.getCloudInstance().getInstanceId()).collect(Collectors.toUnmodifiableSet());
 
-                // TODO CB-14929: Move this into a utility function. | Translation because 'stack' handlers, when living in
-                //  'cloud-reactor' don't have access to InstanceMetadata.
-                List<InstanceMetaData> instanceMetaDatas = context.getStack().getInstanceGroups()
-                        .stream().filter(ig -> ig.getGroupName().equals(context.getHostGroupName()))
-                        .flatMap(instanceGroup -> instanceGroup.getInstanceMetaDataSet().stream())
-                        .filter(im -> im.getInstanceId() == null ? false : cloudInstanceIds.contains(im.getInstanceId()))
-                        .collect(toList());
+                List<InstanceMetaData> instanceMetaDatas = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedInstances(
+                        context.getStack(), context.getHostGroupName(), cloudInstanceIds);
 
                 clusterDownscaleFlowService.clusterDownscaleFinished(context.getStack().getId(), context.getHostGroupName(), new HashSet<>(instanceMetaDatas));
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
