@@ -1,11 +1,9 @@
 package com.sequenceiq.freeipa.flow.chain;
 
-import static com.sequenceiq.freeipa.flow.freeipa.backup.full.FullBackupEvent.FULL_BACKUP_EVENT;
 import static com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents.IMAGE_CHANGE_EVENT;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -17,7 +15,6 @@ import com.google.common.collect.Lists;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.core.chain.FlowEventChainFactory;
 import com.sequenceiq.flow.core.chain.config.FlowTriggerEventQueue;
-import com.sequenceiq.freeipa.flow.freeipa.backup.full.event.TriggerFullBackupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.event.DownscaleEvent;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
@@ -48,7 +45,6 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new SaltUpdateTriggerEvent(SaltUpdateEvent.SALT_UPDATE_EVENT.event(), event.getResourceId(), event.accepted(), true, false)
                 .withOperationId(event.getOperationId()));
-        createBackupTriggerEvent(event).ifPresent(flowEventChain::add);
         flowEventChain.add(new ImageChangeEvent(IMAGE_CHANGE_EVENT.event(), event.getResourceId(), event.getImageSettingsRequest())
                 .withOperationId(event.getOperationId()));
 
@@ -88,16 +84,6 @@ public class UpgradeFlowEventChainFactory implements FlowEventChainFactory<Upgra
                     event.getResourceId(), Lists.newArrayList(instanceId), instanceCountForDownscale, false, true, false, event.getOperationId()));
         }
         return events;
-    }
-
-    private Optional<TriggerFullBackupEvent> createBackupTriggerEvent(UpgradeEvent event) {
-        if (event.isBackupSet()) {
-            LOGGER.info("Backup is set, adding full backup to upgrade flow chain");
-            return Optional.of(new TriggerFullBackupEvent(FULL_BACKUP_EVENT.event(), event.getResourceId(), event.getOperationId(), true, false));
-        } else {
-            LOGGER.info("Backup is not set for FreeIPA. No backup will be performed before upgrade.");
-            return Optional.empty();
-        }
     }
 
     @Override
