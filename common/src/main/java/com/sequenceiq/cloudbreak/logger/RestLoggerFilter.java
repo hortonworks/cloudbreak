@@ -65,7 +65,7 @@ public class RestLoggerFilter extends OncePerRequestFilter {
     }
 
     private boolean excludePathPattern(String requestPath) {
-        if (requestPath.contains("/metrics") || requestPath.contains("/autoscale")) {
+        if (requestPath.contains("/credential") || requestPath.contains("/metrics") || requestPath.contains("/autoscale")) {
             return true;
         }
         return false;

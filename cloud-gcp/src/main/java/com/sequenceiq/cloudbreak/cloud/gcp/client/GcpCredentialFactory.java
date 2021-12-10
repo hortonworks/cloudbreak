@@ -90,7 +90,7 @@ public class GcpCredentialFactory {
                 credential.putParameter(PRIVATE_KEY, "");
             }
         } catch (IOException iox) {
-            throw new CredentialVerificationException("Invalid credential json!", iox);
+            throw new CredentialVerificationException("Invalid credential json!");
         }
     }
 
