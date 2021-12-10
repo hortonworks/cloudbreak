@@ -100,7 +100,12 @@ public class GcpDiskResourceBuilder extends AbstractGcpComputeBuilder {
         String resourceName = resource.getName();
         VolumeSetAttributes volumeSetAttributes = resource.getParameter(CloudResource.ATTRIBUTES, VolumeSetAttributes.class);
 
-        String zone = volumeSetAttributes.getAvailabilityZone();
+        String zone;
+        if (volumeSetAttributes != null && volumeSetAttributes.getAvailabilityZone() != null) {
+            zone = volumeSetAttributes.getAvailabilityZone();
+        } else {
+            zone = context.getLocation().getAvailabilityZone().value();
+        }
         try {
             LOGGER.info("Creating operation to delete disk [name: {}] in project [id: {}] in the following availability zone: {}", resourceName,
                     context.getProjectId(), zone);
