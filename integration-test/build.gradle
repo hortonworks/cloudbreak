@@ -161,19 +161,19 @@ dependencies {
 
   implementation(group: 'com.nimbusds', name: 'oauth2-oidc-sdk') {
     version {
-      strictly '6.5'
+      strictly oauth2OidcSdkVersion
     }
     because 'java.lang.NoClassDefFoundError: com/nimbusds/oauth2/sdk/http/CommonContentTypes caused by multiple oauth2-oidc-sdk versions on classpath.'
   }
   implementation(group: 'net.minidev', name: 'json-smart') {
     version {
-      strictly '2.4.5'
+      strictly jsonSmartVersion
     }
     because 'CVE-2021-31684'
   }
   implementation(group: 'net.minidev', name: 'accessors-smart') {
     version {
-      strictly '2.4.7'
+      strictly accessorSmartVersion
     }
     because 'because there is no jar for 2.4.3 in maven central repo...'
   }

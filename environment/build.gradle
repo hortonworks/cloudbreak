@@ -106,6 +106,19 @@ dependencies {
     implementation     group: 'net.sourceforge.jregex',    name: 'jregex',                                   version: '1.2_01'
     implementation     group: 'com.fasterxml.jackson.core',name: 'jackson-databind',                         version: jacksonVersion
 
+    implementation(group: 'net.minidev', name: 'json-smart') {
+      version {
+        strictly jsonSmartVersion
+      }
+      because 'CVE-2021-31684'
+    }
+    implementation(group: 'net.minidev', name: 'accessors-smart') {
+      version {
+        strictly accessorSmartVersion
+      }
+      because 'because there is no jar for 2.4.3 in maven central repo...'
+    }
+
     testImplementation project(path: ':authorization-common', configuration: 'tests')
     testImplementation project(path: ':common', configuration: 'tests')
     testImplementation project(path: ':flow', configuration: 'tests')
