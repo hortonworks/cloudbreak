@@ -88,6 +88,19 @@ dependencies {
   // mockito juniper depends on ByteBuddy 1.9.7, but hibernate use older version
   implementation group: 'net.bytebuddy', name: 'byte-buddy', version: '1.9.12'
 
+  implementation(group: 'net.minidev', name: 'json-smart') {
+    version {
+      strictly jsonSmartVersion
+    }
+    because 'CVE-2021-31684'
+  }
+  implementation(group: 'net.minidev', name: 'accessors-smart') {
+    version {
+      strictly accessorSmartVersion
+    }
+    because 'because there is no jar for 2.4.3 in maven central repo...'
+  }
+
   constraints {
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'

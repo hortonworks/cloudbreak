@@ -71,6 +71,19 @@ dependencies {
   implementation     group: 'io.projectreactor',         name: 'reactor-bus',                          version: eventBusVersion
   implementation     group: 'io.projectreactor',         name: 'reactor-stream',                       version: eventBusVersion
 
+  implementation(group: 'net.minidev', name: 'json-smart') {
+    version {
+      strictly jsonSmartVersion
+    }
+    because 'CVE-2021-31684'
+  }
+  implementation(group: 'net.minidev', name: 'accessors-smart') {
+    version {
+      strictly accessorSmartVersion
+    }
+    because 'because there is no jar for 2.4.3 in maven central repo...'
+  }
+
   runtimeOnly            group: 'com.sun.xml.bind',          name: 'jaxb-impl'
   runtimeOnly            group: 'org.glassfish.jaxb',        name: 'jaxb-runtime'
 
@@ -83,7 +96,7 @@ dependencies {
   testImplementation project(path: ':flow', configuration: 'tests')
 
   constraints {
-    implementation            group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
+    implementation     group: 'org.yaml',                  name: 'snakeyaml',                      version: '1.23'
     implementation     group: 'com.google.guava',          name: 'guava',                          version: guavaVersion
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
