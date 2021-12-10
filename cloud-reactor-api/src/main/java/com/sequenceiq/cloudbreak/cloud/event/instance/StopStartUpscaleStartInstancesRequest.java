@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cloud.event.instance;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.resource.CloudStackRequest;
@@ -10,22 +12,41 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
 public class StopStartUpscaleStartInstancesRequest<T> extends CloudStackRequest<T> {
 
-    // TODO CB-14929: The CB state of STOPPED instances may not be up-to-date. It may be better to send a list of all isntances,
-    //  and have the handler determine the instance state from the cloud-provider - at least as a fallback mechanism.
-    //  This would require sending 1) The stopped instances to the handler, and 2) a list of all-instances to the handler.
+    private final String hostGroupName;
+
     private final List<CloudInstance> stoppedCloudInstancesInHg;
+
+    private final List<CloudInstance> allInstancesInHg;
+
+    private final List<CloudInstance> startedInstancesWithServicesNotRunning;
 
     private final int numInstancesToStart;
 
     public StopStartUpscaleStartInstancesRequest(CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
-            List<CloudInstance> stoppedCloudInstancesInHg, int numInstancesToStart) {
+            String hostGroupName, List<CloudInstance> stoppedCloudInstancesInHg, List<CloudInstance> allInstancesInHg,
+            List<CloudInstance> startedInstancesWithServicesNotRunning, int numInstancesToStart) {
         super(cloudContext, cloudCredential, cloudStack);
+        this.hostGroupName = hostGroupName;
         this.stoppedCloudInstancesInHg = stoppedCloudInstancesInHg;
+        this.allInstancesInHg = allInstancesInHg;
+        this.startedInstancesWithServicesNotRunning = Optional.ofNullable(startedInstancesWithServicesNotRunning).orElse(Collections.emptyList());
         this.numInstancesToStart = numInstancesToStart;
+    }
+
+    public String getHostGroupName() {
+        return hostGroupName;
     }
 
     public List<CloudInstance> getStoppedCloudInstancesInHg() {
         return stoppedCloudInstancesInHg;
+    }
+
+    public List<CloudInstance> getAllInstancesInHg() {
+        return allInstancesInHg;
+    }
+
+    public List<CloudInstance> getStartedInstancesWithServicesNotRunning() {
+        return startedInstancesWithServicesNotRunning;
     }
 
     public int getNumInstancesToStart() {
@@ -35,7 +56,10 @@ public class StopStartUpscaleStartInstancesRequest<T> extends CloudStackRequest<
     @Override
     public String toString() {
         return "StopStartUpscaleStartInstancesRequest{" +
-                "stoppedCloudInstancesInHg=" + stoppedCloudInstancesInHg +
+                "hostGroupName=" + hostGroupName +
+                "stoppedCloudInstancesInHgCount=" + stoppedCloudInstancesInHg.size() +
+                "allInstancesInHgCount=" + allInstancesInHg.size() +
+                "startedInstancesWithServicesNotRunningCount=" + startedInstancesWithServicesNotRunning.size() +
                 ", numInstancesToStart=" + numInstancesToStart +
                 '}';
     }

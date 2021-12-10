@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.dyngr.Polling;
+import com.dyngr.Polling.PollingOptions;
 import com.dyngr.core.AttemptResult;
 import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
@@ -37,12 +38,22 @@ public class PollerUtil {
 
     public List<CloudVmInstanceStatus> waitFor(AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
             Set<InstanceStatus> completedStatuses, String waitStatus) {
+        PollingOptions pollingOptions = constructDefaultPollingOptions();
+        return waitForInternal(pollingOptions, authenticatedContext, instances, completedStatuses, waitStatus);
+    }
+
+    public List<CloudVmInstanceStatus> timeBoundWaitFor(long timeBoundInMs, AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
+            Set<InstanceStatus> completedStatuses, String waitStatus) {
+        PollingOptions pollingOptions = constructTimeBoundPollingOptions(timeBoundInMs);
+        return waitForInternal(pollingOptions, authenticatedContext, instances, completedStatuses, waitStatus);
+    }
+
+    private List<CloudVmInstanceStatus> waitForInternal(PollingOptions pollingOptions,
+            AuthenticatedContext authenticatedContext, List<CloudInstance> instances,
+            Set<InstanceStatus> completedStatuses, String waitStatus) {
         long start = System.currentTimeMillis();
         try {
-            return Polling.stopAfterAttempt(pollingAttempt)
-                    .waitPeriodly(pollingInterval, TimeUnit.SECONDS)
-                    .stopIfException(true)
-                    .run(process(authenticatedContext, instances, completedStatuses));
+            return pollingOptions.run(process(authenticatedContext, instances, completedStatuses));
         } catch (PollerStoppedException e) {
             List<CloudVmInstanceStatus> currentInstances = awsInstanceConnector.check(authenticatedContext, instances);
             long duration = System.currentTimeMillis() - start;
@@ -55,6 +66,18 @@ public class PollerUtil {
             LOGGER.error("{} operation cannot be finished on {}. Duration: {}", getOperation(waitStatus), currentInstances, duration, e);
             throw e;
         }
+    }
+
+    private PollingOptions constructDefaultPollingOptions() {
+        return Polling.stopAfterAttempt(pollingAttempt)
+                .waitPeriodly(pollingInterval, TimeUnit.SECONDS)
+                .stopIfException(true);
+    }
+
+    private PollingOptions constructTimeBoundPollingOptions(long timeBoundInMs) {
+        return Polling.stopAfterDelay(timeBoundInMs, TimeUnit.MILLISECONDS)
+                .waitPeriodly(pollingInterval, TimeUnit.SECONDS)
+                .stopIfException(true);
     }
 
     private String getOperation(String waitStatus) {

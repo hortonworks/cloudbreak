@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cloud.aws.common;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -35,9 +36,9 @@ import com.amazonaws.services.ec2.model.StopInstancesRequest;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.InstanceConnector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.client.AmazonEc2Client;
+import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsInstanceStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AuthenticatedContextView;
-import com.sequenceiq.cloudbreak.cloud.aws.common.poller.PollerUtil;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudOperationNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -90,6 +91,27 @@ public class AwsInstanceConnector implements InstanceConnector {
 
     @Retryable(
             value = SdkClientException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000)
+    )
+    @Override
+    public List<CloudVmInstanceStatus> startWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
+            Long timeboundInMs) {
+        // The following states will never transition over to "Running"/STARTED - so it is safe to ignore instances in this state.
+        Set<InstanceStatus> completedStatuses = EnumSet.of(
+                InstanceStatus.FAILED,
+                InstanceStatus.TERMINATED,
+                InstanceStatus.TERMINATED_BY_PROVIDER,
+                InstanceStatus.DELETE_REQUESTED,
+                AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Running"));
+        return setCloudVmInstanceStatuses(ac, vms, "Running",
+                (ec2Client, instances) -> ec2Client.startInstances(new StartInstancesRequest().withInstanceIds(instances)),
+                completedStatuses,
+                "Failed to send start request to AWS: ", timeboundInMs);
+    }
+
+    @Retryable(
+            value = SdkClientException.class,
             maxAttemptsExpression = "#{${cb.vm.retry.attempt:15}}",
             backoff = @Backoff(delayExpression = "#{${cb.vm.retry.backoff.delay:1000}}",
                     multiplierExpression = "#{${cb.vm.retry.backoff.multiplier:2}}",
@@ -103,7 +125,8 @@ public class AwsInstanceConnector implements InstanceConnector {
     }
 
     private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
-            BiConsumer<AmazonEc2Client, Collection<String>> consumer, String exceptionText) {
+            BiConsumer<AmazonEc2Client, Collection<String>> consumer, Set<InstanceStatus> completedStatuses, String exceptionText,
+            Long timeboundInMs) {
         AmazonEc2Client amazonEC2Client = new AuthenticatedContextView(ac).getAmazonEC2Client();
         try {
             Collection<String> instances = instanceIdsWhichAreNotInCorrectState(vms, amazonEC2Client, status);
@@ -116,7 +139,17 @@ public class AwsInstanceConnector implements InstanceConnector {
             LOGGER.warn(exceptionText, e);
             throw e;
         }
-        return pollerUtil.waitFor(ac, vms, Sets.newHashSet(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED), status);
+        if (timeboundInMs != null) {
+            return pollerUtil.timeBoundWaitFor(timeboundInMs, ac, vms, completedStatuses, status);
+        } else {
+            return pollerUtil.waitFor(ac, vms, completedStatuses, status);
+        }
+    }
+
+    private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
+            BiConsumer<AmazonEc2Client, Collection<String>> consumer, String exceptionText) {
+        return setCloudVmInstanceStatuses(ac, vms, status, consumer,
+                Sets.newHashSet(AwsInstanceStatusMapper.getInstanceStatusByAwsStatus(status), InstanceStatus.FAILED), exceptionText, null);
     }
 
     @Retryable(
@@ -219,6 +252,11 @@ public class AwsInstanceConnector implements InstanceConnector {
     )
     @Override
     public List<CloudVmInstanceStatus> check(AuthenticatedContext ac, List<CloudInstance> vms) {
+        return checkWithoutRetry(ac, vms);
+    }
+
+    @Override
+    public List<CloudVmInstanceStatus> checkWithoutRetry(AuthenticatedContext ac, List<CloudInstance> vms) {
         LOGGER.debug("Check instances on aws side: {}", vms);
         List<CloudInstance> cloudInstancesWithInstanceId = vms.stream()
                 .filter(cloudInstance -> cloudInstance.getInstanceId() != null)

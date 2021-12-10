@@ -52,6 +52,13 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
             List<CloudVmInstanceStatus> cloudVmInstanceStatusList = Collections.emptyList();
             if (cloudInstancesToStop.size() > 0) {
                 LOGGER.info("ZZZ: Attempting to stop instances");
+                // TODO CB-14929: Error handlnig. Currently - an error from the following command (e.g. NPE)
+                //  results in no WARNINGS on the console. The stop is just ignored, and the cluster goes into a
+                //  RUNNING state, with the nodes in a DECOMMISSIONED state. The error handling needs to make sure
+                //  that the system goes into a failed state, and there is at least some logging on the console
+                //  to indicate what happened.
+                // TODO CB-14929: Also, after re-provisioning nodes via CM, the CB UI does not seem to be refreshing the node
+                //  status to RUNNING, and instead the nodes stay in a STUCK state. Is the CM sync task not taking care of this?
                 cloudVmInstanceStatusList = connector.instances().stop(ac, null, cloudInstancesToStop);
                 LOGGER.info("ZZZ: CloudVMInstanceStatusesPostStop={}", cloudVmInstanceStatusList);
             } else {

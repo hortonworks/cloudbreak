@@ -2,6 +2,8 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -12,11 +14,12 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
+import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
-import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;
@@ -25,6 +28,8 @@ import reactor.bus.EventBus;
 public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEventHandler<StopStartUpscaleStartInstancesRequest> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStartUpscaleStartInstancesHandler.class);
+
+    private static final Long START_POLL_TIMEBOUND_MS = 180_000L;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
@@ -42,57 +47,129 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
         StopStartUpscaleStartInstancesRequest request = event.getData();
         LOGGER.info("StopStartUpscaleStartInstancesHandler: {}", event.getData().getResourceId());
 
+        int numInstancesToStart = request.getNumInstancesToStart() - request.getStartedInstancesWithServicesNotRunning().size();
+        if (numInstancesToStart <= 0) {
+            // TODO CB-15132: This is currently not exercised, since the Flow itself does not send any good information about running instances.
+            LOGGER.debug("No nodes to start. Start requested for numInstances={}, Running CM instances with services not running={}",
+                    request.getNumInstancesToStart(), request.getStartedInstancesWithServicesNotRunning().size());
+            List<CloudInstance> startedInstancesWithServicesNotRunning = request.getStartedInstancesWithServicesNotRunning();
+            List<CloudVmInstanceStatus> vmInstanceStatuses = startedInstancesWithServicesNotRunning.stream()
+                    .map(i -> new CloudVmInstanceStatus(i, InstanceStatus.STARTED)).collect(Collectors.toUnmodifiableList());
+            StopStartUpscaleStartInstancesResult result = new StopStartUpscaleStartInstancesResult(
+                    request.getResourceId(), request, vmInstanceStatuses);
+            notify(result, event);
+            return;
+        }
+
         CloudContext cloudContext = request.getCloudContext();
         try {
             CloudConnector<?> connector = cloudPlatformConnectors.get(cloudContext.getPlatformVariant());
             AuthenticatedContext ac = getAuthenticatedContext(request, cloudContext, connector);
 
-            List<CloudInstance> stoppedInstancesInHg = request.getStoppedCloudInstancesInHg();
-            int numInstancesToStart = request.getNumInstancesToStart() < stoppedInstancesInHg.size() ?
-                    request.getNumInstancesToStart() : stoppedInstancesInHg.size();
-            LOGGER.info("ZZZ: Requested instances to start: {}, actual instances being started: {}", request.getNumInstancesToStart(), numInstancesToStart);
+            List<CloudInstance> stoppedInstancesInCbHg = request.getStoppedCloudInstancesInHg();
+            List<CloudVmInstanceStatus> stoppedInstancesOnCloudProvider = Collections.emptyList();
 
-            // TODO CB-14929: This should ideally be randomized a bit, so that different isntances are started/stopped each time. That said, there is value in
-            //  a reliable pattern. i.e. something along the lines of sort by hostname within this list.
+            List<CloudInstance> instancesToStart = Collections.emptyList();
 
-            List<CloudInstance> instancesToStart = request.getStoppedCloudInstancesInHg().subList(0, numInstancesToStart);
-            // TODO CB-14929: Additional validation here to check if these instances are actually in STOPPED state
-            //  (as against the current list which is an indication of what the Cloudbreak Database thinks are STOPPED instances)
-
-            LOGGER.info("ZZZ: Instance identified as start candidates: count={}, instances={}", instancesToStart.size(), instancesToStart);
-            if (instancesToStart.size() < request.getNumInstancesToStart()) {
-                LOGGER.info("ZZZ: There are fewer instances available to start as compared to the request. Requested: {}, Available: {}",
-                        request.getNumInstancesToStart(), instancesToStart.size());
+            if (numInstancesToStart > stoppedInstancesInCbHg.size()) {
+                // See if we can find additional instances on the cloud-provider which can potentially be STARTED.
+                stoppedInstancesOnCloudProvider = collectStoppedInstancesFromCloudProvider(connector, ac, request.getAllInstancesInHg());
+                instancesToStart = getInstancesToStart(stoppedInstancesInCbHg, stoppedInstancesOnCloudProvider, request.getHostGroupName(), numInstancesToStart);
+            } else {
+                // TODO CB-15132: Potentially validate against the cloud-provider to make sure these instances are actually in STOPPED state.
+                // Try starting the required instances based on CB state.
+                instancesToStart = stoppedInstancesInCbHg.subList(0, numInstancesToStart);
+                // TODO CB-15132: If there's a failure on this particular operation - go back to the cloud provider to try finding additional STOPPED instances,
+                // and try STARTING these as well.
             }
+            LOGGER.info("Requested instances to start={}, actual instances being started={}, numInstancesWithServicesNotRunning={}",
+                    request.getNumInstancesToStart(), instancesToStart.size(), request.getStartedInstancesWithServicesNotRunning().size());
+
+            LOGGER.debug("Attempting to start instances. count={}, instanceIds={}",
+                    instancesToStart.size(), instancesToStart.stream().map(i -> i.getInstanceId()).collect(Collectors.toList()));
 
             List<CloudVmInstanceStatus> instanceStatuses = Collections.emptyList();
+
             if (instancesToStart.size() > 0) {
-                LOGGER.info("ZZZ: Attempting to start instances");
-                instanceStatuses = connector.instances().start(ac, null, instancesToStart);
-                LOGGER.info("ZZZ: Instance start attempt complete");
+                instanceStatuses = startInstances(connector, ac, instancesToStart);
+                LOGGER.info("Started instances. Result: {}", instanceStatuses);
             } else {
-                LOGGER.info("ZZZ: Did not find any instances to start");
+                LOGGER.info("No instances to start");
             }
 
-            // TODO CB-14929: If we are not able to start adequate resources, consider going to the cloud-provider to check instance state,
-            //  in case CB DB entries are out of sync.
-            // TODO CB-14929: Timebound this operation to X minutes. Start whatever is possible within this duration.
-            // TODO CB-14929: start API call in the library may need to be modified to handle errors differently, given the time duration check we want.
-            // TODO CB-14929: Optionally factor in nodes which are running but have CM services in STOPPED/DECOMMISSIONED state
-            // TODO CB-14929: Error Handling: If instances fail to START - do we need to actively try STOPPING them?
-            //  In case of failure, make sure the list is propagated up for activity/needs-attention.
+            StopStartUpscaleStartInstancesResult result = new StopStartUpscaleStartInstancesResult(request.getResourceId(), request, instanceStatuses);
 
-            // TODO CB-14929: Tempoarilty assuming that all isntances started successfully.
-            //  Not bothering to map back from the results vs the originally computed list.
-            //  so instancesToStart is the metaData that can be sent to the next stage.
-            //  Normally, this would need to be filtered and re-built for the next step.
-            StopStartUpscaleStartInstancesResult result = new StopStartUpscaleStartInstancesResult(request.getResourceId(), instanceStatuses);
-
-            eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+            notify(result, event);
         } catch (Exception e) {
             // TODO CB-14929: Handle exceptions in a useful way. Ideally need to leave the cluster in a usable state after failure of the flow.
+            //  What happens in this scenario? e.g. if the AWS lookup throws a RuntimeException - how should this be handled?
+            //  More specifically - how should this be handled for Exceptions which we don't otherwise explicitly take care of?
+            //  Also, the error handling needs to be more granular. e.g. looking up instances initially to find STOPPED instances is not a fatal error,
+            //  however - starting instances failing is likely a fatal error
             throw e;
         }
+    }
+
+    private List<CloudVmInstanceStatus> startInstances(
+            CloudConnector<?> connector, AuthenticatedContext ac, List<CloudInstance> instancesToStart) {
+        // Note: This timebound can apply thrice along with some delays, given how retries on this API are currently configured for AWS.
+        //  The rest of the cloud providers is an UNKNOWN.
+        return connector.instances().startWithLimitedRetry(ac, null, instancesToStart, START_POLL_TIMEBOUND_MS);
+    }
+
+    private List<CloudVmInstanceStatus> collectStoppedInstancesFromCloudProvider(
+            CloudConnector<?> connector, AuthenticatedContext ac, List<CloudInstance> cloudInstances) {
+        try {
+            List<CloudVmInstanceStatus> vmInstanceStatusAllInstances = connector.instances().checkWithoutRetry(ac, cloudInstances);
+            return vmInstanceStatusAllInstances.stream().filter(vm -> vm.getStatus() == InstanceStatus.STOPPED).collect(Collectors.toList());
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private List<CloudInstance> getInstancesToStart(List<CloudInstance> stoppedInstancesInCb,
+            List<CloudVmInstanceStatus> stoppedInstancesOnCloudProvider, String hostGroupName, int numInstancesToStart) {
+        // Instances considered to be STOPPED on the cloud-provider get precendece,
+        // unless there was an error retrieving instance metadata from the cloud provider - in which case
+        // we fail the flow. The assumption is that the next attempt will try the same again,
+        // and should succeed.
+        if (stoppedInstancesInCb.size() != stoppedInstancesOnCloudProvider.size()) {
+            logInfoAboutCbCloudProviderStoppedInstanceDiscrepency(stoppedInstancesInCb, stoppedInstancesOnCloudProvider, hostGroupName);
+        }
+        return stoppedInstancesOnCloudProvider.stream().limit(numInstancesToStart).map(vmi -> vmi.getCloudInstance()).collect(Collectors.toList());
+    }
+
+    private void logInfoAboutCbCloudProviderStoppedInstanceDiscrepency(List<CloudInstance> stoppedInstancesInCb,
+            List<CloudVmInstanceStatus> stoppedInstancesOnCloudProvider, String hostGroupName) {
+        Set<String> stoppedInstancesInCbSet = stoppedInstancesInCb.stream().map(i -> i.getInstanceId()).collect(Collectors.toUnmodifiableSet());
+        Set<String> stoppedInstancesOnCloudProviderSet = stoppedInstancesOnCloudProvider.stream()
+                .map(i -> i.getCloudInstance().getInstanceId()).collect(Collectors.toUnmodifiableSet());
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.format("For hostGroup: %s, NumberOfStoppedInstancesKnownToCB: %d, numberOfStoppedInstancesOnCloudProvider: %d.",
+                hostGroupName, stoppedInstancesInCb.size(), stoppedInstancesOnCloudProvider.size()));
+        List<String> missingStoppedInstancesCb = stoppedInstancesOnCloudProvider.stream()
+                .filter(vmi -> !stoppedInstancesInCbSet.contains(vmi.getCloudInstance().getInstanceId()))
+                .map(vmi -> vmi.getCloudInstance().getInstanceId())
+                .collect(Collectors.toList());
+        List<String> missingStoppedInstancesCloudProvider = stoppedInstancesInCb.stream()
+                .filter(i -> !stoppedInstancesOnCloudProviderSet.contains(i.getInstanceId()))
+                .map(i -> i.getInstanceId())
+                .collect(Collectors.toList());
+
+
+        if (!missingStoppedInstancesCb.isEmpty()) {
+            sb.append(String.format(" Found instances stopped on cloud provider but not in CB. count=%d, instances=[%s].",
+                    missingStoppedInstancesCb.size(), missingStoppedInstancesCb));
+        }
+        if (!missingStoppedInstancesCloudProvider.isEmpty()) {
+            sb.append(String.format(" Found instances stopped in CB but not in stopped state on cloud provider. count=%d, instances=[%s].",
+                    missingStoppedInstancesCloudProvider.size(), missingStoppedInstancesCloudProvider));
+        }
+        LOGGER.info(sb.toString());
+    }
+
+    protected void notify(StopStartUpscaleStartInstancesResult result, Event<StopStartUpscaleStartInstancesRequest> event) {
+        eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
     private AuthenticatedContext getAuthenticatedContext(StopStartUpscaleStartInstancesRequest<StopStartUpscaleStartInstancesResult> request,
