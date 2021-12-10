@@ -201,7 +201,7 @@ class StackCommonServiceTest {
 
         underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true);
 
-        verify(stackOperationService).removeInstances(stack, nodes, true, null);
+        verify(stackOperationService).removeInstances(stack, nodes, true);
     }
 
     @Test

@@ -250,4 +250,11 @@ public class UpdateNodeCountValidator {
         downscaleValidatorService.checkClusterInValidStatus(stack);
         return metaData;
     }
+
+    public InstanceMetaData validateInstanceForStop(String instanceId, Stack stack) {
+        InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId).orElse(null);
+        downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
+        downscaleValidatorService.checkClusterInValidStatus(stack);
+        return metaData;
+    }
 }

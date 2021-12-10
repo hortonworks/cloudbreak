@@ -217,7 +217,10 @@ public class StackCommonService {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
         validateStackIsNotDataLake(stack.get(), instanceIds);
-        return stackOperationService.removeInstances(stack.get(), instanceIds, forced, scalingStrategy);
+        if (scalingStrategy != null) {
+            return stackOperationService.stopInstances(stack.get(), instanceIds, forced);
+        }
+        return stackOperationService.removeInstances(stack.get(), instanceIds, forced);
     }
 
     public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {

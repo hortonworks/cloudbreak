@@ -315,17 +315,22 @@ public class StackOperationServiceTest {
 
         // Verify non stop-start invocation
         capturedInstances = ArgumentCaptor.forClass(Map.class);
-        underTest.removeInstances(stack, instanceIds, false, null);
+        underTest.removeInstances(stack, instanceIds, false);
         verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
         assertEquals(1, captured.size());
         assertEquals("group1", captured.keySet().iterator().next());
         assertEquals(3, captured.entrySet().iterator().next().getValue().size());
 
+        // This ends up skipping the actual validation that is run here.
+        when(updateNodeCountValidator.validateInstanceForStop(im1.getInstanceId(), stack)).thenReturn(im1);
+        when(updateNodeCountValidator.validateInstanceForStop(im2.getInstanceId(), stack)).thenReturn(im2);
+        when(updateNodeCountValidator.validateInstanceForStop(im3.getInstanceId(), stack)).thenReturn(im3);
+
         // Verify stop-start invocation
         reset(flowManager);
         capturedInstances = ArgumentCaptor.forClass(Map.class);
-        underTest.removeInstances(stack, instanceIds, false, ScalingStrategy.STOPSTART);
+        underTest.stopInstances(stack, instanceIds, false);
         verify(flowManager).triggerStopStartStackDownscale(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
         assertEquals(1, captured.size());
@@ -333,23 +338,22 @@ public class StackOperationServiceTest {
         assertEquals(3, captured.entrySet().iterator().next().getValue().size());
 
 
-        // No requestIds sent - BadRequest (regular and stopstart)
+        // No requestIds sent - BadRequest stopstart
         assertThrows(BadRequestException.class,
-                () -> underTest.removeInstances(stack, null, false, null));
-        assertThrows(BadRequestException.class,
-                () -> underTest.removeInstances(stack, null, false, ScalingStrategy.STOPSTART));
+                () -> underTest.stopInstances(stack, null, false));
 
         // stopstart supports a single hostGroup only
         reset(flowManager);
         InstanceMetaData im4 = createInstanceMetadataForTest(4L, "group2");
-        when(updateNodeCountValidator.validateInstanceForDownscale(im4.getInstanceId(), stack)).thenReturn(im4);
+        when(updateNodeCountValidator.validateInstanceForStop(im4.getInstanceId(), stack)).thenReturn(im4);
         instanceIds.add("i4");
         assertThrows(BadRequestException.class,
-                () -> underTest.removeInstances(stack, instanceIds, false, ScalingStrategy.STOPSTART));
+                () -> underTest.stopInstances(stack, instanceIds, false));
 
         // regular scaling supports multiple hostgroups
         reset(flowManager);
-        underTest.removeInstances(stack, instanceIds, false, null);
+        when(updateNodeCountValidator.validateInstanceForDownscale(im4.getInstanceId(), stack)).thenReturn(im4);
+        underTest.removeInstances(stack, instanceIds, false);
         verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
         assertEquals(2, captured.size());

@@ -113,54 +113,57 @@ public class StackOperationService {
         return flowManager.triggerStackRemoveInstance(stack.getId(), instanceGroupName, metaData.getPrivateId(), forced);
     }
 
-    public FlowIdentifier removeInstances(Stack stack, Collection<String> instanceIds, boolean forced, ScalingStrategy scalingStrategy) {
-        LOGGER.info("Received removeInstances request with scaling strategy for instanceIds: {}, [{}]", scalingStrategy, instanceIds);
-
-        // TODO CB-14929: How is a null instanceId set / an empty-instanceid set handled by the downstream handlers
-        if (instanceIds == null) {
-            throw new BadRequestException("Downscale request cannot process a 'null' instanceIds collection");
+    public FlowIdentifier removeInstances(Stack stack, Collection<String> instanceIds, boolean forced) {
+        Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
+        for (String instanceId : instanceIds) {
+            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
+            instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
         }
-
-        try {
-            return transactionService.required(() -> {
-                Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
-                for (String instanceId : instanceIds) {
-                    // TODO CB-14929: CB-15154 An invalid instanceId should not necessarily fail a downscale-stop operation?
-                    InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
-                    instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
-                }
-                updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
-                        .stream()
-                        .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
-                LOGGER.info("ZZZ: removeInstances: instanceIds/hostnames received: {}", instanceIds);
-                LOGGER.info("ZZZ: removeInstances: computedInstanceIds: {}", instanceIdsByHostgroupMap);
-                // TODO CB-14929: Validations for start-stop
-                if (!forced) {
-                    for (Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
-                        String instanceGroupName = entry.getKey();
-                        int scalingAdjustment = entry.getValue().size() * -1;
-                        updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
-                        updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
-                    }
-                }
-                if (scalingStrategy != null) {
-                    // TODO: CB-14929: CB-15154 stopstart can only support a single hostGroup being specified.
-                    if (instanceIdsByHostgroupMap.size() > 1) {
-                        throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
-                    }
-                    stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_BY_STOP_REQUESTED,
-                            "Requested node count for downscaling (stopstart): " + instanceIds.size());
-                    return flowManager.triggerStopStartStackDownscale(stack.getId(), instanceIdsByHostgroupMap, forced);
-                } else {
-                    return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
-                }
-            });
-        } catch (TransactionExecutionException e) {
-            if (e.getCause() instanceof BadRequestException) {
-                throw e.getCause();
+        updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+        if (!forced) {
+            for (Map.Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
+                String instanceGroupName = entry.getKey();
+                int scalingAdjustment = entry.getValue().size() * -1;
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
             }
-            throw new TransactionRuntimeExecutionException(e);
         }
+        return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
+    }
+
+    public FlowIdentifier stopInstances(Stack stack, Collection<String> instanceIds, boolean forced) {
+        LOGGER.info("Received stop instances request for instanceIds: [{}]", instanceIds);
+
+        if (instanceIds == null || instanceIds.isEmpty()) {
+            throw new BadRequestException("Stop request cannot process an empty instanceIds collection");
+        }
+        Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
+        for (String instanceId : instanceIds) {
+            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForStop(instanceId, stack);
+            if (metaData != null) {
+                instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
+            }
+        }
+        if (instanceIdsByHostgroupMap.size() > 1) {
+            throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
+        }
+        updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+        LOGGER.info("Stopping the following instances: {}", instanceIdsByHostgroupMap);
+        if (!forced) {
+            for (Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
+                String instanceGroupName = entry.getKey();
+                int scalingAdjustment = entry.getValue().size() * -1;
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+            }
+        }
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_BY_STOP_REQUESTED,
+                "Requested node count for downscaling (stopstart): " + instanceIds.size());
+        return flowManager.triggerStopStartStackDownscale(stack.getId(), instanceIdsByHostgroupMap, forced);
     }
 
     public FlowIdentifier updateImage(ImageChangeDto imageChangeDto) {
