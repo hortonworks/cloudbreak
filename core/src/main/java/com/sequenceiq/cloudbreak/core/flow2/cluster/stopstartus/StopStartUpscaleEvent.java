@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
+import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 

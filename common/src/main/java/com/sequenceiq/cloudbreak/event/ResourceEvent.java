@@ -303,10 +303,15 @@ public enum ResourceEvent {
     // TODO CB-14929: Requests must include instanceCounts (Ideally change this for the current scaling operations as well)
     CLUSTER_SCALING_STOPSTART_UPSCALE_INIT("cluster.scaling.stopstart.upscale.init"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED("cluster.scaling.stopstart.upscale.nodes.started"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_NOT_STARTED("cluster.scaling.stopstart.upscale.nodes.notstarted"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_INADEQUATE_NODES("cluster.scaling.stopstart.upscale.inadequate.nodes"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING("cluster.scaling.stopstart.upscale.commissioning"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING2("cluster.scaling.stopstart.upscale.commissioning2"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_COULDNOTCOMMISSION("cluster.scaling.stopstart.upscale.couldnotcommission"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART("cluster.scaling.stopstart.upscale.waiting.hoststart"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED("cluster.scaling.stopstart.upscale.cmhostsstarted"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED("cluster.scaling.stopstart.upscale.finished"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_FAILED("cluster.scaling.stopstart.upscale.failed"),
 
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT("cluster.scaling.stopstart.downscale.init"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING("cluster.scaling.stopstart.downscale.starting"),

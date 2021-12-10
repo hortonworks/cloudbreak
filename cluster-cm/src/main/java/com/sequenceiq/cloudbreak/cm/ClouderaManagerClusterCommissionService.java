@@ -9,6 +9,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
@@ -23,6 +24,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 
 @Service
+@Scope("prototype")
 public class ClouderaManagerClusterCommissionService implements ClusterCommissionService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterCommissionService.class);
