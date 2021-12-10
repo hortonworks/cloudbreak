@@ -203,7 +203,7 @@ class StackCommonServiceTest {
 
         underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true);
 
-        verify(stackOperationService).removeInstances(stack, nodes, true, null);
+        verify(stackOperationService).removeInstances(stack, nodes, true);
     }
 
     @Test
@@ -237,8 +237,6 @@ class StackCommonServiceTest {
         // Status is set - Bad Request
         updateStackV4Request.setStatus(StatusRequest.FULL_SYNC);
         assertThrows(BadRequestException.class, () -> underTest.putStartInstancesInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request, null));
-
-        // TODO CB-14929: CB-15154 Add validation tests for upscale/downscale limits after the validations are adjusted.
     }
 
     @Test
