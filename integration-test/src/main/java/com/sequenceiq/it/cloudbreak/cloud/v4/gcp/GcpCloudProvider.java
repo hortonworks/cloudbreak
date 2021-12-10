@@ -30,6 +30,8 @@ import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.JsonPar
 import com.sequenceiq.environment.api.v1.credential.model.parameters.gcp.P12Parameters;
 import com.sequenceiq.environment.api.v1.environment.model.EnvironmentNetworkGcpParams;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.GcpNetworkParameters;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkRequest;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
@@ -487,5 +489,25 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getFreeIpaUpgradeImageCatalog() {
         return gcpProperties.getFreeipa().getUpgrade().getCatalog();
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
+        return environmentTestDto.withGcp(GcpEnvironmentParameters.builder()
+                .withResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey(getEncryptionKey(true))
+                        .build())
+                .build());
+    }
+
+    @Override
+    public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
+        return distroXTestDtoBase;
+    }
+
+    public String getEncryptionKey(boolean environmentEncryption) {
+        return environmentEncryption
+                ? gcpProperties.getDiskEncryption().getEnvironmentKey()
+                : gcpProperties.getDiskEncryption().getDatahubKey();
     }
 }

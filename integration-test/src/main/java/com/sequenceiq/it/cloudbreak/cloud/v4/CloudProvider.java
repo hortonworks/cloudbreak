@@ -100,6 +100,10 @@ public interface CloudProvider {
 
     EnvironmentTestDto withResourceGroup(EnvironmentTestDto environmentTestDto, String resourceGroupUsage, String resourceGroupName);
 
+    EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto);
+
+    DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase);
+
     StackTestDtoBase stack(StackTestDtoBase stack);
 
     ClusterTestDto cluster(ClusterTestDto cluster);

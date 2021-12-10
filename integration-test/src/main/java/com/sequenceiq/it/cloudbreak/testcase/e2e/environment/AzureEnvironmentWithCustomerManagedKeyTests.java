@@ -25,11 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 
-public class EnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
-
-    private static final String ENCRYPTION_KEY_URL = "https://cloud-jenkins-secrets.vault.azure.net/keys/key-azure-cmk-e2e/c1a1df3097f441b4a10cfcb7c8a3bcd9";
-
-    private static final String ENCRYPTION_KEY_URL_RESOURCE_GROUP = "cloud-daily";
+public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
 
     private static final String RESOURCE_GROUP_FOR_TEST = "azure-test-des-rg";
 
@@ -56,30 +52,28 @@ public class EnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
         deleteResourceGroupCreatedForEnvironment(RESOURCE_GROUP_FOR_TEST);
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, description = "Creating a resource group for this test case. Disk encryption set(DES)" +
+            " is created in this newly created RG, as cloud-daily RG has locks which prevents cleanup of DES.")
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an Environment with encryption parameters where key and environment are in different Resource groups",
+            when = "create an Environment with disk encryption where key and environment are in same Resource groups",
             then = "should use encryption parameters for resource encryption.")
-    public void testEnvironmentWithRGSpecifiedForEnv(TestContext testContext) {
-        // testEnvironmentWithResourceGroupSpecifiedForEnvironment
-        // Creating a resource group for this test case. Disk encryption set(DES) is created in this newly created RG, as cloud-daily RG
-        // has locks which prevents cleanup of DES.
+    public void testWithEnvironmentResourceGroup(TestContext testContext) {
         createResourceGroupForEnvironment(RESOURCE_GROUP_FOR_TEST);
 
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
+                    .withLogging()
+                    .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                .withName("azure-test-des-1")
-                .withNetwork()
-                .withResourceGroup("SINGLE", RESOURCE_GROUP_FOR_TEST)
-                .withAzureResourceEncryptionParameters(ENCRYPTION_KEY_URL, ENCRYPTION_KEY_URL_RESOURCE_GROUP)
-                .withTelemetry("telemetry")
+                    .withName("azure-test-des-1")
+                    .withNetwork()
+                    .withResourceGroup("SINGLE", RESOURCE_GROUP_FOR_TEST)
+                    .withResourceEncryption()
+                    .withTelemetry("telemetry")
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))
@@ -87,27 +81,26 @@ public class EnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, description = "Environment's Resource Group is not specified, in this case all the resources create their own" +
+            " resource groups.")
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
-            when = "create an Environment with encryption parameters where key and environment are in different Resource groups",
+            when = "create an Environment with disk encryption where key and environment are in different Resource groups",
             then = "should use encryption parameters for resource encryption.")
-    public void testEnvironmentWithRGSpecifiedForKey(TestContext testContext) {
-        // testEnvironmentWithResourceGroupSpecifiedForEncryptionKey
-        // Environment's Resource Group is not specified, in this case all the resources create their own resource groups.
+    public void testWithEncryptionKeyResourceGroup(TestContext testContext) {
         testContext
                 .given(CredentialTestDto.class)
                 .when(credentialTestClient.create())
                 .given("telemetry", TelemetryTestDto.class)
-                .withLogging()
-                .withReportClusterLogs()
+                    .withLogging()
+                    .withReportClusterLogs()
                 .given(EnvironmentTestDto.class)
-                .withName("azure-test-des-2")
-                .withNetwork()
-                .withResourceGroup("USE_MULTIPLE", null)
-                .withAzureResourceEncryptionParameters(ENCRYPTION_KEY_URL, ENCRYPTION_KEY_URL_RESOURCE_GROUP)
-                .withTelemetry("telemetry")
+                    .withName("azure-test-des-2")
+                    .withNetwork()
+                    .withResourceGroup("USE_MULTIPLE", null)
+                    .withResourceEncryption()
+                    .withTelemetry("telemetry")
                 .when(environmentTestClient.create())
                 .await(EnvironmentStatus.AVAILABLE)
                 .then((tc, testDto, cc) -> environmentTestClient.describe().action(tc, testDto, cc))

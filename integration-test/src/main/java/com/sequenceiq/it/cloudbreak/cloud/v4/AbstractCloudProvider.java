@@ -25,6 +25,7 @@ import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ImageSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.SubnetId;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDtoBase;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentAuthenticationTestDto;
@@ -107,6 +108,16 @@ public abstract class AbstractCloudProvider implements CloudProvider {
     @Override
     public EnvironmentTestDto withResourceGroup(EnvironmentTestDto environmentTestDto, String resourceGroupUsage, String resourceGroupName) {
         return environmentTestDto;
+    }
+
+    @Override
+    public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
+        return environmentTestDto;
+    }
+
+    @Override
+    public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
+        return distroXTestDtoBase;
     }
 
     @Override

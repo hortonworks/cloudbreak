@@ -29,6 +29,8 @@ public class AzureProperties {
 
     private final Network network = new Network();
 
+    private final DiskEncription diskEncryption = new DiskEncription();
+
     private FreeIpaProperties freeipa = new FreeIpaProperties();
 
     public FreeIpaProperties getFreeipa() {
@@ -85,6 +87,10 @@ public class AzureProperties {
 
     public Network getNetwork() {
         return network;
+    }
+
+    public DiskEncription getDiskEncryption() {
+        return diskEncryption;
     }
 
     public static class Credential {
@@ -324,6 +330,67 @@ public class AzureProperties {
 
         public void setNoPublicIp(Boolean noPublicIp) {
             this.noPublicIp = noPublicIp;
+        }
+    }
+
+    public static class DiskEncription {
+
+        private final EnvironmentKey environmentKey = new EnvironmentKey();
+
+        private final DatahubKey datahubKey = new DatahubKey();
+
+        public EnvironmentKey getEnvironmentKey() {
+            return environmentKey;
+        }
+
+        public DatahubKey getDatahubKey() {
+            return datahubKey;
+        }
+
+        public static class EnvironmentKey {
+
+            private String encryptionKeyUrl;
+
+            private String resourceGroupName;
+
+            public String getEncryptionKeyUrl() {
+                return encryptionKeyUrl;
+            }
+
+            public void setEncryptionKeyUrl(String encryptionKeyUrl) {
+                this.encryptionKeyUrl = encryptionKeyUrl;
+            }
+
+            public String getResourceGroupName() {
+                return resourceGroupName;
+            }
+
+            public void setResourceGroupName(String resourceGroupName) {
+                this.resourceGroupName = resourceGroupName;
+            }
+        }
+
+        public static class DatahubKey {
+
+            private String encryptionKeyUrl;
+
+            private String resourceGroupName;
+
+            public String getEncryptionKeyUrl() {
+                return encryptionKeyUrl;
+            }
+
+            public void setEncryptionKeyUrl(String encryptionKeyUrl) {
+                this.encryptionKeyUrl = encryptionKeyUrl;
+            }
+
+            public String getResourceGroupName() {
+                return resourceGroupName;
+            }
+
+            public void setResourceGroupName(String resourceGroupName) {
+                this.resourceGroupName = resourceGroupName;
+            }
         }
     }
 }

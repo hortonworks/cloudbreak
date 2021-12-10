@@ -32,10 +32,9 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRe
 import com.sequenceiq.environment.api.v1.environment.model.request.FreeIpaImageRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.LocationRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.SecurityAccessRequest;
-import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsDiskEncryptionParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.AwsEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureEnvironmentParameters;
-import com.sequenceiq.environment.api.v1.environment.model.request.azure.AzureResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -274,41 +273,22 @@ public class EnvironmentTestDto
         return getCloudProvider().withResourceGroup(this, resourceGroupUsage, resourceGroupName);
     }
 
-    public EnvironmentTestDto withAzureResourceEncryptionParameters(String encryptionKeyUrl, String resourceGroup) {
-        if (CloudPlatform.AZURE.equals(getTestContext().getCloudProvider().getCloudPlatform())) {
-            AzureResourceEncryptionParameters azureResourceEncryptionParameters = AzureResourceEncryptionParameters.builder()
-                    .withEncryptionKeyUrl(encryptionKeyUrl)
-                    .withEncryptionKeyResourceGroupName(resourceGroup)
-                    .build();
-            if (getRequest().getAzure() == null) {
-                getRequest().setAzure(AzureEnvironmentParameters.builder()
-                        .withResourceEncryptionParameters(azureResourceEncryptionParameters)
-                        .build());
-            } else {
-                getRequest().getAzure().setResourceEncryptionParameters(azureResourceEncryptionParameters);
-            }
-        }
-        return this;
-    }
-
-    public EnvironmentTestDto withAwsResourceEncryptionParameters(String encryptionKeyArn) {
-        if (CloudPlatform.AWS.equals(getTestContext().getCloudProvider().getCloudPlatform())) {
-            AwsDiskEncryptionParameters awsDiskEncryptionParameters = AwsDiskEncryptionParameters.builder()
-                    .withEncryptionKeyArn(encryptionKeyArn)
-                    .build();
-            if (getRequest().getAws() == null) {
-                getRequest().setAws(AwsEnvironmentParameters.builder()
-                        .withAwsDiskEncryptionParameters(awsDiskEncryptionParameters)
-                        .build());
-            } else {
-                getRequest().getAws().setAwsDiskEncryptionParameters(awsDiskEncryptionParameters);
-            }
-        }
-        return this;
+    public EnvironmentTestDto withResourceEncryption() {
+        return getCloudProvider().withResourceEncryption(this);
     }
 
     public EnvironmentTestDto withAws(AwsEnvironmentParameters awsEnvironmentParameters) {
         getRequest().setAws(awsEnvironmentParameters);
+        return this;
+    }
+
+    public EnvironmentTestDto withAzure(AzureEnvironmentParameters azureEnvironmentParameters) {
+        getRequest().setAzure(azureEnvironmentParameters);
+        return this;
+    }
+
+    public EnvironmentTestDto withGcp(GcpEnvironmentParameters gcpEnvironmentParameters) {
+        getRequest().setGcp(gcpEnvironmentParameters);
         return this;
     }
 
@@ -319,11 +299,6 @@ public class EnvironmentTestDto
         } else {
             LOGGER.info("S3guard is ignored on cloudplatform {}.", getTestContext().getCloudProvider().getCloudPlatform());
         }
-        return this;
-    }
-
-    public EnvironmentTestDto withAzure(AzureEnvironmentParameters azureEnvironmentParameters) {
-        getRequest().setAzure(azureEnvironmentParameters);
         return this;
     }
 

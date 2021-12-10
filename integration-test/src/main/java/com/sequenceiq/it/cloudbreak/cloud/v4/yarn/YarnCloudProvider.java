@@ -310,4 +310,14 @@ public class YarnCloudProvider extends AbstractCloudProvider {
     public String getInstanceProfile() {
         return null;
     }
+
+    @Override
+    public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
+        return environmentTestDto;
+    }
+
+    @Override
+    public DistroXTestDtoBase withResourceEncryption(DistroXTestDtoBase distroXTestDtoBase) {
+        return distroXTestDtoBase;
+    }
 }

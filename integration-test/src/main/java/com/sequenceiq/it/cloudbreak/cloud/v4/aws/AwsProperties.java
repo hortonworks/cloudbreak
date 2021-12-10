@@ -27,8 +27,6 @@ public class AwsProperties {
 
     private Boolean multiaz;
 
-    private String diskEncryptionKey;
-
     private final Instance instance = new Instance();
 
     private final Instance storageOptimizedInstance = new Instance();
@@ -38,6 +36,8 @@ public class AwsProperties {
     private final Baseimage baseimage = new Baseimage();
 
     private final Cloudstorage cloudstorage = new Cloudstorage();
+
+    private final DiskEncryption diskEncryption = new DiskEncryption();
 
     private FreeIpaProperties freeipa = new FreeIpaProperties();
 
@@ -63,14 +63,6 @@ public class AwsProperties {
 
     public void setRegion(String region) {
         this.region = region;
-    }
-
-    public String getDiskEncryptionKey() {
-        return diskEncryptionKey;
-    }
-
-    public void setDiskEncryptionKey(String diskEncryptionKey) {
-        this.diskEncryptionKey = diskEncryptionKey;
     }
 
     public Boolean getMultiaz() {
@@ -134,6 +126,10 @@ public class AwsProperties {
 
     public Cloudstorage getCloudStorage() {
         return cloudstorage;
+    }
+
+    public DiskEncryption getDiskEncryption() {
+        return diskEncryption;
     }
 
     public String getDynamoTableName() {
@@ -289,6 +285,29 @@ public class AwsProperties {
             public void setInstanceProfile(String instanceProfile) {
                 this.instanceProfile = instanceProfile;
             }
+        }
+    }
+
+    public static class DiskEncryption {
+
+        private String environmentKey;
+
+        private String datahubKey;
+
+        public String getEnvironmentKey() {
+            return environmentKey;
+        }
+
+        public void setEnvironmentKey(String environmentKey) {
+            this.environmentKey = environmentKey;
+        }
+
+        public String getDatahubKey() {
+            return datahubKey;
+        }
+
+        public void setDatahubKey(String datahubKey) {
+            this.datahubKey = datahubKey;
         }
     }
 }

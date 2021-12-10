@@ -30,6 +30,11 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
+    public List<String> listVolumeKmsKeyIds(List<String> instanceIds) {
+        return amazonEC2Util.listVolumeKmsKeyIds(instanceIds);
+    }
+
+    @Override
     public Map<String, Map<String, String>> listTagsByInstanceId(String clusterName, List<String> instanceIds) {
         return amazonEC2Util.listTagsByInstanceId(instanceIds);
     }

@@ -97,6 +97,10 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
         return this;
     }
 
+    public DistroXTestDtoBase<T> withResourceEncryption() {
+        return getCloudProvider().withResourceEncryption(this);
+    }
+
     public DistroXTestDtoBase<T> withAzure(AzureDistroXV1Parameters azure) {
         getRequest().setAzure(azure);
         return this;
