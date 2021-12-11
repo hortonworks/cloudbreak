@@ -512,8 +512,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             boolean razEnabled,
             boolean enableMultiAz,
             DetailedEnvironmentResponse environmentResponse) {
-        validateMicroDutySdxEnablement(shape, runtime, environmentResponse);
-        validateMediumDutySdxEnablement(shape, runtime, environmentResponse);
+        validateShape(shape, runtime, environmentResponse);
         validateRazEnablement(runtime, razEnabled, environmentResponse);
         validateMultiAz(enableMultiAz, environmentResponse);
         SdxCluster newSdxCluster = new SdxCluster();
@@ -536,7 +535,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (enableMultiAz) {
             if (!environmentResponse.getCloudPlatform().equals(AWS.name())) {
-                validationBuilder.error(String.format("Provisioning a multi AZ cluster is only enabled for AWS."));
+                validationBuilder.error("Provisioning a multi AZ cluster is only enabled for AWS.");
             }
         }
         ValidationResult validationResult = validationBuilder.build();
@@ -655,7 +654,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     protected StackV4Request prepareDefaultSecurityConfigs(StackV4Request internalRequest, StackV4Request stackV4Request, CloudPlatform cloudPlatform) {
-        if (internalRequest == null && !List.of("MOCK", "YARN").contains(cloudPlatform)) {
+        if (internalRequest == null && !List.of("MOCK", "YARN").contains(cloudPlatform.name())) {
             stackV4Request.getInstanceGroups().forEach(instance -> {
                 SecurityGroupV4Request groupRequest = new SecurityGroupV4Request();
                 if (InstanceGroupType.CORE.equals(instance.getType())) {
@@ -829,34 +828,19 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
-    private void validateMicroDutySdxEnablement(SdxClusterShape shape, String runtime, DetailedEnvironmentResponse environment) {
+    private void validateShape(SdxClusterShape shape, String runtime, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (SdxClusterShape.MICRO_DUTY.equals(shape)) {
             if (!entitlementService.microDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId())) {
                 validationBuilder.error(String.format("Provisioning a micro duty data lake cluster is not enabled for %s. " +
                         "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
             }
-            if (!isMicroDutySdxSupported(runtime)) {
+            if (!isShapeVersionSupportedByRuntime(runtime, MICRO_DUTY_REQUIRED_VERSION)) {
                 validationBuilder.error("Provisioning a Micro Duty SDX shape is only valid for CM version >= " + MICRO_DUTY_REQUIRED_VERSION +
                         " and not " + runtime);
             }
-        }
-        ValidationResult validationResult = validationBuilder.build();
-        if (validationResult.hasError()) {
-            throw new BadRequestException(validationResult.getFormattedErrors());
-        }
-    }
-
-    private void validateMediumDutySdxEnablement(SdxClusterShape shape, String runtime, DetailedEnvironmentResponse environment) {
-        ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
-        if (SdxClusterShape.MEDIUM_DUTY_HA.equals(shape)) {
-            boolean mediumDutySdxEntitlementEnabled = entitlementService.mediumDutySdxEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
-            boolean entitlementRequiredForCloudProvider = isMediumDutyEntitlementRequiredForCloudProvider(environment.getCloudPlatform());
-            if (!mediumDutySdxEntitlementEnabled && entitlementRequiredForCloudProvider) {
-                validationBuilder.error(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. " +
-                        "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
-            }
-            if (!isMediumDutySdxSupported(runtime)) {
+        } else if (SdxClusterShape.MEDIUM_DUTY_HA.equals(shape)) {
+            if (!isShapeVersionSupportedByRuntime(runtime, MEDIUM_DUTY_REQUIRED_VERSION)) {
                 validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION +
                         " and not " + runtime);
             }
@@ -867,8 +851,13 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
     }
 
-    private boolean isMediumDutyEntitlementRequiredForCloudProvider(String cloudPlatform) {
-        return !(AWS.equalsIgnoreCase(cloudPlatform));
+    private boolean isShapeVersionSupportedByRuntime(String runtime, String shapeVersion) {
+        // If runtime is empty, then SDX internal call was used, so we assume it's supported.
+        if (StringUtils.isEmpty(runtime)) {
+            return true;
+        }
+        Comparator<Versioned> versionComparator = new VersionComparator();
+        return versionComparator.compare(() -> runtime, () -> shapeVersion) > -1;
     }
 
     /**
@@ -883,31 +872,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         return versionComparator.compare(() -> runtime, () -> AWS.equals(cloudPlatform) ? "7.2.2" : "7.2.1") > -1;
     }
 
-    /*
-     * Micro Duty HA is only on 7.2.12 and later.  If runtime is empty, then sdx-internal call was used.
-     */
-    private boolean isMicroDutySdxSupported(String runtime) {
-        if (StringUtils.isEmpty(runtime)) {
-            return true;
-        }
-        Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> MICRO_DUTY_REQUIRED_VERSION) > -1;
-    }
-
-    /*
-     * Medium Duty HA is only on 7.2.7 and later.  If runtime is empty, then sdx-internal call was used.
-     */
-    private boolean isMediumDutySdxSupported(String runtime) {
-        if (StringUtils.isEmpty(runtime)) {
-            return true;
-        }
-        Comparator<Versioned> versionComparator = new VersionComparator();
-        return versionComparator.compare(() -> runtime, () -> MEDIUM_DUTY_REQUIRED_VERSION) > -1;
-    }
-
     private boolean isCloudStorageConfigured(SdxClusterRequest clusterRequest) {
         return clusterRequest.getCloudStorage() != null
-                && StringUtils.isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
+                && isNotEmpty(clusterRequest.getCloudStorage().getBaseLocation());
     }
 
     private void validateSdxRequest(String name, String envName, String accountId) {
@@ -1191,7 +1158,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             SdxCluster sdxCluster = getById(resourceId);
             DetailedEnvironmentResponse envResp = environmentClientService.getByCrn(sdxCluster.getEnvCrn());
             return PayloadContext.create(sdxCluster.getCrn(), envResp.getCloudPlatform());
-        } catch (NotFoundException nfe) {
+        } catch (NotFoundException ignored) {
             // skip
         } catch (Exception e) {
             LOGGER.warn("Error happened during fetching payload context for datalake with environment response.", e);
@@ -1211,9 +1178,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 getAccountIdFromCrn(ThreadBasedUserCrnProvider.getUserCrn()),
                 resourceCrnSet);
         Map<String, Optional<String>> resourceCrnWithEnvCrn = new LinkedHashMap<>();
-        clusters.forEach(cluster -> {
-            resourceCrnWithEnvCrn.put(cluster.getCrn(), Optional.ofNullable(cluster.getEnvCrn()));
-        });
+        clusters.forEach(cluster -> resourceCrnWithEnvCrn.put(cluster.getCrn(), Optional.ofNullable(cluster.getEnvCrn())));
         return resourceCrnWithEnvCrn;
     }
 
@@ -1233,7 +1198,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     @Override
     public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
         Map<String, Optional<String>> result = new HashMap<>();
-        sdxClusterRepository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId()).stream()
+        sdxClusterRepository.findResourceNamesByCrnAndAccountId(crns, ThreadBasedUserCrnProvider.getAccountId())
                 .forEach(nameAndCrn -> result.put(nameAndCrn.getCrn(), Optional.ofNullable(nameAndCrn.getName())));
         return result;
     }

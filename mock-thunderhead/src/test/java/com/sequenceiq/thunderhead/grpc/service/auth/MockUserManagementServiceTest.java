@@ -208,9 +208,6 @@ public class MockUserManagementServiceTest {
                 {"ccmV2Enabled false", "ccmV2Enabled", false, "CDP_CCM_V2", false},
                 {"ccmV2Enabled true", "ccmV2Enabled", true, "CDP_CCM_V2", true},
 
-                {"mediumDutySdxEnabled false", "mediumDutySdxEnabled", false, "CDP_MEDIUM_DUTY_SDX", false},
-                {"mediumDutySdxEnabled true", "mediumDutySdxEnabled", true, "CDP_MEDIUM_DUTY_SDX", true},
-
                 {"microDutySdxEnabled false", "microDutySdxEnabled", false, "CDP_MICRO_DUTY_SDX", false},
                 {"microDutySdxEnabled true", "microDutySdxEnabled", true, "CDP_MICRO_DUTY_SDX", true},
 

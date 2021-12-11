@@ -45,7 +45,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIE
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
@@ -328,9 +327,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.ccmv2.upgradeToV2Jumpgate.enable}")
     private boolean ccmV2UpgradeToV2JumpgateEnabled;
-
-    @Value("${auth.mock.mediumdutysdx.enable}")
-    private boolean mediumDutySdxEnabled;
 
     @Value("${auth.mock.microdutysdx.enable}")
     private boolean microDutySdxEnabled;
@@ -749,9 +745,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (ccmV2UpgradeToV2JumpgateEnabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2_TO_V2_JUMPGATE_UPGRADE));
-        }
-        if (mediumDutySdxEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_MEDIUM_DUTY_SDX));
         }
         if (microDutySdxEnabled) {
             builder.addEntitlements(createEntitlement(CDP_MICRO_DUTY_SDX));
