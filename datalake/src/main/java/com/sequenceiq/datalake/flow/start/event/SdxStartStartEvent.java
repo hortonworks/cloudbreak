@@ -1,6 +1,9 @@
 package com.sequenceiq.datalake.flow.start.event;
 
+import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.datalake.flow.SdxEvent;
+
+import reactor.rx.Promise;
 
 public class SdxStartStartEvent extends SdxEvent {
 
@@ -8,9 +11,8 @@ public class SdxStartStartEvent extends SdxEvent {
         super(selector, sdxId, userId);
     }
 
-    @Override
-    public String selector() {
-        return "SdxStartStartEvent";
+    public SdxStartStartEvent(String selector, Long sdxId, String userId, Promise<AcceptResult> accepted) {
+        super(selector, sdxId, userId, accepted);
     }
 
     @Override

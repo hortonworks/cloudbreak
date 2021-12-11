@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.resize.recovery;
 
+import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
+
 import java.util.Optional;
 
 import javax.inject.Inject;
@@ -17,6 +19,7 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.SdxStatusEntity;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.flow.chain.DatalakeResizeFlowEventChainFactory;
+import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.recovery.RecoveryService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.Flow2Handler;
@@ -53,6 +56,9 @@ public class ResizeRecoveryService implements RecoveryService {
     @Inject
     private FlowChainLogService flowChainLogService;
 
+    @Inject
+    private SdxClusterRepository sdxClusterRepository;
+
     @Override
     public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster, SdxRecoveryRequest request) {
         Optional<FlowLog> flowLogOptional = flow2Handler.getFirstStateLogfromLatestFlow(sdxCluster.getId());
@@ -72,20 +78,21 @@ public class ResizeRecoveryService implements RecoveryService {
             case STOP_FAILED:
                 return new SdxRecoverableResponse("Resize can be recovered from a failed stop", RecoveryStatus.RECOVERABLE);
             case STOPPED:
-                if (sdxCluster.isDetached()) {
-                    return new SdxRecoverableResponse("Resize can not yet reattach cluster", RecoveryStatus.NON_RECOVERABLE);
-                } else {
-                    return new SdxRecoverableResponse("Resize can restart cluster", RecoveryStatus.RECOVERABLE);
-                }
+                return new SdxRecoverableResponse("Resize can recover cluster", RecoveryStatus.RECOVERABLE);
             case PROVISIONING_FAILED:
                 return new SdxRecoverableResponse("Failed to provision, recovery will restart original data lake, and delete the new one",
                         RecoveryStatus.RECOVERABLE);
-            case DATALAKE_RESTORE_FAILED:
-                return new SdxRecoverableResponse("Failed to restore backup to new data lake, recovery will restart original data lake, and delete the new one",
-                        RecoveryStatus.RECOVERABLE);
             case DELETE_FAILED:
                 return new SdxRecoverableResponse("Failed to delete original data lake, not a recoverable error", RecoveryStatus.NON_RECOVERABLE);
-
+            case RUNNING:
+                if (actualStatusForSdx.getStatusReason().contains("Datalake restore failed")) {
+                    return new SdxRecoverableResponse(
+                            "Failed to restore backup to new data lake, recovery will restart original data lake, and delete the new one",
+                            RecoveryStatus.RECOVERABLE
+                    );
+                } else {
+                    return new SdxRecoverableResponse("Datalake is running, resize can not be recovered from this point", RecoveryStatus.NON_RECOVERABLE);
+                }
             default:
                 return new SdxRecoverableResponse("Resize can not be recovered from this point", RecoveryStatus.NON_RECOVERABLE);
         }
@@ -105,20 +112,32 @@ public class ResizeRecoveryService implements RecoveryService {
                     return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
                 case STOPPED:
                     if (sdxCluster.isDetached()) {
-                        //TODO CB-14339 return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
-                        throw new NotImplementedException("Cluster is currently in an unrecoverable state");
+                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(sdxCluster, null));
                     } else {
                         return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxStartFlow(sdxCluster));
                     }
                 case PROVISIONING_FAILED:
-                case DATALAKE_RESTORE_FAILED:
+                    return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(getOldCluster(sdxCluster), sdxCluster));
+                case RUNNING:
+                    if (actualStatusForSdx.getStatusReason().contains("Datalake restore failed")) {
+                        return new SdxRecoveryResponse(sdxReactorFlowManager.triggerSdxResizeRecovery(getOldCluster(sdxCluster), sdxCluster));
+                    } else {
+                        throw new NotImplementedException("Cluster is currently running and cannot be recovered");
+                    }
                 default:
                     throw new NotImplementedException("Cluster is currently in an unrecoverable state");
             }
         } else {
             throw new BadRequestException("Entitlement for resize recovery is missing");
         }
-
     }
 
+    private SdxCluster getOldCluster(SdxCluster newCluster) {
+        return sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(
+                newCluster.getAccountId(), newCluster.getEnvCrn()
+        ).orElseThrow(notFound(
+                "detached SDX cluster",
+                "Env CRN: " + newCluster.getEnvCrn() + ", Account ID: " + newCluster.getAccountId()
+        ));
+    }
 }

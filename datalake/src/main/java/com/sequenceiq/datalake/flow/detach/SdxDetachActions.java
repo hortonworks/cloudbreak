@@ -46,6 +46,8 @@ public class SdxDetachActions {
 
     private static final String DETACHED_SDX = "DETACHED_SDX";
 
+    private static final String IS_DETACH_DURING_RECOVERY = "IS_DETACH_DURING_RECOVERY";
+
     @Inject
     private SdxDetachService sdxDetachService;
 
@@ -70,11 +72,12 @@ public class SdxDetachActions {
 
             @Override
             protected void doExecute(SdxContext context, SdxStartDetachEvent payload,
-                    Map<Object, Object> variables) throws Exception {
+                    Map<Object, Object> variables) {
                 LOGGER.info("Detaching of SDX with ID {} in progress.", payload.getResourceId());
-                SdxCluster detached = sdxDetachService.detachCluster(payload.getResourceId());
+                SdxCluster detached = sdxDetachService.detachCluster(payload.getResourceId(), payload.isDetachDuringRecovery());
                 variables.put(RESIZED_SDX, payload.getSdxCluster());
                 variables.put(DETACHED_SDX, detached);
+                variables.put(IS_DETACH_DURING_RECOVERY, payload.isDetachDuringRecovery());
                 eventSenderService.sendEventAndNotification(
                         detached, context.getFlowTriggerUserCrn(), ResourceEvent.SDX_DETACH_STARTED,
                         List.of(detached.getClusterName())
@@ -101,8 +104,7 @@ public class SdxDetachActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxEvent payload,
-                    Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 sdxDetachService.detachStack(
                         (SdxCluster) variables.get(DETACHED_SDX),
                         ((SdxCluster) variables.get(RESIZED_SDX)).getClusterName()
@@ -135,15 +137,14 @@ public class SdxDetachActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxDetachFailedEvent payload,
-                    Map<Object, Object> variables) throws Exception {
-                SdxCluster clusterToReattach = (SdxCluster) variables.get(DETACHED_SDX);
-                LOGGER.error("Failed to detach stack of SDX with ID: {}. Attempting to restore it.", clusterToReattach.getId());
-
-                clusterToReattach = sdxAttachService.reattachCluster(clusterToReattach);
-
-                LOGGER.info("Successfully restored detached SDX with ID {} which failed to detach its stack.",
-                        clusterToReattach.getId());
+            protected void doExecute(SdxContext context, SdxDetachFailedEvent payload, Map<Object, Object> variables) {
+                if (!((boolean) variables.get(IS_DETACH_DURING_RECOVERY))) {
+                    SdxCluster clusterToReattach = (SdxCluster) variables.get(DETACHED_SDX);
+                    LOGGER.error("Failed to detach stack of SDX with ID: {}. Attempting to restore it.", clusterToReattach.getId());
+                    clusterToReattach = sdxAttachService.reattachCluster(clusterToReattach);
+                    LOGGER.info("Successfully restored detached SDX with ID {} which failed to detach its stack.",
+                            clusterToReattach.getId());
+                }
                 sendEvent(context, SDX_DETACH_FAILED_EVENT.event(), payload);
             }
 
@@ -168,8 +169,7 @@ public class SdxDetachActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxEvent payload,
-                    Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxEvent payload, Map<Object, Object> variables) {
                 sdxDetachService.detachExternalDatabase((SdxCluster) variables.get(DETACHED_SDX));
                 sendEvent(context, SDX_DETACH_EXTERNAL_DB_SUCCESS_EVENT.event(), payload);
             }
@@ -194,17 +194,18 @@ public class SdxDetachActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxDetachFailedEvent payload,
-                    Map<Object, Object> variables) throws Exception {
-                SdxCluster detached = (SdxCluster) variables.get(DETACHED_SDX);
-                LOGGER.error("Failed to detach external DB of SDX with ID: {}. Attempting to restore it.", detached.getId());
+            protected void doExecute(SdxContext context, SdxDetachFailedEvent payload, Map<Object, Object> variables) {
+                if (!((boolean) variables.get(IS_DETACH_DURING_RECOVERY))) {
+                    SdxCluster detached = (SdxCluster) variables.get(DETACHED_SDX);
+                    LOGGER.error("Failed to detach external DB of SDX with ID: {}. Attempting to restore it.", detached.getId());
 
-                String detachedName = detached.getClusterName();
-                SdxCluster reattached = sdxAttachService.reattachCluster(detached);
-                sdxAttachService.reattachStack(reattached, detachedName);
+                    String detachedName = detached.getClusterName();
+                    SdxCluster reattached = sdxAttachService.reattachCluster(detached);
+                    sdxAttachService.reattachStack(reattached, detachedName);
 
-                LOGGER.info("Successfully restored detached SDX with ID {} which failed to detach its external database.",
-                        reattached.getId());
+                    LOGGER.info("Successfully restored detached SDX with ID {} which failed to detach its external database.",
+                            reattached.getId());
+                }
                 sendEvent(context, SDX_DETACH_FAILED_EVENT.event(), payload);
             }
 
@@ -236,22 +237,23 @@ public class SdxDetachActions {
                 eventSenderService.notifyEvent(detachedCluster, context, ResourceEvent.SDX_DETACH_FINISHED);
                 LOGGER.info("Detaching of SDX with ID {} finished.", detachedCluster.getId());
 
-                SdxCluster resizedCluster = (SdxCluster) variables.get(RESIZED_SDX);
-                LOGGER.info("Attaching of SDX cluster with ID {} in progress.", resizedCluster.getId());
-                MDCBuilder.buildMdcContext(resizedCluster);
-                resizedCluster = sdxAttachService.saveSdxAndAssignResourceOwnerRole(resizedCluster);
-                sdxAttachService.markAsAttached(resizedCluster);
-                LOGGER.info("Attaching of SDX cluster with ID {} is complete.", resizedCluster.getId());
-                context.setSdxId(resizedCluster.getId());
+                if (!((boolean) variables.get(IS_DETACH_DURING_RECOVERY))) {
+                    SdxCluster resizedCluster = (SdxCluster) variables.get(RESIZED_SDX);
+                    LOGGER.info("Attaching of SDX cluster with ID {} in progress.", resizedCluster.getId());
+                    MDCBuilder.buildMdcContext(resizedCluster);
+                    resizedCluster = sdxAttachService.saveSdxAndAssignResourceOwnerRole(resizedCluster);
+                    sdxAttachService.markAsAttached(resizedCluster);
+                    LOGGER.info("Attaching of SDX cluster with ID {} is complete.", resizedCluster.getId());
+                    context.setSdxId(resizedCluster.getId());
+                }
                 sendEvent(context, SDX_ATTACH_NEW_CLUSTER_SUCCESS_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(SdxEvent payload, Optional<SdxContext> flowContext,
                     Exception e) {
-                LOGGER.error("Attach new cluster state Detach action failed.", e);
-                return SdxDetachFailedEvent.from(payload, e);
-            }
+                LOGGER.error("Failed to attach new cluster during detach.", e);
+                return SdxDetachFailedEvent.from(payload, e);            }
         };
     }
 
@@ -268,23 +270,17 @@ public class SdxDetachActions {
             @Override
             protected void doExecute(SdxContext context, SdxDetachFailedEvent payload,
                     Map<Object, Object> variables) throws Exception {
-                SdxCluster resized = (SdxCluster) variables.get(RESIZED_SDX);
                 SdxCluster clusterToReattach = (SdxCluster) variables.get(DETACHED_SDX);
-                LOGGER.error("Failed to attach new cluster with ID {} during detaching of cluster with ID {}." +
-                        " Attempting to reattach detached cluster.", resized.getId(), clusterToReattach.getId());
-
                 clusterToReattach = sdxAttachService.reattachDetachedSdxCluster(clusterToReattach);
+                LOGGER.info("Successfully restored detached SDX with ID {}.", clusterToReattach.getId());
 
-                LOGGER.info("Successfully restored detached SDX with ID {} which failed during attaching of new cluster.",
-                        clusterToReattach.getId());
                 sendEvent(context, SDX_DETACH_FAILED_EVENT.event(), payload);
             }
 
             @Override
             protected Object getFailurePayload(SdxDetachFailedEvent payload, Optional<SdxContext> flowContext,
                     Exception e) {
-                LOGGER.error("Failed to reattach SDX with ID {} which failed during attaching of new cluster.",
-                        payload.getResourceId());
+                LOGGER.error("Failed to recover from detach of SDX with ID {}.", payload.getResourceId());
                 return payload;
             }
         };
@@ -301,18 +297,12 @@ public class SdxDetachActions {
             }
 
             @Override
-            protected void doExecute(SdxContext context, SdxDetachFailedEvent payload,
-                    Map<Object, Object> variables) throws Exception {
+            protected void doExecute(SdxContext context, SdxDetachFailedEvent payload, Map<Object, Object> variables) {
                 Exception exception = payload.getException();
                 LOGGER.error("Detaching SDX cluster with ID {} and name {} failed with error {}.",
                         payload.getResourceId(), payload.getSdxName(), exception.getMessage(), exception);
-
-                String statusReason = "SDX detach failed";
-                if (exception.getMessage() != null) {
-                    statusReason = exception.getMessage();
-                }
+                String statusReason = Optional.ofNullable(exception.getMessage()).orElse("SDX detach failed");
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, statusReason, payload.getResourceId());
-
                 getFlow(context.getFlowParameters().getFlowId()).setFlowFailed(payload.getException());
                 sendEvent(context, SDX_DETACH_FAILED_HANDLED_EVENT.event(), payload);
             }
