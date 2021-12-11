@@ -12,9 +12,4 @@ public class SdxDetachFailedEvent extends SdxFailedEvent {
     public static SdxDetachFailedEvent from(SdxEvent event, Exception exception) {
         return new SdxDetachFailedEvent(event.getResourceId(), event.getUserId(), exception);
     }
-
-    @Override
-    public String selector() {
-        return "SdxStartDetachEvent";
-    }
 }
