@@ -330,6 +330,10 @@ public class SdxService implements ResourceIdProvider, PayloadContextProvider, H
         }
     }
 
+    public void delete(SdxCluster sdxCluster) {
+        sdxClusterRepository.delete(sdxCluster);
+    }
+
     public UpdateRecipesV4Response refreshRecipes(SdxCluster sdxCluster, UpdateRecipesV4Request request) {
         return ThreadBasedUserCrnProvider.doAsInternalActor(() -> stackV4Endpoint.refreshRecipesInternal(WORKSPACE_ID_DEFAULT, request, sdxCluster.getName(),
                 sdxCluster.getInitiatorUserCrn()));

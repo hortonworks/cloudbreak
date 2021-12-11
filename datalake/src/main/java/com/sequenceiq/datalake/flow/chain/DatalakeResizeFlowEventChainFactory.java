@@ -51,7 +51,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
         }
 
 
-        // De-attach sdx from environment
+        // Detach sdx from environment
         chain.add(new SdxStartDetachEvent(SDX_DETACH_EVENT.event(), event.getResourceId(), event.getSdxCluster(), event.getUserId()));
 
         // Create new
@@ -62,7 +62,7 @@ public class DatalakeResizeFlowEventChainFactory implements FlowEventChainFactor
             chain.add(new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), event.getResourceId(), event.getSdxCluster().getClusterName(),
                     event.getUserId(), null, event.getBackupLocation(), null, DatalakeRestoreFailureReason.RESTORE_ON_RESIZE));
         }
-        // Delete  De-attached Sdx
+        // Delete the detached Sdx
         chain.add(new SdxDeleteStartEvent(SDX_DELETE_EVENT.event(), event.getResourceId(), event.getUserId(), true));
 
         return new FlowTriggerEventQueue(getName(), event, chain);
