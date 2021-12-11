@@ -8,7 +8,7 @@ import com.sequenceiq.datalake.flow.detach.SdxDetachEvent;
 
 public class SdxStartDetachEvent extends SdxEvent {
 
-    private SdxCluster sdxCluster;
+    private final SdxCluster sdxCluster;
 
     public SdxStartDetachEvent(String selector, Long sdxId, SdxCluster newSdxCluster, String userId) {
         super(selector, sdxId, userId);
