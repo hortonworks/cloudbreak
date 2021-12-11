@@ -48,7 +48,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLU
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MEDIUM_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTATUS_ENABLE_SALT_PING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
@@ -210,10 +209,6 @@ public class EntitlementService {
 
     public boolean razEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_RAZ);
-    }
-
-    public boolean mediumDutySdxEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_MEDIUM_DUTY_SDX);
     }
 
     public boolean microDutySdxEnabled(String accountId) {
@@ -409,7 +404,7 @@ public class EntitlementService {
     private boolean isEntitlementRegistered(String accountId, Entitlement entitlement) {
         boolean entitled = getEntitlements(accountId)
                 .stream()
-                .map(e -> e.toUpperCase())
+                .map(String::toUpperCase)
                 .anyMatch(e -> e.equalsIgnoreCase(entitlement.name()));
         LOGGER.debug("Entitlement result {}={}", entitlement, entitled);
         return entitled;

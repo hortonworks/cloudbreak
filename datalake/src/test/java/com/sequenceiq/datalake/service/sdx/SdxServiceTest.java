@@ -1,64 +1,5 @@
 package com.sequenceiq.datalake.service.sdx;
 
-import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
-import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
-import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_JUMPGATE_REQUIRED_VERSION;
-import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_REQUIRED_VERSION;
-import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
-import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Assert;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -97,6 +38,8 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
+import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
+import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -106,6 +49,9 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
+import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_JUMPGATE_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -121,9 +67,58 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+import org.apache.commons.lang3.tuple.Pair;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -501,8 +496,8 @@ class SdxServiceTest {
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
-        Assertions.assertEquals(id, createdSdxCluster.getId());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        assertEquals(id, createdSdxCluster.getId());
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         assertEquals("tagecske", capturedSdx.getTags().getValue("mytag"));
@@ -684,7 +679,7 @@ class SdxServiceTest {
 
     @Test
     void testDeleteSdxWhennNameIsProvidedAndClusterDoesNotExistShouldThrowNotFoundException() {
-        Assertions.assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class,
+        assertThrows(com.sequenceiq.cloudbreak.common.exception.NotFoundException.class,
                 () -> underTest.deleteSdx(USER_CRN, CLUSTER_NAME, false));
         verify(sdxClusterRepository, times(1))
                 .findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(eq("hortonworks"), eq(CLUSTER_NAME));
@@ -698,7 +693,7 @@ class SdxServiceTest {
         mockCBCallForDistroXClusters(Sets.newHashSet());
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
@@ -749,7 +744,7 @@ class SdxServiceTest {
 
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
@@ -764,7 +759,7 @@ class SdxServiceTest {
 
         underTest.deleteSdx(USER_CRN, "sdx-cluster-name", true);
         verify(sdxReactorFlowManager, times(1)).triggerSdxDeletion(sdxCluster, true);
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(sdxStatusService, times(1))
                 .setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_REQUESTED, "Datalake deletion requested", sdxCluster);
@@ -820,8 +815,8 @@ class SdxServiceTest {
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
-        Assertions.assertEquals(id, createdSdxCluster.getId());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        assertEquals(id, createdSdxCluster.getId());
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         assertFalse(capturedSdx.isRangerRazEnabled());
@@ -851,8 +846,8 @@ class SdxServiceTest {
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
-        Assertions.assertEquals(id, createdSdxCluster.getId());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        assertEquals(id, createdSdxCluster.getId());
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
         assertTrue(capturedSdx.isRangerRazEnabled());
@@ -924,7 +919,7 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxCreateMediumDutySdxEnabled() throws IOException, TransactionExecutionException {
+    void testSdxCreateMediumDutySdx() throws IOException, TransactionExecutionException {
         final String runtime = "7.2.7";
         when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
         String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/medium_duty_ha.json");
@@ -941,79 +936,22 @@ class SdxServiceTest {
         });
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
-        Assertions.assertEquals(id, createdSdxCluster.getId());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        assertEquals(id, createdSdxCluster.getId());
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         SdxCluster capturedSdx = captor.getValue();
-        assertTrue(capturedSdx.getClusterShape().equals(MEDIUM_DUTY_HA));
+        assertEquals(MEDIUM_DUTY_HA, capturedSdx.getClusterShape());
     }
 
     @Test
-    void testSdxCreateAzureMediumDutySdxNoEntitlement() throws IOException {
-        final String runtime = "7.2.7";
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AZURE, null);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
-                "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
-    }
-
-    @Test
-    void testSdxCreateGcpMediumDutySdxNoEntitlement() throws IOException {
-        final String runtime = "7.2.7";
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.GCP, null);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.GCP.name()) +
-                "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
-    }
-
-    @Test
-    void testSdxCreateAWSMediumDutySdxNoEntitlememt() throws IOException, TransactionExecutionException {
-        final String runtime = "7.2.7";
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(runtime, MEDIUM_DUTY_HA);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
-        when(transactionService.required(isA(Supplier.class))).thenAnswer(invocation -> invocation.getArgument(0, Supplier.class).get());
-        String lightDutyJson = FileReaderUtils.readFileFromClasspath("/duties/" + runtime + "/aws/medium_duty_ha.json");
-        when(cdpConfigService.getConfigForKey(any())).thenReturn(JsonUtil.readValue(lightDutyJson, StackV4Request.class));
-        when(sdxReactorFlowManager.triggerSdxCreation(any())).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
-        withCloudStorage(sdxClusterRequest);
-        long id = 10L;
-        when(sdxClusterRepository.save(any(SdxCluster.class))).thenAnswer(invocation -> {
-            SdxCluster sdxWithId = invocation.getArgument(0, SdxCluster.class);
-            sdxWithId.setId(id);
-            return sdxWithId;
-        });
-        when(clock.getCurrentTimeMillis()).thenReturn(1L);
-        Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
-        SdxCluster createdSdxCluster = result.getLeft();
-        Assertions.assertEquals(id, createdSdxCluster.getId());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
-        verify(sdxClusterRepository, times(1)).save(captor.capture());
-        SdxCluster capturedSdx = captor.getValue();
-        assertTrue(capturedSdx.getClusterShape().equals(MEDIUM_DUTY_HA));
-    }
-
-    @Test
-    void testSdxCreateMediumDutySdxEnabled710Runtime() {
+    void testSdxCreateMediumDutySdx710Runtime() {
         final String invalidRuntime = "7.1.0";
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(invalidRuntime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
@@ -1021,12 +959,11 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxCreateMediumDutySdxEnabled720Runtime() {
+    void testSdxCreateMediumDutySdx720Runtime() {
         final String invalidRuntime = "7.2.0";
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(invalidRuntime, MEDIUM_DUTY_HA);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
@@ -1050,19 +987,19 @@ class SdxServiceTest {
 
         ArgumentCaptor<SdxCluster> sdxClusterArgumentCaptor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(sdxClusterArgumentCaptor.capture());
-        Assert.assertEquals("7.2.1", sdxClusterArgumentCaptor.getValue().getRuntime());
+        assertEquals("7.2.1", sdxClusterArgumentCaptor.getValue().getRuntime());
 
         cdpResponse.setVersion("7.1.0");
 
         underTest.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
         verify(sdxClusterRepository, times(2)).save(sdxClusterArgumentCaptor.capture());
-        Assert.assertEquals("7.1.0", sdxClusterArgumentCaptor.getValue().getRuntime());
+        assertEquals("7.1.0", sdxClusterArgumentCaptor.getValue().getRuntime());
 
         cdpResponse.setVersion("7.0.2-valami");
 
         underTest.updateRuntimeVersionFromStackResponse(sdxCluster, stackV4Response);
         verify(sdxClusterRepository, times(3)).save(sdxClusterArgumentCaptor.capture());
-        Assert.assertEquals("7.0.2", sdxClusterArgumentCaptor.getValue().getRuntime());
+        assertEquals("7.0.2", sdxClusterArgumentCaptor.getValue().getRuntime());
     }
 
     @Test
@@ -1360,54 +1297,6 @@ class SdxServiceTest {
     }
 
     @Test
-    void testSdxResizeAzureMediumDutySdxNoEntitlement() throws IOException {
-        final String runtime = "7.2.7";
-        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
-        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
-        sdxClusterResizeRequest.setEnvironment("environment");
-
-        SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
-
-        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
-
-        mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AZURE);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
-        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
-        assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.AZURE.name()) +
-                "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
-    }
-
-    @Test
-    void testSdxResizeGcpMediumDutySdxNoEntitlement() throws IOException {
-        final String runtime = "7.2.7";
-
-        SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
-        sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
-        sdxClusterResizeRequest.setEnvironment("environment");
-
-        SdxCluster sdxCluster = getSdxCluster();
-        sdxCluster.setClusterShape(LIGHT_DUTY);
-        sdxCluster.setDatabaseCrn(null);
-
-        when(entitlementService.isDatalakeLightToMediumMigrationEnabled(anyString())).thenReturn(true);
-        when(sdxClusterRepository.findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(Optional.of(sdxCluster));
-        when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
-
-        mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.GCP);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(false);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
-        assertEquals(String.format("Provisioning a medium duty data lake cluster is not enabled for %s. ", CloudPlatform.GCP.name()) +
-                "Contact Cloudera support to enable CDP_MEDIUM_DUTY_SDX entitlement for the account.", badRequestException.getMessage());
-    }
-
-    @Test
     void testSdxResizeMediumDutySdxEnabled710Runtime() {
         final String invalidRuntime = "7.1.0";
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
@@ -1424,7 +1313,6 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
         assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
@@ -1448,7 +1336,6 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
         assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
@@ -1470,7 +1357,6 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                         underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
@@ -1496,7 +1382,6 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvCrnAndDeletedIsNullAndDetachedIsTrue(anyString(), anyString())).thenReturn(Optional.empty());
 
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
-        when(entitlementService.mediumDutySdxEnabled(anyString())).thenReturn(true);
         when(sdxReactorFlowManager.triggerSdxResize(anyLong(), any(SdxCluster.class))).thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
         String mediumDutyJson = FileReaderUtils.readFileFromClasspath("/duties/7.2.10/aws/medium_duty_ha.json");
@@ -1509,14 +1394,14 @@ class SdxServiceTest {
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.resizeSdx(USER_CRN, sdxCluster.getClusterName(), sdxClusterResizeRequest));
         SdxCluster createdSdxCluster = result.getLeft();
-        Assert.assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
-        Assert.assertEquals(runtime, createdSdxCluster.getRuntime());
-        Assert.assertEquals("s3a://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
-        Assert.assertEquals("envir", createdSdxCluster.getEnvName());
+        assertEquals(sdxCluster.getClusterName(), createdSdxCluster.getClusterName());
+        assertEquals(runtime, createdSdxCluster.getRuntime());
+        assertEquals("s3a://some/dir/", createdSdxCluster.getCloudStorageBaseLocation());
+        assertEquals("envir", createdSdxCluster.getEnvName());
     }
 
     @Test
-    void testSdxResizeClusterWithNoEntitlement() throws Exception {
+    void testSdxResizeClusterWithNoEntitlement() {
         final String runtime = "7.2.10";
         SdxClusterResizeRequest sdxClusterResizeRequest = new SdxClusterResizeRequest();
         sdxClusterResizeRequest.setClusterShape(MEDIUM_DUTY_HA);
@@ -1533,7 +1418,7 @@ class SdxServiceTest {
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
-        assertEquals(String.format("Resizing of the data lake is not supported"), badRequestException.getMessage());
+        assertEquals("Resizing of the data lake is not supported", badRequestException.getMessage());
     }
 
     @ParameterizedTest(name = "Runtime {0} is compatible with CCMv2 = {1}")
@@ -1600,12 +1485,12 @@ class SdxServiceTest {
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
-        Assertions.assertEquals(id, createdSdxCluster.getId());
-        final ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
+        assertEquals(id, createdSdxCluster.getId());
+        ArgumentCaptor<SdxCluster> captor = ArgumentCaptor.forClass(SdxCluster.class);
         verify(sdxClusterRepository, times(1)).save(captor.capture());
         verify(recipeV4Endpoint, times(1)).listInternal(anyLong(), anyString());
         SdxCluster capturedSdx = captor.getValue();
-        assertTrue(capturedSdx.getClusterShape().equals(MICRO_DUTY));
+        assertEquals(MICRO_DUTY, capturedSdx.getClusterShape());
     }
 
     @Test
