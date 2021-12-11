@@ -59,8 +59,8 @@ public class SdxUpgradeRequest {
         this.dryRun = dryRun;
     }
 
-    public boolean isBackupSkipped() {
-        return Boolean.TRUE.equals(skipBackup);
+    public Boolean getSkipBackup() {
+        return skipBackup;
     }
 
     public void setSkipBackup(Boolean skipBackup) {

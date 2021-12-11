@@ -164,7 +164,7 @@ public class SdxRuntimeUpgradeService {
     private SdxUpgradeResponse initSdxUpgrade(String userCrn, List<ImageInfoV4Response> upgradeCandidates, SdxUpgradeRequest request, SdxCluster cluster) {
         verifyPaywallAccess(userCrn, request);
         String imageId = determineImageId(request, upgradeCandidates);
-        boolean skipBackup = request != null && request.isBackupSkipped();
+        boolean skipBackup = request != null && Boolean.TRUE.equals(request.getSkipBackup());
         FlowIdentifier flowIdentifier = triggerDatalakeUpgradeFlow(imageId, cluster, shouldReplaceVmsAfterUpgrade(request), skipBackup);
         String message = getMessage(imageId);
         return new SdxUpgradeResponse(message, flowIdentifier);
