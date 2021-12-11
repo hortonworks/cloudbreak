@@ -2,6 +2,7 @@ package com.sequenceiq.flow.core;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.statemachine.StateContext;
 
@@ -65,6 +66,17 @@ public class AbstractActionTestSupport<S extends FlowState, E extends FlowEvent,
      */
     public C createFlowContext(FlowParameters flowParameters, StateContext<S, E> stateContext, P payload) {
         return action.createFlowContext(flowParameters, stateContext, payload);
+    }
+
+    /**
+     * Delegates to {@link AbstractAction#getFailurePayload(Payload, Optional, Exception)}.
+     * @param payload request event payload
+     * @param flowContext optional containing the flow context
+     * @param ex failure exception
+     * @return payload for the failure
+     */
+    public Object getFailurePayload(P payload, Optional<C> flowContext, Exception ex) {
+        return action.getFailurePayload(payload, flowContext, ex);
     }
 
 }

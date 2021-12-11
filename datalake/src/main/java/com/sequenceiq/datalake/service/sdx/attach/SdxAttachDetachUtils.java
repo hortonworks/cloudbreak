@@ -21,13 +21,14 @@ public class SdxAttachDetachUtils {
         sdxCluster.setClusterName(newName);
         sdxCluster.setOriginalCrn(sdxCluster.getCrn());
         sdxCluster.setCrn(newCrn);
+        sdxCluster.setStackCrn(newCrn);
     }
 
-    public void updateStack(SdxCluster cluster, String originalName) {
+    public void updateStack(String originalName, String newName, String newCrn) {
         String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
         ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                 stackV4Endpoint.updateNameAndCrn(
-                        0L, originalName, initiatorUserCrn, cluster.getClusterName(), cluster.getCrn()
+                        0L, originalName, initiatorUserCrn, newName, newCrn
                 )
         );
     }

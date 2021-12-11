@@ -17,6 +17,7 @@ import org.mockito.MockitoAnnotations;
 
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.service.sdx.SdxService;
@@ -24,7 +25,6 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.redbeams.api.endpoint.v4.databaseserver.DatabaseServerV4Endpoint;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 
-@SuppressWarnings("unchecked")
 public class SdxAttachServiceTest {
     private static final String TEST_CLUSTER_ENV_CRN = "envCrn";
 
@@ -59,6 +59,9 @@ public class SdxAttachServiceTest {
 
     @Mock
     private SdxStatusService mockSdxStatusService;
+
+    @Mock
+    private StatusCheckerJobService mockJobService;
 
     @InjectMocks
     private SdxAttachDetachUtils mockSdxAttachDetachUtils = spy(SdxAttachDetachUtils.class);

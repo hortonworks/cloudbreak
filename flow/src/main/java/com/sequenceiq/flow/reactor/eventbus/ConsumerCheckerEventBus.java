@@ -22,7 +22,7 @@ public class ConsumerCheckerEventBus extends EventBus {
         try {
             getConsumerRegistry().select(event.getKey());
         } catch (ConsumerNotFoundException e) {
-            LOGGER.error("Can not found consumer for event: " + e.getEvent(), e);
+            LOGGER.error("Could not find consumer for event: " + e.getEvent(), e);
             throw new EventCanNotBeDeliveredException(event);
         }
         super.accept(event);
