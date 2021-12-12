@@ -103,7 +103,7 @@ public class AwsEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
                 .when(environmentTestClient.describe())
                 .then(this::verifyEnvironmentResponseKMSParameters)
                 .given(FreeIpaTestDto.class)
-                .then(this::verifyFreeIPAEC2VolumeKMSKey)
+                .then(this::verifyFreeIpaEc2VolumeKMSKey)
                 .validate();
     }
 
@@ -126,12 +126,12 @@ public class AwsEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest {
         return testDto;
     }
 
-    private FreeIpaTestDto verifyFreeIPAEC2VolumeKMSKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
+    private FreeIpaTestDto verifyFreeIpaEc2VolumeKMSKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = freeIpaInstanceUtil.getInstanceIds(testDto, freeIpaClient, MASTER.getName());
         String kmsKeyArn = awsProperties.getDiskEncryption().getEnvironmentKey();
 
-        List<String> volumeKmsKeyIds = new ArrayList<>(cloudFunctionality.listVolumeKmsKeyIds(instanceIds));
+        List<String> volumeKmsKeyIds = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(testDto.getRequest().getName(), instanceIds));
         if (volumeKmsKeyIds.stream().noneMatch(keyId -> keyId.equalsIgnoreCase(kmsKeyArn))) {
             LOGGER.error("FreeIpa volume has not been encrypted with [{}] KMS key!", kmsKeyArn);
             throw new TestFailException(format("FreeIpa volume has not been encrypted with [%s] KMS key!", kmsKeyArn));

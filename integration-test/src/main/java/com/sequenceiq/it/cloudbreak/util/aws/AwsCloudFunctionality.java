@@ -5,10 +5,12 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.NotImplementedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.aws.amazonec2.AmazonEC2Util;
 import com.sequenceiq.it.cloudbreak.util.aws.amazons3.AmazonS3Util;
@@ -30,7 +32,7 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<String> listVolumeKmsKeyIds(List<String> instanceIds) {
+    public List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds) {
         return amazonEC2Util.listVolumeKmsKeyIds(instanceIds);
     }
 
@@ -47,6 +49,18 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     @Override
     public void stopInstances(String clusterName, List<String> instanceIds) {
         amazonEC2Util.stopHostGroupInstances(instanceIds);
+    }
+
+    @Override
+    public ResourceGroup createResourceGroup(String resourceGroupName) {
+        LOGGER.debug("createResourceGroup: nothing to do for AWS");
+        throw new NotImplementedException("Resource group creation is not applicable for AWS!");
+    }
+
+    @Override
+    public void deleteResourceGroup(String resourceGroupName) {
+        LOGGER.debug("deleteResourceGroup: nothing to do for AWS");
+        throw new NotImplementedException("Resource group deletion is not applicable for AWS!");
     }
 
     @Override

@@ -6,9 +6,9 @@ import java.util.Map;
 
 import javax.inject.Inject;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Component;
 
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.azure.azurecloudblob.AzureCloudBlobUtil;
 import com.sequenceiq.it.cloudbreak.util.azure.azurevm.action.AzureClientActions;
@@ -28,8 +28,8 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<String> listVolumeKmsKeyIds(List<String> instanceIds) {
-        throw new NotImplementedException("Not yet implemented on Azure");
+    public List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds) {
+        return azureClientActions.getVolumesDesId(clusterName, instanceIds);
     }
 
     @Override
@@ -45,6 +45,16 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public void stopInstances(String clusterName, List<String> instanceIds) {
         azureClientActions.stopInstances(clusterName, instanceIds);
+    }
+
+    @Override
+    public ResourceGroup createResourceGroup(String resourceGroupName) {
+        return azureClientActions.createResourceGroup(resourceGroupName);
+    }
+
+    @Override
+    public void deleteResourceGroup(String resourceGroupName) {
+        azureClientActions.deleteResourceGroup(resourceGroupName);
     }
 
     @Override

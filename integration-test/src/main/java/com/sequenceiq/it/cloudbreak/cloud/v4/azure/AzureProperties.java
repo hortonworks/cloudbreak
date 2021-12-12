@@ -335,62 +335,24 @@ public class AzureProperties {
 
     public static class DiskEncription {
 
-        private final EnvironmentKey environmentKey = new EnvironmentKey();
+        private String encryptionKeyUrl;
 
-        private final DatahubKey datahubKey = new DatahubKey();
+        private String resourceGroupName;
 
-        public EnvironmentKey getEnvironmentKey() {
-            return environmentKey;
-        }
-
-        public DatahubKey getDatahubKey() {
-            return datahubKey;
-        }
-
-        public static class EnvironmentKey {
-
-            private String encryptionKeyUrl;
-
-            private String resourceGroupName;
-
-            public String getEncryptionKeyUrl() {
+        public String getEncryptionKeyUrl() {
                 return encryptionKeyUrl;
             }
 
-            public void setEncryptionKeyUrl(String encryptionKeyUrl) {
+        public void setEncryptionKeyUrl(String encryptionKeyUrl) {
                 this.encryptionKeyUrl = encryptionKeyUrl;
             }
 
-            public String getResourceGroupName() {
+        public String getResourceGroupName() {
                 return resourceGroupName;
             }
 
-            public void setResourceGroupName(String resourceGroupName) {
+        public void setResourceGroupName(String resourceGroupName) {
                 this.resourceGroupName = resourceGroupName;
             }
-        }
-
-        public static class DatahubKey {
-
-            private String encryptionKeyUrl;
-
-            private String resourceGroupName;
-
-            public String getEncryptionKeyUrl() {
-                return encryptionKeyUrl;
-            }
-
-            public void setEncryptionKeyUrl(String encryptionKeyUrl) {
-                this.encryptionKeyUrl = encryptionKeyUrl;
-            }
-
-            public String getResourceGroupName() {
-                return resourceGroupName;
-            }
-
-            public void setResourceGroupName(String resourceGroupName) {
-                this.resourceGroupName = resourceGroupName;
-            }
-        }
     }
 }
