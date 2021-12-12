@@ -90,6 +90,9 @@ public class OperationDetailsPopulator {
                     source.setProgress(progressFromHistory);
                 }
             }
+            if (source.getProgressStatus().isCompleted()) {
+                source.setProgress(MAX_PROGRESS);
+            }
         } else {
             source.setProgress(DEFAULT_PROGRESS);
             source.setProgressStatus(OperationProgressStatus.UNKNOWN);
