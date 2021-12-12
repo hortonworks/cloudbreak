@@ -76,6 +76,7 @@ allprojects {
         force "org.springframework:spring-messaging:$springFrameworkVersion"
         force "io.swagger:swagger-jersey2-jaxrs:$swaggerVersion"
         force "io.swagger:swagger-annotations:$swaggerVersion"
+        force "com.google.protobuf:protobuf-java:$protobufVersion"
       }
     }
   }
