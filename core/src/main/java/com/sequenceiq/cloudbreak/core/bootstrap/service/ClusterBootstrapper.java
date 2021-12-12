@@ -222,20 +222,24 @@ public class ClusterBootstrapper {
     }
 
     public ClusterComponent updateSaltComponent(Stack stack) {
-        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
         try {
             byte[] stateConfigZip = hostOrchestrator.getStateConfigZip();
-            if (saltComponent == null) {
-                LOGGER.debug("Create new salt component");
-                saltComponent = createSaltComponent(stack, stateConfigZip);
-            } else {
-                LOGGER.debug("Overwrite existing salt component attributes");
-                saltComponent.setAttributes(new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))));
-            }
-            return clusterComponentProvider.store(saltComponent);
+            return updateSaltComponent(stack, stateConfigZip);
         } catch (IOException e) {
             throw new CloudbreakServiceException(e);
         }
+    }
+
+    public ClusterComponent updateSaltComponent(Stack stack, byte[] stateConfigZip) {
+        ClusterComponent saltComponent = clusterComponentProvider.getComponent(stack.getCluster().getId(), ComponentType.SALT_STATE);
+        if (saltComponent == null) {
+            LOGGER.debug("Create new salt component");
+            saltComponent = createSaltComponent(stack, stateConfigZip);
+        } else {
+            LOGGER.debug("Overwrite existing salt component attributes");
+            saltComponent.setAttributes(new Json(singletonMap(ComponentType.SALT_STATE.name(), Base64.encodeBase64String(stateConfigZip))));
+        }
+        return clusterComponentProvider.store(saltComponent);
     }
 
     private void saveOrchestrator(Stack stack, InstanceMetaData primaryGateway) {

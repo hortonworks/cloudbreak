@@ -1,0 +1,1 @@
+mycomponent1
