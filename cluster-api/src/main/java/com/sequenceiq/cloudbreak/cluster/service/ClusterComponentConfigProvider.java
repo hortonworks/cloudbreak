@@ -6,12 +6,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.codec.binary.Base64;
 import org.hibernate.envers.AuditReader;
 import org.hibernate.envers.exception.NotAuditedException;
 import org.slf4j.Logger;
@@ -76,6 +78,24 @@ public class ClusterComponentConfigProvider {
         return components.stream().map(component ->
                 retrieveFromAttribute(component, ClouderaManagerProduct.class))
                 .collect(Collectors.toList());
+    }
+
+    public byte[] getSaltStateComponent(Long clusterId) {
+        byte[] result = null;
+        ClusterComponent component = ofNullable(getComponent(clusterId, ComponentType.SALT_STATE))
+                .orElse(getComponent(clusterId, ComponentType.SALT_STATE));
+        if (component != null && ComponentType.SALT_STATE.equals(component.getComponentType())) {
+            Json jsonAttr = component.getAttributes();
+            if (jsonAttr != null) {
+                Map<String, Object> saltStateMap = jsonAttr.getMap();
+                String key = ComponentType.SALT_STATE.name();
+                if (saltStateMap.containsKey(key) && saltStateMap.get(key) != null) {
+                    String base64Content = saltStateMap.get(key).toString();
+                    result = Base64.decodeBase64(base64Content);
+                }
+            }
+        }
+        return result;
     }
 
     public <T> T getComponent(Collection<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
