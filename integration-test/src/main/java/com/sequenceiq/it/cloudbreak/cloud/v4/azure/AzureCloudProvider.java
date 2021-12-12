@@ -478,8 +478,8 @@ public class AzureCloudProvider extends AbstractCloudProvider {
     public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
         return environmentTestDto.withAzure(AzureEnvironmentParameters.builder()
                 .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
-                        .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName(true))
-                        .withEncryptionKeyUrl(getEncryptionKeyUrl(true))
+                        .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
+                        .withEncryptionKeyUrl(getEncryptionKeyUrl())
                         .build())
                 .build());
     }
@@ -489,15 +489,11 @@ public class AzureCloudProvider extends AbstractCloudProvider {
         return distroXTestDtoBase;
     }
 
-    public String getEncryptionResourceGroupName(boolean environmentEncryption) {
-        return environmentEncryption
-                ? azureProperties.getDiskEncryption().getEnvironmentKey().getResourceGroupName()
-                : azureProperties.getDiskEncryption().getDatahubKey().getResourceGroupName();
+    public String getEncryptionResourceGroupName() {
+        return azureProperties.getDiskEncryption().getResourceGroupName();
     }
 
-    public String getEncryptionKeyUrl(boolean environmentEncryption) {
-        return environmentEncryption
-                ? azureProperties.getDiskEncryption().getEnvironmentKey().getEncryptionKeyUrl()
-                : azureProperties.getDiskEncryption().getDatahubKey().getEncryptionKeyUrl();
+    public String getEncryptionKeyUrl() {
+        return azureProperties.getDiskEncryption().getEncryptionKeyUrl();
     }
 }

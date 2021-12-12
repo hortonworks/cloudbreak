@@ -194,12 +194,8 @@ integrationtest:
         imageId: dc277098-ea7c-48b7-b1a2-89950b989b6a
         catalog: https://cloudbreak-imagecatalog.s3.us-west-1.amazonaws.com/freeipa-upgrade-test-catalog.json
     diskEncryption:
-      environmentKey:
-        encryptionKeyUrl:
-        resourceGroupName:
-      datahubKey:
-        encryptionKeyUrl:
-        resourceGroupName:
+      encryptionKeyUrl:
+      resourceGroupName:
 
   # gcp parameters
   gcp:

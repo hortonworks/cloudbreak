@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 
 public interface CloudFunctionality {
@@ -28,7 +29,7 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    List<String> listVolumeKmsKeyIds(List<String> instanceIds);
+    List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds);
 
     @Retryable(
             maxAttempts = ATTEMPTS,
@@ -47,6 +48,18 @@ public interface CloudFunctionality {
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
     void stopInstances(String clusterName, List<String> instanceIds);
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    ResourceGroup createResourceGroup(String resourceGroupName);
+
+    @Retryable(
+            maxAttempts = ATTEMPTS,
+            backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
+    )
+    void deleteResourceGroup(String resourceGroupName);
 
     @Retryable(
             maxAttempts = ATTEMPTS,
