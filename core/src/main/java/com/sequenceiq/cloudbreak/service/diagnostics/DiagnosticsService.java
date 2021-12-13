@@ -40,6 +40,7 @@ import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -88,12 +89,12 @@ public class DiagnosticsService {
     private FlowLogsToListDiagnosticsCollectionResponseConverter flowLogsToListDiagnosticsCollectionResponseConverter;
 
     public ListDiagnosticsCollectionResponse getDiagnosticsCollections(String stackCrn) {
-        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, DiagnosticsCollectionFlowConfig.class);
+        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, ClassValue.of(DiagnosticsCollectionFlowConfig.class));
         return flowLogsToListDiagnosticsCollectionResponseConverter.convert(flowLogs);
     }
 
     public void cancelDiagnosticsCollections(String stackCrn) {
-        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, DiagnosticsCollectionFlowConfig.class);
+        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, ClassValue.of(DiagnosticsCollectionFlowConfig.class));
         flowLogs.stream()
                 .filter(f -> !f.getFinalized())
                 .forEach(cancelFlow());

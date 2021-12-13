@@ -340,14 +340,14 @@ public class FlowLogDBService implements FlowLogService {
         return flowLogs.stream().anyMatch(pendingFlowLogPredicate());
     }
 
-    public <T extends AbstractFlowConfiguration> List<FlowLog> getFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
+    public <T extends AbstractFlowConfiguration> List<FlowLog> getFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
         Long resourceId = getResourceIdByCrnOrName(resourceCrn);
-        return flowLogRepository.findAllFlowByType(resourceId, clazz);
+        return flowLogRepository.findAllFlowByType(resourceId, classValue);
     }
 
-    public <T extends AbstractFlowConfiguration> List<FlowLog> getLatestFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
+    public <T extends AbstractFlowConfiguration> List<FlowLog> getLatestFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
         Long resourceId = getResourceIdByCrnOrName(resourceCrn);
-        return flowLogRepository.findLastFlowLogsByTypeAndResourceId(resourceId, clazz);
+        return flowLogRepository.findLastFlowLogsByTypeAndResourceId(resourceId, classValue);
     }
 
     public List<FlowLog> getLatestFlowLogsByCrnInFlowChain(String resourceCrn) {

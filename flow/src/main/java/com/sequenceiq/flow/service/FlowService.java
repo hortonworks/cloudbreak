@@ -31,6 +31,7 @@ import com.sequenceiq.flow.converter.FlowProgressResponseConverter;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
 import com.sequenceiq.flow.core.stats.FlowOperationStatisticsService;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowChainLog;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -96,10 +97,10 @@ public class FlowService {
         return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
-    public <T extends AbstractFlowConfiguration> List<FlowLogResponse> getFlowLogsByCrnAndType(String resourceCrn, Class<T> clazz) {
+    public <T extends AbstractFlowConfiguration> List<FlowLogResponse> getFlowLogsByCrnAndType(String resourceCrn, ClassValue classValue) {
         checkState(Crn.isCrn(resourceCrn));
-        LOGGER.info("Getting flow logs by resource crn {} and type {}", resourceCrn, clazz.getCanonicalName());
-        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, clazz);
+        LOGGER.info("Getting flow logs by resource crn {} and type {}", resourceCrn, classValue.getClassValue().getCanonicalName());
+        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, classValue);
         return flowLogs.stream().map(flowLog -> flowLogConverter.convert(flowLog)).collect(Collectors.toList());
     }
 
@@ -235,10 +236,11 @@ public class FlowService {
         return flowProgressResponseConverter.convertList(flowLogs, resourceCrn);
     }
 
-    public <T extends AbstractFlowConfiguration> Optional<FlowProgressResponse> getLastFlowProgressByResourceCrnAndType(String resourceCrn, Class<T> clazz) {
+    public <T extends AbstractFlowConfiguration> Optional<FlowProgressResponse> getLastFlowProgressByResourceCrnAndType(
+            String resourceCrn, ClassValue classValue) {
         checkState(Crn.isCrn(resourceCrn));
-        LOGGER.info("Getting flow logs (progress) by resource crn {} and type {}", resourceCrn, clazz.getCanonicalName());
-        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, clazz);
+        LOGGER.info("Getting flow logs (progress) by resource crn {} and type {}", resourceCrn, classValue.getClassValue().getCanonicalName());
+        List<FlowLog> flowLogs = flowLogDBService.getFlowLogsByCrnAndType(resourceCrn, classValue);
         FlowProgressResponse response = flowProgressResponseConverter.convert(flowLogs, resourceCrn);
         if (StringUtils.isBlank(response.getFlowId())) {
             LOGGER.debug("Not found any historical flow data for requested resource (crn: {})", resourceCrn);

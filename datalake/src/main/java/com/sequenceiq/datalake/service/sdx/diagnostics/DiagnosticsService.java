@@ -30,6 +30,7 @@ import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.validation.diagnostics.DiagnosticsCollectionValidator;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.Flow2Handler;
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.flowlog.FlowLogDBService;
 
@@ -73,7 +74,7 @@ public class DiagnosticsService {
 
     public void cancelDiagnosticsCollection(String stackCrn) {
         diagnosticsV4Endpoint.cancelCollections(stackCrn);
-        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, SdxDiagnosticsFlowConfig.class);
+        List<FlowLog> flowLogs = flowLogDBService.getLatestFlowLogsByCrnAndType(stackCrn, ClassValue.of(SdxDiagnosticsFlowConfig.class));
         flowLogs.stream()
                 .filter(f -> !f.getFinalized())
                 .forEach(cancelFlow());
