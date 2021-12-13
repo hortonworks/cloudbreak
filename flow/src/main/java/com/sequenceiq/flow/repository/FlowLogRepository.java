@@ -13,6 +13,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 import com.sequenceiq.flow.domain.StateStatus;
@@ -40,13 +41,13 @@ public interface FlowLogRepository extends CrudRepository<FlowLog, Long> {
     Set<FlowLog> findAllUnassigned();
 
     @Query("SELECT fl FROM FlowLog fl WHERE fl.flowType = :flowType AND fl.resourceId = :resourceId ORDER BY fl.created DESC")
-    List<FlowLog> findAllFlowByType(@Param("resourceId") Long resourceId, @Param("flowType") Class<?> clazz);
+    List<FlowLog> findAllFlowByType(@Param("resourceId") Long resourceId, @Param("flowType") ClassValue classValue);
 
     @Query("SELECT fl FROM FlowLog fl WHERE fl.created IN " +
             "( SELECT max(fls.created) from FlowLog fls WHERE fls.flowType = :flowType and fls.resourceId = :resourceId " +
             "GROUP BY (fls.flowId, fls.resourceId)) " +
             "ORDER BY fl.created DESC ")
-    List<FlowLog> findLastFlowLogsByTypeAndResourceId(@Param("resourceId") Long resourceId, @Param("flowType") Class<?> clazz);
+    List<FlowLog> findLastFlowLogsByTypeAndResourceId(@Param("resourceId") Long resourceId, @Param("flowType") ClassValue classValue);
 
     @Query("SELECT fl.flowId FROM FlowLog fl WHERE fl.flowChainId IN (:chainIds)")
     Set<String> findAllFlowIdsByChainIds(@Param("chainIds") Set<String> chainIds);
