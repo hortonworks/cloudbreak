@@ -45,7 +45,7 @@ public class SdxBackupRestoreTest extends PreconditionSdxE2ETest {
         createEnvironmentWithFreeIpaAndDatalake(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT, description = "We need to wait the CB-13322 to be resolved")
+    @Test(dataProvider = TEST_CONTEXT, description = "IGNORED: CB-14825 SDX backup flow has been finalised with failed status")
     @UseSpotInstances
     @Description(
             given = "there is a running Manowar SDX cluster in available state",

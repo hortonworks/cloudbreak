@@ -1,0 +1,8 @@
+name: "sdx-backup-restore-tests"
+tests:
+  - name: "sdx_backup_restore_e2e_tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.l0promotion.SdxBackupRestoreTest
+        excludedMethods:
+          # CB-14825 SDX backup flow has been finalised with failed status
+          - testSDXBackupRestoreCanBeSuccessful
