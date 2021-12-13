@@ -7,7 +7,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
@@ -53,8 +52,7 @@ public class DistroXStopStartTest extends AbstractE2ETest {
         createEnvironmentWithFreeIpaAndDatalake(testContext);
     }
 
-    @Ignore("Increase in CM API call fails with SocketTimeoutException")
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, description = "IGNORED: CB-15434 CM API calls fail on Azure with SocketTimeoutException")
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",

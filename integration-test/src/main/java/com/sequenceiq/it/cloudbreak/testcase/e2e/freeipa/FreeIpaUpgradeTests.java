@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import javax.inject.Inject;
 
-import org.testng.annotations.Ignore;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -57,8 +56,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .validate();
     }
 
-    @Ignore("Fails with {status=TIMEDOUT}")
-    @Test(dataProvider = TEST_CONTEXT)
+    @Test(dataProvider = TEST_CONTEXT, description = "IGNORED: CB-15466 Azure FreeIPA Upgrade operation has been timed out with no error message")
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent with 3 FreeIPA instances " +
