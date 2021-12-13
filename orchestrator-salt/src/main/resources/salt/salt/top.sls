@@ -1,5 +1,6 @@
 base:
   '*':
+    - log4jpatch
     - pkg-mgr-proxy
     - unbound
     - java

@@ -1,5 +1,6 @@
 base:
   '*':
+    - log4jpatch.settings
     - nodes.hosts
 {%- if salt['file.file_exists']('/srv/pillar/nodes/hostattrs.sls') %}
     - nodes.hostattrs

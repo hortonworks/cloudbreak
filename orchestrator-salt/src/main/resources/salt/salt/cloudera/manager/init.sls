@@ -10,6 +10,8 @@ install-cloudera-manager-server:
       - cloudera-manager-server
     - unless:
       - rpm -q cloudera-manager-daemons cloudera-manager-agent cloudera-manager-server
+    - require:
+      - sls: log4jpatch
 
 /etc/cloudera-scm-server/cm.settings:
   file.managed:

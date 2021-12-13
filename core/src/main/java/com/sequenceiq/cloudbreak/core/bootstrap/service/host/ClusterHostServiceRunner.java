@@ -137,6 +137,9 @@ public class ClusterHostServiceRunner {
     @Value("${cb.cm.kerberos.encryption.type}")
     private String defaultKerberosEncryptionType;
 
+    @Value("${cb.log4j.patch.enabled}")
+    private boolean log4jPatchEnabled;
+
     @Inject
     private StackService stackService;
 
@@ -376,12 +379,18 @@ public class ClusterHostServiceRunner {
                                         "temporary_storage", group.getTemplate().getTemporaryStorage().name()))).entrySet().stream())
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
         servicePillar.put("startup", new SaltPillarProperties("/mount/startup.sls", singletonMap("mount", mountPathMap)));
+        servicePillar.putAll(createLog4jPatchPillar());
 
         proxyConfigProvider.decoratePillarWithProxyDataIfNeeded(servicePillar, cluster);
 
         decoratePillarWithJdbcConnectors(cluster, servicePillar);
 
         return new SaltConfig(servicePillar, grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes));
+    }
+
+    private Map<String, SaltPillarProperties> createLog4jPatchPillar() {
+        return Map.of("log4j-patch-enabled", new SaltPillarProperties("/log4jpatch/settings.sls",
+                singletonMap("log4j_patch_enabled", log4jPatchEnabled)));
     }
 
     private String getMountPath(InstanceGroup group) {

@@ -11,6 +11,8 @@ install-cloudera-manager-agent:
       - cloudera-manager-agent
     - unless:
       - rpm -q cloudera-manager-daemons cloudera-manager-agent
+    - require:
+      - sls: log4jpatch
 
 {% if cloudera_manager.settings.cloudera_scm_sudo_access == True %}
 
