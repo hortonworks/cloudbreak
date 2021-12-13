@@ -1,6 +1,7 @@
-name: "aws-distrox-tests"
+name: "aws-pr-tests"
 tests:
-  - name: "[pull_request]_aws_distrox_e2e_tests"
+  - name: "[pull_request]_aws_e2e_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
