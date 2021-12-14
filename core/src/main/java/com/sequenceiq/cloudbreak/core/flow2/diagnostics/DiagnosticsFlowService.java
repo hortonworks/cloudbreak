@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -46,6 +47,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryVersionConfiguration;
 import com.sequenceiq.cloudbreak.usage.UsageReporter;
+import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
+import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
 
 @Service
 public class DiagnosticsFlowService {
@@ -60,6 +63,8 @@ public class DiagnosticsFlowService {
 
     private static final String AWS_EC2_METADATA_SERVICE_WARNING = "Could be related with unavailable instance metadata service response " +
             "from ec2 node. (region, domain)";
+
+    private static final Integer ERROR_MESSAGE_MAX_LENGTH = 1000;
 
     @Inject
     private StackService stackService;
@@ -90,6 +95,34 @@ public class DiagnosticsFlowService {
 
     @Inject
     private UsageReporter usageReporter;
+
+    public void vmDiagnosticsReport(String resourceCrn, DiagnosticParameters parameters) {
+        vmDiagnosticsReport(resourceCrn, parameters, null, null);
+    }
+
+    public void vmDiagnosticsReport(String resourceCrn, DiagnosticParameters parameters, UsageProto.CDPVMDiagnosticsFailureType.Value failureType,
+            Exception exception) {
+        if (parameters == null) {
+            LOGGER.debug("Skip sending diagnostics report as diagnostic parameter input is empty.");
+            return;
+        }
+        UsageProto.CDPVMDiagnosticsEvent.Builder eventBuilder = UsageProto.CDPVMDiagnosticsEvent.newBuilder();
+        if (exception != null) {
+            eventBuilder.setFailureMessage(StringUtils.left(exception.getMessage(), ERROR_MESSAGE_MAX_LENGTH));
+            eventBuilder.setResult(UsageProto.CDPVMDiagnosticsResult.Value.FAILED);
+        } else {
+            eventBuilder.setResult(UsageProto.CDPVMDiagnosticsResult.Value.SUCCESSFUL);
+        }
+        setIfNotNull(eventBuilder::setFailureType, failureType);
+        setIfNotNull(eventBuilder::setUuid, parameters.getUuid());
+        setIfNotNull(eventBuilder::setDescription, parameters.getDescription());
+        setIfNotNull(eventBuilder::setAccountId, parameters.getAccountId());
+        setIfNotNull(eventBuilder::setInputParameters, parameters.toMap().toString());
+        setIfNotNull(eventBuilder::setResourceCrn, resourceCrn);
+        UsageProto.CDPVMDiagnosticsDestination.Value dest = convertUsageDestination(parameters.getDestination());
+        setIfNotNull(eventBuilder::setDestination, dest);
+        usageReporter.cdpVmDiagnosticsEvent(eventBuilder.build());
+    }
 
     public void nodeStatusNetworkReport(Long stackId) {
         try {
@@ -441,10 +474,31 @@ public class DiagnosticsFlowService {
                 .collect(Collectors.toList());
     }
 
+    private UsageProto.CDPVMDiagnosticsDestination.Value convertUsageDestination(DiagnosticsDestination destination) {
+        switch (destination) {
+            case LOCAL:
+                return UsageProto.CDPVMDiagnosticsDestination.Value.LOCAL;
+            case CLOUD_STORAGE:
+                return UsageProto.CDPVMDiagnosticsDestination.Value.CLOUD_STORAGE;
+            case SUPPORT:
+                return UsageProto.CDPVMDiagnosticsDestination.Value.SUPPORT;
+            case ENG:
+                return UsageProto.CDPVMDiagnosticsDestination.Value.ENGINEERING;
+            default:
+                return UsageProto.CDPVMDiagnosticsDestination.Value.UNSET;
+        }
+    }
+
     public boolean isVersionGreaterOrEqual(String actualVersion, String versionToCompare) {
         ModuleDescriptor.Version actVersion = ModuleDescriptor.Version.parse(actualVersion);
         ModuleDescriptor.Version versionToCmp = ModuleDescriptor.Version.parse(versionToCompare);
         return actVersion.compareTo(versionToCmp) >= 0;
+    }
+
+    private <T> void setIfNotNull(final Consumer<T> setter, final T value) {
+        if (value != null) {
+            setter.accept(value);
+        }
     }
 
 }

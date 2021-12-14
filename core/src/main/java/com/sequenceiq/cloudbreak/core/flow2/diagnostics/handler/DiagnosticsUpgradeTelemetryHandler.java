@@ -58,7 +58,7 @@ public class DiagnosticsUpgradeTelemetryHandler extends EventSenderAwareHandler<
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
             LOGGER.debug("Diagnostics upgrade cdp-telemetry failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
-            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters);
+            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters, null);
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
     }

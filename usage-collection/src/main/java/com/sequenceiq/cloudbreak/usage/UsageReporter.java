@@ -128,4 +128,11 @@ public interface UsageReporter {
      */
     void cdpNetworkCheckEvent(
             UsageProto.CDPNetworkCheck details);
+
+    /**
+     * Reports CDP VM diagnostics results.
+     * @param details the event details
+     */
+    void cdpVmDiagnosticsEvent(
+            UsageProto.CDPVMDiagnosticsEvent details);
 }

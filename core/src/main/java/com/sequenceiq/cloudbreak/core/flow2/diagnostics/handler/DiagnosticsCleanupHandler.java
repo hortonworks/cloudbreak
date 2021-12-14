@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionFailureEvent;
@@ -62,7 +63,8 @@ public class DiagnosticsCleanupHandler extends EventSenderAwareHandler<Diagnosti
             eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
         } catch (Exception e) {
             LOGGER.debug("Diagnostics cleanup failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
-            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters);
+            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters,
+                    UsageProto.CDPVMDiagnosticsFailureType.Value.CLEANUP_FAILURE.name());
             eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
         }
     }
