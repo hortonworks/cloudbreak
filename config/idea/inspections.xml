@@ -1,5 +1,5 @@
 <profile version="1.0">
-  <option name="myName" value="CloudbreakDefault" />
+  <option name="myName" value="Default" />
   <inspection_tool class="AbstractClassNamingConvention" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="AbstractClassNeverImplemented" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="AbstractMethodOverridesAbstractMethod" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -460,16 +460,7 @@
   <inspection_tool class="MultipleTopLevelClassesInFile" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="MultipleTypedDeclaration" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="NakedNotify" enabled="true" level="WARNING" enabled_by_default="true" />
-  <inspection_tool class="NewMethodNamingConvention" enabled="true" level="ERROR" enabled_by_default="true">
-    <extension name="JUnit3MethodNamingConvention" enabled="true" />
-    <extension name="JUnit4MethodNamingConvention" enabled="true" />
-    <extension name="NativeMethodNamingConvention" enabled="true" />
-    <extension name="TestNGMethodNamingConvention" enabled="true">
-      <option name="m_regex" value="[a-z][A-Za-z_\d]*" />
-      <option name="m_minLength" value="4" />
-      <option name="m_maxLength" value="63" />
-    </extension>
-  </inspection_tool>
+  <inspection_tool class="NativeMethodNamingConvention" enabled="true" level="WARNING" enabled_by_default="true" />
   <inspection_tool class="NegatedConditional" enabled="true" level="WARNING" enabled_by_default="true">
     <option name="m_ignoreNegatedNullComparison" value="true" />
   </inspection_tool>
