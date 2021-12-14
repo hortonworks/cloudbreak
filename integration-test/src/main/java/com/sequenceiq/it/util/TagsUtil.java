@@ -16,7 +16,6 @@ import org.testng.asserts.SoftAssert;
 import com.google.common.base.Objects;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.tag.request.TaggableRequest;
 import com.sequenceiq.common.api.tag.response.TaggedResponse;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -44,18 +43,18 @@ public class TagsUtil {
 
     static final String TEST_NAME_TAG_VALUE_FAILURE_PATTERN = "Test name tag: [%s] value is: [%s] NOT equals [%s] test method name!";
 
-    private static final int TAGS_MAX_LENGTH = 128;
+    private static final int GCP_TAG_MAX_LENGTH = 63;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TagsUtil.class);
 
     @Inject
     private GcpLabelUtil gcpLabelUtil;
 
-    public void addTestNameTag(CloudPlatform cloudPlatform, CloudbreakTestDto testDto, String testName) {
+    public void addTestNameTag(CloudbreakTestDto testDto, String testName) {
         if (testDto instanceof AbstractTestDto) {
             Object request = ((AbstractTestDto<?, ?, ?, ?>) testDto).getRequest();
             if (request instanceof TaggableRequest) {
-                addTags(cloudPlatform, (TaggableRequest) request, TEST_NAME_TAG, testName);
+                addTags((TaggableRequest) request, TEST_NAME_TAG, testName);
             }
         }
     }
@@ -92,28 +91,45 @@ public class TagsUtil {
                     if (StringUtils.isEmpty(tagValue)) {
                         tagValue = response.getTagValue(tag.toLowerCase());
                     }
-                    Log.log(LOGGER, format(" PASSED:: Default tag: [%s] value is: [%s] present! ", tag, tagValue));
-                    softAssert.assertNotNull(tagValue, format(MISSING_DEFAULT_TAG, tag));
+                    Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] Not Null! ", tag, tagValue));
+                    softAssert.assertNotNull(tagValue, String.format(MISSING_DEFAULT_TAG, tag));
                 }
             });
             softAssert.assertAll();
         } catch (NullPointerException e) {
             LOGGER.error("Tag validation is not possible, because of response: {} throws: {}!", response, e.getMessage(), e);
-            throw new TestFailException(format(" Tag validation is not possible, because of response: %s", response), e);
+            throw new TestFailException(String.format(" Tag validation is not possible, because of response: %s", response), e);
         }
     }
 
-    private void addTags(CloudPlatform cloudPlatform, TaggableRequest taggableRequest, String tagKey, String tagValue) {
-        tagKey = applyLengthRestrictions(cloudPlatform, tagKey);
-        tagValue = applyLengthRestrictions(cloudPlatform, tagValue);
+    private void addTags(TaggableRequest taggableRequest, String tagKey, String tagValue) {
+        tagKey = applyLengthRestrictions(tagKey);
+        tagValue = applyLengthRestrictions(tagValue);
         taggableRequest.addTag(tagKey, tagValue);
     }
 
-    private String applyLengthRestrictions(CloudPlatform cloudPlatform, String tag) {
-        if (CloudPlatform.GCP.equals(cloudPlatform) || tag.length() > TAGS_MAX_LENGTH) {
-            tag = gcpLabelUtil.transformLabelKeyOrValue(tag);
+    private String applyLengthRestrictions(String tag) {
+        if (tag.length() > GCP_TAG_MAX_LENGTH) {
+            tag = tag.substring(0, GCP_TAG_MAX_LENGTH - 1);
         }
         return tag;
+    }
+
+    private void validateOwnerTag(TaggedResponse response, String tag, TestContext testContext) {
+        String tagValue = response.getTagValue(tag);
+        if (StringUtils.isNotEmpty(tagValue)) {
+            if (tagValue.equals(testContext.getActingUserName()) || tagValue.equals(sanitize(testContext.getActingUserName()))) {
+                Log.log(LOGGER, format("Default tag: [%s] value is: [%s] equals [%s] acting user name! ", tag, tagValue,
+                        testContext.getActingUserName()));
+            } else if (gcpLabelTransformedValue(tagValue, testContext.getActingUserName())) {
+                Log.log(LOGGER, format("Default tag: [%s] value is: [%s] equals [%s] acting user name transformed to a GCP label value! ", tag,
+                        tagValue, testContext.getActingUserName()));
+            }
+        } else {
+            String message = format(ACTING_USER_NAME_VALUE_FAILURE_PATTERN, tag, tagValue, testContext.getActingUserName());
+            LOGGER.error(message);
+            throw new TestFailException(message);
+        }
     }
 
     private String sanitize(String value) {
@@ -124,78 +140,46 @@ public class TagsUtil {
         return tagValue.equals(gcpLabelUtil.transformLabelKeyOrValue(rawValue));
     }
 
-    private void validateOwnerTag(TaggedResponse response, String tag, TestContext testContext) {
-        String tagValue = response.getTagValue(tag);
-        String actingUserName = testContext.getActingUserName();
+    private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
+        Crn actingUserCrn = testContext.getActingUserCrn();
 
-        if (StringUtils.isNotEmpty(tagValue)) {
-            if (tagValue.equals(actingUserName) || tagValue.equals(sanitize(actingUserName))) {
-                Log.log(LOGGER, format(" PASSED:: Default tag: [%s] value: [%s] equals [%s] acting user name! ", tag, tagValue, actingUserName));
-            } else if (gcpLabelTransformedValue(tagValue, actingUserName)) {
-                Log.log(LOGGER, format(" PASSED:: Default tag: [%s] value: [%s] equals [%s] acting user name transformed to a GCP label value! ", tag,
-                        tagValue, actingUserName));
+        String tagValue = response.getTagValue(tag);
+        if (StringUtils.isEmpty(tagValue)) {
+            tagValue = response.getTagValue(tag.toLowerCase());
+        }
+        if (actingUserCrn != null && gcpLabelTransformedValue(tagValue, actingUserCrn.toString())) {
+            Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN transformed to a GCP label value! ", tag, tagValue,
+                    actingUserCrn));
+        } else {
+            Crn creatorResourceNameTag = Crn.fromString(tagValue);
+
+            if (actingUserCrn != null && creatorResourceNameTag != null && crnEqualsWithoutConsideringPartition(actingUserCrn, creatorResourceNameTag)) {
+                Log.log(LOGGER, format(" Default tag: [%s] value is: [%s] equals [%s] acting user CRN! ", tag, creatorResourceNameTag, actingUserCrn));
             } else {
-                String message = format(ACTING_USER_NAME_VALUE_FAILURE_PATTERN, tag, tagValue, actingUserName);
+                String message = format(ACTING_USER_CRN_VALUE_FAILURE_PATTERN, tag, creatorResourceNameTag, actingUserCrn);
                 LOGGER.error(message);
                 throw new TestFailException(message);
             }
-        } else {
-            throw new TestFailException(format("[%s] tag validation is not possible, because of the tag value is empty or null!", tag));
-        }
-    }
-
-    private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
-        String tagValue = response.getTagValue(tag);
-        String actingUser = testContext.getActingUserCrn().toString();
-
-        if (StringUtils.isNotEmpty(tagValue)) {
-            if (tagValue.equals(actingUser)) {
-                Log.log(LOGGER, format(" PASSED:: Default tag: [%s] value: [%s] equals [%s] acting user CRN! ", tag, tagValue, actingUser));
-            } else if (gcpLabelTransformedValue(tagValue, actingUser)) {
-                Log.log(LOGGER, format(" PASSED:: Default tag: [%s] value: [%s] equals [%s] acting user CRN transformed to a GCP label value! ", tag, tagValue,
-                        actingUser));
-            } else {
-                Crn actingUserCrn = java.util.Objects.requireNonNull(Crn.fromString(actingUser));
-                Crn creatorCrn = java.util.Objects.requireNonNull(Crn.fromString(tagValue));
-
-                if (crnEqualsWithoutConsideringPartition(actingUserCrn, creatorCrn)) {
-                    Log.log(LOGGER, format(" PASSED:: Default tag: [%s] value: [%s] equals [%s] acting user CRN partitions! ", tag, creatorCrn,
-                            actingUserCrn));
-                } else {
-                    String message = format(ACTING_USER_CRN_VALUE_FAILURE_PATTERN, tag, tagValue, actingUserCrn);
-                    LOGGER.error(message);
-                    throw new TestFailException(message);
-                }
-            }
-        } else {
-            throw new TestFailException(format("[%s] tag validation is not possible, because of the tag value is empty or null!", tag));
         }
     }
 
     private void validateTestNameTag(TaggedResponse response, TestContext testContext) {
-        String tagValue = response.getTagValue(TEST_NAME_TAG);
-        String testName = testContext.getTestMethodName().orElseThrow(() -> new TestFailException("Test method name cannot be found for tag validation!"));
-
-        if (StringUtils.isNotEmpty(tagValue)) {
-            testName = applyLengthRestrictions(testContext.getCloudProvider().getCloudPlatform(), testName);
-
-            if (tagValue.equalsIgnoreCase(testName)) {
-                Log.log(LOGGER, format(" PASSED:: [%s] tag value: [%s] equals [%s] test method name! ", TEST_NAME_TAG, tagValue, testName));
-            } else {
-                String message = format(TEST_NAME_TAG_VALUE_FAILURE_PATTERN, TEST_NAME_TAG, tagValue, testName);
-                LOGGER.error(message);
-                throw new TestFailException(message);
-            }
+        String testNameTagValue = response.getTagValue(TEST_NAME_TAG);
+        if (StringUtils.isNotEmpty(testNameTagValue) && testNameTagValue.toLowerCase().equals(testContext.getTestMethodName().get().toLowerCase())) {
+            Log.log(LOGGER, format("Test name tag: [%s] value is: [%s] equals [%s] test method name! ", TEST_NAME_TAG, testNameTagValue,
+                    testContext.getTestMethodName().get()));
         } else {
-            throw new TestFailException(format("[%s] tag validation is not possible, because of the tag value is empty or null!", TEST_NAME_TAG));
+            String message = format(TEST_NAME_TAG_VALUE_FAILURE_PATTERN, TEST_NAME_TAG, testNameTagValue, testContext.getTestMethodName().get());
+            LOGGER.error(message);
+            throw new TestFailException(message);
         }
     }
 
-    private boolean crnEqualsWithoutConsideringPartition(Crn actingUserCrn, Crn creatorCrn) {
-        return Objects.equal(actingUserCrn.getService(), creatorCrn.getService())
-                && Objects.equal(actingUserCrn.getRegion(), creatorCrn.getRegion())
-                && Objects.equal(actingUserCrn.getAccountId(), creatorCrn.getAccountId())
-                && Objects.equal(actingUserCrn.getResourceType(), creatorCrn.getResourceType())
-                && Objects.equal(actingUserCrn.getResource(), creatorCrn.getResource());
+    private boolean crnEqualsWithoutConsideringPartition(Crn actingUserCrn, Crn creatorResourceNameTag) {
+        return Objects.equal(actingUserCrn.getService(), creatorResourceNameTag.getService())
+                && Objects.equal(actingUserCrn.getRegion(), creatorResourceNameTag.getRegion())
+                && Objects.equal(actingUserCrn.getAccountId(), creatorResourceNameTag.getAccountId())
+                && Objects.equal(actingUserCrn.getResourceType(), creatorResourceNameTag.getResourceType())
+                && Objects.equal(actingUserCrn.getResource(), creatorResourceNameTag.getResource());
     }
 }
