@@ -24,9 +24,12 @@ public class FreeIpaRebuildAction implements Action<FreeIpaTestDto, FreeIpaClien
         request.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
         request.setSourceCrn(testDto.getCrn());
         Log.whenJson(LOGGER, format(" FreeIPA rebuild request: %n"), request);
-        client.getDefaultClient()
-                .getFreeIpaV1Endpoint()
-                .rebuild(request);
+        testDto.setResponse(
+                client.getDefaultClient()
+                        .getFreeIpaV1Endpoint()
+                        .rebuild(request));
+        Log.whenJson(LOGGER, format(" FreeIPA rebuilt successfully:%n"), testDto.getResponse());
+        Log.when(LOGGER, format(" FreeIPA CRN: %s", testDto.getResponse().getCrn()));
         return testDto;
     }
 }
