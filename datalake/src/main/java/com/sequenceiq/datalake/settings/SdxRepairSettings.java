@@ -8,7 +8,6 @@ import java.util.stream.Stream;
 
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
@@ -36,7 +35,7 @@ public class SdxRepairSettings {
                     ", or nodes ('nodesIds').");
         }
         SdxRepairSettings settings = new SdxRepairSettings();
-        if (Strings.isNotEmpty(request.getHostGroupName())) {
+        if (StringUtils.isNotEmpty(request.getHostGroupName())) {
             settings.hostGroupNames.add(request.getHostGroupName());
         } else if (CollectionUtils.isNotEmpty(request.getHostGroupNames())) {
             settings.hostGroupNames.addAll(request.getHostGroupNames());

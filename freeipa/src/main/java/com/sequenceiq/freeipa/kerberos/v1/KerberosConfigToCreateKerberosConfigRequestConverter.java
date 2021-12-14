@@ -1,6 +1,6 @@
 package com.sequenceiq.freeipa.kerberos.v1;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.ActiveDirectoryKerberosDescriptor;
@@ -87,7 +87,7 @@ public class KerberosConfigToCreateKerberosConfigRequestConverter {
     }
 
     private String getFakeSecretIfNotNull(String value, String postfix) {
-        if (Strings.isNotBlank(value)) {
+        if (StringUtils.isNotBlank(value)) {
             String postString = postfix != null ? postfix : "secret";
             return "fake-" + postString;
         }

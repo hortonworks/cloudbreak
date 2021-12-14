@@ -5,7 +5,7 @@ import java.util.Optional;
 
 import javax.inject.Inject;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -59,7 +59,7 @@ public class ImageCatalogService implements ResourcePropertyProvider {
                     imageSettingsV4Request.getCatalog(), imageSettingsV4Request.getId());
             ImagesV4Response imagesV4Response = null;
             try {
-                if (Strings.isBlank(imageSettingsV4Request.getCatalog())) {
+                if (StringUtils.isBlank(imageSettingsV4Request.getCatalog())) {
                     imagesV4Response = imageCatalogV4Endpoint.getImageByImageId(SdxService.WORKSPACE_ID_DEFAULT, imageSettingsV4Request.getId(), accountId);
                 } else {
                     imagesV4Response = imageCatalogV4Endpoint.getImageByCatalogNameAndImageId(SdxService.WORKSPACE_ID_DEFAULT,

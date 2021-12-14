@@ -6,7 +6,6 @@ import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
 
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
-import static org.apache.logging.log4j.util.Strings.isEmpty;
 
 import java.util.HashSet;
 import java.util.Map;
@@ -235,11 +234,11 @@ public class EnvironmentValidatorService {
     }
 
     private boolean isAnySecurityGroupMissing(SecurityAccessDto securityAccessDto) {
-        return isEmpty(securityAccessDto.getDefaultSecurityGroupId()) || isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
+        return StringUtils.isEmpty(securityAccessDto.getDefaultSecurityGroupId()) || StringUtils.isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
     }
 
     private boolean isAllSecurityGroupMissing(SecurityAccessDto securityAccessDto) {
-        return isEmpty(securityAccessDto.getDefaultSecurityGroupId()) && isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
+        return StringUtils.isEmpty(securityAccessDto.getDefaultSecurityGroupId()) && StringUtils.isEmpty(securityAccessDto.getSecurityGroupIdForKnox());
     }
 
     private boolean platformEnabled(Set<String> cloudPlatforms, String cloudPlatform) {
