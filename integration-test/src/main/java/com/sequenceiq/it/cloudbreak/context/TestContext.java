@@ -3,17 +3,14 @@ package com.sequenceiq.it.cloudbreak.context;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 
 import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -109,9 +106,6 @@ public abstract class TestContext implements ApplicationContextAware {
     @Value("${integrationtest.testsuite.cleanUp:true}")
     private boolean cleanUp;
 
-    @Value("${integrationtest.testsuite.pollingInterval:1000}")
-    private long pollingInterval;
-
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
@@ -150,10 +144,6 @@ public abstract class TestContext implements ApplicationContextAware {
     private boolean initialized;
 
     private CloudbreakUser actingUser;
-
-    public Duration getPollingDurationInMills() {
-        return Duration.of(pollingInterval, ChronoUnit.MILLIS);
-    }
 
     public Map<String, CloudbreakTestDto> getResourceNames() {
         return resourceNames;
@@ -924,33 +914,18 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(Class<T> entityClass, Map<String, E> desiredStatuses) {
-        return await(entityClass, desiredStatuses, emptyRunningParameter(), getPollingDurationInMills());
+        return await(entityClass, desiredStatuses, emptyRunningParameter());
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(Class<T> entityClass, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(Class<T> entityClass, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter, pollingInterval);
+        return await(getEntityFromEntityClass(entityClass, runningParameter), desiredStatuses, runningParameter);
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses) {
-        return await(entity, desiredStatuses, emptyRunningParameter(), getPollingDurationInMills());
+        return await(entity, desiredStatuses, emptyRunningParameter());
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
-        return await(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
-            Duration pollingInterval) {
-        return await(entity, desiredStatuses, new HashSet<>(), runningParameter, pollingInterval);
-    }
-
-    public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, Set<E> ignoredFailedStatuses,
-            RunningParameter runningParameter, Duration pollingInterval) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
@@ -962,7 +937,7 @@ public abstract class TestContext implements ApplicationContextAware {
             awaitEntity = entity;
         }
         if (runningParameter.isWaitForFlow()) {
-            awaitForFlow(awaitEntity, emptyRunningParameter());
+            awaitForFlow(awaitEntity, runningParameter);
         }
 
         try {
@@ -972,18 +947,13 @@ public abstract class TestContext implements ApplicationContextAware {
             LOGGER.info("Resource Crn is not available for: {}", awaitEntity.getName());
         }
 
-        resourceAwait.await(awaitEntity, desiredStatuses, ignoredFailedStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry, maxRetryCount);
+        resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
+                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry, maxRetryCount);
         return entity;
     }
 
     public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitForInstance(T entity, Map<List<String>, E> desiredStatuses,
             RunningParameter runningParameter) {
-        return awaitForInstance(entity, desiredStatuses, runningParameter, getPollingDurationInMills());
-    }
-
-    public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitForInstance(T entity, Map<List<String>, E> desiredStatuses,
-            RunningParameter runningParameter,
-            Duration pollingInterval) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Cloudbreak await for instance should be skipped because of previous error. awaitforinstance [%s]",
@@ -992,7 +962,8 @@ public abstract class TestContext implements ApplicationContextAware {
         }
         String key = getKeyForAwait(entity, entity.getClass(), runningParameter);
         CloudbreakTestDto awaitEntity = get(key);
-        instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter, pollingInterval, maxRetry);
+        instanceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
+                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry);
         return entity;
     }
 

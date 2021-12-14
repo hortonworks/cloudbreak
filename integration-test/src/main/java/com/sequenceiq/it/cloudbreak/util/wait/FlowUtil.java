@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.wait;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -33,6 +35,16 @@ public class FlowUtil {
     private int maxRetry;
 
     public long getPollingInterval() {
+        return getPollingDurationOrTheDefault(RunningParameter.emptyRunningParameter()).toMillis();
+    }
+
+    public Duration getPollingDurationOrTheDefault(RunningParameter runningParameter) {
+
+        Duration pollingInterval = runningParameter.getPollingInterval();
+
+        if (pollingInterval == null) {
+            pollingInterval = Duration.of(this.pollingInterval, ChronoUnit.MILLIS);
+        }
         return pollingInterval;
     }
 
@@ -53,6 +65,7 @@ public class FlowUtil {
         boolean flowFailed = false;
 
         int retryCount = 0;
+        long pollingInterval = getPollingInterval();
         while (flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval, crn, flowChainId, flowId);
             try {

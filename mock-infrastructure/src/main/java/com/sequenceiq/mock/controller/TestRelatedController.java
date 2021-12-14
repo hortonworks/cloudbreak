@@ -31,12 +31,12 @@ public class TestRelatedController {
     }
 
     @GetMapping("/calls/{mockUuid}")
-    public List<Call> getCalls(@PathVariable String mockUuid) {
-        return requestResponseStorageService.get(mockUuid);
+    public List<Call> getCalls(@PathVariable String mockUuid, @RequestParam("path") String path) {
+        return requestResponseStorageService.get(mockUuid, path);
     }
 
     @GetMapping("/calls")
     public List<Call> getCallsByPath(@RequestParam("path") String path) {
-        return requestResponseStorageService.get(path);
+        return requestResponseStorageService.get(path, path);
     }
 }

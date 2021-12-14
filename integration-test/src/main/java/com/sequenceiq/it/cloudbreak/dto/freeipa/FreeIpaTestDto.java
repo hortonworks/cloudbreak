@@ -4,7 +4,6 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DE
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunningParameter;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
-import java.time.Duration;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -353,16 +352,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
             RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
-    }
-
-    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
-            RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
-    }
-
-    public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
-            Duration pollingInterval) {
-        return awaitForFreeIpaInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     public FreeIpaTestDto withUpgradeCatalogAndImage() {

@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.Response;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.mock.CheckCount;
 import com.sequenceiq.it.cloudbreak.dto.mock.Method;
@@ -69,11 +71,19 @@ public class DefaultResponseConfigure<T extends CloudbreakTestDto, R> {
     }
 
     public T verify() {
-        Call[] calls;
+        String callsJson;
         if (crnless) {
-            calls = executeQuery.execute("/tests/calls", w -> w.queryParam("path", pathReplaced(path)), r -> r.readEntity(Call[].class));
+            callsJson = executeQuery.execute("/tests/calls", w -> w.queryParam("path", pathReplaced(path)), r -> r.readEntity(String.class));
         } else {
-            calls = executeQuery.execute("/tests/calls/" + testDto.getCrn(), r -> r.readEntity(Call[].class));
+            callsJson = executeQuery.execute("/tests/calls/" + testDto.getCrn(),
+                    w -> w.queryParam("path", pathReplaced(path)),
+                    r -> r.readEntity(String.class));
+        }
+        Call[] calls;
+        try {
+            calls = new ObjectMapper().readValue(callsJson, Call[].class);
+        } catch (JsonProcessingException e) {
+            throw new TestFailException("Cannot deserialize calls: " + e.getMessage(), e);
         }
         if (calls == null) {
             calls = new Call[0];

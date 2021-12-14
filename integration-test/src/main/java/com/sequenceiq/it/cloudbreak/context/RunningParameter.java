@@ -1,7 +1,11 @@
 package com.sequenceiq.it.cloudbreak.context;
 
 import java.lang.reflect.Method;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -31,6 +35,10 @@ public class RunningParameter {
     private Method urlMethod;
 
     private FlowWaitConfig waitForFlow = FlowWaitConfig.WAIT_SUCCESS;
+
+    private Duration pollingInterval;
+
+    private Set<Enum<?>> ignoredStatuses;
 
     public enum FlowWaitConfig {
         WAIT_SUCCESS,
@@ -73,6 +81,17 @@ public class RunningParameter {
 
     public boolean isWaitForFlowFail() {
         return FlowWaitConfig.WAIT_FAILURE.equals(waitForFlow);
+    }
+
+    public Duration getPollingInterval() {
+        return pollingInterval;
+    }
+
+    public <E extends Enum<E>> Set<E> getIgnoredStatuses() {
+        if (ignoredStatuses != null) {
+            return new HashSet<>((Collection<? extends E>) ignoredStatuses);
+        }
+        return new HashSet<>();
     }
 
     public RunningParameter withSkipOnFail(boolean skipOnFail) {
@@ -147,7 +166,12 @@ public class RunningParameter {
     }
 
     public RunningParameter withWaitForFlow(boolean waitForFlow) {
-        this.waitForFlow = waitForFlow ? FlowWaitConfig.WAIT_SUCCESS :  FlowWaitConfig.NOT_WAIT;
+        this.waitForFlow = waitForFlow ? FlowWaitConfig.WAIT_SUCCESS : FlowWaitConfig.NOT_WAIT;
+        return this;
+    }
+
+    public RunningParameter withoutWaitForFlow() {
+        this.waitForFlow = FlowWaitConfig.NOT_WAIT;
         return this;
     }
 
@@ -158,6 +182,16 @@ public class RunningParameter {
 
     public RunningParameter withWaitForFlowFail() {
         this.waitForFlow = FlowWaitConfig.WAIT_FAILURE;
+        return this;
+    }
+
+    public RunningParameter withPollingInterval(Duration pollingInterval) {
+        this.pollingInterval = pollingInterval;
+        return this;
+    }
+
+    public RunningParameter withIgnoredStatues(Set<Enum<?>> ignoredStatuses) {
+        this.ignoredStatuses = ignoredStatuses;
         return this;
     }
 
@@ -217,4 +251,11 @@ public class RunningParameter {
         return new RunningParameter().withWaitForFlowFail();
     }
 
+    public static RunningParameter pollingInterval(Duration pollingInterval) {
+        return new RunningParameter().withPollingInterval(pollingInterval);
+    }
+
+    public static RunningParameter ignoredStatues(Set<Enum<?>> ignoredStatuses) {
+        return new RunningParameter().withIgnoredStatues(ignoredStatuses);
+    }
 }

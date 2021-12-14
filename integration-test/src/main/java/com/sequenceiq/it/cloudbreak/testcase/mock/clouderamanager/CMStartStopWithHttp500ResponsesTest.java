@@ -2,19 +2,22 @@ package com.sequenceiq.it.cloudbreak.testcase.mock.clouderamanager;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
+import java.util.Set;
+
 import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
 
 public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
 
@@ -22,15 +25,15 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
     private BlueprintTestClient blueprintTestClient;
 
     @Inject
-    private StackTestClient stackTestClient;
+    private DistroXTestClient distroXTestClient;
 
     @Override
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
+        createEnvironmentWithFreeIpaAndDatalake(testContext);
         createCmBlueprint(testContext);
     }
 
@@ -46,20 +49,20 @@ public class CMStartStopWithHttp500ResponsesTest extends AbstractClouderaManager
         String stack = resourcePropertyProvider().getName();
 
         testContext
-                .given(cm, ClouderaManagerTestDto.class)
-                .given(cmcluster, ClusterTestDto.class)
+                .given(cm, DistroXClouderaManagerTestDto.class)
+                .given(cmcluster, DistroXClusterTestDto.class)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withBlueprintName(name)
                 .withClouderaManager(cm)
-                .given(stack, StackTestDto.class)
+                .given(stack, DistroXTestDto.class)
                 .withCluster(cmcluster)
-                .when(stackTestClient.createV4(), key(stack))
+                .when(distroXTestClient.create(), key(stack))
                 .mockCm().profile(PROFILE_RETURN_HTTP_500, 1)
                 .await(STACK_AVAILABLE, key(stack))
-                .when(stackTestClient.stopV4(), key(stack))
-                .await(STACK_STOPPED, key(stack))
-                .when(stackTestClient.startV4(), key(stack))
-                .await(STACK_AVAILABLE, key(stack))
+                .when(distroXTestClient.stop(), key(stack))
+                .await(STACK_STOPPED, key(stack).withIgnoredStatues(Set.of(Status.UNREACHABLE)))
+                .when(distroXTestClient.start(), key(stack))
+                .await(STACK_AVAILABLE, key(stack).withIgnoredStatues(Set.of(Status.UNREACHABLE)))
                 .validate();
     }
 

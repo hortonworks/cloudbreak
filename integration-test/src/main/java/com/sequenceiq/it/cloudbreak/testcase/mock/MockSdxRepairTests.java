@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.IDBROKER;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.pollingInterval;
 
 import java.time.Duration;
 import java.util.ArrayList;
@@ -124,7 +125,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
                             new HashMap<>(), null, response -> { }, w -> w);
                     return testDto;
                 })
-                .await(SdxClusterStatusResponse.NODE_FAILURE, Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS))
+                .await(SdxClusterStatusResponse.NODE_FAILURE, pollingInterval(Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS)))
                 .when(sdxTestClient.repairInternal(MASTER.getName()), key(sdxInternal))
                 .awaitForMasterDeletedOnProvider()
                 .awaitForFlowFail()
@@ -191,7 +192,7 @@ public class MockSdxRepairTests extends AbstractMockTest {
                     instancesToDelete.forEach(instanceId -> actionOnNode.accept("/" + testDto.getCrn() + "/spi/" + instanceId));
                     return testDto;
                 })
-                .await(stateBeforeRepair, Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS))
+                .await(stateBeforeRepair, pollingInterval(Duration.ofSeconds(POLLING_INTERVAL_FOR_REPAIR_SECONDS)))
                 .when(sdxTestClient.repairInternal(hostGroups.stream().map(HostGroupType::getName).toArray(String[]::new)), key(sdxInternal))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxInternal))
                 .validate();

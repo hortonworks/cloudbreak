@@ -5,22 +5,23 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.action.v4.stack.StackScalePostAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.it.cloudbreak.client.BlueprintTestClient;
-import com.sequenceiq.it.cloudbreak.client.StackTestClient;
+import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.MockedTestContext;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.ClouderaManagerTestDto;
-import com.sequenceiq.it.cloudbreak.dto.ClusterTestDto;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXClusterTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
 
 public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTest {
 
@@ -34,7 +35,7 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
     private BlueprintTestClient blueprintTestClient;
 
     @Inject
-    private StackTestClient stackTestClient;
+    private DistroXTestClient distroXTestClient;
 
     private Integer originalWorkerCount;
 
@@ -44,9 +45,9 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
     protected void setupTest(TestContext testContext) {
         createDefaultUser(testContext);
         createDefaultCredential(testContext);
-        createDefaultEnvironment(testContext);
         createDefaultImageCatalog(testContext);
         initializeDefaultBlueprints(testContext);
+        createEnvironmentWithFreeIpaAndDatalake(testContext);
         createCmBlueprint(testContext);
     }
 
@@ -67,18 +68,18 @@ public class CMUpscaleWithHttp500ResponsesTest extends AbstractClouderaManagerTe
         String stack = resourcePropertyProvider().getName();
         int addedNodes = desiredWorkerCount - originalWorkerCount;
         testContext
-                .given(CLOUDERA_MANAGER_KEY, ClouderaManagerTestDto.class)
-                .given(CLUSTER_KEY, ClusterTestDto.class)
+                .given(CLOUDERA_MANAGER_KEY, DistroXClouderaManagerTestDto.class)
+                .given(CLUSTER_KEY, DistroXClusterTestDto.class)
                 .withBlueprintName(blueprintName)
                 .withValidateBlueprint(Boolean.FALSE)
                 .withClouderaManager(CLOUDERA_MANAGER_KEY)
-                .given(stack, StackTestDto.class).withCluster(CLUSTER_KEY)
+                .given(stack, DistroXTestDto.class).withCluster(CLUSTER_KEY)
                 .withName(clusterName)
-                .when(stackTestClient.createV4(), key(stack))
+                .when(distroXTestClient.create(), key(stack))
                 .mockCm().profile(PROFILE_RETURN_HTTP_500, 1)
-                .await(STACK_AVAILABLE, key(stack))
-                .when(StackScalePostAction.valid().withDesiredCount(desiredWorkerCount).withForced(Boolean.FALSE), key(stack))
-                .await(StackTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL)
+                .await(STACK_AVAILABLE, key(stack).withIgnoredStatues(Set.of(Status.UNREACHABLE)))
+                .when(distroXTestClient.scale("worker", desiredWorkerCount), key(stack))
+                .await(STACK_AVAILABLE, key(stack).withIgnoredStatues(Set.of(Status.UNREACHABLE)))
                 .mockSpi().cloudInstanceStatuses().post().atLeast(1).verify()
                 .mockSpi().cloudMetadataStatuses().post().bodyContains("CREATE_REQUESTED", addedNodes).times(1).verify()
                 .mockSalt().health().get().atLeast(1).verify()

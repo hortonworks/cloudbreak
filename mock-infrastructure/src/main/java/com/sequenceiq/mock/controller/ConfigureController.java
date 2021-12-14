@@ -1,5 +1,8 @@
 package com.sequenceiq.mock.controller;
 
+import java.util.List;
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -38,6 +41,17 @@ public class ConfigureController {
         if (!clouderaManagerStoreService.exists(mockUuid)) {
             clouderaManagerStoreService.start(mockUuid);
         }
-        clouderaManagerStoreService.read(mockUuid).getActiveProfiles().add(new CmProfile(profile, times));
+        List<CmProfile> activeProfiles = clouderaManagerStoreService.read(mockUuid).getActiveProfiles();
+        Optional<CmProfile> cmProfileOpt = activeProfiles.stream().filter(p -> p.getProfile().equals(profile)).findFirst();
+        if (cmProfileOpt.isPresent()) {
+            CmProfile cmProfile = cmProfileOpt.get();
+            if (times == 0) {
+                activeProfiles.remove(cmProfile);
+            } else {
+                cmProfile.setTimes(times);
+            }
+        } else {
+            activeProfiles.add(new CmProfile(profile, times));
+        }
     }
 }

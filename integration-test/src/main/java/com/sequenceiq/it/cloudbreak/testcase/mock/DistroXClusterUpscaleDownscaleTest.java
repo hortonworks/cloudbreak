@@ -87,11 +87,11 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
         for (int i = 0; i < 3; i++) {
             currentContext = currentContext
                     .when(distroXClient.scale(params.getHostgroup(), UPPER_NODE_COUNT))
-                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+                    .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL));
 
             currentContext = currentContext
                     .when(distroXClient.scale(params.getHostgroup(), LOWER_NODE_COUNT))
-                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+                    .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL));
         }
 
         currentContext
@@ -127,11 +127,11 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
         for (int i = 0; i < scalingCycles; i++) {
             currentContext = currentContext
                     .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterUpscale))
-                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+                    .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL));
 
             currentContext = currentContext
                     .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterDownscale))
-                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+                    .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL));
         }
 
         currentContext
