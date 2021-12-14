@@ -52,7 +52,7 @@ public class DistroXStopStartTest extends AbstractE2ETest {
         createEnvironmentWithFreeIpaAndDatalake(testContext);
     }
 
-    @Test(dataProvider = TEST_CONTEXT, description = "IGNORED: CB-15434 CM API calls fail on Azure with SocketTimeoutException")
+    @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",

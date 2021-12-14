@@ -11,8 +11,5 @@ tests:
           # CB-15466 Azure FreeIPA Upgrade operation has been timed out with no error message
           - testHAFreeIpaInstanceUpgrade
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXStopStartTest
-        excludedMethods:
-          # CB-15434 CM API calls fail on Azure with SocketTimeoutException
-          - testCreateDistroXWithEphemeralTemporaryStorage
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXUpgradeTests
