@@ -678,7 +678,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
-        return init(clss, getCloudPlatform());
+        return init(clss, CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
@@ -707,7 +707,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss) {
-        return given(key, clss, getCloudPlatform());
+        return given(key, clss, CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
     }
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss, CloudPlatform cloudPlatform) {
@@ -1211,10 +1211,6 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public CloudProviderProxy getCloudProvider() {
         return cloudProvider;
-    }
-
-    public CloudPlatform getCloudPlatform() {
-        return CloudPlatform.valueOf(commonCloudProperties.getCloudProvider());
     }
 
     public void waitingFor(Duration duration, String interruptedMessage) {

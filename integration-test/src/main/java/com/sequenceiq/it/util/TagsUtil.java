@@ -44,8 +44,6 @@ public class TagsUtil {
 
     static final String TEST_NAME_TAG_VALUE_FAILURE_PATTERN = "Test name tag: [%s] value is: [%s] NOT equals [%s] test method name!";
 
-    static final String TAG_VALUE_IS_NULL_FAILURE_PATTERN = "[%s] tag validation is not possible, because of the tag value is empty or null!";
-
     private static final int TAGS_MAX_LENGTH = 128;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TagsUtil.class);
@@ -56,9 +54,6 @@ public class TagsUtil {
     public void addTestNameTag(CloudPlatform cloudPlatform, CloudbreakTestDto testDto, String testName) {
         if (testDto instanceof AbstractTestDto) {
             Object request = ((AbstractTestDto<?, ?, ?, ?>) testDto).getRequest();
-            if (CloudPlatform.GCP.equals(cloudPlatform)) {
-                testName = testName.toLowerCase();
-            }
             if (request instanceof TaggableRequest) {
                 addTags(cloudPlatform, (TaggableRequest) request, TEST_NAME_TAG, testName);
             }
@@ -145,16 +140,15 @@ public class TagsUtil {
                 throw new TestFailException(message);
             }
         } else {
-            String message = format(TAG_VALUE_IS_NULL_FAILURE_PATTERN, tag);
-            throw new TestFailException(message);
+            throw new TestFailException(format("[%s] tag validation is not possible, because of the tag value is empty or null!", tag));
         }
     }
 
     private void validateClouderaCreatorResourceNameTag(TaggedResponse response, String tag, TestContext testContext) {
         String tagValue = response.getTagValue(tag);
-        String actingUser = getActingUser(testContext);
+        String actingUser = testContext.getActingUserCrn().toString();
 
-        if (StringUtils.isNotEmpty(tagValue) && StringUtils.isNotEmpty(actingUser)) {
+        if (StringUtils.isNotEmpty(tagValue)) {
             if (tagValue.equals(actingUser)) {
                 Log.log(LOGGER, format(" PASSED:: Default tag: [%s] value: [%s] equals [%s] acting user CRN! ", tag, tagValue, actingUser));
             } else if (gcpLabelTransformedValue(tagValue, actingUser)) {
@@ -174,8 +168,7 @@ public class TagsUtil {
                 }
             }
         } else {
-            throw new TestFailException(format("[%s] tag validation is not possible, because of either the tag value [%s] or acting user Crn [%s]" +
-                            " is empty or null!", tag, tagValue, actingUser));
+            throw new TestFailException(format("[%s] tag validation is not possible, because of the tag value is empty or null!", tag));
         }
     }
 
@@ -184,7 +177,7 @@ public class TagsUtil {
         String testName = testContext.getTestMethodName().orElseThrow(() -> new TestFailException("Test method name cannot be found for tag validation!"));
 
         if (StringUtils.isNotEmpty(tagValue)) {
-            testName = applyLengthRestrictions(testContext.getCloudPlatform(), testName);
+            testName = applyLengthRestrictions(testContext.getCloudProvider().getCloudPlatform(), testName);
 
             if (tagValue.equalsIgnoreCase(testName)) {
                 Log.log(LOGGER, format(" PASSED:: [%s] tag value: [%s] equals [%s] test method name! ", TEST_NAME_TAG, tagValue, testName));
@@ -194,8 +187,7 @@ public class TagsUtil {
                 throw new TestFailException(message);
             }
         } else {
-            String message = format(TAG_VALUE_IS_NULL_FAILURE_PATTERN, TEST_NAME_TAG);
-            throw new TestFailException(message);
+            throw new TestFailException(format("[%s] tag validation is not possible, because of the tag value is empty or null!", TEST_NAME_TAG));
         }
     }
 
@@ -205,13 +197,5 @@ public class TagsUtil {
                 && Objects.equal(actingUserCrn.getAccountId(), creatorCrn.getAccountId())
                 && Objects.equal(actingUserCrn.getResourceType(), creatorCrn.getResourceType())
                 && Objects.equal(actingUserCrn.getResource(), creatorCrn.getResource());
-    }
-
-    private String getActingUser(TestContext testContext) {
-        try {
-            return testContext.getActingUserCrn().toString();
-        } catch (NullPointerException e) {
-            return null;
-        }
     }
 }
