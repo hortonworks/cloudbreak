@@ -4,6 +4,7 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
 @Component
@@ -17,6 +18,10 @@ public class StructuredSyncEventToCDPSyncDetailsConverter {
             if (clusterDetails != null) {
                 cdpSyncDetails.setClusterCreationStarted(clusterDetails.getCreationStarted() != null ? clusterDetails.getCreationStarted() : 0L);
                 cdpSyncDetails.setClusterCreationFinished(clusterDetails.getCreationFinished() != null ? clusterDetails.getCreationFinished() : 0L);
+            }
+            StackDetails stackDetails = structuredSyncEvent.getStack();
+            if (stackDetails != null) {
+                cdpSyncDetails.setDatabaseType(stackDetails.getDatabaseType() != null ? stackDetails.getDatabaseType() : "UNKNOWN");
             }
         }
 

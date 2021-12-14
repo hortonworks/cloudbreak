@@ -1219,6 +1219,8 @@ message CDPSyncDetails {
   uint64 clusterCreationStarted = 3;
   // The timestamp of the finish of the cluster creation
   uint64 clusterCreationFinished = 4;
+  // The database type of the cluster
+  string databaseType = 5;
 }
 
 // Generated periodically for Datalake clusters
