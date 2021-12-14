@@ -12,7 +12,6 @@ import javax.ws.rs.BadRequestException;
 import javax.ws.rs.NotFoundException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,8 +21,8 @@ import com.dyngr.Polling;
 import com.dyngr.core.AttemptResults;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.database.StackDatabaseServerResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
@@ -130,7 +129,7 @@ public class DatabaseService {
     }
 
     private boolean dbHasBeenCreatedPreviously(SdxCluster sdxCluster) {
-        return Strings.isNotEmpty(sdxCluster.getDatabaseCrn());
+        return StringUtils.isNotEmpty(sdxCluster.getDatabaseCrn());
     }
 
     public void terminate(SdxCluster sdxCluster, boolean forced) {

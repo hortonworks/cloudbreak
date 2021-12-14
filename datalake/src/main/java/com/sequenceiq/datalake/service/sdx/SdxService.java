@@ -32,7 +32,6 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.EnumUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -471,7 +470,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         newSdxCluster.setTags(sdxCluster.getTags());
         newSdxCluster.setCrn(sdxCluster.getCrn());
         CloudPlatform cloudPlatform = CloudPlatform.valueOf(environment.getCloudPlatform());
-        if (!Strings.isBlank(sdxCluster.getCloudStorageBaseLocation())) {
+        if (!StringUtils.isBlank(sdxCluster.getCloudStorageBaseLocation())) {
             newSdxCluster.setCloudStorageBaseLocation(sdxCluster.getCloudStorageBaseLocation());
             newSdxCluster.setCloudStorageFileSystemType(sdxCluster.getCloudStorageFileSystemType());
         } else if (!CloudPlatform.YARN.equalsIgnoreCase(cloudPlatform.name()) &&
@@ -492,7 +491,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         prepareCloudStorageForStack(stackRequest, stackV4Response, newSdxCluster, environment);
         prepareDefaultSecurityConfigs(null, stackRequest, cloudPlatform);
         try {
-            if (!Strings.isBlank(sdxCluster.getStackRequestToCloudbreak())) {
+            if (!StringUtils.isBlank(sdxCluster.getStackRequestToCloudbreak())) {
                 StackV4Request stackV4RequestOrig = JsonUtil.readValue(sdxCluster.getStackRequestToCloudbreak(), StackV4Request.class);
                 stackRequest.setImage(stackV4RequestOrig.getImage());
             }
@@ -1086,7 +1085,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     }
 
     private void checkIfSdxIsDeletable(SdxCluster sdxCluster, boolean forced) {
-        if (!forced && sdxCluster.hasExternalDatabase() && Strings.isEmpty(sdxCluster.getDatabaseCrn())) {
+        if (!forced && sdxCluster.hasExternalDatabase() && StringUtils.isEmpty(sdxCluster.getDatabaseCrn())) {
             throw new BadRequestException(String.format("Can not find external database for Data Lake, but it was requested: %s. Please use force delete.",
                     sdxCluster.getClusterName()));
         }

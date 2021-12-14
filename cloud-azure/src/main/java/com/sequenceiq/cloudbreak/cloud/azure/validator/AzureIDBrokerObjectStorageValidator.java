@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -169,7 +168,7 @@ public class AzureIDBrokerObjectStorageValidator {
 
     private void validateLog(AzureClient client, Identity identity, String logsLocationBase, ValidationResultBuilder resultBuilder) {
         LOGGER.debug(String.format("Validating logger identity %s", identity.principalId()));
-        if (Strings.isNotEmpty(logsLocationBase)) {
+        if (StringUtils.isNotEmpty(logsLocationBase)) {
             validateStorageAccount(client, Set.of(identity), logsLocationBase, LOG, resultBuilder);
         } else {
             LOGGER.debug("There is no storage location set for logger identity, this should not happen!");

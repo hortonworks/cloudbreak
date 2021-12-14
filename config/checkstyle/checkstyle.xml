@@ -186,8 +186,12 @@
             <property name="illegalClassNames" value="" />
         </module>
         <module name="IllegalImport">
+            <!-- no sun dependency, use java.lang -->
+            <property name="illegalPkgs" value="sun" />
+        </module>
+        <module name="IllegalImport">
             <!-- use org.slf4j -->
-            <property name="illegalPkgs" value="sun, org.apache.commons.logging, org.apache.log4j, java.util.logging" />
+            <property name="illegalPkgs" value="org.apache.logging, org.apache.commons.logging, org.apache.log4j, java.util.logging" />
         </module>
         <module name="IllegalImport">
             <!-- use org.junit -->

@@ -1,6 +1,6 @@
 package com.sequenceiq.environment.environment.validation.cloudstorage;
 
-import org.apache.logging.log4j.util.Strings;
+import org.apache.commons.lang3.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.util.DocumentationLinkProvider;
@@ -10,7 +10,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 public abstract class EnvironmentStorageConfigurationValidator {
 
     protected void validateGcsConfig(Environment environment, ValidationResult.ValidationResultBuilder resultBuilder, String serviceAccountEmail) {
-        if (Strings.isNotBlank(serviceAccountEmail)) {
+        if (StringUtils.isNotBlank(serviceAccountEmail)) {
             if (!serviceAccountEmail.contains(".iam.gserviceaccount.com")) {
                 resultBuilder.error("Must be a full valid google service account in the format of " +
                         "[service-account-name]@[project-name].iam.gserviceaccount.com." +
@@ -23,7 +23,7 @@ public abstract class EnvironmentStorageConfigurationValidator {
     }
 
     protected void validateAdlsGen2Config(Environment environment, ValidationResult.ValidationResultBuilder resultBuilder, String managedIdentity) {
-        if (Strings.isNotBlank(managedIdentity)) {
+        if (StringUtils.isNotBlank(managedIdentity)) {
             if (!managedIdentity.matches("^/subscriptions/[0-9a-f]{8}-[0-9a-f]{4}-[0-5][0-9a-f]{3}-[089ab][0-9a-f]{3}-[0-9a-f]{12}/"
                     + "(resourceGroups|resourcegroups)/[-\\w._()]+/providers/Microsoft.ManagedIdentity/userAssignedIdentities/[A-Za-z0-9-_]*$")) {
                 resultBuilder.error("Must be a full valid managed identity resource ID in the format of /subscriptions/[your-subscription-id]/resourceGroups/" +
@@ -37,7 +37,7 @@ public abstract class EnvironmentStorageConfigurationValidator {
     }
 
     protected void validateS3Config(Environment environment, ValidationResult.ValidationResultBuilder resultBuilder, String instanceProfile) {
-        if (Strings.isNotBlank(instanceProfile)) {
+        if (StringUtils.isNotBlank(instanceProfile)) {
             if (!instanceProfile.startsWith("arn:aws:iam::") || !(instanceProfile.contains(":instance-profile/"))) {
                 resultBuilder.error("Must be a full valid amazon instance profile in the format of arn:aws:iam::[account-id]:instance-profile/[role-name]." +
                         getDocLink(environment.getCloudPlatform()));
