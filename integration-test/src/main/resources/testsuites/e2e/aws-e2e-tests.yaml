@@ -10,6 +10,7 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkWithNoInternetEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaTests
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaRebuildTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
