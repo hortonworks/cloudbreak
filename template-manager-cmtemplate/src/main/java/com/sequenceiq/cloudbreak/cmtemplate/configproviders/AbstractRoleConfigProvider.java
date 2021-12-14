@@ -19,6 +19,8 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 
 public abstract class AbstractRoleConfigProvider implements CmTemplateComponentConfigProvider {
 
+    public static final String LOG4J2_FORMAT_MSG_NO_LOOKUPS = "-Dlog4j2.formatMsgNoLookups=True";
+
     private static final String PATCH_VERSION_REGEX = "\\.p([0-9]+)\\.";
 
     @Override

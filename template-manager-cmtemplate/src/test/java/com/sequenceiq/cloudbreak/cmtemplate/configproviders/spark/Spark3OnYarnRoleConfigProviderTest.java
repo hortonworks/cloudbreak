@@ -63,7 +63,10 @@ public class Spark3OnYarnRoleConfigProviderTest {
 
         assertEquals(1, sparkOnYarnConfigs.size());
         assertEquals("spark3-conf/spark-defaults.conf_client_config_safety_valve", sparkOnYarnConfigs.get(0).getName());
-        assertEquals("spark.kerberos.access.hadoopFileSystems=" + clientConfigDirLocation, sparkOnYarnConfigs.get(0).getValue());
+        String log4j = "\nspark.yarn.am.extraJavaOptions=-Dlog4j2.formatMsgNoLookups=True\n" +
+                "spark.driver.extraJavaOptions=-Dlog4j2.formatMsgNoLookups=True\n" +
+                "spark.executor.extraJavaOptions=-Dlog4j2.formatMsgNoLookups=True";
+        assertEquals("spark.kerberos.access.hadoopFileSystems=" + clientConfigDirLocation + log4j, sparkOnYarnConfigs.get(0).getValue());
     }
 
     private TemplatePreparationObject getTemplatePreparationObject(String... locations) {

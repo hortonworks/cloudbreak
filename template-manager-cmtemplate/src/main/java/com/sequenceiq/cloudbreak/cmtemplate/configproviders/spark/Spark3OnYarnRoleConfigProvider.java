@@ -16,6 +16,12 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class Spark3OnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
 
+    public static final String SPARK_YARN_AM_EXTRA_JAVA_OPTIONS = "spark.yarn.am.extraJavaOptions";
+
+    public static final String SPARK_DRIVER_EXTRA_JAVA_OPTIONS = "spark.driver.extraJavaOptions";
+
+    public static final String SPARK_EXECUTOR_EXTRA_JAVA_OPTIONS = "spark.executor.extraJavaOptions";
+
     private static final String SPARK3_CONF_CLIENT_SAFETY_VALVE = "spark3-conf/spark-defaults.conf_client_config_safety_valve";
 
     private static final String SPARK3_YARN_ACCESS_DIR_PARAM = "spark.kerberos.access.hadoopFileSystems=";
@@ -27,7 +33,10 @@ public class Spark3OnYarnRoleConfigProvider extends AbstractRoleConfigProvider {
                 return ConfigUtils.getStorageLocationForServiceProperty(source, HMS_METASTORE_EXTERNAL_DIR)
                         .map(location -> ConfigUtils.getBasePathFromStorageLocation(location.getValue()))
                         .map(basePath -> List.of(config(SPARK3_CONF_CLIENT_SAFETY_VALVE,
-                                SPARK3_YARN_ACCESS_DIR_PARAM + basePath)))
+                                SPARK3_YARN_ACCESS_DIR_PARAM + basePath + '\n' +
+                                        SPARK_YARN_AM_EXTRA_JAVA_OPTIONS + '=' + LOG4J2_FORMAT_MSG_NO_LOOKUPS + '\n' +
+                                        SPARK_DRIVER_EXTRA_JAVA_OPTIONS + '=' + LOG4J2_FORMAT_MSG_NO_LOOKUPS + '\n' +
+                                        SPARK_EXECUTOR_EXTRA_JAVA_OPTIONS + '=' + LOG4J2_FORMAT_MSG_NO_LOOKUPS)))
                         .orElseGet(List::of);
             default:
                 return List.of();

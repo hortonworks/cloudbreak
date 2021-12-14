@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.yarn;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider.LOG4J2_FORMAT_MSG_NO_LOOKUPS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.List;
@@ -23,6 +24,10 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
 
     private static final String YARN_SITE_SERVICE_SAFETY_VALVE = "yarn_service_config_safety_valve";
 
+    private static final String MAPREDUCE_MAP_JAVA_OPTS = "mapreduce_map_java_opts";
+
+    private static final String MAPREDUCE_REDUCE_JAVA_OPTS = "mapreduce_reduce_java_opts";
+
     @Inject
     private ExposedServiceCollector exposedServiceCollector;
 
@@ -32,6 +37,8 @@ public class YarnConfigProvider implements CmTemplateComponentConfigProvider {
         if (templateProcessor.getServiceByType(HiveRoles.HIVELLAP).isPresent()) {
             apiClusterTemplateConfigs.add(config(YARN_SITE_SERVICE_SAFETY_VALVE, getYarnSiteServiceValveValue()));
         }
+        apiClusterTemplateConfigs.add(config(MAPREDUCE_MAP_JAVA_OPTS, LOG4J2_FORMAT_MSG_NO_LOOKUPS));
+        apiClusterTemplateConfigs.add(config(MAPREDUCE_REDUCE_JAVA_OPTS, LOG4J2_FORMAT_MSG_NO_LOOKUPS));
         return apiClusterTemplateConfigs;
     }
 

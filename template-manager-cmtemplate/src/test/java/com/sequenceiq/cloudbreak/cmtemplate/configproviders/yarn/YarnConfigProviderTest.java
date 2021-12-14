@@ -32,16 +32,20 @@ public class YarnConfigProviderTest {
     public void testGetConfigsWhenLlapIsPresent() {
         when(cmTemplateProcessor.getServiceByType(eq(HiveRoles.HIVELLAP))).thenReturn(Optional.of(new ApiClusterTemplateService()));
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, null);
-        assertEquals(1, serviceConfigs.size());
-        assertTrue(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_service_config_safety_valve")));
+        assertEquals(3, serviceConfigs.size());
+        assertTrue(serviceConfigs.stream().allMatch(sc -> StringUtils.equals(sc.getName(), "yarn_service_config_safety_valve") ||
+                                                            StringUtils.equals(sc.getName(), "mapreduce_map_java_opts") ||
+                                                            StringUtils.equals(sc.getName(), "mapreduce_reduce_java_opts")));
     }
 
     @Test
     public void testGetConfigsWhenLlapIsNotPresent() {
         when(cmTemplateProcessor.getServiceByType(eq(HiveRoles.HIVELLAP))).thenReturn(Optional.empty());
         List<ApiClusterTemplateConfig> serviceConfigs = underTest.getServiceConfigs(cmTemplateProcessor, null);
-        assertEquals(0, serviceConfigs.size());
+        assertEquals(2, serviceConfigs.size());
         assertFalse(serviceConfigs.stream().anyMatch(sc -> StringUtils.equals(sc.getName(), "yarn_service_config_safety_valve")));
+        assertTrue(serviceConfigs.stream().allMatch(sc -> StringUtils.equals(sc.getName(), "mapreduce_map_java_opts") ||
+                                                            StringUtils.equals(sc.getName(), "mapreduce_reduce_java_opts")));
     }
 
 }
