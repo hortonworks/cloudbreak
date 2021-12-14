@@ -76,13 +76,13 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
         try {
             ApiConfigList knoxConfigs = roleConfigGroupsResourceApi.readConfig(testDto.getName(), "yarn-NODEMANAGER-BASE",
-                    "yarn", "summary");
+                    "yarn", "full");
             knoxConfigs.getItems().stream()
                     .forEach(knoxConfig -> {
                         String knoxConfigName = knoxConfig.getName();
@@ -114,7 +114,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     public DistroXTestDto checkCmHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON
@@ -125,7 +125,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
                     .forEach(config -> {
                         String hdfsConfigName = config.getName();
                         String mappingsFromHdfsConfig = config.getValue();
-                        if ("dfs_data_dir_list".equalsIgnoreCase(hdfsConfigName)) {
+                        if ("dfs_name_dir_list".equalsIgnoreCase(hdfsConfigName)) {
                             if (mountPoints.stream().anyMatch(mappingsFromHdfsConfig::startsWith)) {
                                 LOGGER.error("{} contains ephemeral volume mapping '{}'!", hdfsConfigName, mappingsFromHdfsConfig);
                                 throw new TestFailException(String.format("%s contains ephemeral volume mapping '%s'!", hdfsConfigName,
@@ -154,7 +154,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
 
     public DistroXTestDto checkCmHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
-        ApiClient apiClient = getCmApiClient(serverIp, testDto.getName(), V_43, user, password);
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, user, password);
         // CHECKSTYLE:OFF
         RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
         // CHECKSTYLE:ON

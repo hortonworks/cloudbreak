@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.clouderamanager.client;
 
+import java.util.concurrent.TimeUnit;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -28,6 +30,13 @@ public class ClouderaManagerClient {
         cmClient.setVerifyingSsl(false);
         cmClient.getHttpClient().interceptors().add(cmRequestIdProviderInterceptor);
         LOGGER.info(String.format("Cloudera Manager Base Path: %s", cmClient.getBasePath()));
+        return cmClient;
+    }
+
+    public ApiClient getCmApiClientWithTimeoutDisabled(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
+        ApiClient cmClient = getCmApiClient(serverFqdn, clusterName, apiVersion, cmUser, cmPassword);
+        cmClient.setConnectTimeout(0);
+        cmClient.getHttpClient().setReadTimeout(0, TimeUnit.MILLISECONDS);
         return cmClient;
     }
 }
