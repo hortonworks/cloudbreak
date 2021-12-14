@@ -4,7 +4,9 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.c
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.HashSet;
 import java.util.List;
@@ -15,11 +17,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
@@ -46,8 +49,13 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class KnoxGatewayConfigProviderTest {
+    private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
+
     @Mock
     private VirtualGroupService virtualGroupService;
+
+    @Mock
+    private EntitlementService entitlementService;
 
     @InjectMocks
     private final KnoxGatewayConfigProvider underTest = new KnoxGatewayConfigProvider();
@@ -163,7 +171,8 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(true);
 
         assertEquals(
                 List.of(
@@ -189,7 +198,66 @@ public class KnoxGatewayConfigProviderTest {
                         config("gateway_dispatch_whitelist", "^*.*$"),
                         config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
                 ),
-                underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+        );
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+    }
+
+    @Test
+    public void roleConfigsWithGatewayWhenOdbcEntitlementFalse() {
+        GatewayTopology topology = new GatewayTopology();
+        topology.setTopologyName("my-topology");
+        topology.setExposedServices(Json.silent(new ExposedServices()));
+
+        Gateway gateway = new Gateway();
+        gateway.setKnoxMasterSecret("admin");
+        gateway.setPath("/a/b/c");
+        gateway.setTopologies(Set.of(topology));
+
+        IdBroker idBroker = new IdBroker();
+        idBroker.setMasterSecret("supersecret");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key", new HashSet<>())
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withBlueprintView(blueprintView)
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.10")
+                        .withName("CDH")))
+                .withIdBroker(idBroker)
+                .build();
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(false);
+
+        assertEquals(
+                List.of(
+                        config("idbroker_master_secret", "supersecret"),
+                        config("idbroker_gateway_knox_admin_groups", ""),
+                        config("idbroker_gateway_signing_keystore_name", "signing.jks"),
+                        config("idbroker_gateway_signing_keystore_type", "JKS"),
+                        config("idbroker_gateway_signing_key_alias", "signing-identity")
+                ),
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+        );
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_default_topology_name",
+                                gateway.getTopologies().iterator().next().getTopologyName()),
+                        config("gateway_knox_admin_groups", ""),
+                        config("gateway_auto_discovery_enabled", "false"),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_token_generation_enable_lifespan_input", "true"),
+                        config("gateway_token_generation_knox_token_ttl", "86400000"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
+                ),
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
         );
         assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
     }
@@ -211,7 +279,7 @@ public class KnoxGatewayConfigProviderTest {
                         .withVersion("7.2.10")
                         .withName("CDH")))
                 .build();
-        Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
         assertEquals(
                 List.of(
                         config("idbroker_master_secret", "supersecret"),
@@ -258,7 +326,8 @@ public class KnoxGatewayConfigProviderTest {
                         .withName("CDH")))
                 .withIdBroker(idBroker)
                 .build();
-        Mockito.when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
+        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(true);
 
         assertEquals(
             List.of(
@@ -283,7 +352,63 @@ public class KnoxGatewayConfigProviderTest {
                 config("gateway_dispatch_whitelist", "^*.*$"),
                 config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
             ),
-            underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source)
+            ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
+        );
+        assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
+    }
+
+    @Test
+    public void roleConfigsWithGatewayWithLdapConfigWhenOdbcEntitlementFalse() {
+        Gateway gateway = new Gateway();
+        gateway.setKnoxMasterSecret("admin");
+        gateway.setPath("/a/b/c");
+        IdBroker idBroker = new IdBroker();
+        idBroker.setMasterSecret("supersecret");
+        BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
+
+        LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
+        BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+
+        TemplatePreparationObject source = Builder.builder()
+                .withGateway(gateway, "key", new HashSet<>())
+                .withLdapConfig(ldapConfig)
+                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withBlueprintView(blueprintView)
+                .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
+                .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
+                        .withVersion("7.2.10")
+                        .withName("CDH")))
+                .withIdBroker(idBroker)
+                .build();
+        when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
+        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(false);
+
+        assertEquals(
+                List.of(
+                        config("idbroker_master_secret", "supersecret"),
+                        config("idbroker_gateway_knox_admin_groups", "knox_admins"),
+                        config("idbroker_gateway_signing_keystore_name", "signing.jks"),
+                        config("idbroker_gateway_signing_keystore_type", "JKS"),
+                        config("idbroker_gateway_signing_key_alias", "signing-identity")
+                ),
+                underTest.getRoleConfigs(KnoxRoles.IDBROKER, source)
+        );
+        assertEquals(
+                List.of(
+                        config("gateway_master_secret", gateway.getKnoxMasterSecret()),
+                        config("gateway_default_topology_name", "cdp-proxy"),
+                        config("gateway_knox_admin_groups", "knox_admins"),
+                        config("gateway_auto_discovery_enabled", "false"),
+                        config("gateway_path", gateway.getPath()),
+                        config("gateway_signing_keystore_name", "signing.jks"),
+                        config("gateway_signing_keystore_type", "JKS"),
+                        config("gateway_signing_key_alias", "signing-identity"),
+                        config("gateway_dispatch_whitelist", "^*.*$"),
+                        config("gateway_token_generation_enable_lifespan_input", "true"),
+                        config("gateway_token_generation_knox_token_ttl", "86400000"),
+                        config("gateway_service_tokenstate_impl", "org.apache.knox.gateway.services.token.impl.JDBCTokenStateService")
+                ),
+                ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.getRoleConfigs(KnoxRoles.KNOX_GATEWAY, source))
         );
         assertEquals(List.of(), underTest.getRoleConfigs("NAMENODE", source));
     }

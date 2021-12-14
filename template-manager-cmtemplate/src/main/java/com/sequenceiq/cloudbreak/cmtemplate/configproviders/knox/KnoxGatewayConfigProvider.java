@@ -1,9 +1,13 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.knox;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_9;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isKnoxDatabaseSupported;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -18,9 +22,13 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
+import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.configproviders.AbstractRoleConfigProvider;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
@@ -75,8 +83,19 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private static final String GATEWAY_SERVICE_TOKENSTATE_IMPL = "gateway_service_tokenstate_impl";
 
+    private static final String GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL = "gateway_token_generation_knox_token_ttl";
+
+    private static final String GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL_ONE_DAY = "86400000";
+
+    private static final String GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT = "gateway_token_generation_enable_lifespan_input";
+
+    private static final String GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT_TRUE = "true";
+
     @Inject
     private VirtualGroupService virtualGroupService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
@@ -100,6 +119,7 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                     config.add(config(GATEWAY_SIGNING_KEYSTORE_TYPE, JKS));
                     config.add(config(GATEWAY_SIGNING_KEY_ALIAS, SIGNING_IDENTITY));
                     config.add(getGatewayWhitelistConfig(source));
+                    config.addAll(getDefaultsIfRequired(source));
                 }
                 if (source.getProductDetailsView() != null
                         && isKnoxDatabaseSupported(source.getProductDetailsView().getCm(), getCdhProduct(source), getCdhPatchVersion(source))) {
@@ -150,6 +170,29 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
                     .collect(Collectors.toMap(HostgroupView::getName, v -> knox));
         }
         return Map.of();
+    }
+
+    private Set<ApiClusterTemplateConfig> getDefaultsIfRequired(TemplatePreparationObject source) {
+        Set<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new HashSet<>();
+        ClouderaManagerRepo clouderaManagerRepoDetails = source.getProductDetailsView().getCm();
+        Optional<ClouderaManagerProduct> cdhProduct = getCdhProduct(source);
+        if (cdhProduct.isPresent()) {
+            String cdhVersion = cdhProduct.get().getVersion().split("-")[0];
+            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_9)) {
+                if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1)) {
+                    String accountId = ThreadBasedUserCrnProvider.getAccountId();
+                    if (!entitlementService.isOjdbcTokenDh(accountId)) {
+                        apiClusterTemplateConfigs.add(
+                                config(GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL,
+                                        GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL_ONE_DAY));
+                        apiClusterTemplateConfigs.add(
+                                config(GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT,
+                                        GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT_TRUE));
+                    }
+                }
+            }
+        }
+        return apiClusterTemplateConfigs;
     }
 
     private ApiClusterTemplateService createBaseKnoxService() {
