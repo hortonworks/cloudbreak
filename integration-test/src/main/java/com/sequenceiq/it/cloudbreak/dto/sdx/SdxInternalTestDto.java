@@ -6,7 +6,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -311,19 +310,11 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     public SdxInternalTestDto await(SdxClusterStatusResponse status) {
-        return await(status, emptyRunningParameter());
-    }
-
-    public SdxInternalTestDto await(SdxClusterStatusResponse status, Duration duration) {
-        return getTestContext().await(this, Map.of("status", status), emptyRunningParameter(), duration);
+        return getTestContext().await(this, Map.of("status", status), emptyRunningParameter());
     }
 
     public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter) {
         return getTestContext().await(this, Map.of("status", status), runningParameter);
-    }
-
-    public SdxInternalTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
     }
 
     public SdxInternalTestDto awaitForFlow() {
@@ -383,14 +374,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
 
     public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
-    }
-
-    public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
-    }
-
-    public SdxInternalTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
-        return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     @Override

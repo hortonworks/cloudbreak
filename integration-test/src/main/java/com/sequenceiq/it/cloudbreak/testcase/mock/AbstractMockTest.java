@@ -71,4 +71,11 @@ public abstract class AbstractMockTest extends AbstractIntegrationTest {
                 .when(environmentTestClient.describe())
                 .validate();
     }
+
+    @Override
+    protected void createEnvironmentWithFreeIpaAndDatalake(TestContext testContext) {
+        createDefaultEnvironment(testContext);
+        createDefaultFreeIpa(testContext);
+        createDatalake(testContext);
+    }
 }

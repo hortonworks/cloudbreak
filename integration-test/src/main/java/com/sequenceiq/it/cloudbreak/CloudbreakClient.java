@@ -85,7 +85,7 @@ public class CloudbreakClient extends MicroserviceClient<com.sequenceiq.cloudbre
             TestContext testContext, Set<E> ignoredFailedStatuses) {
         Map<String, Status> map = new HashMap<>();
         desiredStatuses.forEach((key, v) -> map.put(key, (Status) v));
-        return (T) new CloudbreakWaitObject(this, name, map, testContext.getActingUserCrn().getAccountId());
+        return (T) new CloudbreakWaitObject(this, name, map, testContext.getActingUserCrn().getAccountId(), (Set<Status>) ignoredFailedStatuses);
     }
 
     @Override

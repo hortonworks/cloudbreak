@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.testcase.AbstractIntegrationTest.STACK_DELETED;
 
-import java.time.Duration;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -160,11 +159,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, Duration pollingInteval) {
-        return getTestContext().await(this, statuses, emptyRunningParameter(), pollingInteval);
-    }
-
-    @Override
     public DistroXTestDto await(Class<DistroXTestDto> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
         return getTestContext().await(this, statuses, runningParameter);
     }
@@ -245,14 +239,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
-    }
-
-    public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
-    }
-
-    public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
-        return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     public DistroXTestDto awaitForFlow() {

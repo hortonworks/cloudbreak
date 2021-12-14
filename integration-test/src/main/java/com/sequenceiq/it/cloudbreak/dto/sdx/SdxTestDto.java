@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
-import java.time.Duration;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
@@ -153,15 +152,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return getTestContext().await(this, Map.of("status", status), runningParameter);
     }
 
-    public SdxTestDto await(SdxClusterStatusResponse status, Set<SdxClusterStatusResponse> ignoredFailedStatuses, RunningParameter runningParameter) {
-        TestContext testContext = getTestContext();
-        return getTestContext().await(this, Map.of("status", status), ignoredFailedStatuses, runningParameter, testContext.getPollingDurationInMills());
-    }
-
-    public SdxTestDto await(SdxClusterStatusResponse status, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
-    }
-
     public SdxTestDto awaitForFlow() {
         return awaitForFlow(emptyRunningParameter());
     }
@@ -227,14 +217,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
 
     public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
-    }
-
-    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
-    }
-
-    public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
-        return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     public SdxTestDto withCloudStorage() {

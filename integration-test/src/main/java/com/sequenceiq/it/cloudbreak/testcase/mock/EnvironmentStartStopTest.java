@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.ENV_STOPPED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.AVAILABLE;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.pollingInterval;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlowFail;
 
 import java.time.Duration;
@@ -98,7 +99,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .awaitForHealthyInstances()
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.delete())
-                .await(EnvironmentStatus.ARCHIVED, POLLING_INTERVAL)
+                .await(EnvironmentStatus.ARCHIVED, pollingInterval(POLLING_INTERVAL))
                 .validate();
     }
 
@@ -142,7 +143,7 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .await(Status.STOPPED)
                 // await stopped env
                 .given(EnvironmentTestDto.class)
-                .await(ENV_STOPPED, POLLING_INTERVAL)
+                .await(ENV_STOPPED, pollingInterval(POLLING_INTERVAL))
                 .when(environmentTestClient.start())
                 // await started freeipa
                 .given(FreeIpaTestDto.class)
@@ -157,9 +158,9 @@ public class EnvironmentStartStopTest extends AbstractMockTest {
                 .await(STACK_AVAILABLE, key(DX_2))
                 // await started env
                 .given(EnvironmentTestDto.class)
-                .await(EnvironmentStatus.AVAILABLE, POLLING_INTERVAL)
+                .await(EnvironmentStatus.AVAILABLE, pollingInterval(POLLING_INTERVAL))
                 .when(environmentTestClient.delete())
-                .await(EnvironmentStatus.ARCHIVED, POLLING_INTERVAL)
+                .await(EnvironmentStatus.ARCHIVED, pollingInterval(POLLING_INTERVAL))
                 .then(auditGrpcServiceAssertion::create)
                 .then(auditGrpcServiceAssertion::delete)
                 .then(auditGrpcServiceAssertion::start)

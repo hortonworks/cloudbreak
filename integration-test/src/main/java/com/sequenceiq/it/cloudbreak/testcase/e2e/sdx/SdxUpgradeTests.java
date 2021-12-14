@@ -109,7 +109,7 @@ public class SdxUpgradeTests extends PreconditionSdxE2ETest {
                 })
                 .when(sdxTestClient.upgrade(), key(sdx))
                 .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdx).withWaitForFlow(Boolean.FALSE))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdx), Duration.ofSeconds(5L))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdx).withPollingInterval(Duration.ofSeconds(5L)))
                 .awaitForHealthyInstances()
                 .then((tc, testDto, client) -> {
                     List<String> instanceIds = sdxUtil.getInstanceIds(testDto, client, MASTER.getName());

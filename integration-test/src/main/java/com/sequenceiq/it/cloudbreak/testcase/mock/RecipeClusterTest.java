@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_CLOUDERA_MANAGER_START;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Type.PRE_TERMINATION;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.pollingInterval;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -201,7 +202,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(4))
-                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
+                .await(STACK_AVAILABLE, pollingInterval(POLLING_INTERVAL))
                 .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(1).verify()
                 .validate();
     }
@@ -242,7 +243,7 @@ public class RecipeClusterTest extends AbstractMockTest {
                 .when(stackTestClient.createV4())
                 .await(STACK_AVAILABLE)
                 .when(StackScalePostAction.valid().withDesiredCount(4))
-                .await(StackTestDto.class, STACK_AVAILABLE, POLLING_INTERVAL)
+                .await(STACK_AVAILABLE, pollingInterval(POLLING_INTERVAL))
                 .mockSalt().run().post().bodyContains(HIGHSTATE, 1).atLeast(1).verify()
                 .validate();
     }

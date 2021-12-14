@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.sdx.api.model.SdxClusterStatusResponse.DELETED;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -202,14 +201,6 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
 
     public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
-    }
-
-    public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().awaitForInstance(this, statuses, runningParameter, pollingInterval);
-    }
-
-    public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, Duration pollingInterval) {
-        return awaitForInstance(statuses, emptyRunningParameter(), pollingInterval);
     }
 
     @Override

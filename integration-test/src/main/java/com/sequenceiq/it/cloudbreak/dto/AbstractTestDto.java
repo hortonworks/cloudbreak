@@ -4,7 +4,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.finder.Finders.same;
 import static java.lang.String.format;
 
-import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,8 +28,8 @@ import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.context.TestErrorLog;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ClouderaManagerEndpoints;
-import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.FreeIPAEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.ExperienceEndpoints;
+import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.FreeIPAEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SaltEndpoints;
 import com.sequenceiq.it.cloudbreak.dto.mock.endpoint.SpiEndpoints;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -236,15 +235,7 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
     }
 
     public T await(Class<T> entityClass, Map<String, Status> statuses) {
-        return await(entityClass, statuses, emptyRunningParameter());
-    }
-
-    public T await(Class<T> entityClass, Map<String, Status> statuses, Duration pollingInteval) {
-        return getTestContext().await(entityClass, statuses, emptyRunningParameter(), pollingInteval);
-    }
-
-    public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter, Duration pollingInteval) {
-        return getTestContext().await(entityClass, statuses, runningParameter, pollingInteval);
+        return getTestContext().await(entityClass, statuses, emptyRunningParameter());
     }
 
     public T await(Class<T> entityClass, Map<String, Status> statuses, RunningParameter runningParameter) {
@@ -261,6 +252,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public T awaitForFlow(RunningParameter runningParameter) {
         return getTestContext().awaitForFlow((T) this, runningParameter);
+    }
+
+    public T awaitForFlow() {
+        return getTestContext().awaitForFlow((T) this, emptyRunningParameter());
     }
 
     public <E extends Exception> T expect(Class<E> expectedException) {

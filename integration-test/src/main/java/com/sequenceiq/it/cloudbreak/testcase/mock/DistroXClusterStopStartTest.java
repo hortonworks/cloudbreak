@@ -87,7 +87,7 @@ public class DistroXClusterStopStartTest extends AbstractClouderaManagerTest {
                     .await(STACK_AVAILABLE, key(stack))
                     .then(auditGrpcServiceAssertion::start)
                     .when(distroXClient.scale(params.getHostgroup(), current))
-                    .await(DistroXTestDto.class, STACK_AVAILABLE, key(stack), POLLING_INTERVAL);
+                    .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL));
         }
 
         currentContext

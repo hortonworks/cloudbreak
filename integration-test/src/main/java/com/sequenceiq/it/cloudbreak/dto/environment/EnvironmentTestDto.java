@@ -7,7 +7,6 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.util.Objects.isNull;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -422,14 +421,6 @@ public class EnvironmentTestDto
 
     public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter) {
         return getTestContext().await(this, Map.of("status", status), runningParameter);
-    }
-
-    public EnvironmentTestDto await(EnvironmentStatus status, RunningParameter runningParameter, Duration pollingInterval) {
-        return getTestContext().await(this, Map.of("status", status), runningParameter, pollingInterval);
-    }
-
-    public EnvironmentTestDto await(EnvironmentStatus status, Duration pollingInterval) {
-        return await(status, emptyRunningParameter(), pollingInterval);
     }
 
     public EnvironmentTestDto awaitForFlow() {

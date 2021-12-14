@@ -2,6 +2,7 @@ package com.sequenceiq.it.cloudbreak.testcase.mock;
 
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.expectedMessage;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
+import static com.sequenceiq.it.cloudbreak.context.RunningParameter.pollingInterval;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -392,7 +393,7 @@ public class DistroXClusterCreationTest extends AbstractClouderaManagerTest {
         return testContext
                 .given(EnvironmentTestDto.class)
                 .when(environmentTestClient.stop())
-                .await(EnvironmentStatus.ENV_STOPPED, POLLING_INTERVAL);
+                .await(EnvironmentStatus.ENV_STOPPED, pollingInterval(POLLING_INTERVAL));
     }
 
     private SdxCloudStorageRequest testStorage() {

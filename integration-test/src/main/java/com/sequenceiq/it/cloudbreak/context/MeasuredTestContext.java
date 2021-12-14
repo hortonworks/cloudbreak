@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.context;
 
-import java.time.Duration;
 import java.util.Map;
 
 import org.springframework.beans.BeansException;
@@ -49,11 +48,6 @@ public class MeasuredTestContext extends MockedTestContext {
     @Override
     public TestContext as(CloudbreakUser cloudbreakUser) {
         return wrappedTestContext.as(cloudbreakUser);
-    }
-
-    @Override
-    public Duration getPollingDurationInMills() {
-        return wrappedTestContext.getPollingDurationInMills();
     }
 
     @Override
