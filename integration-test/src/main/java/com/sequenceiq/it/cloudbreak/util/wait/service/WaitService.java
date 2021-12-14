@@ -6,6 +6,8 @@ import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.cloudbreak.polling.AttemptBasedTimeoutChecker;
+import com.sequenceiq.cloudbreak.polling.TimeoutChecker;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 
 public class WaitService<T extends WaitObject> {
@@ -13,7 +15,7 @@ public class WaitService<T extends WaitObject> {
 
     public Result<WaitResult, Exception> waitObject(StatusChecker<T> statusChecker, T t, TestContext testContext, Duration interval, int maxAttempts,
             int maxRetryCount) {
-        return waitObject(statusChecker, t, testContext, interval, new TimeoutChecker(maxAttempts), maxRetryCount);
+        return waitObject(statusChecker, t, testContext, interval, new AttemptBasedTimeoutChecker(maxAttempts), maxRetryCount);
     }
 
     public Result<WaitResult, Exception> waitObject(StatusChecker<T> statusChecker, T t, TestContext testContext, Duration interval,

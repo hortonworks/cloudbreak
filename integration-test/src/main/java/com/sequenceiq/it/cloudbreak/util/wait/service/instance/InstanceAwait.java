@@ -40,8 +40,13 @@ public class InstanceAwait {
                     client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceFailedChecker<>(), instanceWaitObject, testContext,
                             pollingInterval, maxRetry, 1);
                 } else {
-                    client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceOperationChecker<>(), instanceWaitObject, testContext,
-                            pollingInterval, maxRetry, 1);
+                    if (runningParameter != null && runningParameter.getTimeoutChecker() != null) {
+                        client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceOperationChecker<>(), instanceWaitObject, testContext,
+                                pollingInterval, runningParameter.getTimeoutChecker(), maxRetry);
+                    } else {
+                        client.<CloudbreakInstanceWaitObject>waiterService().waitObject(new InstanceOperationChecker<>(), instanceWaitObject, testContext,
+                                pollingInterval, maxRetry, 1);
+                    }
                 }
             });
         } catch (Exception e) {
