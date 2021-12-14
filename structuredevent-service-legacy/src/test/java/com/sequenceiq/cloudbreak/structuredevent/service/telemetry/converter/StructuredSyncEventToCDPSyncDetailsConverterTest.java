@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.structuredevent.event.ClusterDetails;
+import com.sequenceiq.cloudbreak.structuredevent.event.StackDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredSyncEvent;
 
 public class StructuredSyncEventToCDPSyncDetailsConverterTest {
@@ -47,4 +48,14 @@ public class StructuredSyncEventToCDPSyncDetailsConverterTest {
         Assert.assertEquals(0L, details.getClusterCreationFinished());
     }
 
+    @Test
+    public void testConversionWithEmptyStackDetails() {
+        StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
+        StackDetails stackDetails = new StackDetails();
+        structuredSyncEvent.setStack(stackDetails);
+
+        UsageProto.CDPSyncDetails details = underTest.convert(structuredSyncEvent);
+
+        Assert.assertEquals("UNKNOWN", details.getDatabaseType());
+    }
 }

@@ -101,6 +101,8 @@ public class StackDetails implements Serializable {
 
     private Json tags;
 
+    private String databaseType;
+
     public Long getId() {
         return id;
     }
@@ -307,5 +309,13 @@ public class StackDetails implements Serializable {
                     .orElse(new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>()));
         }
         return new StackTags(new HashMap<>(), new HashMap<>(), new HashMap<>());
+    }
+
+    public String getDatabaseType() {
+        return databaseType;
+    }
+
+    public void setDatabaseType(String databaseType) {
+        this.databaseType = databaseType;
     }
 }
