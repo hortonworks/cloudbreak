@@ -215,6 +215,14 @@ public class UsageReportProcessor implements UsageReporter {
                 .build());
     }
 
+    @Override
+    public void cdpVmDiagnosticsEvent(UsageProto.CDPVMDiagnosticsEvent details) {
+        checkNotNull(details);
+        usageProcessingStrategy.processUsage(eventBuilder()
+                .setCdpVmDiagnosticsEvent(details)
+                .build());
+    }
+
     private UsageProto.Event.Builder eventBuilder() {
         return UsageProto.Event.newBuilder()
                 .setId(UUID.randomUUID().toString())

@@ -20,6 +20,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
@@ -48,6 +49,9 @@ public class DiagnosticsCollectionActions {
 
     @Inject
     private CloudbreakEventService cloudbreakEventService;
+
+    @Inject
+    private DiagnosticsFlowService diagnosticsFlowService;
 
     @Bean(name = "DIAGNOSTICS_SALT_VALIDATION_STATE")
     public Action<?, ?> diagnosticsSaltValidationAction() {
@@ -343,6 +347,7 @@ public class DiagnosticsCollectionActions {
                         .withHostGroups(payload.getHostGroups())
                         .withExcludeHosts(payload.getExcludeHosts())
                         .build();
+                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters());
                 sendEvent(context, event);
             }
         };
@@ -372,6 +377,8 @@ public class DiagnosticsCollectionActions {
                         .withHostGroups(payload.getHostGroups())
                         .withExcludeHosts(payload.getExcludeHosts())
                         .build();
+                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters(),
+                        UsageProto.CDPVMDiagnosticsFailureType.Value.valueOf(payload.getFailureType()), payload.getException());
                 sendEvent(context, event);
             }
         };
