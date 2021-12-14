@@ -6,6 +6,7 @@ import com.sequenceiq.cloudbreak.domain.StorageLocation;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.filesystem.s3.S3FileSystemConfigurationsView;
+import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.HostgroupView;
 import com.sequenceiq.cloudbreak.template.views.SharedServiceConfigsView;
@@ -16,6 +17,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 public class AbstractHbaseConfigProviderTest {
@@ -51,10 +53,14 @@ public class AbstractHbaseConfigProviderTest {
         CmTemplateProcessor cmTemplateProcessor = new CmTemplateProcessor(inputJson);
         cmTemplateProcessor.setCdhVersion(cdhVersion);
 
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
         return TemplatePreparationObject.Builder.builder().withFileSystemConfigurationView(fileSystemConfigurationsView)
                 .withBlueprintView(new BlueprintView(inputJson, "", "", cmTemplateProcessor))
                 .withSharedServiceConfigs(sharedServicesConfigsView)
                 .withHostgroupViews(Set.of(master, worker))
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .withDefaultTags(defaultTags)
                 .withCloudPlatform(cloudPlatform)
                 .build();

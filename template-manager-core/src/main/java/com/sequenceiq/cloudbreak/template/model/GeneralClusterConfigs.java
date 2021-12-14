@@ -49,6 +49,8 @@ public class GeneralClusterConfigs {
 
     private Optional<String> loadBalancerGatewayFqdn = Optional.empty();
 
+    private Optional<String> accountId = Optional.empty();
+
     public OrchestratorType getOrchestratorType() {
         return orchestratorType;
     }
@@ -215,5 +217,13 @@ public class GeneralClusterConfigs {
 
     public void setLoadBalancerGatewayFqdn(Optional<String> loadBalancerGatewayFqdn) {
         this.loadBalancerGatewayFqdn = loadBalancerGatewayFqdn;
+    }
+
+    public Optional<String> getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(Optional<String> accountId) {
+        this.accountId = accountId;
     }
 }

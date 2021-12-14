@@ -403,6 +403,7 @@ public class StackToTemplatePreparationObjectConverter {
             }
         }
         generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.ofNullable(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(source.getId())));
+        generalClusterConfigs.setAccountId(Optional.ofNullable(Crn.safeFromString(source.getResourceCrn()).getAccountId()));
         return generalClusterConfigs;
     }
 
