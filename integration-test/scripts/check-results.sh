@@ -8,7 +8,7 @@ set -ex
 
 if [[ "$CIRCLECI" ]]; then
 
-    # Check integration test results
+    # Checking integration test results
     date
     if [[ ! -d test-output ]]; then
         echo -e "\033[0;91m--- !!! NO test-output DIRECTORY !!! ---\n";
@@ -27,6 +27,37 @@ if [[ "$CIRCLECI" ]]; then
     if [[ $(find suites_log -maxdepth 1 -name '*.log' | wc -l) -lt 3 ]]; then
         echo -e "\033[0;91m--- !!! NO TEST HAS BEEN LAUNCHED !!! ---\n";
         status_code=1;
+    fi
+
+    if [[ -z $ghprbPullId ]]; then
+      # Checking timed out tests
+      declare executed_tests=$(find suites_log -maxdepth 1 -name '*.test*.log' | wc -l)
+      declare generated_results=$(find . -maxdepth 1 -name 'resource_names_test*.json' | wc -l)
+      declare -i diff=$executed_tests-$generated_results
+      declare -a suite_logs
+      declare -a resource_files
+      declare -a timed_out_tests
+      if [[ $diff -gt 0 ]]; then
+          while IFS=  read -r -d $'\0'; do
+              REPLY=${REPLY#*.}; REPLY=${REPLY%-*}
+              suite_logs+=("$REPLY")
+          done < <(find suites_log -type f -name '*.test*.log' -print0)
+          while IFS=  read -r -d $'\0'; do
+              REPLY=${REPLY#*resource_names_}; REPLY=${REPLY%.json*}
+              resource_files+=("$REPLY")
+          done < <(find . -type f -name 'resource_names_test*.json' -print0)
+
+          for suite_log in "${suite_logs[@]}"; do
+            if [[ ! ${resource_files[*]} =~ $suite_log ]]; then
+              timed_out_tests+=("$suite_log")
+            fi
+          done
+
+          if [[ ! -z "${timed_out_tests[*]}" ]]; then
+            echo -e "\033[0;91m--- !!! ["${timed_out_tests[*]}"] TEST HAS BEEN TIMEDOUT !!! ---\n";
+            status_code=1;
+          fi
+      fi
     fi
 
     if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
