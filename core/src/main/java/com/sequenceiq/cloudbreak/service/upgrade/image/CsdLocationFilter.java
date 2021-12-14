@@ -7,10 +7,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
@@ -55,14 +57,14 @@ public class CsdLocationFilter implements PackageLocationFilter {
     private boolean isEligibleForUpgrade(Image image, Set<String> requiredParcels) {
         Map<String, Set<String>> csdUrlsByParcel = getCsdUrlsByParcelNames(image, requiredParcels);
         LOGGER.debug("Available CSD URLs for the parcels: {} on image: {}", csdUrlsByParcel, image.getUuid());
-        return !csdUrlsByParcel.isEmpty() && allRequiredCsdAvailable(csdUrlsByParcel) && allRequiredCsdUrlLocationEligible(csdUrlsByParcel);
+        return allAvailableRequiredCsdHasValue(csdUrlsByParcel) && allAvailableRequiredCsdUrlLocationIsValid(csdUrlsByParcel);
     }
 
-    private boolean allRequiredCsdAvailable(Map<String, Set<String>> csdList) {
+    private boolean allAvailableRequiredCsdHasValue(Map<String, Set<String>> csdList) {
         return csdList.entrySet().stream().noneMatch(csdListByParcel -> csdListByParcel.getValue().isEmpty());
     }
 
-    private boolean allRequiredCsdUrlLocationEligible(Map<String, Set<String>> csdList) {
+    private boolean allAvailableRequiredCsdUrlLocationIsValid(Map<String, Set<String>> csdList) {
         return csdList.entrySet().stream()
                 .allMatch(csdListByParcel -> csdListByParcel.getValue().stream()
                         .allMatch(csdUrl -> URL_PATTERN.matcher(csdUrl).find()));
@@ -72,15 +74,24 @@ public class CsdLocationFilter implements PackageLocationFilter {
         List<String> imagePreWarmCsd = image.getPreWarmCsd();
         LOGGER.debug("Available CSD urls: {}", imagePreWarmCsd);
         return requiredParcels.stream()
+                .filter(parcel -> isCsdExistsOnImage(imagePreWarmCsd, parcel))
                 .collect(Collectors.toMap(
                         parcelName -> parcelName,
                         parcelName -> filterCsdUrlsByStackRelatedParcel(imagePreWarmCsd, parcelName)));
     }
 
+    private boolean isCsdExistsOnImage(List<String> imagePreWarmCsd, String parcelName) {
+        return getCsdStreamWithMatchingParcelName(imagePreWarmCsd, parcelName).anyMatch(StringUtils::hasText);
+    }
+
     private Set<String> filterCsdUrlsByStackRelatedParcel(List<String> imagePreWarmCsd, String parcelName) {
-        return imagePreWarmCsd.stream()
-                .filter(csdUrlContainsParcelName(parcelName))
+        return getCsdStreamWithMatchingParcelName(imagePreWarmCsd, parcelName)
                 .collect(Collectors.toSet());
+    }
+
+    private Stream<String> getCsdStreamWithMatchingParcelName(List<String> imagePreWarmCsd, String parcelName) {
+        return imagePreWarmCsd.stream()
+                .filter(csdUrlContainsParcelName(parcelName));
     }
 
     private Predicate<String> csdUrlContainsParcelName(String parcelName) {

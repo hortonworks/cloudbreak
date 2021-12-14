@@ -55,6 +55,13 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     @Test
+    public void testFilterImageShouldReturnTrueWhenSomePreWarmParcelsListElementsAreNull() {
+        List<List<String>> preWarmParcels = List.of(Arrays.asList("parcel1", ARCHIVE_URL), Arrays.asList(null, null));
+        Image image = createImage(preWarmParcels);
+        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
+    }
+
+    @Test
     public void testFilterImageShouldReturnFalseWhenThePreWarmParcelsListElementsAreNull() {
         List<List<String>> preWarmParcels = List.of(Arrays.asList("parcel1", null), Arrays.asList(null, null));
         Image image = createImage(preWarmParcels);
@@ -76,10 +83,10 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThePreWarmParcelsAreNotEligibleForUpgrade() {
+    public void testFilterImageShouldReturnTrueWhenThePreWarmParcelsAreNotEligibleForUpgrade() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel", RANDOM_URL));
         Image image = createImage(preWarmParcels);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
+        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel1", "", "parcel2", ""))));
     }
 
     @Test
@@ -90,10 +97,10 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenTheImageDoesNotContainsPreWarmParcelFromTheStackRelatedParcels() {
+    public void testFilterImageShouldReturnTrueWhenTheImageDoesNotContainsPreWarmParcelFromTheStackRelatedParcels() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel1", RANDOM_URL), List.of("parcel2", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(Map.of("spark", ""))));
+        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("spark", ""))));
     }
 
     @Test
@@ -118,10 +125,10 @@ public class PreWarmParcelLocationFilterTest {
     }
 
     @Test
-    public void testFilterImageShouldReturnFalseWhenThereAreNoPreWarmParcelAvailableForAllRequiresParcels() {
+    public void testFilterImageShouldReturnTrueWhenThereAreNoPreWarmParcelAvailableForAllRequiresParcels() {
         List<List<String>> preWarmParcels = List.of(List.of("parcel", ARCHIVE_URL));
         Image image = createImage(preWarmParcels);
-        assertFalse(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel", "", "spark", ""))));
+        assertTrue(underTest.filterImage(image, null, createImageFilterParams(Map.of("parcel", "", "spark", ""))));
     }
 
     private Image createImage(List<List<String>> preWarmParcels) {
