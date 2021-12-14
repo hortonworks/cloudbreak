@@ -71,6 +71,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_D
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
@@ -394,6 +395,10 @@ public class EntitlementService {
 
     public boolean isOjdbcTokenDh(String accountId) {
         return isEntitlementRegistered(accountId, OJDBC_TOKEN_DH);
+    }
+
+    public boolean isOjdbcTokenDhOneHour(String accountId) {
+        return isEntitlementRegistered(accountId, OJDBC_TOKEN_DH_ONE_HOUR_TOKEN);
     }
 
     public List<String> getEntitlements(String accountId) {

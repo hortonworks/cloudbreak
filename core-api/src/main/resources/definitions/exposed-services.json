@@ -755,7 +755,6 @@
       "ssoSupported": true,
       "apiOnly": false,
       "apiIncluded": false,
-      "entitlement": "OJDBC_TOKEN_DH",
       "visibleForDatalake": true,
       "visibleForDatahub": true,
       "withoutProxyPath": true,

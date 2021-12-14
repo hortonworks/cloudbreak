@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.Test;
@@ -157,13 +158,16 @@ public class KnoxGatewayConfigProviderTest {
         gateway.setPath("/a/b/c");
         gateway.setTopologies(Set.of(topology));
 
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
         IdBroker idBroker = new IdBroker();
         idBroker.setMasterSecret("supersecret");
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
-                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
@@ -172,7 +176,7 @@ public class KnoxGatewayConfigProviderTest {
                 .withIdBroker(idBroker)
                 .build();
         when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
-        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(true);
+        when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
 
         assertEquals(
                 List.of(
@@ -218,9 +222,13 @@ public class KnoxGatewayConfigProviderTest {
         idBroker.setMasterSecret("supersecret");
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
         BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
+
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
-                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
@@ -229,7 +237,7 @@ public class KnoxGatewayConfigProviderTest {
                 .withIdBroker(idBroker)
                 .build();
         when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("");
-        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(false);
+        when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
 
         assertEquals(
                 List.of(
@@ -266,6 +274,7 @@ public class KnoxGatewayConfigProviderTest {
     public void roleConfigsWithoutGateway() {
         GeneralClusterConfigs gcc = new GeneralClusterConfigs();
         gcc.setPassword("secret");
+        gcc.setAccountId(Optional.of("1234"));
         IdBroker idBroker = new IdBroker();
         idBroker.setMasterSecret("supersecret");
         BlueprintTextProcessor blueprintTextProcessor = mock(BlueprintTextProcessor.class);
@@ -315,10 +324,13 @@ public class KnoxGatewayConfigProviderTest {
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
         BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
 
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withLdapConfig(ldapConfig)
-                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
@@ -327,7 +339,7 @@ public class KnoxGatewayConfigProviderTest {
                 .withIdBroker(idBroker)
                 .build();
         when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
-        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(true);
+        when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(true);
 
         assertEquals(
             List.of(
@@ -369,10 +381,13 @@ public class KnoxGatewayConfigProviderTest {
         LdapView ldapConfig = LdapViewBuilder.aLdapView().build();
         BlueprintView blueprintView = new BlueprintView("text", "7.2.11", "CDH", blueprintTextProcessor);
 
+        GeneralClusterConfigs generalClusterConfigs = new GeneralClusterConfigs();
+        generalClusterConfigs.setAccountId(Optional.of("1234"));
+
         TemplatePreparationObject source = Builder.builder()
                 .withGateway(gateway, "key", new HashSet<>())
                 .withLdapConfig(ldapConfig)
-                .withGeneralClusterConfigs(new GeneralClusterConfigs())
+                .withGeneralClusterConfigs(generalClusterConfigs)
                 .withBlueprintView(blueprintView)
                 .withVirtualGroupView(new VirtualGroupRequest(TestConstants.CRN, ""))
                 .withProductDetails(new ClouderaManagerRepo().withVersion("7.4.2"), List.of(new ClouderaManagerProduct()
@@ -381,7 +396,7 @@ public class KnoxGatewayConfigProviderTest {
                 .withIdBroker(idBroker)
                 .build();
         when(virtualGroupService.getVirtualGroup(source.getVirtualGroupRequest(), UmsRight.KNOX_ADMIN.getRight())).thenReturn("knox_admins");
-        when(entitlementService.isOjdbcTokenDh(anyString())).thenReturn(false);
+        when(entitlementService.isOjdbcTokenDhOneHour(anyString())).thenReturn(false);
 
         assertEquals(
                 List.of(

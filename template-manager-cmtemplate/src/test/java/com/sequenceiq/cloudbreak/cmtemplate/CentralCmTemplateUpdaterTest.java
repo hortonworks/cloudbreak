@@ -136,6 +136,7 @@ public class CentralCmTemplateUpdaterTest {
 
         when(generalClusterConfigs.getClusterName()).thenReturn("testcluster");
         when(generalClusterConfigs.getPassword()).thenReturn("Admin123!");
+        when(generalClusterConfigs.getAccountId()).thenReturn(Optional.of("1234"));
         clouderaManagerRepo = new ClouderaManagerRepo();
         clouderaManagerRepo.setVersion("6.1.0");
         ProductDetailsView productDetailsView = new ProductDetailsView(clouderaManagerRepo, List.of());

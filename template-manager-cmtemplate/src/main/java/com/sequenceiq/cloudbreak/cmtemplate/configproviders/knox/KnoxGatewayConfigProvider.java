@@ -22,7 +22,6 @@ import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
 import com.cloudera.api.swagger.model.ApiClusterTemplateRoleConfigGroup;
 import com.cloudera.api.swagger.model.ApiClusterTemplateService;
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
@@ -174,25 +173,32 @@ public class KnoxGatewayConfigProvider extends AbstractRoleConfigProvider {
 
     private Set<ApiClusterTemplateConfig> getDefaultsIfRequired(TemplatePreparationObject source) {
         Set<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new HashSet<>();
-        ClouderaManagerRepo clouderaManagerRepoDetails = source.getProductDetailsView().getCm();
         Optional<ClouderaManagerProduct> cdhProduct = getCdhProduct(source);
-        if (cdhProduct.isPresent()) {
+        if (cdhProduct.isPresent() && source.getProductDetailsView() != null) {
             String cdhVersion = cdhProduct.get().getVersion().split("-")[0];
-            if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_9)) {
-                if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1)) {
-                    String accountId = ThreadBasedUserCrnProvider.getAccountId();
-                    if (!entitlementService.isOjdbcTokenDh(accountId)) {
-                        apiClusterTemplateConfigs.add(
-                                config(GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL,
-                                        GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL_ONE_DAY));
-                        apiClusterTemplateConfigs.add(
-                                config(GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT,
-                                        GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT_TRUE));
-                    }
+            ClouderaManagerRepo clouderaManagerRepoDetails = source.getProductDetailsView().getCm();
+            if (tokenServiceSupported(cdhVersion, clouderaManagerRepoDetails)) {
+                Optional<String> accountId = source.getGeneralClusterConfigs().getAccountId();
+                if (accountId.isPresent() && !entitlementService.isOjdbcTokenDhOneHour(accountId.get())) {
+                    apiClusterTemplateConfigs.add(
+                            config(GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL,
+                                    GATEWAY_TOKEN_GENERATION_KNOX_TOKEN_TTL_ONE_DAY));
+                    apiClusterTemplateConfigs.add(
+                            config(GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT,
+                                    GATEWAY_TOKEN_GENERATION_ENABLE_LIFESPAN_INPUT_TRUE));
                 }
             }
         }
         return apiClusterTemplateConfigs;
+    }
+
+    private boolean tokenServiceSupported(String cdhVersion, ClouderaManagerRepo clouderaManagerRepoDetails) {
+        if (isVersionNewerOrEqualThanLimited(cdhVersion, CLOUDERA_STACK_VERSION_7_2_9)) {
+            if (isVersionNewerOrEqualThanLimited(clouderaManagerRepoDetails::getVersion, CLOUDERAMANAGER_VERSION_7_4_1)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ApiClusterTemplateService createBaseKnoxService() {
