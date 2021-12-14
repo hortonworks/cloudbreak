@@ -36,7 +36,12 @@ public class ResourceAwait {
                 client.waiterService().waitObject(new WaitFailedChecker<>(), waitObject, testContext, pollingInterval, maxRetry, maxRetryCount);
                 entity.refresh();
             } else {
-                client.waiterService().waitObject(new WaitOperationChecker<>(), waitObject, testContext, pollingInterval, maxRetry, maxRetryCount);
+                if (runningParameter != null && runningParameter.getTimeoutChecker() != null) {
+                    client.waiterService().waitObject(new WaitOperationChecker<>(), waitObject, testContext, pollingInterval,
+                            runningParameter.getTimeoutChecker(), maxRetryCount);
+                } else {
+                    client.waiterService().waitObject(new WaitOperationChecker<>(), waitObject, testContext, pollingInterval, maxRetry, maxRetryCount);
+                }
                 entity.refresh();
             }
         } catch (Exception e) {

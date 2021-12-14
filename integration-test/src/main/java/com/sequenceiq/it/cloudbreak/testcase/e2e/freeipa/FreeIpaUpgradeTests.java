@@ -12,6 +12,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
+import com.sequenceiq.cloudbreak.polling.AbsolutTimeBasedTimeoutChecker;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -28,6 +29,8 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
     protected static final Status FREEIPA_AVAILABLE = Status.AVAILABLE;
 
     protected static final Status FREEIPA_DELETE_COMPLETED = Status.DELETE_COMPLETED;
+
+    private static final long TWO_HOURS_IN_SEC = 2L * 60 * 60;
 
     @Inject
     private FreeIpaTestClient freeIpaTestClient;
@@ -63,7 +66,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .validate();
     }
 
-    @Test(dataProvider = TEST_CONTEXT, description = "IGNORED: CB-15466 Azure FreeIPA Upgrade operation has been timed out with no error message")
+    @Test(dataProvider = TEST_CONTEXT)
     @Description(
             given = "there is a running cloudbreak",
             when = "a valid stack create request is sent with 3 FreeIPA instances " +
@@ -87,7 +90,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .given(FreeIpaOperationStatusTestDto.class)
                 .withOperationId(((FreeIpaTestDto) testContext.get(freeIpa)).getOperationId())
                 .then((tc, testDto, freeIpaClient) -> testFreeIpaAvailabilityDuringUpgrade(tc, testDto, freeIpaClient, freeIpa))
-                .await(COMPLETED)
+                .await(COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(TWO_HOURS_IN_SEC)))
                 .given(freeIpa, FreeIpaTestDto.class)
                 .await(FREEIPA_AVAILABLE, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .then((tc, testDto, client) -> freeIpaTestClient.delete().action(tc, testDto, client))

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.it.cloudbreak.Prototype;
+import com.sequenceiq.it.cloudbreak.context.RunningParameter;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 
@@ -44,5 +45,9 @@ public class FreeIpaOperationStatusTestDto extends AbstractFreeIpaTestDto<String
 
     public FreeIpaOperationStatusTestDto await(OperationState operationState) {
         return getTestContext().await(this, Map.of("status", operationState), waitForFlow().withWaitForFlow(Boolean.FALSE));
+    }
+
+    public FreeIpaOperationStatusTestDto await(OperationState operationState, RunningParameter runningParameter) {
+        return getTestContext().await(this, Map.of("status", operationState), runningParameter);
     }
 }
