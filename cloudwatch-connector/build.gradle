@@ -19,6 +19,7 @@ dependencies {
   implementation     group: 'org.springframework.boot',            name: 'spring-boot-starter-jersey',     version: springBootVersion
   implementation     group: 'net.bytebuddy',                       name: 'byte-buddy',                     version: '1.10.11'
   implementation     group: 'com.google.protobuf',                 name: 'protobuf-java-util',             version: protobufVersion
+  implementation     group: 'com.amazonaws',                       name: 'aws-java-sdk-logs',        version: awsSdkVersion
 
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
