@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -290,13 +291,18 @@ public class StackCreationService {
             if (template != null) {
                 boolean ephemeralVolumesOnly = template.getVolumeTemplates().stream()
                         .allMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
+                Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
                 if (ephemeralVolumesOnly) {
                     LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
                             "Group name: {}, Template id: {}, instance type: {}",
                             TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
                     template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES_ONLY);
+                } else if (instanceStorageCount > 0 && stack.getType().equals(StackType.WORKLOAD)) {
+                    LOGGER.debug("The host group's instance type has ephemeral volumes. Setting temporary storage in template to: {}. " +
+                                    "Group name: {}, Template id: {}, instance type: {}",
+                            TemporaryStorage.EPHEMERAL_VOLUMES.name(), ig.getGroupName(), template.getId(), template.getInstanceType());
+                    template.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
                 }
-                Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
                 LOGGER.debug("Setting instance storage count in template. " +
                         "Group name: {}, Template id: {}, instance type: {}", ig.getGroupName(), template.getId(), template.getInstanceType());
                 template.setInstanceStorageCount(instanceStorageCount);

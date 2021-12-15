@@ -85,7 +85,6 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .withTemplate(String.format(commonClusterManagerProperties.getInternalDistroXBlueprintType(), currentRuntimeVersion))
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .defaultHostGroup()
-                        .withEphemeralTemporaryStorage()
                         .withStorageOptimizedInstancetype()
                         .build())
                 .when(distroXTestClient.create(), key(distroXName))
