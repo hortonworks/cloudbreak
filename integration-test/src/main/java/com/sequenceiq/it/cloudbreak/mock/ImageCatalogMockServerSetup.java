@@ -54,7 +54,7 @@ public class ImageCatalogMockServerSetup {
     private String getCloudbreakUnderTestVersion(String cbServerAddress) {
         WebTarget target;
         Client client = RestClientUtil.get();
-        if (cbServerAddress.contains("dps.mow") || cbServerAddress.contains("cdp.mow")) {
+        if (cbServerAddress.contains("dps.mow") || cbServerAddress.contains("cdp.mow") || cbServerAddress.contains("cdp-priv.mow")) {
             target = client.target(defaultCloudbreakServer + "/cloud/cb/info");
         } else {
             target = client.target(cbServerAddress + "/info");
