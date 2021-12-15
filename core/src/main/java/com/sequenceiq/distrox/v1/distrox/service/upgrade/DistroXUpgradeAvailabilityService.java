@@ -30,7 +30,7 @@ import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.RuntimeVersionService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
-import com.sequenceiq.distrox.v1.distrox.StackOperations;
+import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 
 @Service
 public class DistroXUpgradeAvailabilityService {
@@ -41,7 +41,7 @@ public class DistroXUpgradeAvailabilityService {
     private EntitlementService entitlementService;
 
     @Inject
-    private StackOperations stackOperations;
+    private StackUpgradeOperations stackUpgradeOperations;
 
     @Inject
     private StackService stackService;
@@ -83,7 +83,7 @@ public class DistroXUpgradeAvailabilityService {
     public UpgradeV4Response checkForUpgrade(NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request, String userCrn) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         String accountId = Crn.safeFromString(userCrn).getAccountId();
-        UpgradeV4Response response = stackOperations.checkForClusterUpgrade(accountId, stack, workspaceId, request);
+        UpgradeV4Response response = stackUpgradeOperations.checkForClusterUpgrade(accountId, stack, workspaceId, request);
         validateRangerRaz(accountId, stack);
         List<ImageInfoV4Response> filteredCandidates = filterCandidates(accountId, stack, request, response);
         response.setUpgradeCandidates(filteredCandidates);
@@ -110,25 +110,25 @@ public class DistroXUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
-            filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
-            List<ImageInfoV4Response> filteredCandidates;
-            String stackName = stack.getName();
-            boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
-            if (differentDataHubAndDataLakeVersionAllowed) {
-                LOGGER.info("Different Data Hub version is enabled, not filtering based on Data Lake version, Data Hub: {}", stackName);
-                filteredCandidates = upgradeV4Response.getUpgradeCandidates();
-            } else {
-                LOGGER.info("Filter Data Hub upgrade images based on the Data Lake version, Data Hub: {}", stackName);
-                filteredCandidates = filterForDatalakeVersion(stack, upgradeV4Response);
+        filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
+        List<ImageInfoV4Response> filteredCandidates;
+        String stackName = stack.getName();
+        boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
+        if (differentDataHubAndDataLakeVersionAllowed) {
+            LOGGER.info("Different Data Hub version is enabled, not filtering based on Data Lake version, Data Hub: {}", stackName);
+            filteredCandidates = upgradeV4Response.getUpgradeCandidates();
+        } else {
+            LOGGER.info("Filter Data Hub upgrade images based on the Data Lake version, Data Hub: {}", stackName);
+            filteredCandidates = filterForDatalakeVersion(stack, upgradeV4Response);
+        }
+        if (CollectionUtils.isNotEmpty(filteredCandidates) && Objects.nonNull(request)) {
+            if (LATEST_ONLY == request.getShowAvailableImages()) {
+                filteredCandidates = filterForLatestImagePerRuntime(filteredCandidates);
+            } else if (request.isDryRun()) {
+                filteredCandidates = filterForLatestImage(filteredCandidates);
             }
-            if (CollectionUtils.isNotEmpty(filteredCandidates) && Objects.nonNull(request)) {
-                if (LATEST_ONLY == request.getShowAvailableImages()) {
-                    filteredCandidates = filterForLatestImagePerRuntime(filteredCandidates);
-                } else if (request.isDryRun()) {
-                    filteredCandidates = filterForLatestImage(filteredCandidates);
-                }
-            }
-            return filteredCandidates;
+        }
+        return filteredCandidates;
     }
 
     private void filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(String accountId, String clusterName, UpgradeV4Response upgradeV4Response) {

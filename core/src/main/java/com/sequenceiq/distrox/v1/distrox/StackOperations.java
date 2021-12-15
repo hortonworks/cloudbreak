@@ -13,9 +13,7 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.BadRequestException;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,7 +35,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UserNamePassword
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.AttachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.DetachRecipeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.recipe.UpdateRecipesV4Request;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.CertificatesRotationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.GeneratedBlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Response;
@@ -48,41 +45,29 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.AttachRe
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.DetachRecipeV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recipe.UpdateRecipesV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeOptionV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
-import com.sequenceiq.cloudbreak.conf.LimitConfiguration;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackClusterStatusViewToStatusConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.UserNamePasswordV4RequestToUpdateClusterV4RequestConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.view.StackApiViewToStackViewV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.flow2.stack.detach.StackUpdateService;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackCrnView;
-import com.sequenceiq.cloudbreak.domain.projection.StackInstanceCount;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.view.StackApiView;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.ClusterCommonService;
 import com.sequenceiq.cloudbreak.service.DatabaseBackupRestoreService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerUpdateService;
 import com.sequenceiq.cloudbreak.service.StackCommonService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterDBValidationService;
 import com.sequenceiq.cloudbreak.service.image.GenerateImageCatalogService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterRecoveryService;
-import com.sequenceiq.cloudbreak.service.upgrade.ClusterUpgradeAvailabilityService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradePreconditionService;
-import com.sequenceiq.cloudbreak.service.upgrade.UpgradeService;
 import com.sequenceiq.cloudbreak.service.user.UserService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
-import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.v1.distrox.service.EnvironmentServiceDecorator;
@@ -106,9 +91,6 @@ public class StackOperations implements ResourcePropertyProvider {
     private UserService userService;
 
     @Inject
-    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
-
-    @Inject
     private WorkspaceService workspaceService;
 
     @Inject
@@ -127,28 +109,13 @@ public class StackOperations implements ResourcePropertyProvider {
     private SdxServiceDecorator sdxServiceDecorator;
 
     @Inject
-    private UpgradeService upgradeService;
-
-    @Inject
     private ClusterRecoveryService recoveryService;
-
-    @Inject
-    private ClusterUpgradeAvailabilityService clusterUpgradeAvailabilityService;
 
     @Inject
     private DatabaseBackupRestoreService databaseBackupRestoreService;
 
     @Inject
-    private ClusterDBValidationService clusterDBValidationService;
-
-    @Inject
     private LoadBalancerUpdateService loadBalancerUpdateService;
-
-    @Inject
-    private EntitlementService entitlementService;
-
-    @Inject
-    private UpgradePreconditionService upgradePreconditionService;
 
     @Inject
     private StackApiViewToStackViewV4ResponseConverter stackApiViewToStackViewV4ResponseConverter;
@@ -167,12 +134,6 @@ public class StackOperations implements ResourcePropertyProvider {
 
     @Inject
     private FlowLogService flowLogService;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private LimitConfiguration limitConfiguration;
 
     public StackViewV4Responses listByEnvironmentName(Long workspaceId, String environmentName, List<StackType> stackTypes) {
         Set<StackViewV4Response> stackViewResponses;
@@ -218,9 +179,8 @@ public class StackOperations implements ResourcePropertyProvider {
         return new StackViewV4Responses(stackViewResponses);
     }
 
-    public StackV4Response post(Long workspaceId, @Valid StackV4Request request, boolean distroxRequest) {
+    public StackV4Response post(Long workspaceId, CloudbreakUser cloudbreakUser, @Valid StackV4Request request, boolean distroxRequest) {
         LOGGER.info("Post for Stack in workspace {}.", workspaceId);
-        CloudbreakUser cloudbreakUser = restRequestThreadLocalService.getCloudbreakUser();
         User user = userService.getOrCreate(cloudbreakUser);
         LOGGER.info("Cloudbreak user for the requested stack is {}.", cloudbreakUser);
         Workspace workspace = workspaceService.get(workspaceId, user);
@@ -290,26 +250,6 @@ public class StackOperations implements ResourcePropertyProvider {
         return stackCommonService.repairCluster(workspaceId, nameOrCrn, clusterRepairRequest);
     }
 
-    public FlowIdentifier upgradeOs(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        LOGGER.debug("Starting to upgrade OS: " + nameOrCrn);
-        return upgradeService.upgradeOs(workspaceId, nameOrCrn);
-    }
-
-    public UpgradeOptionV4Response checkForOsUpgrade(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        if (nameOrCrn.hasName()) {
-            return upgradeService.getOsUpgradeOptionByStackNameOrCrn(workspaceId, nameOrCrn, user);
-        } else {
-            LOGGER.debug("No stack name provided for upgrade, found: " + nameOrCrn);
-            throw new BadRequestException("Please provide a stack name for upgrade");
-        }
-    }
-
-    public FlowIdentifier upgradeCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, String imageId) {
-        LOGGER.debug("Starting to upgrade cluster: " + nameOrCrn);
-        return upgradeService.upgradeCluster(workspaceId, nameOrCrn, imageId);
-    }
-
     public FlowIdentifier recoverCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         LOGGER.debug("Starting to recover cluster ({}) from failed upgrade", nameOrCrn);
         return recoveryService.recoverCluster(workspaceId, nameOrCrn);
@@ -323,49 +263,6 @@ public class StackOperations implements ResourcePropertyProvider {
     public FlowIdentifier updatePillarConfiguration(@NotNull NameOrCrn nameOrCrn, Long workspaceId) {
         LOGGER.debug("Starting pillar configuration update: " + nameOrCrn);
         return clusterCommonService.updatePillarConfiguration(nameOrCrn, workspaceId);
-    }
-
-    public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull Stack stack, Long workspaceId, UpgradeV4Request request) {
-        MDCBuilder.buildMdcContext(stack);
-        boolean osUpgrade = upgradeService.isOsUpgrade(request);
-        boolean replaceVms = determineReplaceVmsParameter(stack, request.getReplaceVms());
-        if (replaceVms) {
-            StackInstanceCount stackInstanceCount = instanceMetaDataService.countByStackId(stack.getId());
-            if (stackInstanceCount.getInstanceCount() > limitConfiguration.getUpgradeNodeCountLimit()) {
-                throw new BadRequestException(
-                        String.format("There are %s nodes in the cluster. Upgrade has a limit of %s nodes, above the limit it is unstable. " +
-                                        "Please downscale the cluster below the limit and retry the upgrade.",
-                                stackInstanceCount.getInstanceCount(), limitConfiguration.getUpgradeNodeCountLimit()));
-            }
-        }
-        UpgradeV4Response upgradeResponse = clusterUpgradeAvailabilityService.checkForUpgradesByName(stack, osUpgrade, replaceVms,
-                request.getInternalUpgradeSettings());
-        if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
-            clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
-        }
-        validateDatalakeHasNoRunningDatahub(accountId, workspaceId, stack, upgradeResponse);
-        return upgradeResponse;
-    }
-
-    public UpgradeV4Response checkForClusterUpgrade(String accountId, @NotNull NameOrCrn nameOrCrn, Long workspaceId, UpgradeV4Request request) {
-        return checkForClusterUpgrade(accountId, stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId), workspaceId, request);
-    }
-
-    private void validateDatalakeHasNoRunningDatahub(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
-        if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()) {
-            LOGGER.info("Checking that the attached DataHubs of the Datalake are in stopped state only in case if Datalake runtime upgarda is enabled" +
-                    " in [{}] account on [{}] cluster.", accountId, stack.getName());
-            StackViewV4Responses stackViewV4Responses = listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(), List.of(StackType.WORKLOAD));
-            upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse);
-        }
-    }
-
-    private boolean determineReplaceVmsParameter(Stack stack, Boolean replaceVms) {
-        if (stack.isDatalake() || replaceVms != null) {
-            return Optional.ofNullable(replaceVms).orElse(Boolean.TRUE);
-        } else {
-            return clusterDBValidationService.isGatewayRepairEnabled(stack.getCluster());
-        }
     }
 
     public GeneratedBlueprintV4Response postStackForBlueprint(@Valid StackV4Request stackRequest) {
@@ -409,8 +306,6 @@ public class StackOperations implements ResourcePropertyProvider {
                 ? stackService.getByNameInWorkspace(nameOrCrn.getName(), workspaceId)
                 : stackService.getByCrnInWorkspace(nameOrCrn.getCrn(), workspaceId);
         UpdateClusterV4Request updateClusterJson = userNamePasswordV4RequestToUpdateClusterV4RequestConverter.convert(userNamePasswordJson);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);
     }
 
@@ -421,8 +316,6 @@ public class StackOperations implements ResourcePropertyProvider {
 
     public FlowIdentifier putCluster(@NotNull NameOrCrn nameOrCrn, Long workspaceId, @Valid UpdateClusterV4Request updateJson) {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-        User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        workspaceService.get(restRequestThreadLocalService.getRequestedWorkspaceId(), user);
         return clusterCommonService.put(stack.getResourceCrn(), updateJson);
     }
 

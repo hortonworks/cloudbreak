@@ -15,8 +15,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.Upgrade
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
-import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 
 @Component
@@ -25,19 +23,13 @@ public class UpgradePreconditionService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UpgradePreconditionService.class);
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private SpotInstanceUsageCondition spotInstanceUsageCondition;
-
-    @Inject
-    private InstanceGroupService instanceGroupService;
 
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
 
-    public UpgradeV4Response checkForRunningAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeV4Response upgradeOptions) {
-        String notStoppedAttachedClusters = getNotStoppedAttachedClusters(stackViewV4Responses);
+    public UpgradeV4Response checkForRunningAttachedClusters(StackViewV4Responses stackViewV4Responses, UpgradeV4Response upgradeOptions, Stack stack) {
+        String notStoppedAttachedClusters = getNotStoppedAttachedClusters(stackViewV4Responses, stack);
         if (!notStoppedAttachedClusters.isEmpty()) {
             upgradeOptions.setReason(String.format("There are attached Data Hub clusters in incorrect state: %s. "
                     + "Please stop those to be able to perform the upgrade.", notStoppedAttachedClusters));
@@ -45,10 +37,10 @@ public class UpgradePreconditionService {
         return upgradeOptions;
     }
 
-    private String getNotStoppedAttachedClusters(StackViewV4Responses stackViewV4Responses) {
+    private String getNotStoppedAttachedClusters(StackViewV4Responses stackViewV4Responses, Stack stack) {
         return stackViewV4Responses.getResponses()
                 .stream()
-                .filter(stackResponse -> (isStackStatusNotEligible(stackResponse) || isClusterStatusNotEligible(stackResponse)) && isStoppable(stackResponse))
+                .filter(stackResponse -> (isStackStatusNotEligible(stackResponse) || isClusterStatusNotEligible(stackResponse)) && isStoppable(stack))
                 .map(StackViewV4Response::getName)
                 .collect(Collectors.joining(","));
     }
@@ -58,14 +50,12 @@ public class UpgradePreconditionService {
         return !Status.getAllowedDataHubStatesForSdxUpgrade().contains(stackResponse.getStatus());
     }
 
-    private boolean isStoppable(StackViewV4Response stackResponse) {
-        LOGGER.info("Checking volume for {}", stackResponse.getName());
-        Stack stack = stackService.getByCrn(stackResponse.getCrn());
-        stack.setInstanceGroups(instanceGroupService.getByStackAndFetchTemplates(stack.getId()));
+    private boolean isStoppable(Stack stack) {
+        LOGGER.info("Checking volume for {}", stack.getName());
         return notUsingEphemeralVolume(stack) && notRunsOnSpotInstances(stack);
     }
 
-    private boolean notUsingEphemeralVolume(Stack stack) {
+    public boolean notUsingEphemeralVolume(Stack stack) {
         StopRestrictionReason stopRestrictionReason = stackStopRestrictionService.isInfrastructureStoppable(stack);
         return !StopRestrictionReason.EPHEMERAL_VOLUMES.equals(stopRestrictionReason)
                 && !StopRestrictionReason.EPHEMERAL_VOLUME_CACHING.equals(stopRestrictionReason);
