@@ -20,8 +20,6 @@ public class InstanceGroupDetails implements Serializable {
 
     private List<VolumeDetails> volumes;
 
-    private SecurityGroupDetails securityGroup;
-
     private String temporaryStorage;
 
     private Integer rootVolumeSize;
@@ -66,14 +64,6 @@ public class InstanceGroupDetails implements Serializable {
 
     public void setVolumes(List<VolumeDetails> volumes) {
         this.volumes = volumes;
-    }
-
-    public SecurityGroupDetails getSecurityGroup() {
-        return securityGroup;
-    }
-
-    public void setSecurityGroup(SecurityGroupDetails securityGroup) {
-        this.securityGroup = securityGroup;
     }
 
     public String getTemporaryStorage() {

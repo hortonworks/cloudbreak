@@ -233,7 +233,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
         Assertions.assertTrue(definitionLength >= 0 && definitionLength <= 3000);
 
         master = createInstanceGroupDetails("master", 2, null);
-        stackDetails.setInstanceGroups(Collections.nCopies(100, master));
+        stackDetails.setInstanceGroups(Collections.nCopies(110, master));
         structuredFlowEvent.setStack(stackDetails);
 
         flowClusterShape = underTest.convert(structuredFlowEvent);
