@@ -20,6 +20,8 @@ public class JsonParameters implements Serializable {
     @ApiModelProperty(required = true)
     private String credentialJson;
 
+    private String projectId;
+
     public String getCredentialJson() {
         return credentialJson;
     }
@@ -28,8 +30,18 @@ public class JsonParameters implements Serializable {
         this.credentialJson = credentialJson;
     }
 
+    public String getProjectId() {
+        return projectId;
+    }
+
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+
     @Override
     public String toString() {
-        return "JsonParameters{}";
+        return "JsonParameters{" +
+                "projectId='" + projectId + '\'' +
+                '}';
     }
 }
