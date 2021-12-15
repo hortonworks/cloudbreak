@@ -843,5 +843,5 @@ crn:
   region: us-west-1
 
 existingstackpatcher:
-  intervalhours: 1
+  intervalhours: 24
   enabled: true

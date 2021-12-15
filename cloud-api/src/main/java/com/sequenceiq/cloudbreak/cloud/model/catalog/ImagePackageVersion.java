@@ -15,7 +15,8 @@ public enum ImagePackageVersion {
     SALT("salt"),
     SALT_BOOTSTRAP("salt-bootstrap"),
     SPARK3("spark3", "Spark 3"),
-    STACK("stack");
+    STACK("stack"),
+    CDP_LOGGING_AGENT("cdp-logging-agent");
 
     private final String key;
 

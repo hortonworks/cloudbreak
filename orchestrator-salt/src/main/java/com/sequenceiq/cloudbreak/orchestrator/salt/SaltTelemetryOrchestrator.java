@@ -77,9 +77,15 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final String FLUENT_AGENT_STOP = "fluent.agent-stop";
 
+    private static final String FLUENT_CRONTAB = "fluent.crontab";
+
+    private static final String FLUENT_DOCTOR = "fluent.doctor";
+
     private static final String TELEMETRY_CLOUD_STORAGE_TEST = "telemetry.test-cloud-storage";
 
-    private static final String PERMISSION = "0700";
+    private static final String READ_WRITE_PERMISSION = "0600";
+
+    private static final String EXECUTE_PERMISSION = "0700";
 
     private static final String PREFLIGHT_ERROR_START = "PreFlight diagnostics check FAILED";
 
@@ -89,13 +95,21 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final String LOCAL_PREFLIGHT_SCRIPTS_LOCATION = "salt-common/salt/filecollector/scripts/";
 
-    private static final String REMOTE_PREFLIGHT_SCRIPTS_LOCATION = "/srv/salt/scripts";
+    private static final String REMOTE_SCRIPTS_LOCATION = "/opt/salt/scripts";
 
     private static final String LOCAL_TELEMETRY_SCRIPTS_LOCATION = "salt-common/salt/telemetry/scripts/";
 
     private static final String TELEMETRY_DEPLOYER_SCRIPT_FILENAME = "cdp_telemetry_deployer.sh";
 
+    private static final String LOCAL_SALT_RESOURCES_LOCATION = "salt";
+
+    private static final String SALT_STATE_UPDATER_SCRIPT = "salt-state-updater.sh";
+
+    private static final String REMOTE_TMP_FOLDER = "/tmp/";
+
     private static final String[] SCRIPTS_TO_UPLOAD = new String[]{"preflight_check.sh", "filecollector_minion_check.py"};
+
+    private static final String FLUENT_COMPONENT = "fluent";
 
     private final ExitCriteria exitCriteria;
 
@@ -204,7 +218,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             if (skipComponentRestart) {
                 extraParams += " -s";
             }
-            String upgradeCommand = String.format("/srv/salt/scripts/%s upgrade%s", TELEMETRY_DEPLOYER_SCRIPT_FILENAME, extraParams);
+            String upgradeCommand = String.format("%s/%s upgrade%s", REMOTE_SCRIPTS_LOCATION, TELEMETRY_DEPLOYER_SCRIPT_FILENAME, extraParams);
             Target<String> targets = new HostList(gatewayHostnames);
             Map<String, String> upgradeResponse = SaltStates.runCommandOnHosts(retry, sc, targets, upgradeCommand);
             LOGGER.debug("Upgrade response: {}", upgradeResponse);
@@ -221,27 +235,9 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGateways);
         Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            uploadScripts(sc, gatewayTargets, exitModel, LOCAL_PREFLIGHT_SCRIPTS_LOCATION, SCRIPTS_TO_UPLOAD);
-            String command = String.format("/srv/salt/scripts/%s master-check", SCRIPTS_TO_UPLOAD[0]);
-            boolean anyHostsFilter = doesFilecollectorConfigHasHostsFilter(parameters);
-            if (anyHostsFilter && CollectionUtils.isNotEmpty(nodes)) {
-                command += " -h " + nodes.stream().map(Node::getHostname).collect(Collectors.joining(","));
-            }
             Target<String> targets = new HostList(gatewayHostnames);
-            Map<String, String> preFlightResponses = SaltStates.runCommandOnHosts(retry, sc, targets, command);
-            logMemoryWarnings(preFlightResponses);
-            boolean successful = isSuccessful(preFlightResponses);
-            if (successful) {
-                LOGGER.debug("Diagnostics VM preflight check was successful");
-            } else {
-                String errorMessage = getErrorMessageForPreFlightCheck(preFlightResponses);
-                if (StringUtils.isNotBlank(errorMessage)) {
-                    throw new CloudbreakOrchestratorFailedException(errorMessage);
-                } else {
-                    throw new CloudbreakOrchestratorFailedException(String.format(
-                            "Running of preflight_check.sh script got unexpected result: %s", getAnyPreflightOutput(preFlightResponses)));
-                }
-            }
+            uploadScripts(sc, gatewayTargets, exitModel, LOCAL_PREFLIGHT_SCRIPTS_LOCATION, SCRIPTS_TO_UPLOAD);
+            executeVmPreFlightCheck(sc, targets, nodes, parameters);
         } catch (Exception e) {
             LOGGER.info("Error occurred during preflight_check.sh script upload/execution", e);
             throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
@@ -292,6 +288,26 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
         } catch (Exception e) {
             LOGGER.info("Cannot collect unresponsive salt minions", e);
             throw new CloudbreakOrchestratorFailedException(e);
+        }
+    }
+
+    @Override
+    public void executeLoggingAgentDiagnostics(byte[] loggingAgentSaltState, List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException {
+        GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateways);
+        Set<String> gatewayTargets = getGatewayPrivateIps(allGateways);
+        Set<String> gatewayHostnames = getGatewayHostnames(allGateways);
+        try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
+            Target<String> targets = new HostList(gatewayHostnames);
+            uploadScripts(sc, gatewayTargets, exitModel, LOCAL_SALT_RESOURCES_LOCATION, SALT_STATE_UPDATER_SCRIPT);
+            String loggingAgentZip = String.format("%s.zip", FLUENT_COMPONENT);
+            uploadFileToTargetsWithContentAndPermission(sc, gatewayTargets, exitModel, loggingAgentSaltState,
+                    REMOTE_TMP_FOLDER, loggingAgentZip, READ_WRITE_PERMISSION);
+            updateLoggingAgentSaltStateDefinition(sc, targets, loggingAgentZip);
+            distributeAndExecuteLoggingAgentDoctor(allGateways, nodes, exitModel);
+        } catch (Exception e) {
+            LOGGER.info("Error occurred during ", e);
+            throw new CloudbreakOrchestratorFailedException(e.getMessage(), e);
         }
     }
 
@@ -348,9 +364,15 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
             String localFolderPath, String fileName) throws CloudbreakOrchestratorFailedException {
         ClassPathResource scriptResource = new ClassPathResource(Path.of(localFolderPath, fileName).toString(), getClass().getClassLoader());
         byte[] content = asString(scriptResource).getBytes(StandardCharsets.UTF_8);
+        uploadFileToTargetsWithContentAndPermission(saltConnector, targets, exitCriteriaModel, content,
+                REMOTE_SCRIPTS_LOCATION, fileName, EXECUTE_PERMISSION);
+    }
+
+    private void uploadFileToTargetsWithContentAndPermission(SaltConnector saltConnector, Set<String> targets, ExitCriteriaModel exitCriteriaModel,
+            byte[] content, String remoteFolder, String fileName, String permission) throws CloudbreakOrchestratorFailedException {
         try {
-            OrchestratorBootstrap saltUpload = new SaltUploadWithPermission(saltConnector, targets, REMOTE_PREFLIGHT_SCRIPTS_LOCATION,
-                    fileName, PERMISSION, content);
+            OrchestratorBootstrap saltUpload = new SaltUploadWithPermission(saltConnector, targets, remoteFolder,
+                    fileName, permission, content);
             Callable<Boolean> saltUploadRunner = saltRunner.runner(saltUpload, exitCriteria, exitCriteriaModel);
             saltUploadRunner.call();
         } catch (Exception e) {
@@ -428,5 +450,45 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
                     Set<String> hostSet = (Set<String>) filecollectorConfig.get(key);
                     return CollectionUtils.isNotEmpty(hostSet);
                 });
+    }
+
+    private void executeVmPreFlightCheck(SaltConnector sc, Target<String> targets, Set<Node> nodes, Map<String, Object> parameters)
+            throws CloudbreakOrchestratorFailedException {
+        String command = String.format("%s/%s master-check", REMOTE_SCRIPTS_LOCATION, SCRIPTS_TO_UPLOAD[0]);
+        boolean anyHostsFilter = doesFilecollectorConfigHasHostsFilter(parameters);
+        if (anyHostsFilter && CollectionUtils.isNotEmpty(nodes)) {
+            command += " -h " + nodes.stream().map(Node::getHostname).collect(Collectors.joining(","));
+        }
+        Map<String, String> preFlightResponses = SaltStates.runCommandOnHosts(retry, sc, targets, command);
+        logMemoryWarnings(preFlightResponses);
+        boolean successful = isSuccessful(preFlightResponses);
+        if (successful) {
+            LOGGER.debug("Diagnostics VM preflight check was successful");
+        } else {
+            String errorMessage = getErrorMessageForPreFlightCheck(preFlightResponses);
+            if (StringUtils.isNotBlank(errorMessage)) {
+                throw new CloudbreakOrchestratorFailedException(errorMessage);
+            } else {
+                throw new CloudbreakOrchestratorFailedException(String.format(
+                        "Running of preflight_check.sh script got unexpected result: %s", getAnyPreflightOutput(preFlightResponses)));
+            }
+        }
+    }
+
+    private void updateLoggingAgentSaltStateDefinition(SaltConnector sc, Target<String> targets, String loggingAgentZip) {
+        String command = String.format("%s/%s -f %s%s -s %s",
+                REMOTE_SCRIPTS_LOCATION, SALT_STATE_UPDATER_SCRIPT, REMOTE_TMP_FOLDER, loggingAgentZip, FLUENT_COMPONENT);
+        Map<String, String> result = SaltStates.runCommandOnHosts(retry, sc, targets, command);
+        LOGGER.debug("Result of partial salt state (fluent) upgrade: {}", result);
+    }
+
+    private void distributeAndExecuteLoggingAgentDoctor(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel) {
+        try {
+            runSimpleSaltState(allGateways, nodes, exitModel, FLUENT_CRONTAB, "Logging agent crontab distribution operation failed.",
+                    1, false);
+            runSimpleSaltState(allGateways, nodes, exitModel, FLUENT_DOCTOR, "Logging agent doctor failed.", 1, false);
+        } catch (Exception e) {
+            LOGGER.warn("Logging agent doctor operation failed. Skipping...", e);
+        }
     }
 }

@@ -44,4 +44,7 @@ public interface TelemetryOrchestrator {
 
     void validateCloudStorage(List<GatewayConfig> allGateways, Set<Node> allNodes, Set<String> targetHostNames,
             Map<String, Object> parameters, ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorException;
+
+    void executeLoggingAgentDiagnostics(byte[] loggingAgentSaltState, List<GatewayConfig> gatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException;
 }
