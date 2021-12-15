@@ -33,6 +33,14 @@ public class DatabaseServerSslCertificateConfig {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseServerSslCertificateConfig.class);
 
+    private static final Pattern CLOUD_PLATFORM_AND_REGION_PATTERN = Pattern.compile("(aws|azure)(?:\\.([a-zA-Z0-9-]+))?");
+
+    private static final int GROUP_CLOUD_PLATFORM = 1;
+
+    private static final int GROUP_CLOUD_REGION = 2;
+
+    private static final String CLOUD_PLATFORM_AND_REGION_FORMAT = "%s.%s";
+
     private static final String CERT_LIST_SEPARATOR_REGEX = ";";
 
     private static final int GROUP_VERSION = 1;
@@ -52,10 +60,16 @@ public class DatabaseServerSslCertificateConfig {
 
     private static final Map<String, Integer> CERT_LEGACY_MAX_VERSIONS_BY_CLOUD_PLATFORM = Map.ofEntries(
             Map.entry(CloudPlatform.AWS.toString().toLowerCase(), 0),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".eu-south-1", 0),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".af-south-1", 0),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".me-south-1", 0),
             Map.entry(CloudPlatform.AZURE.toString().toLowerCase(), 1));
 
     private static final Map<String, String> CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIERS_BY_CLOUD_PLATFORM = Map.ofEntries(
             Map.entry(CloudPlatform.AWS.toString().toLowerCase(), "rds-ca-2019"),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".eu-south-1", "rds-ca-2019-eu-south-1"),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".af-south-1", "rds-ca-2019-af-south-1"),
+            Map.entry(CloudPlatform.AWS.toString().toLowerCase() + ".me-south-1", "rds-ca-2019-me-south-1"),
             Map.entry(CloudPlatform.AZURE.toString().toLowerCase(), "DigiCertGlobalRootG2"));
 
     // Must not be renamed or made final, gets injected from application properties
@@ -76,11 +90,14 @@ public class DatabaseServerSslCertificateConfig {
         certsByCloudPlatformCache = certs.entrySet()
                 .stream()
                 .filter(e -> StringUtils.isNoneBlank(e.getValue()))
-                .collect(Collectors.toMap(e -> e.getKey().toLowerCase(), e -> buildCertsSet(e.getKey(), e.getValue())));
+                .collect(Collectors.toMap(e -> e.getKey().toLowerCase(), e -> buildCertsSet(e.getKey().toLowerCase(), e.getValue())));
+
+        validateCloudPlatformFormat();
+        validateCloudProviderIdentifierUniqueness();
+
         certsByCloudPlatformByVersionCache = certsByCloudPlatformCache.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> buildCertsByVersionMap(e.getValue())));
-        validateCloudProviderIdentifierUniqueness();
         certsByCloudPlatformByCloudProviderIdentifierCache = certsByCloudPlatformCache.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Map.Entry::getKey, e -> buildCertsByCloudProviderIdentifierMap(e.getValue())));
@@ -96,6 +113,18 @@ public class DatabaseServerSslCertificateConfig {
         logCerts();
     }
 
+    private String prettyPrintCloudPlatform(String cloudPlatform) {
+        Matcher matcher = CLOUD_PLATFORM_AND_REGION_PATTERN.matcher(cloudPlatform);
+        if (matcher.matches()) {
+            String cloudPlatformBase = matcher.group(GROUP_CLOUD_PLATFORM);
+            String region = matcher.group(GROUP_CLOUD_REGION);
+            return Strings.isNullOrEmpty(region) ? cloudPlatformBase + " (global)" : String.format("%s (region %s)", cloudPlatformBase, region);
+        } else {
+            LOGGER.warn("Ignoring malformed cloud platform \"{}\"", cloudPlatform);
+            return cloudPlatform + " (malformed)";
+        }
+    }
+
     private Set<SslCertificateEntry> buildCertsSet(String cloudPlatform, String entries) {
         List<SslCertificateEntry> certsList = Arrays.stream(entries.split(CERT_LIST_SEPARATOR_REGEX))
                 .map(String::trim)
@@ -106,7 +135,8 @@ public class DatabaseServerSslCertificateConfig {
         certsList.forEach(e -> {
             if (!result.add(e)) {
                 throw new IllegalArgumentException(
-                        String.format("Duplicated SSL certificate version %d for cloud platform \"%s\"", e.getVersion(), cloudPlatform));
+                        String.format("Duplicated SSL certificate version %d for cloud platform \"%s\"", e.getVersion(),
+                                prettyPrintCloudPlatform(cloudPlatform)));
             }
         });
         return result;
@@ -115,7 +145,8 @@ public class DatabaseServerSslCertificateConfig {
     private SslCertificateEntry parseCertEntry(String cloudPlatform, String entry) {
         Matcher matcher = CERT_ENTRY_PATTERN.matcher(entry);
         if (!matcher.matches()) {
-            throw new IllegalArgumentException(String.format("Malformed SSL certificate entry for cloud platform \"%s\": \"%s\"", cloudPlatform, entry));
+            throw new IllegalArgumentException(String.format("Malformed SSL certificate entry for cloud platform \"%s\": \"%s\"",
+                    prettyPrintCloudPlatform(cloudPlatform), entry));
         }
         int version = Integer.parseInt(matcher.group(GROUP_VERSION));
         String cloudProviderIdentifier = matcher.group(GROUP_CLOUD_PROVIDER_IDENTIFIER);
@@ -129,7 +160,7 @@ public class DatabaseServerSslCertificateConfig {
         if (Strings.isNullOrEmpty(cloudProviderIdentifier) || cloudProviderIdentifier.length() > CLOUD_PROVIDER_IDENTIFIER_MAX_LENGTH) {
             throw new IllegalArgumentException(String.format("Malformed SSL certificate CloudProviderIdentifier for cloud platform \"%s\": \"%s\". " +
                             "It should not be empty and its length must be less than %d characters.",
-                    cloudPlatform, cloudProviderIdentifier, CLOUD_PROVIDER_IDENTIFIER_MAX_LENGTH));
+                    prettyPrintCloudPlatform(cloudPlatform), cloudProviderIdentifier, CLOUD_PROVIDER_IDENTIFIER_MAX_LENGTH));
         }
     }
 
@@ -138,7 +169,7 @@ public class DatabaseServerSslCertificateConfig {
             return PkiUtil.fromCertificatePem(certPem);
         } catch (Exception e) {
             throw new IllegalArgumentException(
-                    String.format("Error parsing SSL certificate PEM for cloud platform \"%s\": \"%s\"", cloudPlatform, certPem), e);
+                    String.format("Error parsing SSL certificate PEM for cloud platform \"%s\": \"%s\"", prettyPrintCloudPlatform(cloudPlatform), certPem), e);
         }
     }
 
@@ -154,22 +185,32 @@ public class DatabaseServerSslCertificateConfig {
                 .collect(Collectors.toMap(SslCertificateEntry::getCloudProviderIdentifier, Function.identity()));
     }
 
-    private IllegalStateException createIseForEmptyCertsByVersionMap(String cloudPlatform) {
-        return new IllegalStateException(String.format("Empty certsByVersionMap encountered for cloud platform \"%s\"", cloudPlatform));
+    private IllegalStateException createEmptyCertsByVersionMapException(String cloudPlatform) {
+        return new IllegalStateException(String.format("Empty certsByVersionMap encountered for cloud platform \"%s\"",
+                prettyPrintCloudPlatform(cloudPlatform)));
     }
 
     private int getCertMinVersion(String cloudPlatform, Map<Integer, SslCertificateEntry> certsByVersionMap) {
         return certsByVersionMap.keySet()
                 .stream()
                 .min(Integer::compareTo)
-                .orElseThrow(() -> createIseForEmptyCertsByVersionMap(cloudPlatform));
+                .orElseThrow(() -> createEmptyCertsByVersionMapException(cloudPlatform));
     }
 
     private int getCertMaxVersion(String cloudPlatform, Map<Integer, SslCertificateEntry> certsByVersionMap) {
         return certsByVersionMap.keySet()
                 .stream()
                 .max(Integer::compareTo)
-                .orElseThrow(() -> createIseForEmptyCertsByVersionMap(cloudPlatform));
+                .orElseThrow(() -> createEmptyCertsByVersionMapException(cloudPlatform));
+    }
+
+    private void validateCloudPlatformFormat() {
+        for (String cloudPlatform : certsByCloudPlatformCache.keySet()) {
+            Matcher matcher = CLOUD_PLATFORM_AND_REGION_PATTERN.matcher(cloudPlatform);
+            if (!matcher.matches()) {
+                throw new IllegalArgumentException(String.format("Malformed cloud platform \"%s\".", prettyPrintCloudPlatform(cloudPlatform)));
+            }
+        }
     }
 
     private void validateCloudProviderIdentifierUniqueness() {
@@ -180,7 +221,7 @@ public class DatabaseServerSslCertificateConfig {
             entry.getValue().forEach(e -> {
                 if (!cloudProviderIdentifierSet.add(e.getCloudProviderIdentifier())) {
                     throw new IllegalArgumentException(String.format("Duplicated SSL certificate CloudProviderIdentifier for cloud platform \"%s\": \"%s\"",
-                            cloudPlatform, e.getCloudProviderIdentifier()));
+                            prettyPrintCloudPlatform(cloudPlatform), e.getCloudProviderIdentifier()));
                 }
             });
         }
@@ -194,7 +235,8 @@ public class DatabaseServerSslCertificateConfig {
             entry.getValue().forEach(e -> {
                 if (!certPemSet.add(e.getCertPem())) {
                     throw new IllegalArgumentException(
-                            String.format("Duplicated SSL certificate PEM for cloud platform \"%s\": \"%s\"", cloudPlatform, e.getCertPem()));
+                            String.format("Duplicated SSL certificate PEM for cloud platform \"%s\": \"%s\"", prettyPrintCloudPlatform(cloudPlatform),
+                                    e.getCertPem()));
                 }
             });
         }
@@ -206,7 +248,8 @@ public class DatabaseServerSslCertificateConfig {
             int numCerts = entry.getValue().size();
             int versionsRangeSize = certMaxVersionsByCloudPlatformCache.get(cloudPlatform) - certMinVersionsByCloudPlatformCache.get(cloudPlatform) + 1;
             if (numCerts != versionsRangeSize) {
-                throw new IllegalArgumentException(String.format("SSL certificate versions are not contiguous for cloud platform \"%s\"", cloudPlatform));
+                throw new IllegalArgumentException(String.format("SSL certificate versions are not contiguous for cloud platform \"%s\"",
+                        prettyPrintCloudPlatform(cloudPlatform)));
             }
         }
     }
@@ -220,24 +263,24 @@ public class DatabaseServerSslCertificateConfig {
             int minVersion = certMinVersionsByCloudPlatformCache.get(cloudPlatform);
             int maxVersion = certMaxVersionsByCloudPlatformCache.get(cloudPlatform);
             LOGGER.info("Found SSL certificates registered for cloud platform \"{}\": numberOfCerts={}, minVersion={}, maxVersion={}, certs=\"{}\"",
-                    cloudPlatform, numCerts, minVersion, maxVersion, entry.getValue());
+                    prettyPrintCloudPlatform(cloudPlatform), numCerts, minVersion, maxVersion, entry.getValue());
         }
         LOGGER.info("Total number of SSL certificates registered: {}", numCertsTotal);
     }
 
-    public SslCertificateEntry getCertByPlatformAndVersion(String cloudPlatform, int version) {
-        Set<SslCertificateEntry> result = getCertsByPlatformAndVersions(cloudPlatform, version);
+    public SslCertificateEntry getCertByCloudPlatformAndRegionAndVersion(String cloudPlatform, String region, int version) {
+        Set<SslCertificateEntry> result = getCertsByCloudPlatformAndRegionAndVersions(cloudPlatform, region, version);
         return result.isEmpty() ? null : result.iterator().next();
     }
 
-    public Set<SslCertificateEntry> getCertsByPlatformAndVersions(String cloudPlatform, int... versions) {
+    public Set<SslCertificateEntry> getCertsByCloudPlatformAndRegionAndVersions(String cloudPlatform, String region, int... versions) {
         if (versions == null) {
             return new HashSet<>();
         } else {
             Set<SslCertificateEntry> result = new LinkedHashSet<>(versions.length);
             Optional.ofNullable(cloudPlatform)
                     .filter(c -> !Strings.isNullOrEmpty(c))
-                    .map(c -> certsByCloudPlatformByVersionCache.get(c.toLowerCase()))
+                    .map(c -> getValueByCloudPlatformAndRegion(certsByCloudPlatformByVersionCache, c, region))
                     .ifPresent(certsByVersionMap -> Arrays.stream(versions)
                             .mapToObj(certsByVersionMap::get)
                             .filter(Objects::nonNull)
@@ -246,47 +289,59 @@ public class DatabaseServerSslCertificateConfig {
         }
     }
 
-    public SslCertificateEntry getCertByPlatformAndCloudProviderIdentifier(String cloudPlatform, String cloudProviderIdentifier) {
+    private <V> V getValueByCloudPlatformAndRegion(Map<String, V> valuesByCloudPlatformMap, String cloudPlatform, String region) {
+        String cloudPlatformNormalized = cloudPlatform.toLowerCase();
+        V globalValue = valuesByCloudPlatformMap.get(cloudPlatformNormalized);
+        if (!Strings.isNullOrEmpty(region)) {
+            String cloudPlatformAndRegion = String.format(CLOUD_PLATFORM_AND_REGION_FORMAT, cloudPlatformNormalized, region.toLowerCase());
+            V regionalValue = valuesByCloudPlatformMap.get(cloudPlatformAndRegion);
+            return regionalValue == null ? globalValue : regionalValue;
+        } else {
+            return globalValue;
+        }
+    }
+
+    public SslCertificateEntry getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(String cloudPlatform, String region, String cloudProviderIdentifier) {
         return Optional.ofNullable(cloudPlatform)
                 .filter(c -> !Strings.isNullOrEmpty(c))
-                .map(c -> certsByCloudPlatformByCloudProviderIdentifierCache.get(c.toLowerCase()))
+                .map(c -> getValueByCloudPlatformAndRegion(certsByCloudPlatformByCloudProviderIdentifierCache, c, region))
                 .map(certsByCloudProviderIdentifierMap -> certsByCloudProviderIdentifierMap.get(cloudProviderIdentifier))
                 .orElse(null);
     }
 
-    public int getNumberOfCertsByPlatform(String cloudPlatform) {
+    public int getNumberOfCertsByCloudPlatformAndRegion(String cloudPlatform, String region) {
         return Optional.ofNullable(cloudPlatform)
                 .filter(c -> !Strings.isNullOrEmpty(c))
-                .map(c -> certsByCloudPlatformCache.get(c.toLowerCase()))
+                .map(c -> getValueByCloudPlatformAndRegion(certsByCloudPlatformCache, c, region))
                 .map(Set::size)
                 .orElse(NO_CERTS);
     }
 
-    public int getMinVersionByPlatform(String cloudPlatform) {
+    public int getMinVersionByCloudPlatformAndRegion(String cloudPlatform, String region) {
         return Optional.ofNullable(cloudPlatform)
                 .filter(c -> !Strings.isNullOrEmpty(c))
-                .map(c -> certMinVersionsByCloudPlatformCache.get(c.toLowerCase()))
+                .map(c -> getValueByCloudPlatformAndRegion(certMinVersionsByCloudPlatformCache, c, region))
                 .orElse(DUMMY_VERSION);
     }
 
-    public int getMaxVersionByPlatform(String cloudPlatform) {
+    public int getMaxVersionByCloudPlatformAndRegion(String cloudPlatform, String region) {
         return Optional.ofNullable(cloudPlatform)
                 .filter(c -> !Strings.isNullOrEmpty(c))
-                .map(c -> certMaxVersionsByCloudPlatformCache.get(c.toLowerCase()))
+                .map(c -> getValueByCloudPlatformAndRegion(certMaxVersionsByCloudPlatformCache, c, region))
                 .orElse(DUMMY_VERSION);
     }
 
-    public int getLegacyMaxVersionByPlatform(String cloudPlatform) {
+    public int getLegacyMaxVersionByCloudPlatformAndRegion(String cloudPlatform, String region) {
         return Optional.ofNullable(cloudPlatform)
                 .filter(c -> !Strings.isNullOrEmpty(c))
-                .map(c -> CERT_LEGACY_MAX_VERSIONS_BY_CLOUD_PLATFORM.get(c.toLowerCase()))
+                .map(c -> getValueByCloudPlatformAndRegion(CERT_LEGACY_MAX_VERSIONS_BY_CLOUD_PLATFORM, c, region))
                 .orElse(DUMMY_VERSION);
     }
 
-    public String getLegacyCloudProviderIdentifierByPlatform(String cloudPlatform) {
+    public String getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(String cloudPlatform, String region) {
         return Optional.ofNullable(cloudPlatform)
                 .filter(c -> !Strings.isNullOrEmpty(c))
-                .map(c -> CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIERS_BY_CLOUD_PLATFORM.get(c.toLowerCase()))
+                .map(c -> getValueByCloudPlatformAndRegion(CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIERS_BY_CLOUD_PLATFORM, c, region))
                 .orElse(null);
     }
 
@@ -294,10 +349,10 @@ public class DatabaseServerSslCertificateConfig {
         return certs;
     }
 
-    public Set<SslCertificateEntry> getCertsByPlatform(String cloudPlatform) {
+    public Set<SslCertificateEntry> getCertsByCloudPlatformAndRegion(String cloudPlatform, String region) {
         return Optional.ofNullable(cloudPlatform)
                 .filter(c -> !Strings.isNullOrEmpty(c))
-                .map(c -> certsByCloudPlatformCache.get(c.toLowerCase()))
+                .map(c -> getValueByCloudPlatformAndRegion(certsByCloudPlatformCache, c, region))
                 .orElse(new HashSet<>());
     }
 

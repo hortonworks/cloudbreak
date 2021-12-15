@@ -45,6 +45,8 @@ import com.sequenceiq.redbeams.service.stack.DBStackService;
 @ExtendWith(MockitoExtension.class)
 class DatabaseServerSslCertificateSyncServiceTest {
 
+    private static final String REGION = "myRegion";
+
     private static final String CERT_ID_1 = "certID-1";
 
     private static final String CERT_ID_2 = "certID-2";
@@ -134,7 +136,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
         verify(cloudPlatformConnectors, never()).get(any(CloudPlatformVariant.class));
-        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndCloudProviderIdentifier(anyString(), anyString());
+        verify(databaseServerSslCertificateConfig, never()).getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(anyString(), anyString(), anyString());
         verify(dbStackService, never()).save(any(DBStack.class));
     }
 
@@ -158,7 +160,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
 
         assertThat(exceptionResult).isSameAs(e);
 
-        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndCloudProviderIdentifier(anyString(), anyString());
+        verify(databaseServerSslCertificateConfig, never()).getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(anyString(), anyString(), anyString());
         verify(dbStackService, never()).save(any(DBStack.class));
     }
 
@@ -180,7 +182,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
 
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
-        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndCloudProviderIdentifier(anyString(), anyString());
+        verify(databaseServerSslCertificateConfig, never()).getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(anyString(), anyString(), anyString());
         verify(dbStackService, never()).save(any(DBStack.class));
     }
 
@@ -195,7 +197,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
 
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
-        verify(databaseServerSslCertificateConfig, never()).getCertByPlatformAndCloudProviderIdentifier(anyString(), anyString());
+        verify(databaseServerSslCertificateConfig, never()).getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(anyString(), anyString(), anyString());
         verify(dbStackService, never()).save(any(DBStack.class));
     }
 
@@ -218,7 +220,8 @@ class DatabaseServerSslCertificateSyncServiceTest {
         when(resourceConnector.getDatabaseServerActiveSslRootCertificate(authenticatedContext, databaseStack))
                 .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
 
-        when(databaseServerSslCertificateConfig.getCertByPlatformAndCloudProviderIdentifier(CloudPlatform.AWS.name(), CERT_ID_2)).thenReturn(null);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(null);
 
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
@@ -248,7 +251,8 @@ class DatabaseServerSslCertificateSyncServiceTest {
                 .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
 
         SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_3, CERT_PEM, x509Cert);
-        when(databaseServerSslCertificateConfig.getCertByPlatformAndCloudProviderIdentifier(CloudPlatform.AWS.name(), CERT_ID_2)).thenReturn(cert);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(cert);
 
         IllegalStateException illegalStateException =
                 assertThrows(IllegalStateException.class, () -> underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack));
@@ -271,7 +275,8 @@ class DatabaseServerSslCertificateSyncServiceTest {
                 .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
 
         SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, "", x509Cert);
-        when(databaseServerSslCertificateConfig.getCertByPlatformAndCloudProviderIdentifier(CloudPlatform.AWS.name(), CERT_ID_2)).thenReturn(cert);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(cert);
 
         IllegalStateException illegalStateException =
                 assertThrows(IllegalStateException.class, () -> underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack));
@@ -295,7 +300,8 @@ class DatabaseServerSslCertificateSyncServiceTest {
                 .thenReturn(new CloudDatabaseServerSslCertificate(CloudDatabaseServerSslCertificateType.ROOT, CERT_ID_2));
 
         SslCertificateEntry cert = new SslCertificateEntry(CERT_VERSION, CERT_ID_2, CERT_PEM, x509Cert);
-        when(databaseServerSslCertificateConfig.getCertByPlatformAndCloudProviderIdentifier(CloudPlatform.AWS.name(), CERT_ID_2)).thenReturn(cert);
+        when(databaseServerSslCertificateConfig.getCertByCloudPlatformAndRegionAndCloudProviderIdentifier(CloudPlatform.AWS.name(), REGION, CERT_ID_2))
+                .thenReturn(cert);
 
         underTest.syncSslCertificateIfNeeded(cloudContext, cloudCredential, dbStack, databaseStack);
 
@@ -309,6 +315,7 @@ class DatabaseServerSslCertificateSyncServiceTest {
 
     private DBStack getDBStack(SslConfig sslConfig) {
         DBStack dbStack = new DBStack();
+        dbStack.setRegion(REGION);
         dbStack.setSslConfig(sslConfig);
         return dbStack;
     }
