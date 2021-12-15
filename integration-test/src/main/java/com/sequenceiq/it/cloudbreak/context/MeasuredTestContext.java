@@ -271,6 +271,11 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public CloudPlatform getCloudPlatform() {
+        return wrappedTestContext.getCloudPlatform();
+    }
+
+    @Override
     protected <T extends CloudbreakTestDto, U extends MicroserviceClient>
     T doAction(T entity, Class<? extends MicroserviceClient> clientClass, Action<T, U> action, String who) throws Exception {
         PerformanceIndicator pi = new PerformanceIndicator(action.getClass().getSimpleName());

@@ -21,16 +21,13 @@ public class E2ETestContext extends TestContext {
     public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
         O bean = super.init(clss, cloudPlatform);
         String testName = getTestMethodName().orElseThrow(TestMethodNameMissingException::new);
-        if  (cloudPlatform == CloudPlatform.GCP) {
-            testName = testName.toLowerCase();
-        }
-        tagsUtil.addTestNameTag(bean, testName);
+        tagsUtil.addTestNameTag(cloudPlatform, bean, testName);
         return bean;
     }
 
     @Override
     public void cleanupTestContext() {
-        super.cleanupTestContext();
         getResourceNames().values().forEach(value -> tagsUtil.verifyTags(value, this));
+        super.cleanupTestContext();
     }
 }
