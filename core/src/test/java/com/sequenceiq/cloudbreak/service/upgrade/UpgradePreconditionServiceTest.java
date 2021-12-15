@@ -23,8 +23,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.views.ClusterViewV4Respo
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
-import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -34,13 +32,7 @@ public class UpgradePreconditionServiceTest {
     private UpgradePreconditionService underTest;
 
     @Mock
-    private StackService stackService;
-
-    @Mock
     private SpotInstanceUsageCondition spotInstanceUsageCondition;
-
-    @Mock
-    private InstanceGroupService instanceGroupService;
 
     @Mock
     private StackStopRestrictionService stackStopRestrictionService;
@@ -54,16 +46,12 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Response dataHubStack3 = createStackResponse(Status.STOPPED, "stack-3", "stack-crn-2");
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
         Stack stack = new Stack();
-        when(stackService.getByCrn(dataHubStack1.getCrn())).thenReturn(stack);
-        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
 
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response());
+        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response(), stack);
 
         assertNull(actual.getUpgradeCandidates());
         assertEquals("There are attached Data Hub clusters in incorrect state: stack-1. Please stop those to be able to perform the upgrade.",
                 actual.getReason());
-        verify(stackService).getByCrn(dataHubStack1.getCrn());
-        verify(instanceGroupService).getByStackAndFetchTemplates(any());
         verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(stack);
     }
 
@@ -76,11 +64,9 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Response dataHubStack3 = createStackResponse(Status.STOPPED, "stack-3", "stack-crn-3");
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
 
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response());
+        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response(), new Stack());
 
         assertNull(actual.getReason());
-        verifyNoInteractions(stackService);
-        verifyNoInteractions(instanceGroupService);
         verifyNoInteractions(spotInstanceUsageCondition);
     }
 
@@ -93,13 +79,10 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Response dataHubStack3 = createStackResponse(Status.STOPPED, "stack-3", "stack-crn-3");
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
-        when(stackService.getByCrn(dataHubStack1.getCrn())).thenReturn(new Stack());
 
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response());
+        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response(), new Stack());
 
         assertNull(actual.getReason());
-        verify(stackService).getByCrn(dataHubStack1.getCrn());
-        verify(instanceGroupService).getByStackAndFetchTemplates(any());
         verifyNoInteractions(spotInstanceUsageCondition);
     }
 
@@ -113,14 +96,11 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of(dataHubStack1, dataHubStack2, dataHubStack3));
         Stack stack = new Stack();
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
-        when(stackService.getByCrn(dataHubStack1.getCrn())).thenReturn(stack);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
 
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response());
+        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, new UpgradeV4Response(), stack);
 
         assertNull(actual.getReason());
-        verify(stackService).getByCrn(dataHubStack1.getCrn());
-        verify(instanceGroupService).getByStackAndFetchTemplates(any());
         verify(spotInstanceUsageCondition).isStackRunsOnSpotInstances(stack);
     }
 
@@ -129,11 +109,9 @@ public class UpgradePreconditionServiceTest {
         StackViewV4Responses stackViewV4Responses = new StackViewV4Responses(Set.of());
         UpgradeV4Response response = new UpgradeV4Response();
 
-        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, response);
+        UpgradeV4Response actual = underTest.checkForRunningAttachedClusters(stackViewV4Responses, response, new Stack());
 
         assertNull(actual.getReason());
-        verifyNoInteractions(stackService);
-        verifyNoInteractions(instanceGroupService);
         verifyNoInteractions(spotInstanceUsageCondition);
     }
 

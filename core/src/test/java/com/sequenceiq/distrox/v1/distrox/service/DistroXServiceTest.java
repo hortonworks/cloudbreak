@@ -2,12 +2,14 @@ package com.sequenceiq.distrox.v1.distrox.service;
 
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.AVAILABLE;
 import static com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus.START_DATAHUB_STARTED;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -30,12 +32,14 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackV4Request;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.user.CloudbreakUser;
 import com.sequenceiq.cloudbreak.domain.view.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentClientService;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeipaClientService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
+import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
@@ -66,6 +70,9 @@ class DistroXServiceTest {
     @Mock
     private FreeipaClientService freeipaClientService;
 
+    @Mock
+    private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
     @InjectMocks
     private DistroXService underTest;
 
@@ -92,7 +99,7 @@ class DistroXServiceTest {
 
         verify(environmentClientService, calledOnce()).getByName(any());
         verify(environmentClientService, calledOnce()).getByName(invalidEnvNameValue);
-        verify(stackOperations, never()).post(any(), any(), anyBoolean());
+        verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
         verify(workspaceService, never()).getForCurrentUser();
         verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
     }
@@ -145,7 +152,7 @@ class DistroXServiceTest {
 
             verify(environmentClientService, calledOnce()).getByName(any());
             verify(environmentClientService, calledOnce()).getByName(eq(envName));
-            verify(stackOperations, never()).post(any(), any(), anyBoolean());
+            verify(stackOperations, never()).post(any(), any(), any(), anyBoolean());
             verify(workspaceService, never()).getForCurrentUser();
             verify(stackRequestConverter, never()).convert(any(DistroXV1Request.class));
         }
@@ -169,15 +176,17 @@ class DistroXServiceTest {
         when(environmentClientService.getByName(envName)).thenReturn(envResponse);
 
         StackV4Request converted = new StackV4Request();
+        CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(stackRequestConverter.convert(r)).thenReturn(converted);
         when(stackViewService.findDatalakeViewByEnvironmentCrn(anyString())).thenReturn(Optional.of(createDlStackView(Status.AVAILABLE)));
+        when(restRequestThreadLocalService.getCloudbreakUser()).thenReturn(cloudbreakUser);
 
         underTest.post(r);
 
         verify(environmentClientService, calledOnce()).getByName(any());
         verify(environmentClientService, calledOnce()).getByName(envName);
-        verify(stackOperations, calledOnce()).post(any(), any(), anyBoolean());
-        verify(stackOperations, calledOnce()).post(USER_ID, converted, true);
+        verify(stackOperations, calledOnce()).post(any(), any(), any(), anyBoolean());
+        verify(stackOperations, calledOnce()).post(eq(USER_ID), eq(cloudbreakUser), eq(converted), eq(true));
         verify(workspaceService, calledOnce()).getForCurrentUser();
         verify(stackRequestConverter, calledOnce()).convert(any(DistroXV1Request.class));
         verify(stackRequestConverter, calledOnce()).convert(r);
