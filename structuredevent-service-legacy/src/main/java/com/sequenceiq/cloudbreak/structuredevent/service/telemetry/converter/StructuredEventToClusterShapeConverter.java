@@ -25,7 +25,7 @@ public class StructuredEventToClusterShapeConverter {
 
     private static final int DEFAULT_INTEGER_VALUE = -1;
 
-    private static final int MAX_STRING_LENGTH = 3000;
+    private static final int MAX_STRING_LENGTH = 4000;
 
     public UsageProto.CDPClusterShape convert(StructuredFlowEvent structuredFlowEvent) {
         UsageProto.CDPClusterShape.Builder cdpClusterShape = UsageProto.CDPClusterShape.newBuilder();
