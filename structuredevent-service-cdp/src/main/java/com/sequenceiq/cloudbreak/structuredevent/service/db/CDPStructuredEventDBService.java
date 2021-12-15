@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
@@ -63,8 +64,10 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
 
     private ValidationResult validate(CDPStructuredEvent event) {
         ValidationResult.ValidationResultBuilder builder = ValidationResult.builder();
-        if (StringUtils.isEmpty(event.getOperation().getResourceCrn())) {
-            builder.error("Resource crn cannot be null or empty");
+
+        if (!StringUtils.hasText(event.getOperation().getResourceCrn()) ||
+                !Crn.isCrn(event.getOperation().getResourceCrn())) {
+            builder.error("Resource crn cannot be null or empty or invalid");
         }
         return builder.build();
     }
@@ -98,6 +101,21 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
                     .convert(event));
         } catch (Exception ex) {
             String msg = String.format("Failed get pageable events for types: '%s' and resource CRN: '%s'", types, resourceCrn);
+            LOGGER.warn(msg, ex);
+            throw new CloudbreakServiceException(msg, ex);
+        }
+    }
+
+    @Override
+    public <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResources(List<StructuredEventType> eventTypes, List<String> resourceCrns, Pageable pageable) {
+        LOGGER.debug("Gathering pageable events for types: '{}' and resource CRNs: '{}'", eventTypes, resourceCrns);
+        List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
+        try {
+            Page<CDPStructuredEventEntity> events = pagingStructuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns, pageable);
+            return (Page<T>) Optional.ofNullable(events).orElse(Page.empty()).map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
+                    .convert(event));
+        } catch (Exception ex) {
+            String msg = String.format("Failed get pageable events for types: '%s' and resource CRNs: '%s'", types, resourceCrns);
             LOGGER.warn(msg, ex);
             throw new CloudbreakServiceException(msg, ex);
         }

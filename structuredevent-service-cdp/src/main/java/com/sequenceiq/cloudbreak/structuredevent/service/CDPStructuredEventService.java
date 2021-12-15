@@ -14,4 +14,6 @@ public interface CDPStructuredEventService extends CDPStructuredEventSenderServi
     <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResource(List<StructuredEventType> eventType, String resourceCrn, Pageable pageable);
 
     <T extends CDPStructuredEvent> List<T> getEventsOfResource(List<StructuredEventType> eventTypes, String resourceCrn);
+
+    <T extends CDPStructuredEvent> Page<T> getPagedEventsOfResources(List<StructuredEventType> eventTypes, List<String> resourceCrns, Pageable pageable);
 }

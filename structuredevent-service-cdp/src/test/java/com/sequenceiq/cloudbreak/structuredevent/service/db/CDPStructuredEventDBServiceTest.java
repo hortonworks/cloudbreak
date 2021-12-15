@@ -97,7 +97,7 @@ public class CDPStructuredEventDBServiceTest {
     public void testCreateWhenResourceCrnIsNotEmpty() {
         CDPStructuredEvent event = new CDPStructuredRestCallEvent();
         CDPOperationDetails operation = new CDPOperationDetails();
-        operation.setResourceCrn("crn");
+        operation.setResourceCrn("crn:cdp:cloudbreak:us-west-1:someone:stack:12345");
         event.setOperation(operation);
         CDPStructuredEventEntity entity = new CDPStructuredEventEntity();
         when(cdpStructuredEventToCDPStructuredEventEntityConverter.convert(event)).thenReturn(entity);

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.events;
 
+import java.util.List;
+
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
@@ -43,6 +45,17 @@ public interface EventV4Endpoint {
     @ApiOperation(value = EventOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
             nickname = "getEventsByStackNameInWorkspace")
     Page<CloudbreakEventV4Response> getCloudbreakEventsByStack(
+            @PathParam("name") String name,
+            @QueryParam("page") @DefaultValue("0") Integer page,
+            @QueryParam("size") @DefaultValue("100") Integer size,
+            @AccountId @QueryParam("accountId") String accountId);
+
+    @GET
+    @Path("{name}/list")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EventOpDescription.GET_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = Notes.EVENT_NOTES,
+            nickname = "getCloudbreakEventsListByStack")
+    List<CloudbreakEventV4Response> getPagedCloudbreakEventListByStack(
             @PathParam("name") String name,
             @QueryParam("page") @DefaultValue("0") Integer page,
             @QueryParam("size") @DefaultValue("100") Integer size,

@@ -16,6 +16,7 @@ import com.sequenceiq.authorization.controller.AuthorizationInfoController;
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
 import com.sequenceiq.cloudbreak.exception.mapper.DefaultExceptionMapper;
 import com.sequenceiq.cloudbreak.structuredevent.rest.controller.CDPStructuredEventV1Controller;
+import com.sequenceiq.datalake.controller.SdxEventController;
 import com.sequenceiq.datalake.controller.diagnostics.DiagnosticsController;
 import com.sequenceiq.datalake.controller.mapper.WebApplicaitonExceptionMapper;
 import com.sequenceiq.datalake.controller.operation.OperationController;
@@ -62,7 +63,8 @@ public class EndpointConfig extends ResourceConfig {
             SdxRestoreController.class,
             SdxRecipeController.class,
             CDPStructuredEventV1Controller.class,
-            SdxRecoveryController.class
+            SdxRecoveryController.class,
+            SdxEventController.class
     );
 
     @Value("${info.app.version:unspecified}")
@@ -82,10 +84,6 @@ public class EndpointConfig extends ResourceConfig {
 
     @PostConstruct
     private void init() {
-        // todo: uncomment me for CB-13786
-//        if (auditEnabled) {
-//            register(CDPStructuredEventFilter.class);
-//        }
         registerEndpoints();
         registerExceptionMappers();
         register(serverTracingDynamicFeature);

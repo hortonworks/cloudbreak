@@ -10,6 +10,7 @@ dependencies {
   implementation project(':core-api')
   implementation project(':authorization-common-api')
   implementation project(":structuredevent-api-cdp")
+  implementation project(':structuredevent-model')
 
   implementation     group: 'io.opentracing.contrib',        name: 'opentracing-jaxrs2',             version: opentracingJaxrs2Version
 }
