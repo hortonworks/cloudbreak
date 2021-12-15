@@ -74,7 +74,6 @@ public class DistroXRepairTests extends AbstractE2ETest {
                 .given(distrox, DistroXTestDto.class)
                 .withInstanceGroupsEntity(new DistroXInstanceGroupsBuilder(testContext)
                         .defaultHostGroup()
-                        .withEphemeralTemporaryStorage()
                         .withStorageOptimizedInstancetype()
                         .build())
                 .when(distroXTestClient.create(), key(distrox))
