@@ -6,6 +6,8 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Date;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -32,7 +34,7 @@ public class RoundRobinStreamProcessingQueuesTest {
     public void testProcess() throws InterruptedException {
         // GIVEN
         MockitoAnnotations.openMocks(this);
-        DummyRequest input = new DummyRequest("body", null);
+        DummyRequest input = new DummyRequest("body", null, new Date().getTime());
         given(recordProcessor.getServiceName()).willReturn("DummyService");
         doNothing().when(recordProcessor).handleDroppedRecordRequest(input, 2);
         RoundRobinStreamProcessingQueues<AbstractStreamingConfiguration, RecordRequest, RecordWorker> underTest =
@@ -51,8 +53,8 @@ public class RoundRobinStreamProcessingQueuesTest {
 
     static class DummyRequest extends RecordRequest {
 
-        DummyRequest(String rawBody, GeneratedMessageV3 messageBody) {
-            super(rawBody, messageBody);
+        DummyRequest(String rawBody, GeneratedMessageV3 messageBody, long timestamp) {
+            super(rawBody, messageBody, timestamp);
         }
     }
 }

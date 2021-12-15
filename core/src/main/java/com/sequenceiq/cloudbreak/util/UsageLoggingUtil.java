@@ -12,8 +12,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.usage.LoggingUsageReporter;
-import com.sequenceiq.cloudbreak.usage.UsageReporter;
+import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
 
 /**
  * Utility class for logging usage events.
@@ -21,7 +20,11 @@ import com.sequenceiq.cloudbreak.usage.UsageReporter;
 @Component
 public class UsageLoggingUtil {
 
-    private UsageReporter usageReporter = new LoggingUsageReporter();
+    private final UsageReportProcessor usageReportProcessor;
+
+    public UsageLoggingUtil(UsageReportProcessor usageReportProcessor) {
+        this.usageReportProcessor = usageReportProcessor;
+    }
 
     /**
      * Log datalake/datahub requested usage event.
@@ -52,7 +55,7 @@ public class UsageLoggingUtil {
                     UsageProto.CDPDatalakeClusterRequested.newBuilder();
             protoBuilder.setDatalakeId(cluster.getId().toString());
             buildDatalakeRequestedProto(cluster, cloudPlatformEnum, protoBuilder);
-            usageReporter.cdpDatalakeClusterRequested(timestamp, protoBuilder.build());
+            usageReportProcessor.cdpDatalakeClusterRequested(timestamp, protoBuilder.build());
         } else {
             UsageProto.CDPDatahubClusterRequested.Builder protoBuilder =
                     UsageProto.CDPDatahubClusterRequested.newBuilder();
@@ -61,7 +64,7 @@ public class UsageLoggingUtil {
                 protoBuilder.setDatalakeCrn(stack.getDatalakeCrn());
             }
             buildDatahubRequestedProto(cluster, cloudPlatformEnum, protoBuilder);
-            usageReporter.cdpDatahubClusterRequested(timestamp, protoBuilder.build());
+            usageReportProcessor.cdpDatahubClusterRequested(timestamp, protoBuilder.build());
         }
     }
 
@@ -98,14 +101,14 @@ public class UsageLoggingUtil {
                     .setOldStatus(oldStatusEnum)
                     .setNewStatus(newStatusEnum)
                     .build();
-            usageReporter.cdpDatalakeClusterStatusChanged(proto);
+            usageReportProcessor.cdpDatalakeClusterStatusChanged(proto);
         } else {
             UsageProto.CDPDatahubClusterStatusChanged proto = UsageProto.CDPDatahubClusterStatusChanged.newBuilder()
                     .setClusterId(cluster.getId().toString())
                     .setOldStatus(oldStatusEnum)
                     .setNewStatus(newStatusEnum)
                     .build();
-            usageReporter.cdpDatahubClusterStatusChanged(proto);
+            usageReportProcessor.cdpDatahubClusterStatusChanged(proto);
         }
     }
 

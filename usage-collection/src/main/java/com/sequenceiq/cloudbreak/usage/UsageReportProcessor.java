@@ -10,26 +10,33 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.google.common.io.BaseEncoding;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.usage.strategy.CloudwatchUsageProcessingStrategy;
+import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
+import com.sequenceiq.cloudbreak.usage.strategy.UsageProcessingStrategy;
 
-/**
- * A usage reporter that logs usage events.
- */
 @Service
-public class LoggingUsageReporter implements UsageReporter {
+public class UsageReportProcessor implements UsageReporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingUsageReporter.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingUsageProcessingStrategy.class);
 
-    private static final Logger BINARY_EVENT_LOGGER = LoggerFactory.getLogger("CDP_BINARY_USAGE_EVENT");
+    private final UsageProcessingStrategy usageProcessingStrategy;
 
-    private static final String USAGE_EVENT_MDC_NAME = "binaryUsageEvent";
+    public UsageReportProcessor(LoggingUsageProcessingStrategy loggingUsageProcessingStrategy,
+            CloudwatchUsageProcessingStrategy cloudwatchUsageProcessingStrategy) {
+        this.usageProcessingStrategy = initUsageProcessingStrategy(loggingUsageProcessingStrategy, cloudwatchUsageProcessingStrategy);
+    }
+
+    private UsageProcessingStrategy initUsageProcessingStrategy(LoggingUsageProcessingStrategy loggingUsageProcessingStrategy,
+            CloudwatchUsageProcessingStrategy cloudwatchUsageProcessingStrategy) {
+        return cloudwatchUsageProcessingStrategy != null
+                && cloudwatchUsageProcessingStrategy.isEnabled() ? cloudwatchUsageProcessingStrategy : loggingUsageProcessingStrategy;
+    }
 
     @Override
     public void cdpDatahubClusterRequested(long timestamp, UsageProto.CDPDatahubClusterRequested details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setTimestamp(timestamp)
                     .setCdpDatahubClusterRequested(details)
                     .build());
@@ -43,7 +50,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatahubClusterStatusChanged(UsageProto.CDPDatahubClusterStatusChanged details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubClusterStatusChanged(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -56,7 +63,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatalakeClusterRequested(long timestamp, UsageProto.CDPDatalakeClusterRequested details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setTimestamp(timestamp)
                     .setCdpDatalakeClusterRequested(details)
                     .build());
@@ -70,9 +77,10 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatalakeClusterStatusChanged(UsageProto.CDPDatalakeClusterStatusChanged details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            UsageProto.Event event = eventBuilder()
                     .setCdpDatalakeClusterStatusChanged(details)
-                    .build());
+                    .build();
+            usageProcessingStrategy.processUsage(event);
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
             LOGGER.warn("Could not log binary format for the following usage event: {}! Cause: {}", details, e.getMessage());
@@ -83,7 +91,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpEnvironmentRequested(UsageProto.CDPEnvironmentRequested details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpEnvironmentRequested(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -96,7 +104,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpEnvironmentStatusChanged(UsageProto.CDPEnvironmentStatusChanged details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpEnvironmentStatusChanged(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -109,7 +117,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatalakeRequested(UsageProto.CDPDatalakeRequested details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatalakeRequested(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -122,7 +130,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatalakeStatusChanged(UsageProto.CDPDatalakeStatusChanged details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatalakeStatusChanged(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -135,7 +143,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatahubRequested(UsageProto.CDPDatahubRequested details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubRequested(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -148,7 +156,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatahubStatusChanged(UsageProto.CDPDatahubStatusChanged details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubStatusChanged(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -161,7 +169,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatalakeSync(UsageProto.CDPDatalakeSync details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatalakeSync(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -174,7 +182,7 @@ public class LoggingUsageReporter implements UsageReporter {
     public void cdpDatahubSync(UsageProto.CDPDatahubSync details) {
         try {
             checkNotNull(details);
-            log(eventBuilder()
+            usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubSync(details)
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
@@ -186,7 +194,7 @@ public class LoggingUsageReporter implements UsageReporter {
     @Override
     public void cdpDatahubAutoscaleTriggered(UsageProto.CDPDatahubAutoscaleTriggered details) {
         checkNotNull(details);
-        log(eventBuilder()
+        usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpDatahubAutoscaleTriggered(details)
                 .build());
     }
@@ -194,7 +202,7 @@ public class LoggingUsageReporter implements UsageReporter {
     @Override
     public void cdpDatahubAutoscaleConfigChanged(UsageProto.CDPDatahubAutoscaleConfigChanged details) {
         checkNotNull(details);
-        log(eventBuilder()
+        usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpDatahubAutoscaleConfigChanged(details)
                 .build());
     }
@@ -202,7 +210,7 @@ public class LoggingUsageReporter implements UsageReporter {
     @Override
     public void cdpNetworkCheckEvent(UsageProto.CDPNetworkCheck details) {
         checkNotNull(details);
-        log(eventBuilder()
+        usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpNetworkCheck(details)
                 .build());
     }
@@ -212,13 +220,5 @@ public class LoggingUsageReporter implements UsageReporter {
                 .setId(UUID.randomUUID().toString())
                 .setTimestamp(Instant.now().toEpochMilli())
                 .setVersion(UsageReporter.USAGE_VERSION);
-    }
-
-    void log(UsageProto.Event event) {
-        LOGGER.info("Logging binary format for the following usage event: {}", event);
-        String binaryUsageEvent = BaseEncoding.base64().encode(event.toByteArray());
-        MDCBuilder.addMdcField(USAGE_EVENT_MDC_NAME, binaryUsageEvent);
-        BINARY_EVENT_LOGGER.info(binaryUsageEvent);
-        MDCBuilder.removeMdcField(USAGE_EVENT_MDC_NAME);
     }
 }

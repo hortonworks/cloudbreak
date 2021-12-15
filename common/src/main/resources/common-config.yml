@@ -13,3 +13,21 @@ telemetry:
     desiredVersion: 0.4.18
   cdpLoggingAgent:
     desiredVersion: 0.2.11
+  usage:
+    cloudwatch:
+      enabled: false
+      workers: 1
+      queueSizeLimit: 2000
+      maxRetry: 5
+      additionalFields:
+        - key: component
+          value: cloudbreak-server-usage
+        - key: level
+          value: INFO
+        - key: "@app"
+          value: cloudbreak
+        - key: "@env"
+          value: cloudbreak-eng
+        - key: "@cluster"
+          value: dps
+      forceLogging: false

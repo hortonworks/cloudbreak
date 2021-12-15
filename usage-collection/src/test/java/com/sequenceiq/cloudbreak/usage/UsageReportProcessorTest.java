@@ -1,84 +1,105 @@
 package com.sequenceiq.cloudbreak.usage;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import com.sequenceiq.cloudbreak.usage.strategy.CloudwatchUsageProcessingStrategy;
+import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.spy;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
 
-public class LoggingUsageReporterTest {
-    LoggingUsageReporter usageReporter = spy(LoggingUsageReporter.class);
+@ExtendWith(MockitoExtension.class)
+public class UsageReportProcessorTest {
 
-    String dummy = "dummy";
+    private static final String DUMMY = "dummy";
+
+    private UsageReportProcessor usageReporter;
+
+    @Mock
+    private LoggingUsageProcessingStrategy loggingUsageProcessingStrategy;
+
+    @Mock
+    private CloudwatchUsageProcessingStrategy cloudwatchUsageProcessingStrategy;
+
+    @BeforeEach
+    public void setUp() {
+        MockitoAnnotations.openMocks(this);
+        usageReporter = new UsageReportProcessor(loggingUsageProcessingStrategy, cloudwatchUsageProcessingStrategy);
+    }
 
     @Test
     public void cdpDatahubClusterRequested() {
         long timestamp = System.currentTimeMillis();
         UsageProto.CDPDatahubClusterRequested proto = UsageProto.CDPDatahubClusterRequested.newBuilder()
-                .setAccountId(dummy)
-                .setCdpdVersion(dummy)
-                .setClusterId(dummy)
-                .setClusterName(dummy)
-                .setCreatorCrn(dummy)
-                .setDatalakeCrn(dummy)
+                .setAccountId(DUMMY)
+                .setCdpdVersion(DUMMY)
+                .setClusterId(DUMMY)
+                .setClusterName(DUMMY)
+                .setCreatorCrn(DUMMY)
+                .setDatalakeCrn(DUMMY)
                 .build();
         usageReporter.cdpDatahubClusterRequested(timestamp, proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(usageReporter).log(captor.capture());
+        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
 
         assertEquals(timestamp, captor.getValue().getTimestamp());
-        assertEquals(dummy, captor.getValue().getCdpDatahubClusterRequested().getCreatorCrn());
+        assertEquals(DUMMY, captor.getValue().getCdpDatahubClusterRequested().getCreatorCrn());
     }
 
     @Test
     public void cdpDatahubClusterStatusChanged() {
         UsageProto.CDPDatahubClusterStatusChanged proto = UsageProto.CDPDatahubClusterStatusChanged.newBuilder()
-                .setClusterId(dummy)
+                .setClusterId(DUMMY)
                 .setOldStatus(UsageProto.CDPCloudbreakClusterStatus.Value.REQUESTED)
                 .setNewStatus(UsageProto.CDPCloudbreakClusterStatus.Value.CREATE_IN_PROGRESS)
                 .build();
         usageReporter.cdpDatahubClusterStatusChanged(proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(usageReporter).log(captor.capture());
+        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
 
-        assertEquals(dummy, captor.getValue().getCdpDatahubClusterStatusChanged().getClusterId());
+        assertEquals(DUMMY, captor.getValue().getCdpDatahubClusterStatusChanged().getClusterId());
     }
 
     @Test
     public void cdpDatalakeClusterRequested() {
         long timestamp = System.currentTimeMillis();
         UsageProto.CDPDatalakeClusterRequested proto = UsageProto.CDPDatalakeClusterRequested.newBuilder()
-                .setAccountId(dummy)
-                .setCdpdVersion(dummy)
-                .setDatalakeId(dummy)
-                .setDatalakeName(dummy)
-                .setCreatorCrn(dummy)
+                .setAccountId(DUMMY)
+                .setCdpdVersion(DUMMY)
+                .setDatalakeId(DUMMY)
+                .setDatalakeName(DUMMY)
+                .setCreatorCrn(DUMMY)
                 .build();
         usageReporter.cdpDatalakeClusterRequested(timestamp, proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(usageReporter).log(captor.capture());
+        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
 
         assertEquals(timestamp, captor.getValue().getTimestamp());
-        assertEquals(dummy, captor.getValue().getCdpDatalakeClusterRequested().getCreatorCrn());
+        assertEquals(DUMMY, captor.getValue().getCdpDatalakeClusterRequested().getCreatorCrn());
     }
 
     @Test
     public void cdpDatalakeClusterStatusChanged() {
         UsageProto.CDPDatalakeClusterStatusChanged proto = UsageProto.CDPDatalakeClusterStatusChanged.newBuilder()
-                .setDatalakeId(dummy)
+                .setDatalakeId(DUMMY)
                 .setOldStatus(UsageProto.CDPCloudbreakClusterStatus.Value.REQUESTED)
                 .setNewStatus(UsageProto.CDPCloudbreakClusterStatus.Value.CREATE_IN_PROGRESS)
                 .build();
         usageReporter.cdpDatalakeClusterStatusChanged(proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(usageReporter).log(captor.capture());
+        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
 
-        assertEquals(dummy, captor.getValue().getCdpDatalakeClusterStatusChanged().getDatalakeId());
+        assertEquals(DUMMY, captor.getValue().getCdpDatalakeClusterStatusChanged().getDatalakeId());
     }
 }

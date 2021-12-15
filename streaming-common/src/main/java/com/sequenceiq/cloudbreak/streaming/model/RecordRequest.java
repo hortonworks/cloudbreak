@@ -10,9 +10,12 @@ public class RecordRequest {
 
     private final GeneratedMessageV3 messageBody;
 
-    public RecordRequest(String rawBody, GeneratedMessageV3 messageBody) {
+    private final long timestamp;
+
+    public RecordRequest(String rawBody, GeneratedMessageV3 messageBody, long timestamp) {
         this.rawBody = rawBody;
         this.messageBody = messageBody;
+        this.timestamp = timestamp;
     }
 
     public Optional<String> getRawBody() {
@@ -23,11 +26,16 @@ public class RecordRequest {
         return Optional.ofNullable(messageBody);
     }
 
+    public long getTimestamp() {
+        return timestamp;
+    }
+
     @Override
     public String toString() {
         return "RecordRequest{" +
                 "rawBody='" + rawBody + '\'' +
                 ", messageBody=" + messageBody +
+                ", timestamp=" + timestamp +
                 '}';
     }
 }
