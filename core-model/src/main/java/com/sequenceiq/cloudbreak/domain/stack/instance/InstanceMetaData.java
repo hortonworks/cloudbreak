@@ -401,6 +401,7 @@ public class InstanceMetaData implements ProvisionEntity {
                 .add("instanceName='" + instanceName + "'")
                 .add("statusReason='" + statusReason + "'")
                 .add("variant='" + variant + "'")
+                .add("subnetId='" + subnetId + "'")
                 .toString();
     }
 }

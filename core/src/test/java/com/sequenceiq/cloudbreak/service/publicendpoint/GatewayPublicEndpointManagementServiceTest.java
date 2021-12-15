@@ -200,8 +200,8 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
         String fqdn = endpointName + "." + environmentDomain;
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
-        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
-                .thenReturn(List.of());
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of());
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(), anyBoolean(), any())).thenReturn(true);
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
@@ -210,7 +210,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
-                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
         verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
         verify(dnsManagementService, times(1)).createOrUpdateDnsEntryWithIp(anyString(), anyString(), anyString(),
                 anyBoolean(), any());
@@ -243,8 +243,8 @@ class GatewayPublicEndpointManagementServiceTest {
         String fqdn = endpointName + "." + environmentDomain;
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
 
-        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
-                .thenReturn(List.of());
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of());
         cluster.setFqdn(fqdn);
 
         boolean result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.renewCertificate(stack));
@@ -253,7 +253,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(1)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
-                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
         verify(securityConfigService, times(1)).save(any(SecurityConfig.class));
         Assertions.assertEquals(Boolean.TRUE, result);
     }
@@ -324,8 +324,8 @@ class GatewayPublicEndpointManagementServiceTest {
         when(environmentClientService.getByCrn(Mockito.anyString())).thenReturn(environment);
         when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
-        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
-                .thenReturn(List.of());
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of());
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
 
@@ -335,7 +335,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
-                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
@@ -366,8 +366,8 @@ class GatewayPublicEndpointManagementServiceTest {
         String fqdn = endpointName + "." + environmentDomain;
         when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
-        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
-                .thenReturn(List.of());
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of());
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
 
@@ -377,7 +377,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
-                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
@@ -613,8 +613,8 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), lbEndpointName, environment)).thenReturn(lbfqdn);
-        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
-                .thenReturn(List.of());
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of());
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
         when(dnsManagementService.createOrUpdateDnsEntryWithCloudDns(eq("123"), eq(lbEndpointName), eq(envName), eq(cloudDns),
@@ -628,7 +628,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
-                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));
@@ -670,8 +670,8 @@ class GatewayPublicEndpointManagementServiceTest {
         when(domainNameProvider.getCommonName(endpointName, environment)).thenReturn(commonName);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), endpointName, environment)).thenReturn(fqdn);
         when(domainNameProvider.getFullyQualifiedEndpointName(Set.of(), lbEndpointName, environment)).thenReturn(lbfqdn);
-        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class)))
-                .thenReturn(List.of());
+        when(certificateCreationService.create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class),
+                eq(stack.getResourceCrn()))).thenReturn(List.of());
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                 eq(List.of(primaryGatewayInstance.getPublicIpWrapper())))).thenReturn(Boolean.TRUE);
         when(dnsManagementService.createOrUpdateDnsEntryWithIp(eq("123"), eq(lbEndpointName), eq(envName), eq(Boolean.FALSE),
@@ -685,7 +685,7 @@ class GatewayPublicEndpointManagementServiceTest {
         verify(domainNameProvider, times(1)).getCommonName(endpointName, environment);
         verify(domainNameProvider, times(2)).getFullyQualifiedEndpointName(Set.of(), endpointName, environment);
         verify(certificateCreationService, times(1))
-                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class));
+                .create(eq("123"), eq(endpointName), eq(envName), any(PKCS10CertificationRequest.class), eq(stack.getResourceCrn()));
         verify(dnsManagementService, times(1))
                 .createOrUpdateDnsEntryWithIp(eq("123"), eq(endpointName), eq(envName), eq(Boolean.FALSE),
                         eq(List.of(primaryGatewayInstance.getPublicIpWrapper())));

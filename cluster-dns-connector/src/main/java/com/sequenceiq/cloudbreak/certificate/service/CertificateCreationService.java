@@ -32,11 +32,11 @@ public class CertificateCreationService {
     @Inject
     private GrpcClusterDnsClient grpcClusterDnsClient;
 
-    public List<String> create(String accountId, String endpoint, String environment, PKCS10CertificationRequest csr)
+    public List<String> create(String accountId, String endpoint, String environment, PKCS10CertificationRequest csr, String resourceCrn)
             throws IOException {
         LOGGER.info("Starting certificate creation for endpoint: {} in environment: {}", endpoint, environment);
         Optional<String> requestIdOptional = Optional.ofNullable(MDCBuilder.getOrGenerateRequestId());
-        String pollingRequestId = grpcClusterDnsClient.signCertificate(accountId, environment, csr.getEncoded(), requestIdOptional);
+        String pollingRequestId = grpcClusterDnsClient.signCertificate(accountId, environment, csr.getEncoded(), requestIdOptional, resourceCrn);
         return polling(pollingRequestId);
     }
 

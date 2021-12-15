@@ -19,6 +19,7 @@ import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointM
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningRequest;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
 import com.google.protobuf.ByteString;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
 
@@ -39,13 +40,15 @@ public class ClusterDnsClient {
         this.tracer = tracer;
     }
 
-    public String signCertificate(String requestId, String accountId, String environment, byte[] csr) {
+    public String signCertificate(String requestId, String accountId, String environment, byte[] csr, Crn crn) {
         checkNotNull(requestId, "requestId should not be null.");
         checkNotNull(accountId, "accountId should not be null.");
         CertificateSigningRequest.Builder requestBuilder = CertificateSigningRequest.newBuilder()
                 .setAccountId(accountId)
                 .setEnvironmentName(environment)
-                .setCsr(ByteString.copyFrom(csr));
+                .setCsr(ByteString.copyFrom(csr))
+                .setClusterCrn(crn.toString())
+                .setClientName(crn.getService().getName());
 
         return newStub(requestId).signCertificate(requestBuilder.build()).getWorkflowId();
     }
