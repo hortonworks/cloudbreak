@@ -21,4 +21,6 @@ public interface CDPPagingStructuredEventRepository extends PagingAndSortingRepo
     Page<CDPStructuredEventEntity> findByEventTypeAndResourceCrn(StructuredEventType eventType, String resourceCrn, Pageable pageable);
 
     Page<CDPStructuredEventEntity> findByEventTypeInAndResourceCrn(List<StructuredEventType> eventType, String resourceCrn, Pageable pageable);
+
+    Page<CDPStructuredEventEntity> findByEventTypeInAndResourceCrnIn(List<StructuredEventType> eventType, List<String> resourceCrn, Pageable pageable);
 }

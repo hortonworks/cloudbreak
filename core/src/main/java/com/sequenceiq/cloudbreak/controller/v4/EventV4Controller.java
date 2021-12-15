@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -62,6 +63,12 @@ public class EventV4Controller implements EventV4Endpoint {
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         StackView stackView = getStackViewIfAvailable(name);
         return cloudbreakEventsFacade.retrieveEventsByStack(stackView.getId(), stackView.getType(), pageable);
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
+    public List<CloudbreakEventV4Response> getPagedCloudbreakEventListByStack(String name, Integer page, Integer size, @AccountId String accountId) {
+        return getCloudbreakEventsByStack(name, page, size, accountId).getContent();
     }
 
     private StackView getStackViewIfAvailable(String name) {

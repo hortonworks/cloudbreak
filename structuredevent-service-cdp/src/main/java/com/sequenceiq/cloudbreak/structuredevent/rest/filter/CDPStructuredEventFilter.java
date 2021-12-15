@@ -27,11 +27,11 @@ import com.sequenceiq.cloudbreak.structuredevent.rest.urlparser.CDPRestUrlParser
 
 /**
  * Inspects all requests to a service and determines if it should mark the request or response up with additional Structured Event metadata.
- *
+ * <p>
  * Uses implementations of {@code CDPRestUrlParser} to determine if additional actions should be taken on a request.
- *
+ * <p>
  * Activation of this filter is controlled by the {@code contentLogging} configuration value.
- *
+ * <p>
  * To use this class, it should be registered in an {@code EndpointConfig}.
  */
 @Component
@@ -64,6 +64,12 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
     @Autowired
     private List<CDPRestUrlParser> cdpRestUrlParsers;
 
+    /**
+     * Add structured event parameters to the properties to the request context.
+     *
+     * @param requestContext the context on which to attach additional properties.
+     * @throws IOException if the request entity stream cannot be read correctly.
+     */
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
         boolean loggingEnabled = isLoggingEnabled(requestContext);
@@ -78,6 +84,15 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
         }
     }
 
+    /**
+     * On response, attaches a logging stream to the request context, or sends a structured event.
+     * <p>
+     * The filter essentially helps send a structured event or sends it itself.
+     * <ul>
+     *     <li>When there is a response entity, {@code LoggingStream} is attached and used in {@code aroundWriteTo} to send a structured event.</li>
+     *     <li>When there isn't a response entity, send a structured event directly.</li>
+     * </ul>
+     */
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) {
         if (BooleanUtils.isTrue((Boolean) requestContext.getProperty(LOGGING_ENABLED_PROPERTY))) {
@@ -119,7 +134,7 @@ public class CDPStructuredEventFilter implements WriterInterceptor, ContainerReq
 
     /**
      * Iterates through implementations of {@code CDPRestUrlParser} to extract URL parameters if possible.
-     *
+     * <p>
      * The list of URL parsers is autowired by Spring.
      *
      * @param requestContext the source of URL parameters, parseable by one of the REST URL parsers
