@@ -1,10 +1,8 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
-import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
-
+import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
 
 import org.springframework.stereotype.Component;
 
@@ -16,9 +14,6 @@ import com.sequenceiq.cloudbreak.structuredevent.event.VolumeDetails;
 @Component
 public class InstanceGroupToInstanceGroupDetailsConverter {
 
-    @Inject
-    private SecurityGroupToSecurityGroupDetailsConverter securityGroupToSecurityGroupDetailsConverter;
-
     public InstanceGroupDetails convert(InstanceGroup source) {
         InstanceGroupDetails instanceGroupDetails = new InstanceGroupDetails();
         instanceGroupDetails.setGroupName(source.getGroupName());
@@ -27,7 +22,7 @@ public class InstanceGroupToInstanceGroupDetailsConverter {
         Template template = source.getTemplate();
         if (template != null) {
             instanceGroupDetails.setInstanceType(template.getInstanceType());
-            instanceGroupDetails.setAttributes(template.getAttributes().getMap());
+            instanceGroupDetails.setAttributes(filterAttributes(template.getAttributes().getMap()));
             instanceGroupDetails.setRootVolumeSize(template.getRootVolumeSize());
             if (template.getVolumeTemplates() != null) {
                 instanceGroupDetails.setVolumes(template.getVolumeTemplates().stream().map(volmue -> {
@@ -42,7 +37,18 @@ public class InstanceGroupToInstanceGroupDetailsConverter {
                 instanceGroupDetails.setTemporaryStorage(template.getTemporaryStorage().name());
             }
         }
-        instanceGroupDetails.setSecurityGroup(getIfNotNull(source.getSecurityGroup(), securityGroupToSecurityGroupDetailsConverter::convert));
         return instanceGroupDetails;
+    }
+
+    private Map<String, Object> filterAttributes(Map<String, Object> input) {
+        Map<String, Object> attributes;
+        if (input != null) {
+            attributes = input.entrySet().stream()
+                    .filter(e -> "encrypted".equals(e.getKey()))
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        } else {
+            attributes = new HashMap<>();
+        }
+        return attributes;
     }
 }
