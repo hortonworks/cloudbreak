@@ -257,3 +257,5 @@ fluentd_delalyed_restart:
         - "nohup sh /etc/cdp-logging-agent/post-start.sh {{ restart_sleep_time }} > /etc/cdp-logging-agent/delayed_restart.out 2>&1 &"
     - onlyif: "test -f /etc/cdp-logging-agent/cdp-logging-agent.conf && ! test -f /etc/cdp-logging-agent/databus_bundle.lock && grep -q 'CLUSTER BUNDLE LOGS ENABLED' /etc/cdp-logging-agent/cdp-logging-agent.conf"
 {% endif %}
+include:
+  - fluent.crontab

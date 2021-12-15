@@ -23,11 +23,11 @@ public class ClusterDeletionBasedExitCriteriaModel extends ExitCriteriaModel {
         return Optional.ofNullable(clusterId);
     }
 
-    public static ExitCriteriaModel clusterDeletionBasedModel(Long stackId, Long clusterId) {
+    public static ClusterDeletionBasedExitCriteriaModel clusterDeletionBasedModel(Long stackId, Long clusterId) {
         return new ClusterDeletionBasedExitCriteriaModel(stackId, clusterId);
     }
 
-    public static ExitCriteriaModel nonCancellableModel() {
+    public static ClusterDeletionBasedExitCriteriaModel nonCancellableModel() {
         return new ClusterDeletionBasedExitCriteriaModel(null, null);
     }
 

@@ -61,6 +61,12 @@ public abstract class ExistingStackPatchService {
         }
     }
 
+    protected boolean isCmServerReachable(Stack stack) throws ExistingStackPatchApplyException {
+        return stack.getClusterManagerServer()
+                .orElseThrow(() -> new ExistingStackPatchApplyException("Could not find CM server for stack: " + stack.getResourceCrn()))
+                .isReachable();
+    }
+
     /**
      * @return The StackFixType that is fixed by running the service implementation's doApply
      */

@@ -82,8 +82,7 @@ public class ClusterComponentConfigProvider {
 
     public byte[] getSaltStateComponent(Long clusterId) {
         byte[] result = null;
-        ClusterComponent component = ofNullable(getComponent(clusterId, ComponentType.SALT_STATE))
-                .orElse(getComponent(clusterId, ComponentType.SALT_STATE));
+        ClusterComponent component = ofNullable(getComponent(clusterId, ComponentType.SALT_STATE)).orElse(null);
         if (component != null && ComponentType.SALT_STATE.equals(component.getComponentType())) {
             Json jsonAttr = component.getAttributes();
             if (jsonAttr != null) {

@@ -98,12 +98,6 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
         }
     }
 
-    private boolean isCmServerReachable(Stack stack) throws ExistingStackPatchApplyException {
-        return stack.getClusterManagerServer()
-                .orElseThrow(() -> new ExistingStackPatchApplyException("Could not find CM server for stack: " + stack.getResourceCrn()))
-                .isReachable();
-    }
-
     private AttemptResult<Boolean> pollFlowState(FlowIdentifier flowIdentifier) {
         FlowCheckResponse flowState = flowService.getFlowState(flowIdentifier.getPollableId());
         LOGGER.debug("Salt update polling has active flow: {}, with latest fail: {}",
