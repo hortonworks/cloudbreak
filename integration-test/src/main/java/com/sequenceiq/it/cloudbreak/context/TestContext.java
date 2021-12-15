@@ -543,8 +543,8 @@ public abstract class TestContext implements ApplicationContextAware {
      * by `useRealUmsUser(testContext, AuthUserKeys.ACCOUNT_ADMIN)`
      */
     private Optional<String> getRealUMSUserName() {
-        if (Crn.isCrn(getActingUser().getCrn())) {
-            return Optional.of(Objects.requireNonNull(Crn.fromString(getActingUser().getCrn())).getUserId());
+        if (getRealUMSUserCrn().isPresent()) {
+            return Optional.of(getActingUser().getDisplayName());
         }
         return Optional.empty();
     }
@@ -668,7 +668,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
-        return init(clss, CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
+        return init(clss, getCloudPlatform());
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss, CloudPlatform cloudPlatform) {
@@ -697,7 +697,7 @@ public abstract class TestContext implements ApplicationContextAware {
     }
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss) {
-        return given(key, clss, CloudPlatform.valueOf(commonCloudProperties.getCloudProvider()));
+        return given(key, clss, getCloudPlatform());
     }
 
     public <O extends CloudbreakTestDto> O given(String key, Class<O> clss, CloudPlatform cloudPlatform) {
@@ -1182,6 +1182,10 @@ public abstract class TestContext implements ApplicationContextAware {
 
     public CloudProviderProxy getCloudProvider() {
         return cloudProvider;
+    }
+
+    public CloudPlatform getCloudPlatform() {
+        return CloudPlatform.valueOf(commonCloudProperties.getCloudProvider());
     }
 
     public void waitingFor(Duration duration, String interruptedMessage) {
