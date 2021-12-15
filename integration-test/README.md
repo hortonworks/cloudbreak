@@ -118,29 +118,10 @@ Real UMS and Legacy AuthZ test cases are special kind of Mock tests:
 
 Related test cases are present at [testcase/authorization](src/main/java/com/sequenceiq/it/cloudbreak/testcase/authorization) folder.
 
-### Legacy AuthZ tests
-Legacy tests require custom account parameter at `application.yml`:
-```
-integrationtest:
-   ums:
-     accountKey: legacy
-     deploymentKey: dev
-```
-
 ### Locally running Authorization tests
-- UMS host and cache timeout values need to be changed:
-    - `altus.ums.host`
-    - `altus.ums.rights.cache.seconds.ttl`: Tests are using `Thread.sleep(7000)` to wait for UMS rights cache to expire. So locally the default cache need to be set to 5 seconds.
-    ```
-      export UMS_HOST="ums.thunderhead-dev.cloudera.com"
-      export CB_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5 -Drest.debug=true -Dmock.spi.endpoint=https://test:9443"
-      export REDBEAMS_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
-      export DATALAKE_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
-      export FREEIPA_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
-      export ENVIRONMENT_JAVA_OPTS="-Daltus.ums.rights.cache.seconds.ttl=5"
-    ```
 - `make fetch-secrets` is needed to initialize real UMS or Legacy users for authorization tests. *Fetching secrets accomplished via Azure CLI from Cloudbreak Team Azure Key Vault.*
     - [Install the Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) on your local machine if it has not been installed yet. Read through the [Sign in with Azure CLI](https://docs.microsoft.com/en-us/cli/azure/authenticate-azure-cli?view=azure-cli-latest) documentation.
+- follow [internal wiki](https://cloudera.atlassian.net/wiki/spaces/ENG/pages/626622557/Local+CB+with+Remote+UMS) about setting up remote UMS for your local setup
 
 ## L0 Promotion tests
 Cloudbreak related [promotion tests](src/main/java/com/sequenceiq/it/cloudbreak/testcase/e2e/l0promotion) from [Management Console/Control Plane test repository](https://github.infra.cloudera.com/CDH/cdpmc-qe).
