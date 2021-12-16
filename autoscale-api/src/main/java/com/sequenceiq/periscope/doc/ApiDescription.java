@@ -92,6 +92,7 @@ public class ApiDescription {
         public static final String CLUSTER_DELETE = "delete cluster";
         public static final String CLUSTER_SET_STATE = "set cluster state";
         public static final String CLUSTER_SET_AUTOSCALE_STATE = "enable or disable cluster's autoscale feature";
+        public static final String CLUSTER_SET_STOP_START_SCALING = "enable or disable cluster's stop start scaling feature";
         public static final String CLUSTER_UPDATE_AUTOSCALE_CONFIG = "update cluster's autoscale config";
         public static final String CLUSTER_DELETE_ALERTS = "delete a cluster's alerts";
     }
@@ -113,6 +114,8 @@ public class ApiDescription {
         public static final String STACK_CRN = "crn of the stack in Cloudbreak";
         public static final String ENABLE_AUTOSCALING = "Enable or Disable the Autoscaling feature set on the underlying Periscope cluster";
         public static final String AUTOSCALING_ENABLED = "Indicate that the Autoscaling feature set is Enabled or Disabled";
+        public static final String ENABLE_STOP_START_SCALING = "Enable or Disable the StopStart scaling feature set on the underlying Periscope cluster";
+        public static final String STOP_START_SCALING_ENABLED = "Indicates if stop start scaling feature is enabled or disabled";
         public static final String ID = "Id of the cluster";
         public static final String STACK_NAME = "Name of stack in Cloudbreak";
         public static final String STACK_TYPE = "Type of stack in Cloudbreak";
@@ -143,6 +146,10 @@ public class ApiDescription {
 
     public static class ClusterAutoscaleState {
         public static final String ENABLE_AUTOSCALING = "field to switch on or off autoscaling feature";
+    }
+
+    public static class ClusterStopStartScalingState {
+        public static final String ENABLE_STOP_START_SCALING = "field to switch on or off the stop start scaling feature.";
     }
 
     public static class TimeAlertJsonProperties {

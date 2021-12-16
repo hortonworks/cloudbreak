@@ -15,6 +15,9 @@ public class DistroXAutoscaleClusterRequest implements Json {
     @ApiModelProperty(ClusterJsonsProperties.ENABLE_AUTOSCALING)
     private @NotNull Boolean enableAutoscaling;
 
+    @ApiModelProperty(value = ClusterJsonsProperties.ENABLE_STOP_START_SCALING)
+    private Boolean useStopStartMechanism;
+
     @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
     private List<@Valid TimeAlertRequest> timeAlertRequests;
 
@@ -46,5 +49,13 @@ public class DistroXAutoscaleClusterRequest implements Json {
 
     public void setLoadAlertRequests(List<LoadAlertRequest> loadAlertRequests) {
         this.loadAlertRequests = loadAlertRequests;
+    }
+
+    public Boolean getUseStopStartMechanism() {
+        return useStopStartMechanism;
+    }
+
+    public void setUseStopStartMechanism(Boolean useStopStartMechanism) {
+        this.useStopStartMechanism = useStopStartMechanism;
     }
 }
