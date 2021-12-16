@@ -24,17 +24,18 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
         this.backupLocation = backupLocation;
     }
 
-    public DatalakeDatabaseRestoreStartEvent(String selector, SdxOperation drStatus, String userId,
+    public DatalakeDatabaseRestoreStartEvent(String selector, Long sdxId, SdxOperation drStatus, String userId,
             String backupId, String restoreId, String backupLocation) {
-        super(selector, userId, drStatus);
+        super(selector, sdxId, userId, drStatus);
         this.backupId = backupId;
         this.restoreId = restoreId;
         this.backupLocation = backupLocation;
     }
 
-    public static DatalakeDatabaseRestoreStartEvent from(DatalakeTriggerRestoreEvent trigggerRestoreEvent,
+    public static DatalakeDatabaseRestoreStartEvent from(DatalakeTriggerRestoreEvent trigggerRestoreEvent, Long sdxId,
             String restoreId) {
         return new DatalakeDatabaseRestoreStartEvent(DATALAKE_DATABASE_RESTORE_EVENT.event(),
+                sdxId,
                 trigggerRestoreEvent.getDrStatus(),
                 trigggerRestoreEvent.getUserId(),
                 trigggerRestoreEvent.getBackupId(),
