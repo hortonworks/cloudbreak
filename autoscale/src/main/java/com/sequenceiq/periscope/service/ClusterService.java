@@ -203,6 +203,14 @@ public class ClusterService {
         return cluster;
     }
 
+    public Cluster setStopStartScalingState(Cluster cluster, Boolean enableStopStartScaling) {
+        LoggingUtils.buildMdcContext(cluster);
+        cluster.setStopStartScalingEnabled(enableStopStartScaling);
+        cluster = clusterRepository.save(cluster);
+        calculateClusterStateMetrics();
+        return cluster;
+    }
+
     public void setLastEvaluated(Long clusterId, Long lastEvaluated) {
         clusterRepository.setClusterLastEvaluated(clusterId, lastEvaluated);
     }

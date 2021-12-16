@@ -42,17 +42,18 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
 
         StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
 
-        // TODO CB-14929: cluster availability checks needs to be based on the scaling mechanism, and the eventual status of
-        // a cluster which has STOPPED instances.
-//        boolean clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
-//                && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
+        boolean clusterAvailable;
+        boolean clusterNodesUnhealthy = false;
+        if (cluster.isStopStartScalingEnabled()) {
+            clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false);
+            clusterNodesUnhealthy = Optional.ofNullable(statusResponse.getStatus()).map(s -> s == Status.NODE_FAILURE).orElse(false);
+            clusterAvailable |= clusterNodesUnhealthy;
+        } else {
+            clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
+            && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
+        }
 
-        boolean clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false);
-        boolean clusterNodesUnhealthy = Optional.ofNullable(statusResponse.getStatus()).map(s -> s == Status.NODE_FAILURE).orElse(false);
         LOGGER.info("ZZZ: Computed clusterAvailable: {}, clusterNodesUnhealthy: {}", clusterAvailable, clusterNodesUnhealthy);
-        clusterAvailable |= clusterNodesUnhealthy;
-
-
         LOGGER.debug("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
         LOGGER.info("ZZZ: Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ",
                 statusResponse, cluster.getStackCrn(), clusterAvailable);
