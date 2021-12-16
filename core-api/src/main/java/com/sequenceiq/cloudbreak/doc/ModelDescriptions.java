@@ -46,15 +46,6 @@ public class ModelDescriptions {
         public static final String AZURE_PARAMETERS = "custom parameters for Azure credential";
     }
 
-    public static class CustomConfigurationsModelDescription {
-        public static final String CUSTOM_CONFIGURATIONS_NAME = "unique name of the custom configs";
-        public static final String CRN = "unique crn of the custom configs";
-        public static final String CONFIGURATION_PROPERTIES = "list of properties";
-        public static final String NAME = "name of the property";
-        public static final String VALUE = "value of the property";
-        public static final String RUNTIME_VERSION = "Runtime version that custom configs point to";
-    }
-
     public static class OrchestratorModelDescription {
         public static final String TYPE = "type of the orchestrator";
         public static final String PARAMETERS = "orchestrator specific parameters, like authentication details";

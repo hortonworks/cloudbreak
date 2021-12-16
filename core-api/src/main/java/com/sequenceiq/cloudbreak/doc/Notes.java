@@ -90,9 +90,6 @@ public class Notes {
     public static final String LIST_RETRYABLE_NOTES = "List all, currently retryable operations for the stack";
     public static final String RENEW_CERTIFICATE_NOTES = "Trigger a certificate renewal on the specified cluster.";
     public static final String FLOW_OPERATION_PROGRESS_NOTES = "Flow operation progress";
-    public static final String CUSTOM_CONFIGURATIONS_NOTES = "Custom Configurations are sets of properties or name value pairs that "
-            + "belong to any of the services present in Cluster Definitions (Blueprints). These can be used to override "
-            + "and/or append properties to the corresponding Cluster Definition while launching Data Hub Clusters.";
 
     private Notes() {
     }

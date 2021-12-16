@@ -2,13 +2,18 @@ package com.sequenceiq.cloudbreak.service.customconfigs;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,11 +22,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -51,7 +59,7 @@ class CustomConfigurationsServiceTest {
             new CustomConfigurationProperty("property3", "value3", "role3", "service2")
     );
 
-    private final CustomConfigurations customConfigurations = new CustomConfigurations(TEST_NAME,
+    private CustomConfigurations customConfigurations = new CustomConfigurations(TEST_NAME,
             TEST_CRN_1, configs, TEST_VERSION, TEST_ACCOUNT_ID_1, null);
 
     @Mock
@@ -66,13 +74,21 @@ class CustomConfigurationsServiceTest {
     @Mock
     private RegionAwareCrnGenerator regionAwareCrnGenerator;
 
+    @Mock
+    private OwnerAssignmentService ownerAssignmentService;
+
+    @Mock
+    private TransactionService transactionService;
+
     @InjectMocks
     private CustomConfigurationsService underTest;
 
     @Test
     void testIfCustomConfigsAreRetrievedByCrn() {
         when(customConfigurationsRepository.findByCrn(TEST_CRN_1)).thenReturn(Optional.of(customConfigurations));
+
         CustomConfigurations returnedValue = underTest.getByNameOrCrn(NameOrCrn.ofCrn(TEST_CRN_1));
+
         assertEquals(customConfigurations, returnedValue);
         verify(customConfigurationsRepository).findByCrn(TEST_CRN_1);
     }
@@ -80,6 +96,7 @@ class CustomConfigurationsServiceTest {
     @Test
     void testIfCustomConfigsAreRetrievedByName() {
         when(customConfigurationsRepository.findByNameAndAccountId(TEST_NAME, TEST_ACCOUNT_ID_1)).thenReturn(Optional.of(customConfigurations));
+
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> {
             CustomConfigurations returnedValue = underTest.getByNameOrCrn(NameOrCrn.ofName(TEST_NAME));
             assertEquals(customConfigurations, returnedValue);
@@ -89,8 +106,14 @@ class CustomConfigurationsServiceTest {
     }
 
     @Test
-    void testIfCustomConfigsAreBeingAddedCorrectly() {
+    void testIfCustomConfigsAreBeingAddedCorrectly() throws TransactionService.TransactionExecutionException {
+        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
+        doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
+        CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
+        when(customConfigurationsRepository.save(any(CustomConfigurations.class))).thenReturn(customConfigurations);
+
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> underTest.create(customConfigurations, TEST_ACCOUNT_ID_1));
+
         ArgumentCaptor<CustomConfigurations> customConfigsArgumentCaptor = ArgumentCaptor.forClass(CustomConfigurations.class);
         verify(customConfigurationsRepository).save(customConfigsArgumentCaptor.capture());
         CustomConfigurations capturedValue = customConfigsArgumentCaptor.getValue();
@@ -101,7 +124,9 @@ class CustomConfigurationsServiceTest {
     void testThrowsExceptionWhenNotDeletedClusterHasCustomConfigs() {
         when(clusterService.findByCustomConfigurations(customConfigurations)).thenReturn(Set.of(mock(Cluster.class)));
         when(customConfigurationsRepository.findByCrn(anyString())).thenReturn(Optional.of(customConfigurations));
+
         BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.deleteByCrn(TEST_CRN_1));
+
         assertEquals(String.format("There is a cluster associated with the Custom Configurations '%s'. " +
                 "Please delete the cluster before deleting the Custom Configurations. " +
                 "The following cluster is associated with these Custom Configurations: %s", TEST_NAME, null), actual.getMessage());
@@ -110,7 +135,30 @@ class CustomConfigurationsServiceTest {
     @Test
     void testDuplicateNameForSameAccountThrowsException() {
         when(customConfigurationsRepository.findByNameAndAccountId(TEST_NAME, TEST_ACCOUNT_ID_1)).thenReturn(Optional.of(customConfigurations));
+
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1,
                 () -> assertThrows(CustomConfigurationsCreationException.class, () -> underTest.create(customConfigurations, TEST_ACCOUNT_ID_1)));
+    }
+
+    @Test
+    void testCustomConfigurationsAreDeletedByName() {
+        when(customConfigurationsRepository.findByNameAndAccountId(TEST_NAME, TEST_ACCOUNT_ID_1)).thenReturn(Optional.of(customConfigurations));
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> {
+            CustomConfigurations result = underTest.deleteByName(TEST_NAME, TEST_ACCOUNT_ID_1);
+            verify(customConfigurationsRepository, times(1)).deleteById(result.getId());
+        });
+    }
+
+    @Test
+    void testCustomConfigurationsAreDeletedByCrn() {
+        when(customConfigurationsRepository.findByCrn(TEST_CRN_1)).thenReturn(Optional.of(customConfigurations));
+        doNothing().when(ownerAssignmentService).notifyResourceDeleted(anyString(), any());
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> {
+            CustomConfigurations result = underTest.deleteByCrn(TEST_CRN_1);
+            verify(customConfigurationsRepository, times(1)).deleteById(result.getId());
+        });
     }
 }

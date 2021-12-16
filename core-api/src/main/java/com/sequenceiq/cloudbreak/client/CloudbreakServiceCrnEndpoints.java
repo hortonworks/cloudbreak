@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.client;
 import javax.ws.rs.client.WebTarget;
 
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.CustomConfigurationsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintUtilV4Endpoint;
@@ -64,6 +65,10 @@ public class CloudbreakServiceCrnEndpoints extends AbstractUserCrnServiceEndpoin
 
     public RecipeV4Endpoint recipeV4Endpoint() {
         return getEndpoint(RecipeV4Endpoint.class);
+    }
+
+    public CustomConfigurationsV4Endpoint customConfigurationsV4Endpoint() {
+        return getEndpoint(CustomConfigurationsV4Endpoint.class);
     }
 
     public UserProfileV4Endpoint userProfileV4Endpoint() {

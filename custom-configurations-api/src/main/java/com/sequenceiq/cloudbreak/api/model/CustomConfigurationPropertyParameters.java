@@ -6,7 +6,7 @@ import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ApiDescription.CustomConfigurationsJsonProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -16,11 +16,11 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomConfigurationPropertyParameters {
 
-    @ApiModelProperty(value = ModelDescriptions.CustomConfigurationsModelDescription.NAME)
+    @ApiModelProperty(value = CustomConfigurationsJsonProperties.NAME)
     @NotNull
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.CustomConfigurationsModelDescription.VALUE)
+    @ApiModelProperty(value = CustomConfigurationsJsonProperties.VALUE)
     @NotNull
     private String value;
 
@@ -30,6 +30,16 @@ public class CustomConfigurationPropertyParameters {
     @ApiModelProperty
     @NotNull
     private String serviceType;
+
+    public CustomConfigurationPropertyParameters() {
+    }
+
+    public CustomConfigurationPropertyParameters(String name, String value, String roleType, String serviceType) {
+        this.name = name;
+        this.value = value;
+        this.roleType = roleType;
+        this.serviceType = serviceType;
+    }
 
     public String getName() {
         return name;

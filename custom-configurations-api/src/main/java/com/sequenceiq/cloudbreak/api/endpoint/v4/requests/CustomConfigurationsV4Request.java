@@ -12,7 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sequenceiq.cloudbreak.api.model.CustomConfigurationPropertyParameters;
-import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
+import com.sequenceiq.cloudbreak.doc.ApiDescription.CustomConfigurationsJsonProperties;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -22,7 +22,7 @@ import io.swagger.annotations.ApiModelProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CustomConfigurationsV4Request {
 
-    @ApiModelProperty(value = ModelDescriptions.CustomConfigurationsModelDescription.CUSTOM_CONFIGURATIONS_NAME)
+    @ApiModelProperty(value = CustomConfigurationsJsonProperties.CUSTOM_CONFIGURATIONS_NAME)
     @Size(min = 1, max = 100,
             message = "Length of custom configurations name must be from 1 to 100 characters and shouldn't contain semicolon and percentage symbol")
     @Pattern(regexp = "^[^;\\/%]*$")
@@ -30,13 +30,13 @@ public class CustomConfigurationsV4Request {
     @NotEmpty
     private String name;
 
-    @ApiModelProperty(value = ModelDescriptions.CustomConfigurationsModelDescription.CONFIGURATION_PROPERTIES)
+    @ApiModelProperty(value = CustomConfigurationsJsonProperties.CONFIGURATION_PROPERTIES)
     @NotNull(message = "Config Properties cannot be missing or empty")
     @NotEmpty
     @Valid
     private Set<CustomConfigurationPropertyParameters> configurations;
 
-    @ApiModelProperty(value = ModelDescriptions.CustomConfigurationsModelDescription.RUNTIME_VERSION)
+    @ApiModelProperty(value = CustomConfigurationsJsonProperties.RUNTIME_VERSION)
     private String runtimeVersion;
 
     public String getName() {
