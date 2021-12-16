@@ -26,6 +26,9 @@ public class DistroXAutoscaleClusterResponse implements Json {
     @ApiModelProperty(ClusterJsonsProperties.AUTOSCALING_ENABLED)
     private Boolean autoscalingEnabled;
 
+    @ApiModelProperty(ClusterJsonsProperties.STOP_START_SCALING_ENABLED)
+    private Boolean stopStartScalingEnabled;
+
     @ApiModelProperty(ClusterJsonsProperties.TIME_ALERTS)
     private List<TimeAlertResponse> timeAlerts;
 
@@ -97,5 +100,13 @@ public class DistroXAutoscaleClusterResponse implements Json {
 
     public void setStackCrn(String stackCrn) {
         this.stackCrn = stackCrn;
+    }
+
+    public Boolean isStopStartScalingEnabled() {
+        return stopStartScalingEnabled;
+    }
+
+    public void setStopStartScalingEnabled(Boolean stopStartScalingEnabled) {
+        this.stopStartScalingEnabled = stopStartScalingEnabled;
     }
 }
