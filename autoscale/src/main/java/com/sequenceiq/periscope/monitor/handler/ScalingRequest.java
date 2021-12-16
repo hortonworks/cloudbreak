@@ -135,7 +135,6 @@ public class ScalingRequest implements Runnable {
 
             LOGGER.info("Sending request to add '{}' instance(s) into host group '{}', triggered adjustmentType '{}', cluster '{}', user '{}'",
                     scalingAdjustment, hostGroup, policy.getAdjustmentType(), stackCrn, userCrn);
-            LOGGER.info("ZZZ: with alternate mechanism");
             UpdateStackV4Request updateStackJson = new UpdateStackV4Request();
             updateStackJson.setWithClusterEvent(true);
             InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
@@ -143,7 +142,12 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
-            cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstances(stackCrn, updateStackJson);
+            if (cluster.isStopStartScalingEnabled()) {
+                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstances(stackCrn, updateStackJson);
+            } else {
+                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
+            }
+
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);

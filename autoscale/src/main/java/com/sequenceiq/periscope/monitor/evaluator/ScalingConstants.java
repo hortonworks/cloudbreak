@@ -18,6 +18,8 @@ public class ScalingConstants {
 
     public static final int DEFAULT_MAX_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS = 180;
 
+    public static final boolean STOP_START_SCALING_ENABLED = Boolean.FALSE;
+
     private ScalingConstants() {
     }
 }

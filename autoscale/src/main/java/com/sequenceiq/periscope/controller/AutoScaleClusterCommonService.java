@@ -108,13 +108,23 @@ public class AutoScaleClusterCommonService implements ResourcePropertyProvider {
     }
 
     public Cluster setAutoscaleState(Long clusterId, AutoscaleClusterState autoscaleState) {
-        return setAutoscaleState(clusterId, autoscaleState.isEnableAutoscaling());
+        Cluster cluster = setAutoscaleState(clusterId, autoscaleState.isEnableAutoscaling());
+        return setStopStartScalingState(cluster.getId(), autoscaleState.getUseStopStartMechanism());
     }
 
     public Cluster setAutoscaleState(Long clusterId, Boolean enableAutoScaling) {
         Cluster cluster = clusterService.findById(clusterId);
-        if (!cluster.isAutoscalingEnabled().equals(enableAutoScaling)) {
+        if (enableAutoScaling != null && !cluster.isAutoscalingEnabled().equals(enableAutoScaling)) {
             cluster = clusterService.setAutoscaleState(clusterId, enableAutoScaling);
+            processAutoscalingStateChanged(cluster);
+        }
+        return cluster;
+    }
+
+    public Cluster setStopStartScalingState(Long clusterId, Boolean enableStopStartScaling) {
+        Cluster cluster = clusterService.findById(clusterId);
+        if (enableStopStartScaling != null && !cluster.isStopStartScalingEnabled().equals(enableStopStartScaling)) {
+            cluster = clusterService.setStopStartScalingState(cluster, enableStopStartScaling);
             processAutoscalingStateChanged(cluster);
         }
         return cluster;
