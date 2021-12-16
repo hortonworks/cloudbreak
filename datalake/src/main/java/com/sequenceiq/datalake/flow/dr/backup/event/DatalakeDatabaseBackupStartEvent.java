@@ -21,7 +21,7 @@ public class DatalakeDatabaseBackupStartEvent extends DatalakeDatabaseDrStartBas
 
     public DatalakeDatabaseBackupStartEvent(String selector, SdxOperation drStatus, String userId,
                                             String backupId, String backupLocation) {
-        super(selector, userId, drStatus);
+        super(selector, drStatus.getSdxClusterId(), userId, drStatus);
         this.backupRequest = new SdxDatabaseBackupRequest();
         backupRequest.setBackupId(backupId);
         backupRequest.setBackupLocation(backupLocation);

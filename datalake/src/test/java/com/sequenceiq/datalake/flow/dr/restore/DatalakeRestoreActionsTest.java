@@ -12,8 +12,10 @@ import static org.mockito.Mockito.when;
 import java.util.HashMap;
 import java.util.Optional;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -98,8 +100,11 @@ public class DatalakeRestoreActionsTest {
         SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID, null), event);
         testSupport.doExecute(context, event, new HashMap());
 
-        verify(reactorEventFactory, times(1)).createEvent(any(), any(DatalakeDatabaseRestoreStartEvent.class));
-    }
+        ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> captor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);
+
+        verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
+        DatalakeDatabaseRestoreStartEvent captorValue = captor.getValue();
+        Assertions.assertEquals(OLD_SDX_ID, captorValue.getResourceId());    }
 
     @Test
     public void testGetNewSdxIdForResize() throws Exception {
@@ -110,7 +115,7 @@ public class DatalakeRestoreActionsTest {
                 .thenReturn(new DatalakeDrStatusResponse(BACKUP_ID, State.STARTED, Optional.empty()));
         when(flowLogService.getLastFlowLog(anyString())).thenReturn(Optional.of(new FlowLog()));
         FlowChainLog flowChainLog = new FlowChainLog();
-        flowChainLog.setFlowChainType(DatalakeResizeFlowEventChainFactory.class.getName());
+        flowChainLog.setFlowChainType(DatalakeResizeFlowEventChainFactory.class.getSimpleName());
         when(flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(any())).thenReturn(Optional.of(flowChainLog));
 
         DatalakeTriggerRestoreEvent event = new DatalakeTriggerRestoreEvent(DATALAKE_TRIGGER_RESTORE_EVENT.event(), OLD_SDX_ID, DATALAKE_NAME,
@@ -121,7 +126,11 @@ public class DatalakeRestoreActionsTest {
         SdxContext context = SdxContext.from(new FlowParameters(FLOW_ID, FLOW_ID, null), event);
         testSupport.doExecute(context, event, new HashMap());
 
-        verify(reactorEventFactory, times(1)).createEvent(any(), any(DatalakeDatabaseRestoreStartEvent.class));
+        ArgumentCaptor<DatalakeDatabaseRestoreStartEvent> captor = ArgumentCaptor.forClass(DatalakeDatabaseRestoreStartEvent.class);
+
+        verify(reactorEventFactory, times(1)).createEvent(any(), captor.capture());
+        DatalakeDatabaseRestoreStartEvent captorValue = captor.getValue();
+        Assertions.assertEquals(NEW_SDX_ID, captorValue.getResourceId());
 
     }
 

@@ -105,7 +105,7 @@ public class DatalakeRestoreActions {
                 Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
                 if (lastFlowLog.isPresent()) {
                     Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
-                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getName())) {
+                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
                         SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
                         context.setSdxId(sdxCluster.getId());
                         sdxId = sdxCluster.getId();
@@ -121,7 +121,7 @@ public class DatalakeRestoreActions {
                 variables.put(OPERATION_ID, restoreStatusResponse.getDrOperationId());
                 payload.getDrStatus().setOperationId(restoreStatusResponse.getDrOperationId());
                 if (!restoreStatusResponse.failed()) {
-                    sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, restoreStatusResponse.getDrOperationId()));
+                    sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, sdxId, restoreStatusResponse.getDrOperationId()));
                 } else {
                     LOGGER.error("Datalake restore has failed for {} ", sdxId);
                     sendEvent(context, DATALAKE_RESTORE_FAILED_EVENT.event(), payload);
