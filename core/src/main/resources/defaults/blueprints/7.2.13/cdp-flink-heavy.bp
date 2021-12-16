@@ -188,6 +188,16 @@
             "roleType": "KAFKA_BROKER",
             "base": true
           }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "offsets.topic.replication.factor",
+            "value": "2"
+          },
+          {
+            "name": "transaction.state.log.replication.factor",
+            "value": "2"
+          }
         ]
       },
       {
