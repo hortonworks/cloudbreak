@@ -65,6 +65,8 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
     private static final String CLOUD_PLATFORM = CloudPlatform.AWS.name();
 
+    private static final String REGION = "myRegion";
+
     @Mock
     private DatabaseServerSslCertificateConfig databaseServerSslCertificateConfig;
 
@@ -261,6 +263,7 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
 
         DBStack dbStack = new DBStack();
         dbStack.setCloudPlatform(CLOUD_PLATFORM);
+        dbStack.setRegion(REGION);
         SslConfig sslConfig = new SslConfig();
         sslConfig.setSslCertificateType(SslCertificateType.CLOUD_PROVIDER_OWNED);
         sslConfig.setSslCertificates(CERTS);
@@ -269,9 +272,10 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverterTest {
         dbStack.setSslConfig(sslConfig);
         server.setDbStack(dbStack);
 
-        when(databaseServerSslCertificateConfig.getMaxVersionByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_MAX_VERSION);
-        when(databaseServerSslCertificateConfig.getLegacyMaxVersionByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_LEGACY_MAX_VERSION);
-        when(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByPlatform(CLOUD_PLATFORM)).thenReturn(CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIER);
+        when(databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION)).thenReturn(CERT_MAX_VERSION);
+        when(databaseServerSslCertificateConfig.getLegacyMaxVersionByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION)).thenReturn(CERT_LEGACY_MAX_VERSION);
+        when(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(CLOUD_PLATFORM, REGION))
+                .thenReturn(CERT_LEGACY_CLOUD_PROVIDER_IDENTIFIER);
 
         DatabaseServerV4Response response = converter.convert(server);
 

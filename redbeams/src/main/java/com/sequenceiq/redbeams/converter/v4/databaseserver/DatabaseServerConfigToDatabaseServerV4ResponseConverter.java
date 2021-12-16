@@ -58,13 +58,15 @@ public class DatabaseServerConfigToDatabaseServerV4ResponseConverter {
                 sslConfigV4Response.setSslCertificateType(sslConfig.getSslCertificateType());
                 sslConfigV4Response.setSslMode(NONE.equals(sslConfig.getSslCertificateType()) ? DISABLED : ENABLED);
                 String cloudPlatform = dbStack.getCloudPlatform();
+                String region = dbStack.getRegion();
                 // TODO Add SslConfig.sslCertificateMaxVersion that is kept up-to-date (mostly for GCP), use getMaxVersionByPlatform() as fallback
-                sslConfigV4Response.setSslCertificateHighestAvailableVersion(databaseServerSslCertificateConfig.getMaxVersionByPlatform(cloudPlatform));
+                sslConfigV4Response.setSslCertificateHighestAvailableVersion(
+                        databaseServerSslCertificateConfig.getMaxVersionByCloudPlatformAndRegion(cloudPlatform, region));
                 sslConfigV4Response.setSslCertificateActiveVersion(Optional.ofNullable(sslConfig.getSslCertificateActiveVersion())
-                        .orElse(databaseServerSslCertificateConfig.getLegacyMaxVersionByPlatform(cloudPlatform)));
+                        .orElse(databaseServerSslCertificateConfig.getLegacyMaxVersionByCloudPlatformAndRegion(cloudPlatform, region)));
                 sslConfigV4Response.setSslCertificateActiveCloudProviderIdentifier(
                         Optional.ofNullable(sslConfig.getSslCertificateActiveCloudProviderIdentifier())
-                                .orElse(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByPlatform(cloudPlatform)));
+                                .orElse(databaseServerSslCertificateConfig.getLegacyCloudProviderIdentifierByCloudPlatformAndRegion(cloudPlatform, region)));
                 response.setSslConfig(sslConfigV4Response);
             }
         } else if (source.getHost() != null && source.getPort() != null) {
