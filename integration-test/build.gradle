@@ -83,6 +83,9 @@ dependencies {
   implementation (project(':environment-api')) {
     transitive = false;
   }
+  implementation (project(':custom-configurations-api')) {
+    transitive = false;
+  }
   implementation (project(':structuredevent-api-cdp')) {
     transitive = false;
   }

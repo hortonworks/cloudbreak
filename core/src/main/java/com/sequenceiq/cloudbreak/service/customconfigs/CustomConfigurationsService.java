@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.authorization.resource.AuthorizationResourceType;
+import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
@@ -24,10 +25,12 @@ import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.crn.RegionAwareCrnGenerator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CustomConfigurationsCreationException;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationsRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.validation.CustomConfigurationsValidator;
@@ -42,6 +45,12 @@ public class CustomConfigurationsService implements ResourcePropertyProvider {
 
     @Inject
     private ClusterService clusterService;
+
+    @Inject
+    private OwnerAssignmentService ownerAssignmentService;
+
+    @Inject
+    private TransactionService transactionService;
 
     @Inject
     private CustomConfigurationsValidator validator;
@@ -85,7 +94,16 @@ public class CustomConfigurationsService implements ResourcePropertyProvider {
         initializeCrnForCustomConfigs(customConfigurations, accountId);
         customConfigurations.setAccount(accountId);
         customConfigurations.getConfigurations().forEach(config -> config.setCustomConfigs(customConfigurations));
-        customConfigurationsRepository.save(customConfigurations);
+        try {
+            transactionService.required(() -> {
+                CustomConfigurations created = customConfigurationsRepository.save(customConfigurations);
+                ownerAssignmentService.assignResourceOwnerRoleIfEntitled(ThreadBasedUserCrnProvider.getUserCrn(), created.getCrn(),
+                        ThreadBasedUserCrnProvider.getAccountId());
+                return created;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
         return customConfigurations;
     }
 
@@ -146,6 +164,7 @@ public class CustomConfigurationsService implements ResourcePropertyProvider {
         CustomConfigurations customConfigurationsByCrn = getByCrn(crn);
         prepareDeletion(customConfigurationsByCrn);
         customConfigurationsRepository.deleteById(customConfigurationsByCrn.getId());
+        ownerAssignmentService.notifyResourceDeleted(crn, MDCUtils.getRequestId());
         return customConfigurationsByCrn;
     }
 
@@ -153,6 +172,7 @@ public class CustomConfigurationsService implements ResourcePropertyProvider {
         CustomConfigurations customConfigurationsByName = getByName(name, accountId);
         prepareDeletion(customConfigurationsByName);
         customConfigurationsRepository.deleteById(customConfigurationsByName.getId());
+        ownerAssignmentService.notifyResourceDeleted(customConfigurationsByName.getCrn(), MDCUtils.getRequestId());
         return customConfigurationsByName;
     }
 
@@ -175,7 +195,7 @@ public class CustomConfigurationsService implements ResourcePropertyProvider {
     public Map<String, Optional<String>> getNamesByCrns(Collection<String> crns) {
         return customConfigurationsRepository.findResourceNamesByCrnsAndAccountId(ThreadBasedUserCrnProvider.getAccountId(), crns)
                 .stream()
-                .collect(Collectors.toMap(k -> k.getCrn(), v -> Optional.of(v.getName())));
+                .collect(Collectors.toMap(k -> k.getCrn(), v -> Optional.ofNullable(v.getName())));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.client;
 
 import com.sequenceiq.authorization.info.AuthorizationUtilEndpoint;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.CustomConfigurationsV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.audits.AuditEventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.BlueprintV4Endpoint;
@@ -39,6 +40,8 @@ public interface CloudbreakClient {
     DatabaseV4Endpoint databaseV4Endpoint();
 
     RecipeV4Endpoint recipeV4Endpoint();
+
+    CustomConfigurationsV4Endpoint customConfigurationsV4Endpoint();
 
     UserProfileV4Endpoint userProfileV4Endpoint();
 
