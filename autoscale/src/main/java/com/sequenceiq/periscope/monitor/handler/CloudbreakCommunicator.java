@@ -58,9 +58,13 @@ public class CloudbreakCommunicator {
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         ScalingStrategy scalingStrategy = ScalingStrategy.STOPSTART;
         requestLogging.logResponseTime(() -> {
-            cloudbreakInternalCrnClient.withInternalCrn().autoscaleEndpoint()
-                    .stopInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
-            // TODO CB-14929: Make Periscope scaling mechanism aware
+            if (cluster.isStopStartScalingEnabled()) {
+                cloudbreakInternalCrnClient.withInternalCrn()
+                        .autoscaleEndpoint().stopInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
+            } else {
+                cloudbreakInternalCrnClient.withInternalCrn()
+                        .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false);
+            }
             return Optional.empty();
         }, String.format("DecommissionInstancesForCluster query for cluster crn %s, Scaling strategy %s, NodeIds %s, Scaling Strategy %s",
                 scalingStrategy, cluster.getStackCrn(), scalingStrategy, decommissionNodeIds));

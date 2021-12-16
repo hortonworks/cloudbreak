@@ -30,6 +30,7 @@ public class DistroXAutoscaleClusterResponseConverter extends AbstractConverter<
                 source.getState());
 
         json.setStackType(source.getStackType());
+        json.setStopStartScalingEnabled(source.isStopStartScalingEnabled());
 
         List<TimeAlertResponse> timeAlertRequests =
                 timeAlertResponseConverter.convertAllToJson(new ArrayList<>(source.getTimeAlerts()));
