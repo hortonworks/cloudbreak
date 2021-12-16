@@ -113,12 +113,6 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
     protected void pollYarnMetricsAndScaleCluster() throws Exception {
         StackV4Response stackV4Response = cloudbreakCommunicator.getByCrn(cluster.getStackCrn());
-        // TODO CB-14929: This needs to be carefully handled. The filter for STOPPED instances, if it does not apply correctl (e.g. nodes
-        //  are in 'Services Starting' state, can result in upscale being skipped, or in some scenarios - unnecessary downscales.
-        //  Sample log for when this happened (downscale by 1 instead of upscale by 5).
-        //  (AS min set to 15, AS max set to 20: 15 nodes RUNNING. 5 nodes in SERVICE_STARTING state - ended up downscaling by 1)
-        //  Sample log: hostFqdnsToInstanceId=20, configMaxNodeCount=0, configMinNodeCount=1, maxAllowedUpScale=0, maxAllowedDownScale=1
-        //  At least protect against such unnecessary downscales.
         Map<String, String> hostFqdnsToInstanceId = stackResponseUtils.getCloudInstanceIdsForHostGroup(stackV4Response, policyHostGroup);
 
         int existingHostGroupSize = hostFqdnsToInstanceId.size();
