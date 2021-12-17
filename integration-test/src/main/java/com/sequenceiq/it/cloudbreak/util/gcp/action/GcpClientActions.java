@@ -101,28 +101,37 @@ public class GcpClientActions extends GcpClient {
         Compute compute = buildCompute();
         for (String instanceId : instanceIds) {
             try {
-                Operation stopInstanceResponse = compute
+                Operation deleteOperationResponse = compute
                         .instances()
                         .delete(getProjectId(), gcpProperties.getAvailabilityZone(), instanceId)
                         .execute();
-                Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, stopInstanceResponse.getStatus(),
-                        stopInstanceResponse.getStatusMessage()));
-                waitForComplete(compute, stopInstanceResponse, getProjectId(), TIMEOUT);
-                if (stopInstanceResponse.getStatus().equals("DONE")) {
+                Log.log(LOGGER, format(" Gcp instance [%s] state is [%s] with message: %s", instanceId, deleteOperationResponse.getStatus(),
+                        deleteOperationResponse.getStatusMessage()));
+                try {
+                    waitForComplete(compute, deleteOperationResponse, getProjectId(), TIMEOUT);
+                } catch (Exception e) {
+                    String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperationResponse);
+                    LOGGER.error(defaultErrorMessageForInstanceDeletion);
+                    throw new TestFailException(defaultErrorMessageForInstanceDeletion, e);
+                }
+                if (deleteOperationResponse.getStatus().equals("DONE")) {
                     Log.log(LOGGER, format(" Gcp Instance: %s state is DELETED ", instanceId));
                 } else {
-                    LOGGER.error("Gcp Instance: {} delete has not been successful. So the actual state is: {} with message: {}",
-                            instanceId, stopInstanceResponse.getStatus(), stopInstanceResponse.getStatusMessage());
-                    throw new TestFailException(" Gcp Instance: " + instanceId
-                            + " delete has not been successful, because of the actual state is: "
-                            + stopInstanceResponse.getStatus()
-                            + " with message: "
-                            + stopInstanceResponse.getStatusMessage());
+                    String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperationResponse);
+                    LOGGER.error(defaultErrorMessageForInstanceDeletion);
+                    throw new TestFailException(defaultErrorMessageForInstanceDeletion);
                 }
-            } catch (Exception e) {
-                LOGGER.warn(String.format("Failed to get the details of the instance from Gcp with instance id: '%s'", instanceId), e);
+            } catch (IOException e) {
+                String errorMessage = format("Failed to invoke GCP instance deletion for instance [%s]:", instanceId);
+                LOGGER.error(errorMessage);
+                throw new TestFailException(errorMessage, e);
             }
         }
+    }
+
+    private String getDefaultErrorMessageForInstanceDeletion(String instanceId, Operation deleteOperationResponse) {
+        return String.format(" Gcp Instance [%s] deletion was not successful, actual state of deletion is: %s, status message: %s",
+                instanceId, deleteOperationResponse.getStatus(), deleteOperationResponse.getStatusMessage());
     }
 
     public void stopHostGroupInstances(List<String> instanceIds) {
