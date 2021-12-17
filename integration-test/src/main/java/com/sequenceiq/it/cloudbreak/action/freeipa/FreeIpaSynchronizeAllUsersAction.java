@@ -5,7 +5,9 @@ import static java.lang.String.format;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.UserSyncState;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
@@ -19,14 +21,27 @@ public class FreeIpaSynchronizeAllUsersAction implements Action<FreeIpaUserSyncT
     public FreeIpaUserSyncTestDto action(TestContext testContext, FreeIpaUserSyncTestDto testDto, FreeIpaClient client) throws Exception {
         Log.when(LOGGER, format(" Environment Crn: [%s], freeIpa Crn: %s", testDto.getEnvironmentCrn(), testDto.getRequest().getEnvironments()));
         Log.whenJson(LOGGER, format(" FreeIPA sync request: %n"), testDto.getRequest());
-        SyncOperationStatus syncOperationStatus = client.getDefaultClient()
-                .getUserV1Endpoint()
-                .synchronizeAllUsers(testDto.getRequest());
-        testDto.setOperationId(syncOperationStatus.getOperationId());
-        LOGGER.info("Sync is in state: [{}], sync operation: [{}] with type: [{}]", syncOperationStatus.getStatus(),
-                syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType());
-        Log.when(LOGGER, format(" Sync is in state: [%s], sync operation: [%s] with type: [%s]", syncOperationStatus.getStatus(),
-                syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType()));
+        // checking if there is ongoing usersync
+        EnvironmentUserSyncState environmentUserSyncState =
+                client.getDefaultClient().getUserV1Endpoint().getUserSyncState(testDto.getEnvironmentCrn());
+        if (UserSyncState.SYNC_IN_PROGRESS.equals(environmentUserSyncState.getState())) {
+            // sync already in progress, no need to execute another one
+            testDto.setOperationId(environmentUserSyncState.getLastUserSyncOperationId());
+            LOGGER.info("Sync is in state: [{}], sync operation: [{}]", environmentUserSyncState.getState(),
+                    environmentUserSyncState.getLastUserSyncOperationId());
+            Log.when(LOGGER, format(" Sync is in state: [%s], sync operation: [%s]", environmentUserSyncState.getState(),
+                    environmentUserSyncState.getLastUserSyncOperationId()));
+        } else {
+            // need to sync
+            SyncOperationStatus syncOperationStatus = client.getDefaultClient()
+                    .getUserV1Endpoint()
+                    .synchronizeAllUsers(testDto.getRequest());
+            testDto.setOperationId(syncOperationStatus.getOperationId());
+            LOGGER.info("Sync is in state: [{}], sync operation id: [{}] with type: [{}]", syncOperationStatus.getStatus(),
+                    syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType());
+            Log.when(LOGGER, format(" Sync is in state: [%s], sync operation id: [%s] with type: [%s]", syncOperationStatus.getStatus(),
+                    syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType()));
+        }
         return testDto;
     }
 }
