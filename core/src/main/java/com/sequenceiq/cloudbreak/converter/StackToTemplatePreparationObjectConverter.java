@@ -394,17 +394,14 @@ public class StackToTemplatePreparationObjectConverter {
 
     private GeneralClusterConfigs calculateGeneralClusterConfigs(Stack source, Cluster cluster) {
         GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cluster);
-        List<SdxClusterResponse> clients = sdxClientService.getByEnvironmentCrn(source.getEnvironmentCrn());
-        if (!clients.isEmpty()) {
-            boolean allInstanceGroupsHaveMultiAz = source.getInstanceGroups().stream().allMatch(ig -> {
-                boolean instanceGroupHasMultiAz = ((List<String>) ig.getInstanceGroupNetwork()
-                        .getAttributes()
-                        .getMap()
-                        .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>())).size() > 1;
-                return instanceGroupHasMultiAz;
-            });
-            generalClusterConfigs.setMultiAzEnabled(allInstanceGroupsHaveMultiAz && clients.get(0).isEnableMultiAz());
-        }
+        boolean allInstanceGroupsHaveMultiAz = source.getInstanceGroups().stream().allMatch(ig -> {
+            boolean instanceGroupHasMultiAz = ((List<String>) ig.getInstanceGroupNetwork()
+                    .getAttributes()
+                    .getMap()
+                    .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>())).size() > 1;
+            return instanceGroupHasMultiAz;
+        });
+        generalClusterConfigs.setMultiAzEnabled(allInstanceGroupsHaveMultiAz);
         if (source.getPrimaryGatewayInstance() != null) {
             if (StringUtils.isBlank(generalClusterConfigs.getClusterManagerIp())) {
                 String primaryGatewayIp = gatewayConfigService.getPrimaryGatewayIp(source);
