@@ -20,6 +20,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
 import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.model.AttachedDisk;
 import com.google.api.services.compute.model.Instance;
@@ -111,7 +112,7 @@ public class GcpClientActions extends GcpClient {
                     waitForComplete(compute, deleteOperationResponse, getProjectId(), TIMEOUT);
                 } catch (Exception e) {
                     String defaultErrorMessageForInstanceDeletion = getDefaultErrorMessageForInstanceDeletion(instanceId, deleteOperationResponse);
-                    LOGGER.error(defaultErrorMessageForInstanceDeletion);
+                    LOGGER.error(defaultErrorMessageForInstanceDeletion, e);
                     throw new TestFailException(defaultErrorMessageForInstanceDeletion, e);
                 }
                 if (deleteOperationResponse.getStatus().equals("DONE")) {
@@ -121,12 +122,22 @@ public class GcpClientActions extends GcpClient {
                     LOGGER.error(defaultErrorMessageForInstanceDeletion);
                     throw new TestFailException(defaultErrorMessageForInstanceDeletion);
                 }
+            } catch (GoogleJsonResponseException e) {
+                if (!e.getMessage().contains("Not Found")) {
+                    handleGeneralInstanceDeletionError(instanceId, e);
+                } else {
+                    LOGGER.info(String.format("Gcp instance [%s] is not found, thus it is deleted.", instanceId));
+                }
             } catch (IOException e) {
-                String errorMessage = format("Failed to invoke GCP instance deletion for instance [%s]:", instanceId);
-                LOGGER.error(errorMessage);
-                throw new TestFailException(errorMessage, e);
+                handleGeneralInstanceDeletionError(instanceId, e);
             }
         }
+    }
+
+    private void handleGeneralInstanceDeletionError(String instanceId, IOException e) {
+        String errorMessage = format("Failed to invoke GCP instance deletion for instance [%s]: ", instanceId, e.getMessage());
+        LOGGER.error(errorMessage);
+        throw new TestFailException(errorMessage, e);
     }
 
     private String getDefaultErrorMessageForInstanceDeletion(String instanceId, Operation deleteOperationResponse) {
