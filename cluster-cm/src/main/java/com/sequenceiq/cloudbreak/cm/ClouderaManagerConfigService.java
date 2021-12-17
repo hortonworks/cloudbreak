@@ -110,20 +110,6 @@ public class ClouderaManagerConfigService {
         }
     }
 
-    public Optional<String> getServiceNameIfExists(ApiClient client, String clusterName, String serviceType) {
-        try {
-            ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
-            ApiServiceList serviceList = servicesResourceApi.readServices(clusterName, DataView.SUMMARY.name());
-            return serviceList.getItems().stream()
-                    .filter(service -> serviceType.equalsIgnoreCase(service.getType()))
-                    .map(ApiService::getName)
-                    .findFirst();
-        } catch (ApiException e) {
-            LOGGER.debug("Failed to get {} service name from Cloudera Manager on cluster {}.", serviceType, clusterName, e);
-            return Optional.empty();
-        }
-    }
-
     public void modifyServiceConfig(ApiClient client, String clusterName, String serviceType, Map<String, String> config) throws CloudbreakException {
         ServicesResourceApi servicesResourceApi = clouderaManagerApiFactory.getServicesResourceApi(client);
         LOGGER.info("Trying to modify config: {} for service {}", Arrays.asList(config), serviceType);

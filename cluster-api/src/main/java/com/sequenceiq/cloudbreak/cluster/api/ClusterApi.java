@@ -69,10 +69,6 @@ public interface ClusterApi {
         clusterModificationService().updateServiceConfig(serviceType, config);
     }
 
-    default boolean doesServiceExist(String serviceType) throws CloudbreakException {
-        return clusterModificationService().doesServiceExist(serviceType);
-    }
-
     default void stopCluster(boolean disableKnoxAutorestart) throws CloudbreakException {
         clusterModificationService().stopCluster(disableKnoxAutorestart);
     }
