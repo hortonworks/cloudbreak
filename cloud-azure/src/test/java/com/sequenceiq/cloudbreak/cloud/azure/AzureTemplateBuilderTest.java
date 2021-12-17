@@ -23,6 +23,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.codec.binary.Base64;
@@ -619,6 +620,67 @@ public class AzureTemplateBuilderTest {
         assertTrue(templateString.contains("\"type\": \"Microsoft.Network/publicIPAddresses\","));
         assertTrue(templateString.contains("\"name\": \"Standard\""));
         assertTrue(templateString.contains("\"tier\": \"Regional\""));
+    }
+
+    @ParameterizedTest(name = "buildWithStandardLoadBalancerOnlyTargetGroupsUpdated {0}")
+    @MethodSource("templatesPathDataProvider")
+    public void buildWithStandardLoadBalancerOnlyTargetGroupsUpdated(String templatePath) {
+        assumeTrue(isTemplateVersionGreaterOrEqualThan(templatePath, "2.7.3.0"));
+        //GIVEN
+        ReflectionTestUtils.setField(azureTemplateBuilder, FIELD_ARM_TEMPLATE_PATH, templatePath);
+
+        String lbGroupExpectedBlob =
+                "\"tags\":{},\"sku\":{\"name\":\"Standard\",\"tier\":\"Regional\"},\"properties\":{\"publicIPAllocationM" +
+                        "ethod\":\"Static\"}},{\"apiVersion\":\"2016-09-01\",\"type\":\"Microsoft.Network/networkInterfa" +
+                        "ces\",\"name\":\"[concat(parameters('nicNamePrefix'),'m0')]\",\"location\":\"[parameters('regio" +
+                        "n')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft.Network/networkSecurityGroups/',variable" +
+                        "s('gateway-groupsecGroupName'))]\"";
+        String nonLbGroupExpectedBlob =
+                "\"tags\":{},\"properties\":{\"publicIPAllocationMethod\":\"Dynamic\"}},{\"apiVersion\":\"2016-09-01\",\"" +
+                        "type\":\"Microsoft.Network/networkInterfaces\",\"name\":\"[concat(parameters('nicNamePrefix'),'" +
+                        "m0')]\",\"location\":\"[parameters('region')]\",\"tags\":{},\"dependsOn\":[\"[concat('Microsoft" +
+                        ".Network/networkSecurityGroups/',variables('core-groupsecGroupName'))]\"";
+
+        Network network = new Network(new Subnet(SUBNET_CIDR));
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("persistentStorage", "persistentStorageTest");
+        parameters.put("attachedStorageOption", "attachedStorageOptionTest");
+        InstanceAuthentication instanceAuthentication = new InstanceAuthentication("sshkey", "", "cloudbreak");
+
+        Map<String, Object> lbParams = new HashMap<>();
+        Map<String, Object> lbAsName = new HashMap<>();
+        lbAsName.put("name", "gateway-group-as");
+        lbParams.put("availabilitySet", lbAsName);
+        Group lbGroup = new Group("gateway-group", InstanceGroupType.GATEWAY, Collections.singletonList(instance), security, null,
+                lbParams, instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
+        Group nonLbGroup = new Group("core-group", InstanceGroupType.CORE, Collections.singletonList(instance), security, null,
+                instanceAuthentication, instanceAuthentication.getLoginUserName(),
+                instanceAuthentication.getPublicKey(), ROOT_VOLUME_SIZE, Optional.empty(), createGroupNetwork(), emptyMap());
+        groups.add(lbGroup);
+        groups.add(nonLbGroup);
+
+        List<CloudLoadBalancer> loadBalancers = new ArrayList<>();
+        CloudLoadBalancer loadBalancer = new CloudLoadBalancer(LoadBalancerType.PUBLIC, LoadBalancerSku.STANDARD);
+        loadBalancer.addPortToTargetGroupMapping(new TargetGroupPortPair(443, 8443), Set.of(lbGroup));
+        loadBalancers.add(loadBalancer);
+
+        cloudStack = new CloudStack(groups, network, image, parameters, tags, azureTemplateBuilder.getTemplateString(),
+                instanceAuthentication, instanceAuthentication.getLoginUserName(), instanceAuthentication.getPublicKey(), null, loadBalancers);
+        azureStackView = new AzureStackView("mystack", 3, groups, azureStorageView, azureSubnetStrategy, Collections.emptyMap());
+
+        //WHEN
+        when(azureAcceleratedNetworkValidator.validate(any())).thenReturn(ACCELERATED_NETWORK_SUPPORT);
+        when(azureStorage.getImageStorageName(any(AzureCredentialView.class), any(CloudContext.class), any(CloudStack.class))).thenReturn("test");
+        when(azureStorage.getDiskContainerName(any(CloudContext.class))).thenReturn("testStorageContainer");
+
+        String templateString =
+                azureTemplateBuilder.build(stackName, CUSTOM_IMAGE_NAME, azureCredentialView, azureStackView, cloudContext, cloudStack,
+                        AzureInstanceTemplateOperation.PROVISION, null);
+        //THEN
+        String strippedTemplateString = templateString.replaceAll("\\s", "");
+        assertTrue(strippedTemplateString.contains(lbGroupExpectedBlob));
+        assertTrue(strippedTemplateString.contains(nonLbGroupExpectedBlob));
     }
 
     @ParameterizedTest(name = "buildWithGatewayInstanceGroupTypeAndMultipleLoadBalancers {0}")

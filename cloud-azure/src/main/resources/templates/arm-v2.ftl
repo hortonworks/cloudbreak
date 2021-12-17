@@ -212,7 +212,7 @@
                         </#list>
                      </#if>
                      },
-                   <#if loadBalancers?? && (loadBalancers?filter(loadBalancer -> loadBalancer.sku == "STANDARD")?size > 0)>
+                   <#if loadBalancerMapping[instance.groupName]?? && (loadBalancers?filter(loadBalancer -> loadBalancer.sku == "STANDARD")?size > 0)>
                      "sku": {
                          "name": "Standard",
                          "tier": "Regional"
