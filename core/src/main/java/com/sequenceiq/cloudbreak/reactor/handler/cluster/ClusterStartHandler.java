@@ -14,6 +14,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -82,6 +84,9 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
     @Inject
     private DatalakeService datalakeService;
 
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterStartRequest.class);
@@ -110,7 +115,7 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
                 LOGGER.info("Triggering update of remote data context");
                 apiConnectors.getConnector(stack).startClusterMgmtServices();
                 clusterBuilderService.configureManagementServices(stack.getId());
-                if (apiConnectors.getConnector(stack).doesServiceExist(HIVE_SERVICE)) {
+                if (shouldReloadDatabaseConfig(stack.getCluster())) {
                     //Update Hive service database configuration
                     updateDatabaseConfiguration(datalakeStack, stack, HIVE_SERVICE, DatabaseType.HIVE);
                 } else {
@@ -158,5 +163,11 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
 
     private boolean isDatalakeCreatedAfterDataHub(Stack datalakeStack, Stack dataHubStack) {
         return datalakeStack.getCreated() > dataHubStack.getCreated();
+    }
+
+    private boolean shouldReloadDatabaseConfig(Cluster cluster) {
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
     }
 }
