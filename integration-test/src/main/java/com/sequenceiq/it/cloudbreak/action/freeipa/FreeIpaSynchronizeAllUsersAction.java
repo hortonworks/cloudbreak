@@ -2,8 +2,11 @@ package com.sequenceiq.it.cloudbreak.action.freeipa;
 
 import static java.lang.String.format;
 
+import javax.ws.rs.ClientErrorException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.EnvironmentUserSyncState;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
@@ -32,15 +35,24 @@ public class FreeIpaSynchronizeAllUsersAction implements Action<FreeIpaUserSyncT
             Log.when(LOGGER, format(" Sync is in state: [%s], sync operation: [%s]", environmentUserSyncState.getState(),
                     environmentUserSyncState.getLastUserSyncOperationId()));
         } else {
-            // need to sync
-            SyncOperationStatus syncOperationStatus = client.getDefaultClient()
-                    .getUserV1Endpoint()
-                    .synchronizeAllUsers(testDto.getRequest());
-            testDto.setOperationId(syncOperationStatus.getOperationId());
-            LOGGER.info("Sync is in state: [{}], sync operation id: [{}] with type: [{}]", syncOperationStatus.getStatus(),
-                    syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType());
-            Log.when(LOGGER, format(" Sync is in state: [%s], sync operation id: [%s] with type: [%s]", syncOperationStatus.getStatus(),
-                    syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType()));
+            try {
+                // need to sync
+                SyncOperationStatus syncOperationStatus = client.getDefaultClient()
+                        .getUserV1Endpoint()
+                        .synchronizeAllUsers(testDto.getRequest());
+                testDto.setOperationId(syncOperationStatus.getOperationId());
+                LOGGER.info("Sync is in state: [{}], sync operation id: [{}] with type: [{}]", syncOperationStatus.getStatus(),
+                        syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType());
+                Log.when(LOGGER, format(" Sync is in state: [%s], sync operation id: [%s] with type: [%s]", syncOperationStatus.getStatus(),
+                        syncOperationStatus.getOperationId(), syncOperationStatus.getSyncOperationType()));
+            } catch (ClientErrorException e) {
+                // still can happen that a concurrent user sync got initiated
+                if (e.getResponse() != null && HttpStatus.CONFLICT.value() == e.getResponse().getStatus()) {
+                    LOGGER.info("Sync were already initiated for environment {}", testDto.getEnvironmentCrn());
+                } else {
+                    throw e;
+                }
+            }
         }
         return testDto;
     }
