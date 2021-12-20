@@ -60,12 +60,12 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
         try {
             environmentService.findEnvironmentById(environmentDto.getId()).ifPresent(environment -> {
                 if (AZURE.name().equalsIgnoreCase(environmentDto.getCloudPlatform())) {
-                    String diskEncryptionSetId = Optional.ofNullable(environmentDto.getParameters())
+                    String encryptionKeyUrl = Optional.ofNullable(environmentDto.getParameters())
                             .map(ParametersDto::getAzureParametersDto)
                             .map(AzureParametersDto::getAzureResourceEncryptionParametersDto)
-                            .map(AzureResourceEncryptionParametersDto::getDiskEncryptionSetId)
+                            .map(AzureResourceEncryptionParametersDto::getEncryptionKeyUrl)
                             .orElse(null);
-                    if (StringUtils.isNotEmpty(diskEncryptionSetId) &&
+                    if (StringUtils.isNotEmpty(encryptionKeyUrl) &&
                             (environment.getStatus() != EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED)) {
                         deleteEncryptionResources(environmentDto, environment);
                     } else {
