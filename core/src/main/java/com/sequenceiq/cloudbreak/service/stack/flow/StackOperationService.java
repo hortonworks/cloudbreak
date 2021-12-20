@@ -274,29 +274,17 @@ public class StackOperationService {
     public FlowIdentifier updateNodeCountStartInstances(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson,
             boolean withClusterEvent, ScalingStrategy scalingStrategy) {
 
-        // TODO CB-14929: Post CB-15162 Remove this
         if (instanceGroupAdjustmentJson.getScalingAdjustment() == 0) {
-            LOGGER.info("ZZZ: Scaling Adjustment 0. Cancalling existing flows... and continuing");
-            flowCancelService.cancelRunningFlows(stack.getId());
+            throw new BadRequestException("Attempting to upscale zero instances");
         }
         if (instanceGroupAdjustmentJson.getScalingAdjustment() < 0) {
-            throw new BadRequestException(String.format("Attempting to downscale via the start instances method. (File a bug)"));
+            throw new BadRequestException("Attempting to downscale via the start instances method. (File a bug)");
         }
 
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
                 Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
-
-                // TODO CB-14929: Post CB-15162 Remove this
-                if (!stack.isAvailable()) {
-                    LOGGER.info("ZZZ: Stack status is not AVAILABLE. Resetting, and cancelling existing flows... it is at: {}", stackWithLists.getStatus());
-                    flowCancelService.cancelRunningFlows(stack.getId());
-                    stackWithLists.getStackStatus().setStatus(AVAILABLE);
-                    clusterService.updateClusterStatusByStackId(stackWithLists.getId(), DetailedStackStatus.AVAILABLE, "fake update");
-                    stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.AVAILABLE,
-                            String.format("fake update"));
-                }
 
                 // TODO CB-14929: validateServiceRoles needs adjusting - it counts NMs, and could be the place where we allow this only for NMs/gateways.
                 updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
@@ -310,7 +298,6 @@ public class StackOperationService {
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
                     updateNodeCountValidator.validataCMStatus(stackWithLists, instanceGroupAdjustmentJson);
                 }
-                // TODO CB-14929: Post CB-15162 and add an additional check to ignore upscale requests of size 0 in stackCommonService
                 stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED,
                         "Requested node count for upscaling (stopstart): " + instanceGroupAdjustmentJson.getScalingAdjustment());
                 return flowManager.triggerStopStartStackUpscale(
