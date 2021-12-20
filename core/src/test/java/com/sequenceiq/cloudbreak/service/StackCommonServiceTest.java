@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -28,6 +29,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.StatusRequest;
@@ -44,6 +46,7 @@ import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
 import com.sequenceiq.cloudbreak.service.stack.CloudParameterCache;
@@ -54,6 +57,7 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.service.FlowCancelService;
 
 @ExtendWith(MockitoExtension.class)
 class StackCommonServiceTest {
@@ -101,6 +105,15 @@ class StackCommonServiceTest {
 
     @Mock
     private TransactionService transactionService;
+
+    @Mock
+    private FlowCancelService flowCancelService;
+
+    @Mock
+    private ClusterService clusterService;
+
+    @Mock
+    private StackUpdater stackUpdater;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -204,6 +217,21 @@ class StackCommonServiceTest {
         underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true);
 
         verify(stackOperationService).removeInstances(stack, nodes, true);
+    }
+
+    @Test
+    public void testCancelInWorkspace() {
+        when(stackService.getIdByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(1L);
+        doNothing().when(flowCancelService).cancelRunningFlows(1L);
+
+        underTest.cancelInWorkspace(STACK_NAME, WORKSPACE_ID);
+
+        verify(stackService).getIdByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID);
+        verify(flowCancelService).cancelRunningFlows(1L);
+        verify(clusterService).updateClusterStatusByStackId(1L, DetailedStackStatus.AVAILABLE,
+                "fake update after cancelling the running flows");
+        verify(stackUpdater).updateStackStatus(1L, DetailedStackStatus.AVAILABLE,
+                "fake update after cancelling the running flows");
     }
 
     @Test
