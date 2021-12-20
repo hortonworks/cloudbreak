@@ -233,6 +233,10 @@ public class StackOperations implements ResourcePropertyProvider {
         return stackCommonService.retryInWorkspace(nameOrCrn, workspaceId);
     }
 
+    public void cancel(NameOrCrn nameOrCrn, Long workspaceId) {
+        stackCommonService.cancelInWorkspace(nameOrCrn, workspaceId);
+    }
+
     public FlowIdentifier putStop(NameOrCrn nameOrCrn, Long workspaceId) {
         return stackCommonService.putStopInWorkspace(nameOrCrn, workspaceId);
     }
