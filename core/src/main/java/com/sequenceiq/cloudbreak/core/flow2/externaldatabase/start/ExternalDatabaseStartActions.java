@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.start.action.AbstractExternalDatabaseStartAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.start.config.ExternalDatabaseStartEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.start.config.ExternalDatabaseStartState;
-import com.sequenceiq.cloudbreak.core.flow2.stack.start.StackStartEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -79,7 +78,7 @@ public class ExternalDatabaseStartActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(StackStartEvent.START_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ExternalDatabaseStartEvent.EXTERNAL_DATABASE_START_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
             }
 
             @Override

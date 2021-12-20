@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.StackUpdaterService
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.action.AbstractExternalDatabaseStopAction;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopEvent;
 import com.sequenceiq.cloudbreak.core.flow2.externaldatabase.stop.config.ExternalDatabaseStopState;
-import com.sequenceiq.cloudbreak.core.flow2.stack.stop.StackStopEvent;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
@@ -79,7 +78,7 @@ public class ExternalDatabaseStopActions {
 
             @Override
             protected Selectable createRequest(ExternalDatabaseContext context) {
-                return new StackEvent(StackStopEvent.STOP_FAIL_HANDLED_EVENT.event(), context.getStack().getId());
+                return new StackEvent(ExternalDatabaseStopEvent.EXTERNAL_DATABASE_STOP_FAILURE_HANDLED_EVENT.event(), context.getStack().getId());
             }
 
             @Override
