@@ -44,6 +44,7 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @Service
@@ -69,10 +70,13 @@ public class EnvironmentModificationService {
 
     private final EnvironmentEncryptionService environmentEncryptionService;
 
+    private final AzureParametersRepository azureParametersRepository;
+
     public EnvironmentModificationService(EnvironmentDtoConverter environmentDtoConverter, EnvironmentService environmentService,
             CredentialService credentialService, NetworkService networkService, AuthenticationDtoConverter authenticationDtoConverter,
             ParametersService parametersService, EnvironmentFlowValidatorService environmentFlowValidatorService,
-            EnvironmentResourceService environmentResourceService, EnvironmentEncryptionService environmentEncryptionService) {
+            EnvironmentResourceService environmentResourceService, EnvironmentEncryptionService environmentEncryptionService,
+            AzureParametersRepository azureParametersRepository) {
         this.environmentDtoConverter = environmentDtoConverter;
         this.environmentService = environmentService;
         this.credentialService = credentialService;
@@ -82,6 +86,7 @@ public class EnvironmentModificationService {
         this.environmentFlowValidatorService = environmentFlowValidatorService;
         this.environmentResourceService = environmentResourceService;
         this.environmentEncryptionService = environmentEncryptionService;
+        this.azureParametersRepository = azureParametersRepository;
     }
 
     public EnvironmentDto editByName(String environmentName, EnvironmentEditDto editDto) {
@@ -183,6 +188,7 @@ public class EnvironmentModificationService {
                 CreatedDiskEncryptionSet createdDiskEncryptionSet = environmentEncryptionService.createEncryptionResources(
                         environmentDtoConverter.environmentToDto(environment));
                 azureParameters.setDiskEncryptionSetId(createdDiskEncryptionSet.getDiskEncryptionSetId());
+                azureParametersRepository.save(azureParameters);
             } catch (Exception e) {
                 throw new BadRequestException(e);
             }
@@ -190,8 +196,7 @@ public class EnvironmentModificationService {
         } else {
             throw new BadRequestException(validateKey.getFormattedErrors());
         }
-        Environment saved = environmentService.save(environment);
-        return environmentDtoConverter.environmentToDto(saved);
+        return environmentDtoConverter.environmentToDto(environment);
     }
 
     private EnvironmentDto changeTelemetryFeatures(EnvironmentFeatures features, Environment environment) {

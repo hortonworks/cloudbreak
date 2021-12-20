@@ -59,6 +59,7 @@ import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
 
 @ExtendWith(SpringExtension.class)
@@ -96,6 +97,9 @@ class EnvironmentModificationServiceTest {
 
     @MockBean
     private EnvironmentEncryptionService environmentEncryptionService;
+
+    @MockBean
+    private AzureParametersRepository azureParametersRepository;
 
     @Mock
     private EnvironmentValidatorService validatorService;
@@ -652,10 +656,10 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentName(ACCOUNT_ID,
                 ENVIRONMENT_NAME, updateAzureResourceEncryptionDto);
 
-        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(environmentArgumentCaptor.capture());
-        assertEquals("dummyKeyUrl", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyUrl());
-        assertEquals("dummyResourceGroupName", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyResourceGroupName());
+        ArgumentCaptor<AzureParameters> azureParametersArgumentCaptor = ArgumentCaptor.forClass(AzureParameters.class);
+        verify(azureParametersRepository).save(azureParametersArgumentCaptor.capture());
+        assertEquals("dummyKeyUrl", azureParametersArgumentCaptor.getValue().getEncryptionKeyUrl());
+        assertEquals("dummyResourceGroupName", azureParametersArgumentCaptor.getValue().getEncryptionKeyResourceGroupName());
     }
 
     @Test
@@ -681,10 +685,10 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,
                 ENVIRONMENT_NAME, updateAzureResourceEncryptionDto);
 
-        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
-        verify(environmentService).save(environmentArgumentCaptor.capture());
-        assertEquals("dummyKeyUrl", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyUrl());
-        assertEquals("dummyResourceGroupName", ((AzureParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKeyResourceGroupName());
+        ArgumentCaptor<AzureParameters> azureParametersArgumentCaptor = ArgumentCaptor.forClass(AzureParameters.class);
+        verify(azureParametersRepository).save(azureParametersArgumentCaptor.capture());
+        assertEquals("dummyKeyUrl", azureParametersArgumentCaptor.getValue().getEncryptionKeyUrl());
+        assertEquals("dummyResourceGroupName", azureParametersArgumentCaptor.getValue().getEncryptionKeyResourceGroupName());
 
     }
 

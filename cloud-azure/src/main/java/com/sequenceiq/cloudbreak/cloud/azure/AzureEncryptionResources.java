@@ -110,6 +110,13 @@ public class AzureEncryptionResources implements EncryptionResources {
             String sourceVaultId = String.format("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.KeyVault/vaults/%s",
                     azureClient.getCurrentSubscription().subscriptionId(), vaultResourceGroupName, vaultName);
 
+            // Check for the existence of keyVault user has specified before creating disk encryption set (DES).
+            // If keyVault is wrong or user lacks permissions to access it, granting access permissions to this keyVault for DES would fail.
+            if (!azureClient.keyVaultExists(vaultResourceGroupName, vaultName)) {
+                throw new IllegalArgumentException(String.format("Vault with name \"%s\" either does not exist or user does not have permissions to " +
+                                "access it. Kindly check if the vault & encryption key exists and correct encryption key URL is specified.",
+                        vaultName));
+            }
             CreatedDiskEncryptionSet diskEncryptionSet = getOrCreateDiskEncryptionSetOnCloud(
                     authenticatedContext,
                     azureClient,
@@ -311,18 +318,25 @@ public class AzureEncryptionResources implements EncryptionResources {
         } else {
             throw new IllegalArgumentException(String.format("Failed to deduce vault resource group name from source vault ID \"%s\"", sourceVaultId));
         }
-        String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
-                        "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
-                desName, desResourceGroupName);
-        retryService.testWith2SecDelayMax15Times(() -> {
-            try {
-                LOGGER.info("Removing {}.", description);
-                azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
-                LOGGER.info("Removed {}.", description);
-                return true;
-            } catch (Exception e) {
-                throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Removing " + description);
-            }
-        });
+
+        // Check for the existence of keyVault user has specified before removing disk encryption set's (DES) access permissions from this keyVault.
+        if (!azureClient.keyVaultExists(vaultResourceGroupName, vaultName)) {
+            LOGGER.warn(String.format("Vault with name \"%s\" either does not exist/have been deleted or user does not have permissions to access it.",
+                    vaultName));
+        } else {
+            String description = String.format("access to Key Vault \"%s\" in Resource Group \"%s\" for Service Principal having object ID \"%s\" " +
+                            "associated with Disk Encryption Set \"%s\" in Resource Group \"%s\"", vaultName, vaultResourceGroupName, desPrincipalObjectId,
+                    desName, desResourceGroupName);
+            retryService.testWith2SecDelayMax15Times(() -> {
+                try {
+                    LOGGER.info("Removing {}.", description);
+                    azureClient.removeKeyVaultAccessPolicyFromServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
+                    LOGGER.info("Removed {}.", description);
+                    return true;
+                } catch (Exception e) {
+                    throw azureUtils.convertToActionFailedExceptionCausedByCloudConnectorException(e, "Removing " + description);
+                }
+            });
+        }
     }
 }

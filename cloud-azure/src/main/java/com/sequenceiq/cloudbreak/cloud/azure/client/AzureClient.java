@@ -57,6 +57,7 @@ import com.microsoft.azure.management.graphrbac.RoleAssignment;
 import com.microsoft.azure.management.graphrbac.RoleAssignments;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
 import com.microsoft.azure.management.keyvault.KeyPermissions;
+import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.marketplaceordering.v2015_06_01.AgreementTerms;
 import com.microsoft.azure.management.marketplaceordering.v2015_06_01.implementation.MarketplaceOrderingManager;
 import com.microsoft.azure.management.msi.Identity;
@@ -103,8 +104,8 @@ import com.microsoft.azure.storage.blob.CopyState;
 import com.microsoft.azure.storage.blob.ListBlobItem;
 import com.sequenceiq.cloudbreak.client.ProviderAuthenticationFailedException;
 import com.sequenceiq.cloudbreak.cloud.azure.AzureDiskType;
-import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.AzurePrivateDnsZoneServiceEnum;
+import com.sequenceiq.cloudbreak.cloud.azure.image.marketplace.AzureMarketplaceImage;
 import com.sequenceiq.cloudbreak.cloud.azure.status.AzureStatusMapper;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
@@ -981,6 +982,14 @@ public class AzureClient {
             DiskEncryptionSetInner desIn = createDiskEncryptionSetInner(sourceVaultId, encryptionKeyUrl, location, tags);
             DiskEncryptionSetsInner dSetsIn = computeManager.inner().diskEncryptionSets();
             return dSetsIn.createOrUpdate(resourceGroupName, diskEncryptionSetName, desIn);
+        });
+    }
+
+    public boolean keyVaultExists(String resourceGroupName, String vaultName) {
+        return handleAuthException(() -> {
+            Vault keyVault = azure.vaults()
+                    .getByResourceGroup(resourceGroupName, vaultName);
+            return keyVault != null;
         });
     }
 
