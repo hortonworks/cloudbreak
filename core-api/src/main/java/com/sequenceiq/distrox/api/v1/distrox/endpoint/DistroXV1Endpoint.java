@@ -12,6 +12,7 @@ import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescrip
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REFRESH_RECIPES_BY_CRN;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.REFRESH_RECIPES_BY_NAME;
 import static com.sequenceiq.cloudbreak.doc.OperationDescriptions.StackOpDescription.ROTATE_CERTIFICATES;
+import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CANCEL_BY_CRN;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CLI_COMMAND;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.CREATE;
 import static com.sequenceiq.distrox.api.v1.distrox.doc.DistroXOpDescription.DELETE_BY_CRN;
@@ -196,6 +197,12 @@ public interface DistroXV1Endpoint {
     @ApiOperation(value = RETRY_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.RETRY_STACK_NOTES,
             nickname = "retryDistroXV1ByCrn")
     void retryByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
+
+    @POST
+    @Path("crn/{crn}/cancel/internal")
+    @ApiOperation(value = CANCEL_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = Notes.CANCEL_STACK_NOTES,
+            nickname = "internalCancelDistroXV1ByCrn")
+    void cancelByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn);
 
     @PUT
     @Path("name/{name}/stop")
