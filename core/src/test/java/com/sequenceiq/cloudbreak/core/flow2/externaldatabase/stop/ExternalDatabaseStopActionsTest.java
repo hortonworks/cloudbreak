@@ -223,7 +223,7 @@ class ExternalDatabaseStopActionsTest {
         verify(reactorEventFactory).createEvent(headersArgumentCaptor.capture(), payloadArgumentCaptor.capture());
         verify(metricService).incrementMetricCounter(MetricType.EXTERNAL_DATABASE_STOP_FAILED, STACK);
         verify(flow).setFlowFailed(exceptionCaptor.capture());
-        assertThat(selectorArgumentCaptor.getValue()).isEqualTo("STOPFAILHANDLED");
+        assertThat(selectorArgumentCaptor.getValue()).isEqualTo("EXTERNAL_DATABASE_STOP_FAILURE_HANDLED_EVENT");
         Object capturedPayload = payloadArgumentCaptor.getValue();
         assertThat(capturedPayload).isInstanceOf(StackEvent.class);
         StackEvent stackEvent = (StackEvent) capturedPayload;
