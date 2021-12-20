@@ -284,7 +284,9 @@ public class StackOperationServiceTest {
         assertThrows(BadRequestException.class,
                 () -> underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
 
-        // TODO CB-14929: Post CB-15162 Test what happens when the instanceCountAdjustment is 0
+        upscaleAdjustment.setScalingAdjustment(0);
+        assertThrows(BadRequestException.class,
+                () -> underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
     }
 
     @Test
