@@ -796,6 +796,8 @@ cb:
         LIVY_FOR_SPARK3: 7.2.9,
         OMID: 7.2.9,
         OOZIE: 7.2.9,
+        NIFI: 7.2.13,
+        NIFIREGISTRY: 7.2.13,
         PHOENIX: 7.2.9,
         QUEUEMANAGER: 7.2.9,
         SCHEMAREGISTRY: 7.2.9,
