@@ -34,6 +34,8 @@ public class ClusterUseCaseMapper {
         firstStepUseCaseMap.put(Pair.of("ProvisionFlowEventChainFactory", "CloudConfigValidationFlowConfig"), UsageProto.CDPClusterStatus.Value.CREATE_STARTED);
         firstStepUseCaseMap.put(Pair.of("ProperTerminationFlowEventChainFactory", "ClusterTerminationFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.DELETE_STARTED);
+        firstStepUseCaseMap.put(Pair.of("TerminationFlowEventChainFactory", "ClusterTerminationFlowConfig"),
+                UsageProto.CDPClusterStatus.Value.DELETE_STARTED);
         firstStepUseCaseMap.put(Pair.of("UpscaleFlowEventChainFactory", "StackUpscaleConfig"), UsageProto.CDPClusterStatus.Value.UPSCALE_STARTED);
         firstStepUseCaseMap.put(Pair.of("MultiHostgroupDownscaleFlowEventChainFactory", "FlowChainInitFlowConfig"),
                 UsageProto.CDPClusterStatus.Value.DOWNSCALE_STARTED);
@@ -83,6 +85,7 @@ public class ClusterUseCaseMapper {
                     useCase = getClusterStatus(nextFlowState, "CLUSTER_CREATION_FINISHED_STATE",
                             UsageProto.CDPClusterStatus.Value.CREATE_FINISHED, UsageProto.CDPClusterStatus.Value.CREATE_FAILED);
                     break;
+                case "TerminationFlowEventChainFactory":
                 case "ProperTerminationFlowEventChainFactory":
                     useCase = getClusterStatus(nextFlowState, "TERMINATION_FINISHED_STATE",
                             UsageProto.CDPClusterStatus.Value.DELETE_FINISHED, UsageProto.CDPClusterStatus.Value.DELETE_FAILED);
