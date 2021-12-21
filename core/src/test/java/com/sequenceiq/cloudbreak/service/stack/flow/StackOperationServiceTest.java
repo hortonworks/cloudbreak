@@ -1,14 +1,22 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_UPGRADE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyMap;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -20,16 +28,23 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
@@ -59,6 +74,7 @@ import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
 @RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class StackOperationServiceTest {
 
     @Rule
@@ -105,6 +121,9 @@ public class StackOperationServiceTest {
 
     @Mock
     private UpdateNodeCountValidator updateNodeCountValidator;
+
+    @Spy
+    private UpdateNodeCountValidator updateNodeCountValidator = new UpdateNodeCountValidator();
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
@@ -248,6 +267,11 @@ public class StackOperationServiceTest {
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
         when(targetedUpscaleSupportService.targetedUpscaleOperationSupported(any())).thenReturn(Boolean.TRUE);
+        doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), any(InstanceGroupAdjustmentV4Request.class));
+        doNothing().when(updateNodeCountValidator).validateInstanceGroup(any(), any());
+        doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), any(InstanceGroupAdjustmentV4Request.class));
+        doNothing().when(updateNodeCountValidator).validateScalingAdjustment(any(InstanceGroupAdjustmentV4Request.class), any());
+        doNothing().when(updateNodeCountValidator).validateHostGroupIsPresent(any(InstanceGroupAdjustmentV4Request.class), any());
 
         underTest.updateNodeCount(stack, upscaleAdjustment, true);
         verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
@@ -271,11 +295,12 @@ public class StackOperationServiceTest {
 
     }
 
-    @Test
-    public void testUpdateNodeCountStartInstances() throws TransactionService.TransactionExecutionException {
+    @ParameterizedTest(name = "{0}: With stackStatus={1}")
+    @MethodSource("stackStatus")
+    public void testUpdateNodeCountStartInstances(String methodName, DetailedStackStatus stackStatus) throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus(stack, stackStatus));
         Cluster cluster = new Cluster();
         cluster.setStatus(Status.AVAILABLE);
         stack.setCluster(cluster);
@@ -286,12 +311,24 @@ public class StackOperationServiceTest {
         upscaleAdjustment.setScalingAdjustment(5);
 
         when(transactionService.required(any(Supplier.class))).thenAnswer(ans -> ((Supplier) ans.getArgument(0)).get());
+        doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), any(InstanceGroupAdjustmentV4Request.class));
+        if (stackStatus != CLUSTER_UPGRADE_FAILED) {
+            doNothing().when(updateNodeCountValidator).validateInstanceGroup(any(), any());
+            doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), any(InstanceGroupAdjustmentV4Request.class));
+            doNothing().when(updateNodeCountValidator).validateScalingAdjustment(any(InstanceGroupAdjustmentV4Request.class), any());
+            doNothing().when(updateNodeCountValidator).validateHostGroupIsPresent(any(InstanceGroupAdjustmentV4Request.class), any());
+        }
 
         // Regular
-        underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART);
-        String expectedStatusReason = "Requested node count for upscaling (stopstart): " + upscaleAdjustment.getScalingAdjustment();
-        verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED, expectedStatusReason);
-        verify(flowManager).triggerStopStartStackUpscale(stack.getId(), upscaleAdjustment, true);
+        try {
+            underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART);
+            String expectedStatusReason = "Requested node count for upscaling (stopstart): " + upscaleAdjustment.getScalingAdjustment();
+            verify(stackUpdater).updateStackStatus(stack.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED, expectedStatusReason);
+            verify(flowManager).triggerStopStartStackUpscale(stack.getId(), upscaleAdjustment, true);
+        } catch (Exception e) {
+            assertSame(CLUSTER_UPGRADE_FAILED, stackStatus);
+            assertSame(BadRequestException.class, e.getClass());
+        }
 
         // Somehow invoked with a negative value
         upscaleAdjustment.setScalingAdjustment(-1);
@@ -299,6 +336,14 @@ public class StackOperationServiceTest {
                 () -> underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
 
         // TODO CB-14929: Post CB-15162 Test what happens when the instanceCountAdjustment is 0
+    }
+
+    public static Stream<Arguments> stackStatus() {
+        return Stream.of(
+                Arguments.of("Stack is available", AVAILABLE),
+                Arguments.of("Stack has node failure", NODE_FAILURE),
+                Arguments.of("Stack upgrade failure", CLUSTER_UPGRADE_FAILED)
+        );
     }
 
     @Test
@@ -319,9 +364,13 @@ public class StackOperationServiceTest {
         instanceIds.add("i3");
 
         // This ends up skipping the actual validation that is run here.
-        when(updateNodeCountValidator.validateInstanceForDownscale(im1.getInstanceId(), stack)).thenReturn(im1);
-        when(updateNodeCountValidator.validateInstanceForDownscale(im2.getInstanceId(), stack)).thenReturn(im2);
-        when(updateNodeCountValidator.validateInstanceForDownscale(im3.getInstanceId(), stack)).thenReturn(im3);
+        doReturn(im1).when(updateNodeCountValidator).validateInstanceForDownscale(im1.getInstanceId(), stack);
+        doReturn(im2).when(updateNodeCountValidator).validateInstanceForDownscale(im2.getInstanceId(), stack);
+        doReturn(im3).when(updateNodeCountValidator).validateInstanceForDownscale(im3.getInstanceId(), stack);
+
+        doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), anyMap());
+        doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), anyString(), anyInt());
+        doNothing().when(updateNodeCountValidator).validateScalingAdjustment(anyString(), anyInt(), any());
 
         ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
         Map<String, Set<Long>> captured;
@@ -336,9 +385,9 @@ public class StackOperationServiceTest {
         assertEquals(3, captured.entrySet().iterator().next().getValue().size());
 
         // This ends up skipping the actual validation that is run here.
-        when(updateNodeCountValidator.validateInstanceForStop(im1.getInstanceId(), stack)).thenReturn(im1);
-        when(updateNodeCountValidator.validateInstanceForStop(im2.getInstanceId(), stack)).thenReturn(im2);
-        when(updateNodeCountValidator.validateInstanceForStop(im3.getInstanceId(), stack)).thenReturn(im3);
+        doReturn(im1).when(updateNodeCountValidator).validateInstanceForStop(im1.getInstanceId(), stack);
+        doReturn(im2).when(updateNodeCountValidator).validateInstanceForStop(im2.getInstanceId(), stack);
+        doReturn(im3).when(updateNodeCountValidator).validateInstanceForStop(im3.getInstanceId(), stack);
 
         // Verify stop-start invocation
         reset(flowManager);
@@ -358,14 +407,14 @@ public class StackOperationServiceTest {
         // stopstart supports a single hostGroup only
         reset(flowManager);
         InstanceMetaData im4 = createInstanceMetadataForTest(4L, "group2");
-        when(updateNodeCountValidator.validateInstanceForStop(im4.getInstanceId(), stack)).thenReturn(im4);
+        doReturn(im4).when(updateNodeCountValidator).validateInstanceForStop(im4.getInstanceId(), stack);
         instanceIds.add("i4");
         assertThrows(BadRequestException.class,
                 () -> underTest.stopInstances(stack, instanceIds, false));
 
         // regular scaling supports multiple hostgroups
         reset(flowManager);
-        when(updateNodeCountValidator.validateInstanceForDownscale(im4.getInstanceId(), stack)).thenReturn(im4);
+        doReturn(im4).when(updateNodeCountValidator).validateInstanceForDownscale(im4.getInstanceId(), stack);
         underTest.removeInstances(stack, instanceIds, false);
         verify(flowManager).triggerStackRemoveInstances(eq(stack.getId()), capturedInstances.capture(), eq(false));
         captured = capturedInstances.getValue();
