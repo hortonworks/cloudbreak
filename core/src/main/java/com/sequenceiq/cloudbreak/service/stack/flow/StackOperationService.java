@@ -306,7 +306,7 @@ public class StackOperationService {
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
                 LOGGER.info("ZZZ: stack.isAvailable: {}, stackStatus: {}", stackWithLists.isAvailable(), stackWithLists.getStatus());
                 if (withClusterEvent) {
-                    updateNodeCountValidator.validateClusterStatus(stackWithLists);
+                    updateNodeCountValidator.validateClusterStatusForStartHostGroup(stackWithLists);
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
                     updateNodeCountValidator.validataCMStatus(stackWithLists, instanceGroupAdjustmentJson);
                 }
