@@ -399,9 +399,7 @@ cb:
           7.2.1 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small;
           7.2.1 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.2.1 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
-          7.2.1 - Data Discovery and Exploration=cdp-dde;
-          7.2.1 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
-          7.2.1 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy
+          7.2.1 - Data Discovery and Exploration=cdp-dde
         7.2.2: >
           7.2.2 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
           7.2.2 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
@@ -416,8 +414,6 @@ cb:
           7.2.2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.2.2 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
           7.2.2 - Data Discovery and Exploration=cdp-dde;
-          7.2.2 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
-          7.2.2 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.2 COD Edge Node=cdp-cod-edge-node
         7.2.3: >
           7.2.3 COD Edge Node=cdp-cod-edge-node
@@ -435,8 +431,6 @@ cb:
           7.2.6 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.2.6 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
           7.2.6 - Data Discovery and Exploration=cdp-dde;
-          7.2.6 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
-          7.2.6 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.6 COD Edge Node=cdp-cod-edge-node
         7.2.7: >
           7.2.7 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
@@ -452,8 +446,6 @@ cb:
           7.2.7 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.2.7 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
           7.2.7 - Data Discovery and Exploration=cdp-dde;
-          7.2.7 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
-          7.2.7 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.7 COD Edge Node=cdp-cod-edge-node
         7.2.8: >
           7.2.8 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
@@ -469,8 +461,6 @@ cb:
           7.2.8 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.2.8 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
           7.2.8 - Data Discovery and Exploration=cdp-dde;
-          7.2.8 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
-          7.2.8 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.8 COD Edge Node=cdp-cod-edge-node
         7.2.9: >
           7.2.9 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
@@ -486,8 +476,6 @@ cb:
           7.2.9 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.2.9 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
           7.2.9 - Data Discovery and Exploration=cdp-dde;
-          7.2.9 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
-          7.2.9 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.9 COD Edge Node=cdp-cod-edge-node
         7.2.10: >
           7.2.10 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
@@ -503,8 +491,6 @@ cb:
           7.2.10 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.2.10 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
           7.2.10 - Data Discovery and Exploration=cdp-dde;
-          7.2.10 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
-          7.2.10 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.10 COD Edge Node=cdp-cod-edge-node
         7.2.11: >
           7.2.11 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
