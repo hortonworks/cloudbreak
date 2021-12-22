@@ -5,7 +5,6 @@ import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -15,7 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -394,13 +393,7 @@ public class StackToTemplatePreparationObjectConverter {
 
     private GeneralClusterConfigs calculateGeneralClusterConfigs(Stack source, Cluster cluster) {
         GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cluster);
-        boolean allInstanceGroupsHaveMultiAz = source.getInstanceGroups().stream().allMatch(ig -> {
-            boolean instanceGroupHasMultiAz = ((List<String>) ig.getInstanceGroupNetwork()
-                    .getAttributes()
-                    .getMap()
-                    .getOrDefault(NetworkConstants.SUBNET_IDS, new ArrayList<>())).size() > 1;
-            return instanceGroupHasMultiAz;
-        });
+        boolean allInstanceGroupsHaveMultiAz = source.getInstanceGroups().stream().allMatch(this::isInstanceGroupsHaveMultiAz);
         generalClusterConfigs.setMultiAzEnabled(allInstanceGroupsHaveMultiAz);
         if (source.getPrimaryGatewayInstance() != null) {
             if (StringUtils.isBlank(generalClusterConfigs.getClusterManagerIp())) {
@@ -415,6 +408,10 @@ public class StackToTemplatePreparationObjectConverter {
         generalClusterConfigs.setLoadBalancerGatewayFqdn(Optional.ofNullable(loadBalancerConfigService.getLoadBalancerUserFacingFQDN(source.getId())));
         generalClusterConfigs.setAccountId(Optional.ofNullable(Crn.safeFromString(source.getResourceCrn()).getAccountId()));
         return generalClusterConfigs;
+    }
+
+    boolean isInstanceGroupsHaveMultiAz(InstanceGroup instanceGroup) {
+        return instanceGroup.getAvailabilityZones().size() > 1;
     }
 
     private void decorateBuilderWithServicePrincipals(Stack source, Builder builder,
