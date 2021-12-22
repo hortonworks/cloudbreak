@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.PlatformVariants;
 import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
+import com.sequenceiq.distrox.api.v1.distrox.validation.volume.RootVolumeSizeProvider;
 
 /**
  * This class reads the environment properties of default root volume size configurations for each cloud provider platform.
@@ -23,10 +24,9 @@ import com.sequenceiq.cloudbreak.cloud.model.generic.StringType;
  * -Dcb.platform.default.rootVolumeSize.AZURE=100
  *
  * etc.
- *
  */
 @Service
-public class DefaultRootVolumeSizeProvider {
+public class DefaultRootVolumeSizeProvider implements RootVolumeSizeProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DefaultRootVolumeSizeProvider.class);
 
@@ -40,15 +40,15 @@ public class DefaultRootVolumeSizeProvider {
         PlatformVariants platformVariants = cloudPlatformConnectors.getPlatformVariants();
         platformVolumeSizeMap = Collections.unmodifiableMap(
                 platformVariants.getDefaultVariants().keySet()
-                .stream()
-                .collect(Collectors.toMap(StringType::value, p -> initPlatform(environment, p)))
+                        .stream()
+                        .collect(Collectors.toMap(StringType::value, p -> initPlatform(environment, p)))
         );
     }
 
     public int getForPlatform(String platform) {
         if (!platformVolumeSizeMap.containsKey(platform.toUpperCase())) {
-            LOGGER.debug("No default root volume size found for platform: {}. Falling back to default value of 50 GB. "
-                            + "Set '{}' property if '{}' is a valid cloud provider.",
+            LOGGER.debug("No default root volume size found for platform: {}. Falling back to default value of {} GB. "
+                            + "Set '{}' property if '{}' is a valid cloud provider.", DEFAULT_ROOT_VOLUME_SIZE,
                     platform, ROOT_VOLUME_SIZE_PROPERTY_PREFIX + platform, platform);
         }
         return platformVolumeSizeMap.getOrDefault(platform.toUpperCase(), DEFAULT_ROOT_VOLUME_SIZE);
