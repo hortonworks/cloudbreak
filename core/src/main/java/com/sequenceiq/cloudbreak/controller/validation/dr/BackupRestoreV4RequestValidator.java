@@ -1,5 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.validation.dr;
 
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.MOCK;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Arrays;
@@ -15,20 +20,17 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
-import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
-
 @Component
 public class BackupRestoreV4RequestValidator {
     private static final Logger LOGGER = LoggerFactory.getLogger(BackupRestoreV4RequestValidator.class);
 
-    private static final String[] SUPPORTED_CLOUD_PLATFORMS = {AWS, AZURE, GCP};
+    private static final String[] SUPPORTED_CLOUD_PLATFORMS = {AWS, AZURE, GCP, MOCK};
 
     private static final Map<String, Pattern> CLOUD_PLATFORM_TO_PATTERN = Map.of(
             AWS, Pattern.compile("^s3[a|n]?$", Pattern.CASE_INSENSITIVE),
             AZURE, Pattern.compile("^abfs[s]?$", Pattern.CASE_INSENSITIVE),
-            GCP, Pattern.compile("^gs$", Pattern.CASE_INSENSITIVE)
+            GCP, Pattern.compile("^gs$", Pattern.CASE_INSENSITIVE),
+            MOCK, Pattern.compile("^mock$", Pattern.CASE_INSENSITIVE)
     );
 
     public ValidationResult validate(Stack stack, String location, String backupId) {

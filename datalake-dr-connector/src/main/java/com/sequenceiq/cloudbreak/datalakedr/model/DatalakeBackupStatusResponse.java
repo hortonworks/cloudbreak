@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.datalakedr.model;
 
 import java.util.Optional;
 
-public class DatalakeDrStatusResponse {
+public class DatalakeBackupStatusResponse {
 
     public static final String NO_FAILURES = "No failure messages found";
 
@@ -15,13 +15,12 @@ public class DatalakeDrStatusResponse {
 
     private final State state;
 
-    private final String drOperationId;
+    private final String backupId;
 
     private final Optional<String> failureReason;
 
-    public
-    DatalakeDrStatusResponse(String drOperationId, State state, Optional<String> failureReason) {
-        this.drOperationId = drOperationId;
+    public DatalakeBackupStatusResponse(String backupId, State state, Optional<String> failureReason) {
+        this.backupId = backupId;
         this.state = state;
         this.failureReason = failureReason.isPresent() && "null".equals(failureReason.get())
             ? Optional.empty() : failureReason;
@@ -43,7 +42,7 @@ public class DatalakeDrStatusResponse {
         return failureReason.isPresent() ? failureReason.get() : NO_FAILURES;
     }
 
-    public String getDrOperationId() {
-        return drOperationId;
+    public String getBackupId() {
+        return backupId;
     }
 }

@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.dr;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AWS;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.AZURE;
 import static com.sequenceiq.cloudbreak.common.type.CloudConstants.GCP;
+import static com.sequenceiq.cloudbreak.common.type.CloudConstants.MOCK;
 import static java.util.Collections.singletonMap;
 
 import java.net.URI;
@@ -62,6 +63,8 @@ public class BackupRestoreSaltConfigGenerator {
             fullLocation = "abfs://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
         } else if (GCP.equalsIgnoreCase(cloudPlatform)) {
             fullLocation = "gs://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
+        } else if (MOCK.equalsIgnoreCase(cloudPlatform)) {
+            fullLocation = "mock://" + uri.getSchemeSpecificPart().replaceAll("^/+", "");
         } else {
             throw new UnsupportedOperationException("Cloud platform not supported for backup/restore: " + cloudPlatform);
         }

@@ -1,6 +1,7 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
@@ -25,6 +26,7 @@ import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 import com.sequenceiq.flow.reactor.api.event.BaseFlowEvent;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
@@ -104,7 +106,26 @@ public class SdxReactorFlowManagerTest {
     public void testSdxBackupOnUpgradeAzureSupported() {
         sdxCluster = getValidSdxCluster("7.2.2");
         sdxCluster.setRangerRazEnabled(false);
-        sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
+        when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
+        when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
+        when(datalakeDrConfig.isConfigured()).thenReturn(true);
+
+        sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP));
+        } catch (Exception ignored) {
+        }
+        verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testSdxBackupOnUpgradeForMockPlatform() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("MOCK");
+        sdxCluster = getValidSdxCluster("7.2.2");
+        sdxCluster.setRangerRazEnabled(true);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);

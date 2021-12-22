@@ -24,7 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
-import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.entity.operation.SdxOperation;
@@ -103,12 +103,12 @@ public class SdxBackupRestoreServiceTest {
     public void triggerDatabaseBackupInternalSuccess() {
         String drOperationId = UUID.randomUUID().toString();
         when(datalakeDrClient.triggerBackup(any(), any(), any(), any()))
-                .thenReturn(new DatalakeDrStatusResponse(drOperationId, DatalakeDrStatusResponse.State.IN_PROGRESS, Optional.empty()));
+                .thenReturn(new DatalakeBackupStatusResponse(drOperationId, DatalakeBackupStatusResponse.State.IN_PROGRESS, Optional.empty()));
         when(sdxClusterRepository.findById(sdxCluster.getId())).thenReturn(Optional.of(sdxCluster));
-        DatalakeDrStatusResponse backupResponse = sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster.getId(), BACKUP_LOCATION, BACKUP_NAME, USER_CRN);
+        DatalakeBackupStatusResponse backupResponse = sdxBackupRestoreService.triggerDatalakeBackup(sdxCluster.getId(), BACKUP_LOCATION, BACKUP_NAME, USER_CRN);
         assertTrue(backupResponse != null);
-        assertEquals(drOperationId, backupResponse.getDrOperationId());
-        assertTrue(isUUID(backupResponse.getDrOperationId()));
+        assertEquals(drOperationId, backupResponse.getBackupId());
+        assertTrue(isUUID(backupResponse.getBackupId()));
     }
 
     @Test

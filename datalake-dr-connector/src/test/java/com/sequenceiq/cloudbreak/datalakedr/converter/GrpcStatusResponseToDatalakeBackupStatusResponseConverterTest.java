@@ -3,21 +3,21 @@ package com.sequenceiq.cloudbreak.datalakedr.converter;
 import static org.junit.Assert.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
-import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
-
 import org.junit.Before;
 import org.junit.Test;
 
-public class GrpcStatusResponseToDatalakeDrStatusResponseConverterTest {
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+
+public class GrpcStatusResponseToDatalakeBackupStatusResponseConverterTest {
 
     private static final String FAILURE_REASON = "Failed operation";
 
-    private GrpcStatusResponseToDatalakeDrStatusResponseConverter underTest;
+    private GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter underTest;
 
     @Before
     public void setUp() {
-        underTest = new GrpcStatusResponseToDatalakeDrStatusResponseConverter();
+        underTest = new GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter();
     }
 
     @Test
@@ -27,9 +27,9 @@ public class GrpcStatusResponseToDatalakeDrStatusResponseConverterTest {
                 .setOverallState("SUCCESSFUL")
                 .setFailureReason("null");
 
-        DatalakeDrStatusResponse response = underTest.convert(builder.build());
-        assertEquals(DatalakeDrStatusResponse.State.SUCCESSFUL, response.getState());
-        assertEquals(DatalakeDrStatusResponse.NO_FAILURES, response.getFailureReason());
+        DatalakeBackupStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.SUCCESSFUL, response.getState());
+        assertEquals(DatalakeBackupStatusResponse.NO_FAILURES, response.getFailureReason());
         assert response.isComplete();
     }
 
@@ -39,8 +39,8 @@ public class GrpcStatusResponseToDatalakeDrStatusResponseConverterTest {
             datalakeDRProto.BackupDatalakeStatusResponse.newBuilder()
                 .setOverallState("IN_PROGRESS");
 
-        DatalakeDrStatusResponse response = underTest.convert(builder.build());
-        assertEquals(DatalakeDrStatusResponse.State.IN_PROGRESS, response.getState());
+        DatalakeBackupStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.IN_PROGRESS, response.getState());
         assert !response.isComplete();
     }
 
@@ -51,8 +51,8 @@ public class GrpcStatusResponseToDatalakeDrStatusResponseConverterTest {
                 .setOverallState("FAILED")
                 .setFailureReason(FAILURE_REASON);
 
-        DatalakeDrStatusResponse response = underTest.convert(builder.build());
-        assertEquals(DatalakeDrStatusResponse.State.FAILED, response.getState());
+        DatalakeBackupStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.FAILED, response.getState());
         assertEquals(FAILURE_REASON, response.getFailureReason());
         assert response.isComplete();
     }
@@ -75,9 +75,9 @@ public class GrpcStatusResponseToDatalakeDrStatusResponseConverterTest {
                 .setOverallState("SUCCESSFUL")
                 .setFailureReason("null");
 
-        DatalakeDrStatusResponse response = underTest.convert(builder.build());
-        assertEquals(DatalakeDrStatusResponse.State.SUCCESSFUL, response.getState());
-        assertEquals(DatalakeDrStatusResponse.NO_FAILURES, response.getFailureReason());
+        DatalakeBackupStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.SUCCESSFUL, response.getState());
+        assertEquals(DatalakeBackupStatusResponse.NO_FAILURES, response.getFailureReason());
         assert response.isComplete();
     }
 
@@ -87,8 +87,8 @@ public class GrpcStatusResponseToDatalakeDrStatusResponseConverterTest {
             datalakeDRProto.RestoreDatalakeStatusResponse.newBuilder()
                 .setOverallState("IN_PROGRESS");
 
-        DatalakeDrStatusResponse response = underTest.convert(builder.build());
-        assertEquals(DatalakeDrStatusResponse.State.IN_PROGRESS, response.getState());
+        DatalakeBackupStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.IN_PROGRESS, response.getState());
         assert !response.isComplete();
     }
 
@@ -99,8 +99,8 @@ public class GrpcStatusResponseToDatalakeDrStatusResponseConverterTest {
                 .setOverallState("FAILED")
                 .setFailureReason(FAILURE_REASON);
 
-        DatalakeDrStatusResponse response = underTest.convert(builder.build());
-        assertEquals(DatalakeDrStatusResponse.State.FAILED, response.getState());
+        DatalakeBackupStatusResponse response = underTest.convert(builder.build());
+        assertEquals(DatalakeBackupStatusResponse.State.FAILED, response.getState());
         assertEquals(FAILURE_REASON, response.getFailureReason());
         assert response.isComplete();
     }

@@ -20,7 +20,7 @@ import org.springframework.statemachine.action.Action;
 
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -90,6 +90,21 @@ public class DatalakeRestoreActions {
             @Override
             protected SdxContext createFlowContext(FlowParameters flowParameters, StateContext<FlowState, FlowEvent> stateContext,
                     DatalakeTriggerRestoreEvent payload) {
+
+                // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
+                Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(flowParameters.getFlowId());
+                if (lastFlowLog.isPresent()) {
+                    SdxContext sdxContext;
+                    Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
+                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
+                        SdxCluster sdxCluster = sdxService.getByNameInAccount(payload.getUserId(), payload.getSdxName());
+                        LOGGER.info("Updating the Sdx-id in context from {} to {}", payload.getResourceId(), sdxCluster.getId());
+                        payload.getDrStatus().setSdxClusterId(sdxCluster.getId());
+                        sdxContext = SdxContext.from(flowParameters, payload);
+                        sdxContext.setSdxId(sdxCluster.getId());
+                        return sdxContext;
+                    }
+                }
                 return SdxContext.from(flowParameters, payload);
             }
 
@@ -100,30 +115,20 @@ public class DatalakeRestoreActions {
 
             @Override
             protected void doExecute(SdxContext context, DatalakeTriggerRestoreEvent payload, Map<Object, Object> variables) {
-                Long sdxId = payload.getResourceId();
-                // When SDX is created as part of re-size flow chain, SDX in payload will not have the correct ID.
-                Optional<FlowLog> lastFlowLog = flowLogService.getLastFlowLog(context.getFlowParameters().getFlowId());
-                if (lastFlowLog.isPresent()) {
-                    Optional<FlowChainLog> flowChainLog = flowChainLogService.findFirstByFlowChainIdOrderByCreatedDesc(lastFlowLog.get().getFlowChainId());
-                    if (flowChainLog.isPresent() && flowChainLog.get().getFlowChainType().equals(DatalakeResizeFlowEventChainFactory.class.getSimpleName())) {
-                        SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
-                        context.setSdxId(sdxCluster.getId());
-                        sdxId = sdxCluster.getId();
-                    }
-                }
-                LOGGER.info("Triggering datalake restore for {}", sdxId);
-                DatalakeDrStatusResponse restoreStatusResponse =
-                        sdxBackupRestoreService.triggerDatalakeRestore(sdxId,
+                DatalakeRestoreStatusResponse restoreStatusResponse =
+                        sdxBackupRestoreService.triggerDatalakeRestore(context.getSdxId(),
                                 payload.getBackupId(),
                                 payload.getBackupLocationOverride(),
                                 payload.getUserId());
-                variables.put(RESTORE_ID, restoreStatusResponse.getDrOperationId());
-                variables.put(OPERATION_ID, restoreStatusResponse.getDrOperationId());
-                payload.getDrStatus().setOperationId(restoreStatusResponse.getDrOperationId());
+                variables.put(RESTORE_ID, restoreStatusResponse.getRestoreId());
+                variables.put(BACKUP_ID, restoreStatusResponse.getBackupId());
+                variables.put(OPERATION_ID, restoreStatusResponse.getRestoreId());
+                payload.getDrStatus().setOperationId(restoreStatusResponse.getRestoreId());
                 if (!restoreStatusResponse.failed()) {
-                    sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, sdxId, restoreStatusResponse.getDrOperationId()));
+                    sendEvent(context, DatalakeDatabaseRestoreStartEvent.from(payload, context.getSdxId(), restoreStatusResponse.getBackupId(),
+                            restoreStatusResponse.getRestoreId()));
                 } else {
-                    LOGGER.error("Datalake restore has failed for {} ", sdxId);
+                    LOGGER.error("Datalake restore has failed for {} ", context.getSdxId());
                     sendEvent(context, DATALAKE_RESTORE_FAILED_EVENT.event(), payload);
                 }
             }

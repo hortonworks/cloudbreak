@@ -19,7 +19,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
-import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -97,14 +97,14 @@ public class DatalakeBackupActions {
                 SdxCluster sdxCluster = sdxService.getById(payload.getResourceId());
                 eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_IN_PROGRESS);
 
-                DatalakeDrStatusResponse backupStatusResponse =
+                DatalakeBackupStatusResponse backupStatusResponse =
                         sdxBackupRestoreService.triggerDatalakeBackup(payload.getResourceId(), payload.getBackupLocation(),
                                 payload.getBackupName(), payload.getUserId());
-                variables.put(BACKUP_ID, backupStatusResponse.getDrOperationId());
-                variables.put(OPERATION_ID, backupStatusResponse.getDrOperationId());
-                payload.getDrStatus().setOperationId(backupStatusResponse.getDrOperationId());
+                variables.put(BACKUP_ID, backupStatusResponse.getBackupId());
+                variables.put(OPERATION_ID, backupStatusResponse.getBackupId());
+                payload.getDrStatus().setOperationId(backupStatusResponse.getBackupId());
                 if (!backupStatusResponse.failed()) {
-                    sendEvent(context, DatalakeDatabaseBackupStartEvent.from(payload, backupStatusResponse.getDrOperationId()));
+                    sendEvent(context, DatalakeDatabaseBackupStartEvent.from(payload, backupStatusResponse.getBackupId()));
                 } else {
                     sendEvent(context, DATALAKE_BACKUP_FAILED_EVENT.event(), payload);
                 }
