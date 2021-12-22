@@ -33,12 +33,12 @@ public class DatalakeDatabaseRestoreStartEvent extends DatalakeDatabaseDrStartBa
     }
 
     public static DatalakeDatabaseRestoreStartEvent from(DatalakeTriggerRestoreEvent trigggerRestoreEvent, Long sdxId,
-            String restoreId) {
+            String backupId, String restoreId) {
         return new DatalakeDatabaseRestoreStartEvent(DATALAKE_DATABASE_RESTORE_EVENT.event(),
                 sdxId,
                 trigggerRestoreEvent.getDrStatus(),
                 trigggerRestoreEvent.getUserId(),
-                trigggerRestoreEvent.getBackupId(),
+                backupId,
                 restoreId,
                 trigggerRestoreEvent.getBackupLocation());
     }

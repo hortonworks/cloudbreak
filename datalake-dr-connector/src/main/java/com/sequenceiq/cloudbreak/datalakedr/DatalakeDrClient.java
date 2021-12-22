@@ -21,8 +21,9 @@ import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatala
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto.RestoreDatalakeStatusRequest;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
-import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeDrStatusResponseConverter;
-import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.converter.GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeRestoreStatusResponse;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.grpc.altus.AltusMetadataInterceptor;
 import com.sequenceiq.cloudbreak.grpc.util.GrpcUtil;
@@ -40,19 +41,19 @@ public class DatalakeDrClient {
 
     private final DatalakeDrConfig datalakeDrConfig;
 
-    private final GrpcStatusResponseToDatalakeDrStatusResponseConverter statusConverter;
+    private final GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter statusConverter;
 
     private final Tracer tracer;
 
-    public DatalakeDrClient(DatalakeDrConfig datalakeDrConfig, GrpcStatusResponseToDatalakeDrStatusResponseConverter statusConverter, Tracer tracer) {
+    public DatalakeDrClient(DatalakeDrConfig datalakeDrConfig, GrpcStatusResponseToDatalakeBackupRestoreStatusResponseConverter statusConverter, Tracer tracer) {
         this.datalakeDrConfig = datalakeDrConfig;
         this.statusConverter = statusConverter;
         this.tracer = tracer;
     }
 
-    public DatalakeDrStatusResponse triggerBackup(String datalakeName, String backupLocation, String backupName, String actorCrn) {
+    public DatalakeBackupStatusResponse triggerBackup(String datalakeName, String backupLocation, String backupName, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
-            return missingConnectorResponse();
+            return missingConnectorResponseOnBackup();
         }
 
         checkNotNull(datalakeName);
@@ -74,11 +75,10 @@ public class DatalakeDrClient {
         }
     }
 
-    public DatalakeDrStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn) {
+    public DatalakeRestoreStatusResponse triggerRestore(String datalakeName, String backupId, String backupLocationOverride, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
-            return missingConnectorResponse();
+            return missingConnectorResponseOnRestore();
         }
-
         checkNotNull(datalakeName);
         checkNotNull(actorCrn, "actorCrn should not be null.");
 
@@ -98,17 +98,17 @@ public class DatalakeDrClient {
         }
     }
 
-    public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String actorCrn) {
+    public DatalakeBackupStatusResponse getBackupStatus(String datalakeName, String actorCrn) {
         return getBackupStatus(datalakeName, null, null, actorCrn);
     }
 
-    public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String backupId, String actorCrn) {
+    public DatalakeBackupStatusResponse getBackupStatus(String datalakeName, String backupId, String actorCrn) {
         return getBackupStatus(datalakeName, backupId, null, actorCrn);
     }
 
-    public DatalakeDrStatusResponse getBackupStatus(String datalakeName, String backupId, String backupName, String actorCrn) {
+    public DatalakeBackupStatusResponse getBackupStatus(String datalakeName, String backupId, String backupName, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
-            return missingConnectorResponse();
+            return missingConnectorResponseOnBackup();
         }
 
         checkNotNull(datalakeName);
@@ -148,14 +148,14 @@ public class DatalakeDrClient {
         }
     }
 
-    public DatalakeDrStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId, String actorCrn) {
+    public DatalakeBackupStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId, String actorCrn) {
         return getBackupStatusByBackupId(datalakeName, backupId, null, actorCrn);
     }
 
-    public DatalakeDrStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId,
+    public DatalakeBackupStatusResponse getBackupStatusByBackupId(String datalakeName, String backupId,
         String backupName, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
-            return missingConnectorResponse();
+            return missingConnectorResponseOnBackup();
         }
 
         checkNotNull(datalakeName);
@@ -176,9 +176,9 @@ public class DatalakeDrClient {
         }
     }
 
-    public DatalakeDrStatusResponse getRestoreStatusByRestoreId(String datalakeName, String restoreId, String actorCrn) {
+    public DatalakeBackupStatusResponse getRestoreStatusByRestoreId(String datalakeName, String restoreId, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
-            return missingConnectorResponse();
+            return missingConnectorResponseOnBackup();
         }
 
         checkNotNull(datalakeName);
@@ -197,17 +197,17 @@ public class DatalakeDrClient {
         }
     }
 
-    public DatalakeDrStatusResponse getRestoreStatus(String datalakeName, String actorCrn) {
+    public DatalakeRestoreStatusResponse getRestoreStatus(String datalakeName, String actorCrn) {
         return getRestoreStatus(datalakeName, null, null, actorCrn);
     }
 
-    public DatalakeDrStatusResponse getRestoreStatus(String datalakeName, String restoreId, String actorCrn) {
+    public DatalakeRestoreStatusResponse getRestoreStatus(String datalakeName, String restoreId, String actorCrn) {
         return getRestoreStatus(datalakeName, restoreId, null, actorCrn);
     }
 
-    public DatalakeDrStatusResponse getRestoreStatus(String datalakeName, String restoreId, String backupName, String actorCrn) {
+    public DatalakeRestoreStatusResponse getRestoreStatus(String datalakeName, String restoreId, String backupName, String actorCrn) {
         if (!datalakeDrConfig.isConfigured()) {
-            return missingConnectorResponse();
+            return missingConnectorResponseOnRestore();
         }
 
         checkNotNull(datalakeName);
@@ -317,10 +317,17 @@ public class DatalakeDrClient {
             .withInterceptors(GrpcUtil.getTracingInterceptor(tracer), new AltusMetadataInterceptor(requestId, actorCrn));
     }
 
-    private DatalakeDrStatusResponse missingConnectorResponse() {
-        return new DatalakeDrStatusResponse(UUID.randomUUID().toString(),
-            DatalakeDrStatusResponse.State.FAILED,
+    private DatalakeBackupStatusResponse missingConnectorResponseOnBackup() {
+        return new DatalakeBackupStatusResponse(UUID.randomUUID().toString(),
+            DatalakeBackupStatusResponse.State.FAILED,
             Optional.of(NO_CONNECTOR_ERROR)
+        );
+    }
+
+    private DatalakeRestoreStatusResponse missingConnectorResponseOnRestore() {
+        return new DatalakeRestoreStatusResponse(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                DatalakeBackupStatusResponse.State.FAILED,
+                Optional.of(NO_CONNECTOR_ERROR)
         );
     }
 }

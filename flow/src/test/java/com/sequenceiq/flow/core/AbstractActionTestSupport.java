@@ -3,6 +3,8 @@ package com.sequenceiq.flow.core;
 import java.util.Map;
 import java.util.Objects;
 
+import org.springframework.statemachine.StateContext;
+
 import com.sequenceiq.cloudbreak.common.event.Payload;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 
@@ -53,6 +55,16 @@ public class AbstractActionTestSupport<S extends FlowState, E extends FlowEvent,
      */
     public void doExecute(C context, P payload, Map<Object, Object> variables) throws Exception {
         action.doExecute(context, payload, variables);
+    }
+
+    /**
+     * Delegates to {@link AbstractAction#createFlowContext(flowParameters, stateContext, Payload)}.
+     * @param flowParameters flow paramters
+     * @param stateContext State Context
+     * @param payload request event payload
+     */
+    public C createFlowContext(FlowParameters flowParameters, StateContext<S, E> stateContext, P payload) {
+        return action.createFlowContext(flowParameters, stateContext, payload);
     }
 
 }

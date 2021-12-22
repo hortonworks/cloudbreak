@@ -29,6 +29,7 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.common.event.Acceptable;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.datalakedr.config.DatalakeDrConfig;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
@@ -53,6 +54,7 @@ import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -170,7 +172,13 @@ public class SdxReactorFlowManager {
             reason = "Unsupported cloud provider Azure on runtime: " + cluster.getRuntime();
         }
         if (!retVal) {
-            LOGGER.info("Backup not triggered. Reason: " + reason);
+            DetailedEnvironmentResponse environmentResponse = environmentClientService.getByName(cluster.getEnvName());
+            CloudPlatform cloudPlatform = CloudPlatform.valueOf(environmentResponse.getCloudPlatform());
+            if (CloudPlatform.MOCK.equalsIgnoreCase(cloudPlatform.name())) {
+                retVal = true;
+            } else {
+                LOGGER.info("Backup not triggered. Reason: " + reason);
+            }
         }
         return retVal;
     }

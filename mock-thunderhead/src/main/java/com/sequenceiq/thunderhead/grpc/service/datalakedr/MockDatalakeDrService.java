@@ -10,7 +10,8 @@ import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRGrpc;
 import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
-import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeDrStatusResponse;
+import com.google.common.base.Strings;
+import com.sequenceiq.cloudbreak.datalakedr.model.DatalakeBackupStatusResponse;
 
 import io.grpc.stub.StreamObserver;
 
@@ -29,7 +30,7 @@ import io.grpc.stub.StreamObserver;
 @Component
 public class MockDatalakeDrService extends datalakeDRGrpc.datalakeDRImplBase {
 
-    private static Map<String, DatalakeDrStatusResponse.State> mockStatusDatabase = new HashMap<>();
+    private static Map<String, DatalakeBackupStatusResponse.State> mockStatusDatabase = new HashMap<>();
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockDatalakeDrService.class);
 
@@ -37,11 +38,11 @@ public class MockDatalakeDrService extends datalakeDRGrpc.datalakeDRImplBase {
     public void backupDatalake(datalakeDRProto.BackupDatalakeRequest request, StreamObserver<datalakeDRProto.BackupDatalakeResponse> responseObserver) {
         LOGGER.info("Backing up for {}", request.getBackupName());
         UUID id = UUID.randomUUID();
-        mockStatusDatabase.put(id.toString(), DatalakeDrStatusResponse.State.STARTED);
+        mockStatusDatabase.put(id.toString(), DatalakeBackupStatusResponse.State.STARTED);
         responseObserver.onNext(datalakeDRProto.BackupDatalakeResponse.newBuilder()
                 .setBackupName(request.getBackupName())
                 .setBackupId(id.toString())
-                .setOverallState(DatalakeDrStatusResponse.State.STARTED.name()).build());
+                .setOverallState(DatalakeBackupStatusResponse.State.STARTED.name()).build());
         responseObserver.onCompleted();
     }
 
@@ -49,29 +50,29 @@ public class MockDatalakeDrService extends datalakeDRGrpc.datalakeDRImplBase {
     public void restoreDatalake(datalakeDRProto.RestoreDatalakeRequest request, StreamObserver<datalakeDRProto.RestoreDatalakeResponse> responseObserver) {
 
         LOGGER.info("restore for {}", request.getBackupName());
-        UUID id = UUID.randomUUID();
-        mockStatusDatabase.put(id.toString(), DatalakeDrStatusResponse.State.STARTED);
+        UUID requestId = UUID.randomUUID();
+        mockStatusDatabase.put(requestId.toString(), DatalakeBackupStatusResponse.State.STARTED);
         responseObserver.onNext(datalakeDRProto.RestoreDatalakeResponse.newBuilder()
-                .setBackupId(request.getBackupId())
-                .setRestoreId(id.toString())
-                .setOverallState(DatalakeDrStatusResponse.State.STARTED.name()).build());
+                .setBackupId((Strings.isNullOrEmpty(request.getBackupId())) ? UUID.randomUUID().toString() : request.getBackupId())
+                .setRestoreId(requestId.toString())
+                .setOverallState(DatalakeBackupStatusResponse.State.STARTED.name()).build());
         responseObserver.onCompleted();
     }
 
     @Override
     public void backupDatalakeStatus(datalakeDRProto.BackupDatalakeStatusRequest request,
             StreamObserver<datalakeDRProto.BackupDatalakeStatusResponse> responseObserver) {
-        DatalakeDrStatusResponse.State state = mockStatusDatabase.get(request.getBackupId());
+        DatalakeBackupStatusResponse.State state = mockStatusDatabase.get(request.getBackupId());
         datalakeDRProto.BackupDatalakeStatusResponse.Builder builder = datalakeDRProto.BackupDatalakeStatusResponse.newBuilder();
         builder.setBackupId(request.getBackupId());
         switch (state) {
             case STARTED:
-                mockStatusDatabase.put(request.getBackupId(), DatalakeDrStatusResponse.State.IN_PROGRESS);
-                builder.setOverallState(DatalakeDrStatusResponse.State.IN_PROGRESS.name());
+                mockStatusDatabase.put(request.getBackupId(), DatalakeBackupStatusResponse.State.IN_PROGRESS);
+                builder.setOverallState(DatalakeBackupStatusResponse.State.IN_PROGRESS.name());
                 break;
             case IN_PROGRESS:
-                mockStatusDatabase.put(request.getBackupId(), DatalakeDrStatusResponse.State.SUCCESSFUL);
-                builder.setOverallState(DatalakeDrStatusResponse.State.SUCCESSFUL.name());
+                mockStatusDatabase.put(request.getBackupId(), DatalakeBackupStatusResponse.State.SUCCESSFUL);
+                builder.setOverallState(DatalakeBackupStatusResponse.State.SUCCESSFUL.name());
                 break;
             default:
                 builder.setOverallState(state.name());
@@ -83,17 +84,17 @@ public class MockDatalakeDrService extends datalakeDRGrpc.datalakeDRImplBase {
     @Override
     public void restoreDatalakeStatus(datalakeDRProto.RestoreDatalakeStatusRequest request,
             StreamObserver<datalakeDRProto.RestoreDatalakeStatusResponse> responseObserver) {
-        DatalakeDrStatusResponse.State state = mockStatusDatabase.get(request.getRestoreId());
+        DatalakeBackupStatusResponse.State state = mockStatusDatabase.get(request.getRestoreId());
         datalakeDRProto.RestoreDatalakeStatusResponse.Builder builder = datalakeDRProto.RestoreDatalakeStatusResponse.newBuilder();
         builder.setRestoreId(request.getRestoreId());
         switch (state) {
             case STARTED:
-                mockStatusDatabase.put(request.getRestoreId(), DatalakeDrStatusResponse.State.IN_PROGRESS);
-                builder.setOverallState(DatalakeDrStatusResponse.State.IN_PROGRESS.name());
+                mockStatusDatabase.put(request.getRestoreId(), DatalakeBackupStatusResponse.State.IN_PROGRESS);
+                builder.setOverallState(DatalakeBackupStatusResponse.State.IN_PROGRESS.name());
                 break;
             case IN_PROGRESS:
-                mockStatusDatabase.put(request.getRestoreId(), DatalakeDrStatusResponse.State.SUCCESSFUL);
-                builder.setOverallState(DatalakeDrStatusResponse.State.SUCCESSFUL.name());
+                mockStatusDatabase.put(request.getRestoreId(), DatalakeBackupStatusResponse.State.SUCCESSFUL);
+                builder.setOverallState(DatalakeBackupStatusResponse.State.SUCCESSFUL.name());
                 break;
             default:
                 builder.setOverallState(state.name());
