@@ -6,10 +6,10 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
-import static org.junit.Assert.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -31,19 +31,15 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.assertj.core.api.Assertions;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.authorization.service.CommonPermissionCheckingUtils;
@@ -72,12 +68,8 @@ import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 
-@RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 public class StackOperationServiceTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @InjectMocks
     private StackOperationService underTest;
@@ -162,11 +154,10 @@ public class StackOperationServiceTest {
         stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOP_FAILED));
         stack.setId(1L);
 
-        expectedException.expect(BadRequestException.class);
-        expectedException.expectMessage("");
-        underTest.start(stack, null, false);
-
-        verify(stackUpdater, times(1)).updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> underTest.start(stack, null, false));
+        assertEquals("Cannot update the status of the stack to START_REQUESTED when stack is in STOP_FAILED state.",
+                badRequestException.getMessage());
     }
 
     @Test
