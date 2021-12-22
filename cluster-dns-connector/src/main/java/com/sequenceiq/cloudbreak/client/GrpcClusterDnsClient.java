@@ -17,6 +17,7 @@ import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointM
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.GenerateManagedDomainNamesResponse;
 import com.cloudera.thunderhead.service.publicendpointmanagement.PublicEndpointManagementProto.PollCertificateSigningResponse;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -34,12 +35,13 @@ public class GrpcClusterDnsClient {
     @Inject
     private Tracer tracer;
 
-    public String signCertificate(String accountId, String environment, byte[] csr, Optional<String> requestId) {
+    public String signCertificate(String accountId, String environment, byte[] csr, Optional<String> requestId, String resourceCrn) {
         try (ManagedChannelWrapper channelWrapper = makeWrapper()) {
             ClusterDnsClient client = makeClient(channelWrapper.getChannel(), ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN);
             String requestIdValue = requestId.orElse(UUID.randomUUID().toString());
-            LOGGER.info("Fire a create certification request with account id:{}, and requestId: {}", accountId, requestIdValue);
-            String signingWorkflowId = client.signCertificate(requestIdValue, accountId, environment, csr);
+            LOGGER.info("Fire a create certification request(resource crn: {}) with account id:{}, and requestId: {}", resourceCrn, accountId, requestIdValue);
+            Crn crn = Crn.fromString(resourceCrn);
+            String signingWorkflowId = client.signCertificate(requestIdValue, accountId, environment, csr, crn);
             LOGGER.info("The workflow id for polling the result of creation: {}", signingWorkflowId);
             return signingWorkflowId;
         }

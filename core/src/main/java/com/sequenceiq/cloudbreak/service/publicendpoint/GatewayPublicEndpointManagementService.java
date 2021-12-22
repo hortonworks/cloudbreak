@@ -255,7 +255,7 @@ public class GatewayPublicEndpointManagementService extends BasePublicEndpointMa
 
             LOGGER.info("Acquiring certificate with common name:{} and SANs: {}", commonName, String.join(",", subjectAlternativeNames));
             PKCS10CertificationRequest csr = PkiUtil.csr(keyPair, commonName, subjectAlternativeNames);
-            List<String> certs = getCertificateCreationService().create(accountId, endpointName, environmentName, csr);
+            List<String> certs = getCertificateCreationService().create(accountId, endpointName, environmentName, csr, stack.getResourceCrn());
             securityConfig.setUserFacingCert(String.join("", certs));
             securityConfigService.save(securityConfig);
             result = true;
