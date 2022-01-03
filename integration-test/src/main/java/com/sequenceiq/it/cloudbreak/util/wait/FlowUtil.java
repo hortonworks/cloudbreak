@@ -91,6 +91,11 @@ public class FlowUtil {
             }
             retryCount++;
         }
+        if (retryCount >= maxRetry) {
+            String errorMessage = String.format("Test timed out, flow did not finish in time. Crn=%s, FlowId=%s, FlowChainId=%s", crn, flowId, flowChainId);
+            LOGGER.error(errorMessage);
+            throw new TestFailException(errorMessage);
+        }
         if (flowFailed && runningParameter.isWaitForFlowSuccess()) {
             LOGGER.error("Flow has been finalized with failed status. Crn={}, FlowId={}, FlowChainId={}", crn, flowId, flowChainId);
             throw new TestFailException(String.format(" Flow has been finalized with failed status. Crn=%s, FlowId=%s , FlowChainId=%s ", crn, flowId,
