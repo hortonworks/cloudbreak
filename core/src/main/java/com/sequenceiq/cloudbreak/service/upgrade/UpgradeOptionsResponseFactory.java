@@ -12,9 +12,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageInfoV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
@@ -31,7 +30,7 @@ public class UpgradeOptionsResponseFactory {
             String imageCatalogName) {
         return new UpgradeV4Response(
                 createImageInfoFromCurrentImage(currentImage, cloudPlatform, region, imageCatalogName),
-                createImageInfoFromFilteredImages(filteredImages.getAvailableImages(), imageCatalogName, cloudPlatform, region),
+                createImageInfoFromFilteredImages(filteredImages.getImages(), imageCatalogName, cloudPlatform, region),
                 filteredImages.getReason());
     }
 
@@ -40,8 +39,9 @@ public class UpgradeOptionsResponseFactory {
                 currentImage.getDate(), getComponentVersions(currentImage.getPackageVersions(), currentImage.getOs(), currentImage.getDate()));
     }
 
-    private List<ImageInfoV4Response> createImageInfoFromFilteredImages(Images filteredImages, String imageCatalogName, String cloudPlatform, String region) {
-        return filteredImages.getCdhImages().stream()
+    private List<ImageInfoV4Response> createImageInfoFromFilteredImages(List<Image> filteredImages, String imageCatalogName, String cloudPlatform,
+            String region) {
+        return filteredImages.stream()
                 .map(image -> createImageInfo(image, imageCatalogName, cloudPlatform, region)).sorted().collect(Collectors.toList());
     }
 

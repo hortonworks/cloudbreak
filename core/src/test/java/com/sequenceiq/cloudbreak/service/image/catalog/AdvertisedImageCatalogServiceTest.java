@@ -1,23 +1,23 @@
 package com.sequenceiq.cloudbreak.service.image.catalog;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
+
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.when;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 
 @ExtendWith(MockitoExtension.class)
 public class AdvertisedImageCatalogServiceTest {
@@ -40,10 +40,10 @@ public class AdvertisedImageCatalogServiceTest {
 
     @Test
     public void shouldReturnImagesWithAdvertisedFlag() {
-        List<Image> cdhImages = Arrays.asList(createImage(ADVERTISED_IMAGE_ID, true), createImage(NON_ADVERTISED_IMAGE_ID, false));
+        List<Image> cdhImages = List.of(createImage(ADVERTISED_IMAGE_ID, true), createImage(NON_ADVERTISED_IMAGE_ID, false));
         when(imageCatalogV3.getImages()).thenReturn(images);
         when(images.getCdhImages()).thenReturn(cdhImages);
-        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getAvailableImages().getCdhImages();
+        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getImages();
 
         assertTrue(actual.stream().anyMatch(i -> i.getUuid().equals(ADVERTISED_IMAGE_ID)));
         assertFalse(actual.stream().anyMatch(i -> i.getUuid().equals(NON_ADVERTISED_IMAGE_ID)));
@@ -51,7 +51,7 @@ public class AdvertisedImageCatalogServiceTest {
 
     @Test
     public void validationShouldNotFailInCaseOfNullVersionsAndAdvertisedCdhImages() throws CloudbreakImageCatalogException {
-        List<Image> cdhImages = Arrays.asList(createImage(ADVERTISED_IMAGE_ID, true), createImage(NON_ADVERTISED_IMAGE_ID, false));
+        List<Image> cdhImages = List.of(createImage(ADVERTISED_IMAGE_ID, true), createImage(NON_ADVERTISED_IMAGE_ID, false));
         when(imageCatalogV3.getImages()).thenReturn(images);
         when(images.getCdhImages()).thenReturn(cdhImages);
 
@@ -60,7 +60,7 @@ public class AdvertisedImageCatalogServiceTest {
 
     @Test
     public void validationShouldFailInCaseOfNoAdvertisedCdhImages() {
-        List<Image> cdhImages = Arrays.asList(createImage(NON_ADVERTISED_IMAGE_ID, false));
+        List<Image> cdhImages = List.of(createImage(NON_ADVERTISED_IMAGE_ID, false));
         when(imageCatalogV3.getImages()).thenReturn(images);
         when(images.getCdhImages()).thenReturn(cdhImages);
 

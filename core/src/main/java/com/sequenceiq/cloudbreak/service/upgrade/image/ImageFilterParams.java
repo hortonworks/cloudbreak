@@ -24,8 +24,10 @@ public class ImageFilterParams {
 
     private final InternalUpgradeSettings internalUpgradeSettings;
 
+    private final String cloudPlatform;
+
     public ImageFilterParams(Image currentImage, boolean lockComponents, Map<String, String> stackRelatedParcels, StackType stackType, Blueprint blueprint,
-            Long stackId, InternalUpgradeSettings internalUpgradeSettings) {
+            Long stackId, InternalUpgradeSettings internalUpgradeSettings, String cloudPlatform) {
         this.currentImage = currentImage;
         this.lockComponents = lockComponents;
         this.stackRelatedParcels = stackRelatedParcels;
@@ -33,6 +35,7 @@ public class ImageFilterParams {
         this.blueprint = blueprint;
         this.stackId = stackId;
         this.internalUpgradeSettings = internalUpgradeSettings;
+        this.cloudPlatform = cloudPlatform;
     }
 
     public Image getCurrentImage() {
@@ -67,6 +70,11 @@ public class ImageFilterParams {
         return internalUpgradeSettings != null && internalUpgradeSettings.isDataHubRuntimeUpgradeEntitled();
     }
 
+    public String getCloudPlatform() {
+        return cloudPlatform;
+    }
+
+    @SuppressWarnings("checkstyle:CyclomaticComplexity")
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -82,11 +90,12 @@ public class ImageFilterParams {
                 Objects.equals(stackRelatedParcels, that.stackRelatedParcels) &&
                 Objects.equals(stackType, that.stackType) &&
                 Objects.equals(blueprint, that.blueprint) &&
+                Objects.equals(cloudPlatform, that.cloudPlatform) &&
                 Objects.equals(stackId, that.stackId);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings);
+        return Objects.hash(currentImage, lockComponents, stackRelatedParcels, stackType, blueprint, stackId, internalUpgradeSettings, cloudPlatform);
     }
 }

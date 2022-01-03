@@ -1,103 +1,45 @@
 package com.sequenceiq.cloudbreak.service.image;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.junit.jupiter.api.Test;
 
-import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 
-@RunWith(MockitoJUnitRunner.class)
-public class ImageProviderTest {
+class ImageProviderTest {
 
-    private static final long STACK_ID = 1L;
+    private static final String CURRENT_IMAGE_ID = "current-image";
 
-    private static final String NEW_IMAGE = "new-image";
-
-    private static final String OLD_IMAGE = "old-image";
-
-    @InjectMocks
-    private ImageProvider underTest;
-
-    @Mock
-    private InstanceMetaDataService instanceMetaDataService;
+    private final ImageProvider underTest = new ImageProvider();
 
     @Test
-    public void testFilterCurrentImageShouldReturnTrueWhenThereAreInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), createInstanceMetaData(OLD_IMAGE));
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertTrue(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
+    public void testGetCurrentImageFromCatalogShouldReturnTheCurrentImage() throws CloudbreakImageNotFoundException {
+        Image actual = underTest.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, createImageCatalog(List.of("other-image1", CURRENT_IMAGE_ID, "other-image2")));
+        assertEquals(CURRENT_IMAGE_ID, actual.getUuid());
     }
 
     @Test
-    public void testFilterCurrentImageShouldReturnTrueWhenThereAreNoInstanceWithOtherImage() {
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), createInstanceMetaData(NEW_IMAGE));
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertFalse(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
+    public void testGetCurrentImageFromCatalogShouldThrowExceptionWhenTheCurrentImageIsNotFound() {
+        CloudbreakImageCatalogV3 imageCatalog = createImageCatalog(List.of("other-image1", "other-image2"));
+        Exception exception = assertThrows(CloudbreakImageNotFoundException.class, () -> underTest.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog));
+        assertEquals("Image not found with id: current-image", exception.getMessage());
     }
 
-    @Test
-    public void testFilterCurrentImageShouldReturnFalseWhenOneOfTheImageJsonIsNull() {
-        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
-        nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), nullImageInstanceMetadata);
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertFalse(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
+    private CloudbreakImageCatalogV3 createImageCatalog(List<String> images) {
+        return new CloudbreakImageCatalogV3(new Images(Collections.emptyList(), images.stream().map(this::createImage).collect(Collectors.toList()),
+                Collections.emptyList(), Collections.emptySet()), null);
     }
 
-    @Test
-    public void testFilterCurrentImageShouldReturnTrueWhenOneOfTheImageJsonIsNullButTheOtherIsOnOldImage() {
-        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
-        nullImageInstanceMetadata.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(OLD_IMAGE), nullImageInstanceMetadata);
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertTrue(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
-    }
-
-    @Test
-    public void testFilterCurrentImageShouldReturnFalseWhenBothOfTheImageJsonIsNull() {
-        InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
-        nullImageInstanceMetadata.setImage(new Json(null));
-        InstanceMetaData nullImageInstanceMetadata2 = new InstanceMetaData();
-        nullImageInstanceMetadata2.setImage(new Json(null));
-        Set<InstanceMetaData> instanceMetaData = Set.of(nullImageInstanceMetadata, nullImageInstanceMetadata2);
-        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
-
-        assertFalse(underTest.filterCurrentImage(STACK_ID, NEW_IMAGE));
-
-        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
-    }
-
-    private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId) {
-        return new com.sequenceiq.cloudbreak.cloud.model.Image(null, null, null, null, null, null, imageId, null);
-    }
-
-    private InstanceMetaData createInstanceMetaData(String imageId) {
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setImage(new Json(createImage(imageId)));
-        return instanceMetaData;
+    private Image createImage(String imageId) {
+        return new Image(null, null, null, null, null, imageId, null, null, null, null, null, null, null, null, null, true, null, null);
     }
 
 }
