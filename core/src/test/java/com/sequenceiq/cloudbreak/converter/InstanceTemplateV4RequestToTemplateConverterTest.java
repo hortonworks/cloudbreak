@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.Mappable;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.type.APIResourceType;
+import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.instancegroup.template.InstanceTemplateV4RequestToTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
@@ -159,6 +160,24 @@ public class InstanceTemplateV4RequestToTemplateConverterTest {
 
         assertGcpEncryptionConvertResult(source, result);
         assertThat(new Json(result.getSecretAttributes()).getMap().get(InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID)).isEqualTo("myKey");
+    }
+
+    @Test
+    public void convertWithNullTemporaryStorage() {
+        InstanceTemplateV4Request source = getSampleGcpRequest();
+        source.setTemporaryStorage(null);
+
+        Template result = underTest.convert(source);
+        assertThat(result.getTemporaryStorage()).isEqualTo(TemporaryStorage.ATTACHED_VOLUMES);
+    }
+
+    @Test
+    public void convertWithNonNullTemporaryStorage() {
+        InstanceTemplateV4Request source = getSampleGcpRequest();
+        source.setTemporaryStorage(TemporaryStorage.EPHEMERAL_VOLUMES);
+
+        Template result = underTest.convert(source);
+        assertThat(result.getTemporaryStorage()).isEqualTo(TemporaryStorage.EPHEMERAL_VOLUMES);
     }
 
     @Test
