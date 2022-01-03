@@ -78,10 +78,6 @@ public class DistroXStopStartTest extends AbstractE2ETest {
                 .given("non_eph_dx", DistroXTestDto.class)
                 .await(STACK_AVAILABLE, RunningParameter.key("non_eph_dx"))
                 .then((tc, testDto, client) -> {
-                    verifyMountPointsUsedForTemporalDisks(testDto, "fs", "resource");
-                    return testDto;
-                })
-                .then((tc, testDto, client) -> {
                     verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(sanitizedUserName, testDto);
                     return testDto;
                 })
@@ -90,7 +86,7 @@ public class DistroXStopStartTest extends AbstractE2ETest {
                 .when(distroXTestClient.start(), RunningParameter.key("non_eph_dx"))
                 .await(STACK_AVAILABLE, RunningParameter.key("non_eph_dx"))
                 .then((tc, testDto, client) -> {
-                    verifyMountPointsUsedForTemporalDisks(testDto, "fs", "resource");
+                    verifyEphemeralVolumesShouldNotBeConfiguredInHdfs(sanitizedUserName, testDto);
                     return testDto;
                 })
                 .given("eph_dx", DistroXTestDto.class)
