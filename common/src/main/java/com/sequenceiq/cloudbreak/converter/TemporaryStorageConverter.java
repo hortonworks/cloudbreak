@@ -9,4 +9,11 @@ public class TemporaryStorageConverter extends DefaultEnumConverter<TemporarySto
         return TemporaryStorage.ATTACHED_VOLUMES;
     }
 
+    @Override
+    public TemporaryStorage convertToEntityAttribute(String attribute) {
+        return attribute == null
+                ? super.convertToEntityAttribute(TemporaryStorage.ATTACHED_VOLUMES.name())
+                : super.convertToEntityAttribute(attribute);
+    }
+
 }

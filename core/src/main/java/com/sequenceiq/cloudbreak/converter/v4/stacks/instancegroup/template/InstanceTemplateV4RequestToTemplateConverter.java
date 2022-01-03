@@ -53,7 +53,9 @@ public class InstanceTemplateV4RequestToTemplateConverter {
         Optional.ofNullable(parameters).map(toJson()).ifPresent(template::setAttributes);
         Map<String, Object> secretParameters = providerParameterCalculator.get(source).asSecretMap();
         Optional.ofNullable(secretParameters).map(toJson()).map(Json::getValue).ifPresent(template::setSecretAttributes);
-        template.setTemporaryStorage(source.getTemporaryStorage() != null ? source.getTemporaryStorage() : TemporaryStorage.ATTACHED_VOLUMES);
+        template.setTemporaryStorage(source.getTemporaryStorage() != null
+                ? source.getTemporaryStorage()
+                : TemporaryStorage.ATTACHED_VOLUMES);
         return template;
     }
 
@@ -84,9 +86,9 @@ public class InstanceTemplateV4RequestToTemplateConverter {
             });
         } else {
             VolumeTemplate volumeTemplate = new VolumeTemplate();
-            volumeTemplate.setVolumeCount(Integer.valueOf(0));
+            volumeTemplate.setVolumeCount(0);
             volumeTemplate.setVolumeType("HDD");
-            volumeTemplate.setVolumeSize(Integer.valueOf(0));
+            volumeTemplate.setVolumeSize(0);
             volumeTemplate.setTemplate(template);
             template.getVolumeTemplates().add(volumeTemplate);
         }
