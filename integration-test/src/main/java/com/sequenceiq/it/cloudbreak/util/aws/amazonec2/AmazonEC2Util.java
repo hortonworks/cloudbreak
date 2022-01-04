@@ -18,11 +18,11 @@ public class AmazonEC2Util {
     }
 
     public List<String> listInstanceVolumeIds(List<String> instanceIds) {
-        return ec2ClientActions.getInstanceVolumeIds(instanceIds);
+        return ec2ClientActions.getInstanceVolumeIds(instanceIds, false);
     }
 
     public List<String> listVolumeKmsKeyIds(List<String> instanceIds) {
-        return ec2ClientActions.getVolumesKmsKeys(instanceIds);
+        return ec2ClientActions.getRootVolumesKmsKeys(instanceIds);
     }
 
     public Map<String, Map<String, String>> listTagsByInstanceId(List<String> instanceIds) {
