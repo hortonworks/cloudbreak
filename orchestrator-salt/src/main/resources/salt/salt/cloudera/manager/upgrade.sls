@@ -37,6 +37,7 @@ upgrade-cloudera-server:
         - cloudera-manager-server
         - cloudera-manager-daemons
     - refresh: True
+    - fromrepo: cloudera-manager
     - failhard: True
     - require:
         - sls: cloudera.repo
