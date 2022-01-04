@@ -165,6 +165,7 @@ if [[ "$CIRCLECI" ]]; then
     if [[ -z "${INTEGRATIONTEST_YARN_QUEUE}" ]] && [[ "$AWS" != true ]]; then
         sudo mkdir -p ./test-output
         sudo chmod -R a+rwx ./test-output
+        sudo chmod -R a+rwx ./integcb/logs
         mkdir ./test-output/docker_stats
         docker stats --no-stream --format "{{ .NetIO }}" cbreak_commondb_1 > ./test-output/docker_stats/pg_stat_network_io.result;
 

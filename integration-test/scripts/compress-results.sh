@@ -17,6 +17,7 @@ compress_if_exists () {
     if [ "$exitcode" != "1" ] && [ "$exitcode" != "0" ]; then
         exit $exitcode
     fi
+    sudo chmod -R a+rwx "$sourceDir"
     rm -R "$sourceDir"
     set -e
     du -h "$targetArchive"
