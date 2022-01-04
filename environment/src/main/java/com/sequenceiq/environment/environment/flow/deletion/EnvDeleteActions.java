@@ -248,8 +248,8 @@ public class EnvDeleteActions {
                             String originalName = env.getName();
                             env.setName(generateArchiveName(env.getName()));
                             env.setDeletionTimestamp(new Date().getTime());
-                            env.setStatusReason(null);
                             env.setStatus(EnvironmentStatus.ARCHIVED);
+                            env.setStatusReason(null);
                             env.setArchived(true);
                             env.setProxyConfig(null);
                             Environment result = environmentService.save(env);

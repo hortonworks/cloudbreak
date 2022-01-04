@@ -83,6 +83,7 @@ public class EnvCreationActions {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("Initialization of Environment has started. Current state is - ENVIRONMENT_INITIALIZATION_STATE");
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_INITIALIZATION_IN_PROGRESS);
+                    environment.setStatusReason(null);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_INITIALIZATION_STARTED);
@@ -110,6 +111,7 @@ public class EnvCreationActions {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("Validation of Environment has started. Current state is - ENVIRONMENT_CREATION_VALIDATION_STATE");
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_VALIDATION_IN_PROGRESS);
+                    environment.setStatusReason(null);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_VALIDATION_STARTED);
@@ -141,6 +143,7 @@ public class EnvCreationActions {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("Creation of Network has started. Current state is - NETWORK_CREATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.NETWORK_CREATION_IN_PROGRESS);
+                    environment.setStatusReason(null);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_NETWORK_CREATION_STARTED);
@@ -168,6 +171,7 @@ public class EnvCreationActions {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("Creation of PublicKey has started. Current state is - PUBLICKEY_CREATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.PUBLICKEY_CREATE_IN_PROGRESS);
+                    environment.setStatusReason(null);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_PUBLICKEY_CREATION_STARTED);
@@ -196,6 +200,7 @@ public class EnvCreationActions {
                     LOGGER.info("Initialization of resource encryption has started." +
                         " Current state is - ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.ENVIRONMENT_RESOURCE_ENCRYPTION_INITIALIZATION_IN_PROGRESS);
+                    environment.setStatusReason(null);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(),
@@ -225,6 +230,7 @@ public class EnvCreationActions {
                 environmentService.findEnvironmentById(payload.getResourceId()).ifPresentOrElse(environment -> {
                     LOGGER.info("Creation of FreeIPA has started. Current state is - FREEIPA_CREATION_STARTED_STATE");
                     environment.setStatus(EnvironmentStatus.FREEIPA_CREATION_IN_PROGRESS);
+                    environment.setStatusReason(null);
                     environment = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(environment);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_FREEIPA_CREATION_STARTED);
@@ -253,8 +259,8 @@ public class EnvCreationActions {
                 environmentService
                         .findEnvironmentById(payload.getResourceId())
                         .ifPresentOrElse(environment -> {
-                            environment.setStatusReason(null);
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
+                            environment.setStatusReason(null);
                             Environment result = environmentService.save(environment);
                             environmentJobService.schedule(result);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
