@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.config;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -53,19 +55,40 @@ public class RootCertRegisterService extends AbstractConfigRegister {
         }
     }
 
-    private RootCert registerInternal(Stack stack) throws FreeIpaClientException {
-        MDCBuilder.buildMdcContext(stack);
-        String rootCertificate = getRootCertFromFreeIpa(stack);
-        RootCert rootCert = createRootCertEntity(stack, rootCertificate);
-        return rootCertService.save(rootCert);
-    }
-
     @Retryable(value = RetryableFreeIpaClientException.class,
             maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
             backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
                     multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public RootCert register(Stack stack) throws FreeIpaClientException {
         return registerInternal(stack);
+    }
+
+    @Override
+    public void delete(Stack stack) {
+        try {
+            rootCertService.deleteByStack(stack);
+        } catch (NotFoundException e) {
+            LOGGER.info("Root cert not exists for environment {}", stack.getEnvironmentCrn());
+        }
+    }
+
+    private RootCert registerInternal(Stack stack) throws FreeIpaClientException {
+        MDCBuilder.buildMdcContext(stack);
+        String rootCertificate = getRootCertFromFreeIpa(stack);
+        Optional<RootCert> currentCert = rootCertService.findByStackId(stack.getId());
+        return currentCert.isPresent() ? updateRootCertEntityIfNecessary(currentCert.get(), rootCertificate) : createRootCertEntity(stack, rootCertificate);
+    }
+
+    private RootCert updateRootCertEntityIfNecessary(RootCert rootCert, String rootCertificate) {
+        String rootCertInPemFormat = convertToPemFormat(rootCertificate);
+        if (!rootCertInPemFormat.equals(rootCert.getCert())) {
+            rootCert.setCert(rootCertInPemFormat);
+            LOGGER.debug("Updating root cert entity with new certificate.");
+            return rootCertService.save(rootCert);
+        } else {
+            LOGGER.debug("The root cert entity is already present. Not necessary to update.");
+            return rootCert;
+        }
     }
 
     private String getRootCertFromFreeIpa(Stack stack) throws FreeIpaClientException {
@@ -78,16 +101,8 @@ public class RootCertRegisterService extends AbstractConfigRegister {
         rootCert.setStack(stack);
         rootCert.setEnvironmentCrn(stack.getEnvironmentCrn());
         rootCert.setCert(convertToPemFormat(rootCertificate));
-        return rootCert;
-    }
-
-    @Override
-    public void delete(Stack stack) {
-        try {
-            rootCertService.deleteByStack(stack);
-        } catch (NotFoundException e) {
-            LOGGER.info("Root cert not exists for environment {}", stack.getEnvironmentCrn());
-        }
+        LOGGER.debug("Saving the new root cert entity.");
+        return rootCertService.save(rootCert);
     }
 
     private String convertToPemFormat(String certificate) {
