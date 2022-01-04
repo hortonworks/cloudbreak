@@ -21,6 +21,7 @@ public class DistroXRepairV1Request {
     @Valid
     private DistroXRepairNodesV1Request nodes;
 
+    @Deprecated
     @ApiModelProperty(RepairClusterRequest.REMOVE_ONLY)
     private boolean removeOnly;
 

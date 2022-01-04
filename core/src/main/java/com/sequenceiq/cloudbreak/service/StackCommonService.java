@@ -268,12 +268,12 @@ public class StackCommonService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         if (clusterRepairRequest.getHostGroups() != null) {
             return clusterRepairService.repairHostGroups(stack.getId(), new HashSet<>(clusterRepairRequest.getHostGroups()),
-                    clusterRepairRequest.isRemoveOnly(), clusterRepairRequest.isRestartServices());
+                    clusterRepairRequest.isRestartServices());
         } else {
             return clusterRepairService.repairNodes(stack.getId(),
                     new HashSet<>(clusterRepairRequest.getNodes().getIds()),
                     clusterRepairRequest.getNodes().isDeleteVolumes(),
-                    clusterRepairRequest.isRemoveOnly(), clusterRepairRequest.isRestartServices());
+                    clusterRepairRequest.isRestartServices());
         }
     }
 

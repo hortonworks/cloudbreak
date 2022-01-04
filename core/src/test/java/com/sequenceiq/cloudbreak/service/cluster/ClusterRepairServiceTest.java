@@ -191,9 +191,9 @@ public class ClusterRepairServiceTest {
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
 
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1"))), eq(false));
     }
 
     @Test
@@ -216,7 +216,7 @@ public class ClusterRepairServiceTest {
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false)));
 
         assertEquals("Repair is not supported when the cluster uses cluster proxy and has multiple gateway nodes. This will be fixed in future releases.",
                 exception.getMessage());
@@ -355,13 +355,13 @@ public class ClusterRepairServiceTest {
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(instance1md));
         when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
 
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairNodes(1L, Set.of("instanceId1"), false, false, false));
+        ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairNodes(1L, Set.of("instanceId1"), false, false));
         verify(resourceService).findByStackIdAndType(stack.getId(), volumeSet.getResourceType());
         @SuppressWarnings("unchecked")
         ArgumentCaptor<List<Resource>> saveCaptor = ArgumentCaptor.forClass(List.class);
         verify(resourceService).saveAll(saveCaptor.capture());
         assertFalse(resourceAttributeUtil.getTypedAttributes(saveCaptor.getValue().get(0), VolumeSetAttributes.class).get().getDeleteOnTermination());
-        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false), eq(false));
+        verify(flowManager).triggerClusterRepairFlow(eq(1L), eq(Map.of("hostGroup1", List.of("host1Name.healthy"))), eq(false));
     }
 
     @Test
@@ -380,7 +380,7 @@ public class ClusterRepairServiceTest {
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
         });
 
         assertEquals("Repairable node list is empty. Please check node statuses and try again.", exception.getMessage());
@@ -401,7 +401,7 @@ public class ClusterRepairServiceTest {
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
         });
 
         assertEquals("Database dbCrn is not in AVAILABLE status, could not start repair.", exception.getMessage());
@@ -430,7 +430,7 @@ public class ClusterRepairServiceTest {
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> {
-            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false, false));
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
         });
 
         String expectedErrorMessage =
@@ -451,7 +451,7 @@ public class ClusterRepairServiceTest {
                 .thenReturn(false);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false, false);
+                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false);
 
         assertEquals(1, actual.getError().getValidationErrors().size());
         assertEquals("Action cannot be performed because the FreeIPA isn't available. Please check the FreeIPA state.",
@@ -466,7 +466,7 @@ public class ClusterRepairServiceTest {
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(false);
 
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false, false);
+                underTest.validateRepair(ManualClusterRepairMode.ALL, STACK_ID, Collections.emptySet(), false);
 
         assertEquals(1, actual.getError().getValidationErrors().size());
         assertEquals("Action cannot be performed because the Environment isn't available. Please check the Environment state.",
@@ -498,7 +498,7 @@ public class ClusterRepairServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false, false);
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false);
             assertEquals(1, actual.getError().getValidationErrors().size());
             assertEquals("Gateway node is unhealthy, it must be repaired first.",
                     actual.getError().getValidationErrors().get(0));
@@ -530,7 +530,7 @@ public class ClusterRepairServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false, false);
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false);
             assertEquals(1, actual.getError().getValidationErrors().size());
             assertEquals("Gateway node is unhealthy, it must be repaired first.",
                     actual.getError().getValidationErrors().get(0));
@@ -568,7 +568,7 @@ public class ClusterRepairServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false, false);
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of("idbroker"), false);
             assertTrue(actual.isSuccess());
         });
     }
@@ -591,7 +591,7 @@ public class ClusterRepairServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of(idbrokerGroupName), false, false);
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of(idbrokerGroupName), false);
             assertEquals(1, actual.getSuccess().size());
             assertNotNull(actual.getSuccess().get(hostGroupName(idbrokerGroupName)));
         });
@@ -615,7 +615,7 @@ public class ClusterRepairServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
             Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> actual =
-                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of(idbrokerGroupName), false, false);
+                    underTest.validateRepair(ManualClusterRepairMode.HOST_GROUP, STACK_ID, Set.of(idbrokerGroupName), false);
             assertEquals("Reattach not supported for this disk type.", actual.getError().getValidationErrors().get(0));
         });
     }

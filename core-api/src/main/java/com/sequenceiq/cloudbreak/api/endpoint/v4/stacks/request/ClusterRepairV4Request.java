@@ -22,6 +22,7 @@ public class ClusterRepairV4Request {
     @Valid
     private ClusterRepairNodesV4Request nodes;
 
+    @Deprecated
     @ApiModelProperty(RepairClusterRequest.REMOVE_ONLY)
     private boolean removeOnly;
 
@@ -65,7 +66,6 @@ public class ClusterRepairV4Request {
         return new StringJoiner(", ", ClusterRepairV4Request.class.getSimpleName() + "[", "]")
                 .add("hostGroups=" + hostGroups)
                 .add("nodes=" + nodes)
-                .add("removeOnly=" + removeOnly)
                 .toString();
     }
 }
