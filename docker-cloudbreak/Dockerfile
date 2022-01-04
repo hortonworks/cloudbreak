@@ -1,5 +1,6 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.6-cldr1-jdk-slim-buster
-MAINTAINER info@hortonworks.com
+FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.13-cldr-jre-slim-buster-15122021
+# We can not use alpine based image because of https://github.com/grpc/grpc-java/issues/8751
+MAINTAINER info@cloudera.com
 
 # REPO URL to download jar
 ARG REPO_URL=https://repo.hortonworks.com/content/repositories/releases
@@ -9,6 +10,8 @@ ENV VERSION ${VERSION}
 
 WORKDIR /
 
+RUN apt-get install unzip
+
 # install the cloudbreak app
 ADD ${REPO_URL}/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar /cloudbreak.jar
 
@@ -16,7 +19,8 @@ ADD ${REPO_URL}/com/sequenceiq/cloudbreak/$VERSION/cloudbreak-$VERSION.jar /clou
 ADD jmx_prometheus_javaagent-0.16.1.jar /jmx_prometheus_javaagent.jar
 
 # extract schema files
-RUN jar xf cloudbreak.jar && mv /BOOT-INF/classes/schema/ /schema/
+RUN ( unzip cloudbreak.jar schema/* -d / ) || \
+    ( unzip cloudbreak.jar BOOT-INF/classes/schema/* -d /tmp/ && mv /tmp/BOOT-INF/classes/schema/ /schema/ )
 
 # Install starter script for the Cloudbreak application
 COPY bootstrap/start_cloudbreak_app.sh /
