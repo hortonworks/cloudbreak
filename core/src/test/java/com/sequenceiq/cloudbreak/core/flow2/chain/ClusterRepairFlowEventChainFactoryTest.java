@@ -344,7 +344,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
             if (!failedCoreNodes.isEmpty()) {
                 failedNodes.put("hostGroup-core", failedCoreNodes);
             }
-            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, false, false);
+            return new ClusterRepairTriggerEvent(stack.getId(), failedNodes, false);
         }
     }
 }

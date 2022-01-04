@@ -62,7 +62,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
         flowEventChain.add(new StackImageUpdateTriggerEvent(FlowChainTriggers.STACK_IMAGE_UPDATE_TRIGGER_EVENT, event.getImageChangeDto()));
         if (event.isReplaceVms()) {
             Map<String, List<String>> nodeMap = getReplaceableInstancesByHostgroup(event);
-            flowEventChain.add(new ClusterRepairTriggerEvent(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(), nodeMap, false, true,
+            flowEventChain.add(new ClusterRepairTriggerEvent(FlowChainTriggers.CLUSTER_REPAIR_TRIGGER_EVENT, event.getResourceId(), nodeMap, true,
                     event.getTriggeredStackVariant()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);
@@ -81,7 +81,7 @@ public class UpgradeDistroxFlowEventChainFactory implements FlowEventChainFactor
 
     private Map<String, List<String>> getReplaceableInstancesByHostgroup(DistroXUpgradeTriggerEvent event) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validationResult = clusterRepairService.validateRepair(ManualClusterRepairMode.ALL,
-                event.getResourceId(), Set.of(), false, false);
+                event.getResourceId(), Set.of(), false);
         return toStringMap(validationResult.getSuccess());
     }
 

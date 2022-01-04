@@ -229,7 +229,7 @@ class StackStatusIntegrationTest {
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
-        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
         verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
@@ -258,7 +258,7 @@ class StackStatusIntegrationTest {
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
-        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
         verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
@@ -289,7 +289,7 @@ class StackStatusIntegrationTest {
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
-        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
         verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);
@@ -321,7 +321,7 @@ class StackStatusIntegrationTest {
 
         verify(instanceMetaDataService, never()).findHostInStack(eq(STACK_ID), any());
         verify(hostGroupService, never()).getRepairViewByClusterIdAndName(anyLong(), anyString());
-        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean(), anyBoolean());
+        verify(flowManager, never()).triggerClusterRepairFlow(anyLong(), any(), anyBoolean());
         verify(instanceMetaDataService, never()).saveAll(any());
         verify(clusterService, never()).updateClusterStatusByStackId(any(), any(), any());
         verify(clusterService).updateClusterCertExpirationState(stack.getCluster(), false);

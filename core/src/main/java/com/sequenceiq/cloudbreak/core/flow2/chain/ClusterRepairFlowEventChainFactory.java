@@ -123,12 +123,10 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         }
         for (Repair repair : repairConfig.getRepairs()) {
             flowTriggers.add(fullDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
-            if (!event.isRemoveOnly()) {
-                addAwsNativeMigrationIfNeed(flowTriggers, event.getResourceId(), repair.getHostGroupName(), event.isUpgrade(),
-                        event.getTriggeredStackVariant());
-                flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), false,
-                        event.isRestartServices(), false));
-            }
+            addAwsNativeMigrationIfNeed(flowTriggers, event.getResourceId(), repair.getHostGroupName(), event.isUpgrade(),
+                    event.getTriggeredStackVariant());
+            flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), false,
+                    event.isRestartServices(), false));
         }
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));

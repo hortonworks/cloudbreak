@@ -122,7 +122,7 @@ public class ClusterRepairService {
 
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.ALL, stackId, Set.of(), false, false);
+                validateRepair(ManualClusterRepairMode.ALL, stackId, Set.of(), false);
         Set<String> repairableHostGroups;
         if (repairStart.isSuccess()) {
             repairableHostGroups = repairStart.getSuccess()
@@ -133,24 +133,24 @@ public class ClusterRepairService {
         } else {
             repairableHostGroups = Set.of();
         }
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, false, repairableHostGroups);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, false, repairableHostGroups);
     }
 
-    public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean removeOnly, boolean restartServices) {
+    public FlowIdentifier repairHostGroups(Long stackId, Set<String> hostGroups, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, removeOnly, false);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, restartServices, hostGroups);
+                validateRepair(ManualClusterRepairMode.HOST_GROUP, stackId, hostGroups, false);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, restartServices, hostGroups);
     }
 
-    public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean removeOnly, boolean restartServices) {
+    public FlowIdentifier repairNodes(Long stackId, Set<String> nodeIds, boolean deleteVolumes, boolean restartServices) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, removeOnly, deleteVolumes);
-        return triggerRepairOrThrowBadRequest(stackId, repairStart, removeOnly, restartServices, nodeIds);
+                validateRepair(ManualClusterRepairMode.NODE_ID, stackId, nodeIds, deleteVolumes);
+        return triggerRepairOrThrowBadRequest(stackId, repairStart, restartServices, nodeIds);
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairWithDryRun(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
-                validateRepair(ManualClusterRepairMode.DRY_RUN, stackId, Set.of(), false, false);
+                validateRepair(ManualClusterRepairMode.DRY_RUN, stackId, Set.of(), false);
         if (!repairStart.isSuccess()) {
             LOGGER.info("Stack {} is not repairable. {}", stackId, repairStart.getError().getValidationErrors());
         }
@@ -158,7 +158,7 @@ public class ClusterRepairService {
     }
 
     public Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> validateRepair(ManualClusterRepairMode repairMode, Long stackId,
-            Set<String> selectedParts, boolean removeOnly, boolean deleteVolumes) {
+            Set<String> selectedParts, boolean deleteVolumes) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         boolean reattach = !deleteVolumes;
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStartResult;
@@ -180,7 +180,7 @@ public class ClusterRepairService {
         } else if (hasNotAvailableDatabase(stack)) {
             repairStartResult = Result.error(RepairValidation
                     .of(String.format("Database %s is not in AVAILABLE status, could not start repair.", stack.getCluster().getDatabaseServerCrn())));
-        } else if (isHAClusterAndRepairNotAllowed(removeOnly, stack)) {
+        } else if (isHAClusterAndRepairNotAllowed(stack)) {
             repairStartResult = Result.error(RepairValidation
                     .of("Repair is not supported when the cluster uses cluster proxy and has multiple gateway nodes. This will be fixed in future releases."));
         } else if (isAnyGWUnhealthyAndItIsNotSelected(repairMode, selectedParts, stack)) {
@@ -223,11 +223,10 @@ public class ClusterRepairService {
         }
     }
 
-    private boolean isHAClusterAndRepairNotAllowed(boolean removeOnly, Stack stack) {
+    private boolean isHAClusterAndRepairNotAllowed(Stack stack) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         return !entitlementService.haRepairEnabled(accountId)
                 && !entitlementService.haUpgradeEnabled(accountId)
-                && !removeOnly
                 && stack.getTunnel().useClusterProxy()
                 && hasMultipleGatewayInstances(stack);
     }
@@ -430,7 +429,7 @@ public class ClusterRepairService {
     }
 
     private FlowIdentifier triggerRepairOrThrowBadRequest(Long stackId, Result<Map<HostGroupName, Set<InstanceMetaData>>,
-            RepairValidation> repairValidationResult, boolean removeOnly, boolean restartServices, Set<String> recoveryMessageArgument) {
+            RepairValidation> repairValidationResult, boolean restartServices, Set<String> recoveryMessageArgument) {
         if (repairValidationResult.isError()) {
             eventService.fireCloudbreakEvent(stackId, RECOVERY_FAILED, CLUSTER_MANUALRECOVERY_COULD_NOT_START,
                     repairValidationResult.getError().getValidationErrors());
@@ -438,7 +437,7 @@ public class ClusterRepairService {
         } else {
             if (!repairValidationResult.getSuccess().isEmpty()) {
                 FlowIdentifier flowIdentifier = flowManager.triggerClusterRepairFlow(stackId, toStringMap(repairValidationResult.getSuccess()),
-                        removeOnly, restartServices);
+                        restartServices);
                 eventService.fireCloudbreakEvent(stackId, RECOVERY, CLUSTER_MANUALRECOVERY_REQUESTED,
                         List.of(String.join(",", recoveryMessageArgument)));
                 return flowIdentifier;

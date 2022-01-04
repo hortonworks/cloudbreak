@@ -191,7 +191,7 @@ public class ClusterOperationServiceTest {
         underTest.reportHealthChange(STACK_CRN, Map.of("host1", Optional.empty(), "host2", Optional.empty()), Set.of());
 
         Map<String, List<String>> autoRecoveredNodes = Map.of("master", List.of("host1"));
-        verify(flowManager).triggerClusterRepairFlow(STACK_ID, autoRecoveredNodes, false, false);
+        verify(flowManager).triggerClusterRepairFlow(STACK_ID, autoRecoveredNodes, false);
 
         verify(cloudbreakMessagesService, times(1)).getMessage(eq(CLUSTER_AUTORECOVERY_REQUESTED_HOST_EVENT.getMessage()),
                 any());
@@ -236,7 +236,7 @@ public class ClusterOperationServiceTest {
         when(hostGroupService.findHostGroupsInCluster(stack.getCluster().getId()))
                 .thenReturn(Set.of(getHostGroup(host1, RecoveryMode.AUTO)));
 
-        doThrow(new FlowsAlreadyRunningException("Flow in action")).when(flowManager).triggerClusterRepairFlow(anyLong(), anyMap(), anyBoolean(), anyBoolean());
+        doThrow(new FlowsAlreadyRunningException("Flow in action")).when(flowManager).triggerClusterRepairFlow(anyLong(), anyMap(), anyBoolean());
 
         assertThrows(FlowsAlreadyRunningException.class, () -> {
             underTest.reportHealthChange(STACK_CRN, Map.of("host1", Optional.empty()), Set.of());

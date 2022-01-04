@@ -12,8 +12,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     private final Map<String, List<String>> failedNodesMap;
 
-    private final boolean removeOnly;
-
     private final boolean restartServices;
 
     private final boolean upgrade;
@@ -22,21 +20,19 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     private final String triggeredStackVariant;
 
-    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly, boolean restartServices) {
+    public ClusterRepairTriggerEvent(Long stackId, Map<String, List<String>> failedNodesMap, boolean restartServices) {
         super(stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
-        this.removeOnly = removeOnly;
         this.stackId = stackId;
         this.restartServices = restartServices;
         this.upgrade = false;
         this.triggeredStackVariant = null;
     }
 
-    public ClusterRepairTriggerEvent(String event, Long stackId, Map<String, List<String>> failedNodesMap, boolean removeOnly, boolean restartServices,
+    public ClusterRepairTriggerEvent(String event, Long stackId, Map<String, List<String>> failedNodesMap, boolean restartServices,
             String triggeredStackVariant) {
         super(event, stackId);
         this.failedNodesMap = copyToSerializableMap(failedNodesMap);
-        this.removeOnly = removeOnly;
         this.stackId = stackId;
         this.restartServices = restartServices;
         this.upgrade = true;
@@ -45,10 +41,6 @@ public class ClusterRepairTriggerEvent extends StackEvent {
 
     public Map<String, List<String>> getFailedNodesMap() {
         return failedNodesMap;
-    }
-
-    public boolean isRemoveOnly() {
-        return removeOnly;
     }
 
     public boolean isRestartServices() {
@@ -76,8 +68,7 @@ public class ClusterRepairTriggerEvent extends StackEvent {
     @Override
     public boolean equalsEvent(StackEvent other) {
         return isClassAndEqualsEvent(ClusterRepairTriggerEvent.class, other,
-                event -> removeOnly == event.removeOnly
-                        && restartServices == event.restartServices
+                event -> restartServices == event.restartServices
                         && Objects.equals(failedNodesMap, event.failedNodesMap)
                         && Objects.equals(stackId, event.stackId));
     }

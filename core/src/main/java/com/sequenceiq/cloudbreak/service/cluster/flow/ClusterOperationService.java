@@ -346,7 +346,7 @@ public class ClusterOperationService {
     private void updateAutoRecoverableNodes(Cluster cluster, Map<String, List<String>> autoRecoveryNodesMap,
             Map<String, InstanceMetaData> autoRecoveryHostMetadata) throws TransactionExecutionException {
         if (!autoRecoveryNodesMap.isEmpty()) {
-            flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false, false);
+            flowManager.triggerClusterRepairFlow(cluster.getStack().getId(), autoRecoveryNodesMap, false);
             Map<String, Optional<String>> hostNamesWithReason = autoRecoveryHostMetadata.keySet().stream()
                     .collect(Collectors.toMap(host -> host, host -> Optional.empty()));
             Set<InstanceStatus> expectedStates = Set.of(SERVICES_HEALTHY);
