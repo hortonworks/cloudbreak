@@ -144,6 +144,7 @@ public class EnvironmentDtoConverter {
         environment.setBackup(creationDto.getBackup());
         environment.setLocationDisplayName(location.getDisplayName());
         environment.setStatus(EnvironmentStatus.CREATION_INITIATED);
+        environment.setStatusReason(null);
         environment.setCreateFreeIpa(creationDto.getFreeIpaCreation().getCreate());
         environment.setFreeIpaInstanceCountByGroup(creationDto.getFreeIpaCreation().getInstanceCountByGroup());
         environment.setFreeIpaImageCatalog(creationDto.getFreeIpaCreation().getImageCatalog());

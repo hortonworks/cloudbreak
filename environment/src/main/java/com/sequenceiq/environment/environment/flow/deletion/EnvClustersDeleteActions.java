@@ -150,6 +150,7 @@ public class EnvClustersDeleteActions {
                 .findEnvironmentById(payload.getResourceId())
                 .ifPresentOrElse(environment -> {
                     environment.setStatus(environmentStatus);
+                    environment.setStatusReason(null);
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);

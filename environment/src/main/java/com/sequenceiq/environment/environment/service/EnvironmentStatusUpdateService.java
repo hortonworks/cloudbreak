@@ -37,6 +37,7 @@ public class EnvironmentStatusUpdateService {
                 .findEnvironmentById(payload.getResourceId())
                 .map(environment -> {
                     environment.setStatus(environmentStatus);
+                    environment.setStatusReason(null);
                     Environment env = environmentService.save(environment);
                     EnvironmentDto environmentDto = environmentService.getEnvironmentDto(env);
                     eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), resourceEvent);

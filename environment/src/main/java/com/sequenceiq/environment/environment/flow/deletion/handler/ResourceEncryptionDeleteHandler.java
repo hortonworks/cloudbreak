@@ -86,6 +86,7 @@ public class ResourceEncryptionDeleteHandler extends EventSenderAwareHandler<Env
         try {
             environmentEncryptionService.deleteEncryptionResources(environmentDto);
             environment.setStatus(EnvironmentStatus.ENVIRONMENT_ENCRYPTION_RESOURCES_DELETED);
+            environment.setStatusReason(null);
             environmentService.save(environment);
             LOGGER.info("Finished deleting encryption resources for environment \"{}\".", environmentName);
         } catch (Exception e) {
