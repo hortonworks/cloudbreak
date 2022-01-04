@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.BooleanUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -56,7 +57,7 @@ public class EC2ClientActions extends EC2Client {
     @Inject
     private SdxUtil sdxUtil;
 
-    public List<String> getInstanceVolumeIds(List<String> instanceIds) {
+    public List<String> getInstanceVolumeIds(List<String> instanceIds, boolean rootVolumes) {
         AmazonEC2 ec2Client = buildEC2Client();
         DescribeInstancesResult describeInstancesResult = ec2Client.describeInstances(new DescribeInstancesRequest().withInstanceIds(instanceIds));
         Map<String, Set<String>> instanceIdVolumeIdMap = describeInstancesResult.getReservations()
@@ -66,7 +67,13 @@ public class EC2ClientActions extends EC2Client {
                 .collect(Collectors.toMap(Instance::getInstanceId,
                         instance -> instance.getBlockDeviceMappings()
                                 .stream()
-                                .filter(dev -> !"/dev/xvda".equals(dev.getDeviceName()))
+                                .filter(dev -> {
+                                    if (BooleanUtils.isTrue(rootVolumes)) {
+                                        return "/dev/xvda".equals(dev.getDeviceName());
+                                    } else {
+                                        return !"/dev/xvda".equals(dev.getDeviceName());
+                                    }
+                                })
                                 .map(InstanceBlockDeviceMapping::getEbs)
                                 .map(EbsInstanceBlockDevice::getVolumeId)
                                 .collect(Collectors.toSet())
@@ -191,9 +198,9 @@ public class EC2ClientActions extends EC2Client {
                 .collect(Collectors.toMap(Tag::getKey, Tag::getValue));
     }
 
-    public List<String> getVolumesKmsKeys(List<String> instanceIds) {
+    public List<String> getRootVolumesKmsKeys(List<String> instanceIds) {
         AmazonEC2 ec2Client = buildEC2Client();
-        List<String> volumeIds = getInstanceVolumeIds(instanceIds);
+        List<String> volumeIds = getInstanceVolumeIds(instanceIds, true);
         DescribeVolumesResult describeVolumesResult = ec2Client.describeVolumes(new DescribeVolumesRequest().withVolumeIds(volumeIds));
         Map<String, String> volumeIdKmsIdMap = describeVolumesResult.getVolumes()
                 .stream()
