@@ -153,6 +153,8 @@ message Event {
     CDPCDEVirtualClusterRequested cdpCDEVirtualClusterRequested = 72;
     // A CDP DataEngineering virtual cluster's status changed.
     CDPCDEVirtualClusterStatusChanged cdpCDEVirtualClusterStatusChanged = 73;
+    // A CDP DataEngineering service upgrade was requested.
+    CDPCDEServiceUpgradeRequested cdpCDEServiceUpgradeRequested = 78;
     // Cloudera Data Visualization Usage Event detected.
     CDPCDVEvent cdpCDVEvent = 74;
     // A CDP CML workspace's node state.
@@ -160,6 +162,8 @@ message Event {
     CDPCMLWorkspaceNodeStatesHeartbeat cdpCMLWorkspaceNodeStatesHeartbeat = 75;
     // CDP VM diagnostics event that can be triggerd by CB API or UDX.
     CDPVMDiagnosticsEvent cdpVmDiagnosticsEvent = 76;
+    // A CDP DataWarehouse Virtual Warehouse's nodes changed.
+    CDPCDWVirtualWarehouseNodesChanged cdpCDWVirtualWarehouseNodesChanged = 77;
   }
 }
 
@@ -561,6 +565,58 @@ message CDPCMLWorkspaceStatus {
     PRE_INSTALL_VALIDATION_SUCCEEDED = 27;
     // The status when the pre-install validation of a workspace results in validation failure.
     PRE_INSTALL_VALIDATION_FAILED = 28;
+
+    // The status when the mount of a volume to a workspace is started.
+    MOUNT_STARTED = 29;
+    // The status when the mount of a volume to a workspace is finished.
+    MOUNT_FINISHED = 30;
+    // The status when the mount of a volume to a workspace has failed.
+    MOUNT_FAILED = 31;
+
+    // The status when the renewing the certificate of a workspace running CDSW has failed.
+    RENEW_FAILED = 32;
+
+    // The status when a modification of a workspace is started.
+    MODIFY_STARTED = 33;
+    // The status when a modification of a workspace is finished.
+    MODIFY_FINISHED = 34;
+    // The status when a modification of a workspace has failed.
+    MODIFY_FAILED = 35;
+
+    // The status when the unmount of a volume to a workspace is started.
+    UNMOUNT_STARTED = 36;
+    // The status when the unmount of a volume to a workspace is finished.
+    UNMOUNT_FINISHED = 37;
+    // The status when the unmount of a volume to a workspace has failed.
+    UNMOUNT_FAILED = 38;
+
+    // The status when the operation to shutdown the workspace to initiate a backup is started.
+    SHUTDOWN_FOR_BACKUP_STARTED = 39;
+    // The status when the operation to shutdown the workspace to initiate a backup is finished.
+    SHUTDOWN_FOR_BACKUP_FINISHED = 40;
+    // The status when the operation to shutdown the workspace to initiate a backup has failed.
+    SHUTDOWN_FOR_BACKUP_FAILED = 41;
+
+    // The status when the operation to restart the workspace (after the backup operation was completed) is started.
+    RESTART_AFTER_BACKUP_STARTED = 42;
+    // The status when the operation to restart the workspace (after the backup operation was completed) is finished.
+    RESTART_AFTER_BACKUP_FINISHED = 43;
+    // The status when the operation to restart the workspace (after the backup operation was completed) has failed.
+    RESTART_AFTER_BACKUP_FAILED = 44;
+
+    // The status when the operation to backup the workspace is started.
+    BACKUP_STARTED = 45;
+    // The status when the operation to backup the workspace is finished.
+    BACKUP_FINISHED = 46;
+    // The status when the operation to backup the workspace has failed.
+    BACKUP_FAILED = 47;
+
+    // The status when the operation to restore the storage has started.
+    RESTORE_STARTED = 48;
+    // The status when the operation to restore the storage has finished.
+    RESTORE_FINISHED = 49;
+    // The status when the operation to restore the storage has failed.
+    RESTORE_FAILED = 50;
   }
 }
 
@@ -1136,6 +1192,8 @@ message CDPNetworkDetails {
   string securityAccessType = 8;
   // How CDP using tls
   string controlPlaneAndCCMAgentConnectionSecurity = 9;
+  // Generated domain name
+  string domain = 10;
 }
 
 // Generated when Environment creation has been requested or finished
@@ -1509,6 +1567,8 @@ message CDPDFServiceRequested {
   CDPDFServiceStatus.Value status = 11;
   // Is the load balancer (if configured) restricting access by ip ranges?
   bool loadBalancerAccessRestricted = 12;
+  // CRN of the actor that created the request
+  string actorCrn = 13;
 }
 
 message CDPDFServiceStatusChanged {
@@ -1521,6 +1581,8 @@ message CDPDFServiceStatusChanged {
   // A failure message for the df service. This will only be set if newStatus is
   // *_FAILED.
   string failureReason = 4;
+  // CRN of Cloudbreak environment
+  string environmentCrn = 5;
 }
 
 // The status of a CDP Deployment.
@@ -1614,6 +1676,8 @@ message CDPDFDeploymentRequested {
   bool readyFlow = 12;
   // CRN of the flow version
   string flowVersionCrn = 13;
+  // Deployment name
+  string deploymentName = 14;
 }
 
 message CDPDFDeploymentStatusChanged {
@@ -1626,6 +1690,10 @@ message CDPDFDeploymentStatusChanged {
   // A failure message for the df service. This will only be set if newStatus is
   // *_FAILED.
   string failureReason = 4;
+  // CRN of the flow version
+  string flowVersionCrn = 5;
+  // Deployment name
+  string deploymentName = 6;
 }
 
 // Generated when users initiate diagnostics collection
@@ -1762,6 +1830,10 @@ message CDPDFDeploymentNifiVersionUpdateRequested {
   string newNifiVersion = 6;
   // The initial status of the Deployment. Should only be NIFI_VERSION_UPDATE_REQUESTED or CANCEL_NIFI_VERSION_UPDATE_REQUESTED.
   CDPDFDeploymentStatus.Value status = 7;
+  // CRN of the flow version
+  string flowVersionCrn = 8;
+  // Deployment name
+  string deploymentName = 9;
 }
 
 //Autoscale Policy Type
@@ -2105,6 +2177,20 @@ message CDPCDWVirtualWarehouseStatusChanged {
   string actorCrn = 7;
 }
 
+// Generated when a CDP CDW virtual warehouse's nodes has changed.
+message CDPCDWVirtualWarehouseNodesChanged {
+  // The ID of the CDW virtual warehouse.
+  string id = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The CRN of the CDW virtual warehouse.
+  string crn = 3;
+  // The number of nodes before the scaling event occurred.
+  int32 oldNodeCount = 4;
+  // The number of nodes after the scaling event occurred.
+  int32 newNodeCount = 5;
+}
+
 // The type of a CDW real time event store.
 message CDPCDWRealTimeEventStoreType {
   enum Value {
@@ -2249,6 +2335,19 @@ message CDPCDEVirtualClusterStatusChanged {
   string status = 8;
   // Reason for failure. This will be only set if the newStatus is set to *_FAILED.
   string reason = 7;
+}
+
+message CDPCDEServiceUpgradeRequested {
+  // The ID of the CDP CDE service.
+  string id = 1;
+  // The CRN of the CDP CDE service.
+  string clusterCrn = 2;
+  // The CDP account ID.
+  string accountId = 3;
+  // CDE version from which upgrade was requested.
+  string fromVersion = 4;
+  // Version CDE service was upgraded to.
+  string toVersion = 5;
 }
 
 // Metadata about AWS CDE service when it was created or updated.

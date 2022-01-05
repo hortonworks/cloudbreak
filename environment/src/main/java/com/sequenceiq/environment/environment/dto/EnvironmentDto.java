@@ -412,6 +412,7 @@ public class EnvironmentDto implements Payload, AccountAwareResource, Environmen
         this.deletionType = deletionType;
     }
 
+    @Override
     public String getDomain() {
         return domain;
     }

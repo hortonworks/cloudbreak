@@ -71,6 +71,7 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
         when(environmentDetails.getNetwork()).thenReturn(networkDto);
         when(environmentDetails.getSecurityAccessType()).thenReturn("CIDR_WIDE_OPEN");
         when(environmentDetails.getTunnel()).thenReturn(Tunnel.CCM);
+        when(environmentDetails.getDomain()).thenReturn("cldr.com");
         when(environmentDetails.getTlsType()).thenReturn(CcmV2TlsType.ONE_WAY_TLS);
 
         UsageProto.CDPNetworkDetails networkDetails = underTest.convert(environmentDetails);
@@ -93,6 +94,8 @@ class EnvironmentDetailsToCDPNetworkDetailsConverterTest {
                 networkDetails.getConnectivity());
         Assert.assertEquals("ONE_WAY_TLS",
                 networkDetails.getControlPlaneAndCCMAgentConnectionSecurity());
+        Assert.assertEquals("cldr.com",
+                networkDetails.getDomain());
     }
 
     @Test
