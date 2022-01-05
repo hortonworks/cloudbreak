@@ -36,7 +36,7 @@ public class InstanceOperationChecker<T extends InstanceWaitObject> extends Exce
                         instanceIds, actualStatuses, actualStatusReasons));
             }
             if (waitObject.isInDesiredStatus()) {
-                LOGGER.info("Instance    '{}' is in desired state (status:'{}').", instanceIds, actualStatuses);
+                LOGGER.info("Instance '{}' is in desired state (status:'{}').", instanceIds, actualStatuses);
                 return true;
             }
         } else {

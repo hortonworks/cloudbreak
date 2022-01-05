@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.distrox.api.v1.distrox.model.AwsDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.AzureDistroXV1Parameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.InstanceGroupV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.aws.InstanceGroupAwsNetworkV1Parameters;
@@ -177,6 +178,11 @@ public class DistroXTestDtoBase<T extends DistroXTestDtoBase> extends AbstractCl
     public DistroXTestDtoBase<T> withExternalDatabase(String key) {
         DistroXExternalDatabaseTestDto externalDatabaseDto = getTestContext().get(key);
         getRequest().setExternalDatabase(externalDatabaseDto.getRequest());
+        return this;
+    }
+
+    public DistroXTestDtoBase<T> withExternalDatabase(DistroXDatabaseRequest database) {
+        getRequest().setExternalDatabase(database);
         return this;
     }
 

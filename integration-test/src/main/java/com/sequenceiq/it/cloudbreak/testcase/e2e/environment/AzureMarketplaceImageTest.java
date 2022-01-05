@@ -34,7 +34,7 @@ public class AzureMarketplaceImageTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        checkCloudPlatform(CloudPlatform.AZURE);
+        assertSupportedCloudPlatform(CloudPlatform.AZURE);
         createDefaultUser(testContext);
     }
 

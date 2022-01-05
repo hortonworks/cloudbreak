@@ -6,7 +6,7 @@ import javax.inject.Inject;
 
 import org.testng.annotations.Test;
 
-import com.sequenceiq.it.cloudbreak.assertion.distrox.AvailabilityZoneAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
@@ -65,7 +65,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .when(distroXTestClient.create(), key(distroXName))
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
-                .then(new AvailabilityZoneAssertion())
+                .then(new AwsAvailabilityZoneAssertion())
                 .validate();
         testContext
                 .given(distroXName, DistroXTestDto.class)
@@ -94,7 +94,7 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .when(distroXTestClient.upgrade(), key(distroXName))
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()
-                .then(new AvailabilityZoneAssertion())
+                .then(new AwsAvailabilityZoneAssertion())
                 .validate();
     }
 }

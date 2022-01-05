@@ -117,7 +117,7 @@ public class AwsYcloudHybridCloudTest extends AbstractE2ETest {
 
     @Override
     protected void setupTest(TestContext testContext) {
-        checkCloudPlatform(CloudPlatform.AWS);
+        assertSupportedCloudPlatform(CloudPlatform.AWS);
 
         createDefaultUser(testContext);
         initializeDefaultBlueprints(testContext);
