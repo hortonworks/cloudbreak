@@ -72,6 +72,7 @@ public class EnvironmentDetailsToCDPNetworkDetailsConverter {
         }
         cdpNetworkDetails.setSecurityAccessType(defaultIfEmpty(environmentDetails.getSecurityAccessType(), ""));
         cdpNetworkDetails.setProxyDetails(convertProxy(environmentDetails.getProxyDetails()));
+        cdpNetworkDetails.setDomain(defaultIfEmpty(environmentDetails.getDomain(), ""));
 
         UsageProto.CDPNetworkDetails ret = cdpNetworkDetails.build();
         LOGGER.debug("Converted CDPNetworkDetails: {}", ret);

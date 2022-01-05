@@ -39,4 +39,6 @@ public interface EnvironmentDetails {
     String getSecurityAccessType();
 
     Map<String, String> getUserDefinedTags();
+
+    String getDomain();
 }
