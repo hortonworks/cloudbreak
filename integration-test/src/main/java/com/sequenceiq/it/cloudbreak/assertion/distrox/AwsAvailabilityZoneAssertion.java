@@ -16,7 +16,7 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 
-public class AvailabilityZoneAssertion implements Assertion<DistroXTestDto, CloudbreakClient> {
+public class AwsAvailabilityZoneAssertion implements Assertion<DistroXTestDto, CloudbreakClient> {
 
     @Override
     public DistroXTestDto doAssertion(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {

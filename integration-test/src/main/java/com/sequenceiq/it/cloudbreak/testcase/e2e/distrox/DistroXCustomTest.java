@@ -5,7 +5,7 @@ import javax.inject.Inject;
 import org.testng.annotations.Test;
 
 import com.sequenceiq.it.TestParameter;
-import com.sequenceiq.it.cloudbreak.assertion.distrox.AvailabilityZoneAssertion;
+import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
 import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
@@ -59,7 +59,7 @@ public class DistroXCustomTest extends AbstractE2ETest {
                 .when(sdxTestClient.describeInternal())
                 .given(DistroXTestDto.class).withName("aws-test-770038")
                 .when(distroXTestClient.get())
-                .then(new AvailabilityZoneAssertion())
+                .then(new AwsAvailabilityZoneAssertion())
                 .validate();
     }
 }

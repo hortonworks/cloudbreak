@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.ssh.action;
 
+import static java.lang.String.format;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,6 +18,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.util.aws.AwsCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.ssh.client.SshJClient;
 
@@ -27,12 +30,16 @@ public class SshEnaDriverCheckActions extends SshJClient {
     @Inject
     private AwsCloudFunctionality awsCloudFunctionality;
 
-    private void checkEnaDriver(String instanceIP) {
+    private void checkEnaDriver(String instanceIp) {
         String modinfoEnaCmd = "/usr/sbin/modinfo ena";
         String wrongResult = "modinfo: ERROR: Module ena not found.";
-        Pair<Integer, String> result = executeCommand(instanceIP, modinfoEnaCmd);
+        Pair<Integer, String> result = executeCommand(instanceIp, modinfoEnaCmd);
         if (result.getValue().startsWith(wrongResult)) {
-            throw new TestFailException("Cannot find ena driver on the instance");
+            LOGGER.error(format("ENA driver is not available at '%s' instance!", instanceIp));
+            throw new TestFailException(format("ENA driver is not available at '%s' instance!", instanceIp));
+        } else {
+            LOGGER.info(format("ENA driver is available at '%s' instance: [%s]", instanceIp, result.getValue()));
+            Log.then(LOGGER, format(" ENA driver is available at '%s' instance: [%s] ", instanceIp, result.getValue()));
         }
     }
 
@@ -40,7 +47,11 @@ public class SshEnaDriverCheckActions extends SshJClient {
         Map<String, Boolean> enaSupportResult = awsCloudFunctionality.enaSupport(List.of(instanceId));
         boolean actual = enaSupportResult.values().stream().allMatch(it -> it);
         if (enaSupportResult.isEmpty() || !actual) {
-            throw new TestFailException("Ena is not supported on the instance. Result list from aws: " + enaSupportResult);
+            LOGGER.error(format("ENA is not supported at '%s' instance: [%s]", instanceId, enaSupportResult));
+            throw new TestFailException(format("ENA is not supported at '%s' instance: [%s] ", instanceId, enaSupportResult));
+        } else {
+            LOGGER.info(format("ENA is supported at '%s' instance: [%s]", instanceId, enaSupportResult));
+            Log.then(LOGGER, format(" ENA is supported at '%s' instance: [%s] ", instanceId, enaSupportResult));
         }
     }
 
@@ -54,6 +65,9 @@ public class SshEnaDriverCheckActions extends SshJClient {
             InstanceMetaDataV4Response metadata = getInstanceMetadata(stackV4Response.getName(), client, "master");
             checkEnaDriver(metadata.getPrivateIp());
             checkEnaSupport(metadata.getInstanceId());
+        } else {
+            LOGGER.warn(format("ENA driver is only available at AWS. So validation on '%s' provider is not possible!",
+                    stackV4Response.getCloudPlatform()));
         }
     }
 
