@@ -2,10 +2,8 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -22,7 +20,6 @@ import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
-import com.cloudera.api.swagger.model.ApiParcelList;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
@@ -39,9 +36,12 @@ class ClouderaManagerParcelDecommissionService {
     @Inject
     private ClouderaManagerPollingServiceProvider clouderaManagerPollingServiceProvider;
 
+    @Inject
+    private ClouderaManagerParcelManagementService parcelManagementService;
+
     public Map<String, String> getParcelsInStatus(ParcelsResourceApi parcelsResourceApi, String stackName, ParcelStatus parcelStatus) {
         try {
-            Map<String, String> parcelResponse = getClouderaManagerParcelsByStatus(parcelsResourceApi, stackName, parcelStatus).stream()
+            Map<String, String> parcelResponse = parcelManagementService.getClouderaManagerParcelsByStatus(parcelsResourceApi, stackName, parcelStatus).stream()
                     .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
             LOGGER.debug("The following parcels are found in {} status: {}", parcelStatus, parcelResponse);
             return parcelResponse;
@@ -77,20 +77,30 @@ class ClouderaManagerParcelDecommissionService {
 
     public void removeUnusedParcelVersions(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi, Stack stack,
             ClouderaManagerProduct product) throws ApiException {
-        String parcelName = product.getName();
-        String parcelVersion = product.getVersion();
-        Map<String, String> unusedDistributedParcelVersions = getClouderaManagerParcelsByStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DISTRIBUTED)
-                .stream()
-                .filter(apiParcel -> apiParcel.getProduct().equals(parcelName) && !apiParcel.getVersion().equals(parcelVersion))
-                .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
+        undistributeUnusedDistributedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, product);
+        removeDownloadedUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, product);
+    }
 
-        undistributeParcels(apiClient, parcelResourceApi, stack, unusedDistributedParcelVersions);
-
-        Map<String, String> unusedDownloadedParcelVersions = getClouderaManagerParcelsByStatus(parcelsResourceApi, stack.getName(), ParcelStatus.DOWNLOADED)
-                .stream()
-                .filter(apiParcel -> apiParcel.getProduct().equals(parcelName) && !apiParcel.getVersion().equals(parcelVersion))
-                .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
+    private void removeDownloadedUnusedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi, Stack stack,
+            ClouderaManagerProduct product) throws ApiException {
+        Map<String, String> unusedDownloadedParcelVersions =
+                getParcelVersionsByStatusNameAndVersion(parcelsResourceApi, stack, product, ParcelStatus.DOWNLOADED);
         removeParcels(apiClient, parcelResourceApi, stack, unusedDownloadedParcelVersions);
+    }
+
+    private void undistributeUnusedDistributedParcels(ApiClient apiClient, ParcelsResourceApi parcelsResourceApi, ParcelResourceApi parcelResourceApi,
+            Stack stack, ClouderaManagerProduct product) throws ApiException {
+        Map<String, String> unusedDistributedParcelVersions =
+                getParcelVersionsByStatusNameAndVersion(parcelsResourceApi, stack, product, ParcelStatus.DISTRIBUTED);
+        undistributeParcels(apiClient, parcelResourceApi, stack, unusedDistributedParcelVersions);
+    }
+
+    private Map<String, String> getParcelVersionsByStatusNameAndVersion(ParcelsResourceApi parcelsResourceApi, Stack stack, ClouderaManagerProduct product,
+            ParcelStatus parcelStatus) throws ApiException {
+        return parcelManagementService.getClouderaManagerParcelsByStatus(parcelsResourceApi, stack.getName(), parcelStatus)
+                .stream()
+                .filter(apiParcel -> apiParcel.getProduct().equals(product.getName()) && !apiParcel.getVersion().equals(product.getVersion()))
+                .collect(toMap(ApiParcel::getProduct, ApiParcel::getVersion));
     }
 
     private Map<String, String> getUnusedParcels(Map<String, String> activeParcels, Set<String> usedParcelComponentNames, Set<String> parcelsFromImage) {
@@ -117,22 +127,11 @@ class ClouderaManagerParcelDecommissionService {
     }
 
     private ParcelOperationStatus undistributeParcels(ApiClient apiClient, ParcelResourceApi parcelResourceApi, Stack stack, Map<String, String> parcels) {
-        ParcelOperationStatus undistributeStatus = new ParcelOperationStatus();
-        for (Entry<String, String> distributedParcel : parcels.entrySet()) {
-            Parcel parcel = new Parcel(distributedParcel.getKey(), distributedParcel.getValue());
-            try {
-                LOGGER.debug("Undistributing {} parcel", parcel);
-                parcelResourceApi.startRemovalOfDistributionCommand(stack.getName(), parcel.getName(), parcel.getVersion());
-                undistributeStatus.addSuccesful(parcel.getName(), parcel.getVersion());
-                LOGGER.info("Successfully undistributed parcel: {}", parcel);
-            } catch (ApiException e) {
-                LOGGER.info(String.format("Unable to undistribute parcel: %s", parcel), e);
-                undistributeStatus.addFailed(parcel.getName(), parcel.getVersion());
-            }
-        }
-        Map<String, String> pollableParcels = parcels.entrySet().stream()
-                .filter(filterParcels(undistributeStatus.getSuccessful().keySet()))
-                .collect(toMap(Entry::getKey, Entry::getValue));
+        ParcelOperationStatus undistributeStatus = parcels.entrySet().stream()
+                .map(parcel -> runSingleParcelCommand("UNDISTRIBUTE", stack, parcel, parcelResourceApi::startRemovalOfDistributionCommand))
+                .reduce(new ParcelOperationStatus(), ParcelOperationStatus::merge);
+
+        Map<String, String> pollableParcels = filterForPollableParcels(parcels, undistributeStatus);
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelStatus(stack, apiClient, pollableParcels,
                 ParcelStatus.DOWNLOADED);
         if (isExited(pollingResult)) {
@@ -143,23 +142,31 @@ class ClouderaManagerParcelDecommissionService {
         return undistributeStatus;
     }
 
-    private ParcelOperationStatus removeParcels(ApiClient apiClient, ParcelResourceApi parcelResourceApi, Stack stack, Map<String, String> parcels) {
-        ParcelOperationStatus removalStatus = new ParcelOperationStatus();
-        for (Entry<String, String> downloadedParcel : parcels.entrySet()) {
-            Parcel parcel = new Parcel(downloadedParcel.getKey(), downloadedParcel.getValue());
-            try {
-                LOGGER.debug("Removing {} parcel", parcel);
-                parcelResourceApi.removeDownloadCommand(stack.getName(), parcel.getName(), parcel.getVersion());
-                removalStatus.addSuccesful(parcel.getName(), parcel.getVersion());
-                LOGGER.info("Successfully removed parcel: {}", parcel);
-            } catch (ApiException e) {
-                LOGGER.info(String.format("Unable to delete parcel: %s", parcel), e);
-                removalStatus.addFailed(parcel.getName(), parcel.getVersion());
-            }
-        }
-        Map<String, String> pollableParcels = parcels.entrySet().stream()
-                .filter(filterParcels(removalStatus.getSuccessful().keySet()))
+    private Map<String, String> filterForPollableParcels(Map<String, String> parcels, ParcelOperationStatus parcelOperationStatus) {
+        return parcels.entrySet().stream()
+                .filter(filterParcels(parcelOperationStatus.getSuccessful().keySet()))
                 .collect(toMap(Entry::getKey, Entry::getValue));
+    }
+
+    private ParcelOperationStatus runSingleParcelCommand(String commandName, Stack stack, Entry<String, String> distributedParcel,
+            ParcelCommand parcelCommand) {
+        Parcel parcel = new Parcel(distributedParcel.getKey(), distributedParcel.getValue());
+        try {
+            LOGGER.debug("[{}] Start for {} parcel", commandName, parcel);
+            parcelCommand.apply(stack.getName(), parcel.getName(), parcel.getVersion());
+            LOGGER.info("[{}] Successful for parcel: {}", commandName, parcel);
+            return new ParcelOperationStatus().withSuccesful(parcel.getName(), parcel.getVersion());
+        } catch (ApiException e) {
+            LOGGER.info(String.format("[%s] Failed for parcel: %s", commandName, parcel), e);
+            return new ParcelOperationStatus().withFailed(parcel.getName(), parcel.getVersion());
+        }
+    }
+
+    private ParcelOperationStatus removeParcels(ApiClient apiClient, ParcelResourceApi parcelResourceApi, Stack stack, Map<String, String> parcels) {
+        ParcelOperationStatus removalStatus = parcels.entrySet().stream()
+                .map(parcel -> runSingleParcelCommand("REMOVE", stack, parcel, parcelResourceApi::removeDownloadCommand))
+                .reduce(new ParcelOperationStatus(), ParcelOperationStatus::merge);
+        Map<String, String> pollableParcels = filterForPollableParcels(parcels, removalStatus);
         PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelDelete(stack, apiClient, pollableParcels);
         if (isExited(pollingResult)) {
             throw new CancellationException("Cluster was terminated while waiting for parcels deletion");
@@ -167,19 +174,6 @@ class ClouderaManagerParcelDecommissionService {
             throw new ClouderaManagerOperationFailedException("Timeout while Cloudera Manager deletes parcels.");
         }
         return removalStatus;
-    }
-
-    private List<ApiParcel> getClouderaManagerParcelsByStatus(ParcelsResourceApi parcelsResourceApi, String stackName, ParcelStatus parcelStatus)
-            throws ApiException {
-        ApiParcelList parcelList = getClouderaManagerParcels(parcelsResourceApi, stackName);
-        return parcelList.getItems().stream()
-                .filter(parcel -> parcelStatus.name().equals(parcel.getStage()))
-                .peek(parcel -> LOGGER.debug("Parcel {} is found with status {}", parcel.getDisplayName(), parcelStatus))
-                .collect(toList());
-    }
-
-    private ApiParcelList getClouderaManagerParcels(ParcelsResourceApi parcelsResourceApi, String stackName) throws ApiException {
-        return parcelsResourceApi.readParcels(stackName, "summary");
     }
 
     private Predicate<Entry<String, String>> filterParcels(Set<String> parcels) {
