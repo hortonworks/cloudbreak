@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
@@ -163,9 +164,9 @@ public class AwsNativeInstanceResourceBuilder extends AbstractAwsNativeComputeBu
         AwsInstanceView awsInstanceView = new AwsInstanceView(group.getReferenceInstanceTemplate());
         List<BlockDeviceMapping> blocks = new ArrayList<>();
         blocks.add(volumeBuilderUtil.getRootVolume(awsInstanceView, group, cloudStack, ac));
-        BlockDeviceMapping ephemeral = volumeBuilderUtil.getEphemeral(awsInstanceView);
-        if (ephemeral != null) {
-            blocks.add(ephemeral);
+        List<BlockDeviceMapping> ephemeralBockDeviceMappings = volumeBuilderUtil.getEphemeral(awsInstanceView);
+        if (CollectionUtils.isNotEmpty(ephemeralBockDeviceMappings)) {
+            blocks.addAll(ephemeralBockDeviceMappings);
         }
         return blocks;
     }

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -23,25 +24,22 @@ import com.sequenceiq.cloudbreak.cloud.model.Volume;
 @Component
 public class VolumeBuilderUtil {
 
-    public BlockDeviceMapping getEphemeral(AwsInstanceView awsInstanceView) {
+    public List<BlockDeviceMapping> getEphemeral(AwsInstanceView awsInstanceView) {
         Long ephemeralCount = getEphemeralCount(awsInstanceView);
-        BlockDeviceMapping ephemeral = null;
+        List<BlockDeviceMapping> ephemeralBlockDeviceMappings = new ArrayList<>();
         if (ephemeralCount != 0) {
             List<String> seq = List.of("b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x",
                     "y", "z");
             int xIndex = 0;
-            while (xIndex < seq.size() && ephemeral == null) {
-                // we need to decrease the ephemeralCount, otherwise the 0 index will be never selected
-                if (xIndex == ephemeralCount - 1) {
-                    String x = seq.get(xIndex);
-                    ephemeral = new BlockDeviceMapping()
-                            .withDeviceName("/dev/xvd" + x)
-                            .withVirtualName("ephemeral" + xIndex);
-                }
+            while (xIndex < seq.size() && ephemeralBlockDeviceMappings.size() < ephemeralCount) {
+                String blockDeviceNameIndex = seq.get(xIndex);
+                ephemeralBlockDeviceMappings.add(new BlockDeviceMapping()
+                        .withDeviceName("/dev/xvd" + blockDeviceNameIndex)
+                        .withVirtualName("ephemeral" + xIndex));
                 xIndex++;
             }
         }
-        return ephemeral;
+        return ephemeralBlockDeviceMappings;
     }
 
     private Long getEphemeralCount(AwsInstanceView awsInstanceView) {
