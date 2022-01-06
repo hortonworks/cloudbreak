@@ -41,7 +41,13 @@ include_access_config:
     - name: /etc/unbound/unbound.conf
     - pattern: '#include: "otherfile.conf"'
     - repl: 'include: "/etc/unbound/access.conf"'
-    - unless: grep "/etc/unbound/access.conf" /etc/unbound/unbound.conf
+
+set_max_ttl:
+  file.replace:
+    - name: /etc/unbound/unbound.conf
+    - pattern: '(#\s)?cache-max-ttl:.*'
+    - append_if_not_found: True
+    - repl: 'cache-max-ttl: 30'
 
 /etc/unbound/access.conf:
   file.managed:
