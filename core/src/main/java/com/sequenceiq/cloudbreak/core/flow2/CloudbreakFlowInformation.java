@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.core.flow2;
 
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.UNKNOWN;
-
 import java.util.Arrays;
 import java.util.List;
 
@@ -40,8 +38,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.sync.StackSyncFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.termination.StackTerminationFlowConfig;
 import com.sequenceiq.cloudbreak.core.flow2.stack.upscale.StackUpscaleConfig;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.domain.stack.StackBase;
+import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.config.FlowConfiguration;
@@ -75,6 +73,9 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
     @Inject
     private StackService stackService;
 
+    @Inject
+    private StackUpdater stackUpdater;
+
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
         return RESTARTABLE_FLOWS;
@@ -92,10 +93,9 @@ public class CloudbreakFlowInformation implements ApplicationFlowInformation {
 
     @Override
     public void handleFlowFail(FlowLog flowLog) {
-        Stack stack = stackService.getById(flowLog.getResourceId());
-        if (stack.getStackStatus() != null && stack.getStackStatus().getDetailedStackStatus() != null) {
-            stack.setStackStatus(new StackStatus(stack, stack.getStackStatus().getStatus().mapToFailedIfInProgress(), "Flow failed", UNKNOWN));
-            stackService.save(stack);
+        StackBase stack = stackService.getStackBaseById(flowLog.getResourceId());
+        if (stack.getStatus() != null && stack.getStackStatus().getDetailedStackStatus() != null) {
+            stackUpdater.updateStackStatusAndSetDetailedStatusToUnknown(flowLog.getResourceId(), stack.getStatus().mapToFailedIfInProgress(), "Flow failed");
         }
     }
 }

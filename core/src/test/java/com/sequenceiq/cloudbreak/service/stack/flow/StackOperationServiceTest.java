@@ -91,7 +91,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenStackAvailable() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
         stack.setId(1L);
 
         underTest.start(stack, null, false);
@@ -102,7 +102,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenStackStopped() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, STOPPED));
+        stack.setStackStatus(new StackStatus<>(stack, STOPPED));
         stack.setId(1L);
 
         underTest.start(stack, null, false);
@@ -114,7 +114,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenStackStartFailed() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.START_FAILED));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.START_FAILED));
         stack.setId(1L);
 
         underTest.start(stack, null, false);
@@ -126,7 +126,7 @@ public class StackOperationServiceTest {
     @Test
     public void testStartWhenStackStopFailed() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOP_FAILED));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.STOP_FAILED));
         stack.setId(1L);
 
         expectedException.expect(BadRequestException.class);
@@ -140,7 +140,7 @@ public class StackOperationServiceTest {
     public void testStartWhenClusterStopFailed() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, Status.STOPPED, "", STOPPED));
+        stack.setStackStatus(new StackStatus<>(stack, Status.STOPPED, "", STOPPED));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         underTest.start(stack, cluster, false);
@@ -152,7 +152,7 @@ public class StackOperationServiceTest {
     public void shouldNotTriggerStopWhenStackRunsOnSpotInstances() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
 
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
@@ -168,7 +168,7 @@ public class StackOperationServiceTest {
     public void shouldTriggerStopWhenStackRunsOnOnDemandInstances() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
 
         when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
@@ -183,7 +183,7 @@ public class StackOperationServiceTest {
     public void testStartWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, STOPPED));
+        stack.setStackStatus(new StackStatus<>(stack, STOPPED));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         underTest.start(stack, cluster, false);
@@ -194,7 +194,7 @@ public class StackOperationServiceTest {
     public void testTriggerStackStopIfNeededWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
@@ -207,7 +207,7 @@ public class StackOperationServiceTest {
     public void testUpdateNodeCountWhenCheckCallEnvironmentCheck() throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
         InstanceGroupAdjustmentV4Request adjustment = new InstanceGroupAdjustmentV4Request();
 
         when(transactionService.required(any(Supplier.class))).thenReturn(null);
@@ -220,7 +220,7 @@ public class StackOperationServiceTest {
     public void testUpdateNodeCountAndCheckDownscaleAndUpscaleStatusChange() throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
         InstanceGroupAdjustmentV4Request upscaleAdjustment = new InstanceGroupAdjustmentV4Request();
         upscaleAdjustment.setScalingAdjustment(5);
 

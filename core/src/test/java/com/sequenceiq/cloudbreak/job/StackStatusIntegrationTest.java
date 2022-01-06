@@ -218,7 +218,7 @@ class StackStatusIntegrationTest {
     )
     void availableStackInstancesAreHealthy() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.AVAILABLE));
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.HEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
@@ -247,7 +247,7 @@ class StackStatusIntegrationTest {
     )
     void availableStackOneInstanceGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.AVAILABLE));
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
@@ -277,7 +277,7 @@ class StackStatusIntegrationTest {
     )
     void availableStackAllInstancesGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.AVAILABLE));
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(
@@ -309,7 +309,7 @@ class StackStatusIntegrationTest {
     )
     void availableStackWithOneInstanceDownAllInstancesGoesDown() throws JobExecutionException {
         setUpClusterStatus(ClusterStatus.STARTED);
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.AVAILABLE));
         setUpHealthForInstance(INSTANCE_1, HealthCheckResult.HEALTHY);
         setUpHealthForInstance(INSTANCE_2, HealthCheckResult.UNHEALTHY);
         setUpCloudVmInstanceStatuses(Map.of(

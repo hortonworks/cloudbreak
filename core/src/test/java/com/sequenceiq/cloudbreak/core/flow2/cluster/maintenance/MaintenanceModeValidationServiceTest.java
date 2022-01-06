@@ -78,7 +78,7 @@ public class MaintenanceModeValidationServiceTest {
         cluster = new Cluster();
         cluster.setId(1L);
         stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.AVAILABLE));
         stack.setId(1L);
         stack.setName("stackname");
         stack.setRegion("region");

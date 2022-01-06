@@ -36,7 +36,6 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.RecoveryMode;
@@ -184,7 +183,6 @@ public class ClusterRepairServiceTest {
         hostGroup1.setInstanceGroup(host1.getInstanceGroup());
 
         when(hostGroupService.getByCluster(eq(1L))).thenReturn(Set.of(hostGroup1));
-        when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(host1));
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
@@ -350,7 +348,6 @@ public class ClusterRepairServiceTest {
         volumeSet.setResourceType(ResourceType.AWS_VOLUMESET);
         FlowLog flowLog = new FlowLog();
         flowLog.setStateStatus(StateStatus.SUCCESSFUL);
-        when(stackUpdater.updateStackStatus(1L, DetailedStackStatus.REPAIR_IN_PROGRESS)).thenReturn(stack);
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(instance1md));
         when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));

@@ -59,7 +59,7 @@ public class ClusterRecoveryService {
     }
 
     private RecoveryValidationV4Response validateStackStatus(Stack stack) {
-        List<StackStatus> statusList = stackStatusService.findAllStackStatusesById(stack.getId());
+        List<StackStatus<Stack>> statusList = stackStatusService.findAllStackStatusesById(stack.getId());
         List<DetailedStackStatus> detailedStackStatusList = statusList.stream()
                 .map(StackStatus::getDetailedStackStatus)
                 .collect(Collectors.toList());

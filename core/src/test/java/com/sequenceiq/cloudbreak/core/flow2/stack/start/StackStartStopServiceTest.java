@@ -62,7 +62,7 @@ class StackStartStopServiceTest {
 
     private static Stack stackWithStatus(Status status) {
         Stack stack = new Stack();
-        StackStatus stackStatus = new StackStatus(stack, status, null, null);
+        StackStatus stackStatus = new StackStatus<>(stack, status, null, null);
         stack.setStackStatus(stackStatus);
         return stack;
     }

@@ -151,7 +151,7 @@ public class ClusterCommonServiceTest {
     public void testUpdateNodeCountWhenCheckCallEnvironmentCheck() {
         Stack stack = new Stack();
         stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
 
         when(stackService.getByCrn("crn")).thenReturn(stack);
         when(stackService.getByIdWithLists(anyLong())).thenReturn(stack);

@@ -188,7 +188,7 @@ public class StackV4RequestToStackConverter {
         stack.setDatalakeCrn(datalakeService.getDatalakeCrn(source, workspace));
         stack.setStackAuthentication(stackAuthenticationV4RequestToStackAuthenticationConverter
                 .convert(source.getAuthentication()));
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.PROVISION_REQUESTED));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.PROVISION_REQUESTED));
         stack.setCreated(clock.getCurrentTimeMillis());
         stack.setInstanceGroups(convertInstanceGroups(source, stack));
         measure(() -> updateCluster(source, stack),

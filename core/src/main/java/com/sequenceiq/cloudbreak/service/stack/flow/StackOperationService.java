@@ -268,10 +268,10 @@ public class StackOperationService {
         if (stack.isAvailable()) {
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
         } else if (stack.isReadyForStart() || stack.isStartFailed()) {
-            Stack startStack = stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
+            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.START_REQUESTED);
             flowIdentifier = flowManager.triggerStackStart(stack.getId());
             if (updateCluster && cluster != null) {
-                clusterOperationService.updateStatus(startStack, StatusRequest.STARTED);
+                clusterOperationService.updateStatus(stackService.getById(stack.getId()), StatusRequest.STARTED);
             }
         } else {
             throw NotAllowedStatusUpdate

@@ -80,7 +80,7 @@ public class StructuredSynchronizerJobTest {
 
     @Test
     public void testUnscheduleJobWhenStackIsInUnschedulableState() throws JobExecutionException {
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.DELETE_COMPLETED));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.DELETE_COMPLETED));
         when(stackService.get(anyLong())).thenReturn(stack);
         underTest.executeTracedJob(jobExecutionContext);
 
@@ -100,7 +100,7 @@ public class StructuredSynchronizerJobTest {
 
     @Test
     public void testJobRunsWhenStackIsInCorrectState() throws JobExecutionException {
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.AVAILABLE));
         when(stackService.get(anyLong())).thenReturn(stack);
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         when(structuredSyncEventFactory.createStructuredSyncEvent(1L)).thenReturn(structuredSyncEvent);

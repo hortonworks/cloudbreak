@@ -31,18 +31,13 @@ import javax.persistence.Convert;
 import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKeyColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -64,7 +59,6 @@ import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.converter.DatabaseAvailabilityTypeConverter;
-import com.sequenceiq.cloudbreak.domain.converter.StackTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -78,13 +72,8 @@ import com.sequenceiq.common.api.type.ResourceType;
 import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
-public class Stack implements ProvisionEntity, WorkspaceAwareResource {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
-    @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
-    private Long id;
+@Table(name = "Stack", uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
+public class Stack extends AbstractStack<Stack> implements ProvisionEntity, WorkspaceAwareResource {
 
     private String name;
 
@@ -142,9 +131,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @OneToOne(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Cluster cluster;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private StackStatus stackStatus;
-
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Resource> resources = new HashSet<>();
 
@@ -163,9 +149,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<Component> components = new HashSet<>();
-
-    @Version
-    private Long version;
 
     @ManyToOne
     private Network network;
@@ -201,9 +184,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     private String datalakeCrn;
 
-    @Convert(converter = StackTypeConverter.class)
-    private StackType type;
-
     private boolean clusterProxyRegistered;
 
     private String minaSshdServiceId;
@@ -238,14 +218,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return this;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -276,30 +248,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setCluster(Cluster cluster) {
         this.cluster = cluster;
-    }
-
-    public StackStatus getStackStatus() {
-        return stackStatus;
-    }
-
-    public void setStackStatus(StackStatus stackStatus) {
-        this.stackStatus = stackStatus;
-    }
-
-    public Status getStatus() {
-        return stackStatus != null ? stackStatus.getStatus() : null;
-    }
-
-    public String getStatusReason() {
-        return stackStatus != null ? stackStatus.getStatusReason() : null;
-    }
-
-    public Long getVersion() {
-        return version;
-    }
-
-    public void setVersion(Long version) {
-        this.version = version;
     }
 
     public String getRegion() {
@@ -792,14 +740,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.workspace = workspace;
     }
 
-    public StackType getType() {
-        return type;
-    }
-
-    public void setType(StackType type) {
-        this.type = type;
-    }
-
     public Long getTerminated() {
         return terminated;
     }
@@ -813,7 +753,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isDatalake() {
-        return type == StackType.DATALAKE;
+        return getType() == StackType.DATALAKE;
     }
 
     public boolean hasCustomHostname() {
@@ -877,7 +817,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     @Override
     public String toString() {
         return "Stack{" +
-                "id=" + id +
+                "id=" + getId() +
                 ", name='" + name + '\'' +
                 ", region='" + region + '\'' +
                 ", availabilityZone='" + availabilityZone + '\'' +
@@ -897,13 +837,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 ", platformVariant='" + platformVariant + '\'' +
                 ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", cluster=" + cluster +
-                ", stackStatus=" + stackStatus +
+                ", stackStatus=" + getStackStatus() +
                 ", resources=" + resources +
                 ", onFailureActionAction=" + onFailureActionAction +
                 ", failurePolicy=" + failurePolicy +
                 ", securityConfig=" + securityConfig +
                 ", instanceGroups=" + instanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet()) +
-                ", version=" + version +
+                ", version=" + getVersion() +
                 ", network=" + network +
                 ", stackAuthentication=" + stackAuthentication +
                 ", orchestrator=" + orchestrator +
@@ -916,7 +856,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 ", creator=" + creator +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 ", datalakeCrn='" + datalakeCrn + '\'' +
-                ", type=" + type +
+                ", type=" + getType() +
                 ", clusterProxyRegistered=" + clusterProxyRegistered +
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +

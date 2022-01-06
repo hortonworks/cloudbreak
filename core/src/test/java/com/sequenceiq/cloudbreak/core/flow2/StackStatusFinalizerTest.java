@@ -36,7 +36,7 @@ public class StackStatusFinalizerTest {
     @Test
     public void shouldUpdateWhenIsInProgressStatus() {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(RESOURCE_ID))
-                .thenReturn(Optional.of(new StackStatus(new Stack(), Status.UPDATE_IN_PROGRESS, "", DetailedStackStatus.UNKNOWN)));
+                .thenReturn(Optional.of(new StackStatus<>(new Stack(), Status.UPDATE_IN_PROGRESS, "", DetailedStackStatus.UNKNOWN)));
 
         underTest.onFinalize(RESOURCE_ID);
 
@@ -46,7 +46,7 @@ public class StackStatusFinalizerTest {
     @Test
     public void shouldNotUpdateWhenIsInFinalStatus() {
         when(stackStatusService.findFirstByStackIdOrderByCreatedDesc(RESOURCE_ID))
-                .thenReturn(Optional.of(new StackStatus(new Stack(), Status.AVAILABLE, "", DetailedStackStatus.UNKNOWN)));
+                .thenReturn(Optional.of(new StackStatus<>(new Stack(), Status.AVAILABLE, "", DetailedStackStatus.UNKNOWN)));
 
         underTest.onFinalize(RESOURCE_ID);
 

@@ -172,7 +172,7 @@ public class TestUtil {
         Stack stack = new Stack();
         stack.setCreator(user);
         stack.setWorkspace(workspace);
-        stack.setStackStatus(new StackStatus(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
+        stack.setStackStatus(new StackStatus<>(stack, stackStatus, "statusReason", DetailedStackStatus.UNKNOWN));
         stack.setName("simplestack");
         stack.setId(1L);
         stack.setInstanceGroups(generateGcpInstanceGroups(3));

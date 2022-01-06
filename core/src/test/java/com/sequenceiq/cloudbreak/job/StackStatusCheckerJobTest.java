@@ -230,6 +230,6 @@ public class StackStatusCheckerJobTest {
     }
 
     private void setStackStatus(DetailedStackStatus detailedStackStatus) {
-        stack.setStackStatus(new StackStatus(stack, detailedStackStatus));
+        stack.setStackStatus(new StackStatus<>(stack, detailedStackStatus));
     }
 }

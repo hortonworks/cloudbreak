@@ -36,7 +36,7 @@ public class ClusterRecoveryServiceTest {
     private static final Stack STACK = TestUtil.stack();
 
     @Parameterized.Parameter
-    public List<StackStatus> stackStatusList;
+    public List<StackStatus<Stack>> stackStatusList;
 
     @Parameterized.Parameter(1)
     public boolean freeIpaStatus;
@@ -171,7 +171,7 @@ public class ClusterRecoveryServiceTest {
     }
 
     private static StackStatus getStackStatus(DetailedStackStatus detailedStackStatus) {
-        return new StackStatus(STACK, detailedStackStatus);
+        return new StackStatus<>(STACK, detailedStackStatus);
     }
 
 }

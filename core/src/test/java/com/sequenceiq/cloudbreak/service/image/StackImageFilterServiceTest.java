@@ -192,7 +192,7 @@ public class StackImageFilterServiceTest {
         stack.setId(STACK_ID);
         stack.setCloudPlatform(PROVIDER_AWS);
         stack.setName(STACK_NAME);
-        stack.setStackStatus(new StackStatus(stack, detailedStackStatus.getStatus(), "", detailedStackStatus));
+        stack.setStackStatus(new StackStatus<>(stack, detailedStackStatus.getStatus(), "", detailedStackStatus));
         Cluster cluster = new Cluster();
         stack.setCluster(cluster);
         return stack;

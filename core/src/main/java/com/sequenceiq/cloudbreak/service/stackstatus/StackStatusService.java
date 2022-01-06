@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.repository.StackStatusRepository;
 
@@ -16,12 +17,15 @@ public class StackStatusService {
     @Inject
     private StackStatusRepository repository;
 
-    public Optional<StackStatus> findFirstByStackIdOrderByCreatedDesc(long stackId) {
+    public Optional<StackStatus<Stack>> findFirstByStackIdOrderByCreatedDesc(long stackId) {
         return repository.findFirstByStackIdOrderByCreatedDesc(stackId);
     }
 
-    public List<StackStatus> findAllStackStatusesById(long stackId) {
+    public List<StackStatus<Stack>> findAllStackStatusesById(long stackId) {
         return repository.findAllByStackIdOrderByCreatedAsc(stackId);
     }
 
+    public StackStatus<Stack> save(StackStatus<Stack> stackStatus) {
+        return repository.save(stackStatus);
+    }
 }

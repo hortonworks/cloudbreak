@@ -8,15 +8,16 @@ import javax.transaction.Transactional.TxType;
 
 import org.springframework.data.repository.CrudRepository;
 
+import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = StackStatus.class)
 @Transactional(TxType.REQUIRED)
-public interface StackStatusRepository extends CrudRepository<StackStatus, Long> {
+public interface StackStatusRepository extends CrudRepository<StackStatus<Stack>, Long> {
 
-    Optional<StackStatus> findFirstByStackIdOrderByCreatedDesc(long stackId);
+    Optional<StackStatus<Stack>> findFirstByStackIdOrderByCreatedDesc(long stackId);
 
-    List<StackStatus> findAllByStackIdOrderByCreatedAsc(long stackId);
+    List<StackStatus<Stack>> findAllByStackIdOrderByCreatedAsc(long stackId);
 
 }

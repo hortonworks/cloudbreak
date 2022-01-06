@@ -76,7 +76,7 @@ public class StackDownscaleValidatorServiceTest {
     @Test
     public void testCheckClusterInValidStatusWhenValidStatus() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.AVAILABLE));
 
         underTest.checkClusterInValidStatus(stack);
     }
@@ -84,7 +84,7 @@ public class StackDownscaleValidatorServiceTest {
     @Test
     public void testCheckClusterInValidStatusWhenInStoppedStatus() {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.STOPPED));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.STOPPED));
 
         expectedException.expect(BadRequestException.class);
         expectedException.expectMessage("Cluster is in Stopped status. Please start the cluster for downscale.");

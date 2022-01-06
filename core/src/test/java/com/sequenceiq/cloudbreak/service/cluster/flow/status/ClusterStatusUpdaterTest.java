@@ -137,7 +137,7 @@ public class ClusterStatusUpdaterTest {
     private Stack createStack(DetailedStackStatus detailedStackStatus) {
         Stack stack = new Stack();
         stack.setId(TEST_STACK_ID);
-        stack.setStackStatus(new StackStatus(stack, detailedStackStatus.getStatus(), "", detailedStackStatus));
+        stack.setStackStatus(new StackStatus<>(stack, detailedStackStatus.getStatus(), "", detailedStackStatus));
         return stack;
     }
 

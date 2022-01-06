@@ -566,7 +566,7 @@ public class BlueprintServiceTest {
 
     private void patchWithStackStatus(Cluster cluster1, DetailedStackStatus detailedStackStatus) {
         Stack stack = new Stack();
-        stack.setStackStatus(new StackStatus(stack, detailedStackStatus));
+        stack.setStackStatus(new StackStatus<>(stack, detailedStackStatus));
         stack.setType(StackType.WORKLOAD);
         stack.setName(cluster1.getName());
         stack.setId(cluster1.getId());

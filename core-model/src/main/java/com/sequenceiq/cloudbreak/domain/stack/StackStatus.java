@@ -21,14 +21,14 @@ import com.sequenceiq.cloudbreak.domain.StatusConverter;
 
 @Entity
 @Table(name = "stackstatus")
-public class StackStatus implements ProvisionEntity {
+public class StackStatus<T extends AbstractStack<T>> implements ProvisionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stackstatus_generator")
     @SequenceGenerator(name = "stackstatus_generator", sequenceName = "stackstatus_id_seq", allocationSize = 1)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Stack stack;
+    @ManyToOne(fetch = FetchType.LAZY, targetEntity = Stack.class)
+    private T stack;
 
     private Long created;
 
@@ -44,11 +44,11 @@ public class StackStatus implements ProvisionEntity {
     public StackStatus() {
     }
 
-    public StackStatus(Stack stack, DetailedStackStatus detailedStackStatus) {
+    public StackStatus(T stack, DetailedStackStatus detailedStackStatus) {
         this(stack, detailedStackStatus.getStatus(), "", detailedStackStatus);
     }
 
-    public StackStatus(Stack stack, Status status, String statusReason, DetailedStackStatus detailedStackStatus) {
+    public StackStatus(T stack, Status status, String statusReason, DetailedStackStatus detailedStackStatus) {
         this.stack = stack;
         this.status = status;
         this.statusReason = statusReason;
@@ -64,11 +64,11 @@ public class StackStatus implements ProvisionEntity {
         return id;
     }
 
-    public void setStack(Stack stack) {
+    public void setStack(T stack) {
         this.stack = stack;
     }
 
-    public Stack getStack() {
+    public T getStack() {
         return stack;
     }
 

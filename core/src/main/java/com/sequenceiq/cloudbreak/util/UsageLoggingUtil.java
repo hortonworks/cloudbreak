@@ -10,6 +10,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.domain.stack.StackBase;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
@@ -72,14 +73,10 @@ public class UsageLoggingUtil {
      * Log datalake/datahub status change usage event.
      * @param oldClusterStatus the old cluster status. Nullable. If null, no usage events will be logged.
      * @param newClusterStatus the new cluster status. Nullable. If null, no usage events will be logged.
-     * @param cluster the cluster object. Nullable. If null, no usage events will be logged.
+     * @param stack the stack object. Nullable. If null, no usage events will be logged.
      */
-    public void logClusterStatusChangeUsageEvent(@Nullable Status oldClusterStatus, @Nullable Status newClusterStatus, @Nullable Cluster cluster) {
-        if (oldClusterStatus == null || newClusterStatus == null || cluster == null || cluster.getId() == null || cluster.getStack() == null) {
-            return;
-        }
-        Stack stack = cluster.getStack();
-        if (stack == null) {
+    public void logClusterStatusChangeUsageEvent(@Nullable Status oldClusterStatus, @Nullable Status newClusterStatus, @Nullable StackBase stack) {
+        if (oldClusterStatus == null || newClusterStatus == null || stack == null || stack.getCluster() == null || stack.getCluster().getId() == null) {
             return;
         }
         UsageProto.CDPCloudbreakClusterStatus.Value oldStatusEnum = null;
@@ -97,14 +94,14 @@ public class UsageLoggingUtil {
         }
         if (StackType.DATALAKE == stack.getType()) {
             UsageProto.CDPDatalakeClusterStatusChanged proto = UsageProto.CDPDatalakeClusterStatusChanged.newBuilder()
-                    .setDatalakeId(cluster.getId().toString())
+                    .setDatalakeId(stack.getCluster().getId().toString())
                     .setOldStatus(oldStatusEnum)
                     .setNewStatus(newStatusEnum)
                     .build();
             usageReportProcessor.cdpDatalakeClusterStatusChanged(proto);
         } else {
             UsageProto.CDPDatahubClusterStatusChanged proto = UsageProto.CDPDatahubClusterStatusChanged.newBuilder()
-                    .setClusterId(cluster.getId().toString())
+                    .setClusterId(stack.getCluster().getId().toString())
                     .setOldStatus(oldStatusEnum)
                     .setNewStatus(newStatusEnum)
                     .build();

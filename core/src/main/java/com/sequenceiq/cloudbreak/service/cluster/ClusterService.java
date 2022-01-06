@@ -55,11 +55,13 @@ import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterBase;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.repository.ClusterBaseRepository;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -88,6 +90,9 @@ public class ClusterService {
 
     @Inject
     private ClusterRepository repository;
+
+    @Inject
+    private ClusterBaseRepository clusterBaseRepository;
 
     @Inject
     private GatewayService gatewayService;
@@ -132,16 +137,16 @@ public class ClusterService {
         Cluster savedCluster;
         try {
             long start = System.currentTimeMillis();
-            savedCluster =  measure(() -> repository.save(cluster),
+            savedCluster = measure(() -> repository.save(cluster),
                     LOGGER,
                     "Cluster repository save {} ms");
             if (savedCluster.getGateway() != null) {
-                measure(() ->  gatewayService.save(savedCluster.getGateway()),
+                measure(() -> gatewayService.save(savedCluster.getGateway()),
                         LOGGER,
                         "gatewayService repository save {} ms");
             }
             LOGGER.debug("Cluster object saved in {} ms for stack {}", System.currentTimeMillis() - start, stackName);
-            measure(() ->  clusterComponentConfigProvider.store(components, savedCluster),
+            measure(() -> clusterComponentConfigProvider.store(components, savedCluster),
                     LOGGER,
                     "clusterComponentConfigProvider repository save {} ms");
         } catch (DataIntegrityViolationException ex) {
@@ -270,8 +275,8 @@ public class ClusterService {
 
     public Cluster updateClusterStatusByStackId(Long stackId, DetailedStackStatus detailedStackStatus, String statusReason) {
         LOGGER.debug("Updating cluster status. stackId: {}, status: {}, statusReason: {}", stackId, detailedStackStatus, statusReason);
-        Stack stack = stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
-        return stack.getCluster();
+        stackUpdater.updateStackStatus(stackId, detailedStackStatus, statusReason);
+        return stackService.getById(stackId).getCluster();
     }
 
     public Cluster updateClusterStatusByStackId(Long stackId, DetailedStackStatus detailedStackStatus) {
@@ -446,4 +451,10 @@ public class ClusterService {
         repository.delete(cluster);
     }
 
+    public void update(ClusterBase clusterBase) {
+        if (clusterBase.getId() == null) {
+            throw new IllegalArgumentException("Cluster base can only be used for update. Id must be present.");
+        }
+        clusterBaseRepository.save(clusterBase);
+    }
 }

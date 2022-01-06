@@ -87,6 +87,7 @@ import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Component;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackBase;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.StackValidation;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -96,6 +97,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.repository.StackBaseRepository;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -188,6 +190,9 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     @Inject
     private StackRepository stackRepository;
+
+    @Inject
+    private StackBaseRepository stackBaseRepository;
 
     @Inject
     private ImageService imageService;
@@ -991,5 +996,16 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     public CloudPlatformVariant getPlatformVariantByStackId(Long resourceId) {
         StackPlatformVariantView variantView = stackRepository.findPlatformVariantAndCloudPlatformById(resourceId);
         return new CloudPlatformVariant(variantView.getCloudPlatform(), variantView.getPlatformVariant());
+    }
+
+    public StackBase getStackBaseById(Long id) {
+        return stackBaseRepository.findById(id).orElseThrow(notFound("Stack", id));
+    }
+
+    public StackBase update(StackBase stackBase) {
+        if (stackBase.getId() == null) {
+            throw new IllegalArgumentException("Stack base can only be used for update. Id must be present.");
+        }
+        return stackBaseRepository.save(stackBase);
     }
 }

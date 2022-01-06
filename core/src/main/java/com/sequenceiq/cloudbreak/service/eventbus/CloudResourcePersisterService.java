@@ -74,8 +74,8 @@ public class CloudResourcePersisterService implements Persister<ResourceNotifica
         return notification;
     }
 
-    private Stack findStackById(Long stackId) {
-        return stackReferenceRepository.getOne(stackId);
+    public Stack findStackById(Long stackId) {
+        return stackReferenceRepository.getById(stackId);
     }
 
     private void updateWithPersistedFields(Resource resource, Resource persistedResource) {

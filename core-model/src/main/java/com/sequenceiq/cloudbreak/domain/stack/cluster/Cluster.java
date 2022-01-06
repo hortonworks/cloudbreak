@@ -12,14 +12,10 @@ import javax.persistence.Column;
 import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
@@ -37,7 +33,6 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.converter.ConfigStrategyConverter;
 import com.sequenceiq.cloudbreak.domain.converter.ExecutorTypeConverter;
-import com.sequenceiq.cloudbreak.domain.converter.StatusConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -49,13 +44,8 @@ import com.sequenceiq.cloudbreak.workspace.model.WorkspaceAwareResource;
 import com.sequenceiq.common.api.type.CertExpirationState;
 
 @Entity
-@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
-public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "cluster_generator")
-    @SequenceGenerator(name = "cluster_generator", sequenceName = "cluster_id_seq", allocationSize = 1)
-    private Long id;
+@Table(name = "Cluster", uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name"}))
+public class Cluster extends AbstractCluster<Cluster> implements ProvisionEntity, WorkspaceAwareResource {
 
     @OneToOne
     private Stack stack;
@@ -75,10 +65,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     @Column(length = 1000000, columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    @Convert(converter = StatusConverter.class)
-    private Status status;
-
     @Convert(converter = ExecutorTypeConverter.class)
     private ExecutorType executorType;
 
@@ -87,9 +73,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     private Long creationFinished;
 
     private Long upSince;
-
-    @Column(length = 1000000, columnDefinition = "TEXT")
-    private String statusReason;
 
     private String clusterManagerIp;
 
@@ -263,14 +246,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.description = description;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public String getVariant() {
         return variant;
     }
@@ -293,22 +268,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    /**
-     * @deprecated {@link #getStatus} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#getStatus}.
-     */
-    @Deprecated
-    public Status getStatus() {
-        return status;
-    }
-
-    /**
-     * @deprecated {@link #setStatus} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#setStatus}.
-     */
-    @Deprecated
-    public void setStatus(Status status) {
-        this.status = status;
     }
 
     public Long getCreationStarted() {
@@ -335,22 +294,6 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
         this.upSince = upSince;
     }
 
-    /**
-     * @deprecated {@link #getStatusReason} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#getStatusReason}.
-     */
-    @Deprecated
-    public String getStatusReason() {
-        return statusReason;
-    }
-
-    /**
-     * @deprecated {@link #setStatusReason} was replaced by {@link com.sequenceiq.cloudbreak.domain.stack.StackStatus#setStatusReason}.
-     */
-    @Deprecated
-    public void setStatusReason(String statusReason) {
-        this.statusReason = statusReason;
-    }
-
     public Set<HostGroup> getHostGroups() {
         return hostGroups;
     }
@@ -368,7 +311,7 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isCreateFailed() {
-        return Status.CREATE_FAILED.equals(status);
+        return Status.CREATE_FAILED.equals(getStatus());
     }
 
     public Set<RDSConfig> getRdsConfigs() {
@@ -773,12 +716,12 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
             return false;
         }
         Cluster that = (Cluster) o;
-        return Objects.equals(id, that.id);
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id);
+        return Objects.hash(getId());
     }
 
     @Override
@@ -788,11 +731,11 @@ public class Cluster implements ProvisionEntity, WorkspaceAwareResource {
             resourceCrn = stack.getResourceCrn();
         }
         return "Cluster{" +
-                "id=" + id +
+                "id=" + getId() +
                 ", stackResourceCrn='" + resourceCrn + '\'' +
                 ", name='" + name + '\'' +
-                ", status=" + status +
-                ", statusReason='" + statusReason + '\'' +
+                ", status=" + getStatus() +
+                ", statusReason='" + getStatusReason() + '\'' +
                 ", environmentCrn='" + environmentCrn + '\'' +
                 '}';
     }

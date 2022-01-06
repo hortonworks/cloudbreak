@@ -2,17 +2,22 @@ package com.sequenceiq.cloudbreak.util;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.domain.stack.StackBase;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
 import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
+import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
 
 // This test makes sure that we do not blow-up on null values during usage logging.
+@ExtendWith(MockitoExtension.class)
 public class UsageLoggingUtilTest {
 
     private static final String TEST_USER_CRN = "crn:cdp:iam:us-west-1:1:user:2";
@@ -23,6 +28,9 @@ public class UsageLoggingUtilTest {
 
     Stack stack;
 
+    @Mock
+    private StackBase stackBase;
+
     @Test
     public void logClusterRequestedUsageEvent() {
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> util.logClusterRequestedUsageEvent(cluster));
@@ -31,9 +39,9 @@ public class UsageLoggingUtilTest {
 
     @Test
     public void logClusterStatusChangeUsageEvent() {
-        util.logClusterStatusChangeUsageEvent(Status.AVAILABLE, Status.AVAILABLE, cluster);
+        util.logClusterStatusChangeUsageEvent(Status.AVAILABLE, Status.AVAILABLE, stackBase);
         util.logClusterStatusChangeUsageEvent(null, null, null);
-        util.logClusterStatusChangeUsageEvent(Status.AVAILABLE, Status.AVAILABLE, cluster);
+        util.logClusterStatusChangeUsageEvent(Status.AVAILABLE, Status.AVAILABLE, stackBase);
     }
 
     @BeforeEach
@@ -46,7 +54,7 @@ public class UsageLoggingUtilTest {
         stack = new Stack();
         stack.setCluster(cluster);
         stack.setCloudPlatform("mock");
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.CLUSTER_CREATE_FAILED));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.CLUSTER_CREATE_FAILED));
 
         cluster.setStack(stack);
         cluster.setId(1L);

@@ -77,7 +77,7 @@ public class ReactorNotifierTest {
     public void testNonAllowedFlowInMaintenanceMode() {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.setStackStatus(new StackStatus(stack, DetailedStackStatus.MAINTENANCE_MODE_ENABLED));
+        stack.setStackStatus(new StackStatus<>(stack, DetailedStackStatus.MAINTENANCE_MODE_ENABLED));
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
         BaseFlowEvent baseFlowEvent = new BaseFlowEvent("dontcare", 1L, "crn");
         when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
@@ -92,7 +92,7 @@ public class ReactorNotifierTest {
     public void testAccepted() throws InterruptedException {
         Stack stack = TestUtil.stack();
         stack.setCluster(TestUtil.cluster());
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
+        stack.setStackStatus(new StackStatus<>(stack, AVAILABLE));
         when(stackService.getByIdWithTransaction(1L)).thenReturn(stack);
         Acceptable data = mock(Acceptable.class);
         Promise<AcceptResult> accepted = (Promise<AcceptResult>) mock(Promise.class);
