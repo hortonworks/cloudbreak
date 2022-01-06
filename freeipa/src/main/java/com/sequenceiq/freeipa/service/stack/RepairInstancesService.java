@@ -4,6 +4,7 @@ import static com.sequenceiq.freeipa.flow.instance.reboot.RebootEvent.REBOOT_EVE
 import static java.util.function.Predicate.not;
 
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -16,11 +17,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
-import com.sequenceiq.freeipa.converter.stack.StackToCreateFreeIpaRequestConverter;
-import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -33,19 +29,24 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.converter.stack.StackToCreateFreeIpaRequestConverter;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.chain.FlowChainTriggers;
 import com.sequenceiq.freeipa.flow.freeipa.repair.event.RepairEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootInstanceEvent;
+import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -205,7 +206,7 @@ public class RepairInstancesService {
         if (operation.getStatus() == OperationState.RUNNING) {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.REPAIR_REQUESTED, "Repair requested");
             flowManager.notify(FlowChainTriggers.REPAIR_TRIGGER_EVENT, new RepairEvent(FlowChainTriggers.REPAIR_TRIGGER_EVENT, stack.getId(),
-                    operation.getOperationId(), nodeCount, instancesToRepair.keySet().stream().collect(Collectors.toList()), additionalTerminatedInstanceIds));
+                    operation.getOperationId(), nodeCount, new ArrayList<>(instancesToRepair.keySet()), additionalTerminatedInstanceIds));
         }
         return operationToOperationStatusConverter.convert(operation);
     }

@@ -127,6 +127,15 @@ freeipa:
   server.deletion.check:
     maxWaitSeconds: 900
     interval: 10000
+  scaling:
+    allowedScalingPaths:
+      NON_HA:
+        - HA
+        - TWO_NODE_BASED
+      TWO_NODE_BASED:
+        - HA
+      HA:
+        - TWO_NODE_BASED
 
 info:
   app:

@@ -1,7 +1,6 @@
 package com.sequenceiq.freeipa.service.upgrade;
 
 import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNING;
-import static java.util.function.Predicate.not;
 
 import java.util.HashSet;
 import java.util.List;
@@ -21,7 +20,6 @@ import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.image.ImageSettingsRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeOptions;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.upgrade.model.FreeIpaUpgradeResponse;
@@ -35,6 +33,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @Service
 public class UpgradeService {
@@ -56,6 +55,9 @@ public class UpgradeService {
     @Inject
     private UpgradeValidationService validationService;
 
+    @Inject
+    private InstanceMetaDataService instanceMetaDataService;
+
     @SuppressWarnings("IllegalType")
     public FreeIpaUpgradeResponse upgradeFreeIpa(String accountId, FreeIpaUpgradeRequest request) {
         validationService.validateEntitlement(accountId);
@@ -63,8 +65,8 @@ public class UpgradeService {
         MDCBuilder.buildMdcContext(stack);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
         validationService.validateStackForUpgrade(allInstances, stack);
-        String pgwInstanceId = selectPrimaryGwInstanceId(allInstances);
-        HashSet<String> nonPgwInstanceIds = collectNonPrimaryGwInstanceIds(allInstances, pgwInstanceId);
+        String pgwInstanceId = instanceMetaDataService.getPrimaryGwInstance(allInstances).getInstanceId();
+        HashSet<String> nonPgwInstanceIds = instanceMetaDataService.getNonPrimaryGwInstances(allInstances).stream().map(InstanceMetaData::getInstanceId).collect(Collectors.toCollection(HashSet::new));
         ImageInfoResponse currentImage = imageService.fetchCurrentImage(stack);
         ImageSettingsRequest imageSettingsRequest = assembleImageSettingsRequest(request, currentImage);
         ImageInfoResponse selectedImage = imageService.selectImage(stack, imageSettingsRequest);
@@ -98,24 +100,6 @@ public class UpgradeService {
             throw new BadRequestException("Upgrade operation couldn't be started with: " + operation.getError());
         }
         return operation;
-    }
-
-    @SuppressWarnings("IllegalType")
-    private HashSet<String> collectNonPrimaryGwInstanceIds(Set<InstanceMetaData> allInstances, String pgwInstanceId) {
-        HashSet<String> nonPgwInstanceIds = allInstances.stream()
-                .map(InstanceMetaData::getInstanceId)
-                .filter(not(pgwInstanceId::equals))
-                .collect(Collectors.toCollection(HashSet::new));
-        LOGGER.debug("Non primary gateway instance IDs: {}", nonPgwInstanceIds);
-        return nonPgwInstanceIds;
-    }
-
-    private String selectPrimaryGwInstanceId(Set<InstanceMetaData> allInstances) {
-        String pgwInstanceId = allInstances.stream()
-                .filter(instanceMetaData -> InstanceMetadataType.GATEWAY_PRIMARY == instanceMetaData.getInstanceMetadataType())
-                .findFirst().orElseThrow(() -> new BadRequestException("No primary Gateway found")).getInstanceId();
-        LOGGER.debug("Found primary gateway with instance id: [{}]", pgwInstanceId);
-        return pgwInstanceId;
     }
 
     public FreeIpaUpgradeOptions collectUpgradeOptions(String accountId, String environmentCrn, String catalog) {

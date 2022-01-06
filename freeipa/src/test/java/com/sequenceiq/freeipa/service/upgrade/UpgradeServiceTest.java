@@ -41,6 +41,7 @@ import com.sequenceiq.freeipa.flow.freeipa.upgrade.UpgradeEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 @ExtendWith(MockitoExtension.class)
 class UpgradeServiceTest {
@@ -64,6 +65,9 @@ class UpgradeServiceTest {
     @Mock
     private UpgradeValidationService validationService;
 
+    @Mock
+    private InstanceMetaDataService instanceMetaDataService;
+
     @InjectMocks
     private UpgradeService underTest;
 
@@ -83,6 +87,8 @@ class UpgradeServiceTest {
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
 
@@ -121,6 +127,8 @@ class UpgradeServiceTest {
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
 
@@ -180,6 +188,8 @@ class UpgradeServiceTest {
         ArgumentCaptor<Acceptable> eventCaptor = ArgumentCaptor.forClass(Acceptable.class);
         FlowIdentifier flowIdentifier = new FlowIdentifier(FlowType.FLOW_CHAIN, "flowId");
         when(flowManager.notify(eq(FlowChainTriggers.UPGRADE_TRIGGER_EVENT), eventCaptor.capture())).thenReturn(flowIdentifier);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
 
         FreeIpaUpgradeResponse response = underTest.upgradeFreeIpa(ACCOUNT_ID, request);
 
@@ -210,6 +220,7 @@ class UpgradeServiceTest {
         when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Set<InstanceMetaData> allInstances = Set.of();
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenThrow(new BadRequestException("No primary Gateway found"));
 
         assertThrows(BadRequestException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
 
@@ -230,12 +241,31 @@ class UpgradeServiceTest {
         ImageInfoResponse selectedImage = mockSelectedImage(request, stack);
         ImageInfoResponse currentImage = mockCurrentImage(stack);
         mockOperation(OperationState.REJECTED);
+        when(instanceMetaDataService.getPrimaryGwInstance(allInstances)).thenReturn(createPgwIm());
+        when(instanceMetaDataService.getNonPrimaryGwInstances(allInstances)).thenReturn(createGwImSet());
 
         assertThrows(BadRequestException.class, () -> underTest.upgradeFreeIpa(ACCOUNT_ID, request));
 
         verify(validationService).validateEntitlement(ACCOUNT_ID);
         verify(validationService).validateStackForUpgrade(allInstances, stack);
         verify(validationService).validateSelectedImageDifferentFromCurrent(currentImage, selectedImage);
+    }
+
+    private InstanceMetaData createPgwIm() {
+        InstanceMetaData im1 = new InstanceMetaData();
+        im1.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        im1.setInstanceId("pgw");
+        return im1;
+    }
+
+    private Set<InstanceMetaData> createGwImSet() {
+        InstanceMetaData im2 = new InstanceMetaData();
+        im2.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        im2.setInstanceId("im2");
+        InstanceMetaData im3 = new InstanceMetaData();
+        im3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        im3.setInstanceId("im3");
+        return Set.of(im2, im3);
     }
 
     private Set<InstanceMetaData> createValidImSet() {
