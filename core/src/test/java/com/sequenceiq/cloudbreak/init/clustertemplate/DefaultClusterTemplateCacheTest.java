@@ -19,6 +19,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.DefaultClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.converter.v4.clustertemplate.DefaultClusterTemplateV4RequestToClusterTemplateConverter;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterTemplate;
+import com.sequenceiq.cloudbreak.init.blueprint.BlueprintEntities;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultClusterTemplateCacheTest {
@@ -28,6 +29,9 @@ public class DefaultClusterTemplateCacheTest {
 
     @Mock
     private DefaultClusterTemplateV4RequestToClusterTemplateConverter defaultClusterTemplateV4RequestToClusterTemplateConverter;
+
+    @Mock
+    private BlueprintEntities blueprintEntities;
 
     @Before
     public void setUp() throws Exception {
@@ -84,6 +88,7 @@ public class DefaultClusterTemplateCacheTest {
                 .thenReturn(clusterTemplateAws)
                 .thenReturn(clusterTemplateAwsRanger)
                 .thenReturn(clusterTemplateAzure);
+        when(blueprintEntities.getDefaults()).thenReturn(Map.of("7.2.6", "7.2.6 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering"));
 
         underTest.setClusterTemplates(Collections.emptyList());
         underTest.loadClusterTemplatesFromFile();
