@@ -35,8 +35,10 @@ public class Resource {
     @Convert(converter = CommonStatusConverter.class)
     private CommonStatus resourceStatus;
 
+    @Column(nullable = false)
     private String resourceName;
 
+    @Column(columnDefinition = "TEXT")
     private String resourceReference;
 
     public Resource() {
