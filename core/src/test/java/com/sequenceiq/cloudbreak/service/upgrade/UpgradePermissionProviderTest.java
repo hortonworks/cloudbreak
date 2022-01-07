@@ -225,6 +225,6 @@ public class UpgradePermissionProviderTest {
         // cdh
         packageVersions.put(ImagePackageVersion.STACK.getKey(), version);
         packageVersions.put(ImagePackageVersion.CDH_BUILD_NUMBER.getKey(), buildNumber);
-        return new Image(null, null, null, null, null, null, null, null, null, null, packageVersions, null, null, null, true, null, null);
+        return new Image(null, null, null, null, null, null, null, null, null, null, null, packageVersions, null, null, null, true, null, null);
     }
 }

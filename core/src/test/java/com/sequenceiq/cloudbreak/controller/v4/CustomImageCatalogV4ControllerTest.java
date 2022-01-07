@@ -240,6 +240,6 @@ public class CustomImageCatalogV4ControllerTest {
     }
 
     private static Image createTestImage() {
-        return new Image(null, 12345L, null, null, null, null, null, null, null, null, null, null, null, null, true, null, null);
+        return new Image(null, 12345L, null, null, null, null, null, null, null, null, null, null, null, null, null, true, null, null);
     }
 }

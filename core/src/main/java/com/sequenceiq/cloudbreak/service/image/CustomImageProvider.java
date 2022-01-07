@@ -29,6 +29,7 @@ public class CustomImageProvider {
         Image image = statedImage.getImage();
         Image result = new Image(image.getDate(),
                 customImage.getCreated(),
+                customImage.getCreated(),
                 customImage.getDescription(),
                 image.getOs(),
                 customImage.getName(),

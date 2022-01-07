@@ -973,7 +973,7 @@ public class ImageCatalogServiceTest {
     }
 
     private Image getImage() {
-        return new Image(null, null, null, null, "Test uuid", null, null, null, null, null, null, null, null, null, true, null, null);
+        return new Image(null, null, null, null, null, "Test uuid", null, null, null, null, null, null, null, null, null, true, null, null);
     }
 
     private CustomImage getCustomImage(ImageType imageType, String customizedImageId, String baseParcelUrl) {

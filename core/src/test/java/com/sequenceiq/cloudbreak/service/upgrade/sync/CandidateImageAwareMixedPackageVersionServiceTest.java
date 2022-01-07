@@ -207,7 +207,7 @@ public class CandidateImageAwareMixedPackageVersionServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createCatalogImage(String imageId, Long created, String cmVersion) {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, created, null, null, imageId, null, null, null, null, null,
+        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, created, null, null, null, imageId, null, null, null, null, null,
                 Map.of(CM.getKey(), cmVersion), null, Collections.emptyList(), null, false, null, null);
     }
 

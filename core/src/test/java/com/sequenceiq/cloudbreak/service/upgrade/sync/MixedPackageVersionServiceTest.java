@@ -195,12 +195,12 @@ public class MixedPackageVersionServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createCatalogImage(String imageId, String cmVersion) {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, null, imageId, null, null, null, null, null,
+        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, null, null, imageId, null, null, null, null, null,
                 Map.of(CM.getKey(), cmVersion), null, Collections.emptyList(), null, false, null, null);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createCatalogImage(String cmVersion) {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, null, null, null, null, null, null, null,
+        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, null, null, null, null, null, null, null, null,
                 Map.of(CM.getKey(), cmVersion), null, Collections.emptyList(), null, false, null, null);
     }
 
