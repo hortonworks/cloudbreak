@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -378,6 +379,32 @@ public class AwsNativeInstanceResourceBuilderTest {
         when(volumeBuilderUtil.getRootVolume(any(AwsInstanceView.class), eq(group), eq(cloudStack), eq(ac))).thenReturn(root);
         Collection<BlockDeviceMapping> actual = underTest.blocks(group, cloudStack, ac);
         Assertions.assertEquals(1, actual.size());
+    }
+
+    @Test
+    public void testBlocksWhenEphemeralBlockDeviceMappingsListIsEmpty() {
+        BlockDeviceMapping root = new BlockDeviceMapping();
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(volumeBuilderUtil.getEphemeral(any())).thenReturn(new ArrayList<>());
+        when(volumeBuilderUtil.getRootVolume(any(AwsInstanceView.class), eq(group), eq(cloudStack), eq(ac))).thenReturn(root);
+        Collection<BlockDeviceMapping> actual = underTest.blocks(group, cloudStack, ac);
+        Assertions.assertEquals(1, actual.size());
+    }
+
+    @Test
+    public void testBlocksWhenEphemeralBlockDeviceMappingsListIsNotEmpty() {
+        BlockDeviceMapping root = new BlockDeviceMapping();
+        BlockDeviceMapping ephemeralBlockDevice1 = new BlockDeviceMapping()
+                .withDeviceName("/dev/xvdb")
+                .withVirtualName("ephemeral0");
+        BlockDeviceMapping ephemeralBlockDevice2 = new BlockDeviceMapping()
+                .withDeviceName("/dev/xvdc")
+                .withVirtualName("ephemeral1");
+        when(group.getReferenceInstanceTemplate()).thenReturn(instanceTemplate);
+        when(volumeBuilderUtil.getEphemeral(any())).thenReturn(List.of(ephemeralBlockDevice1, ephemeralBlockDevice2));
+        when(volumeBuilderUtil.getRootVolume(any(AwsInstanceView.class), eq(group), eq(cloudStack), eq(ac))).thenReturn(root);
+        Collection<BlockDeviceMapping> actual = underTest.blocks(group, cloudStack, ac);
+        Assertions.assertEquals(3, actual.size());
     }
 
     @Test

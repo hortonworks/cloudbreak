@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.cloud.aws.common.resource;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -58,24 +60,42 @@ public class VolumeBuilderUtilTest {
     @Test
     public void testGetEphemeralWhenVolumesEmpty() {
         when(awsInstanceView.getTemporaryStorageCount()).thenReturn(0L);
-        BlockDeviceMapping actual = underTest.getEphemeral(awsInstanceView);
-        Assertions.assertNull(actual);
+
+        List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
+
+        Assertions.assertNotNull(actual);
+        Assertions.assertTrue(actual.isEmpty());
     }
 
     @Test
     public void testGetEphemeralWhenVolumesNotEmpty() {
         when(awsInstanceView.getTemporaryStorageCount()).thenReturn(1L);
-        BlockDeviceMapping actual = underTest.getEphemeral(awsInstanceView);
-        Assertions.assertEquals("/dev/xvdb", actual.getDeviceName());
-        Assertions.assertEquals("ephemeral0", actual.getVirtualName());
+
+        List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
+
+        Assertions.assertNotNull(actual);
+        Assertions.assertFalse(actual.isEmpty());
+        BlockDeviceMapping theSingleBlockDeviceMapping = actual.get(0);
+        Assertions.assertEquals("/dev/xvdb", theSingleBlockDeviceMapping.getDeviceName());
+        Assertions.assertEquals("ephemeral0", theSingleBlockDeviceMapping.getVirtualName());
     }
 
     @Test
     public void testGetEphemeralWhenHas25Volumes() {
-        when(awsInstanceView.getTemporaryStorageCount()).thenReturn(25L);
-        BlockDeviceMapping actual = underTest.getEphemeral(awsInstanceView);
-        Assertions.assertEquals("/dev/xvdz", actual.getDeviceName());
-        Assertions.assertEquals("ephemeral24", actual.getVirtualName());
+        long storageCount = 25L;
+        when(awsInstanceView.getTemporaryStorageCount()).thenReturn(storageCount);
+
+        List<BlockDeviceMapping> actual = underTest.getEphemeral(awsInstanceView);
+
+        Assertions.assertNotNull(actual);
+        Assertions.assertFalse(actual.isEmpty());
+        Assertions.assertEquals(storageCount, actual.size());
+        Assertions.assertTrue(actual.stream()
+                .anyMatch(deviceMapping -> "/dev/xvdb".equals(deviceMapping.getDeviceName())
+                        && "ephemeral0".equals(deviceMapping.getVirtualName())));
+        Assertions.assertTrue(actual.stream()
+                .anyMatch(deviceMapping -> "/dev/xvdz".equals(deviceMapping.getDeviceName())
+                        && "ephemeral24".equals(deviceMapping.getVirtualName())));
     }
 
     @Test
