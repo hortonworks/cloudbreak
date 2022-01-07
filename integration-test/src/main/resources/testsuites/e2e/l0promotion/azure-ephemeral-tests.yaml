@@ -1,0 +1,5 @@
+name: "azure-ephemeral-tests"
+tests:
+  - name: "azure-ephemeral-tests"
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.ephemeral.DistroXRepairTests
