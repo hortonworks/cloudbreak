@@ -43,6 +43,7 @@ import com.sequenceiq.datalake.service.AbstractSdxAction;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
+import com.sequenceiq.flow.core.Flow;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.core.FlowParameters;
@@ -316,6 +317,8 @@ public class DatalakeRestoreActions {
                 LOGGER.error("Datalake database restore could not be started for datalake with id: {}", payload.getResourceId(), exception);
                 String operationId = (String) variables.get(OPERATION_ID);
                 sdxBackupRestoreService.updateDatabaseStatusEntry(operationId, SdxOperationStatus.FAILED, exception.getLocalizedMessage());
+                Flow flow = getFlow(context.getFlowParameters().getFlowId());
+                flow.setFlowFailed(payload.getException());
                 sendEvent(context, DATALAKE_DATABASE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
 
@@ -344,7 +347,8 @@ public class DatalakeRestoreActions {
                         "Datalake is running, Datalake restore failed", payload.getResourceId());
 
                 eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FAILED);
-
+                Flow flow = getFlow(context.getFlowParameters().getFlowId());
+                flow.setFlowFailed(payload.getException());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FAILED, sdxCluster);
                 sendEvent(context, DATALAKE_RESTORE_FAILURE_HANDLED_EVENT.event(), payload);
             }
