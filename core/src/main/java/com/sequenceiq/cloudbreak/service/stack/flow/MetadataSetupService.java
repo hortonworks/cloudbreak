@@ -21,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -36,6 +37,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -47,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -74,6 +77,9 @@ public class MetadataSetupService {
 
     @Inject
     private LoadBalancerConfigService loadBalancerConfigService;
+
+    @Inject
+    private StackService stackService;
 
     @Inject
     private Clock clock;
@@ -361,6 +367,29 @@ public class MetadataSetupService {
                 loadBalancerEntry.setIp(cloudLoadBalancerMetadata.getIp());
                 loadBalancerEntry.setType(cloudLoadBalancerMetadata.getType());
                 String endpoint = loadBalancerConfigService.generateLoadBalancerEndpoint(stack);
+
+                List<StackStatusView> stoppedDatalakes = stackService.getByEnvironmentCrnAndStackType(stack.getEnvironmentCrn(), StackType.DATALAKE)
+                        .stream().filter(s -> s.getStatus().getStatus().isStopState()).collect(Collectors.toList());
+                if (!stoppedDatalakes.isEmpty()) {
+                    /* Starts to check for a situation where we are resizing a datalake that did not previously have loadbalancers
+                        so that we can use the same endpoint name for a seamless transistion
+                     */
+                    LOGGER.info("Using old datalake endpoint name for resized datalake: {}, env: {}", stack.getName(), stack.getEnvironmentCrn());
+                    if (stoppedDatalakes.size() > 1) {
+                        String ids = stoppedDatalakes.stream().map(StackStatusView::getId).map(Object::toString).collect(Collectors.joining(","));
+                        LOGGER.warn("more than one datalake found to resize from: {}", ids);
+                    }
+                    Long oldId = stoppedDatalakes.get(0).getId();
+
+                    Set<LoadBalancer> oldLoadbalancers = loadBalancerPersistenceService.findByStackId(oldId);
+                    if (oldLoadbalancers.isEmpty()) {
+                        Stack oldStack = stackService.getByIdWithGatewayInTransaction(oldId);
+                        if (stack.getDisplayName().equals(oldStack.getDisplayName())) {
+                            endpoint = oldStack.getPrimaryGatewayInstance().getShortHostname();
+                        }
+                    }
+                }
+
                 LOGGER.info("Saving load balancer endpoint as: {}", endpoint);
                 loadBalancerEntry.setEndpoint(endpoint);
                 loadBalancerEntry.setProviderConfig(loadBalancerConfigConverter.convertLoadBalancer(stack.getCloudPlatform(),
