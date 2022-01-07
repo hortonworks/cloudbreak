@@ -1,5 +1,5 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.6-cldr1-jdk-slim-buster
-MAINTAINER info@hortonworks.com
+FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.13-cldr-jre-slim-buster-15122021
+MAINTAINER info@cloudera.com
 
 # REPO URL to download jar
 ARG REPO_URL=https://repo.hortonworks.com/content/repositories/releases
