@@ -1069,7 +1069,7 @@ class ClouderaManagerModificationServiceTest {
     }
 
     @Test
-    void testDeployConfigAndRefreshCMStaleServicesWhenRefreshFailAndForcedIsFalseFail() throws CloudbreakException, ApiException {
+    void testDeployConfigAndRefreshCMStaleServicesWhenRefreshFailAndForcedIsFalseFail() throws ApiException {
         ApiService apiService = new ApiService().configStalenessStatus(ApiConfigStalenessStatus.STALE)
                 .clientConfigStalenessStatus(ApiConfigStalenessStatus.FRESH);
         List<ApiService> apiServices = List.of(apiService);
@@ -1156,10 +1156,10 @@ class ClouderaManagerModificationServiceTest {
         verify(clouderaManagerParcelDecommissionService, times(1)).removeUnusedParcels(apiClientMock, parcelsResourceApi, parcelResourceApi, stack,
                 usedParcelComponentNames, parcelNamesFromImage);
         assertEquals(1, operationStatus.getSuccessful().size());
-        assertEquals("version5", operationStatus.getSuccessful().get("product5"));
+        assertTrue(operationStatus.getSuccessful().containsEntry("product5", "version5"));
         assertEquals(2, operationStatus.getFailed().size());
-        assertEquals("version3", operationStatus.getFailed().get("spark3"));
-        assertEquals("version4", operationStatus.getFailed().get("product4"));
+        assertTrue(operationStatus.getFailed().containsEntry("spark3", "version3"));
+        assertTrue(operationStatus.getFailed().containsEntry("product4", "version4"));
     }
 
     @Test

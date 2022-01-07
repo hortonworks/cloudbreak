@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
@@ -13,6 +12,7 @@ import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiParcel;
 import com.cloudera.api.swagger.model.ApiParcelList;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
@@ -22,10 +22,10 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerParcelDeletedListenerTask.class);
 
-    private Map<String, String> parcelVersions;
+    private final Multimap<String, String> parcelVersions;
 
     public ClouderaManagerParcelDeletedListenerTask(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService, Map<String, String> parcelVersions) {
+            ClusterEventService clusterEventService, Multimap<String, String> parcelVersions) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
         this.parcelVersions = parcelVersions;
     }
@@ -37,7 +37,7 @@ public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaMa
         ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());
         List<ApiParcel> existedParcels = collectExistingParcels(parcels);
         if (existedParcels.isEmpty()) {
-            LOGGER.debug("Parcels are deleted succesfully.");
+            LOGGER.debug("Parcels are deleted successfully.");
             return true;
         } else {
             LOGGER.debug("Some parcels are not yet deleted: [{}].", getJoinedParcelStages(existedParcels));
@@ -58,7 +58,7 @@ public class ClouderaManagerParcelDeletedListenerTask extends AbstractClouderaMa
     }
 
     private boolean isMatchingParcel(ApiParcel parcel) {
-        return parcelVersions.containsKey(parcel.getProduct()) && parcelVersions.get(parcel.getProduct()).equals(parcel.getVersion());
+        return parcelVersions.containsEntry(parcel.getProduct(), parcel.getVersion());
     }
 
     private String getJoinedParcelStages(List<ApiParcel> notActivated) {

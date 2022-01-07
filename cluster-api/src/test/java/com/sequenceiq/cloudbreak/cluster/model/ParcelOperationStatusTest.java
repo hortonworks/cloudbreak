@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cluster.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Map;
 
@@ -17,9 +18,9 @@ public class ParcelOperationStatusTest {
         ParcelOperationStatus result = status1.merge(status2).merge(status3);
 
         assertEquals(1, result.getSuccessful().size());
-        assertEquals("v3", result.getSuccessful().get("parcel3"));
+        assertTrue(result.getSuccessful().containsEntry("parcel3", "v3"));
         assertEquals(2, result.getFailed().size());
-        assertEquals("v1", result.getFailed().get("parcel1"));
-        assertEquals("v2", result.getFailed().get("parcel2"));
+        assertTrue(result.getFailed().containsEntry("parcel1", "v1"));
+        assertTrue(result.getFailed().containsEntry("parcel2", "v2"));
     }
 }
