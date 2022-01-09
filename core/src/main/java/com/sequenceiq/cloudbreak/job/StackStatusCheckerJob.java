@@ -209,7 +209,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.EXTERNAL_DATABASE_STOP_FAILED,
                 Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
                 Status.EXTERNAL_DATABASE_STOP_FINISHED,
-                Status.RECOVERY_FAILED
+                Status.RECOVERY_FAILED,
+                Status.UPGRADE_CCM_FAILED,
+                Status.UPGRADE_CCM_FINISHED,
+                Status.UPGRADE_CCM_IN_PROGRESS
         );
     }
 

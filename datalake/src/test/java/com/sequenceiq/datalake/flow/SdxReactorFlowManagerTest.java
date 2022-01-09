@@ -1,21 +1,24 @@
 package com.sequenceiq.datalake.flow;
 
 import static com.sequenceiq.datalake.flow.datalake.upgrade.DatalakeUpgradeEvent.DATALAKE_UPGRADE_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
@@ -35,8 +38,8 @@ import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 import reactor.bus.Event;
 import reactor.bus.EventBus;
 
-@RunWith(MockitoJUnitRunner.class)
-public class SdxReactorFlowManagerTest {
+@ExtendWith(MockitoExtension.class)
+class SdxReactorFlowManagerTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
@@ -68,16 +71,16 @@ public class SdxReactorFlowManagerTest {
 
     private SdxCluster sdxCluster;
 
-    @Before
-    public void setUp() {
+    @BeforeEach
+    void setUp() {
         sdxCluster = getValidSdxCluster();
         BaseFlowEvent baseFlowEvent = new BaseFlowEvent("dontcare", 1L, "crn");
-        when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
+        lenient().when(eventFactory.createEventWithErrHandler(anyMap(), any(Acceptable.class)))
                 .thenReturn(new Event(baseFlowEvent));
     }
 
     @Test
-    public void testSdxBackupOnUpgradeAwsSupported() {
+    void testSdxBackupOnUpgradeAwsSupported() {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
@@ -103,7 +106,7 @@ public class SdxReactorFlowManagerTest {
     }
 
     @Test
-    public void testSdxBackupOnUpgradeAzureSupported() {
+    void testSdxBackupOnUpgradeAzureSupported() {
         sdxCluster = getValidSdxCluster("7.2.2");
         sdxCluster.setRangerRazEnabled(false);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
@@ -120,7 +123,7 @@ public class SdxReactorFlowManagerTest {
     }
 
     @Test
-    public void testSdxBackupOnUpgradeForMockPlatform() {
+    void testSdxBackupOnUpgradeForMockPlatform() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setCloudPlatform("MOCK");
         sdxCluster = getValidSdxCluster("7.2.");
@@ -140,7 +143,7 @@ public class SdxReactorFlowManagerTest {
     }
 
     @Test
-    public void testSdxBackupOnUpgradeForMockPlatformWithEmptyFIleSystemType() {
+    void testSdxBackupOnUpgradeForMockPlatformWithEmptyFIleSystemType() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setCloudPlatform("MOCK");
         sdxCluster = getValidSdxCluster("7.2.9");
@@ -159,7 +162,7 @@ public class SdxReactorFlowManagerTest {
     }
 
     @Test
-    public void testSdxBackupOnUpgradeUnSupportedRuntimes() {
+    void testSdxBackupOnUpgradeUnSupportedRuntimes() {
         sdxCluster = getValidSdxCluster("7.2.0");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
@@ -194,7 +197,7 @@ public class SdxReactorFlowManagerTest {
     }
 
     @Test
-    public void testSdxBackupOnUpgradeRazEnabled() {
+    void testSdxBackupOnUpgradeRazEnabled() {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(true);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
@@ -206,20 +209,21 @@ public class SdxReactorFlowManagerTest {
         verify(reactor, times(0)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
     }
 
-    @Test (expected = BadRequestException.class)
-    public void testSdxBackupOnUpgradeRequestEnabledFailure() {
+    @Test
+    void testSdxBackupOnUpgradeRequestEnabledFailure() {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenThrow(new BadRequestException("No backup location"));
         when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
-        ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
-                underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP));
+        assertThatThrownBy(() -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP)))
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
-    public void testSdxBackupOnUpgradeRequestDisabled() {
+    void testSdxBackupOnUpgradeRequestDisabled() {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
@@ -233,7 +237,7 @@ public class SdxReactorFlowManagerTest {
     }
 
     @Test
-    public void testSdxUpgradeRequestBackupNotRequested() {
+    void testSdxUpgradeRequestBackupNotRequested() {
         sdxCluster = getValidSdxCluster("7.2.10");
         sdxCluster.setRangerRazEnabled(false);
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.S3);
@@ -243,6 +247,16 @@ public class SdxReactorFlowManagerTest {
         } catch (Exception ignored) {
         }
         verify(reactor, times(1)).notify(eq(DATALAKE_UPGRADE_EVENT.event()), any(Event.class));
+    }
+
+    @Test
+    void testTriggerCcmUpgradeFlow() {
+        sdxCluster = getValidSdxCluster("7.2.10");
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerCcmUpgradeFlow(sdxCluster));
+        } catch (Exception ignored) {
+        }
+        verify(reactor, times(1)).notify(eq(UPGRADE_CCM_UPGRADE_STACK_EVENT.event()), any(Event.class));
     }
 
     private SdxCluster getValidSdxCluster() {

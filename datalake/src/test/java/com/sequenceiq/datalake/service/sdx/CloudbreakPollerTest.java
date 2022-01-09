@@ -1,5 +1,6 @@
-package com.sequenceiq.datalake.service.sdx.cert;
+package com.sequenceiq.datalake.service.sdx;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,7 +27,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackStatusV4Re
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.statestore.DatalakeInMemoryStateStore;
-import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.flowcheck.FlowState;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
@@ -136,6 +136,40 @@ class CloudbreakPollerTest {
                 () -> underTest.pollStartUntilAvailable(sdxCluster, pollingConfig));
 
         assertEquals("Start failed on 'clusterName' cluster. Reason: testMessage", exception.getMessage());
+    }
+
+    @Test
+    public void testCcmUpgradeFinished() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.AVAILABLE, Status.AVAILABLE));
+
+        underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig);
+    }
+
+    @Test
+    public void testCcmUpgradeFailedStack() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.UPGRADE_CCM_FAILED, "stack error"));
+
+        assertThatThrownBy(() -> underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig))
+                .hasMessage("CCM upgrade failed on 'clusterName' cluster. Reason: stack error")
+                .isInstanceOf(UserBreakException.class);
+    }
+
+    @Test
+    public void testCcmUpgradeFailedCluster() {
+        whenCheckFlowState().thenReturn(FlowState.UNKNOWN);
+        whenCheckStackStatus()
+                .thenReturn(statusResponse(Status.UPGRADE_CCM_IN_PROGRESS, Status.UPGRADE_CCM_IN_PROGRESS))
+                .thenReturn(statusResponse(Status.AVAILABLE, Status.UPGRADE_CCM_FAILED, "cluster error"));
+
+        assertThatThrownBy(() -> underTest.pollCcmUpgradeUntilAvailable(sdxCluster, pollingConfig))
+                .hasMessage("CCM upgrade failed on 'clusterName' cluster. Reason: cluster error")
+                .isInstanceOf(UserBreakException.class);
     }
 
     private OngoingStubbing<FlowState> whenCheckFlowState() {
