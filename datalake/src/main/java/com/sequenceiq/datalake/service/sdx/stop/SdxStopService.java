@@ -19,7 +19,7 @@ import com.sequenceiq.datalake.service.FreeipaService;
 import com.sequenceiq.datalake.service.sdx.DistroxService;
 import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
-import com.sequenceiq.datalake.service.sdx.cert.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
 import com.sequenceiq.datalake.service.sdx.flowcheck.CloudbreakFlowService;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;

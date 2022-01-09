@@ -11,6 +11,7 @@ import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
 import com.sequenceiq.cloudbreak.auth.security.internal.TenantAwareParam;
 import com.sequenceiq.cloudbreak.structuredevent.rest.annotation.AccountEntityType;
 import com.sequenceiq.datalake.entity.SdxCluster;
@@ -55,7 +56,7 @@ public class SdxUpgradeController implements SdxUpgradeEndpoint {
 
     @Override
     @InternalOnly
-    public SdxCcmUpgradeResponse upgradeCcm(@TenantAwareParam String environmentCrn) {
+    public SdxCcmUpgradeResponse upgradeCcm(@ResourceCrn String environmentCrn, @InitiatorUserCrn String initiatorUserCrn) {
         return sdxCcmUpgradeService.upgradeCcm(environmentCrn);
     }
 

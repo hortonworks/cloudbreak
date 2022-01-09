@@ -14,6 +14,7 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.repair.SdxRepairEvent.SDX_REPAIR_EVENT;
 import static com.sequenceiq.datalake.flow.start.SdxStartEvent.SDX_START_EVENT;
 import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_EVENT;
+import static com.sequenceiq.datalake.flow.upgrade.ccm.UpgradeCcmStateSelectors.UPGRADE_CCM_UPGRADE_STACK_EVENT;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -39,8 +40,8 @@ import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.cert.renew.event.SdxStartCertRenewalEvent;
 import com.sequenceiq.datalake.flow.cert.rotation.event.SdxStartCertRotationEvent;
 import com.sequenceiq.datalake.flow.datalake.cmsync.event.SdxCmSyncStartEvent;
-import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.recovery.event.DatalakeRecoveryStartEvent;
+import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeFlowChainStartEvent;
 import com.sequenceiq.datalake.flow.datalake.upgrade.event.DatalakeUpgradeStartEvent;
 import com.sequenceiq.datalake.flow.delete.event.SdxDeleteStartEvent;
 import com.sequenceiq.datalake.flow.detach.event.DatalakeResizeFlowChainStartEvent;
@@ -53,15 +54,16 @@ import com.sequenceiq.datalake.flow.dr.restore.event.DatalakeTriggerRestoreEvent
 import com.sequenceiq.datalake.flow.repair.event.SdxRepairStartEvent;
 import com.sequenceiq.datalake.flow.start.event.SdxStartStartEvent;
 import com.sequenceiq.datalake.flow.stop.event.SdxStartStopEvent;
+import com.sequenceiq.datalake.flow.upgrade.ccm.event.UpgradeCcmStackEvent;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
-import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
-import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.datalake.settings.SdxRepairSettings;
+import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
+import com.sequenceiq.flow.service.FlowNameFormatService;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
 import com.sequenceiq.sdx.api.model.SdxRepairRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
@@ -252,9 +254,10 @@ public class SdxReactorFlowManager {
     }
 
     public FlowIdentifier triggerCcmUpgradeFlow(SdxCluster cluster) {
-        LOGGER.info("Trigger CCM Upgrade on Datalake repair for: {}", cluster);
-        // TODO: add CCM upgrade flow and start it
-        return FlowIdentifier.notTriggered();
+        LOGGER.info("Trigger CCM Upgrade on Datalake for: {}", cluster);
+        String initiatorUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        UpgradeCcmStackEvent event = new UpgradeCcmStackEvent(UPGRADE_CCM_UPGRADE_STACK_EVENT.event(), cluster, initiatorUserCrn);
+        return notify(event.selector(), event);
     }
 
     private FlowIdentifier notify(String selector, SdxEvent acceptable) {
