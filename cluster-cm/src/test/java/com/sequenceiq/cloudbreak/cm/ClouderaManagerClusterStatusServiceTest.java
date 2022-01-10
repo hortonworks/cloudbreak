@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.F
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.FULL_WITH_EXPLANATION_VIEW;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_AGENT_CERTIFICATE_EXPIRY;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_SCM_HEALTH;
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.SUMMARY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -250,6 +251,18 @@ public class ClouderaManagerClusterStatusServiceTest {
     }
 
     @Test
+    public void getDecommissionedHostsFromCM() throws ApiException {
+        hostsAre(
+                new ApiHost().hostname("host1").maintenanceMode(true),
+                new ApiHost().hostname("host2").maintenanceMode(false)
+        );
+
+        List<String> hosts = subject.getDecommissionedHostsFromCM();
+        assertEquals(1, hosts.size());
+        assertEquals("host1", hosts.get(0));
+    }
+
+    @Test
     public void collectsExtendedHostHealthIfAvailable() throws ApiException {
         hostsAre(
                 new ApiHost().hostname("host1")
@@ -431,6 +444,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         Arrays.stream(hosts).forEach(host -> host.addRoleRefsItem(roleRef(ApiHealthSummary.GOOD)));
         ApiHostList list = new ApiHostList().items(Arrays.asList(hosts));
         when(hostsApi.readHosts(null, null, FULL_VIEW)).thenReturn(list);
+        when(hostsApi.readHosts(null, null, SUMMARY)).thenReturn(list);
         when(hostsApi.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW)).thenReturn(list);
     }
 

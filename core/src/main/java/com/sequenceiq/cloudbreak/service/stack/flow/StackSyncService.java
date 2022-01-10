@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
@@ -27,6 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
@@ -212,21 +214,38 @@ public class StackSyncService {
         }
     }
 
-    private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
+    @VisibleForTesting
+    void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
             Set<InstanceMetaData> instances) {
         Status status = stack.getStatus();
+        if (isAllStopped(instanceStateCounts, instances.size())) {
+            checkAndUpdateStackStatus(stack, status, STOPPED, DetailedStackStatus.STOPPED, SYNC_STATUS_REASON);
+            return;
+        }
+        if (isAllDeletedOnProvider(instanceStateCounts, instances.size())) {
+            checkAndUpdateStackStatus(stack, status, DELETE_FAILED, DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON);
+            return;
+        }
         if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {
-            if (syncConfig.isCmServerRunning()) {
-                if (status != AVAILABLE && status != NODE_FAILURE) {
-                    updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON);
-                }
-            } else if (status != UNREACHABLE) {
-                updateStackStatus(stack.getId(), DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING);
+            if (!syncConfig.isCmServerRunning()) {
+                checkAndUpdateStackStatus(stack, status, UNREACHABLE, DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING, CM_SERVER_NOT_RESPONDING);
+                return;
             }
-        } else if (isAllStopped(instanceStateCounts, instances.size()) && status != STOPPED) {
-            updateStackStatus(stack.getId(), DetailedStackStatus.STOPPED, SYNC_STATUS_REASON);
-        } else if (isAllDeletedOnProvider(instanceStateCounts, instances.size()) && status != DELETE_FAILED) {
-            updateStackStatus(stack.getId(), DetailedStackStatus.DELETED_ON_PROVIDER_SIDE, SYNC_STATUS_REASON);
+            if (status == NODE_FAILURE) {
+                return;
+            }
+            if (instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
+                checkAndUpdateStackStatus(
+                        stack, status, AVAILABLE_WITH_STOPPED_INSTANCES, DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES, SYNC_STATUS_REASON);
+                return;
+            }
+            checkAndUpdateStackStatus(stack, status, AVAILABLE, DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON);
+        }
+    }
+
+    private void checkAndUpdateStackStatus(Stack stack, Status currentStatus, Status excludedStatus, DetailedStackStatus newStatus, String syncStatusReason) {
+        if (currentStatus != excludedStatus) {
+            updateStackStatus(stack.getId(), newStatus, syncStatusReason);
         }
     }
 
