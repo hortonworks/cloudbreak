@@ -14,6 +14,7 @@ public enum Status {
     REQUESTED(StatusKind.PROGRESS),
     CREATE_IN_PROGRESS(StatusKind.PROGRESS),
     AVAILABLE(StatusKind.FINAL),
+    AVAILABLE_WITH_STOPPED_INSTANCES(StatusKind.FINAL),
     UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     UPDATE_REQUESTED(StatusKind.PROGRESS),
     UPDATE_FAILED(StatusKind.FINAL),
@@ -102,7 +103,8 @@ public enum Status {
 
     public boolean isRemovableStatus() {
         return EnumSet.of(AVAILABLE, UPDATE_FAILED, RECOVERY_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED, UPGRADE_CCM_FAILED).contains(this);
+                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED, UPGRADE_CCM_FAILED,
+                AVAILABLE_WITH_STOPPED_INSTANCES).contains(this);
     }
 
     public boolean isAvailable() {

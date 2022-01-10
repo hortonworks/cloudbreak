@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,6 +95,13 @@ public class ClouderaManagerClusterCommissionServiceTest {
         Map<String, InstanceMetaData> hosts = mock(Map.class);
         underTest.recommissionClusterNodes(hosts);
         verify(clouderaManagerCommissioner).recommissionNodes(stack, hosts, apiClient);
+    }
+
+    @Test
+    public void testRecommissionClusterHosts() {
+        List<String> hosts = mock(List.class);
+        underTest.recommissionHosts(hosts);
+        verify(clouderaManagerCommissioner).recommissionHosts(stack, apiClient, hosts);
     }
 
     private Stack createStack() {

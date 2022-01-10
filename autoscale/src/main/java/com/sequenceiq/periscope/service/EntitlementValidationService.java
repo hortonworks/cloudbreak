@@ -31,4 +31,20 @@ public class EntitlementValidationService {
         }
         return entitled;
     }
+
+    @Cacheable(cacheNames = "accountEntitlementCache", key = "{#accountId,#cloudPlatform}")
+    public boolean stopStartAutoscalingEntitlementEnabled(String accountId, String cloudPlatform) {
+        boolean entitled = autoscalingEntitlementEnabled(accountId, cloudPlatform);
+        if (!entitled) {
+            return false;
+        }
+        if ("AWS".equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.awsStopStartScalingEnabled(accountId);
+        } else if ("AZURE".equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.azureStopStartScalingEnabled(accountId);
+        } else if ("GCP".equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.gcpStopStartScalingEnabled(accountId);
+        }
+        return entitled;
+    }
 }
