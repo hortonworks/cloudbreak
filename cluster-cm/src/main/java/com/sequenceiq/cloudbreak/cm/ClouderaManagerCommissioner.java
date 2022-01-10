@@ -60,32 +60,56 @@ public class ClouderaManagerCommissioner {
         //  Ideally without needing to persist anything (commandId etc)
         // TODO CB-15132: Deal with situations where CM itself is unavailable. Go back and STOP resources on the cloud-provider.
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
+        ApiHostList hostRefList;
         try {
-            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
-            // TODO CB-14929 Maybe move this to a trace level log.
-            LOGGER.debug("hostsAvailableFromCM: [{}]", hostRefList.getItems().stream().map(ApiHost::getHostname));
+            hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
+        } catch (ApiException e) {
+            LOGGER.error("Failed to communicate with Cloudera Manager", e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+        // TODO CB-14929 Maybe move this to a trace level log.
+        LOGGER.debug("hostsAvailableFromCM: [{}]", hostRefList.getItems().stream().map(ApiHost::getHostname));
 
-            // Not considering the commission states of the nodes. Nodes could be COMMISSIONED with services in STOPPED state.
-            List<String> hostsAvailableForRecommission = hostRefList.getItems().stream()
-                    .filter(apiHostRef -> hostsToRecommission.containsKey(apiHostRef.getHostname()))
-                    .parallel()
-                    .map(ApiHost::getHostname)
-                    .collect(Collectors.toList());
+        // Not considering the commission states of the nodes. Nodes could be COMMISSIONED with services in STOPPED state.
+        List<String> hostsAvailableForRecommission = hostRefList.getItems().stream()
+                .filter(apiHostRef -> hostsToRecommission.containsKey(apiHostRef.getHostname()))
+                .parallel()
+                .map(ApiHost::getHostname)
+                .collect(Collectors.toList());
 
-            Set<String> hostsAvailableForRecommissionSet = new HashSet<>(hostsAvailableForRecommission);
-            List<String> cmHostsUnavailableForRecommission = hostsToRecommission.keySet().stream()
-                    .filter(h -> !hostsAvailableForRecommissionSet.contains(h)).collect(Collectors.toList());
+        Set<String> hostsAvailableForRecommissionSet = new HashSet<>(hostsAvailableForRecommission);
+        List<String> cmHostsUnavailableForRecommission = hostsToRecommission.keySet().stream()
+                .filter(h -> !hostsAvailableForRecommissionSet.contains(h)).collect(Collectors.toList());
 
-            if (cmHostsUnavailableForRecommission.size() != 0) {
-                LOGGER.info("Some recommission targets are unavailable in CM: TotalRecommissionTargetCount={}, unavailableInCMCount={}, unavailableInCM=[{}]",
-                        hostsToRecommission.size(), cmHostsUnavailableForRecommission.size(), cmHostsUnavailableForRecommission);
-            }
+        if (cmHostsUnavailableForRecommission.size() != 0) {
+            LOGGER.info("Some recommission targets are unavailable in CM: TotalRecommissionTargetCount={}, unavailableInCMCount={}, unavailableInCM=[{}]",
+                    hostsToRecommission.size(), cmHostsUnavailableForRecommission.size(), cmHostsUnavailableForRecommission);
+        }
 
-            ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
+        recommissionHosts(stack, client, hostsAvailableForRecommission);
 
-            ApiHostNameList body = new ApiHostNameList().items(hostsAvailableForRecommission);
+        return hostsAvailableForRecommission.stream()
+                .map(hostsToRecommission::get)
+                .map(InstanceMetaData::getDiscoveryFQDN)
+                .collect(Collectors.toSet());
 
-            ApiCommand apiCommand = apiInstance.hostsRecommissionAndExitMaintenanceModeCommand("recommission_with_start", body);
+    }
+
+    /**
+     * Attempts to recommission the provided list of hosts
+     * @param stack the stack under consideration
+     * @param hostsToRecommission hosts to recommission
+     * @param client api client to communicate with ClouderaManager
+     * @throws CloudbreakServiceException when it fails to recommission due to timeout or cancellation
+     */
+    public void recommissionHosts(Stack stack, ApiClient client, List<String> hostsToRecommission) {
+        ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
+
+        ApiHostNameList body = new ApiHostNameList().items(hostsToRecommission);
+
+        ApiCommand apiCommand;
+        try {
+            apiCommand = apiInstance.hostsRecommissionAndExitMaintenanceModeCommand("recommission_with_start", body);
             PollingResult pollingResult = clouderaManagerPollingServiceProvider
                     .startPollingCmHostsRecommission(stack, client, apiCommand.getId());
             if (isExited(pollingResult)) {
@@ -102,15 +126,10 @@ public class ClouderaManagerCommissioner {
                 throw new CloudbreakServiceException(
                         String.format("Timeout while Cloudera Manager recommissioned hosts. CM command Id: %s", apiCommand.getId()));
             }
-
-            return hostsAvailableForRecommission.stream()
-                    .map(hostsToRecommission::get)
-                    .map(InstanceMetaData::getDiscoveryFQDN)
-                    .collect(Collectors.toSet());
         } catch (ApiException e) {
             // TODO CB-15132: Evaluate whether it is possible to figure out if a partial commission succeeded.
             //  Retry / STOP other nodes where it may have failed.
-            LOGGER.error("Failed to recommission hosts: {}", hostsToRecommission.keySet(), e);
+            LOGGER.error("Failed to recommission hosts: {}", hostsToRecommission, e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
