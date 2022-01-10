@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cluster.api;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -13,4 +14,6 @@ public interface ClusterCommissionService {
     Map<String, InstanceMetaData> collectHostsToCommission(@Nonnull HostGroup hostGroup, Set<String> hostNames);
 
     Set<String> recommissionClusterNodes(Map<String, InstanceMetaData> hostsToRecommission);
+
+    void recommissionHosts(List<String> hostsToRecommission);
 }
