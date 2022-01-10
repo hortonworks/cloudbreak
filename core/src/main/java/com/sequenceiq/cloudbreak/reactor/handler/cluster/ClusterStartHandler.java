@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,6 +29,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -82,6 +84,9 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
     @Inject
     private DatalakeService datalakeService;
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterStartRequest.class);
@@ -118,6 +123,12 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
                 requestId = apiConnectors.getConnector(stack).startClusterServices();
             } else {
                 requestId = apiConnectors.getConnector(stack).startCluster();
+            }
+            if (stackUtil.stopStartScalingEnabled(stack)) {
+                List<String> decommissionedHostsFromCM = apiConnectors.getConnector(stack).clusterStatusService().getDecommissionedHostsFromCM();
+                if (!decommissionedHostsFromCM.isEmpty()) {
+                    apiConnectors.getConnector(stack).clusterCommissionService().recommissionHosts(decommissionedHostsFromCM);
+                }
             }
             result = new ClusterStartResult(request, requestId);
         } catch (Exception e) {

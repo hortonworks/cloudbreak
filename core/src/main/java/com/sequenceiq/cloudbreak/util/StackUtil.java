@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import com.google.common.annotations.VisibleForTesting;
 import com.gs.collections.impl.tuple.AbstractImmutableEntry;
 import com.gs.collections.impl.tuple.ImmutableEntry;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
@@ -72,6 +74,9 @@ public class StackUtil {
 
     @Inject
     private GatewayConfigService gatewayConfigService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     public Set<Node> collectNodes(Stack stack) {
         Set<Node> agents = new HashSet<>();
@@ -247,5 +252,19 @@ public class StackUtil {
     public CloudCredential getCloudCredential(Stack stack) {
         Credential credential = credentialClientService.getByEnvironmentCrn(stack.getEnvironmentCrn());
         return credentialConverter.convert(credential);
+    }
+
+    public boolean stopStartScalingEnabled(Stack stack) {
+        boolean entitled = false;
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        String cloudPlatform = stack.getCloudPlatform();
+        if ("AWS".equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.awsStopStartScalingEnabled(accountId);
+        } else if ("AZURE".equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.azureStopStartScalingEnabled(accountId);
+        } else if ("GCP".equalsIgnoreCase(cloudPlatform)) {
+            entitled = entitlementService.gcpStopStartScalingEnabled(accountId);
+        }
+        return entitled;
     }
 }

@@ -54,6 +54,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowLogService;
 
 import io.opentracing.Tracer;
@@ -101,6 +102,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private RuntimeVersionService runtimeVersionService;
+
+    @Inject
+    private StackUtil stackUtil;
 
     public StackStatusCheckerJob(Tracer tracer) {
         super(tracer, "Stack Status Checker Job");
@@ -190,6 +194,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     Set<Status> syncableStates() {
         return EnumSet.of(
                 Status.AVAILABLE,
+                Status.AVAILABLE_WITH_STOPPED_INSTANCES,
                 Status.UPDATE_FAILED,
                 Status.ENABLE_SECURITY_FAILED,
                 Status.START_FAILED,
@@ -253,7 +258,17 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
         clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealthyHostNames);
         if (!failedInstances.isEmpty()) {
-            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
+            if (stackUtil.stopStartScalingEnabled(stack)) {
+                Set<InstanceMetaData> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
+                long stoppedInstancesCount = stoppedInstances.size();
+                // TODO: CB-15341 Is this a sufficient check for compute hostgroup in the long run?
+                boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroup().getGroupName()).allMatch(g -> g.contains("compute"));
+                if (stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
+                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
+                }
+            } else {
+                clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
+            }
         } else if (statesFromAvailableAllowed().contains(stack.getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
         }

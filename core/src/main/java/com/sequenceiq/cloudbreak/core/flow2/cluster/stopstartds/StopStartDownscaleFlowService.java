@@ -93,7 +93,10 @@ public class StopStartDownscaleFlowService {
     public void clusterDownscaleFinished(Long stackId, @Nullable String hostGroupName, Set<InstanceMetaData> instancesStopped) {
         // TODO CB-14929: Make sure Database state updates are handled correctly.
         instancesStopped.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STOPPED));
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "Instances: " + instancesStopped.size() + " stopped successfully.");
+        stackUpdater.updateStackStatus(
+                stackId,
+                DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES,
+                "Instances: " + instancesStopped.size() + " stopped successfully.");
 
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED,
                 hostGroupName == null ? "null" : hostGroupName);
