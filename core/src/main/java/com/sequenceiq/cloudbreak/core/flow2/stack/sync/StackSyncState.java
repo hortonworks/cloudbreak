@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.sync;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.restart.WaitForSyncRestartAction;
 
 public enum StackSyncState implements FlowState {
     INIT_STATE,
@@ -13,6 +13,6 @@ public enum StackSyncState implements FlowState {
 
     @Override
     public Class<? extends RestartAction> restartAction() {
-        return WaitForSyncRestartAction.class;
+        return FillInMemoryStateStoreRestartAction.class;
     }
 }
