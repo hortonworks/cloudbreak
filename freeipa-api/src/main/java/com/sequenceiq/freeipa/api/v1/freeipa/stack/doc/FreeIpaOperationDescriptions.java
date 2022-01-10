@@ -5,6 +5,8 @@ public final class FreeIpaOperationDescriptions {
     public static final String REGISTER_CHILD_ENVIRONMENT = "Register a child environment";
     public static final String DEREGISTER_CHILD_ENVIRONMENT = "Deregister a child environment";
     public static final String GET_BY_ENVID = "Get FreeIPA stack by envid";
+    public static final String GET_ALL_BY_ENVID = "Get all FreeIPA stacks by envid";
+    public static final String INTERNAL_GET_ALL_BY_ENVID = "Get all FreeIPA stacks by envid";
     public static final String INTERNAL_GET_BY_ENVID_AND_ACCOUNTID = "Get FreeIPA stack by envid and account id";
     public static final String LIST_BY_ACCOUNT = "List all FreeIPA stacks by account";
     public static final String INTERNAL_LIST_BY_ACCOUNT = "List all FreeIPA stacks by account using the internal actor";

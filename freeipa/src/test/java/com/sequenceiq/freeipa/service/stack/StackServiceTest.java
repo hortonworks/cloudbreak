@@ -208,19 +208,11 @@ class StackServiceTest {
     }
 
     @Test
-    void getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated() {
-        when(stackRepository.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of(stack));
-        List<Stack> results = underTest.getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID);
+    void findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList() {
+        when(stackRepository.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of(stack));
+        List<Stack> results = underTest.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
 
         assertEquals(List.of(stack), results);
-    }
-
-    @Test
-    void getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedThrowsWhenCrnDoesNotExist() {
-        when(stackRepository.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(List.of());
-        NotFoundException notFoundException =
-                assertThrows(NotFoundException.class, () -> underTest.getMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID));
-        assertEquals("FreeIPA stack by environment [" + ENVIRONMENT_CRN + "] not found", notFoundException.getMessage());
     }
 
     @Test

@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
@@ -39,12 +42,27 @@ public class FreeIpaDescribeService {
 
     public DescribeFreeIpaResponse describe(String environmentCrn, String accountId) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
+        DescribeFreeIpaResponse response = getResponseForStack(stack, false);
+        LOGGER.trace("FreeIPA describe response: {}", response);
+        return response;
+    }
+
+    public List<DescribeFreeIpaResponse> describeAll(String environmentCrn, String accountId) {
+        List<Stack> stacks = stackService.findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(environmentCrn, accountId);
+        List<DescribeFreeIpaResponse> response = stacks.stream()
+                .map(s -> getResponseForStack(s, true))
+                .collect(Collectors.toList());
+        LOGGER.trace("FreeIPA describe all response: {}", response);
+        return response;
+    }
+
+    private DescribeFreeIpaResponse getResponseForStack(Stack stack, Boolean includeAllInstances) {
         MDCBuilder.buildMdcContext(stack);
         ImageEntity image = imageService.getByStack(stack);
         FreeIpa freeIpa = freeIpaService.findByStackId(stack.getId());
         UserSyncStatus userSyncStatus = userSyncStatusService.findByStack(stack);
-        DescribeFreeIpaResponse response = stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus);
-        LOGGER.trace("FreeIPA describe response: {}", response);
+        DescribeFreeIpaResponse response =
+                stackToDescribeFreeIpaResponseConverter.convert(stack, image, freeIpa, userSyncStatus, includeAllInstances);
         return response;
     }
 }

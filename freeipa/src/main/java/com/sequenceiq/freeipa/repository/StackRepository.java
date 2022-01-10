@@ -59,6 +59,14 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
     @Query("SELECT s FROM Stack s WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn")
     List<Stack> findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminated(@Param("environmentCrn") String environmentCrn, @Param("accountId") String accountId);
 
+    @Query("SELECT s FROM Stack s "
+            + "LEFT JOIN FETCH s.instanceGroups ig "
+            + "LEFT JOIN FETCH ig.instanceMetaData "
+            + "WHERE s.accountId = :accountId AND s.environmentCrn = :environmentCrn")
+    List<Stack> findMultipleByEnvironmentCrnAndAccountIdEvenIfTerminatedWithList(
+            @Param("environmentCrn") String environmentCrn,
+            @Param("accountId") String accountId);
+
     @Query("SELECT s FROM Stack s LEFT JOIN ChildEnvironment c ON c.stack.id = s.id WHERE s.accountId = :accountId "
             + "AND (s.environmentCrn IN :environmentCrns OR c.environmentCrn IN :environmentCrns) AND s.terminated = -1")
     List<Stack> findMultipleByEnvironmentCrnOrChildEnvironmentCrnAndAccountId(

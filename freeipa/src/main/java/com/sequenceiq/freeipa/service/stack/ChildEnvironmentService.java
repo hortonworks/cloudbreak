@@ -40,6 +40,10 @@ public class ChildEnvironmentService {
         return repository.findMultipleParentByEnvironmentCrnEvenIfTerminated(environmentCrn, accountId);
     }
 
+    public List<Stack> findMultipleParentStackByChildEnvironmentCrnEvenIfTerminatedWithList(String environmentCrn, String accountId) {
+        return repository.findMultipleParentByEnvironmentCrnEvenIfTerminatedWithList(environmentCrn, accountId);
+    }
+
     public Optional<Stack> findParentStackByChildEnvironmentCrnAndCrnWithListsEvenIfTerminated(String environmentCrn, String accountId, String crn) {
         return repository.findParentByEnvironmentCrnAndCrnWthListsEvenIfTerminated(environmentCrn, accountId, crn);
     }

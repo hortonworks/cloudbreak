@@ -73,6 +73,16 @@ class ChildEnvironmentServiceTest {
     }
 
     @Test
+    void findMultipleParentStackByChildEnvironmentCrnWithListsEvenIfTerminatedWithLIst() {
+        List<Stack> stackList = List.of(new Stack());
+        when(repository.findMultipleParentByEnvironmentCrnEvenIfTerminatedWithList(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stackList);
+
+        List<Stack> result = underTest.findMultipleParentStackByChildEnvironmentCrnEvenIfTerminatedWithList(ENVIRONMENT_CRN, ACCOUNT_ID);
+
+        assertEquals(stackList, result);
+    }
+
+    @Test
     void findParentStackByChildEnvironmentCrnAndCrnWithListsEvenIfTerminated() {
         Optional<Stack> stack = Optional.of(new Stack());
         when(repository.findParentByEnvironmentCrnAndCrnWthListsEvenIfTerminated(ENVIRONMENT_CRN, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(stack);
