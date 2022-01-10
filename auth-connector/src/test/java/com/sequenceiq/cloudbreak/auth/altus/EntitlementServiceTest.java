@@ -140,6 +140,15 @@ class EntitlementServiceTest {
                 {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, false},
                 {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, true},
 
+                {"DATAHUB_AWS_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::awsStopStartScalingEnabled, false},
+                {"DATAHUB_AWS_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::awsStopStartScalingEnabled, true},
+
+                {"DATAHUB_AZURE_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::azureStopStartScalingEnabled, false},
+                {"DATAHUB_AZURE_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::azureStopStartScalingEnabled, true},
+
+                {"DATAHUB_GCP_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::gcpStopStartScalingEnabled, false},
+                {"DATAHUB_GCP_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::gcpStopStartScalingEnabled, true},
+
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
 

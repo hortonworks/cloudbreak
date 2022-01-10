@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cm;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -66,5 +67,10 @@ public class ClouderaManagerClusterCommissionService implements ClusterCommissio
     @Override
     public Set<String> recommissionClusterNodes(Map<String, InstanceMetaData> hostsToRecommission) {
         return clouderaManagerCommissioner.recommissionNodes(stack, hostsToRecommission, client);
+    }
+
+    @Override
+    public void recommissionHosts(List<String> hostsToRecommission) {
+        clouderaManagerCommissioner.recommissionHosts(stack, client, hostsToRecommission);
     }
 }

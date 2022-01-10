@@ -1,9 +1,11 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_UPGRADE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -26,6 +28,7 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -58,6 +61,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
+import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.datalake.DataLakeStatusCheckerService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentService;
@@ -93,6 +97,9 @@ public class StackOperationServiceTest {
     private StackService stackService;
 
     @Mock
+    private ClusterService clusterService;
+
+    @Mock
     private EnvironmentService environmentService;
 
     @Mock
@@ -122,6 +129,30 @@ public class StackOperationServiceTest {
         underTest.start(stack, null, false);
 
         verify(eventService, times(1)).fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), STACK_START_IGNORED);
+    }
+
+    @ParameterizedTest(name = "{0}: With stackStatus={1}")
+    @MethodSource("stackStatusForStop")
+    public void testStop(String methodName, DetailedStackStatus stackStatus) {
+        Stack stack = new Stack();
+        stack.setId(9876L);
+        stack.setStackStatus(new StackStatus(stack, stackStatus));
+        Cluster cluster = new Cluster();
+        cluster.setId(1L);
+        stack.setCluster(cluster);
+        when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
+        // On demand instances
+        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
+        when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
+        when(clusterService.findOneWithLists(cluster.getId())).thenReturn(Optional.of(cluster));
+
+        underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true);
+
+        if (stackStatus == STOP_FAILED) {
+            verify(stackUpdater).updateStackStatus(stack.getId(), STOP_REQUESTED);
+        } else {
+            verify(stackUpdater).updateStackStatus(stack.getId(), STOP_REQUESTED, "Stopping of cluster infrastructure has been requested.");
+        }
     }
 
     @Test
@@ -186,21 +217,6 @@ public class StackOperationServiceTest {
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         verify(stackUpdater, never()).updateStackStatus(any(), any());
-    }
-
-    @Test
-    public void shouldTriggerStopWhenStackRunsOnOnDemandInstances() {
-        Stack stack = new Stack();
-        stack.setId(9876L);
-        stack.setStackStatus(new StackStatus(stack, AVAILABLE));
-
-        when(stackStopRestrictionService.isInfrastructureStoppable(any())).thenReturn(StopRestrictionReason.NONE);
-        when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(false);
-        when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
-
-        underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true);
-
-        verify(stackUpdater).updateStackStatus(stack.getId(), STOP_REQUESTED);
     }
 
     @Test
@@ -270,7 +286,7 @@ public class StackOperationServiceTest {
     }
 
     @ParameterizedTest(name = "{0}: With stackStatus={1}")
-    @MethodSource("stackStatus")
+    @MethodSource("stackStatusForUpdateNodeCount")
     public void testUpdateNodeCountStartInstances(String methodName, DetailedStackStatus stackStatus) throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setId(9876L);
@@ -314,11 +330,19 @@ public class StackOperationServiceTest {
                 () -> underTest.updateNodeCountStartInstances(stack, upscaleAdjustment, true, ScalingStrategy.STOPSTART));
     }
 
-    public static Stream<Arguments> stackStatus() {
+    public static Stream<Arguments> stackStatusForUpdateNodeCount() {
         return Stream.of(
                 Arguments.of("Stack is available", AVAILABLE),
                 Arguments.of("Stack has node failure", NODE_FAILURE),
                 Arguments.of("Stack upgrade failure", CLUSTER_UPGRADE_FAILED)
+        );
+    }
+
+    public static Stream<Arguments> stackStatusForStop() {
+        return Stream.of(
+                Arguments.of("Stack is available", AVAILABLE),
+                Arguments.of("Stack failed to stop", STOP_FAILED),
+                Arguments.of("Stack is available with stopped instances", AVAILABLE_WITH_STOPPED_INSTANCES)
         );
     }
 

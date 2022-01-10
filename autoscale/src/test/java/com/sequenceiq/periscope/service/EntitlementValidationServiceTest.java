@@ -57,6 +57,32 @@ public class EntitlementValidationServiceTest {
     }
 
     @Test
+    public void testWhenAWSStopStartAndEntitled() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
+        when(entitlementService.awsStopStartScalingEnabled(anyString())).thenReturn(true);
+
+        boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertTrue("isEntitled should be true when entitlement found", entitled);
+    }
+
+    @Test
+    public void testWhenAWSStopStartAndNotEntitled() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(false);
+
+        boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertFalse("isEntitled should be false when entitlement is not found", entitled);
+    }
+
+    @Test
+    public void testWhenAWSEntitledAndNotStopStart() {
+        when(entitlementService.awsAutoScalingEnabled(anyString())).thenReturn(true);
+        when(entitlementService.awsStopStartScalingEnabled(anyString())).thenReturn(false);
+
+        boolean entitled = underTest.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS");
+        assertFalse("isEntitled should be false when entitlement is not found", entitled);
+    }
+
+    @Test
     public void testWhenAzureAndEntitled() {
         when(entitlementService.azureAutoScalingEnabled(anyString())).thenReturn(true);
 

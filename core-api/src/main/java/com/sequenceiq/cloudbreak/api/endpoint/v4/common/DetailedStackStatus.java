@@ -71,6 +71,7 @@ public enum DetailedStackStatus {
     ROLLING_BACK(Status.UPDATE_IN_PROGRESS),
     // The stack is available
     AVAILABLE(Status.AVAILABLE),
+    AVAILABLE_WITH_STOPPED_INSTANCES(Status.AVAILABLE_WITH_STOPPED_INSTANCES),
     // Instance removing status
     REMOVE_INSTANCE(Status.UPDATE_IN_PROGRESS),
     // Cluster operation is in progress

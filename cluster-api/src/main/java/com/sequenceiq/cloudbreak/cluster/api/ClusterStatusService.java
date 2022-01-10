@@ -17,6 +17,8 @@ public interface ClusterStatusService {
 
     ExtendedHostStatuses getExtendedHostStatuses(Optional<String> runtimeVersion);
 
+    List<String> getDecommissionedHostsFromCM();
+
     Map<HostName, String> getHostStatusesRaw();
 
     boolean isClusterManagerRunning();
