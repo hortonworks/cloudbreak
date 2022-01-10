@@ -86,6 +86,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     static final String FULL_WITH_EXPLANATION_VIEW = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
 
+    static final String SUMMARY = "summary";
+
     private static final String DEFAULT_STATUS_REASON = "Cloudera Manager reported bad health for this host.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterStatusService.class);
@@ -273,6 +275,19 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         hostStates.entrySet().removeIf(entry -> entry.getValue().isEmpty());
         LOGGER.debug("Creating 'ExtendedHostStatuses' with {}", hostStates);
         return new ExtendedHostStatuses(hostStates);
+    }
+
+    @Override
+    public List<String> getDecommissionedHostsFromCM() {
+        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
+        try {
+            ApiHostList apiHostList = api.readHosts(null, null, SUMMARY);
+            LOGGER.trace("Response from CM for readHosts call: {}", apiHostList);
+            return apiHostList.getItems().stream().filter(ApiHost::getMaintenanceMode).map(ApiHost::getHostname).collect(toList());
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get hosts from CM", e);
+            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
+        }
     }
 
     private static Set<HealthCheck> getHealthChecks(ApiHost apiHost, boolean cmServicesHealthCheckAllowed) {
