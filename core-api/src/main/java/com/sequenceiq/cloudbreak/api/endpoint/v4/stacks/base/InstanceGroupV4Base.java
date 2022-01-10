@@ -24,7 +24,7 @@ import io.swagger.annotations.ApiModelProperty;
 public class InstanceGroupV4Base extends ProviderParametersBase implements JsonEntity {
 
     @Min(value = 0, message = "The node count has to be greater or equals than 0")
-    @Max(value = 100000, message = "The node count has to be less than 100000")
+    @Max(value = 400, message = "The node count has to be less than 400")
     @Digits(fraction = 0, integer = 10, message = "The node count has to be a number")
     @ApiModelProperty(value = InstanceGroupModelDescription.NODE_COUNT, required = true)
     private int nodeCount;
