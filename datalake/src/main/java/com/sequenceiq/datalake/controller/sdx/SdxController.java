@@ -146,8 +146,8 @@ public class SdxController implements SdxEndpoint {
     }
 
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_DATALAKE)
-    public SdxClusterResponse resize(String name, SdxClusterResizeRequest resizeSdxClusterRequest) {
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.RESIZE_DATALAKE)
+    public SdxClusterResponse resize(@ResourceName String name, SdxClusterResizeRequest resizeSdxClusterRequest) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         Pair<SdxCluster, FlowIdentifier> result = sdxService.resizeSdx(userCrn, name, resizeSdxClusterRequest);
         SdxCluster sdxCluster = result.getLeft();
