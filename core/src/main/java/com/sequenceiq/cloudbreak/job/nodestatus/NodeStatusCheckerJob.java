@@ -228,6 +228,7 @@ public class NodeStatusCheckerJob extends StatusCheckerJob {
     private boolean checkableStates(Status status) {
         return EnumSet.of(
                 Status.AVAILABLE,
+                Status.AVAILABLE_WITH_STOPPED_INSTANCES,
                 Status.AMBIGUOUS,
                 Status.MAINTENANCE_MODE_ENABLED,
                 Status.UPDATE_REQUESTED,

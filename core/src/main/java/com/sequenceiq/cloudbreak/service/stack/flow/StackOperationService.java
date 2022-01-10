@@ -409,7 +409,7 @@ public class StackOperationService {
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
                     format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
-        } else if (!stack.isAvailable() && !stack.isStopFailed()) {
+        } else if (!stack.isAvailable() && !stack.isStopFailed() && !stack.isAvailableWithStoppedInstances()) {
             throw NotAllowedStatusUpdate
                     .stack(stack)
                     .to(STOPPED)

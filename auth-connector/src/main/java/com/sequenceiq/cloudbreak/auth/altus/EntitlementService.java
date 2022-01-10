@@ -70,8 +70,11 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DAT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
@@ -279,12 +282,24 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, DATAHUB_AWS_AUTOSCALING);
     }
 
+    public boolean awsStopStartScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AWS_STOP_START_SCALING);
+    }
+
     public boolean azureAutoScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_AZURE_AUTOSCALING);
     }
 
+    public boolean azureStopStartScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AZURE_STOP_START_SCALING);
+    }
+
     public boolean gcpAutoScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_GCP_AUTOSCALING);
+    }
+
+    public boolean gcpStopStartScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_GCP_STOP_START_SCALING);
     }
 
     public boolean ccmV2Enabled(String accountId) {
