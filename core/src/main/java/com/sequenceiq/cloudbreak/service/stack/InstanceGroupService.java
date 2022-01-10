@@ -77,7 +77,9 @@ public class InstanceGroupService {
                     securityGroupService.pureSave(ig.getSecurityGroup());
                     ig.getTemplate().setWorkspace(workspace);
                     templateService.savePure(ig.getTemplate());
-                    instanceGroupNetworkService.savePure(ig.getInstanceGroupNetwork());
+                    if (ig.getInstanceGroupNetwork() != null) {
+                        instanceGroupNetworkService.savePure(ig.getInstanceGroupNetwork());
+                    }
                     InstanceGroup instanceGroup = repository.save(ig);
                     ig.getInstanceMetaDataSet().forEach(instanceMetaDataService::save);
                     return instanceGroup;

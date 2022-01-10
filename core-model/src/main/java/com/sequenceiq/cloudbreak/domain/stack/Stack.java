@@ -879,10 +879,49 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return "Stack{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
+                ", region='" + region + '\'' +
+                ", availabilityZone='" + availabilityZone + '\'' +
+                ", gatewayPort=" + gatewayPort +
+                ", useCcm=" + useCcm +
+                ", tunnel=" + tunnel +
+                ", consulServers=" + consulServers +
+                ", customDomain='" + customDomain + '\'' +
+                ", customHostname='" + customHostname + '\'' +
+                ", hostgroupNameAsHostname=" + hostgroupNameAsHostname +
+                ", clusterNameAsSubdomain=" + clusterNameAsSubdomain +
+                ", displayName='" + displayName + '\'' +
                 ", resourceCrn='" + resourceCrn + '\'' +
+                ", stackVersion='" + stackVersion + '\'' +
+                ", description='" + description + '\'' +
+                ", parameters=" + parameters +
+                ", platformVariant='" + platformVariant + '\'' +
+                ", cloudPlatform='" + cloudPlatform + '\'' +
                 ", cluster=" + cluster +
                 ", stackStatus=" + stackStatus +
+                ", resources=" + resources +
+                ", onFailureActionAction=" + onFailureActionAction +
+                ", failurePolicy=" + failurePolicy +
+                ", securityConfig=" + securityConfig +
+                ", instanceGroups=" + instanceGroups.stream().map(InstanceGroup::getGroupName).collect(Collectors.toSet()) +
+                ", version=" + version +
+                ", network=" + network +
+                ", stackAuthentication=" + stackAuthentication +
+                ", orchestrator=" + orchestrator +
+                ", created=" + created +
+                ", terminated=" + terminated +
+                ", tags=" + tags +
+                ", inputs=" + inputs +
+                ", uuid='" + uuid + '\'' +
+                ", workspace=" + workspace +
+                ", creator=" + creator +
                 ", environmentCrn='" + environmentCrn + '\'' +
+                ", datalakeCrn='" + datalakeCrn + '\'' +
+                ", type=" + type +
+                ", clusterProxyRegistered=" + clusterProxyRegistered +
+                ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
+                ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
+                ", externalDatabaseCreationType=" + externalDatabaseCreationType +
                 '}';
     }
+
 }

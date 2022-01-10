@@ -1,25 +1,28 @@
 package com.sequenceiq.cloudbreak.converter.v4.stacks.network;
 
+import static com.sequenceiq.cloudbreak.util.MapUtil.cleanMap;
+import static java.util.Optional.empty;
+import static java.util.Optional.ofNullable;
+
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
-import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.network.NetworkV4Response;
-import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.common.api.type.ResourceType;
 
 @Component
 public class NetworkToNetworkV4ResponseConverter {
@@ -38,31 +41,23 @@ public class NetworkToNetworkV4ResponseConverter {
     @Inject
     private ProviderParameterCalculator providerParameterCalculator;
 
+    @Nullable
     public NetworkV4Response convert(Stack source) {
+        LOGGER.debug("Converting {} to {} from the content of: {}", Stack.class.getSimpleName(), NetworkV4Response.class.getSimpleName(), source);
         NetworkV4Response networkResp = null;
-        Network network = source.getNetwork();
-        if (network != null) {
+        Optional<Network> network = source != null ? ofNullable(source.getNetwork()) : empty();
+        if (network.isPresent()) {
             networkResp = new NetworkV4Response();
-            networkResp.setSubnetCIDR(network.getSubnetCIDR());
-            if (network.getAttributes() != null) {
-                Map<String, Object> parameters = cleanMap(network.getAttributes().getMap());
+            networkResp.setSubnetCIDR(network.get().getSubnetCIDR());
+            if (network.get().getAttributes() != null) {
+                Map<String, Object> parameters = cleanMap(network.get().getAttributes().getMap());
                 putNetworkResourcesIntoResponse(source, parameters);
                 providerParameterCalculator.parse(parameters, networkResp);
             }
         }
+        LOGGER.debug("Conversion from {} to {} is done with the result of: {}",
+                Stack.class.getSimpleName(), NetworkV4Response.class.getSimpleName(), networkResp);
         return networkResp;
-    }
-
-    private Map<String, Object> cleanMap(Map<String, Object> input) {
-        Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, Object> entry : input.entrySet()) {
-            if (!Objects.isNull(input.get(entry.getKey()))
-                    && !"null".equals(input.get(entry.getKey()))
-                    && !Strings.isNullOrEmpty(input.get(entry.getKey()).toString())) {
-                result.put(entry.getKey(), input.get(entry.getKey()));
-            }
-        }
-        return result;
     }
 
     private void putNetworkResourcesIntoResponse(Stack stack, Map<String, Object> parameters) {
@@ -82,4 +77,5 @@ public class NetworkToNetworkV4ResponseConverter {
     private boolean anyMatchOfResourceTypeIn(Resource aResource, List<ResourceType> identifierResources) {
         return identifierResources.stream().anyMatch(subnetIdentifier -> aResource.getResourceType().equals(subnetIdentifier));
     }
+
 }

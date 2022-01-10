@@ -1,15 +1,14 @@
 package com.sequenceiq.freeipa.converter.network;
 
-import java.util.HashMap;
+import static com.sequenceiq.cloudbreak.util.MapUtil.cleanMap;
+
 import java.util.Map;
-import java.util.Objects;
 
 import javax.inject.Inject;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.stereotype.Component;
 
-import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.network.NetworkResponse;
 import com.sequenceiq.freeipa.entity.Network;
@@ -37,15 +36,4 @@ public class NetworkToNetworkResponseConverter implements Converter<Stack, Netwo
         return networkResp;
     }
 
-    private Map<String, Object> cleanMap(Map<String, Object> input) {
-        Map<String, Object> result = new HashMap<>();
-        for (Map.Entry<String, Object> entry : input.entrySet()) {
-            if (!Objects.isNull(input.get(entry.getKey()))
-                    && !"null".equals(input.get(entry.getKey()))
-                    && !Strings.isNullOrEmpty(input.get(entry.getKey()).toString())) {
-                result.put(entry.getKey(), input.get(entry.getKey()));
-            }
-        }
-        return result;
-    }
 }

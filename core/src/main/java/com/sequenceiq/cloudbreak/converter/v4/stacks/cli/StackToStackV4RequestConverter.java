@@ -159,8 +159,10 @@ public class StackToStackV4RequestConverter {
                         Set<String> recipeNames = hostGroup.getRecipes().stream().map(Recipe::getName).collect(Collectors.toSet());
                         instanceGroupV4Request.setRecipeNames(recipeNames);
                         instanceGroupV4Request.setRecoveryMode(hostGroup.getRecoveryMode());
-                        instanceGroupV4Request.setNetwork(instanceGroupNetworkToInstanceGroupNetworkV4RequestConverter
-                                .convert(instanceGroup.getInstanceGroupNetwork()));
+                        if (instanceGroup.getInstanceGroupNetwork() != null) {
+                            instanceGroupV4Request.setNetwork(instanceGroupNetworkToInstanceGroupNetworkV4RequestConverter
+                                    .convert(instanceGroup.getInstanceGroupNetwork()));
+                        }
                     });
         }
     }
