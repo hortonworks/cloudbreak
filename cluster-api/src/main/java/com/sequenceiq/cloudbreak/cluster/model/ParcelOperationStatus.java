@@ -39,8 +39,18 @@ public class ParcelOperationStatus {
         successful.put(parcelName, parcelVersion);
     }
 
+    public ParcelOperationStatus withSuccesful(String parcelName, String parcelVersion) {
+        successful.put(parcelName, parcelVersion);
+        return this;
+    }
+
     public void addFailed(String parcelName, String parcelVersion) {
         failed.put(parcelName, parcelVersion);
+    }
+
+    public ParcelOperationStatus withFailed(String parcelName, String parcelVersion) {
+        failed.put(parcelName, parcelVersion);
+        return this;
     }
 
     public ParcelOperationStatus merge(ParcelOperationStatus operationStatus) {
