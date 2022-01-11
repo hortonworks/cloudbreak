@@ -21,6 +21,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -253,6 +254,10 @@ public class StackOperationService {
                 }
             });
         } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof ConcurrencyFailureException) {
+                LOGGER.info("A concurrent update arrived to this cluster.", e.getCause());
+                throw new BadRequestException("A concurrent update arrived to this cluster. Please try again later.");
+            }
             if (e.getCause() instanceof BadRequestException) {
                 throw e.getCause();
             }
