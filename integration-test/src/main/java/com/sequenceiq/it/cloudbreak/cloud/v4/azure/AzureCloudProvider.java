@@ -1,6 +1,5 @@
 package com.sequenceiq.it.cloudbreak.cloud.v4.azure;
 
-import static com.sequenceiq.it.cloudbreak.ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE;
 import static java.lang.String.format;
 
 import java.util.List;
@@ -319,9 +318,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentTestDto withResourceGroup(EnvironmentTestDto environmentTestDto, String resourceGroupUsageString, String resourceGroupName) {
-        ResourceGroupUsage resourceGroupUsage = AZURE_RESOURCE_GROUP_USAGE_SINGLE.equals(resourceGroupUsageString)
-                ? ResourceGroupUsage.SINGLE
-                : ResourceGroupUsage.MULTIPLE;
+        ResourceGroupUsage resourceGroupUsage = ResourceGroupUsage.valueOf(resourceGroupUsageString);
 
         if (environmentTestDto.getAzure() == null) {
             environmentTestDto.setAzure(AzureEnvironmentParameters.builder().build());
