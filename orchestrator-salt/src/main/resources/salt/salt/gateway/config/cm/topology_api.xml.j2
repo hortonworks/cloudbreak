@@ -652,7 +652,7 @@
     <service>
         <role>SSB-SSE-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-MVE-API'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSE-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}
