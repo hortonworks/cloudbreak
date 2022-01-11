@@ -76,7 +76,7 @@ public class SdxEventsService {
 
     private List<CDPStructuredEvent> retrieveDatalakeServiceEvents(List<StructuredEventType> types, List<String> datalakeCrns, PageRequest pageable) {
         Page<CDPStructuredEvent> pagedResponse = cdpStructuredEventDBService.getPagedEventsOfResources(types, datalakeCrns, pageable);
-        if (pagedResponse != null && pagedResponse.getContent() != null && pagedResponse.getContent().size() > 0) {
+        if (pagedResponse != null && pagedResponse.getContent().size() > 0) {
             return pagedResponse.getContent();
         } else {
             LOGGER.info("No events from datalake service");
@@ -85,7 +85,7 @@ public class SdxEventsService {
     }
 
     private List<CDPStructuredEvent> retrieveCloudbreakServiceEvents(SdxCluster sdxCluster, Integer page, Integer size) {
-        List<CloudbreakEventV4Response> cloudbreakEventV4Responses = null;
+        List<CloudbreakEventV4Response> cloudbreakEventV4Responses;
         try {
             cloudbreakEventV4Responses = eventV4Endpoint.getPagedCloudbreakEventListByStack(sdxCluster.getName(), page, size,
                     getAccountId(sdxCluster.getEnvCrn()));
@@ -131,7 +131,7 @@ public class SdxEventsService {
     private SdxCluster getDatalake(String environmentCrn) {
         LOGGER.info("Looking for datalake associated with environment Crn {}", environmentCrn);
         List<SdxCluster> sdxClusters = sdxService.listSdxByEnvCrn(environmentCrn);
-        sdxClusters.stream().forEach(sdxCluster -> LOGGER.info("Found SDX cluster {}", sdxCluster));
+        sdxClusters.forEach(sdxCluster -> LOGGER.info("Found SDX cluster {}", sdxCluster));
         if (!sdxClusters.isEmpty()) {
             return sdxClusters.get(0);
         }
@@ -153,6 +153,7 @@ public class SdxEventsService {
         cdpOperationDetails.setResourceName(cloudbreakEventV4Response.getClusterName());
         cdpOperationDetails.setResourceId(cloudbreakEventV4Response.getClusterId());
         cdpOperationDetails.setResourceCrn(datalakeCrn);
+        cdpOperationDetails.setResourceEvent(cloudbreakEventV4Response.getEventType());
         cdpOperationDetails.setResourceType(CloudbreakEventService.DATALAKE_RESOURCE_TYPE);
 
         cdpStructuredNotificationEvent.setOperation(cdpOperationDetails);
