@@ -69,7 +69,7 @@ import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 
 @Prototype
 public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest, DescribeFreeIpaResponse, FreeIpaTestDto>
-        implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable, Investigable {
+        implements Purgable<ListFreeIpaResponse, FreeIpaClient>, Searchable, Investigable, EnvironmentAware {
 
     private static final String FREEIPA_RESOURCE_NAME = "freeipaName";
 
@@ -420,5 +420,10 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
                 .flatMap(ig -> ig.getMetaData().stream())
                 .anyMatch(metadata -> InstanceStatus.DELETED_BY_PROVIDER == metadata.getInstanceStatus());
         return new Clue("FreeIpa", null, getResponse(), hasSpotTermination);
+    }
+
+    @Override
+    public String getEnvironmentCrn() {
+        return getResponse().getEnvironmentCrn();
     }
 }
