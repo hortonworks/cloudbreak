@@ -211,6 +211,13 @@ public interface FreeIpaV1Endpoint {
             nickname = "createBindUserV1")
     OperationStatus createBindUser(@Valid @NotNull BindUserCreateRequest request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
 
+    @POST
+    @Path("binduser/create/e2etest")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.BIND_USER_CREATE, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "createE2ETestBindUserV1")
+    OperationStatus createE2ETestBindUser(@Valid @NotNull BindUserCreateRequest request, @QueryParam("initiatorUserCrn") @NotEmpty String initiatorUserCrn);
+
     @PUT
     @Path("change_image")
     @Produces(MediaType.APPLICATION_JSON)

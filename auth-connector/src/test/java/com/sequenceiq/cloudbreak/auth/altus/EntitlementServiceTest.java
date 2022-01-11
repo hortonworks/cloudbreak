@@ -188,7 +188,10 @@ class EntitlementServiceTest {
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true},
 
                 {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, false},
-                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true}
+                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true},
+
+                {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, false},
+                {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true}
         };
     }
 

@@ -70,6 +70,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_FLO
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
@@ -426,6 +427,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.aws.native.variant.migration.enable}")
     private boolean enableAwsVariantMigration;
+
+    @Value("${auth.mock.e2e.test.only.enable}")
+    private boolean enableE2ETestOnly;
 
     private String cbLicense;
 
@@ -881,6 +885,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableUnboundElimination) {
             builder.addEntitlements(createEntitlement(CDP_UNBOUND_ELIMINATION));
+        }
+        if (enableE2ETestOnly) {
+            builder.addEntitlements(createEntitlement(E2E_TEST_ONLY));
         }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
