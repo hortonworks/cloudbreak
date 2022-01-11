@@ -18,6 +18,7 @@ import com.amazonaws.services.logs.model.DescribeLogStreamsResult;
 import com.amazonaws.services.logs.model.InputLogEvent;
 import com.amazonaws.services.logs.model.PutLogEventsRequest;
 import com.amazonaws.services.logs.model.ResourceNotFoundException;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.util.JsonFormat;
 import com.sequenceiq.cloudbreak.cloudwatch.config.CloudwatchConfiguration;
@@ -39,6 +40,8 @@ public class CloudwatchRecordWorker extends RecordWorker<AbstractCloudwatchRecor
 
     private final String logStream;
 
+    private final String region;
+
     private final int maxRetry;
 
     public CloudwatchRecordWorker(String name, String serviceName, AbstractCloudwatchRecordProcessor recordProcessor,
@@ -47,6 +50,7 @@ public class CloudwatchRecordWorker extends RecordWorker<AbstractCloudwatchRecor
         this.tracer = tracer;
         this.logGroup = configuration.getLogGroup();
         this.logStream = initLogStream(configuration.getLogStream());
+        this.region = configuration.getRegion();
         this.maxRetry = configuration.getMaxRetry();
     }
 
@@ -80,30 +84,39 @@ public class CloudwatchRecordWorker extends RecordWorker<AbstractCloudwatchRecor
             clientConfig.setMaxErrorRetry(maxRetry);
             awsLogsClient = AWSLogsClient.builder()
                     .withClientConfiguration(clientConfig)
+                    .withRegion(region)
                     .build();
         }
         return awsLogsClient;
     }
 
-    private DescribeLogStreamsResult describeLogStreams() {
+    @VisibleForTesting
+    DescribeLogStreamsResult describeLogStreams() {
         DescribeLogStreamsRequest describeLogStreams = new DescribeLogStreamsRequest();
         describeLogStreams.setLogGroupName(logGroup);
         describeLogStreams.setLogStreamNamePrefix(logStream);
         try {
-            return getAwsLogsClient().describeLogStreams(describeLogStreams);
+            DescribeLogStreamsResult describeLogStreamsResult = getAwsLogsClient().describeLogStreams(describeLogStreams);
+            if (!describeLogStreamsResult.getLogStreams().isEmpty()) {
+                return  describeLogStreamsResult;
+            } else {
+                CreateLogStreamRequest createLogStreamRequest = new CreateLogStreamRequest();
+                createLogStreamRequest.setLogGroupName(logGroup);
+                createLogStreamRequest.setLogStreamName(logStream);
+                getAwsLogsClient().createLogStream(createLogStreamRequest);
+                return getAwsLogsClient().describeLogStreams(describeLogStreams);
+            }
         } catch (ResourceNotFoundException re) {
-            CreateLogStreamRequest createLogStreamRequest = new CreateLogStreamRequest();
-            createLogStreamRequest.setLogGroupName(logGroup);
-            createLogStreamRequest.setLogStreamName(logStream);
-            getAwsLogsClient().createLogStream(createLogStreamRequest);
-            return getAwsLogsClient().describeLogStreams(describeLogStreams);
+            LOGGER.error("Error during describing AWS CloudWatch log streams: log group '{}' not found", logGroup, re);
+            throw re;
         }
     }
 
-    private Collection<InputLogEvent> createLogEvents(CloudwatchRecordRequest input) {
+    @VisibleForTesting
+    Collection<InputLogEvent> createLogEvents(CloudwatchRecordRequest input) {
         Collection<InputLogEvent> inputLogEvents = new ArrayList<>();
         String eventJson = null;
-        if (input.getMessageBody().isPresent()) {
+        if (input.getMessageBody().isPresent() && !input.isForceRawOutput()) {
             try {
                 eventJson = JsonFormat.printer()
                         .omittingInsignificantWhitespace().print(input.getMessageBody().get());
@@ -117,7 +130,8 @@ public class CloudwatchRecordWorker extends RecordWorker<AbstractCloudwatchRecor
         return inputLogEvents;
     }
 
-    private String initLogStream(String logStream) {
+    @VisibleForTesting
+    String initLogStream(String logStream) {
         String fullLogStream = logStream;
         try {
             String hostname = InetAddress.getLocalHost().getHostName();
