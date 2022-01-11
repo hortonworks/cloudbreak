@@ -77,7 +77,7 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
     }
 
     @Test(dataProvider = TEST_CONTEXT, groups = { "withrg" }, description = "Creating a resource group for this test case. " +
-            "Disk encryption set(DES) is created in this newly created RG, as cloud-daily RG has locks which prevents cleanup of DES.")
+            "Disk encryption set(DES) is created in this newly created RG, as cloud-daily RG has locks which prevents cleanup of DES.", enabled = false)
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
@@ -126,7 +126,7 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
     }
 
     @Test(dataProvider = TEST_CONTEXT, groups = { "norg" }, description = "Environment's Resource Group is not specified, in this case all the" +
-            " resources create their own resource groups.")
+            " resources create their own resource groups.", enabled = false)
     @UseSpotInstances
     @Description(
             given = "there is a running cloudbreak",
