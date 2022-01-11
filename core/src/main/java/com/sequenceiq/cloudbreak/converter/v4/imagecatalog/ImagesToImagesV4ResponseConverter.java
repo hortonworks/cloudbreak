@@ -89,6 +89,7 @@ public class ImagesToImagesV4ResponseConverter {
     private void copyImageFieldsToJson(Image source, ImageV4Response json) {
         json.setDate(source.getDate());
         json.setCreated(source.getCreated());
+        json.setPublished(source.getPublished());
         json.setDescription(source.getDescription());
         json.setOs(source.getOs());
         json.setOsType(source.getOsType());

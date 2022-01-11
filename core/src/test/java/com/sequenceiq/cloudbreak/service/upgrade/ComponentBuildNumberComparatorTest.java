@@ -69,7 +69,7 @@ public class ComponentBuildNumberComparatorTest {
     private Image createImage(String buildNumber) {
         Map<String, String> packageVersions = new HashMap<>();
         packageVersions.put(BUILD_NUMBER_KEY, buildNumber);
-        return new Image(null, null, null, null, null, null, null, null, null, null, packageVersions, null, null, null, true, null, null);
+        return new Image(null, null, null, null, null, null, null, null, null, null, null, packageVersions, null, null, null, true, null, null);
     }
 
 }

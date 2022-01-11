@@ -162,8 +162,9 @@ public class AdvertisedImageProviderTest {
     }
 
     private Image createImage(String uuid, boolean advertised, String... platforms) {
-        return new Image(null, null, null, null, uuid, null, null, Arrays.stream(platforms).collect(Collectors.toMap(p -> p, p -> Collections.emptyMap())),
-                null, null, null, null, null, null, advertised, null, null);
+        return new Image(null, null, null, null, null, uuid, null, null,
+                Arrays.stream(platforms).collect(Collectors.toMap(p -> p, p -> Collections.emptyMap())), null, null, null, null, null, null, advertised,
+                null, null);
     }
 
     private ImageFilter createImageFilter(boolean enableBaseImages) {

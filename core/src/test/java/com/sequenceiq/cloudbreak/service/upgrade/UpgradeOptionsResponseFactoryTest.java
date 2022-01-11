@@ -80,9 +80,8 @@ public class UpgradeOptionsResponseFactoryTest {
     }
 
     private Image createImage(Map<String, String> packageVersions) {
-        return new Image(null, CREATION_DATE, null, null, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, Map.of(REGION, IMAGE_NAME)), null, null,
-                packageVersions,
-                null, null, null, true, null, null);
+        return new Image(null, CREATION_DATE, null, null, null, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, Map.of(REGION, IMAGE_NAME)), null, null,
+                packageVersions,  null, null, null, true, null, null);
     }
 
     private Map<String, String> createPackageVersions() {

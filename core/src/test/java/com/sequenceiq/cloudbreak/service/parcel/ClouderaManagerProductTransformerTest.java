@@ -121,7 +121,7 @@ public class ClouderaManagerProductTransformerTest {
     }
 
     private Image createImage(List<String> preWarmParcels, List<String> preWarmCsdList) {
-        return new Image(null, null, null, null, null, null, null, null, new ImageStackDetails(null, createStackRepoDetails(), null), OS_TYPE,
+        return new Image(null, null, null, null, null, null, null, null, null, new ImageStackDetails(null, createStackRepoDetails(), null), OS_TYPE,
                 null, List.of(preWarmParcels), preWarmCsdList, null, false, null, null);
     }
 

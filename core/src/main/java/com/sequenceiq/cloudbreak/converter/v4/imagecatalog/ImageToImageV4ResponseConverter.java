@@ -14,6 +14,7 @@ public class ImageToImageV4ResponseConverter {
         ImageV4Response result = new ImageV4Response();
         result.setDate(source.getDate());
         result.setCreated(source.getCreated());
+        result.setPublished(source.getPublished());
         result.setDescription(source.getDescription());
         result.setOs(source.getOs());
         result.setOsType(source.getOsType());

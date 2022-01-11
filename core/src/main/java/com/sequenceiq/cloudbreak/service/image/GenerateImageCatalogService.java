@@ -56,6 +56,7 @@ public class GenerateImageCatalogService {
         return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(
                 source.getDate(),
                 source.getCreated(),
+                source.getPublished(),
                 source.getDescription(),
                 source.getOs(),
                 source.getUuid(),

@@ -25,6 +25,10 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
     @JsonProperty("created")
     private Long created;
 
+    @JsonProperty("published")
+    @JsonInclude(NON_EMPTY)
+    private Long published;
+
     @JsonProperty("description")
     private String description;
 
@@ -159,6 +163,14 @@ public class ImageV4Response extends ImageBasicInfoV4Response implements JsonEnt
 
     public void setCreated(Long created) {
         this.created = created;
+    }
+
+    public Long getPublished() {
+        return published;
+    }
+
+    public void setPublished(Long published) {
+        this.published = published;
     }
 
     public String getCmBuildNumber() {

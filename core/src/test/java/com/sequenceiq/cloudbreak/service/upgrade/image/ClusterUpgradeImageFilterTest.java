@@ -467,51 +467,51 @@ public class ClusterUpgradeImageFilterTest {
     }
 
     private Image createCurrentImage() {
-        return new Image(DATE, CREATED, null, OS, CURRENT_IMAGE_ID, null, null,
+        return new Image(DATE, CREATED, null, null, OS, CURRENT_IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_2, V_7_0_2),
                 getParcels(), null, null, true, null, null);
     }
 
     private Image createProperImage() {
-        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
+        return new Image(null, CREATED_LARGER, null, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3),
                 getParcels(), null, null, true, null, null);
     }
 
     private Image createImageWithDifferentPlatform() {
-        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of("azure", IMAGE_MAP), null, OS_TYPE,
+        return new Image(null, CREATED_LARGER, null, null, OS, IMAGE_ID, null, null, Map.of("azure", IMAGE_MAP), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3),
                 getParcels(), null, null, true, null, null);
     }
 
     private Image createImageWithDifferentOs() {
-        return new Image(null, CREATED_LARGER, null, "ubuntu", IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE,
+        return new Image(null, CREATED_LARGER, null, null, "ubuntu", IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE,
                 createPackageVersions(V_7_0_3, V_7_0_3),
                 getParcels(), null, null, true, null, null);
     }
 
     private Image createImageWithSameStackAndCmVersion() {
-        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
+        return new Image(null, CREATED_LARGER, null, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, IMAGE_MAP), null, OS_TYPE, createPackageVersions(V_7_0_2, V_7_0_2),
                 getParcels(), null, null, true, null, null);
     }
 
     private Image createImageWithDifferentStackVersioning() {
-        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null,
+        return new Image(null, CREATED_LARGER, null, null, OS, IMAGE_ID, null, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions("7.x.0", V_7_0_3),
                 getParcels(), null, null, true, null, null);
     }
 
     private Image createImageWithoutCmVersion() {
-        return new Image(null, CREATED_LARGER, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
+        return new Image(null, CREATED_LARGER, null, null, OS, IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP), null,
                 OS_TYPE, createPackageVersions("", V_7_0_2), getParcels(), null, null, true, null, null);
     }
 
     private Image createImageWithCurrentImageId() {
-        return new Image(null, CREATED_LARGER, null, OS, CURRENT_IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP),
+        return new Image(null, CREATED_LARGER, null, null, OS, CURRENT_IMAGE_ID, null, null, Map.of(CLOUD_PLATFORM, IMAGE_MAP),
                 null, OS_TYPE, createPackageVersions(V_7_0_3, V_7_0_3), getParcels(), null, null, true, null, null);
     }
 

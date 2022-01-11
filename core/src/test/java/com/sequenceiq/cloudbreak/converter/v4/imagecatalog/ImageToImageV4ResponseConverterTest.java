@@ -28,6 +28,8 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
 
     private static final Long TEST_CREATED = 123456L;
 
+    private static final Long TEST_PUBLISHED = 234567L;
+
     private static final String TEST_DESCRIPTION = "Official test image";
 
     private static final String TEST_OS = "redhat7";
@@ -85,14 +87,15 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
         List<List<String>> preWarmParcels = List.of(List.of("PROFILER-2.0.3.2.0.3.0", "http://s3.amazonaws.com/dev.hortonworks.com/DSS/centos7/"));
         List<String> preWarmCsd = List.of("http://s3.amazonaws.com/dev.hortonworks.com/DSS/PROFILER-2.0.3.jar");
 
-        Image image = new Image(TEST_DATE, TEST_CREATED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, repo, imageSetsByProvider, stackDetails,
-                TEST_OS_TYPE, packageVersions, preWarmParcels, preWarmCsd, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL, TEST_SOURCE_IMAGE_ID);
+        Image image = new Image(TEST_DATE, TEST_CREATED, TEST_PUBLISHED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, repo, imageSetsByProvider,
+                stackDetails, TEST_OS_TYPE, packageVersions, preWarmParcels, preWarmCsd, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL,
+                TEST_SOURCE_IMAGE_ID);
         image.setDefaultImage(true);
         return image;
     }
 
     private static Image getTestImageWithoutCollections() {
-        Image image = new Image(TEST_DATE, TEST_CREATED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, null, null, null,
+        Image image = new Image(TEST_DATE, TEST_CREATED, TEST_PUBLISHED, TEST_DESCRIPTION, TEST_OS, TEST_UUID, TEST_VERSION, null, null, null,
                 TEST_OS_TYPE, null, null, null, TEST_CM_BUILD_NUMBER, true, TEST_BASE_PARCEL_URL, TEST_SOURCE_IMAGE_ID);
         image.setDefaultImage(true);
         return image;
@@ -101,6 +104,7 @@ public class ImageToImageV4ResponseConverterTest extends AbstractEntityConverter
     private void validateImageV4Response(ImageV4Response response, boolean emptyCollections) {
         assertEquals(TEST_DATE, response.getDate());
         assertEquals(TEST_CREATED, response.getCreated());
+        assertEquals(TEST_PUBLISHED, response.getPublished());
         assertEquals(TEST_DESCRIPTION, response.getDescription());
         assertEquals(TEST_OS, response.getOs());
         assertEquals(TEST_OS_TYPE, response.getOsType());

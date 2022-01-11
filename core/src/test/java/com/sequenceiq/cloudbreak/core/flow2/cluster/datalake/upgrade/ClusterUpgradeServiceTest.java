@@ -220,14 +220,14 @@ public class ClusterUpgradeServiceTest {
     }
 
     private static Image createImage(String cmBuildNumber, String stackBuildNumber) {
-        return new Image(null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
+        return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), new ImageStackDetails(V_7_0_2, null, stackBuildNumber), OS_TYPE,
                 createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, cmBuildNumber, true, null, null);
     }
 
     private static Image createImage(String cmBuildNumber) {
-        return new Image(null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
+        return new Image(null, null, null, null, OS, CURRENT_IMAGE_ID, V_7_0_2, null,
                 Map.of(CLOUD_PLATFORM, Collections.emptyMap()), null, OS_TYPE,
                 createPackageVersions(V_7_0_2, V_7_0_2, CMF_VERSION, CSP_VERSION, SALT_VERSION),
                 null, null, cmBuildNumber, true, null, null);

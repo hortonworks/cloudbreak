@@ -157,7 +157,7 @@ public class TargetImageAwareMixedPackageVersionServiceTest {
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.catalog.Image createTargetImage() {
-        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, null, null, null, null, null, null, null,
+        return new com.sequenceiq.cloudbreak.cloud.model.catalog.Image(null, null, null, null, null, null, null, null, null, null, null,
                 Map.of(CM.getKey(), CM_VERSION), null, Collections.emptyList(), null, false, null, null);
     }
 

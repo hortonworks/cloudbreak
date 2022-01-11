@@ -19,6 +19,8 @@ public class Image {
 
     private static final String CREATED = "created";
 
+    private static final String PUBLISHED = "published";
+
     private static final String DESCRIPTION = "description";
 
     private static final String OS = "os";
@@ -48,6 +50,8 @@ public class Image {
     private final String date;
 
     private final Long created;
+
+    private final Long published;
 
     private final String description;
 
@@ -85,6 +89,7 @@ public class Image {
     public Image(
             @JsonProperty(value = DATE, required = true) String date,
             @JsonProperty(value = CREATED) Long created,
+            @JsonProperty(value = PUBLISHED) Long published,
             @JsonProperty(value = DESCRIPTION, required = true) String description,
             @JsonProperty(value = OS, required = true) String os,
             @JsonProperty(value = UUID, required = true) String uuid,
@@ -102,6 +107,7 @@ public class Image {
             @JsonProperty("sourceImageId") String sourceImageId) {
         this.date = date;
         this.created = created;
+        this.published = published;
         this.description = description;
         this.os = os;
         this.uuid = uuid;
@@ -202,6 +208,11 @@ public class Image {
         return created;
     }
 
+    @JsonProperty(PUBLISHED)
+    public Long getPublished() {
+        return published;
+    }
+
     @JsonProperty(BUILD_NUMBER)
     public String getCmBuildNumber() {
         return cmBuildNumber;
@@ -232,6 +243,7 @@ public class Image {
                 + "uuid='" + uuid + '\''
                 + ", date='" + date + '\''
                 + ", created='" + created + '\''
+                + ", published='" + published + '\''
                 + ", description='" + description + '\''
                 + ", os='" + os + '\''
                 + ", osType='" + osType + '\''
