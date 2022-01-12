@@ -22,12 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
-import com.sequenceiq.freeipa.converter.stack.StackToCreateFreeIpaRequestConverter;
-import com.sequenceiq.freeipa.entity.StackStatus;
-import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import org.junit.Assert;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -47,19 +41,25 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackSta
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
+import com.sequenceiq.freeipa.converter.stack.StackToCreateFreeIpaRequestConverter;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.entity.StackStatus;
 import com.sequenceiq.freeipa.flow.freeipa.repair.event.RepairEvent;
 import com.sequenceiq.freeipa.flow.instance.InstanceEvent;
+import com.sequenceiq.freeipa.flow.stack.termination.action.TerminationService;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -473,6 +473,7 @@ class RepairInstancesServiceTest {
 
         when(stackService.getByCrnAndAccountIdEvenIfTerminated(ENVIRONMENT_ID1, ACCOUNT_ID, FREEIPA_CRN)).thenReturn(stack);
         when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.of(stack));
+        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(true);
 
         RebuildRequest rebuildRequest = new RebuildRequest();
         rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
@@ -491,6 +492,7 @@ class RepairInstancesServiceTest {
         when(stackService.findByEnvironmentCrnAndAccountId(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(Optional.empty());
         when(stackToCreateFreeIpaRequestConverter.convert(eq(stack))).thenReturn(createFreeIpaRequest);
         when(freeIpaCreationService.launchFreeIpa(eq(createFreeIpaRequest), eq(ACCOUNT_ID))).thenReturn(response);
+        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(true);
 
         RebuildRequest rebuildRequest = new RebuildRequest();
         rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
@@ -532,6 +534,17 @@ class RepairInstancesServiceTest {
         underTest.renameStackIfNeeded(stack);
 
         verify(terminationService).finalizeTermination(STACK_ID);
+    }
+
+    @Test
+    public void testRebuildThrowsWhenEntitlementIsDisabled() throws Exception {
+        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(false);
+
+        RebuildRequest rebuildRequest = new RebuildRequest();
+        rebuildRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
+        rebuildRequest.setSourceCrn(FREEIPA_CRN);
+
+        assertThrows(BadRequestException.class, () -> underTest.rebuild(ACCOUNT_ID, rebuildRequest));
     }
 
     private HealthDetailsFreeIpaResponse getMockDetails1() {

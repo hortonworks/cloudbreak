@@ -45,6 +45,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_MICRO_DUTY_SDX;
@@ -287,6 +288,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.freeipa.ha.repair.enable}")
     private boolean enableFreeIpaHaRepair;
+
+    @Value("${auth.mock.freeipa.rebuild.enable}")
+    private boolean enableFreeIpaRebuild;
 
     @Value("${auth.mock.cloudstoragevalidation.enable.global}")
     private boolean enableCloudStorageValidation;
@@ -711,6 +715,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableFreeIpaHaRepair) {
             builder.addEntitlements(createEntitlement(CDP_FREEIPA_HA_REPAIR));
+        }
+        if (enableFreeIpaRebuild) {
+            builder.addEntitlements(createEntitlement(CDP_FREEIPA_REBUILD));
         }
         if (enableCloudStorageValidation) {
             builder.addEntitlements(createEntitlement(CDP_CLOUD_STORAGE_VALIDATION));

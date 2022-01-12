@@ -18,6 +18,7 @@ auth:
       multiaz.enable: true
       ha:
         repair.enable: true
+      rebuild.enable: true
     cloudstoragevalidation.enable:
       global: true
       aws: true

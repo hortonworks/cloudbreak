@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.converter.stack.StackToDescribeFreeIpaResponseConverter;
@@ -22,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -56,6 +59,9 @@ class FreeIpaDescribeServiceTest {
     @Mock
     private StackToDescribeFreeIpaResponseConverter stackToDescribeFreeIpaResponseConverter;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     private Stack stack;
 
     @BeforeEach
@@ -80,7 +86,15 @@ class FreeIpaDescribeServiceTest {
         when(freeIpaService.findByStackId(any())).thenReturn(freeIpa);
         when(userSyncStatusService.findByStack(any())).thenReturn(userSyncStatus);
         when(stackToDescribeFreeIpaResponseConverter.convert(any(), any(), any(), any(), any())).thenReturn(describeResponse);
+        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(true);
 
         assertEquals(List.of(describeResponse), underTest.describeAll(ENVIRONMENT_CRN, ACCOUNT_ID));
+    }
+
+    @Test
+    void describeAllThrowsWhenEntitlementIsDisabled() {
+        when(entitlementService.isFreeIpaRebuildEnabled(eq(ACCOUNT_ID))).thenReturn(false);
+
+        assertThrows(BadRequestException.class, () -> underTest.describeAll(ENVIRONMENT_CRN, ACCOUNT_ID));
     }
 }

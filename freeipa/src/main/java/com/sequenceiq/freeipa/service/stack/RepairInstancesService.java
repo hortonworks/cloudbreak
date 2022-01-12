@@ -275,6 +275,9 @@ public class RepairInstancesService {
     }
 
     public DescribeFreeIpaResponse rebuild(String accountId, RebuildRequest rebuildRequest) {
+        if (!entitlementService.isFreeIpaRebuildEnabled(accountId)) {
+            throw new BadRequestException("The FreeIPA rebuild capability is disabled.");
+        }
         Stack stack = stackService.getByCrnAndAccountIdEvenIfTerminated(rebuildRequest.getEnvironmentCrn(), accountId, rebuildRequest.getSourceCrn());
         Optional<Stack> nonTerminatedStack = stackService.findByEnvironmentCrnAndAccountId(rebuildRequest.getEnvironmentCrn(), accountId);
         if (nonTerminatedStack.isPresent()) {
