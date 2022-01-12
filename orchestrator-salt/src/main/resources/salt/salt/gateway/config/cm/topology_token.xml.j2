@@ -140,10 +140,6 @@
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
             <param>
-                 <name>{{ aclsauthz_prefix ~ "ssb-sse-api.acl" }}</name>
-                 <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
-            </param>
-            <param>
                  <name>{{ aclsauthz_prefix ~ "kafka_connect.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
             </param>
@@ -577,17 +573,6 @@
         <role>SSB-MVE-API</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['MATERIALIZED_VIEW_ENGINE'] -%}
         <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-MVE-API'] }}</url>
-        {%- endfor %}
-    </service>
-    {%- endif %}
-    {%- endif %}
-
-    {% if 'STREAMING_SQL_ENGINE' in salt['pillar.get']('gateway:location') -%}
-    {% if 'SSB-SSE-API' in exposed -%}
-    <service>
-        <role>SSB-SSE-API</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-SSE-API'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}

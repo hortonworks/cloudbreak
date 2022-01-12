@@ -286,12 +286,6 @@
               <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
             </param>
             {%- endif %}
-            {% if 'SSB-SSE-API' in exposed and 'STREAMING_SQL_ENGINE' in salt['pillar.get']('gateway:location') -%}
-            <param>
-              <name>SSB-SSE-API</name>
-              <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
-            </param>
-            {%- endif %}
             {% if 'SPARKHISTORYUI' in exposed and 'SPARK_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
             <param>
               <name>SPARKHISTORYUI</name>
@@ -647,17 +641,6 @@
     {%- endif %}
     {%- endif %}
 
-    {% if 'STREAMING_SQL_ENGINE' in salt['pillar.get']('gateway:location') -%}
-    {% if 'SSB-SSE-API' in exposed -%}
-    <service>
-        <role>SSB-SSE-API</role>
-        {% for hostloc in salt['pillar.get']('gateway:location')['STREAMING_SQL_ENGINE'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['SSB-MVE-API'] }}</url>
-        {%- endfor %}
-    </service>
-    {%- endif %}
-    {%- endif %}
-    
     {% if 'SPARK_YARN_HISTORY_SERVER' in salt['pillar.get']('gateway:location') -%}
     {% if 'SPARKHISTORYUI' in exposed -%}
     <service>
