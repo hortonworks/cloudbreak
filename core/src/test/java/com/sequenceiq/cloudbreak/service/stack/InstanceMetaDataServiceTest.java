@@ -117,7 +117,7 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
             InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
             instanceMetaData.setSubnetId(subnetId);
@@ -204,7 +204,7 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
         doAnswer(invocation -> {
             InstanceMetaData instanceMetaData = invocation.getArgument(2, InstanceMetaData.class);
             instanceMetaData.setSubnetId(subnetId);
@@ -243,7 +243,7 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = Map.of();
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
 
         Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 1, groupName(3), save, new LinkedHashSet<>(hostnames), false,
                 NetworkScaleDetails.getEmpty());
@@ -267,7 +267,10 @@ class InstanceMetaDataServiceTest {
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
         Map<String, String> subnetAzPairs = subnetId == null || availabilityZone == null ? Map.of() : Map.of(subnetId, availabilityZone);
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
+        if (!hostnames.isEmpty()) {
+            when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(subnetAzPairs);
+        }
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(subnetAzPairs);
         doNothing().when(multiAzCalculatorService).calculateByRoundRobin(eq(subnetAzPairs), any(InstanceGroup.class), any(InstanceMetaData.class), any());
         when(multiAzCalculatorService.determineRackId(subnetId, availabilityZone)).thenReturn(rackId);
 
@@ -287,7 +290,7 @@ class InstanceMetaDataServiceTest {
         Stack stack = stack(1);
 
         when(environmentClientService.getByCrn(ENVIRONMENT_CRN)).thenReturn(environment);
-        when(multiAzCalculatorService.prepareSubnetAzMap(environment, null)).thenReturn(Map.of());
+        when(multiAzCalculatorService.prepareSubnetAzMap(environment)).thenReturn(Map.of());
 
         Stack result = underTest.saveInstanceAndGetUpdatedStack(stack, 0, groupName(INSTANCE_GROUP_COUNT - 1), true, Set.of(), false,
                 NetworkScaleDetails.getEmpty());
