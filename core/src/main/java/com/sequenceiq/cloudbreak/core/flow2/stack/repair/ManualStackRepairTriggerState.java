@@ -1,8 +1,8 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.repair;
 
+import com.sequenceiq.cloudbreak.core.flow2.restart.FillInMemoryStateStoreRestartAction;
 import com.sequenceiq.flow.core.FlowState;
 import com.sequenceiq.flow.core.RestartAction;
-import com.sequenceiq.cloudbreak.core.flow2.restart.WaitForSyncRestartAction;
 
 public enum ManualStackRepairTriggerState implements FlowState {
     INIT_STATE,
@@ -11,7 +11,7 @@ public enum ManualStackRepairTriggerState implements FlowState {
     MANUAL_STACK_REPAIR_TRIGGER_FAILED_STATE,
     FINAL_STATE;
 
-    private final Class<? extends RestartAction> restartAction = WaitForSyncRestartAction.class;
+    private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
     @Override
     public Class<? extends RestartAction> restartAction() {
