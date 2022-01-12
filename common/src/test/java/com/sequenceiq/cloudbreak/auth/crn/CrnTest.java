@@ -20,6 +20,8 @@ public class CrnTest {
 
     private String exampleCrn3 = "crn:cdp:iam:us-west-1:default:user:lnardai@cloudera.com";
 
+    private String exampleCrn4 = "crn:cdp:iam:usg-1:9d74eee4-1cad-45d7-b645-7ccf9edbb73d:user:f3b8ed82-e712-4f89-bd@a7-be07183720d3";
+
     private String invalidCrnPattern = "crn:something:chunked21dqw";
 
     private String invalidCrnEmptyParts = ":::::";
@@ -74,6 +76,7 @@ public class CrnTest {
         assertTrue(Crn.isCrn(exampleCrn));
         assertTrue(Crn.isCrn(exampleCrn2));
         assertTrue(Crn.isCrn(exampleCrn3));
+        assertTrue(Crn.isCrn(exampleCrn4));
     }
 
     @Test
