@@ -1,6 +1,8 @@
 package com.sequenceiq.distrox.api.v1.distrox.validation;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +13,7 @@ import javax.validation.ConstraintValidatorContext;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -60,6 +63,35 @@ public class RootVolumeSizeValidatorTest {
         Assertions.assertEquals(actual, valid);
         int times = valid ? 0 : 1;
         verify(context, times(times)).buildConstraintViolationWithTemplate("Group root volume (" + size + "GB) couldn't be less than 10GB");
+    }
+
+    @Test
+    public void tesIsValidWhenRootVolumeIsNull() {
+        InstanceTemplateV1Request templateV1Request = new InstanceTemplateV1Request();
+        InstanceGroupV1Request value = new InstanceGroupV1Request();
+        value.setTemplate(templateV1Request);
+        boolean actual = underTest.isValid(value, null);
+        Assertions.assertTrue(actual);
+        verify(rootVolumeSizeProvider, never()).getForPlatform(any());
+    }
+
+    @Test
+    public void tesIsValidWhenSizeIsNull() {
+        InstanceTemplateV1Request templateV1Request = new InstanceTemplateV1Request();
+        templateV1Request.setRootVolume(new RootVolumeV1Request());
+        InstanceGroupV1Request value = new InstanceGroupV1Request();
+        value.setTemplate(templateV1Request);
+        boolean actual = underTest.isValid(value, null);
+        Assertions.assertTrue(actual);
+        verify(rootVolumeSizeProvider, never()).getForPlatform(any());
+    }
+
+    @Test
+    public void tesIsValidWhenTemplateIsNull() {
+        InstanceGroupV1Request value = new InstanceGroupV1Request();
+        boolean actual = underTest.isValid(value, null);
+        Assertions.assertTrue(actual);
+        verify(rootVolumeSizeProvider, never()).getForPlatform(any());
     }
 
     static Object[][] isValidSource() {
