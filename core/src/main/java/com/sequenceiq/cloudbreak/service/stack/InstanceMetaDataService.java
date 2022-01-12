@@ -90,7 +90,7 @@ public class InstanceMetaDataService {
         LOGGER.info("Get updated stack with instance count ({}) to instance group: {} and hostnames: {} and save: ({})", instanceToCreate, groupName, hostNames,
                 save);
         DetailedEnvironmentResponse environment = getDetailedEnvironmentResponse(stack.getEnvironmentCrn());
-        Map<String, String> subnetAzPairs = getAllSubnetAzPairs(environment);
+        Map<String, String> subnetAzPairs = multiAzCalculatorService.prepareSubnetAzMap(environment);
         String stackSubnetId = getStackSubnetIdIfExists(stack);
         String stackAz = stackSubnetId == null ? null : subnetAzPairs.get(stackSubnetId);
         Iterator<String> hostNameIterator = hostNames.iterator();
@@ -113,7 +113,10 @@ public class InstanceMetaDataService {
                     instanceMetaData.setDiscoveryFQDN(hostName);
                     subnetAzPairs = getSubnetAzPairsFilteredByHostNameIfRepair(environment, stack, repair, instanceGroup.getGroupName(), hostName);
                 }
-                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroup, instanceMetaData, subnetAzPairs, stackSubnetId, stackAz,
+                Map<String, String> filteredSubnetsByLeastUsedAz = networkScaleDetails == null
+                        ? multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzPairs)
+                        : subnetAzPairs;
+                prepareInstanceMetaDataSubnetAndAvailabilityZoneAndRackId(instanceGroup, instanceMetaData, filteredSubnetsByLeastUsedAz, stackSubnetId, stackAz,
                         networkScaleDetails);
                 if (save) {
                     repository.save(instanceMetaData);
@@ -166,10 +169,6 @@ public class InstanceMetaDataService {
         }
         LOGGER.debug("Cloudbreak does not support the disk reattachment for {}", stack.getCloudPlatform());
         return null;
-    }
-
-    private Map<String, String> getAllSubnetAzPairs(DetailedEnvironmentResponse environment) {
-        return getSubnetAzPairsFilteredByHostNameIfRepair(environment, null, false, null, null);
     }
 
     private Map<String, String> getSubnetAzPairsFilteredByHostNameIfRepair(DetailedEnvironmentResponse environment, Stack stack, boolean repair,
