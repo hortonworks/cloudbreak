@@ -1,0 +1,77 @@
+{
+  "name": "7.2.15 - Data Mart for AWS",
+  "description": "",
+  "type": "DATAMART",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Data Mart: Apache Impala, Hue"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5.4xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "coordinator",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 2,
+              "size": 300,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5d.4xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "executor",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 2,
+              "size": 300,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5d.4xlarge"
+        },
+        "nodeCount": 2,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "name": "7.2.15 - Real-time Data Mart for AWS",
+  "description": "",
+  "type": "DATAMART",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark"
+    },
+    "instanceGroups": [
+      {
+        "name": "master1",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master2",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master3",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "r5.2xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "coordinator",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 2,
+              "size": 1900,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "i3.4xlarge"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "executor",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 2,
+              "size": 1900,
+              "type": "ephemeral"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "i3.4xlarge"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

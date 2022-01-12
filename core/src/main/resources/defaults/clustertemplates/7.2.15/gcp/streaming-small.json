@@ -1,0 +1,68 @@
+{
+  "name": "7.2.15 - Streams Messaging Light Duty for Google Cloud",
+  "description": "",
+  "type": "STREAMING",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
+    },
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "e2-highmem-8",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ]
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "e2-standard-8",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "pd-standard"
+            }
+          ]
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "broker",
+        "template": {
+          "instanceType": "e2-standard-8",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "pd-standard"
+            }
+          ]
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      }
+    ]
+  }
+}

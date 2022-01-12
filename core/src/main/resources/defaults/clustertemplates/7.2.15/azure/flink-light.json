@@ -1,0 +1,83 @@
+{
+  "name": "7.2.15 - Streaming Analytics Light Duty for Azure",
+  "description": "",
+  "type": "STREAMING",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Streaming Analytics Light Duty with Apache Flink"
+    },
+    "instanceGroups": [
+      {
+        "name": "manager",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 2,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

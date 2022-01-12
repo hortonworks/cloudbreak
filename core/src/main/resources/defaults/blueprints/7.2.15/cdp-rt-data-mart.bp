@@ -1,0 +1,215 @@
+{
+  "description": "7.2.15 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark",
+  "blueprint": {
+    "cdhVersion": "7.2.15",
+    "displayName": "rt-datamart",
+    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
+    "services": [
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "configs" : [ {
+              "name" : "dfs_datanode_max_locked_memory",
+              "value" : "0",
+              "autoConfig" : false
+            } ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-BALANCER-BASE",
+            "roleType": "BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "kudu",
+        "serviceType": "KUDU",
+        "roleConfigGroups": [
+          {
+            "refName": "kudu-MASTER-BASE",
+            "roleType": "KUDU_MASTER",
+            "base": true
+          },
+          {
+            "refName": "kudu-TSERVER-BASE",
+            "roleType": "KUDU_TSERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-BASE",
+            "roleType": "NODEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "impala",
+        "serviceType": "IMPALA",
+        "serviceConfigs" : [ {
+          "name" : "impala_cmd_args_safety_valve",
+          "value" : "--cache_s3_file_handles=true"
+        } ],
+        "roleConfigGroups": [
+          {
+            "refName": "impala-IMPALAD-COORDINATOR",
+            "roleType": "IMPALAD",
+            "configs" : [ {
+              "name" : "impalad_specialization",
+              "value" : "COORDINATOR_ONLY"
+            }, {
+              "name" : "impala_hdfs_site_conf_safety_valve",
+              "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            }, {
+              "name" : "impala_graceful_shutdown_deadline",
+              "value" : "60"
+            } ],
+            "base": false
+          },
+          {
+            "refName": "impala-IMPALAD-EXECUTOR",
+            "roleType": "IMPALAD",
+            "configs" : [ {
+              "name" : "impalad_specialization",
+              "value" : "EXECUTOR_ONLY"
+            }, {
+              "name" : "impala_hdfs_site_conf_safety_valve",
+              "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            }, {
+              "name" : "impala_graceful_shutdown_deadline",
+              "value" : "60"
+            } ],
+            "base": false
+          },
+          {
+            "refName": "impala-STATESTORE-BASE",
+            "roleType": "STATESTORE",
+            "base": true
+          },
+          {
+            "refName": "impala-CATALOGSERVER-BASE",
+            "roleType": "CATALOGSERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master1",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-BALANCER-BASE",
+          "hdfs-NAMENODE-BASE",
+          "hdfs-SECONDARYNAMENODE-BASE",
+          "kudu-MASTER-BASE"
+        ]
+      },
+      {
+        "refName": "master2",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE",
+          "impala-CATALOGSERVER-BASE",
+          "impala-STATESTORE-BASE",
+          "kudu-MASTER-BASE"
+        ]
+      },
+      {
+        "refName": "master3",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "kudu-MASTER-BASE"
+        ]
+      },
+      {
+        "refName": "coordinator",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-BASE",
+          "impala-IMPALAD-COORDINATOR",
+          "kudu-TSERVER-BASE"
+        ]
+      },
+      {
+        "refName": "executor",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-BASE",
+          "impala-IMPALAD-EXECUTOR",
+          "kudu-TSERVER-BASE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,120 @@
+{
+  "description": "7.2.15 - Data Mart with Apache Impala and Hue",
+  "blueprint": {
+    "cdhVersion": "7.2.15",
+    "displayName": "datamart",
+    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
+    "services": [
+      {
+        "refName": "core_settings",
+        "serviceType": "CORE_SETTINGS",
+        "roleConfigGroups": [
+          {
+            "refName": "core_settings-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          },
+          {
+            "refName": "core_settings-STORAGEOPERATIONS-BASE",
+            "roleType": "STORAGEOPERATIONS",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "impala",
+        "serviceType": "IMPALA",
+        "serviceConfigs": [ {
+          "name" : "impala_cmd_args_safety_valve",
+          "value" : "--cache_s3_file_handles=true"
+        } ],
+        "roleConfigGroups": [
+          {
+            "refName": "impala-IMPALAD-COORDINATOR",
+            "roleType": "IMPALAD",
+            "configs": [ {
+              "name" : "impalad_specialization",
+              "value" : "COORDINATOR_ONLY"
+            }, {
+              "name" : "impalad_core_site_safety_valve",
+              "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            }, {
+              "name" : "impala_graceful_shutdown_deadline",
+              "value" : "60"
+            } ],
+            "base": false
+          },
+          {
+            "refName": "impala-IMPALAD-EXECUTOR",
+            "roleType": "IMPALAD",
+            "configs": [ {
+              "name" : "impalad_specialization",
+              "value" : "EXECUTOR_ONLY"
+            }, {
+              "name" : "impalad_core_site_safety_valve",
+              "value" : "<property><name>fs.s3a.experimental.input.fadvise</name><value>RANDOM</value></property><property><name>fs.s3a.fast.upload</name><value>true</value></property>"
+            }, {
+              "name" : "impala_graceful_shutdown_deadline",
+              "value" : "60"
+            } ],
+            "base": false
+          },
+          {
+            "refName": "impala-STATESTORE-BASE",
+            "roleType": "STATESTORE",
+            "base": true
+          },
+          {
+            "refName": "impala-CATALOGSERVER-BASE",
+            "roleType": "CATALOGSERVER",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "master",
+        "cardinality": "1",
+        "roleConfigGroupsRefNames": [
+          "core_settings-GATEWAY-BASE",
+          "core_settings-STORAGEOPERATIONS-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE",
+          "impala-CATALOGSERVER-BASE",
+          "impala-STATESTORE-BASE"
+        ]
+      },
+      {
+        "refName": "coordinator",
+        "cardinality": "1",
+        "roleConfigGroupsRefNames": [
+          "impala-IMPALAD-COORDINATOR"
+        ]
+      },
+      {
+        "refName": "executor",
+        "cardinality": "2",
+        "roleConfigGroupsRefNames": [
+          "impala-IMPALAD-EXECUTOR"
+        ]
+      }
+    ]
+  }
+}

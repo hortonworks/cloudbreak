@@ -1,0 +1,266 @@
+{
+  "description": "7.2.15 - Data Discovery and Exploration",
+  "blueprint": {
+    "cdhVersion": "7.2.15",
+    "displayName": "dde",
+    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
+    "services": [
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "configs": [
+              {
+                "name": "zookeeper_server_java_heapsize",
+                "value": "8589934592"
+              },
+              {
+                "name": "maxClientCnxns",
+                "value": "200"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "solr-dde",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "solr-SOLR_SERVER-BASE",
+            "roleType": "SOLR_SERVER"
+          }
+        ],
+        "serviceConfigs": [
+          {
+            "name": "hdfs_service",
+            "ref": "hdfs"
+          },
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "solr_log_dir",
+            "value": "/var/log/solr-dde"
+          },
+          {
+            "name": "zookeeper_znode",
+            "value": "/solr-dde"
+          },
+          {
+            "name": "solr_http_port",
+            "value": "8983"
+          },
+          {
+            "name": "solr_https_port",
+            "value": "8985"
+          },
+          {
+            "name": "client_config_root_dir",
+            "value": "/etc/solr-dde"
+          },
+          {
+            "name": "hdfs_data_dir",
+            "value": "/solr-dde"
+          },
+          {
+            "name": "ranger_audit_hdfs_dir",
+            "value": "${ranger_base_audit_url}/solr"
+          },
+          {
+            "name": "ranger_audit_hdfs_spool_dir",
+            "value": "/var/log/solr-dde/audit/hdfs/spool"
+          },
+          {
+            "name": "ranger_audit_solr_spool_dir",
+            "value": "/var/log/solr-dde/audit/solr/spool"
+          },
+          {
+            "name": "ranger_policy_cache_dir",
+            "value": "/var/lib/ranger/solr-dde/policy-cache"
+          }
+
+        ],
+        "serviceType": "SOLR"
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "configs": [
+              {
+                "name": "fs_checkpoint_dir_list",
+                "value": "/should_not_be_required_in_HA_setup"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+            "roleType": "FAILOVERCONTROLLER",
+            "base": true
+          },
+          {
+            "refName": "hdfs-JOURNALNODE-BASE",
+            "roleType": "JOURNALNODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-BASE",
+            "roleType": "NODEMANAGER",
+            "base": true,
+            "configs": [
+              {
+                "name": "container_executor_allowed_system_users",
+                "value": "nobody, impala, hive, llama, hbase, solr"
+              }
+            ]
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "serviceConfigs": [
+          {
+            "name": "solr_service",
+            "ref": "solr-dde"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "spark_on_yarn",
+        "serviceType": "SPARK_ON_YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE",
+            "roleType": "SPARK_YARN_HISTORY_SERVER",
+            "base": true
+          },
+          {
+            "refName": "spark_on_yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "gateway",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-GATEWAY-BASE",
+          "yarn-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "master",
+        "cardinality": 2,
+        "roleConfigGroupsRefNames": [
+          "hdfs-FAILOVERCONTROLLER-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "hdfs-NAMENODE-BASE",
+          "zookeeper-SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE",
+          "hue-HUE_SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "leader",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-JOURNALNODE-BASE",
+          "zookeeper-SERVER-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "yarn-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE",
+          "spark_on_yarn-SPARK_YARN_HISTORY_SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hdfs-GATEWAY-BASE",
+          "solr-SOLR_SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE"
+        ]
+      },
+      {
+        "refName": "yarnworker",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hdfs-DATANODE-BASE",
+          "hdfs-GATEWAY-BASE",
+          "yarn-NODEMANAGER-BASE",
+          "yarn-GATEWAY-BASE",
+          "spark_on_yarn-GATEWAY-BASE"
+        ]
+      }
+    ]
+  }
+}

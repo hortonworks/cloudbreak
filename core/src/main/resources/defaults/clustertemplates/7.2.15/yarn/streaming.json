@@ -1,0 +1,109 @@
+{
+  "name": "7.2.15 - Streams Messaging Heavy Duty for YCloud",
+  "description": "",
+  "type": "STREAMING",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "registry",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 16384
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "smm",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 16384
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 16384
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "broker",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 16384
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "srm",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 16384
+          },
+          "rootVolume": {
+            "size": 50
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

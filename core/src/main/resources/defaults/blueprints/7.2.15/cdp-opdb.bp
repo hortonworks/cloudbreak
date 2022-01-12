@@ -1,0 +1,371 @@
+{
+  "description": "7.2.15 - Operational Database: Apache HBase, Phoenix",
+  "blueprint": {
+    "cdhVersion": "7.2.15",
+    "displayName": "opdb",
+    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
+    "services": [
+      {
+        "refName": "omid",
+        "serviceType": "OMID",
+        "roleConfigGroups": [
+          {
+            "refName": "omid-OMID_TSO-BASE",
+            "roleType": "OMID_TSO",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "configs": [
+              {
+                "name": "zookeeper_server_java_heapsize",
+                "value": "8589934592"
+              },
+              {
+                "name": "maxClientCnxns",
+                "value": "200"
+              }
+            ],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hdfs",
+        "serviceType": "HDFS",
+        "serviceConfigs": [
+          {
+            "name": "hdfs_verify_ec_with_topology_enabled",
+            "value": false
+          },
+          {
+            "name": "service_health_suppression_hdfs_verify_ec_with_topology",
+            "value": true
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hdfs-NAMENODE-BASE",
+            "roleType": "NAMENODE",
+            "base": true,
+            "configs": [
+              {
+                "name": "erasure_coding_default_policy",
+                "value": " "
+              }
+            ]
+          },
+          {
+            "refName": "hdfs-SECONDARYNAMENODE-BASE",
+            "roleType": "SECONDARYNAMENODE",
+            "configs": [
+              {
+                "name": "fs_checkpoint_dir_list",
+                "value": "/should_not_be_required_in_HA_setup"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hdfs-DATANODE-BASE",
+            "roleType": "DATANODE",
+            "base": true,
+            "configs": [
+              {
+                "name": "dfs_datanode_max_locked_memory",
+                "value": "0"
+              }
+            ]
+          },
+          {
+            "refName": "hdfs-FAILOVERCONTROLLER-BASE",
+            "roleType": "FAILOVERCONTROLLER",
+            "base": true
+          },
+          {
+            "refName": "hdfs-JOURNALNODE-BASE",
+            "roleType": "JOURNALNODE",
+            "base": true
+          },
+          {
+            "refName": "hdfs-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hbase",
+        "serviceType": "HBASE",
+        "serviceConfigs": [
+          {
+            "name": "hbase_wal_dir",
+            "value": "/hbase-wals"
+          },
+          {
+            "name": "hbase_service_config_safety_valve",
+            "value": "<property><name>phoenix.schema.isNamespaceMappingEnabled</name><value>true</value></property><property><name>phoenix.functions.allowUserDefinedFunctions</name><value>true</value></property>"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hbase-MASTER-BASE",
+            "roleType": "MASTER",
+            "configs": [
+              {
+                "name": "hbase_master_java_heapsize",
+                "value": "4294967296"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hbase-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "configs": [
+              {
+                "name": "hbase_client_config_safety_valve",
+                "value": "<property><name>phoenix.schema.isNamespaceMappingEnabled</name><value>true</value></property><property><name>phoenix.functions.allowUserDefinedFunctions</name><value>true</value></property><property><name>phoenix.transactions.enabled</name><value>true</value></property>"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "hbase-REGIONSERVER-BASE",
+            "roleType": "REGIONSERVER",
+            "configs": [
+              {
+                "name": "hbase_regionserver_java_heapsize",
+                "value": "6979321856"
+              },
+              {
+                "name": "hbase_regionserver_global_memstore_upperLimit",
+                "value": "0.25"
+              },
+              {
+                "name": "hfile_block_cache_size",
+                "value": "0.12"
+              },
+              {
+                "name": "hbase_bucketcache_size",
+                "value": "6656"
+              },
+              {
+                "name": "hbase_regionserver_handler_count",
+                "value": "60"
+              },
+              {
+                "name": "hbase_regionserver_maxlogs",
+                "value": "100"
+              },
+              {
+                "name": "hbase_hregion_memstore_block_multiplier",
+                "value": "4"
+              },
+              {
+                "name": "hbase_hstore_blockingStoreFiles",
+                "value": "50"
+              },
+              {
+                "name": "hbase_regionserver_wal_codec",
+                "value": "org.apache.hadoop.hbase.regionserver.wal.IndexedWALEditCodec"
+              },
+              {
+                "name": "REGIONSERVER_role_env_safety_valve",
+                "value": "HBASE_CLASSPATH=${HBASE_CLASSPATH}:/opt/cloudera/parcels/CDH/lib/hbase_connectors/lib/hbase-spark.jar:/opt/cloudera/parcels/CDH/lib/hbase_connectors/lib/hbase-spark-protocol-shaded.jar:/opt/cloudera/parcels/CDH/lib/hbase_connectors/lib/scala-library.jar"
+              }
+            ],
+            "base": true
+          },
+          {
+              "refName": "hbase-HBASETHRIFTSERVER-BASE",
+              "roleType": "HBASETHRIFTSERVER",
+              "displayName": null,
+              "configs": [],
+              "base": true
+           },
+          {
+            "refName": "hbase-HBASERESTSERVER-BASE",
+            "roleType": "HBASERESTSERVER",
+            "displayName": null,
+            "configs": [],
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "phoenix",
+        "serviceType": "PHOENIX",
+        "roleConfigGroups": [
+          {
+            "refName": "phoenix-PHOENIX_QUERY_SERVER-BASE",
+            "roleType": "PHOENIX_QUERY_SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "knox",
+        "serviceType": "KNOX",
+        "roleConfigGroups": [
+          {
+            "base": true,
+            "refName": "knox-KNOX-GATEWAY-BASE",
+            "roleType": "KNOX_GATEWAY"
+          }
+        ]
+      },
+      {
+        "refName": "yarn",
+        "serviceType": "YARN",
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-RESOURCEMANAGER-BASE",
+            "roleType": "RESOURCEMANAGER",
+            "base": true
+          },
+          {
+            "refName": "yarn-NODEMANAGER-BASE",
+            "roleType": "NODEMANAGER",
+            "configs": [
+              {
+                "name": "node_manager_java_heapsize",
+                "value": "536870912"
+              }
+            ],
+            "base": true
+          },
+          {
+            "refName": "yarn-JOBHISTORY-BASE",
+            "roleType": "JOBHISTORY",
+            "base": true
+          },
+          {
+            "refName": "yarn-GATEWAY-BASE",
+            "roleType": "GATEWAY",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "hue",
+        "serviceType": "HUE",
+        "serviceConfigs": [
+          {
+            "name": "hue_service_safety_valve",
+            "value": "[desktop]\napp_blacklist=impala,security,filebrowser,rdbms,jobsub,pig,sqoop,zookeeper,metastore,spark,oozie,indexer,hive,documents,indexes,search",
+            "ref": null,
+            "variable": null,
+            "autoConfig": false
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "hue-HUE_SERVER-BASE",
+            "roleType": "HUE_SERVER",
+            "displayName": null,
+            "configs": [],
+            "base": true
+          },
+          {
+            "refName": "hue-HUE_LOAD_BALANCER-BASE",
+            "roleType": "HUE_LOAD_BALANCER",
+            "displayName": null,
+            "configs": [],
+            "base": true
+          }
+        ],
+        "displayName": null,
+        "roles": []
+      },
+      {
+        "refName": "queuemanager",
+        "serviceType": "QUEUEMANAGER",
+        "serviceConfigs": [
+          {
+            "name": "kerberos.auth.enabled",
+            "value": "true"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "yarn-QUEUEMANAGER_WEBAPP-BASE",
+            "roleType": "QUEUEMANAGER_WEBAPP",
+            "base": true
+          },
+          {
+            "refName": "yarn-QUEUEMANAGER_STORE-BASE",
+            "roleType": "QUEUEMANAGER_STORE",
+            "base": true
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "gateway",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hbase-GATEWAY-BASE",
+          "hdfs-GATEWAY-BASE",
+          "knox-KNOX-GATEWAY-BASE",
+          "yarn-QUEUEMANAGER_WEBAPP-BASE",
+          "yarn-QUEUEMANAGER_STORE-BASE",
+          "yarn-GATEWAY-BASE",
+          "hue-HUE_SERVER-BASE",
+          "hue-HUE_LOAD_BALANCER-BASE"
+        ]
+      },
+      {
+        "refName": "master",
+        "cardinality": 2,
+        "roleConfigGroupsRefNames": [
+          "hbase-GATEWAY-BASE",
+          "hbase-MASTER-BASE",
+          "hdfs-FAILOVERCONTROLLER-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "hdfs-NAMENODE-BASE",
+          "yarn-GATEWAY-BASE",
+          "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "leader",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "hbase-GATEWAY-BASE",
+          "hbase-HBASETHRIFTSERVER-BASE",
+          "hbase-HBASERESTSERVER-BASE",
+          "hdfs-GATEWAY-BASE",
+          "hdfs-JOURNALNODE-BASE",
+          "yarn-JOBHISTORY-BASE",
+          "yarn-RESOURCEMANAGER-BASE",
+          "yarn-GATEWAY-BASE",
+          "zookeeper-SERVER-BASE",
+          "omid-OMID_TSO-BASE"
+        ]
+      },
+      {
+        "refName": "worker",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "hbase-GATEWAY-BASE",
+          "hbase-REGIONSERVER-BASE",
+          "hdfs-DATANODE-BASE",
+          "hdfs-GATEWAY-BASE",
+          "phoenix-PHOENIX_QUERY_SERVER-BASE",
+          "yarn-GATEWAY-BASE",
+          "yarn-NODEMANAGER-BASE"
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,78 @@
+{
+  "name": "7.2.15 - Data Engineering for Google Cloud",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "featureState": "RELEASED",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "e2-standard-16"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "compute",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "gateway",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-ssd"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

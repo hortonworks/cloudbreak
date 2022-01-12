@@ -1,0 +1,129 @@
+{
+  "name": "7.2.15 - Real-time Data Mart for Azure",
+  "description": "",
+  "type": "DATAMART",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark"
+    },
+    "instanceGroups": [
+      {
+        "name": "master1",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D16_v3"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master2",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D16_v3"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master3",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D16_v3"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "coordinator",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 7,
+              "size": 1000,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D16_v3"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "executor",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 7,
+              "size": 1000,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D16_v3"
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}
