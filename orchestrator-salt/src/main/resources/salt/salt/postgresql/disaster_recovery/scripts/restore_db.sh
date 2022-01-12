@@ -130,16 +130,18 @@ restore_db_from_local() {
   if [[ "$SERVICE" == "ranger" ]]; then
     replace_ranger_group_before_import $RANGERGROUP $BACKUP
   fi
-  limit_incomming_connection $SERVICE 0
-  close_existing_connections $SERVICE
-  doLog "INFO Restoring $SERVICE"
-
-  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
-  psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
-  psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" <"$BACKUP" >$LOGFILE 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
-  doLog "INFO Succesfully restored ${SERVICE}"
-
-  limit_incomming_connection $SERVICE -1
+  if [ -f "$BACKUP" ]; then
+    limit_incomming_connection $SERVICE 0
+    close_existing_connections $SERVICE
+    doLog "INFO Restoring $SERVICE"
+    psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "drop database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to drop database ${SERVICE}"
+    psql --host="$HOST" --port="$PORT" --dbname="postgres" --username="$USERNAME" -c "create database ${SERVICE};" > >(tee -a $LOGFILE) 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to re-create database ${SERVICE}"
+    psql --host="$HOST" --port="$PORT" --dbname="$SERVICE" --username="$USERNAME" <"$BACKUP" >$LOGFILE 2> >(tee -a $LOGFILE >&2) || errorExit "Unable to restore ${SERVICE}"
+    doLog "INFO Successfully restored ${SERVICE}"
+    limit_incomming_connection $SERVICE -1
+else
+    doLog "INFO Not restoring ${SERVICE} as ${BACKUP} does not exist"
+fi
 }
 
 run_restore() {
