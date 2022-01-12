@@ -1,0 +1,35 @@
+{
+  "name": "7.2.15 COD Edge Node for AWS",
+  "description": "",
+  "type": "OPERATIONALDATABASE",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 COD Edge Node"
+    },
+    "instanceGroups": [
+      {
+        "name": "leader",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge"
+        },
+        "type": "GATEWAY"
+      }
+    ]
+  }
+}

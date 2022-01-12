@@ -1,0 +1,73 @@
+{
+  "name": "7.2.15 - Data Engineering for YCloud",
+  "description": "",
+  "type": "DATAENGINEERING",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "compute",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "worker",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "gateway",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

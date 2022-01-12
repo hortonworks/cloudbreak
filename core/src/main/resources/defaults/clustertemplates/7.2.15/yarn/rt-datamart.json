@@ -1,0 +1,89 @@
+{
+  "name": "7.2.15 - Real-time Data Mart for YCloud",
+  "description": "",
+  "type": "DATAMART",
+  "featureState": "RELEASED",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark"
+    },
+    "instanceGroups": [
+      {
+        "name": "master1",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master2",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "master3",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 32768
+          }
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "coordinator",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "executor",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}

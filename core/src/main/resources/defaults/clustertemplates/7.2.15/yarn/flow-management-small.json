@@ -1,0 +1,58 @@
+{
+  "name": "7.2.15 - Flow Management Light Duty for YCloud",
+  "description": "",
+  "type": "FLOW_MANAGEMENT",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry"
+    },
+    "instanceGroups": [
+      {
+        "nodeCount": 1,
+        "name": "management",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        }
+      },
+      {
+        "nodeCount": 0,
+        "name": "nifi_scaling",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        }
+      },
+      {
+        "nodeCount": 3,
+        "name": "nifi",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "rootVolume": {
+            "size": 50
+          },
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          }
+        }
+      }
+    ]
+  }
+}

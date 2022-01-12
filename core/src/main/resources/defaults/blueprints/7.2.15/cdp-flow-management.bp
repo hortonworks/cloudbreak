@@ -1,0 +1,313 @@
+{
+  "description": "7.2.15 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry",
+  "blueprint": {
+    "cdhVersion": "7.2.15",
+    "displayName": "flow-management",
+    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
+    "services": [
+      {
+        "refName": "core_settings",
+        "serviceType": "CORE_SETTINGS",
+        "serviceConfigs": [
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "core_settings-STORAGEOPERATIONS-BASE",
+            "roleType": "STORAGEOPERATIONS",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "nifi-NIFI-BASE",
+        "serviceType": "NIFI",
+        "serviceConfigs": [
+          {
+            "name": "zookeeper_service",
+            "ref": "zookeeper"
+          },
+          {
+            "name": "auto.ranger.repository.create",
+            "value": "true"
+          },
+          {
+            "name": "auto.ranger.repository.create.kerberos",
+            "value": "true"
+          },
+          {
+            "name": "auto.kerberos.identity.provider",
+            "value": "false"
+          },
+          {
+            "name": "nifi.proxy.group",
+            "value": "nifi"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "nifi-NIFI_NODE-BASE",
+            "roleType": "NIFI_NODE",
+            "base": true,
+            "configs": [
+              {
+                "name": "xml.authorizers.userGroupProvider.file-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.accessPolicyProvider.file-access-policy-provider.enabled",
+                "value": "false"
+              },
+              {
+                "name": "xml.authorizers.authorizer.managed-authorizer.enabled",
+                "value": "false"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.cm-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.cm-user-group-provider.property.Infer Unqualified Hostnames",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.property.Exclude Groups",
+                "value": "nifi|cloudbreak|users|hadoop"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 1",
+                "value": "cm-user-group-provider"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 2",
+                "value": "shell-user-group-provider"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.property.User Group Provider",
+                "value": "composite-user-group-provider"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.property.Ranger Kerberos Enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.classpath",
+                "value": "${CONF_DIR}/hadoop-conf"
+              },
+              {
+                "name": "nifi.security.identity.mapping.pattern.dn",
+                "value": "^CN=(.*?), .+$"
+              },
+              {
+                "name": "nifi.security.identity.mapping.value.dn",
+                "value": "$1"
+              },
+              {
+                "name": "nifi.security.identity.mapping.transform.dn",
+                "value": "NONE"
+              },
+              {
+                "name": "nifi.properties.ignored",
+                "value": "nifi.kerberos.spnego.principal,nifi.kerberos.spnego.keytab.location,nifi.kerberos.spnego.authentication.expiration,nifi.security.user.login.identity.provider"
+              },
+              {
+                "name": "nifi.security.user.authorizer",
+                "value": "ranger-provider"
+              },
+              {
+                "name" : "nifi.analytics.predict.enabled",
+                "value" : "true"
+              },
+              {
+                "name": "java.arg.3",
+                "value": "-Xmx16g"
+              },
+              {
+                "name": "java.arg.2",
+                "value": "-Xms8g"
+              },
+              {
+                "name": "nifi.registry.client.name",
+                "value": "Default NiFi Registry Client"
+              },
+              {
+                "name": "nifi.registry.client.url",
+                "value": "https://placeholder:18433"
+              },
+              {
+                "name": "rlimit_fds",
+                "value": "500000"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "refName": "zookeeper",
+        "serviceType": "ZOOKEEPER",
+        "roleConfigGroups": [
+          {
+            "refName": "zookeeper-SERVER-BASE",
+            "roleType": "SERVER",
+            "base": true
+          }
+        ]
+      },
+      {
+        "refName": "nifiregistry",
+        "serviceType": "NIFIREGISTRY",
+        "serviceConfigs": [
+          {
+            "name": "auto.kerberos.identity.provider",
+            "value": "false"
+          },
+          {
+            "name": "auto.ranger.repository.create.kerberos",
+            "value": "true"
+          },
+          {
+            "name": "auto.ranger.repository.create",
+            "value": "true"
+          },
+          {
+            "name": "nifi.registry.proxy.group",
+            "value": "nifiregistry"
+          }
+        ],
+        "roleConfigGroups": [
+          {
+            "refName": "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
+            "roleType": "NIFI_REGISTRY_SERVER",
+            "base": true,
+            "configs": [
+              {
+                "name": "xml.authorizers.userGroupProvider.file-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.accessPolicyProvider.file-access-policy-provider.enabled",
+                "value": "false"
+              },
+              {
+                "name": "xml.authorizers.authorizer.managed-authorizer.enabled",
+                "value": "false"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.cm-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.cm-user-group-provider.property.Infer Unqualified Hostnames",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.shell-user-group-provider.property.Exclude Groups",
+                "value": "nifiregistry|cloudbreak|users|hadoop"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 1",
+                "value": "cm-user-group-provider"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-user-group-provider.property.User Group Provider 2",
+                "value": "shell-user-group-provider"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.property.User Group Provider",
+                "value": "composite-user-group-provider"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.property.Ranger Kerberos Enabled",
+                "value": "true"
+              },
+              {
+                "name": "xml.authorizers.authorizer.ranger-provider.classpath",
+                "value": "${CONF_DIR}/hadoop-conf"
+              },
+              {
+                "name": "nifi.registry.security.identity.mapping.pattern.dn",
+                "value": "^CN=(.*?), .+$"
+              },
+              {
+                "name": "nifi.registry.security.identity.mapping.value.dn",
+                "value": "$1"
+              },
+              {
+                "name": "nifi.registry.security.identity.mapping.transform.dn",
+                "value": "NONE"
+              },
+              {
+                "name": "nifi.registry.security.authorizer",
+                "value": "ranger-provider"
+              },
+              {
+                "name": "nifi.registry.properties.ignored",
+                "value": "nifi.registry.security.identity.provider,nifi.registry.kerberos.spnego.principal,nifi.registry.kerberos.spnego.keytab.location,nifi.registry.kerberos.spnego.authentication.expiration"
+              },
+              {
+                "name": "xml.authorizers.userGroupProvider.composite-configurable-user-group-provider.property.User Group Provider 2",
+                "value": "shell-user-group-provider"
+              },
+              {
+                "name": "xml.providers.flowPersistenceProvider.file-provider.enabled",
+                "value": "false"
+              },
+              {
+                "name": "xml.providers.flowPersistenceProvider.database-provider.enabled",
+                "value": "true"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "hostTemplates": [
+      {
+        "refName": "zk",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "zookeeper-SERVER-BASE"
+        ]
+      },
+      {
+        "refName": "nifi",
+        "cardinality": 3,
+        "roleConfigGroupsRefNames": [
+          "nifi-NIFI_NODE-BASE",
+          "core_settings-STORAGEOPERATIONS-BASE"
+        ]
+      },
+      {
+        "refName": "management",
+        "cardinality": 1,
+        "roleConfigGroupsRefNames": [
+          "nifiregistry-NIFI_REGISTRY_SERVER-BASE",
+          "core_settings-STORAGEOPERATIONS-BASE"
+        ]
+      }
+    ]
+  }
+}

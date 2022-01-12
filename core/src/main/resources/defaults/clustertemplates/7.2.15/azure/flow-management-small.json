@@ -1,0 +1,70 @@
+{
+  "name": "7.2.15 - Flow Management Light Duty for Azure",
+  "description": "",
+  "type": "FLOW_MANAGEMENT",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry"
+    },
+    "externalDatabase": {
+      "availabilityType": "NON_HA"
+    },
+    "instanceGroups": [
+      {
+        "nodeCount": 1,
+        "name": "management",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "Standard_D8_v3",
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "Standard_LRS"
+            }
+          ]
+        }
+      },
+      {
+        "nodeCount": 0,
+        "name": "nifi_scaling",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "Standard_D8_v3",
+          "rootVolume": {
+            "size": 150
+          },
+          "attachedVolumes": [
+            {
+              "size": 500,
+              "count": 4,
+              "type": "Standard_LRS"
+            }
+          ]
+        }
+      },
+      {
+        "nodeCount": 3,
+        "name": "nifi",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "Standard_D8_v3",
+          "rootVolume": {
+            "size": 150
+          },
+          "attachedVolumes": [
+            {
+              "size": 500,
+              "count": 4,
+              "type": "Standard_LRS"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

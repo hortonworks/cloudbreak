@@ -1,0 +1,67 @@
+{
+  "cluster": {
+    "blueprintName": "7.2.15 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager",
+    "validateBlueprint": false
+  },
+  "customDomain": {
+    "domainName": "cloudera.site",
+    "hostgroupNameAsHostname": true
+  },
+  "instanceGroups": [
+    {
+      "name": "master",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 2,
+      "type": "CORE"
+    },
+    {
+      "name": "gateway",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 2,
+      "type": "GATEWAY"
+    },
+    {
+      "name": "core",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 3,
+      "type": "CORE"
+    },
+    {
+      "name": "auxiliary",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 1,
+      "type": "CORE"
+    },
+    {
+      "name": "idbroker",
+      "template": {
+        "yarn": {
+          "cpus": 4,
+          "memory": 16384
+        }
+      },
+      "nodeCount": 2,
+      "type": "CORE"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "name": "7.2.15 - Streams Messaging Heavy Duty for Azure",
+  "description": "",
+  "type": "STREAMING",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "Standard_E8s_v3",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "StandardSSD_LRS"
+            }
+          ]
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "registry",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "manageDisk": true
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "smm",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "manageDisk": true
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 1,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "core_broker",
+        "scalabilityOption": "FORBIDDEN",
+        "template": {
+          "instanceType": "Standard_D8s_v3",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "Premium_LRS"
+            }
+          ]
+        },
+        "nodeCount": 3,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "broker",
+        "template": {
+          "instanceType": "Standard_D8s_v3",
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 1000,
+              "type": "Premium_LRS"
+            }
+          ]
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "recipeNames": []
+      },
+      {
+        "name": "srm",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "Standard_LRS"
+            }
+          ],
+          "azure": {
+            "manageDisk": true
+          },
+          "instanceType": "Standard_D8_v3"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}
