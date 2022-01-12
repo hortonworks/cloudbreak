@@ -13,6 +13,7 @@ import com.sequenceiq.cloudbreak.doc.ModelDescriptions.HostGroupModelDescription
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.InstanceGroupModelDescription;
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.InstanceTemplateV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.network.InstanceGroupNetworkV1Request;
+import com.sequenceiq.distrox.api.v1.distrox.validation.ValidRootVolumeSize;
 
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
@@ -20,6 +21,7 @@ import io.swagger.annotations.ApiModelProperty;
 @ApiModel
 @JsonIgnoreProperties(ignoreUnknown = true)
 @JsonInclude(Include.NON_NULL)
+@ValidRootVolumeSize
 public class InstanceGroupV1Request extends InstanceGroupV1Base {
 
     @Valid
