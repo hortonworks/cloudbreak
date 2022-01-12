@@ -128,7 +128,7 @@ class ClusterUpscaleServiceTest {
 
         CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.installServicesOnNewHosts(1L, "master", true, true));
 
-        assertEquals("Failed to remove the following parcels: {parcel=parcel}", exception.getMessage());
+        assertEquals("Failed to remove the following parcels: {parcel=[parcel]}", exception.getMessage());
         verify(parcelService).removeUnusedParcelComponents(stack);
     }
 

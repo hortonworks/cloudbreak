@@ -1,45 +1,48 @@
 package com.sequenceiq.cloudbreak.cluster.model;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
+import com.google.common.collect.Multimaps;
+
 public class ParcelOperationStatus {
 
-    private Map<String, String> successful = new HashMap<>();
+    private Multimap<String, String> successful = HashMultimap.create();
 
-    private Map<String, String> failed = new HashMap<>();
+    private Multimap<String, String> failed = HashMultimap.create();
 
     public ParcelOperationStatus() {
     }
 
     public ParcelOperationStatus(Map<String, String> successful, Map<String, String> failed) {
-        this.successful = new HashMap<>(successful);
-        this.failed = new HashMap<>(failed);
+        this.successful = successful.entrySet().stream().collect(Multimaps.toMultimap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
+        this.failed = failed.entrySet().stream().collect(Multimaps.toMultimap(Map.Entry::getKey, Map.Entry::getValue, HashMultimap::create));
     }
 
-    public Map<String, String> getSuccessful() {
+    public Multimap<String, String> getSuccessful() {
         return successful;
     }
 
-    public void setSuccessful(Map<String, String> successful) {
+    public void setSuccessful(Multimap<String, String> successful) {
         this.successful = successful;
     }
 
-    public Map<String, String> getFailed() {
+    public Multimap<String, String> getFailed() {
         return failed;
     }
 
-    public void setFailed(Map<String, String> failed) {
+    public void setFailed(Multimap<String, String> failed) {
         this.failed = failed;
     }
 
-    public void addSuccesful(String parcelName, String parcelVersion) {
+    public void addSuccessful(String parcelName, String parcelVersion) {
         successful.put(parcelName, parcelVersion);
     }
 
-    public ParcelOperationStatus withSuccesful(String parcelName, String parcelVersion) {
+    public ParcelOperationStatus withSuccessful(String parcelName, String parcelVersion) {
         successful.put(parcelName, parcelVersion);
         return this;
     }
@@ -56,7 +59,7 @@ public class ParcelOperationStatus {
     public ParcelOperationStatus merge(ParcelOperationStatus operationStatus) {
         successful.putAll(operationStatus.successful);
         failed.putAll(operationStatus.failed);
-        successful.entrySet().removeIf(entry -> failed.containsKey(entry.getKey()));
+        operationStatus.failed.forEach((key, value) -> successful.remove(key, value));
         return this;
     }
 

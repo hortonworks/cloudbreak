@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.cm.polling;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
@@ -12,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
+import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
@@ -121,7 +121,7 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerSingleParcelActivationListenerTask(clouderaManagerApiPojoFactory, clusterEventService, product));
     }
 
-    public PollingResult startPollingCmParcelStatus(Stack stack, ApiClient apiClient, Map<String, String> parcelVersions,
+    public PollingResult startPollingCmParcelStatus(Stack stack, ApiClient apiClient, Multimap<String, String> parcelVersions,
             ParcelStatus parcelStatus) {
         LOGGER.debug("Waiting for Cloudera Manager parcels {} to become to status [{}]. [Server address: {}]", parcelVersions, parcelStatus,
                 stack.getClusterManagerIp());
@@ -129,7 +129,7 @@ public class ClouderaManagerPollingServiceProvider {
                 new ClouderaManagerParcelStatusListenerTask(clouderaManagerApiPojoFactory, clusterEventService, parcelVersions, parcelStatus));
     }
 
-    public PollingResult startPollingCmParcelDelete(Stack stack, ApiClient apiClient, Map<String, String> parcelVersions) {
+    public PollingResult startPollingCmParcelDelete(Stack stack, ApiClient apiClient, Multimap<String, String> parcelVersions) {
         LOGGER.debug("Waiting for Cloudera Manager parcels {} to be deleted. [Server address: {}]", parcelVersions,
                 stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, BigDecimal.ZERO, POLL_FOR_ONE_HOUR,
