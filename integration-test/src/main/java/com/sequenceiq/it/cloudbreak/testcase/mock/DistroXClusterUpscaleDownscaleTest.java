@@ -33,6 +33,10 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
 
     private static final int CLUSTER_NODE_COUNT_MIN = 2;
 
+    private static final int WORKER_NODE_COUNT_MAX = CLUSTER_NODE_COUNT_MAX - CLUSTER_NODE_COUNT_MIN;
+
+    private static final int WORKER_NODE_COUNT_MIN = 3;
+
     private static final int UPPER_NODE_COUNT = 10;
 
     private static final int LOWER_NODE_COUNT = 5;
@@ -113,24 +117,24 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
             when = "up- and downscale is called 30 times",
             then = "the cluster should be available")
     public void testScaleDownAndUpManyTimes(MockedTestContext testContext, ITestContext testNgContext) {
-        scalingTestWithManyNodes(testContext, CLUSTER_NODE_COUNT_MAX, CLUSTER_NODE_COUNT_MAX - CLUSTER_NODE_COUNT_MIN, 10, 30);
+        scalingTestWithManyNodes(testContext, WORKER_NODE_COUNT_MAX, WORKER_NODE_COUNT_MAX, WORKER_NODE_COUNT_MIN, 30);
     }
 
-    private void scalingTestWithManyNodes(MockedTestContext testContext, int initialNodeCount, int workerNodeCountAfterUpscale,
+    private void scalingTestWithManyNodes(MockedTestContext testContext, int workerInitialNodeCount, int workerNodeCountAfterUpscale,
             int workerNodeCountAfterDownscale, int scalingCycles) {
         String stack = resourcePropertyProvider().getName();
         createDatalake(testContext);
-        DistroXTestDto currentContext = createDistroxDto(testContext, stack, initialNodeCount)
+        DistroXTestDto currentContext = createDistroxDto(testContext, stack, workerInitialNodeCount)
                 .when(distroXClient.create(), key(stack))
                 .await(STACK_AVAILABLE, key(stack));
 
         for (int i = 0; i < scalingCycles; i++) {
             currentContext = currentContext
-                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterUpscale))
+                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterDownscale))
                     .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL));
 
             currentContext = currentContext
-                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterDownscale))
+                    .when(distroXClient.scale(HostGroupType.WORKER.getName(), workerNodeCountAfterUpscale))
                     .await(STACK_AVAILABLE, key(stack).withPollingInterval(POLLING_INTERVAL));
         }
 
@@ -146,7 +150,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
     public void testNodeCountLimit(MockedTestContext testContext, ITestContext testNgContext) {
         String stack = resourcePropertyProvider().getName();
         createDatalake(testContext);
-        createDistroxDto(testContext, stack, CLUSTER_NODE_COUNT_MAX + 1)
+        createDistroxDto(testContext, stack, WORKER_NODE_COUNT_MAX + 1)
                 .whenException(distroXClient.create(), BadRequestException.class, key(stack)
                         .expectedMessage("The maximum count of nodes for this cluster cannot be higher than 400"))
                 .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
@@ -159,7 +163,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .validate();
     }
 
-    private DistroXTestDtoBase<DistroXTestDto> createDistroxDto(MockedTestContext testContext, String stack, int nodeCount) {
+    private DistroXTestDtoBase<DistroXTestDto> createDistroxDto(MockedTestContext testContext, String stack, int workerNodeCount) {
         return testContext
                 .given(DIX_NET_KEY, DistroXNetworkTestDto.class)
                 .given(DIX_IMG_KEY, DistroXImageTestDto.class)
@@ -174,7 +178,7 @@ public class DistroXClusterUpscaleDownscaleTest extends AbstractClouderaManagerT
                 .given("dx-1000-ig-worker", DistroXInstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.WORKER)
                 .withTemplate("dx-5-volume-ig-template")
-                .withNodeCount(nodeCount)
+                .withNodeCount(workerNodeCount)
                 .given("dx-ig-master", DistroXInstanceGroupTestDto.class)
                 .withHostGroup(HostGroupType.MASTER)
                 .given("dx-ig-gw", DistroXInstanceGroupTestDto.class)
