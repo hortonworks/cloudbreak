@@ -26,6 +26,9 @@ public class RootVolumeSizeValidator implements ConstraintValidator<ValidRootVol
         }
         String cloudPlatform = "unknown";
         InstanceTemplateV1Request template = value.getTemplate();
+        if (template == null || template.getRootVolume() == null || template.getRootVolume().getSize() == null) {
+            return true;
+        }
         if (template.getCloudPlatform() != null) {
             cloudPlatform = template.getCloudPlatform().name();
         }
