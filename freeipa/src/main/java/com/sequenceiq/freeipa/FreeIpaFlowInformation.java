@@ -50,6 +50,8 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
             StackTerminationEvent.TERMINATION_EVENT.event(),
             CreateBindUserFlowEvent.CREATE_BIND_USER_EVENT.event());
 
+    private static final List<Class<? extends FlowConfiguration<?>>> TERMINATION_FLOWS = List.of(StackTerminationFlowConfig.class);
+
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getRestartableFlows() {
         return RESTARTABLE_FLOWS;
@@ -62,6 +64,6 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
 
     @Override
     public List<Class<? extends FlowConfiguration<?>>> getTerminationFlow() {
-        return List.of(StackTerminationFlowConfig.class);
+        return TERMINATION_FLOWS;
     }
 }
