@@ -99,8 +99,7 @@ public class DatabaseConfig {
         HikariConfig config = new HikariConfig();
         if (ssl && Files.exists(Paths.get(certFile))) {
             config.addDataSourceProperty("ssl", "true");
-            config.addDataSourceProperty("sslfactory", "org.postgresql.ssl.SingleCertValidatingFactory");
-            config.addDataSourceProperty("sslfactoryarg", "file://" + certFile);
+            config.addDataSourceProperty("sslrootcert", certFile);
         }
         if (nodeConfig.isNodeIdSpecified()) {
             config.addDataSourceProperty("ApplicationName", nodeConfig.getId());
