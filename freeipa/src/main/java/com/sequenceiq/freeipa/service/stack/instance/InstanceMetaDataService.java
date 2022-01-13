@@ -131,7 +131,9 @@ public class InstanceMetaDataService {
                     instanceMetaData.setInstanceStatus(com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.REQUESTED);
                     instanceMetaData.setInstanceGroup(instanceGroup);
                     instanceMetaData.setDiscoveryFQDN(freeIpa.getHostname() + String.format("%d.", privateId) + freeIpa.getDomain());
-                    multiAzCalculatorService.updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, currentSubnetUsage, instanceMetaData, instanceGroup);
+                    Map<String, String> filteredSubnetsByLeastUsedAz = multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap);
+                    multiAzCalculatorService.updateSubnetIdForSingleInstanceIfEligible(filteredSubnetsByLeastUsedAz, currentSubnetUsage, instanceMetaData,
+                            instanceGroup);
                     instanceMetaDataRepository.save(instanceMetaData);
                     LOGGER.debug("Saved InstanceMetaData: {}", instanceMetaData);
                     instanceGroup.getInstanceMetaDataSet().add(instanceMetaData);
