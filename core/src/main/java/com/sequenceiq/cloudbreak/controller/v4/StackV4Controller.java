@@ -63,6 +63,7 @@ import com.sequenceiq.distrox.v1.distrox.StackUpgradeOperations;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse;
 import com.sequenceiq.flow.api.model.RetryableFlowResponse.Builder;
+import com.sequenceiq.flow.core.exception.FlowNotTriggerableException;
 
 @Controller
 @WorkspaceEntityType(Stack.class)
@@ -455,8 +456,14 @@ public class StackV4Controller extends NotificationController implements StackV4
 
     @Override
     @InternalOnly
-    public FlowIdentifier renewInternalCertificate(Long workspaceId, String crn) {
-        return stackOperationService.renewInternalCertificate(crn);
+    public FlowIdentifier renewInternalCertificate(Long workspaceId, @TenantAwareParam String crn) {
+        try {
+            return stackOperationService.renewInternalCertificate(crn);
+        } catch (FlowNotTriggerableException e) {
+            throw new BadRequestException(e.getMessage());
+        } catch (Exception e) {
+            throw new BadRequestException(e.getMessage());
+        }
     }
 
     @Override

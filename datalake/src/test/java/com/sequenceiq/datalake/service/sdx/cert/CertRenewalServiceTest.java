@@ -13,6 +13,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import javax.ws.rs.WebApplicationException;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -26,6 +28,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
@@ -62,6 +65,9 @@ public class CertRenewalServiceTest {
 
     @Mock
     private CloudbreakPoller cloudbreakPoller;
+
+    @Mock
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @InjectMocks
     private CertRenewalService underTest;
@@ -178,14 +184,11 @@ public class CertRenewalServiceTest {
     @Test
     public void testInternalRenewCertificateNotSetStatusWhenExceptionThrown() throws TransactionExecutionException {
         when(sdxCluster.getStackCrn()).thenReturn("crn");
-        doAnswer(invocation -> {
-            invocation.getArgument(0, Runnable.class).run();
-            return null;
-        }).when(transactionService).required(any(Runnable.class));
-        doThrow(new BadRequestException("Can't start."))
+        when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("cant start");
+        doThrow(new WebApplicationException("Can't start."))
                 .when(stackV4Endpoint).renewInternalCertificate(anyLong(), anyString());
 
-        assertThrows(BadRequestException.class, () -> underTest.renewInternalCertificate(sdxCluster));
+        assertThrows(RuntimeException.class, () -> underTest.renewInternalCertificate(sdxCluster));
 
         verify(stackV4Endpoint).renewInternalCertificate(WORKSPACE_ID_DEFAULT, "crn");
         verifyNoInteractions(cloudbreakFlowService, sdxStatusService);
