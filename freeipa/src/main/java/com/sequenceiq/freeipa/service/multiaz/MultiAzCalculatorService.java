@@ -1,7 +1,9 @@
 package com.sequenceiq.freeipa.service.multiaz;
 
+import static com.google.common.base.Strings.isNullOrEmpty;
 import static com.sequenceiq.cloudbreak.common.network.NetworkConstants.SUBNET_IDS;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -9,6 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -64,15 +67,55 @@ public class MultiAzCalculatorService {
 
     public void updateSubnetIdForSingleInstanceIfEligible(Map<String, String> subnetAzPairs, Map<String, Integer> subnetUsage,
             InstanceMetaData instanceMetaData, InstanceGroup instanceGroup) {
-        if (!subnetUsage.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
-            updateSubnetIdForInstanceIfEmpty(subnetAzPairs, subnetUsage, instanceMetaData);
+        Map<String, Integer> filteredUsage = subnetUsage.entrySet().stream().filter(e -> subnetAzPairs.containsKey(e.getKey()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        if (!filteredUsage.isEmpty() && multiAzValidator.supportedForInstanceMetadataGeneration(instanceGroup)) {
+            updateSubnetIdForInstanceIfEmpty(subnetAzPairs, filteredUsage, instanceMetaData);
+        }
+        subnetUsage.putAll(filteredUsage);
+    }
+
+    public Map<String, String> filterSubnetByLeastUsedAz(InstanceGroup instanceGroup, Map<String, String> subnetAzPairs) {
+        Map<String, List<String>> azSubnetPairs = createAzSubnetPairsFromSubnetAzPairs(subnetAzPairs);
+        Map<String, Integer> azUsage = new HashMap<>();
+        Set<String> azs = azSubnetPairs.keySet();
+        azs.forEach(az -> azUsage.computeIfAbsent(az, k -> 0));
+        collectCurrentAzUsage(instanceGroup, azUsage, subnetAzPairs);
+        Integer numberOfInstanceInAnAz = searchTheSmallestInstanceCountForUsage(azUsage);
+        String leastUsedAz = searchTheSmallestUsedID(azUsage, numberOfInstanceInAnAz);
+        Set<String> subnetsForLeastUsedAz = new HashSet<>(azSubnetPairs.get(leastUsedAz));
+        return subnetsForLeastUsedAz.stream().collect(Collectors.toMap(Function.identity(), v -> leastUsedAz));
+    }
+
+    private Map<String, List<String>> createAzSubnetPairsFromSubnetAzPairs(Map<String, String> subnetAzPairs) {
+        Map<String, List<String>> ret = new HashMap<>();
+        subnetAzPairs.forEach((subnet, az) -> {
+            List<String> subnetIds = ret.computeIfAbsent(az, key -> new ArrayList<>());
+            subnetIds.add(subnet);
+        });
+        return ret;
+    }
+
+    private void collectCurrentAzUsage(InstanceGroup instanceGroup, Map<String, Integer> azUsage, Map<String, String> subnetAzPairs) {
+        for (InstanceMetaData instanceMetaData : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+            String subnetId = instanceMetaData.getSubnetId();
+            if (!isNullOrEmpty(subnetId)) {
+                String az = subnetAzPairs.get(subnetId);
+                Integer countOfInstances = azUsage.get(az);
+                if (countOfInstances != null) {
+                    azUsage.put(az, countOfInstances + 1);
+                } else {
+                    LOGGER.warn("AZ with subnet ID {} is not present in the environment networks. Current usage: {}",
+                            subnetId, azUsage.keySet());
+                }
+            }
         }
     }
 
     private void updateSubnetIdForInstanceIfEmpty(Map<String, String> subnetAzPairs, Map<String, Integer> subnetUsage, InstanceMetaData instanceMetaData) {
         if (StringUtils.isBlank(instanceMetaData.getSubnetId())) {
-            Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForSubnets(subnetUsage);
-            String leastUsedSubnetId = searchTheSmallestUsedSubnetID(subnetUsage, numberOfInstanceInASubnet);
+            Integer numberOfInstanceInASubnet = searchTheSmallestInstanceCountForUsage(subnetUsage);
+            String leastUsedSubnetId = searchTheSmallestUsedID(subnetUsage, numberOfInstanceInASubnet);
             LOGGER.debug("Least used subnet id [{}] with usage count [{}] is selected for instance [{}]",
                     leastUsedSubnetId, numberOfInstanceInASubnet, instanceMetaData.getInstanceId());
 
@@ -90,12 +133,12 @@ public class MultiAzCalculatorService {
         return collectCurrentSubnetUsage(instanceGroup, emptySubnetUsage);
     }
 
-    private Integer searchTheSmallestInstanceCountForSubnets(Map<String, Integer> subnetUsage) {
-        return Collections.min(subnetUsage.values());
+    private Integer searchTheSmallestInstanceCountForUsage(Map<String, Integer> usage) {
+        return Collections.min(usage.values());
     }
 
-    private String searchTheSmallestUsedSubnetID(Map<String, Integer> subnetUsage, Integer currentNumber) {
-        return subnetUsage.entrySet()
+    private String searchTheSmallestUsedID(Map<String, Integer> usage, Integer currentNumber) {
+        return usage.entrySet()
                 .stream()
                 .filter(e -> e.getValue().equals(currentNumber))
                 .findFirst()
