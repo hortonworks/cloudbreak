@@ -25,7 +25,10 @@ dependencies {
   implementation group: 'org.slf4j',                             name: 'slf4j-api',                      version: slf4jApiVersion
   implementation group: 'ch.qos.logback.contrib',                name: 'logback-json-classic',           version: logbackJsonClassicVersion
   implementation group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
-  api group: "io.micrometer",                         name: "micrometer-jersey2",             version: micrometerVersion
+  implementation (group: 'io.micrometer',                         name: 'micrometer-jersey2',             version: micrometerVersion) {
+    exclude group: 'org.glassfish.jersey.inject'
+  }
+  implementation group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
   api group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
   api group: 'commons-net',                           name: 'commons-net',                    version: '3.6'
   api group: 'org.apache.commons',                    name: 'commons-collections4',           version: commonsCollections4Version
