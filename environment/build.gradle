@@ -82,9 +82,6 @@ dependencies {
     implementation     group: "io.springfox",              name: "springfox-swagger-ui",                     version: swagger2Version
     implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion
     implementation     group: "dnsjava",                   name: "dnsjava",                                  version: dnsjavaVersion
-    implementation     group: "io.micrometer",             name: "micrometer-core",                          version: micrometerVersion
-    implementation     group: "io.micrometer",             name: "micrometer-jersey2",                       version: micrometerVersion
-    implementation     group: "io.micrometer",             name: "micrometer-registry-prometheus",           version: micrometerVersion
     implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version
     implementation     group: "io.springfox",              name: "springfox-swagger-ui",                     version: swagger2Version
     implementation    (group: "io.swagger",                name: "swagger-jersey2-jaxrs",                    version: swaggerVersion) {

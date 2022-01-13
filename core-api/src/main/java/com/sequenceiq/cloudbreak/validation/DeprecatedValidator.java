@@ -3,9 +3,9 @@ package com.sequenceiq.cloudbreak.validation;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
-import com.sequenceiq.common.api.util.ValidatorUtil;
+import org.apache.commons.lang3.StringUtils;
 
-import io.micrometer.core.instrument.util.StringUtils;
+import com.sequenceiq.common.api.util.ValidatorUtil;
 
 public class DeprecatedValidator implements ConstraintValidator<ValidDeprecated, String> {
 
