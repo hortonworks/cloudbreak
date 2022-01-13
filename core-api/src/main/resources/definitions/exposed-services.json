@@ -732,21 +732,6 @@
       "minVersion": "7.2.11"
     },
     {
-      "name": "SSB-SSE-API",
-      "displayName": "Streaming SQL Engine API",
-      "serviceName": "STREAMING_SQL_ENGINE",
-      "knoxService": "SSB-SSE-API",
-      "knoxUrl": "/ssb-sse-api/",
-      "ssoSupported": true,
-      "port": 18121,
-      "tlsPort": 18121,
-      "apiOnly": true,
-      "apiIncluded": true,
-      "visibleForDatalake": false,
-      "visibleForDatahub": true,
-      "minVersion": "7.2.13"
-    },
-    {
       "name": "KNOX_TOKEN_INTEGRATOR",
       "displayName": "Token Integration",
       "serviceName": "KNOX",

@@ -39,9 +39,6 @@ dependencies {
     implementation (group: 'org.springframework.vault',            name: 'spring-vault-core',              version: '2.1.0.RELEASE') {
         exclude group: 'org.springframework'
     }
-    implementation group: 'io.micrometer',                         name: 'micrometer-core',                version: micrometerVersion
-    implementation group: 'io.micrometer',                         name: 'micrometer-jersey2',             version: micrometerVersion
-    implementation group: 'io.micrometer',                         name: 'micrometer-registry-prometheus', version: micrometerVersion
     implementation group: 'com.fasterxml.jackson.core',            name: 'jackson-databind',               version: jacksonVersion
     implementation group: 'commons-io',                            name: 'commons-io',                     version: apacheCommonsIoVersion
     implementation group: 'com.google.guava',                      name: 'guava',                          version: guavaVersion
