@@ -22,9 +22,11 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.detach.event.SdxDetachFailedEvent;
@@ -72,6 +74,9 @@ public class SdxDetachActions {
     @Inject
     private DatabaseServerV4Endpoint redbeamsServerEndpoint;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
     @Bean(name = "SDX_DETACH_START_STATE")
     public Action<?, ?> sdxDetach() {
         return new AbstractSdxAction<>(SdxStartDetachEvent.class) {
@@ -86,6 +91,7 @@ public class SdxDetachActions {
                 variables.put(SDX_NAME, payload.getSdxCluster().getName());
                 variables.put(RESIZED_SDX, payload.getSdxCluster());
                 variables.put(DETACHING_SDX, sdxDetachService.detach(payload.getResourceId()));
+                eventSenderService.notifyEvent(payload.getSdxCluster(), context, ResourceEvent.SDX_DETACH_STARTED);
                 sendEvent(context, SDX_DETACH_IN_PROGRESS_EVENT.event(), payload);
             }
 
@@ -145,6 +151,7 @@ public class SdxDetachActions {
             @Override
             protected void doExecute(SdxContext context, SdxDetachSuccessEvent payload, Map<Object, Object> variables) throws Exception {
                 LOGGER.info("SDX detach finalized: {}", payload.getResourceId());
+                eventSenderService.notifyEvent((SdxCluster) variables.get(DETACHING_SDX), context, ResourceEvent.SDX_DETACH_FINISHED);
                 sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.STOPPED, "Datalake is detached", payload.getResourceId());
                 if (variables.containsKey(RESIZED_SDX)) {
                     SdxCluster sdxCluster = (SdxCluster) variables.get(RESIZED_SDX);

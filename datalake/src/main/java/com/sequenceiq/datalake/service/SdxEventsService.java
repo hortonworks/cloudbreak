@@ -52,7 +52,7 @@ public class SdxEventsService {
 
     public List<CDPStructuredEvent> getDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types) {
         List<CDPStructuredEvent> dlEvents;
-        List<CDPStructuredEvent> cbEvents;
+        List<List<CDPStructuredEvent>> cbEvents;
 
         SdxCluster sdxCluster = getDatalake(environmentCrn);
         if (sdxCluster == null) {
@@ -60,12 +60,13 @@ public class SdxEventsService {
             return List.of();
         }
 
-        List<String> datalakeCrns = getDatalakeCrns(environmentCrn);
-        dlEvents = retrieveDatalakeServiceEvents(types, datalakeCrns);
-        cbEvents = retrieveCloudbreakServiceEvents(sdxCluster);
+        List<SdxCluster> datalakes = getDatalakes(environmentCrn);
+        dlEvents = retrieveDatalakeServiceEvents(types,
+                datalakes.stream().map(SdxCluster::getCrn).collect(toList()));
+        cbEvents = datalakes.stream().map(datalake -> retrieveCloudbreakServiceEvents(datalake)).collect(toList());
 
         List<CDPStructuredEvent> combinedEvents = new ArrayList<>();
-        combinedEvents.addAll(cbEvents);
+        cbEvents.forEach(events -> combinedEvents.addAll(events));
         combinedEvents.addAll(dlEvents);
 
         if (combinedEvents.isEmpty()) {
@@ -77,7 +78,7 @@ public class SdxEventsService {
 
     public List<CDPStructuredEvent> getPagedDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types, Integer page, Integer size) {
         List<CDPStructuredEvent> dlEvents;
-        List<CDPStructuredEvent> cbEvents;
+        List<List<CDPStructuredEvent>> cbEvents;
 
         PageRequest pageable = PageRequest.of(page, size, Sort.by("timestamp").descending());
         SdxCluster sdxCluster = getDatalake(environmentCrn);
@@ -86,12 +87,14 @@ public class SdxEventsService {
             return List.of();
         }
 
-        List<String> datalakeCrns = getDatalakeCrns(environmentCrn);
-        dlEvents = retrievePagableDatalakeServiceEvents(types, datalakeCrns, pageable);
-        cbEvents = retrievePagedCloudbreakServiceEvents(sdxCluster, page, size);
+        List<SdxCluster> datalakes = getDatalakes(environmentCrn);
+        dlEvents = retrievePagableDatalakeServiceEvents(types,
+                datalakes.stream().map(SdxCluster::getCrn).collect(toList()), pageable);
+
+        cbEvents = datalakes.stream().map(datalake -> retrievePagedCloudbreakServiceEvents(datalake, page, size)).collect(toList());
 
         List<CDPStructuredEvent> combinedEvents = new ArrayList<>();
-        combinedEvents.addAll(cbEvents);
+        cbEvents.forEach(events -> combinedEvents.addAll(events));
         combinedEvents.addAll(dlEvents);
 
         if (combinedEvents.isEmpty()) {
@@ -163,15 +166,13 @@ public class SdxEventsService {
     }
 
     /**
-     * Get datalake CRNs that are or were provisioned within the environment identified by the provided CRN.
+     * Get SdxCluster's that are or were provisioned within the environment identified by the provided CRN.
      *
      * @param environmentCrn an environment CRN
-     * @return a list of Data Lake CRNs related to the environment
+     * @return a list of SdxCluster's related to the environment
      */
-    private List<String> getDatalakeCrns(String environmentCrn) {
-        return sdxClusterRepository.findByAccountIdAndEnvCrn(getAccountId(environmentCrn), environmentCrn).stream()
-                .map(SdxCluster::getCrn)
-                .collect(toList());
+    private List<SdxCluster> getDatalakes(String environmentCrn) {
+        return sdxClusterRepository.findByAccountIdAndEnvCrn(getAccountId(environmentCrn), environmentCrn);
     }
 
     /**
@@ -217,7 +218,7 @@ public class SdxEventsService {
     /**
      * Converts a collection of {@code StructuredNotificationEvent} to {@code CDPStructuredEvent}.
      *
-     * @param StructuredNotificationEvent Event response from cloudbreak.
+     * @param structuredNotificationEvent Event response from cloudbreak.
      * @param datalakeCrn               Crn of data lake.
      * @return CDP structured Event
      */
