@@ -47,9 +47,6 @@ dependencies {
 
   implementation     group: 'com.google.code.gson',      name: 'gson'
   implementation     group: 'dnsjava',                   name: 'dnsjava'
-  implementation     group: 'io.micrometer',             name: 'micrometer-core'
-  implementation     group: 'io.micrometer',             name: 'micrometer-jersey2'
-  implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus'
   implementation     group: 'io.springfox',              name: 'springfox-swagger2'
   implementation     group: 'io.springfox',              name: 'springfox-swagger-ui'
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
@@ -104,9 +101,6 @@ dependencies {
   constraints {
     implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
-    implementation     group: 'io.micrometer',             name: 'micrometer-core',                version: micrometerVersion
-    implementation     group: 'io.micrometer',             name: 'micrometer-jersey2',             version: micrometerVersion
-    implementation     group: 'io.micrometer',             name: 'micrometer-registry-prometheus', version: micrometerVersion
     implementation     group: 'io.springfox',              name: 'springfox-swagger2',             version: swagger2Version
     implementation     group: 'io.springfox',              name: 'springfox-swagger-ui',           version: swagger2Version
     implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
