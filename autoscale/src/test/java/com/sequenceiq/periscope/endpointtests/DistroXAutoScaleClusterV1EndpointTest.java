@@ -213,6 +213,45 @@ public class DistroXAutoScaleClusterV1EndpointTest {
     }
 
     @Test
+    public void testEnableStopStartScalingForClusterName() {
+        DistroXAutoscaleClusterResponse clusterResponse =
+                distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterName(TEST_CLUSTER_NAME, AutoscaleClusterState.enableStopStart());
+        assertTrue("StopStart scaling should be enabled", clusterResponse.isStopStartScalingEnabled());
+
+        clusterResponse = distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterName(TEST_CLUSTER_NAME, AutoscaleClusterState.disableStopStart());
+        assertFalse("StopStart scaling should be disabled", clusterResponse.isStopStartScalingEnabled());
+    }
+
+    @Test
+    public void testEnableStopStartScalingForClusterCrn() {
+        DistroXAutoscaleClusterResponse clusterResponse =
+                distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.enableStopStart());
+        assertTrue("StopStart scaling should be enabled", clusterResponse.isStopStartScalingEnabled());
+
+        clusterResponse = distroXAutoScaleClusterV1Endpoint.enableAutoscaleForClusterCrn(TEST_CLUSTER_CRN, AutoscaleClusterState.disableStopStart());
+        assertFalse("StopStart scaling should be disabled", clusterResponse.isStopStartScalingEnabled());
+    }
+
+    @Test
+    public void testUpdateAutoscaleConfigByClusterCrnForEnableDisableStopStartScaling() {
+        DistroXAutoscaleClusterRequest clusterRequest = new DistroXAutoscaleClusterRequest();
+        clusterRequest.setEnableAutoscaling(true);
+
+        clusterRequest.setUseStopStartMechanism(null);
+        DistroXAutoscaleClusterResponse clusterResponse =
+                distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, clusterRequest);
+        assertFalse("StopStart scaling should be disabled if not specified in reuqest", clusterResponse.isStopStartScalingEnabled());
+
+        clusterRequest.setUseStopStartMechanism(true);
+        clusterResponse = distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, clusterRequest);
+        assertTrue("StopStart scaling should be enabled", clusterResponse.isStopStartScalingEnabled());
+
+        clusterRequest.setUseStopStartMechanism(false);
+        clusterResponse = distroXAutoScaleClusterV1Endpoint.updateAutoscaleConfigByClusterCrn(TEST_CLUSTER_CRN, clusterRequest);
+        assertFalse("StopStart scaling should be disabled", clusterResponse.isStopStartScalingEnabled());
+    }
+
+    @Test
     public void testUpdateAutoscaleConfigByClusterCrnForLoadAlerts() {
         List<LoadAlertRequest> loadAlertRequests = getLoadAlertRequests(1, List.of("compute"));
 

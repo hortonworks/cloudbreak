@@ -25,7 +25,7 @@ public class StackResponseUtilsTest {
         String hostGroup = "compute";
 
         Map<String, String> instanceIdsForHostGroups = underTest
-                .getCloudInstanceIdsForHostGroup(getMockStackV4Response(hostGroup), hostGroup);
+                .getCloudInstanceIdsForHostGroup(getMockStackV4Response(hostGroup, false), hostGroup);
 
         assertEquals("Retrieved Instance Ids size should match", instanceIdsForHostGroups.size(), 3);
         assertEquals("Retrieved Instance Id should match",
@@ -37,11 +37,22 @@ public class StackResponseUtilsTest {
     }
 
     @Test
+    public void testGetCloudInstanceIdsForHostGroupWithUnhealthyInstances() {
+        String hostGroup = "compute";
+
+        Map<String, String> instanceIdsToHostGroup = underTest.
+                getCloudInstanceIdsForHostGroup(getMockStackV4Response(hostGroup, true), hostGroup);
+
+        assertEquals("Retrieved Instance Ids size should match", 1, instanceIdsToHostGroup.size());
+        assertEquals("Retrieved Instance Id should match", "test_instanceid_compute2", instanceIdsToHostGroup.get("test_fqdn2"));
+    }
+
+    @Test
     public void testGetNodeCountForHostGroup() {
         String hostGroup = "compute";
 
         Integer nodeCountForHostGroup = underTest
-                .getNodeCountForHostGroup(getMockStackV4Response(hostGroup), hostGroup);
+                .getNodeCountForHostGroup(getMockStackV4Response(hostGroup, false), hostGroup);
         assertEquals("Retrieved HostGroup Instance Count should match.", Integer.valueOf(3), nodeCountForHostGroup);
     }
 
@@ -88,9 +99,9 @@ public class StackResponseUtilsTest {
         assertEquals("RoleConfigName in template should match for HostGroup", expectedRoleConfigName, hostGroupRolename);
     }
 
-    private StackV4Response getMockStackV4Response(String hostGroup) {
+    private StackV4Response getMockStackV4Response(String hostGroup, boolean withUnhealthyInstances) {
         return MockStackResponseGenerator
-                .getMockStackV4Response("test-crn", hostGroup, "test_fqdn", 3);
+                .getMockStackV4Response("test-crn", hostGroup, "test_fqdn", 3, withUnhealthyInstances);
     }
 
     private String getTestBP() throws IOException {

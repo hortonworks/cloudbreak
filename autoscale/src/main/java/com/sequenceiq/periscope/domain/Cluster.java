@@ -64,6 +64,9 @@ public class Cluster implements Monitored, Clustered {
     @Column(name = "cooldown")
     private Integer coolDown = ScalingConstants.DEFAULT_CLUSTER_COOLDOWN_MINS;
 
+    @Column(name = "stop_start_enabled")
+    private Boolean stopStartScalingEnabled = ScalingConstants.STOP_START_SCALING_ENABLED;
+
     @Column(name = "cb_stack_crn")
     private String stackCrn;
 
@@ -314,6 +317,14 @@ public class Cluster implements Monitored, Clustered {
 
     public Boolean getAutoscalingEnabled() {
         return autoscalingEnabled;
+    }
+
+    public Boolean isStopStartScalingEnabled() {
+        return stopStartScalingEnabled;
+    }
+
+    public void setStopStartScalingEnabled(Boolean stopStartScalingEnabled) {
+        this.stopStartScalingEnabled = stopStartScalingEnabled;
     }
 }
 
