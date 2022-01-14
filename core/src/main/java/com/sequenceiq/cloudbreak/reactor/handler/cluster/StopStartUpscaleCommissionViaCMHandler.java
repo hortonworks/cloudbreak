@@ -33,14 +33,11 @@ import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommi
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 import reactor.bus.Event;
-import reactor.bus.EventBus;
 
 @Component
 public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEventHandler<StopStartUpscaleCommissionViaCMRequest> {
@@ -48,19 +45,10 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStartUpscaleCommissionViaCMHandler.class);
 
     @Inject
-    private EventBus eventBus;
-
-    @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
     @Inject
-    private StackService stackService;
-
-    @Inject
     private HostGroupService hostGroupService;
-
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
 
     @Inject
     private CloudbreakFlowMessageService flowMessageService;
@@ -129,7 +117,10 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                 recommissionedHostnames = clusterCommissionService.recommissionClusterNodes(hostsToRecommission);
                 // TODO CB-14929: Maybe wait for services to start / force CM sync.
             }
-            List<String> allMissingRecommissionHostnames = Collections.emptyList();
+            List<String> allMissingRecommissionHostnames = null;
+            if (missingHostsInCm.size() > 0) {
+                allMissingRecommissionHostnames = new LinkedList<>(missingHostsInCm);
+            }
             if (hostsToRecommission.size() != recommissionedHostnames.size()) {
                 Set<String> finalRecommissionedHostnames = recommissionedHostnames;
                 List<String> additionalMissingRecommissionHostnames = hostsToRecommission.keySet().stream()
@@ -137,7 +128,9 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                         .collect(Collectors.toList());
                 LOGGER.info("Recommissioned fewer instances then requested. recommissionedCount={}, expectedCount={}, initialCount={}, notRecommissioned={}",
                         recommissionedHostnames.size(), hostsToRecommission.size(), hostNames.size(), additionalMissingRecommissionHostnames);
-                allMissingRecommissionHostnames.addAll(missingHostsInCm);
+                if (allMissingRecommissionHostnames == null) {
+                    allMissingRecommissionHostnames = new LinkedList<>();
+                }
                 allMissingRecommissionHostnames.addAll(additionalMissingRecommissionHostnames);
             }
 
