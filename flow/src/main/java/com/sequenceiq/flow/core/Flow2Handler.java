@@ -35,6 +35,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil;
+import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
@@ -309,8 +310,8 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         try {
             flow.initialize(contextParams);
             runningFlows.put(flow, flowChainId);
-            flowStatCache.put(flowId, flowChainId, payload.getResourceId(),
-                    flowConfig.getFlowOperationType().name(), flow.getFlowConfigClass(), false);
+            Benchmark.measure(() -> flowStatCache.put(flowId, flowChainId, payload.getResourceId(),
+                    flowConfig.getFlowOperationType().name(), flow.getFlowConfigClass(), false), LOGGER, "Creating flow stat took {}ms");
             transactionService.required(() -> {
                 flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), flow.getCurrentState());
                 if (flowChainId != null) {

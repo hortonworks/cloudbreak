@@ -27,6 +27,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
+import com.sequenceiq.cloudbreak.util.Benchmark;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.core.ApplicationFlowInformation;
 import com.sequenceiq.flow.core.FlowConstants;
@@ -164,18 +165,20 @@ public class FlowLogDBService implements FlowLogService {
                         .anyMatch(terminationFlowClassName -> terminationFlowClassName.equals(flowLog.getFlowType().getName())))
                 .filter(flowlog -> flowlog.getCreated() < olderThan)
                 .findFirst().ifPresent(flowLog -> {
-            try {
-                LOGGER.info("Cancel flow [{}] for resource [{}] because it's too old", flowLog.getFlowId(), resourceId);
-                cancel(resourceId, flowLog.getFlowId());
-            } catch (TransactionExecutionException e) {
-                LOGGER.error("Can't cancel termination flow: {}", flowLog.getFlowId(), e);
-            }
-        });
+                    try {
+                        LOGGER.info("Cancel flow [{}] for resource [{}] because it's too old", flowLog.getFlowId(), resourceId);
+                        cancel(resourceId, flowLog.getFlowId());
+                    } catch (TransactionExecutionException e) {
+                        LOGGER.error("Can't cancel termination flow: {}", flowLog.getFlowId(), e);
+                    }
+                });
     }
 
     @Override
     public Set<FlowLogIdWithTypeAndTimestamp> findAllRunningNonTerminationFlowsByResourceId(Long resourceId) {
-        Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId = flowLogRepository.findAllRunningFlowLogByResourceId(resourceId);
+        Set<FlowLogIdWithTypeAndTimestamp> allRunningFlowIdsByResourceId =
+                Benchmark.measure(() -> flowLogRepository.findAllRunningFlowLogByResourceId(resourceId), LOGGER,
+                        "Fetching all running flow for resource took {}ms");
         return allRunningFlowIdsByResourceId.stream()
                 .filter(flowLog -> applicationFlowInformation.getTerminationFlow().stream()
                         .map(Class::getName)
