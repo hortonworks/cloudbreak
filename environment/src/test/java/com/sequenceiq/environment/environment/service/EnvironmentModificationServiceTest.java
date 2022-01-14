@@ -692,6 +692,53 @@ class EnvironmentModificationServiceTest {
 
     }
 
+    @Test
+    void testUpdateAzureResourceEncryptionParametersErrorsWhenEncryptionKeyAlreadyPresent() {
+        UpdateAzureResourceEncryptionDto updateAzureResourceEncryptionDto = UpdateAzureResourceEncryptionDto.builder()
+                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
+                        .withEncryptionKeyUrl("dummyKeyUrl")
+                        .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                        .build())
+                .build();
+        Environment env = new Environment();
+        AzureParameters azureParameters = new AzureParameters();
+        azureParameters.setEncryptionKeyUrl("dummyEncryptionKey");
+        env.setParameters(azureParameters);
+
+        when(environmentService
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
+
+        BadRequestException badRequestException = assertThrows(BadRequestException.class,
+                () -> environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,
+                        ENVIRONMENT_NAME, updateAzureResourceEncryptionDto));
+
+        assertEquals(badRequestException.getMessage(), String.format("Encryption Key '%s' is already set for the environment '%s'. " +
+                "Modifying the encryption key is not allowed.", "dummyEncryptionKey", ENVIRONMENT_NAME));
+    }
+
+    @Test
+    void testUpdateAzureResourceEncryptionParametersNoErrorWhenSameEncryptionKeyAlreadyPresent() {
+        UpdateAzureResourceEncryptionDto updateAzureResourceEncryptionDto = UpdateAzureResourceEncryptionDto.builder()
+                .withAzureResourceEncryptionParametersDto(AzureResourceEncryptionParametersDto.builder()
+                        .withEncryptionKeyUrl("dummyKeyUrl")
+                        .withEncryptionKeyResourceGroupName("dummyResourceGroupName")
+                        .build())
+                .build();
+        Environment env = new Environment();
+        AzureParameters azureParameters = new AzureParameters();
+        azureParameters.setEncryptionKeyUrl("dummyKeyUrl");
+        env.setParameters(azureParameters);
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(environmentService
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
+        when(validatorService.validateEncryptionKeyUrl(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
+
+        environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,
+                ENVIRONMENT_NAME, updateAzureResourceEncryptionDto);
+        verify(environmentDtoConverter, times(1)).environmentToDto(env);
+    }
+
     @Configuration
     @Import(EnvironmentModificationService.class)
     static class Config {
