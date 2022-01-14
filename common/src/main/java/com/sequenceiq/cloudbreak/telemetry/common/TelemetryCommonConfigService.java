@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.Properties;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.PropertyPlaceholderHelper;
 
@@ -25,35 +24,14 @@ public class TelemetryCommonConfigService {
 
     private static final String LOG_FOLDER_DEFAULT = "/var/log";
 
-    private final String version;
-
-    private final boolean databusEndpointValidation;
-
     private final AnonymizationRuleResolver anonymizationRuleResolver;
 
-    public TelemetryCommonConfigService(AnonymizationRuleResolver anonymizationRuleResolver,
-            @Value("${altus.databus.endpoint.validation:false}") boolean databusEndpointValidation,
-            @Value("${info.app.version:}") String version) {
+    public TelemetryCommonConfigService(AnonymizationRuleResolver anonymizationRuleResolver) {
         this.anonymizationRuleResolver = anonymizationRuleResolver;
-        this.databusEndpointValidation = databusEndpointValidation;
-        this.version = version;
     }
-    // CHECKSTYLE:OFF
-    // TODO: refactor parameters to 1 object
+
     public TelemetryCommonConfigView createTelemetryCommonConfigs(Telemetry telemetry, List<VmLog> logs,
-            String clusterType, String clusterCrn, String clusterName, String clusterOwner, String platform,
-            String databusEndpoint, String databusS3Endpoint) {
-        final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
-                .withOwner(clusterOwner)
-                .withName(clusterName)
-                .withType(clusterType)
-                .withCrn(clusterCrn)
-                .withPlatform(platform)
-                .withVersion(version)
-                .withDatabusEndpoint(databusEndpoint)
-                .withDatabusS3Endpoint(databusS3Endpoint)
-                .withDatabusEndpointValidation(databusEndpointValidation)
-                .build();
+            TelemetryClusterDetails clusterDetails) {
         resolveLogPathReferences(telemetry, logs);
         return new TelemetryCommonConfigView.Builder()
                 .withClusterDetails(clusterDetails)
@@ -61,7 +39,6 @@ public class TelemetryCommonConfigService {
                 .withVmLogs(logs)
                 .build();
     }
-    // CHECKSTYLE:ON
 
     @VisibleForTesting
     void resolveLogPathReferences(Telemetry telemetry, List<VmLog> logs) {
