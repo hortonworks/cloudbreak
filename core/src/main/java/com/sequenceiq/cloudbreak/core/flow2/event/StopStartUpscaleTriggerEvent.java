@@ -40,10 +40,6 @@ public class StopStartUpscaleTriggerEvent extends StackEvent implements HostGrou
         return adjustment;
     }
 
-    public Set<Long> getHostIds() {
-        return hostIds;
-    }
-
     public boolean isSinglePrimaryGateway() {
         return singlePrimaryGateway;
     }
