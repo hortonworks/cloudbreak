@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.orchestration;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -16,7 +17,7 @@ public class StopStartUpscaleCommissionViaCMResult extends AbstractClusterScaleR
             List<String> notCommissionedFqdns) {
         super(request);
         this.successfullyCommissionedFqdns = successfullyCommissionedFqdns;
-        this.notRecommissionedFqdns = notCommissionedFqdns;
+        this.notRecommissionedFqdns = notCommissionedFqdns == null ? Collections.emptyList() : notCommissionedFqdns;
     }
 
     public Set<String> getSuccessfullyCommissionedFqdns() {
