@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.util;
 
+import java.util.Arrays;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Strings;
 
@@ -13,7 +15,9 @@ public class SecurityGroupSeparator {
         if (Strings.isNullOrEmpty(securityGroup)) {
             return Set.of();
         }
-        return Set.of(securityGroup.split(","));
+        return Arrays.stream(securityGroup.split(","))
+                .map(e -> e.trim())
+                .collect(Collectors.toSet());
     }
 
 }
