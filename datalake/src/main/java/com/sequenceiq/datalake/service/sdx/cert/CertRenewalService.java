@@ -4,11 +4,13 @@ import static com.sequenceiq.datalake.service.sdx.SdxService.WORKSPACE_ID_DEFAUL
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 
 import javax.inject.Inject;
+import javax.ws.rs.WebApplicationException;
 
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -48,6 +50,9 @@ public class CertRenewalService {
     @Inject
     private CloudbreakPoller cloudbreakPoller;
 
+    @Inject
+    private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
+
     public FlowIdentifier triggerRenewCertificate(SdxCluster sdxCluster, String userCrn) {
         MDCBuilder.buildMdcContext(sdxCluster);
         return sdxReactorFlowManager.triggerCertRenewal(new SdxStartCertRenewalEvent(sdxCluster.getId(), userCrn));
@@ -72,13 +77,14 @@ public class CertRenewalService {
 
     public void renewInternalCertificate(SdxCluster sdxCluster) {
         try {
-            transactionService.required(() -> {
-                FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
-                        () -> stackV4Endpoint.renewInternalCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getStackCrn()));
-                saveChainIdAndStatus(sdxCluster, flowIdentifier);
-            });
+            FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAsInternalActor(
+                    () -> stackV4Endpoint.renewInternalCertificate(WORKSPACE_ID_DEFAULT, sdxCluster.getStackCrn()));
+            transactionService.required(() -> saveChainIdAndStatus(sdxCluster, flowIdentifier));
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
+        } catch (WebApplicationException e) {
+            String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
+            throw new RuntimeException(errorMessage);
         }
     }
 
