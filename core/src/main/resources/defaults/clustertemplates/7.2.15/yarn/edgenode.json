@@ -1,0 +1,27 @@
+{
+  "name": "7.2.15 COD Edge Node for YCloud",
+  "description": "",
+  "type": "OPERATIONALDATABASE",
+  "featureState": "RELEASED",
+  "cloudPlatform": "YARN",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 COD Edge Node"
+    },
+    "instanceGroups": [
+      {
+        "name": "leader",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "yarn": {
+            "cpus": 4,
+            "memory": 8192
+          },
+          "cloudPlatform": "YARN"
+        },
+        "type": "GATEWAY"
+      }
+    ]
+  }
+}

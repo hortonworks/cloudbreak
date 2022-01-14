@@ -138,7 +138,7 @@ cb:
     url: http://localhost:8087
     contextPath: /redbeams
   runtimes:
-    latest: "7.2.14"
+    latest: "7.2.15"
 
   host.discovery.custom.hostname.enabled: false
 
@@ -565,6 +565,25 @@ cb:
           7.2.14 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
           7.2.14 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
           7.2.14 COD Edge Node=cdp-cod-edge-node
+        7.2.15: >
+          7.2.15 - SDX Micro Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-micro;
+          7.2.15 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
+          7.2.15 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx-medium-ha;
+          7.2.15 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas, Profiler Manager=cdp-sdx-medium-ha-profiler;
+          7.2.15 - Data Engineering: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering;
+          7.2.15 - Data Engineering: HA: Apache Spark, Apache Hive, Apache Oozie=cdp-data-engineering-ha;
+          7.2.15 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
+          7.2.15 - Data Mart: Apache Impala, Hue=cdp-data-mart;
+          7.2.15 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
+          7.2.15 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
+          7.2.15 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming;
+          7.2.15 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager, Cruise Control=cdp-streaming-small;
+          7.2.15 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
+          7.2.15 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
+          7.2.15 - Data Discovery and Exploration=cdp-dde;
+          7.2.15 - Streaming Analytics Light Duty with Apache Flink=cdp-flink-light;
+          7.2.15 - Streaming Analytics Heavy Duty with Apache Flink=cdp-flink-heavy;
+          7.2.15 COD Edge Node=cdp-cod-edge-node
   clustertemplate.defaults:
   template.defaults: minviable-gcp,minviable-azure-managed-disks,minviable-aws
   custom.user.data: |

@@ -1,0 +1,102 @@
+{
+  "name": "7.2.15 - Operational Database with SQL for AWS",
+  "description": "",
+  "type": "OPERATIONALDATABASE",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AWS",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Operational Database: Apache HBase, Phoenix"
+    },
+    "instanceGroups": [
+      {
+        "name": "master",
+        "nodeCount": 2,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      },
+      {
+        "name": "gateway",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "GATEWAY"
+      },
+      {
+        "name": "leader",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      },
+      {
+        "name": "worker",
+        "nodeCount": 3,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "standard"
+            }
+          ],
+          "aws": {
+            "encryption": {
+              "type": "NONE"
+            }
+          },
+          "instanceType": "m5.2xlarge",
+          "cloudPlatform": "AWS"
+        },
+        "type": "CORE"
+      }
+    ]
+  }
+}

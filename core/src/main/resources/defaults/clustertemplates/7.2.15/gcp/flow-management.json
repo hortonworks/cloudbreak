@@ -1,0 +1,71 @@
+{
+  "name": "7.2.15 - Flow Management Heavy Duty for Google Cloud",
+  "description": "",
+  "type": "FLOW_MANAGEMENT",
+  "featureState": "RELEASED",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry"
+    },
+    "externalDatabase": {
+      "availabilityType": "HA"
+    },
+    "instanceGroups": [
+      {
+        "nodeCount": 1,
+        "name": "management",
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "e2-standard-8",
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "pd-standard"
+            }
+          ]
+        }
+      },
+      {
+        "nodeCount": 3,
+        "name": "nifi",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "e2-standard-8",
+          "rootVolume": {
+            "size": 150
+          },
+          "attachedVolumes": [
+            {
+              "size": 1000,
+              "count": 4,
+              "type": "pd-ssd"
+            }
+          ]
+        }
+      },
+      {
+        "nodeCount": 3,
+        "name": "zk",
+        "type": "CORE",
+        "recoveryMode": "MANUAL",
+        "template": {
+          "instanceType": "e2-standard-4",
+          "rootVolume": {
+            "size": 100
+          },
+          "attachedVolumes": [
+            {
+              "size": 100,
+              "count": 1,
+              "type": "pd-standard"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

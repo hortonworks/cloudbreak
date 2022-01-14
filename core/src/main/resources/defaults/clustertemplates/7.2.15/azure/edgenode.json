@@ -1,0 +1,38 @@
+{
+  "name": "7.2.15 COD Edge Node for Azure",
+  "description": "",
+  "type": "OPERATIONALDATABASE",
+  "featureState": "RELEASED",
+  "cloudPlatform": "AZURE",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.15 COD Edge Node"
+    },
+    "instanceGroups": [
+      {
+        "name": "leader",
+        "nodeCount": 1,
+        "recoveryMode": "MANUAL",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "StandardSSD_LRS"
+            }
+          ],
+          "azure": {
+            "availabilitySet": {
+              "name": "",
+              "faultDomainCount": 2,
+              "updateDomainCount": 20
+            }
+          },
+          "instanceType": "Standard_D8_v3",
+          "cloudPlatform": "AZURE"
+        },
+        "type": "GATEWAY"
+      }
+    ]
+  }
+}
