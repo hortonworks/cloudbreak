@@ -27,10 +27,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sun.istack.Nullable;
 
 @Component
@@ -51,13 +49,7 @@ public class StopStartDownscaleFlowService {
     private StackUpdater stackUpdater;
 
     @Inject
-    private HostGroupService hostGroupService;
-
-    @Inject
     private InstanceMetaDataService instanceMetaDataService;
-
-    @Inject
-    private MetadataSetupService metadataSetupService;
 
     public void clusterDownscaleStarted(long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds) {
         flowMessageService.fireEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT, hostGroupName);

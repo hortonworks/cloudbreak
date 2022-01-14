@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.cluster;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -20,7 +21,8 @@ public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScale
         super(stack.getId(), hostGroupName);
         this.stack = stack;
         this.startedInstancesToCommission = startedInstancesToCommission;
-        this.servicesNotRunningInstancesToCommission = servicesNotRunningInstancesToCommission;
+        this.servicesNotRunningInstancesToCommission =
+                servicesNotRunningInstancesToCommission == null ? Collections.emptyList() : servicesNotRunningInstancesToCommission;
     }
 
     public List<InstanceMetaData> getStartedInstancesToCommission() {
