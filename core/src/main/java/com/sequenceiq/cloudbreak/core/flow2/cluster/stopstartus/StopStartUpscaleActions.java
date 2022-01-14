@@ -23,6 +23,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
@@ -75,6 +76,9 @@ public class StopStartUpscaleActions {
 
             @Override
             protected void prepareExecution(StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) {
+                // TODO CB-15132 - setting these variables is likely unnecessary. A simpler mechanism may be to have
+                //  AbstractStopStartUpscaleActions explicitly specify StopStartUpscaleTriggerEvent as the Payload type,
+                //  so that it can extract information directly from this, instead of modifying the round-about mechanism with this map.
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
                 variables.put(ADJUSTMENT, payload.getAdjustment());
                 variables.put(SINGLE_PRIMARY_GATEWAY, payload.isSinglePrimaryGateway());
@@ -101,7 +105,7 @@ public class StopStartUpscaleActions {
                         .collect(Collectors.toList());
 
                 LOGGER.info("NotDeletedInstanceMetadata totalCount={}. count for hostGroup: {}={}, stoppedInstancesInHgCount={}",
-                        instanceMetaDataList.size(), context.getHostGroupName(), instanceMetaDataList.size(), stoppedInstancesInHg.size());
+                        instanceMetaDataList.size(), context.getHostGroupName(), instanceMetaDataForHg.size(), stoppedInstancesInHg.size());
 
                 List<CloudInstance> stoppedCloudInstancesForHg = instanceMetaDataToCloudInstanceConverter.convert(stoppedInstancesInHg,
                         stack.getEnvironmentCrn(), stack.getStackAuthentication());
@@ -232,7 +236,8 @@ public class StopStartUpscaleActions {
         };
     }
 
-    private abstract static class AbstractStopStartUpscaleActions<P extends Payload>
+    @VisibleForTesting
+    abstract static class AbstractStopStartUpscaleActions<P extends Payload>
             extends AbstractStackAction<StopStartUpscaleState, StopStartUpscaleEvent, StopStartUpscaleContext, P> {
         static final String HOSTGROUPNAME = "HOSTGROUPNAME";
 
@@ -276,8 +281,6 @@ public class StopStartUpscaleActions {
             // TODO CB-14929: Is this OK to do? In a stack operation.
             MDCBuilder.buildMdcContext(stack.getCluster());
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
-
-
 
             CloudContext cloudContext = CloudContext.Builder.builder()
                     .withId(stack.getId())
