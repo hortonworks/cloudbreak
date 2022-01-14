@@ -1,6 +1,7 @@
 package com.sequenceiq.it.cloudbreak.util.wait.service.freeipa;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -14,13 +15,16 @@ public class FreeIpaOperationWaitObject extends FreeIpaWaitObject {
 
     private final OperationState desiredOperationState;
 
+    private final Set<OperationState> ignoredFailedStatuses;
+
     private OperationStatus operationStatus;
 
     public FreeIpaOperationWaitObject(FreeIpaClient freeIpaClient, String operationId, String freeipaName, String environmentCrn,
-            OperationState desiredOperationState) {
+            OperationState desiredOperationState, Set<OperationState> ignoredFailedStatuses) {
         super(freeIpaClient, freeipaName, environmentCrn, Status.AVAILABLE);
         this.operationId = operationId;
         this.desiredOperationState = desiredOperationState;
+        this.ignoredFailedStatuses = ignoredFailedStatuses;
     }
 
     @Override
@@ -53,6 +57,11 @@ public class FreeIpaOperationWaitObject extends FreeIpaWaitObject {
     @Override
     public Map<String, String> getDesiredStatuses() {
         return Map.of(STATUS, desiredOperationState.name());
+    }
+
+    @Override
+    public boolean isFailedButIgnored() {
+        return ignoredFailedStatuses.contains(operationStatus.getStatus());
     }
 
     @Override

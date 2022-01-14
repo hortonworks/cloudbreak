@@ -5,6 +5,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DE
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status.DELETE_FAILED;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.FreeIpaV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
@@ -20,15 +21,22 @@ public class FreeIpaWaitObject implements WaitObject {
 
     private final Status desiredStatus;
 
+    private final Set<Status> ignoredFailedStatuses;
+
     private final String name;
 
     private DescribeFreeIpaResponse freeIpa;
 
-    public FreeIpaWaitObject(FreeIpaClient freeIpaClient, String name, String environmentCrn, Status desiredStatus) {
+    public FreeIpaWaitObject(FreeIpaClient freeIpaClient, String name, String environmentCrn, Status desiredStatus, Set<Status> ignoredFailedStatuses) {
         this.client = freeIpaClient;
         this.environmentCrn = environmentCrn;
         this.desiredStatus = desiredStatus;
+        this.ignoredFailedStatuses = ignoredFailedStatuses;
         this.name = name;
+    }
+
+    protected FreeIpaWaitObject(FreeIpaClient freeIpaClient, String name, String environmentCrn, Status desiredStatus) {
+        this(freeIpaClient, name, environmentCrn, desiredStatus, Set.of());
     }
 
     public FreeIpaV1Endpoint getEndpoint() {
@@ -88,7 +96,7 @@ public class FreeIpaWaitObject implements WaitObject {
 
     @Override
     public boolean isFailedButIgnored() {
-        return false;
+        return ignoredFailedStatuses.contains(freeIpa.getStatus());
     }
 
     @Override

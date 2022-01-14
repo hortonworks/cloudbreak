@@ -1,7 +1,6 @@
 package com.sequenceiq.it.cloudbreak;
 
 import java.lang.reflect.Field;
-import java.util.Map;
 import java.util.Set;
 
 import org.springframework.util.ReflectionUtils;
@@ -10,8 +9,6 @@ import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsChannelConfig;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
 import com.sequenceiq.flow.api.FlowPublicEndpoint;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsGroupTestDto;
 import com.sequenceiq.it.cloudbreak.dto.ums.UmsTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
@@ -20,7 +17,7 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 
 import io.opentracing.Tracer;
 
-public class UmsClient extends MicroserviceClient<GrpcUmsClient, Void> {
+public class UmsClient<E extends Enum<E>, W extends WaitObject> extends MicroserviceClient<GrpcUmsClient, Void, E, W> {
 
     public static final String UMS_CLIENT = "UMS_CLIENT";
 
@@ -42,12 +39,6 @@ public class UmsClient extends MicroserviceClient<GrpcUmsClient, Void> {
     @Override
     public <T extends WaitObject> WaitService<T> waiterService() {
         throw new TestFailException("Wait service does not support by ums client");
-    }
-
-    @Override
-    public <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext, Set<E> ignoredFailedStatuses) {
-        throw new TestFailException("Wait object does not support by ums client");
     }
 
     @Override

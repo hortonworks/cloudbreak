@@ -14,7 +14,7 @@ import com.sequenceiq.it.cloudbreak.util.wait.service.WaitObject;
 import com.sequenceiq.it.cloudbreak.util.wait.service.WaitService;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
-public abstract class MicroserviceClient<C, I> extends Entity {
+public abstract class MicroserviceClient<C, I, E extends Enum<E>, W extends WaitObject> extends Entity {
 
     protected static final int TIMEOUT = 60 * 1000;
 
@@ -47,11 +47,13 @@ public abstract class MicroserviceClient<C, I> extends Entity {
         return new WaitService<>();
     }
 
-    public abstract <E extends Enum<E>, W extends WaitObject> W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
-            TestContext testContext, Set<E> ignoredFailedStatuses);
+    public W waitObject(CloudbreakTestDto entity, String name, Map<String, E> desiredStatuses,
+            TestContext testContext, Set<E> ignoredFailedStatuses) {
+        throw new TestFailException("Wait object is not supported by the client");
+    }
 
-    public <E extends Enum<E>> InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
-            List<String> instanceIds, E instanceStatus) {
+    public <O extends Enum<O>>  InstanceWaitObject waitInstancesObject(CloudbreakTestDto entity, TestContext testContext,
+            List<String> instanceIds, O instanceStatus) {
         throw new TestFailException("Can't create waitInstanceWaitObject instances object");
     }
 
