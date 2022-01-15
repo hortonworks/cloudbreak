@@ -624,7 +624,9 @@ public class ClusterHostServiceRunner {
     }
 
     @SuppressWarnings("ParameterNumber")
-    private void saveGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Stack stack,
+    private void saveGatewayPillar(GatewayConfig gatewayConfig,
+            Cluster cluster,
+            Stack stack,
             Map<String, SaltPillarProperties> servicePillar,
             VirtualGroupRequest virtualGroupRequest,
             ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
@@ -632,6 +634,8 @@ public class ClusterHostServiceRunner {
             ClouderaManagerRepo clouderaManagerRepo) throws IOException {
         final boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(
                 clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
+        Optional<String> version = Optional.ofNullable(cluster.getBlueprint().getStackVersion());
+
 
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
@@ -656,7 +660,7 @@ public class ClusterHostServiceRunner {
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
             gateway.put("envAccessGroup", virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight()));
-            List<Map<String, Object>> topologies = getTopologies(clusterGateway);
+            List<Map<String, Object>> topologies = getTopologies(clusterGateway, version);
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
                 Boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
@@ -759,11 +763,11 @@ public class ClusterHostServiceRunner {
         return List.of(value);
     }
 
-    private List<Map<String, Object>> getTopologies(Gateway clusterGateway) throws IOException {
+    private List<Map<String, Object>> getTopologies(Gateway clusterGateway, Optional<String> version) throws IOException {
         if (!CollectionUtils.isEmpty(clusterGateway.getTopologies())) {
             List<Map<String, Object>> topologyMaps = new ArrayList<>();
             for (GatewayTopology topology : clusterGateway.getTopologies()) {
-                Map<String, Object> topologyAndExposed = mapTopologyToMap(topology);
+                Map<String, Object> topologyAndExposed = mapTopologyToMap(topology, version);
                 topologyMaps.add(topologyAndExposed);
             }
             return topologyMaps;
@@ -771,13 +775,14 @@ public class ClusterHostServiceRunner {
         return Collections.emptyList();
     }
 
-    private Map<String, Object> mapTopologyToMap(GatewayTopology gt) throws IOException {
+    private Map<String, Object> mapTopologyToMap(GatewayTopology gt, Optional<String> version) throws IOException {
         Map<String, Object> topology = new HashMap<>();
         topology.put("name", gt.getTopologyName());
         Json exposedJson = gt.getExposedServices();
         if (exposedJson != null && isNotEmpty(exposedJson.getValue())) {
             ExposedServices exposedServicesDomain = exposedJson.get(ExposedServices.class);
-            Set<String> exposedServices = exposedServiceCollector.getFullServiceListBasedOnList(exposedServicesDomain.getServices());
+            Set<String> exposedServices = exposedServiceCollector
+                    .getFullServiceListBasedOnList(exposedServicesDomain.getServices(), version);
             topology.put("exposed", exposedServices);
         } else {
             topology.put("exposed", new HashSet<>());

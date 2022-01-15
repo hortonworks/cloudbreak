@@ -239,6 +239,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(environmentResponse.getName()).thenReturn("testEnvironment");
         when(environmentClientService.getByName(anyString())).thenReturn(environmentResponse);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
+        when(blueprintViewProvider.getBlueprintView(any())).thenReturn(getBlueprintView());
         when(credentialClientService.getByName(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credentialClientService.getByCrn(TEST_CREDENTIAL_NAME)).thenReturn(credential);
         when(credential.getName()).thenReturn(TEST_CREDENTIAL_NAME);
@@ -247,7 +248,7 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
         when(credentialToCloudCredentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(awsMockAccountMappingService.getGroupMappings(REGION, cloudCredential, ADMIN_GROUP_NAME)).thenReturn(MOCK_GROUP_MAPPINGS);
         when(awsMockAccountMappingService.getUserMappings(REGION, cloudCredential)).thenReturn(MOCK_USER_MAPPINGS);
-        when(exposedServiceCollector.getAllKnoxExposed()).thenReturn(Set.of());
+        when(exposedServiceCollector.getAllKnoxExposed(any())).thenReturn(Set.of());
     }
 
     @Test
@@ -458,6 +459,12 @@ public class StackV4RequestToTemplatePreparationObjectConverterTest {
             instanceGroups.add(instanceGroup);
         }
         return instanceGroups;
+    }
+
+    private BlueprintView getBlueprintView() {
+        BlueprintView blueprint = new BlueprintView();
+        blueprint.setVersion("7.2.13");
+        return blueprint;
     }
 
 }

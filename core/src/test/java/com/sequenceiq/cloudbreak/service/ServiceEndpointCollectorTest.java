@@ -109,7 +109,7 @@ public class ServiceEndpointCollectorTest {
         when(exposedServiceCollector.getImpalaService()).thenReturn(exposedService("IMPALA"));
         when(exposedServiceCollector.knoxServicesForComponents(any(Optional.class), anyList())).thenReturn(
                 List.of(exposedService("CLOUDERA_MANAGER"), exposedService("CLOUDERA_MANAGER_UI"), exposedService("NAMENODE"), exposedService("HBASEJARS")));
-        when(exposedServiceCollector.getFullServiceListBasedOnList(anyList())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
+        when(exposedServiceCollector.getFullServiceListBasedOnList(anyList(), any())).thenAnswer(a -> Set.copyOf(a.getArgument(0)));
         when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
         when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
         when(exposedServiceCollector.getNameNodeService()).thenReturn(exposedService("NAMENODE"));
@@ -284,7 +284,9 @@ public class ServiceEndpointCollectorTest {
                 new ExposedService[]{exposedService("HIVE_SERVER"), exposedService("WEBHDFS")}, GatewayType.INDIVIDUAL);
         cluster.getGateway().setGatewayPort(443);
         cluster.setExtendedBlueprintText("extended-blueprint");
-        cluster.setBlueprint(null);
+        Blueprint blueprint = new Blueprint();
+        blueprint.setStackVersion("7.2.13");
+        cluster.setBlueprint(blueprint);
         mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));
 

@@ -140,7 +140,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getKnoxExposedServicesNames() {
         underTest.init();
-        assertThat(underTest.getAllKnoxExposed()).containsExactlyInAnyOrder(
+        assertThat(underTest.getAllKnoxExposed(Optional.empty())).containsExactlyInAnyOrder(
                 "ATLAS",
                 "ATLAS_API",
                 "AVATICA",
@@ -193,6 +193,177 @@ class ExposedServiceCollectorTest {
                 "ZEPPELIN",
                 "QUEUEMANAGER_WEBAPP",
                 "KNOX_TOKEN_INTEGRATOR");
+    }
+
+    @Test
+    void getKnoxExposedServicesNamesWiht7211() {
+        underTest.init();
+        assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.11"))).containsExactlyInAnyOrder(
+                "ATLAS",
+                "ATLAS_API",
+                "AVATICA",
+                "CM-API",
+                "CM-UI",
+                "CRUISE-CONTROL",
+                "DAS",
+                "FLINK",
+                "HBASEJARS",
+                "HBASEUI",
+                "HDFSUI",
+                "HIVE",
+                "HUE",
+                "IMPALA",
+                "IMPALA_DEBUG_UI",
+                "JOBHISTORYUI",
+                "JOBTRACKER",
+                "RESOURCEMANAGERAPI",
+                "KUDUUI",
+                "LIVYSERVER1",
+                "LIVYSERVER_API",
+                "LIVY_FOR_SPARK3",
+                "LIVY_FOR_SPARK3_API",
+                "NAMENODE",
+                "NIFI",
+                "NIFI-REGISTRY",
+                "NIFI_REST",
+                "NIFI-REGISTRY-REST",
+                "OOZIE",
+                "DATA-DISCOVERY-SERVICE-API",
+                "PROFILER-ADMIN-API",
+                "PROFILER-METRICS-API",
+                "PROFILER-SCHEDULER-API",
+                "RANGER",
+                "SCHEMA-REGISTRY",
+                "SCHEMA-REGISTRY-API",
+                "SMM-API",
+                "SMM-UI",
+                "SOLR",
+                "SPARKHISTORYUI",
+                "SPARK3HISTORYUI",
+                "SSB-MVE-API",
+                "SSB-SSC-UI",
+                "SSB-SSC-WS",
+                "WEBHBASE",
+                "WEBHDFS",
+                "YARNUIV2",
+                "ZEPPELIN",
+                "QUEUEMANAGER_WEBAPP",
+                "KNOX_TOKEN_INTEGRATOR");
+    }
+
+    @Test
+    void getKnoxExposedServicesNamesWiht7213() {
+        underTest.init();
+        assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.13"))).containsExactlyInAnyOrder(
+                "ATLAS",
+                "ATLAS_API",
+                "AVATICA",
+                "CM-API",
+                "CM-UI",
+                "CRUISE-CONTROL",
+                "DAS",
+                "FLINK",
+                "HBASEJARS",
+                "HBASEUI",
+                "HDFSUI",
+                "HIVE",
+                "HUE",
+                "IMPALA",
+                "IMPALA_DEBUG_UI",
+                "JOBHISTORYUI",
+                "JOBTRACKER",
+                "RESOURCEMANAGERAPI",
+                "KUDUUI",
+                "LIVYSERVER1",
+                "LIVYSERVER_API",
+                "LIVY_FOR_SPARK3",
+                "LIVY_FOR_SPARK3_API",
+                "NAMENODE",
+                "NIFI",
+                "NIFI-REGISTRY",
+                "NIFI_REST",
+                "NIFI-REGISTRY-REST",
+                "OOZIE",
+                "DATA-DISCOVERY-SERVICE-API",
+                "PROFILER-ADMIN-API",
+                "PROFILER-METRICS-API",
+                "PROFILER-SCHEDULER-API",
+                "RANGER",
+                "SCHEMA-REGISTRY",
+                "SCHEMA-REGISTRY-API",
+                "SMM-API",
+                "SMM-UI",
+                "SOLR",
+                "SPARKHISTORYUI",
+                "SPARK3HISTORYUI",
+                "SSB-MVE-API",
+                "SSB-SSC-UI",
+                "SSB-SSC-WS",
+                "WEBHBASE",
+                "WEBHDFS",
+                "YARNUIV2",
+                "ZEPPELIN",
+                "QUEUEMANAGER_WEBAPP",
+                "KNOX_TOKEN_INTEGRATOR",
+                "SSB-SSE-API");
+    }
+
+    @Test
+    void getKnoxExposedServicesNamesWiht7214() {
+        underTest.init();
+        assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.14"))).containsExactlyInAnyOrder(
+                "ATLAS",
+                "ATLAS_API",
+                "AVATICA",
+                "CM-API",
+                "CM-UI",
+                "CRUISE-CONTROL",
+                "DAS",
+                "FLINK",
+                "HBASEJARS",
+                "HBASEUI",
+                "HDFSUI",
+                "HIVE",
+                "HUE",
+                "IMPALA",
+                "IMPALA_DEBUG_UI",
+                "JOBHISTORYUI",
+                "JOBTRACKER",
+                "RESOURCEMANAGERAPI",
+                "KUDUUI",
+                "LIVYSERVER1",
+                "LIVYSERVER_API",
+                "LIVY_FOR_SPARK3",
+                "LIVY_FOR_SPARK3_API",
+                "NAMENODE",
+                "NIFI",
+                "NIFI-REGISTRY",
+                "NIFI_REST",
+                "NIFI-REGISTRY-REST",
+                "OOZIE",
+                "DATA-DISCOVERY-SERVICE-API",
+                "PROFILER-ADMIN-API",
+                "PROFILER-METRICS-API",
+                "PROFILER-SCHEDULER-API",
+                "RANGER",
+                "SCHEMA-REGISTRY",
+                "SCHEMA-REGISTRY-API",
+                "SMM-API",
+                "SMM-UI",
+                "SOLR",
+                "SPARKHISTORYUI",
+                "SPARK3HISTORYUI",
+                "SSB-MVE-API",
+                "SSB-SSC-UI",
+                "SSB-SSC-WS",
+                "WEBHBASE",
+                "WEBHDFS",
+                "YARNUIV2",
+                "ZEPPELIN",
+                "QUEUEMANAGER_WEBAPP",
+                "KNOX_TOKEN_INTEGRATOR",
+                "KAFKA_CONNECT",
+                "SSB-SSE-API");
     }
 
     @Test
@@ -526,8 +697,8 @@ class ExposedServiceCollectorTest {
     @Test
     void getFullListALLOnly() {
         underTest.init();
-        Set<String> allOnly = underTest.getFullServiceListBasedOnList(Set.of("ALL"));
-        Set<String> allAndAnother = underTest.getFullServiceListBasedOnList(Set.of("ALL", "RANGER"));
+        Set<String> allOnly = underTest.getFullServiceListBasedOnList(Set.of("ALL"), Optional.empty());
+        Set<String> allAndAnother = underTest.getFullServiceListBasedOnList(Set.of("ALL", "RANGER"), Optional.empty());
         assertThat(allAndAnother.size()).isGreaterThan(0);
         assertThat(allOnly).hasSameElementsAs(allAndAnother);
     }
@@ -535,7 +706,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getFullListReturnsGivenListOnly() {
         underTest.init();
-        Set<String> itemsOnly = underTest.getFullServiceListBasedOnList(Set.of("ATLAS", "RANGER"));
+        Set<String> itemsOnly = underTest.getFullServiceListBasedOnList(Set.of("ATLAS", "RANGER"), Optional.empty());
         assertThat(itemsOnly).hasSize(2);
         assertThat(itemsOnly).hasSameElementsAs(Set.of("ATLAS", "RANGER"));
     }

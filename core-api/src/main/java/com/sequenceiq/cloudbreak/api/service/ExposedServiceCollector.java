@@ -114,20 +114,20 @@ public class ExposedServiceCollector {
         return getFirst(name);
     }
 
-    public Set<String> getFullServiceListBasedOnList(Collection<String> services) {
+    public Set<String> getFullServiceListBasedOnList(Collection<String> services, Optional<String> bpVersion) {
         Set<String> result = new HashSet<>(services);
         if (services.contains("ALL")) {
-            result = getAllKnoxExposed();
+            result = getAllKnoxExposed(bpVersion);
         }
         return result;
     }
 
-    public boolean isKnoxExposed(String knoxService) {
-        return getAllKnoxExposed().contains(knoxService);
+    public boolean isKnoxExposed(String knoxService, Optional<String> bpVersion) {
+        return getAllKnoxExposed(bpVersion).contains(knoxService);
     }
 
     public Collection<ExposedService> knoxServicesForComponents(Optional<String> bpVersion, Collection<String> components) {
-        return filterSupportedKnoxServices()
+        return filterSupportedKnoxServices(bpVersion)
                 .stream()
                 .filter(exposedService -> isVersionSupported(bpVersion, exposedService))
                 .filter(exposedService ->
@@ -141,8 +141,10 @@ public class ExposedServiceCollector {
                 .collect(Collectors.toList());
     }
 
-    public Set<String> getAllKnoxExposed() {
-        return filterSupportedKnoxServices().stream().map(ExposedService::getKnoxService).collect(Collectors.toSet());
+    public Set<String> getAllKnoxExposed(Optional<String> bpVersion) {
+        return filterSupportedKnoxServices(bpVersion).stream()
+                .map(ExposedService::getKnoxService)
+                .collect(Collectors.toSet());
     }
 
     public Set<String> getAllServiceNames() {
@@ -174,8 +176,11 @@ public class ExposedServiceCollector {
         }
     }
 
-    private Collection<ExposedService> filterSupportedKnoxServices() {
-        return exposedServices.values().stream().filter(x -> StringUtils.isNotEmpty(x.getKnoxService())).collect(Collectors.toList());
+    private Collection<ExposedService> filterSupportedKnoxServices(Optional<String> bpVersion) {
+        return exposedServices.values().stream()
+                .filter(x -> StringUtils.isNotEmpty(x.getKnoxService()))
+                .filter(x -> isVersionSupported(bpVersion, x))
+                .collect(Collectors.toList());
     }
 
     private boolean isVersionSupported(Optional<String> bpVersion, ExposedService exposedService) {

@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.controller.validation.stack.cluster.gateway;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -20,7 +21,7 @@ public class ExposedServiceListValidator implements Validator<List<String>> {
     @Override
     public ValidationResult validate(List<String> subject) {
         List<String> invalidKnoxServices = subject.stream()
-                .filter(es -> !exposedServiceCollector.isKnoxExposed(es))
+                .filter(es -> !exposedServiceCollector.isKnoxExposed(es, Optional.empty()))
                 .filter(es -> !ExposedServiceCollector.ALL.equalsIgnoreCase(es))
                 .collect(Collectors.toList());
 

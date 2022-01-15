@@ -92,8 +92,9 @@ public class ServiceEndpointCollector {
             } else {
                 Gateway gateway = cluster.getGateway();
                 if (gateway != null) {
+                    Optional<String> version = Optional.ofNullable(cluster.getBlueprint().getStackVersion());
                     ExposedService exposedService = exposedServiceCollector.getClouderaManagerUIService();
-                    Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService);
+                    Optional<GatewayTopology> gatewayTopology = getGatewayTopologyForService(gateway, exposedService, version);
                     Optional<String> managerUrl = gatewayTopology
                             .map(t -> getExposedServiceUrl(managerIp, gateway, t.getTopologyName(), exposedService, false));
                     // when knox gateway is enabled, but cm is not exposed, use the default url
@@ -114,6 +115,7 @@ public class ServiceEndpointCollector {
                     blueprintText,
                     entitlementService.getEntitlements(cluster.getWorkspace().getTenant().getName()));
             Gateway gateway = cluster.getGateway();
+            Optional<String> version = Optional.ofNullable(cluster.getBlueprint().getStackVersion());
             Map<String, List<String>> privateIps = componentLocatorService.getComponentLocation(cluster.getId(), processor,
                     knownExposedServices.stream().map(ExposedService::getServiceName).collect(Collectors.toSet()));
             LOGGER.debug("The private IPs in the cluster {}", privateIps);
@@ -122,18 +124,25 @@ public class ServiceEndpointCollector {
             }
             if (gateway != null) {
                 for (GatewayTopology gatewayTopology : gateway.getTopologies()) {
-                    generateGatewayTopology(cluster, managerIp, clusterExposedServiceMap, knownExposedServices, gateway, privateIps, gatewayTopology);
+                    generateGatewayTopology(cluster, managerIp, clusterExposedServiceMap, knownExposedServices, gateway, privateIps, gatewayTopology, version);
                 }
             }
         }
         return clusterExposedServiceMap;
     }
 
-    private void generateGatewayTopology(Cluster cluster, String managerIp, Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap,
-            Collection<ExposedService> knownExposedServices, Gateway gateway, Map<String, List<String>> privateIps, GatewayTopology gatewayTopology) {
+    private void generateGatewayTopology(
+            Cluster cluster,
+            String managerIp,
+            Map<String, Collection<ClusterExposedServiceV4Response>> clusterExposedServiceMap,
+            Collection<ExposedService> knownExposedServices,
+            Gateway gateway,
+            Map<String, List<String>> privateIps,
+            GatewayTopology gatewayTopology,
+            Optional<String> version) {
         LOGGER.debug("Generating the topology for '{}' topologies", gatewayTopology.getTopologyName());
         Set<String> exposedServicesInTopology = gateway.getTopologies().stream()
-                .flatMap(this::getExposedServiceStream)
+                .flatMap(e -> getExposedServiceStream(e, version))
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
         List<ClusterExposedServiceV4Response> uiServices = new ArrayList<>();
@@ -150,12 +159,12 @@ public class ServiceEndpointCollector {
             } else {
                 if (!exposedService.isApiOnly()) {
                     List<ClusterExposedServiceV4Response> uiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                            managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig);
+                            managerIp, privateIps, exposedServicesInTopology, false, autoTlsEnabled, securityConfig, version);
                     uiServices.addAll(uiServiceOnPrivateIps);
                 }
                 if (exposedService.isApiIncluded()) {
                     List<ClusterExposedServiceV4Response> apiServiceOnPrivateIps = createServiceEntries(exposedService, gateway, gatewayTopology,
-                            managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig);
+                            managerIp, privateIps, exposedServicesInTopology, true, autoTlsEnabled, securityConfig, version);
                     apiServices.addAll(apiServiceOnPrivateIps);
                 }
             }
@@ -208,13 +217,21 @@ public class ServiceEndpointCollector {
         privateIps.put(exposedServiceCollector.getImpalaDebugUIService().getServiceName(), impalaCoordinators);
     }
 
-    private List<ClusterExposedServiceV4Response> createServiceEntries(ExposedService exposedService, Gateway gateway, GatewayTopology gatewayTopology,
-            String managerIp, Map<String, List<String>> privateIps,
-            Set<String> exposedServicesInTopology, boolean api, boolean autoTlsEnabled, SecurityConfig securityConfig) {
+    private List<ClusterExposedServiceV4Response> createServiceEntries(
+            ExposedService exposedService,
+            Gateway gateway,
+            GatewayTopology gatewayTopology,
+            String managerIp,
+            Map<String, List<String>> privateIps,
+            Set<String> exposedServicesInTopology,
+            boolean api,
+            boolean autoTlsEnabled,
+            SecurityConfig securityConfig,
+            Optional<String> version) {
         List<ClusterExposedServiceV4Response> services = new ArrayList<>();
         List<String> serviceUrlsForService = getServiceUrlsForService(exposedService, managerIp,
-                gateway, gatewayTopology.getTopologyName(), privateIps, api, autoTlsEnabled);
-        serviceUrlsForService.addAll(getJdbcUrlsForService(exposedService, managerIp, gateway, securityConfig));
+                gateway, gatewayTopology.getTopologyName(), privateIps, api, autoTlsEnabled, version);
+        serviceUrlsForService.addAll(getJdbcUrlsForService(exposedService, managerIp, gateway, securityConfig, version));
         if (serviceUrlsForService.isEmpty()) {
             services.add(createExposedServiceResponse(exposedService, gateway, exposedServicesInTopology, api, null));
         } else {
@@ -225,8 +242,12 @@ public class ServiceEndpointCollector {
         return services;
     }
 
-    private List<ClusterExposedServiceV4Response> createCmProxiedServiceEntries(ExposedService exposedService, Gateway gateway,
-            GatewayTopology gatewayTopology, String managerIp, String clusterName) {
+    private List<ClusterExposedServiceV4Response> createCmProxiedServiceEntries(
+            ExposedService exposedService,
+            Gateway gateway,
+            GatewayTopology gatewayTopology,
+            String managerIp,
+            String clusterName) {
         List<ClusterExposedServiceV4Response> services = new ArrayList<>();
         String serviceUrlsForService = getCmProxiedServiceUrlsForService(exposedService, gateway, gatewayTopology.getTopologyName(), managerIp, clusterName);
         if (!Strings.isNullOrEmpty(serviceUrlsForService)) {
@@ -248,8 +269,12 @@ public class ServiceEndpointCollector {
         return service;
     }
 
-    private ClusterExposedServiceV4Response createExposedServiceResponse(ExposedService exposedService,
-            Gateway gateway, Set<String> exposedServicesInTopology, boolean api, String url) {
+    private ClusterExposedServiceV4Response createExposedServiceResponse(
+            ExposedService exposedService,
+            Gateway gateway,
+            Set<String> exposedServicesInTopology,
+            boolean api,
+            String url) {
         ClusterExposedServiceV4Response service = new ClusterExposedServiceV4Response();
         service.setMode(api ? SSOType.PAM : getSSOType(exposedService, gateway));
         service.setDisplayName(exposedService.getDisplayName());
@@ -287,11 +312,11 @@ public class ServiceEndpointCollector {
                 getExposedServices(blueprint.getBlueprintText(), entitlements));
     }
 
-    private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology) {
+    private Stream<String> getExposedServiceStream(GatewayTopology gatewayTopology, Optional<String> version) {
         if (gatewayTopology.getExposedServices() != null && gatewayTopology.getExposedServices().getValue() != null) {
             try {
                 ExposedServices exposedServices = gatewayTopology.getExposedServices().get(ExposedServices.class);
-                return exposedServiceCollector.getFullServiceListBasedOnList(exposedServices.getServices()).stream();
+                return exposedServiceCollector.getFullServiceListBasedOnList(exposedServices.getServices(), version).stream();
             } catch (IOException e) {
                 LOGGER.debug("Failed to get exposed services from Json.", e);
             }
@@ -300,19 +325,26 @@ public class ServiceEndpointCollector {
     }
 
     //CHECKSTYLE:OFF
-    private List<String> getServiceUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway,
-            String topologyName, Map<String, List<String>> privateIps, boolean api, boolean autoTlsEnabled) {
+    private List<String> getServiceUrlsForService(
+            ExposedService exposedService,
+            String managerIp,
+            Gateway gateway,
+            String topologyName,
+            Map<String, List<String>> privateIps,
+            boolean api,
+            boolean autoTlsEnabled,
+            Optional<String> version) {
         List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService.getName()) {
                 case "NAMENODE":
-                    addNameNodeUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
+                    addNameNodeUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls, version);
                     break;
                 case "HBASE_UI":
-                    addHbaseUrl(managerIp, gateway, privateIps, urls);
+                    addHbaseUrl(managerIp, gateway, privateIps, urls, version);
                     break;
                 case "HBASEJARS":
-                    addHbaseJarsUrl(managerIp, gateway, privateIps, urls);
+                    addHbaseJarsUrl(managerIp, gateway, privateIps, urls, version);
                     break;
                 case "RESOURCEMANAGER_WEB":
                     addResourceManagerUrl(exposedService, managerIp, gateway, topologyName, api, urls);
@@ -327,10 +359,10 @@ public class ServiceEndpointCollector {
                     urls.add(buildKnoxUrlWithProtocol("rpc", managerIp, exposedService, autoTlsEnabled));
                     break;
                 case "IMPALA_DEBUG_UI":
-                    addImplaDebugUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
+                    addImplaDebugUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls, version);
                     break;
                 case "KUDU":
-                    addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls);
+                    addKuduUrl(managerIp, gateway, privateIps, autoTlsEnabled, urls, version);
                     break;
                 case "HIVE_SERVER":
                     // there is no HTTP endpoint for Hive server
@@ -344,7 +376,12 @@ public class ServiceEndpointCollector {
     }
     //CHECKSTYLE:ON
 
-    private String getCmProxiedServiceUrlsForService(ExposedService exposedService, Gateway gateway, String topologyName, String managerIp, String clusterName) {
+    private String getCmProxiedServiceUrlsForService(
+            ExposedService exposedService,
+            Gateway gateway,
+            String topologyName,
+            String managerIp,
+            String clusterName) {
         String url = "";
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             url = getCmProxiedExposedServiceUrl(managerIp, exposedService, clusterName);
@@ -352,15 +389,20 @@ public class ServiceEndpointCollector {
         return url;
     }
 
-    private List<String> getJdbcUrlsForService(ExposedService exposedService, String managerIp, Gateway gateway, SecurityConfig securityConfig) {
+    private List<String> getJdbcUrlsForService(
+            ExposedService exposedService,
+            String managerIp,
+            Gateway gateway,
+            SecurityConfig securityConfig,
+            Optional<String> version) {
         List<String> urls = new ArrayList<>();
         if (hasKnoxUrl(exposedService) && managerIp != null) {
             switch (exposedService.getName()) {
                 case "HIVE_SERVER":
-                    getHiveJdbcUrl(gateway, managerIp, securityConfig).ifPresent(urls::add);
+                    getHiveJdbcUrl(gateway, managerIp, securityConfig, version).ifPresent(urls::add);
                     break;
                 case "IMPALA":
-                    getImpalaJdbcUrl(gateway, managerIp).ifPresent(urls::add);
+                    getImpalaJdbcUrl(gateway, managerIp, version).ifPresent(urls::add);
                     break;
                 default:
                     break;
@@ -373,7 +415,13 @@ public class ServiceEndpointCollector {
         return isNotEmpty(exposedService.getKnoxUrl());
     }
 
-    private void addNameNodeUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
+    private void addNameNodeUrl(
+            String managerIp,
+            Gateway gateway,
+            Map<String, List<String>> privateIps,
+            boolean autoTlsEnabled,
+            List<String> urls,
+            Optional<String> version) {
         String serviceName = exposedServiceCollector.getNameNodeService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
             LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
@@ -381,28 +429,38 @@ public class ServiceEndpointCollector {
             LOGGER.debug("Select {} service from {}", serviceName, privateIps);
             List<String> hdfsUrls = privateIps.get(serviceName)
                     .stream()
-                    .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled))
+                    .map(namenodeIp -> getHdfsUIUrl(gateway, managerIp, namenodeIp, autoTlsEnabled, version))
                     .flatMap(Optional::stream)
                     .collect(Collectors.toList());
             urls.addAll(hdfsUrls);
         }
     }
 
-    private void addHbaseUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, List<String> urls) {
+    private void addHbaseUrl(
+            String managerIp,
+            Gateway gateway,
+            Map<String, List<String>> privateIps,
+            List<String> urls,
+            Optional<String> version) {
         String serviceName = exposedServiceCollector.getHBaseUIService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
             LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             List<String> hbaseUrls = privateIps.get(serviceName)
                     .stream()
-                    .map(hbaseIp -> getHBaseServiceUrl(gateway, managerIp, hbaseIp))
+                    .map(hbaseIp -> getHBaseServiceUrl(gateway, managerIp, hbaseIp, version))
                     .flatMap(Optional::stream)
                     .collect(Collectors.toList());
             urls.addAll(hbaseUrls);
         }
     }
 
-    private void addHbaseJarsUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, List<String> urls) {
+    private void addHbaseJarsUrl(
+            String managerIp,
+            Gateway gateway,
+            Map<String, List<String>> privateIps,
+            List<String> urls,
+            Optional<String> version) {
         String serviceName = exposedServiceCollector.getHBaseJarsService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
             LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
@@ -410,28 +468,39 @@ public class ServiceEndpointCollector {
             // Grab the first HBase master. Any will do, so we'll take the first
             privateIps.get(serviceName)
                     .stream()
-                    .map(hbaseIp -> getHBaseJarsServiceUrl(gateway, managerIp, hbaseIp))
+                    .map(hbaseIp -> getHBaseJarsServiceUrl(gateway, managerIp, hbaseIp, version))
                     .flatMap(Optional::stream)
                     .findFirst()
                     .ifPresent(hbaseUrl -> urls.add(hbaseUrl));
         }
     }
 
-    private void addResourceManagerUrl(ExposedService exposedService, String managerIp, Gateway gateway, String topologyName, boolean api,
+    private void addResourceManagerUrl(
+            ExposedService exposedService,
+            String managerIp,
+            Gateway gateway,
+            String topologyName,
+            boolean api,
             List<String> urls) {
         String knoxUrl = api ? "/resourcemanager/" : exposedService.getKnoxUrl();
         String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
         urls.add(buildKnoxUrl(managerIp, gateway, knoxUrl, topology, !exposedService.isWithoutProxyPath()));
     }
 
-    private void addImplaDebugUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
+    private void addImplaDebugUrl(
+            String managerIp,
+            Gateway gateway,
+            Map<String, List<String>> privateIps,
+            boolean autoTlsEnabled,
+            List<String> urls,
+            Optional<String> version) {
         String serviceName = exposedServiceCollector.getImpalaDebugUIService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
             LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             Optional<String> coordinatorUrl = privateIps.get(serviceName)
                     .stream()
-                    .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled))
+                    .map(coordinator -> getImpalaCoordinatorUrl(gateway, managerIp, coordinator, autoTlsEnabled, version))
                     .flatMap(Optional::stream)
                     .findFirst();
             if (coordinatorUrl.isPresent()) {
@@ -440,14 +509,20 @@ public class ServiceEndpointCollector {
         }
     }
 
-    private void addKuduUrl(String managerIp, Gateway gateway, Map<String, List<String>> privateIps, boolean autoTlsEnabled, List<String> urls) {
+    private void addKuduUrl(
+            String managerIp,
+            Gateway gateway,
+            Map<String, List<String>> privateIps,
+            boolean autoTlsEnabled,
+            List<String> urls,
+            Optional<String> version) {
         String serviceName = exposedServiceCollector.getKuduService().getServiceName();
         if (!privateIps.containsKey(serviceName)) {
             LOGGER.info("Cannot find private ip for the {} exposed service", serviceName);
         } else {
             Optional<String> coordinatorUrl = privateIps.get(serviceName)
                     .stream()
-                    .map(coordinator -> getKuduUrl(gateway, managerIp, coordinator, autoTlsEnabled))
+                    .map(coordinator -> getKuduUrl(gateway, managerIp, coordinator, autoTlsEnabled, version))
                     .flatMap(Optional::stream)
                     .findFirst();
             if (coordinatorUrl.isPresent()) {
@@ -460,38 +535,59 @@ public class ServiceEndpointCollector {
         return exposedServices.contains(exposedService.getKnoxService());
     }
 
-    private Optional<GatewayTopology> getGatewayTopologyForService(Gateway gateway, ExposedService exposedService) {
-        return getGatewayTopology(exposedService, gateway);
+    private Optional<GatewayTopology> getGatewayTopologyForService(
+            Gateway gateway,
+            ExposedService exposedService,
+            Optional<String> version) {
+        return getGatewayTopology(exposedService, gateway, version);
     }
 
-    private Optional<GatewayTopology> getGatewayTopologyWithHive(Gateway gateway) {
-        return getGatewayTopology(exposedServiceCollector.getHiveServerService(), gateway);
+    private Optional<GatewayTopology> getGatewayTopologyWithHive(Gateway gateway, Optional<String> version) {
+        return getGatewayTopology(exposedServiceCollector.getHiveServerService(), gateway, version);
     }
 
-    private Optional<GatewayTopology> getGatewayTopologyWithExposedService(Gateway gateway, ExposedService exposedService) {
-        return getGatewayTopology(exposedService, gateway);
+    private Optional<GatewayTopology> getGatewayTopologyWithExposedService(
+            Gateway gateway,
+            ExposedService exposedService,
+            Optional<String> version) {
+        return getGatewayTopology(exposedService, gateway, version);
     }
 
-    private Optional<GatewayTopology> getGatewayTopology(ExposedService exposedService, Gateway gateway) {
-        return gateway.getTopologies().stream()
-                .filter(gt -> getExposedServiceStream(gt)
+    private Optional<GatewayTopology> getGatewayTopology(
+            ExposedService exposedService,
+            Gateway gateway,
+            Optional<String> version) {
+        return gateway.getTopologies()
+                .stream()
+                .filter(gt -> getExposedServiceStream(gt, version)
                         .anyMatch(es -> exposedService.getServiceName().equalsIgnoreCase(es)
                                 || exposedService.getName().equalsIgnoreCase(es)
                                 || exposedService.getKnoxService().equalsIgnoreCase(es)))
                 .findFirst();
     }
 
-    private String getExposedServiceUrl(String managerIp, Gateway gateway, String topologyName,
-            ExposedService exposedService, boolean api) {
+    private String getExposedServiceUrl(
+            String managerIp,
+            Gateway gateway,
+            String topologyName,
+            ExposedService exposedService,
+            boolean api) {
         String topology = api ? topologyName + API_TOPOLOGY_POSTFIX : topologyName;
         return buildKnoxUrl(managerIp, gateway, exposedService.getKnoxUrl(), topology, !exposedService.isWithoutProxyPath());
     }
 
-    private String getCmProxiedExposedServiceUrl(String managerIp, ExposedService exposedService, String clusterName) {
+    private String getCmProxiedExposedServiceUrl(
+            String managerIp,
+            ExposedService exposedService,
+            String clusterName) {
         return buildCMProxyUrl(managerIp, exposedService.getKnoxUrl(), clusterName);
     }
 
-    private String buildKnoxUrlWithProtocol(String protocol, String managerIp, ExposedService exposedService, boolean autoTlsEnabled) {
+    private String buildKnoxUrlWithProtocol(
+            String protocol,
+            String managerIp,
+            ExposedService exposedService,
+            boolean autoTlsEnabled) {
         Integer port;
         if (autoTlsEnabled) {
             port = exposedService.getTlsPort();
@@ -508,7 +604,12 @@ public class ServiceEndpointCollector {
                 .toString();
     }
 
-    private String buildKnoxUrl(String managerIp, Gateway gateway, String knoxUrl, String topology, boolean useTopology) {
+    private String buildKnoxUrl(
+            String managerIp,
+            Gateway gateway,
+            String knoxUrl,
+            String topology,
+            boolean useTopology) {
         String result;
         if (GatewayType.CENTRAL == gateway.getGatewayType()) {
             result = String.format("/%s/%s%s", gateway.getPath(), topology, knoxUrl);
@@ -526,38 +627,65 @@ public class ServiceEndpointCollector {
         return result;
     }
 
-    private Optional<String> getHdfsUIUrl(Gateway gateway, String managerIp, String nameNodePrivateIp, boolean autoTlsEnabled) {
-        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getNameNodeService())
+    private Optional<String> getHdfsUIUrl(
+            Gateway gateway,
+            String managerIp,
+            String nameNodePrivateIp,
+            boolean autoTlsEnabled,
+            Optional<String> version) {
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getNameNodeService(), version)
                 .map(gt -> getHdfsUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, nameNodePrivateIp, autoTlsEnabled));
     }
 
-    private Optional<String> getImpalaCoordinatorUrl(Gateway gateway, String managerIp, String coordinatorPrivateIps, boolean autoTlsEnabled) {
-        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getImpalaDebugUIService())
+    private Optional<String> getImpalaCoordinatorUrl(
+            Gateway gateway,
+            String managerIp,
+            String coordinatorPrivateIps,
+            boolean autoTlsEnabled,
+            Optional<String> version) {
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getImpalaDebugUIService(), version)
                 .map(gt -> getImpalaCoordinatorUrlWithHostFromGatewayTopology(managerIp, gt, coordinatorPrivateIps, autoTlsEnabled));
     }
 
-    private Optional<String> getKuduUrl(Gateway gateway, String managerIp, String coordinatorPrivateIps, boolean autoTlsEnabled) {
-        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getKuduService())
+    private Optional<String> getKuduUrl(
+            Gateway gateway,
+            String managerIp,
+            String coordinatorPrivateIps,
+            boolean autoTlsEnabled,
+            Optional<String> version) {
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getKuduService(), version)
                 .map(gt -> getKuduUrlWithHostFromGatewayTopology(managerIp, gt, coordinatorPrivateIps, autoTlsEnabled));
     }
 
-    private Optional<String> getHBaseServiceUrl(Gateway gateway, String managerIp, String hbaseMasterPrivateIp) {
-        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getHBaseUIService())
+    private Optional<String> getHBaseServiceUrl(
+            Gateway gateway,
+            String managerIp,
+            String hbaseMasterPrivateIp,
+            Optional<String> version) {
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getHBaseUIService(), version)
                 .map(gt -> getHBaseUIUrlWithHostParameterFromGatewayTopology(managerIp, gt, hbaseMasterPrivateIp));
     }
 
-    private Optional<String> getHBaseJarsServiceUrl(Gateway gateway, String managerIp, String hbaseMasterPrivateIp) {
-        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getHBaseJarsService())
+    private Optional<String> getHBaseJarsServiceUrl(
+            Gateway gateway,
+            String managerIp,
+            String hbaseMasterPrivateIp,
+            Optional<String> version) {
+        return getGatewayTopologyWithExposedService(gateway, exposedServiceCollector.getHBaseJarsService(), version)
                 .map(gt -> getHBaseJarsUrlFromGatewayTopology(managerIp, gt, hbaseMasterPrivateIp));
     }
 
-    private Optional<String> getHiveJdbcUrl(Gateway gateway, String ambariIp, SecurityConfig securityConfig) {
-        return getGatewayTopologyWithHive(gateway)
+    private Optional<String> getHiveJdbcUrl(
+            Gateway gateway,
+            String ambariIp,
+            SecurityConfig securityConfig,
+            Optional<String> version) {
+        return getGatewayTopologyWithHive(gateway, version)
                 .map(gt -> getHiveJdbcUrlFromGatewayTopology(ambariIp, gt, securityConfig));
     }
 
-    private Optional<String> getImpalaJdbcUrl(Gateway gateway, String ambariIp) {
-        return getGatewayTopology(exposedServiceCollector.getImpalaService(), gateway)
+    private Optional<String> getImpalaJdbcUrl(Gateway gateway, String ambariIp, Optional<String> version) {
+        return getGatewayTopology(exposedServiceCollector.getImpalaService(), gateway, version)
                 .map(gt -> getImpalaJdbcUrlFromGatewayTopology(ambariIp, gt));
     }
 
@@ -586,7 +714,11 @@ public class ServiceEndpointCollector {
         }
     }
 
-    private String getHdfsUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String nameNodePrivateIp, boolean autoTlsEnabled) {
+    private String getHdfsUIUrlWithHostParameterFromGatewayTopology(
+            String managerIp,
+            GatewayTopology gt,
+            String nameNodePrivateIp,
+            boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
         ExposedService namenode = exposedServiceCollector.getNameNodeService();
         Integer port = autoTlsEnabled ? namenode.getTlsPort() : namenode.getPort();
@@ -599,7 +731,10 @@ public class ServiceEndpointCollector {
         }
     }
 
-    private String getHBaseUIUrlWithHostParameterFromGatewayTopology(String managerIp, GatewayTopology gt, String hbaseMasterPrivateIp) {
+    private String getHBaseUIUrlWithHostParameterFromGatewayTopology(
+            String managerIp,
+            GatewayTopology gt,
+            String hbaseMasterPrivateIp) {
         Gateway gateway = gt.getGateway();
         ExposedService hbaseUi = exposedServiceCollector.getHBaseUIService();
         if (gatewayListeningOnHttpsPort(gateway)) {
@@ -611,7 +746,10 @@ public class ServiceEndpointCollector {
         }
     }
 
-    private String getHBaseJarsUrlFromGatewayTopology(String managerIp, GatewayTopology gt, String hbaseMasterPrivateIp) {
+    private String getHBaseJarsUrlFromGatewayTopology(
+            String managerIp,
+            GatewayTopology gt,
+            String hbaseMasterPrivateIp) {
         Gateway gateway = gt.getGateway();
         ExposedService hbaseJars = exposedServiceCollector.getHBaseJarsService();
         if (gatewayListeningOnHttpsPort(gateway)) {
@@ -623,7 +761,11 @@ public class ServiceEndpointCollector {
         }
     }
 
-    private String getImpalaCoordinatorUrlWithHostFromGatewayTopology(String managerIp, GatewayTopology gt, String impalaPrivateIp, boolean autoTlsEnabled) {
+    private String getImpalaCoordinatorUrlWithHostFromGatewayTopology(
+            String managerIp,
+            GatewayTopology gt,
+            String impalaPrivateIp,
+            boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
         ExposedService impalaDebugUi = exposedServiceCollector.getImpalaDebugUIService();
         Integer port = autoTlsEnabled ? impalaDebugUi.getTlsPort() : impalaDebugUi.getPort();
@@ -636,7 +778,11 @@ public class ServiceEndpointCollector {
         }
     }
 
-    private String getKuduUrlWithHostFromGatewayTopology(String managerIp, GatewayTopology gt, String kuduPrivateIp, boolean autoTlsEnabled) {
+    private String getKuduUrlWithHostFromGatewayTopology(
+            String managerIp,
+            GatewayTopology gt,
+            String kuduPrivateIp,
+            boolean autoTlsEnabled) {
         Gateway gateway = gt.getGateway();
         ExposedService kudu = exposedServiceCollector.getKuduService();
         Integer port = autoTlsEnabled ? kudu.getTlsPort() : kudu.getPort();
