@@ -47,7 +47,7 @@ class TerminationServiceTest {
         InstanceMetaData im4 = mock(InstanceMetaData.class);
 
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
-        when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2, im3, im4));
+        when(stack.getNotTerminatedInstanceMetaDataSet()).thenReturn(Set.of(im1, im2, im3, im4));
 
         underTest.finalizeRecoveryTeardown(1L);
 
