@@ -12,14 +12,14 @@ import reactor.rx.Promise;
 public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEvent {
     private final ScalingType scalingType;
 
-    private final Map<String, Set<Long>> instanceIdsByHostgroupMap;
+    private final Map<String, Set<Long>> privateIdsByHostgroupMap;
 
     private final ClusterDownscaleDetails details;
 
-    public MultiHostgroupClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap,
+    public MultiHostgroupClusterAndStackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Set<Long>> privateIdsByHostgroupMap,
             ClusterDownscaleDetails details, ScalingType scalingType, Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
-        this.instanceIdsByHostgroupMap = instanceIdsByHostgroupMap;
+        this.privateIdsByHostgroupMap = privateIdsByHostgroupMap;
         this.details = details;
         this.scalingType = scalingType;
     }
@@ -28,8 +28,8 @@ public class MultiHostgroupClusterAndStackDownscaleTriggerEvent extends StackEve
         return scalingType;
     }
 
-    public Map<String, Set<Long>> getInstanceIdsByHostgroupMap() {
-        return instanceIdsByHostgroupMap;
+    public Map<String, Set<Long>> getPrivateIdsByHostgroupMap() {
+        return privateIdsByHostgroupMap;
     }
 
     public ClusterDownscaleDetails getDetails() {

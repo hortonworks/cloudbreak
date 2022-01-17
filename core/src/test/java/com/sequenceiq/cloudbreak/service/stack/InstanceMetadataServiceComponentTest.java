@@ -71,7 +71,7 @@ public class InstanceMetadataServiceComponentTest {
         stack.setInstanceGroups(Set.of(workerInstanceGroup));
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(detailedEnvResponse);
 
-        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, 42, "worker", false, Set.of(), false, null);
+        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of("worker", 42), Map.of(), false, false, null);
         Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
                 .collect(Collectors.groupingBy(
                         InstanceMetaData::getSubnetId,
@@ -118,7 +118,7 @@ public class InstanceMetadataServiceComponentTest {
         when(environmentClientService.getByCrn(ENV_CRN)).thenReturn(detailedEnvResponse);
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails(List.of("sub1", "sub2"));
 
-        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, 42, "worker", false, Set.of(), false, networkScaleDetails);
+        instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of("worker", 42), Map.of(), false, false, networkScaleDetails);
 
         Map<String, List<InstanceMetaData>> groupBySub = workerInstanceGroup.getInstanceMetaDataSet().stream()
                 .collect(Collectors.groupingBy(

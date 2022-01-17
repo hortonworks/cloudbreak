@@ -10,6 +10,7 @@ import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Before;
@@ -67,10 +68,10 @@ public class ClusterDownscaleServiceTest {
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsPositiveThenInstanceGroupEventWillBeCalledThisNumber() {
         doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
 
-        underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, 1, PRIVATE_IDS, details);
+        underTest.clusterDownscaleStarted(STACK_ID, Map.of(HOST_GROUP_NAME, 1), Map.of(HOST_GROUP_NAME, PRIVATE_IDS), details);
 
-        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID,
-                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, ResourceEvent.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, "1", HOST_GROUP_NAME);
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID,
+                Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_NODES, "1");
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);
@@ -85,10 +86,10 @@ public class ClusterDownscaleServiceTest {
     public void testClusterDownscaleStartedWhenScalingAdjustmentIsGivenAndItIsNegativeThenInstanceGroupEventWillBeCalledWithTheAbsoluteValueOfThisNumber() {
         doNothing().when(flowMessageService).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_SCALING_DOWN);
 
-        underTest.clusterDownscaleStarted(STACK_ID, HOST_GROUP_NAME, -1, PRIVATE_IDS, details);
+        underTest.clusterDownscaleStarted(STACK_ID, Map.of(HOST_GROUP_NAME, -1), Map.of(HOST_GROUP_NAME, PRIVATE_IDS), details);
 
-        verify(flowMessageService, times(1)).fireInstanceGroupEventAndLog(STACK_ID,
-                Status.UPDATE_IN_PROGRESS.name(), HOST_GROUP_NAME, ResourceEvent.CLUSTER_REMOVING_NODE_FROM_HOSTGROUP, "1", HOST_GROUP_NAME);
+        verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID,
+                Status.UPDATE_IN_PROGRESS.name(), ResourceEvent.CLUSTER_REMOVING_NODES, "1");
         verify(flowMessageService, times(1)).fireEventAndLog(STACK_ID, Status.UPDATE_IN_PROGRESS.name(),
                 ResourceEvent.CLUSTER_SCALING_DOWN, "worker");
         verify(clusterService, times(1)).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.DOWNSCALE_IN_PROGRESS);

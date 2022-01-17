@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOSTNAMES;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.INSTANCEGROUPNAME;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOST_GROUP_WITH_HOSTNAMES;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.NETWORK_SCALE_DETAILS;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.REPAIR;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.TRIGGERED_VARIANT;
@@ -122,8 +121,8 @@ class StackUpscaleActionsTest {
 
     @BeforeEach
     void setUp() {
-        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME, Set.of(), ADJUSTMENT,
-                false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
+        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT),
+                Map.of(), Map.of(), false, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue()));
     }
 
     private AbstractStackUpscaleAction<StackScaleTriggerEvent> getPrevalidateAction() {
@@ -143,15 +142,14 @@ class StackUpscaleActionsTest {
     void prevalidateTestDoExecuteWhenScalingNeededAndAllowed() throws Exception {
         when(cloudContext.getId()).thenReturn(STACK_ID);
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(), Map.of(),
                 adjustmentTypeWithThreshold, VARIANT);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT);
 
         Stack updatedStack = mock(Stack.class);
-        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, 3, INSTANCE_GROUP_NAME, false, context.getHostNames(), false,
-                context.getStackNetworkScaleDetails()))
-                .thenReturn(updatedStack);
+        when(instanceMetaDataService.saveInstanceAndGetUpdatedStack(stack, Map.of(INSTANCE_GROUP_NAME, 3), Map.of(), false, false,
+                context.getStackNetworkScaleDetails())).thenReturn(updatedStack);
         CloudStack convertedCloudStack = mock(CloudStack.class);
         when(cloudStackConverter.convert(updatedStack)).thenReturn(convertedCloudStack);
 
@@ -159,8 +157,8 @@ class StackUpscaleActionsTest {
 
         new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
 
-        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT, INSTANCE_GROUP_NAME, adjustmentTypeWithThreshold);
-        verify(stackUpscaleService).startAddInstances(stack, ADJUSTMENT, INSTANCE_GROUP_NAME);
+        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), adjustmentTypeWithThreshold);
+        verify(stackUpscaleService).startAddInstances(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT));
 
         verify(reactorEventFactory).createEvent(anyMap(), payloadArgumentCaptor.capture());
         verify(eventBus).notify("UPSCALESTACKVALIDATIONREQUEST", event);
@@ -179,7 +177,7 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestDoExecuteWhenScalingNeededAndNotAllowed() throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT.longValue());
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT,
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), Map.of(), Map.of(),
                 adjustmentTypeWithThreshold, VARIANT);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT, false)).thenReturn(ADJUSTMENT_ZERO);
@@ -191,7 +189,7 @@ class StackUpscaleActionsTest {
 
         new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
 
-        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT, INSTANCE_GROUP_NAME, adjustmentTypeWithThreshold);
+        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT), adjustmentTypeWithThreshold);
         verifyEventForUpscaleStackResult(resourceStatuses);
     }
 
@@ -214,9 +212,9 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestDoExecuteWhenScalingNotNeeded() throws Exception {
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, ADJUSTMENT_ZERO.longValue());
-        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME, Set.of(), ADJUSTMENT_ZERO,
-                false, adjustmentTypeWithThreshold);
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO,
+        context = new StackScalingFlowContext(flowParameters, stack, cloudContext, cloudCredential, cloudStack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO),
+                Map.of(), Map.of(), false, adjustmentTypeWithThreshold);
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), Map.of(), Map.of(),
                 adjustmentTypeWithThreshold, VARIANT);
 
         when(stackUpscaleService.getInstanceCountToCreate(stack, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, false)).thenReturn(ADJUSTMENT_ZERO);
@@ -228,20 +226,19 @@ class StackUpscaleActionsTest {
 
         new AbstractActionTestSupport<>(getPrevalidateAction()).doExecute(context, payload, Map.of());
 
-        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, ADJUSTMENT_ZERO, INSTANCE_GROUP_NAME, adjustmentTypeWithThreshold);
+        verify(stackUpscaleService).addInstanceFireEventAndLog(stack, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), adjustmentTypeWithThreshold);
         verifyEventForUpscaleStackResult(resourceStatuses);
     }
 
     @Test
     void prevalidateTestCreateContextWhenTriggeredVariantSet() {
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, Set.of("hostname"),
-                networkScaleDetails, null, VARIANT);
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), Map.of(),
+                Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), networkScaleDetails, null, VARIANT);
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getPrevalidateAction()).prepareExecution(payload, variables);
-        Assertions.assertEquals(INSTANCE_GROUP_NAME, variables.get(INSTANCEGROUPNAME));
-        Assertions.assertEquals(ADJUSTMENT_ZERO, variables.get(AbstractStackUpscaleAction.ADJUSTMENT));
-        Assertions.assertEquals(Set.of("hostname"), variables.get(HOSTNAMES));
+        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), variables.get(AbstractStackUpscaleAction.HOST_GROUP_WITH_ADJUSTMENT));
+        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), variables.get(HOST_GROUP_WITH_HOSTNAMES));
         Assertions.assertEquals(false, variables.get(REPAIR));
         Assertions.assertEquals(VARIANT, variables.get(TRIGGERED_VARIANT));
         Assertions.assertEquals(networkScaleDetails, variables.get(NETWORK_SCALE_DETAILS));
@@ -250,13 +247,13 @@ class StackUpscaleActionsTest {
     @Test
     void prevalidateTestCreateContextWhenTriggeredVariantNotSet() {
         NetworkScaleDetails networkScaleDetails = new NetworkScaleDetails();
-        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO, Set.of("hostname"),
+        StackScaleTriggerEvent payload = new StackScaleTriggerEvent(SELECTOR, STACK_ID, Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), Map.of(),
+                Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")),
                 networkScaleDetails, null, null);
         Map<Object, Object> variables = new HashMap<>();
         new AbstractActionTestSupport<>(getPrevalidateAction()).prepareExecution(payload, variables);
-        Assertions.assertEquals(INSTANCE_GROUP_NAME, variables.get(INSTANCEGROUPNAME));
-        Assertions.assertEquals(ADJUSTMENT_ZERO, variables.get(AbstractStackUpscaleAction.ADJUSTMENT));
-        Assertions.assertEquals(Set.of("hostname"), variables.get(HOSTNAMES));
+        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, ADJUSTMENT_ZERO), variables.get(AbstractStackUpscaleAction.HOST_GROUP_WITH_ADJUSTMENT));
+        Assertions.assertEquals(Map.of(INSTANCE_GROUP_NAME, Set.of("hostname")), variables.get(HOST_GROUP_WITH_HOSTNAMES));
         Assertions.assertEquals(false, variables.get(REPAIR));
         Assertions.assertNull(variables.get(TRIGGERED_VARIANT));
         Assertions.assertEquals(networkScaleDetails, variables.get(NETWORK_SCALE_DETAILS));

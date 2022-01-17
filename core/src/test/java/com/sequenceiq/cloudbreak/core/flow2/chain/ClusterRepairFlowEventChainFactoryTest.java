@@ -147,8 +147,6 @@ public class ClusterRepairFlowEventChainFactoryTest {
         assertEquals(List.of("FLOWCHAIN_INIT_TRIGGER_EVENT",
                 "STACK_DOWNSCALE_TRIGGER_EVENT",
                 "FULL_UPSCALE_TRIGGER_EVENT",
-                "FULL_DOWNSCALE_TRIGGER_EVENT",
-                "FULL_UPSCALE_TRIGGER_EVENT",
                 "RESCHEDULE_STATUS_CHECK_TRIGGER_EVENT",
                 "FLOWCHAIN_FINALIZE_TRIGGER_EVENT"),
                 triggeredOperations);
@@ -238,7 +236,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         boolean upgrade = false;
         String variant = "variant";
-        underTest.addAwsNativeMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        underTest.addAwsNativeEventMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
 
@@ -248,7 +246,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         boolean upgrade = true;
         String variant = "variant";
-        underTest.addAwsNativeMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        underTest.addAwsNativeEventMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
         Assertions.assertTrue(flowTriggers.isEmpty());
     }
 
@@ -258,7 +256,7 @@ public class ClusterRepairFlowEventChainFactoryTest {
         String groupName = "groupName";
         boolean upgrade = true;
         String variant = "AWS_NATIVE";
-        underTest.addAwsNativeMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
+        underTest.addAwsNativeEventMigrationIfNeed(flowTriggers, STACK_ID, groupName, upgrade, variant);
         Assertions.assertFalse(flowTriggers.isEmpty());
         AwsVariantMigrationTriggerEvent actual = (AwsVariantMigrationTriggerEvent) flowTriggers.peek();
         Assertions.assertEquals(groupName, actual.getHostGroupName());

@@ -81,7 +81,7 @@ public class RecipeEngineTest {
     public void testUploadUpscaleRecipes() throws CloudbreakException {
         // GIVEN
         // WHEN
-        recipeEngine.uploadUpscaleRecipes(stack(), masterHostGroup(), hostGroups());
+        recipeEngine.uploadUpscaleRecipes(stack(), Set.of(masterHostGroup()), hostGroups());
         // THEN
         verify(orchestratorRecipeExecutor, times(1)).uploadRecipes(any(Stack.class), anyMap());
         verify(recipeTemplateService, times(1)).updateAllGeneratedRecipes(anySet(), anyMap());
@@ -93,7 +93,7 @@ public class RecipeEngineTest {
         HostGroup hostGroup = new HostGroup();
         hostGroup.setName("worker");
         // WHEN
-        recipeEngine.uploadUpscaleRecipes(stack(), hostGroup, hostGroups());
+        recipeEngine.uploadUpscaleRecipes(stack(), Set.of(hostGroup), hostGroups());
         // THEN
         verify(orchestratorRecipeExecutor, times(0)).uploadRecipes(any(Stack.class), anyMap());
         verify(recipeTemplateService, times(0)).updateAllGeneratedRecipes(anySet(), anyMap());

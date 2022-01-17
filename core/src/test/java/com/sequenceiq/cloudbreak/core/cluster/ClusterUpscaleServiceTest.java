@@ -75,12 +75,12 @@ class ClusterUpscaleServiceTest {
         im3.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
         instanceGroup.setInstanceMetaData(Set.of(im1, im2, im3));
         hostGroup.setInstanceGroup(instanceGroup);
-        when(hostGroupService.getByClusterIdAndNameWithRecipes(2L, "master")).thenReturn(hostGroup);
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
         when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Collections.emptyMap(), Collections.emptyMap()));
 
-        underTest.installServicesOnNewHosts(1L, "master", true, true);
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true);
 
-        verify(clusterApi, times(1)).upscaleCluster(eq(hostGroup), any());
+        verify(clusterApi, times(1)).upscaleCluster(any());
         verify(clusterApi, times(1)).restartAll(false);
         verify(parcelService).removeUnusedParcelComponents(stack);
     }
@@ -106,12 +106,12 @@ class ClusterUpscaleServiceTest {
         stack.setInstanceGroups(Set.of(instanceGroup));
         instanceGroup.setInstanceMetaData(Set.of(im1, im2, im3));
         hostGroup.setInstanceGroup(instanceGroup);
-        when(hostGroupService.getByClusterIdAndNameWithRecipes(2L, "master")).thenReturn(hostGroup);
+        when(hostGroupService.getByClusterWithRecipes(any())).thenReturn(Set.of(hostGroup));
         when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Collections.emptyMap(), Collections.emptyMap()));
 
-        underTest.installServicesOnNewHosts(1L, "master", true, true);
+        underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true);
 
-        verify(clusterApi, times(1)).upscaleCluster(eq(hostGroup), any());
+        verify(clusterApi, times(1)).upscaleCluster(any());
         verify(clusterApi, times(0)).restartAll(false);
         verify(parcelService).removeUnusedParcelComponents(stack);
     }
@@ -126,7 +126,7 @@ class ClusterUpscaleServiceTest {
         when(stackService.getByIdWithClusterInTransaction(eq(1L))).thenReturn(stack);
         when(parcelService.removeUnusedParcelComponents(stack)).thenReturn(new ParcelOperationStatus(Collections.emptyMap(), Map.of("parcel", "parcel")));
 
-        CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.installServicesOnNewHosts(1L, "master", true, true));
+        CloudbreakException exception = assertThrows(CloudbreakException.class, () -> underTest.installServicesOnNewHosts(1L, Set.of("master"), true, true));
 
         assertEquals("Failed to remove the following parcels: {parcel=[parcel]}", exception.getMessage());
         verify(parcelService).removeUnusedParcelComponents(stack);

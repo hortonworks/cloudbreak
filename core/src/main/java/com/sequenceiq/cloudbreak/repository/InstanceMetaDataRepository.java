@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,7 +35,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "AND i.instanceStatus <> 'TERMINATED' " +
             "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
             "AND i.instanceStatus <> 'DELETED_BY_PROVIDER'")
-    Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);
+    Set<InstanceMetaData> findNotDeletedForStack(@Param("stackId") Long stackId);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i " +
@@ -72,6 +73,9 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId= :instanceId AND i.instanceGroup.stack.id= :stackId")
     Optional<InstanceMetaData> findByStackIdAndInstanceId(@Param("stackId") Long stackId, @Param("instanceId") String instanceId);
+
+    @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceId IN :instanceIds AND i.instanceGroup.stack.id= :stackId")
+    List<InstanceMetaData> findByStackIdAndInstanceIds(@Param("stackId") Long stackId, @Param("instanceIds") Collection<String> instanceIds);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.discoveryFQDN= :hostName AND i.instanceStatus <> 'TERMINATED'")

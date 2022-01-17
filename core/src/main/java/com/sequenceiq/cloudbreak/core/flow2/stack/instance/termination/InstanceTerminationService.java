@@ -8,8 +8,9 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REMOVING_INSTA
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_REMOVING_INSTANCE_FINISHED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_SCALING_TERMINATING_HOST_FROM_HOSTGROUP;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -22,7 +23,6 @@ import com.sequenceiq.cloudbreak.cloud.event.resource.RemoveInstanceResult;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.StackUpdater;
@@ -60,11 +60,8 @@ public class InstanceTerminationService {
             throws TransactionService.TransactionExecutionException {
         Stack stack = context.getStack();
         List<InstanceMetaData> instanceMetaDataList = context.getInstanceMetaDataList();
-        for (InstanceMetaData instanceMetaData : instanceMetaDataList) {
-            String instanceId = instanceMetaData.getInstanceId();
-            InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupId(instanceMetaData.getInstanceGroup().getId());
-            stackScalingService.updateRemovedResourcesState(Collections.singleton(instanceId), instanceGroup);
-        }
+        Set<Long> privateIds = instanceMetaDataList.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
+        stackScalingService.updateInstancesToTerminated(privateIds, stack.getId());
         LOGGER.debug("Terminate instance result: {}", payload);
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.AVAILABLE, "Instance removed");
         flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_REMOVING_INSTANCE_FINISHED);

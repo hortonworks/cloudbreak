@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.core.cluster;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -54,24 +51,16 @@ public class ClusterManagerUpscaleService {
     @Inject
     private InstanceMetaDataService instanceMetaDataService;
 
-    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged, boolean repair)
+    public void upscaleClusterManager(Long stackId, Map<String, Integer> hostGroupWithAdjustment, boolean primaryGatewayChanged, boolean repair)
             throws ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-        LOGGER.debug("Adding {} new nodes for host group {}", scalingAdjustment, hostGroupName);
-        Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
+        LOGGER.debug("Adding new nodes for host group {}", hostGroupWithAdjustment);
 
-        NodeReachabilityResult nodeReachabilityResult = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment, repair);
+        NodeReachabilityResult nodeReachabilityResult = hostRunner.addClusterServices(stackId, hostGroupWithAdjustment, repair);
         if (primaryGatewayChanged) {
             clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
         }
-        for (String hostName : nodeReachabilityResult.getReachableHosts()) {
-            if (!hostsPerHostGroup.containsKey(hostGroupName)) {
-                hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
-            }
-            hostsPerHostGroup.get(hostGroupName).add(hostName);
-        }
-        clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
-
+        clusterService.updateInstancesToRunning(stack.getCluster().getId(), nodeReachabilityResult.getReachableNodes());
         clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
 
         ClusterApi connector = clusterApiConnectors.getConnector(stack);

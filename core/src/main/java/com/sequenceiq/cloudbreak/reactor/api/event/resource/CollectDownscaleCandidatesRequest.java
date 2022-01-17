@@ -1,30 +1,32 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
 
 public class CollectDownscaleCandidatesRequest extends AbstractClusterScaleRequest {
-    private final Integer scalingAdjustment;
 
     private final ClusterDownscaleDetails details;
 
-    private final Set<Long> privateIds;
+    private final Map<String, Integer> hostGroupWithAdjustment;
 
-    public CollectDownscaleCandidatesRequest(Long stackId, String hostGroupName, Integer scalingAdjustment, Set<Long> privateIds,
+    private final Map<String, Set<Long>> hostGroupWithPrivateIds;
+
+    public CollectDownscaleCandidatesRequest(Long stackId, Map<String, Integer> hostGroupWithAdjustment, Map<String, Set<Long>> hostGroupWithPrivateIds,
             ClusterDownscaleDetails details) {
-        super(stackId, hostGroupName);
-        this.scalingAdjustment = scalingAdjustment;
-        this.privateIds = privateIds;
+        super(stackId, hostGroupWithAdjustment.size() > 0 ? hostGroupWithAdjustment.keySet() : hostGroupWithPrivateIds.keySet());
+        this.hostGroupWithAdjustment = hostGroupWithAdjustment;
+        this.hostGroupWithPrivateIds = hostGroupWithPrivateIds;
         this.details = details;
     }
 
-    public Integer getScalingAdjustment() {
-        return scalingAdjustment;
+    public Map<String, Integer> getHostGroupWithAdjustment() {
+        return hostGroupWithAdjustment;
     }
 
-    public Set<Long> getPrivateIds() {
-        return privateIds;
+    public Map<String, Set<Long>> getHostGroupWithPrivateIds() {
+        return hostGroupWithPrivateIds;
     }
 
     public ClusterDownscaleDetails getDetails() {
@@ -35,10 +37,9 @@ public class CollectDownscaleCandidatesRequest extends AbstractClusterScaleReque
     public String toString() {
         return "CollectDownscaleCandidatesRequest{" +
                 "stackId=" + getResourceId() +
-                ", hostGroupName=" + getHostGroupName() +
-                ", scalingAdjustment=" + scalingAdjustment +
+                ", hostGroupWithAdjustment=" + hostGroupWithAdjustment +
+                ", hostGroupWithPrivateIds=" + hostGroupWithPrivateIds +
                 ", details=" + details +
-                ", privateIds=" + privateIds +
                 '}';
     }
 

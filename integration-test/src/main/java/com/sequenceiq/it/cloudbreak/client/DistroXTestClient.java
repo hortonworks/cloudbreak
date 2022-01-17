@@ -14,6 +14,7 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXCreateInternalActio
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstanceAction;
@@ -90,6 +91,10 @@ public class DistroXTestClient {
 
     public Action<DistroXTestDto, CloudbreakClient> repair(HostGroupType... hostGroupTypes) {
         return new DistroXRepairAction(List.of(hostGroupTypes));
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> repairInstances() {
+        return new DistroXRepairInstancesAction();
     }
 
     public Action<DistroXTestDto, CloudbreakClient> upgrade() {

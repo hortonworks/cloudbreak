@@ -7,6 +7,7 @@ import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -76,7 +77,7 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
             Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
             Collection<Resource> resources = resourceService.getAllByStackId(stack.getId());
             stack.setResources(new HashSet<>(resources));
-            Set<Long> privateIds = request.getPrivateIds();
+            Set<Long> privateIds = request.getHostGroupWithPrivateIds().values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
             if (CollectionUtils.isEmpty(privateIds)) {
                 LOGGER.info("No private id(s) has been provided for downscale!");
                 privateIds = collectCandidates(request, stack);
@@ -99,9 +100,10 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
             }
             LOGGER.info("Moving ahead with " + CollectDownscaleCandidatesResult.class.getSimpleName() + " with the following request [{}] " +
                             "and private IDs: [{}]", request,
-                    privateIds.stream().map(id -> String.valueOf(id)).collect(Collectors.joining(", ")));
+                    privateIds.stream().map(String::valueOf).collect(Collectors.joining(", ")));
             if (isEmpty(privateIds)) {
-                LOGGER.info("No instances met downscale criteria in host group: {}", request.getHostGroupName());
+                LOGGER.info("No instances met downscale criteria in host groups: {}",
+                        String.join(", ", request.getHostGroupWithAdjustment().keySet()));
             } else {
                 LOGGER.info("Selected {} instances based on downscale request {}.", privateIds, request);
             }
@@ -115,19 +117,24 @@ public class CollectDownscaleCandidatesHandler implements EventHandler<CollectDo
 
     private Set<Long> collectCandidates(CollectDownscaleCandidatesRequest request, Stack stack)
             throws CloudbreakException {
+        Set<Long> privateIds = new HashSet<>();
         LOGGER.debug("Collecting candidates for downscale based on [{}] and stack CRN [{}].", request, stack.getResourceCrn());
-        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), request.getHostGroupName())
-                .orElseThrow(NotFoundException.notFound("hostgroup", request.getHostGroupName()));
-        LOGGER.debug("Host group has been found for cluster! It's name: {}", hostGroup.getName());
-        List<InstanceMetaData> metaDataForInstanceGroup = instanceMetaDataService.findAliveInstancesInInstanceGroup(hostGroup.getInstanceGroup().getId());
-        Set<InstanceMetaData> collectedCandidates = clusterApiConnectors.getConnector(stack).clusterDecomissionService()
-                .collectDownscaleCandidates(hostGroup, request.getScalingAdjustment(), new HashSet<>(metaDataForInstanceGroup));
-        String collectedHostsAsString = collectedCandidates.stream().map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null ?
-                "FQDN: " + instanceMetaData.getDiscoveryFQDN() : "Private id: " + instanceMetaData.getPrivateId())
-                .collect(Collectors.joining(", "));
-        LOGGER.debug("The following hosts has been collected as candidates for downscale: [{}]", collectedHostsAsString);
-        flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_SELECT_FOR_DOWNSCALE, collectedHostsAsString);
-        return collectedCandidates.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet());
+        for (Map.Entry<String, Integer> entry : request.getHostGroupWithAdjustment().entrySet()) {
+            String hostGroupName = entry.getKey();
+            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(stack.getCluster().getId(), hostGroupName)
+                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
+            LOGGER.debug("Host group has been found for cluster! It's name: {}", hostGroup.getName());
+            List<InstanceMetaData> metaDataForInstanceGroup = instanceMetaDataService.findAliveInstancesInInstanceGroup(hostGroup.getInstanceGroup().getId());
+            Set<InstanceMetaData> collectedCandidates = clusterApiConnectors.getConnector(stack).clusterDecomissionService()
+                    .collectDownscaleCandidates(hostGroup, entry.getValue(), new HashSet<>(metaDataForInstanceGroup));
+            String collectedHostsAsString = collectedCandidates.stream().map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null ?
+                    "FQDN: " + instanceMetaData.getDiscoveryFQDN() : "Private id: " + instanceMetaData.getPrivateId())
+                    .collect(Collectors.joining(", "));
+            LOGGER.debug("The following hosts has been collected as candidates for downscale: [{}]", collectedHostsAsString);
+            flowMessageService.fireEventAndLog(stack.getId(), AVAILABLE.name(), STACK_SELECT_FOR_DOWNSCALE, collectedHostsAsString);
+            privateIds.addAll(collectedCandidates.stream().map(InstanceMetaData::getPrivateId).collect(Collectors.toSet()));
+        }
+        return privateIds;
     }
 
 }

@@ -1,8 +1,10 @@
 package com.sequenceiq.cloudbreak.core.flow2.stack.upscale;
 
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOSTNAMES;
-import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.INSTANCEGROUPNAME;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOST_GROUP_WITH_ADJUSTMENT;
+import static com.sequenceiq.cloudbreak.core.flow2.stack.upscale.AbstractStackUpscaleAction.HOST_GROUP_WITH_HOSTNAMES;
 
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +34,6 @@ import com.sequenceiq.cloudbreak.cloud.model.ResourceStatus;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.converter.spi.ResourceToCloudResourceConverter;
@@ -106,9 +107,8 @@ public class StackUpscaleActions {
         return new AbstractStackUpscaleAction<>(StackScaleTriggerEvent.class) {
             @Override
             protected void prepareExecution(StackScaleTriggerEvent payload, Map<Object, Object> variables) {
-                variables.put(INSTANCEGROUPNAME, payload.getInstanceGroup());
-                variables.put(ADJUSTMENT, payload.getAdjustment());
-                variables.put(HOSTNAMES, payload.getHostNames());
+                variables.put(HOST_GROUP_WITH_ADJUSTMENT, payload.getHostGroupsWithAdjustment());
+                variables.put(HOST_GROUP_WITH_HOSTNAMES, payload.getHostGroupsWithHostNames());
                 variables.put(REPAIR, payload.isRepair());
                 if (payload.getTriggeredStackVariant() != null) {
                     variables.put(TRIGGERED_VARIANT, payload.getTriggeredStackVariant());
@@ -119,12 +119,16 @@ public class StackUpscaleActions {
 
             @Override
             protected void doExecute(StackScalingFlowContext context, StackScaleTriggerEvent payload, Map<Object, Object> variables) {
-                int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(context.getStack(), payload.getInstanceGroup(),
-                        payload.getAdjustment(), context.isRepair());
-                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), payload.getAdjustment(), payload.getInstanceGroup(),
-                        payload.getAdjustmentTypeWithThreshold());
+                Map<String, Integer> hostGroupsWithAdjustment = payload.getHostGroupsWithAdjustment();
+                int instanceCountToCreate = 0;
+                for (Map.Entry<String, Integer> hostGroupWithAdjustment : hostGroupsWithAdjustment.entrySet()) {
+                    instanceCountToCreate += stackUpscaleService.getInstanceCountToCreate(context.getStack(), hostGroupWithAdjustment.getKey(),
+                            hostGroupWithAdjustment.getValue(), context.isRepair());
+                }
+
+                stackUpscaleService.addInstanceFireEventAndLog(context.getStack(), hostGroupsWithAdjustment, payload.getAdjustmentTypeWithThreshold());
                 if (instanceCountToCreate > 0) {
-                    stackUpscaleService.startAddInstances(context.getStack(), payload.getAdjustment(), payload.getInstanceGroup());
+                    stackUpscaleService.startAddInstances(context.getStack(), hostGroupsWithAdjustment);
                     sendEvent(context);
                 } else {
                     List<CloudResourceStatus> list = resourceService.getAllAsCloudResourceStatus(payload.getResourceId());
@@ -135,11 +139,9 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
-                int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(),
-                        context.getAdjustment(), context.isRepair());
-                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
-                        context.getInstanceGroupName(), false, context.getHostNames(), context.isRepair(), context.getStackNetworkScaleDetails());
+                Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context);
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), hostGroupWithInstanceCountToCreate,
+                        context.getHostgroupWithHostnames(), false, context.isRepair(), context.getStackNetworkScaleDetails());
                 CloudStack cloudStack = cloudStackConverter.convert(updatedStack);
                 return new UpscaleStackValidationRequest<UpscaleStackValidationResult>(context.getCloudContext(), context.getCloudCredential(), cloudStack);
             }
@@ -156,18 +158,18 @@ public class StackUpscaleActions {
 
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
-                LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
-                int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(context.getStack(), context.getInstanceGroupName(),
-                        context.getAdjustment(), context.isRepair());
-                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), instanceCountToCreate,
-                        context.getInstanceGroupName(), true, context.getHostNames(), context.isRepair(), context.getStackNetworkScaleDetails());
+                Map<String, Integer> hostGroupWithInstanceCountToCreate = getHostGroupsWithInstanceCountToCreate(context);
+
+                Stack updatedStack = instanceMetaDataService.saveInstanceAndGetUpdatedStack(context.getStack(), hostGroupWithInstanceCountToCreate,
+                        context.getHostgroupWithHostnames(), true, context.isRepair(), context.getStackNetworkScaleDetails());
                 List<CloudResource> resources = context.getStack().getResources().stream()
                         .map(r -> cloudResourceConverter.convert(r))
                         .collect(Collectors.toList());
                 CloudStack updatedCloudStack = cloudStackConverter.convert(updatedStack);
                 AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = context.getAdjustmentTypeWithThreshold();
                 if (adjustmentTypeWithThreshold == null) {
-                    adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, context.getAdjustment().longValue());
+                    Integer exactNumber = hostGroupWithInstanceCountToCreate.values().stream().reduce(0, Integer::sum);
+                    adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, exactNumber.longValue());
                 }
                 LOGGER.info("Adjustment type with threshold for upscale request: {}", adjustmentTypeWithThreshold);
                 return new UpscaleStackRequest<UpscaleStackResult>(context.getCloudContext(), context.getCloudCredential(), updatedCloudStack, resources,
@@ -208,10 +210,14 @@ public class StackUpscaleActions {
                         .collect(Collectors.toList());
                 List<CloudInstance> allKnownInstances = cloudStackConverter.buildInstances(context.getStack());
                 LOGGER.info("All known instances: {}", allKnownInstances);
-                Set<String> unusedInstancesForGroup = instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
-                                context.getInstanceGroupName()).stream()
-                        .map(InstanceMetaData::getInstanceId)
-                        .collect(Collectors.toSet());
+                Set<String> unusedInstancesForGroup = new HashSet<>();
+                for (String hostGroup : context.getHostGroupWithAdjustment().keySet()) {
+                    unusedInstancesForGroup.addAll(instanceMetaDataService.unusedInstancesInInstanceGroupByName(context.getStack().getId(),
+                            hostGroup).stream()
+                            .map(InstanceMetaData::getInstanceId)
+                            .collect(Collectors.toSet()));
+                }
+
                 LOGGER.info("Unused instances for group: {}", unusedInstancesForGroup);
                 List<CloudInstance> newCloudInstances = allKnownInstances.stream()
                         .filter(cloudInstance -> InstanceStatus.CREATE_REQUESTED.equals(cloudInstance.getTemplate().getStatus())
@@ -229,11 +235,15 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, CollectMetadataResult payload, Map<Object, Object> variables)
                     throws TransactionExecutionException {
-                Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), context.getAdjustment(), payload);
+                Integer adjustment = context.getHostGroupWithAdjustment().values().stream().reduce(0, Integer::sum);
+                Set<String> upscaleCandidateAddresses = stackUpscaleService.finishExtendMetadata(context.getStack(), adjustment, payload);
                 variables.put(UPSCALE_CANDIDATE_ADDRESSES, upscaleCandidateAddresses);
-                InstanceGroup ig = instanceGroupService.findOneWithInstanceMetadataByGroupNameInStack(payload.getResourceId(), context.getInstanceGroupName())
-                        .orElseThrow(NotFoundException.notFound("instanceGroup", context.getInstanceGroupName()));
-                if (InstanceGroupType.GATEWAY == ig.getInstanceGroupType()) {
+                Set<String> hostGroups = context.getHostGroupWithAdjustment().keySet();
+                List<InstanceGroup> scaledInstanceGroups = instanceGroupService.findByStackIdAndInstanceGroupNames(payload.getResourceId(),
+                        hostGroups);
+                boolean gatewayWasUpscaled = scaledInstanceGroups.stream()
+                        .anyMatch(instanceGroup -> InstanceGroupType.GATEWAY.equals(instanceGroup.getInstanceGroupType()));
+                if (gatewayWasUpscaled) {
                     LOGGER.info("Gateway type instance group");
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStack().getId());
                     InstanceMetaData gatewayMetaData = stack.getPrimaryGatewayInstance();
@@ -289,7 +299,7 @@ public class StackUpscaleActions {
             @Override
             protected Selectable createRequest(StackScalingFlowContext context) {
                 return new ClusterProxyReRegistrationRequest(context.getStack().getId(),
-                        context.getInstanceGroupName(),
+                        context.getHostGroupWithAdjustment().keySet(),
                         context.getStack().getCloudPlatform());
             }
         };
@@ -301,8 +311,10 @@ public class StackUpscaleActions {
             @Override
             protected void doExecute(StackScalingFlowContext context, BootstrapNewNodesEvent payload, Map<Object, Object> variables) {
                 stackUpscaleService.bootstrappingNewNodes(context.getStack());
+                Map<String, Set<String>> hostgroupWithHostnames = context.getHostgroupWithHostnames();
                 Selectable request = new BootstrapNewNodesRequest(context.getStack().getId(),
-                        (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES), context.getHostNames());
+                        (Set<String>) variables.get(UPSCALE_CANDIDATE_ADDRESSES),
+                        hostgroupWithHostnames.values().stream().flatMap(Collection::stream).collect(Collectors.toSet()));
                 sendEvent(context, request);
             }
         };
@@ -337,7 +349,7 @@ public class StackUpscaleActions {
                         .filter(im -> im.getDiscoveryFQDN() != null)
                         .map(InstanceMetaData::getDiscoveryFQDN)
                         .collect(Collectors.toSet());
-                CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, isRepair(variables));
+                CleanupFreeIpaEvent cleanupFreeIpaEvent = new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, context.isRepair());
                 sendEvent(context, cleanupFreeIpaEvent);
             }
         };
@@ -372,10 +384,11 @@ public class StackUpscaleActions {
         return new AbstractStackFailureAction<StackUpscaleState, StackUpscaleEvent>() {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                Set<String> hostNames = (Set<String>) variables.getOrDefault(HOSTNAMES, new HashSet<>());
-                String instanceGroupName = (String) variables.getOrDefault(INSTANCEGROUPNAME, null);
-                stackUpscaleService.handleStackUpscaleFailure(isRepair(variables), hostNames, payload.getException(),
-                        payload.getResourceId(), instanceGroupName);
+                Map<String, Set<String>> hostgroupWithHostnames = (Map<String, Set<String>>)  variables.getOrDefault(HOST_GROUP_WITH_HOSTNAMES,
+                        new HashMap<>());
+                Map<String, Integer> hostGroupWithAdjustment = (Map<String, Integer>) variables.getOrDefault(HOST_GROUP_WITH_ADJUSTMENT, new HashMap<>());
+                stackUpscaleService.handleStackUpscaleFailure(isRepair(variables), hostgroupWithHostnames, payload.getException(),
+                        payload.getResourceId(), hostGroupWithAdjustment);
                 getMetricService().incrementMetricCounter(MetricType.STACK_UPSCALE_FAILED, context.getStackView(), payload.getException());
                 sendEvent(context);
             }
@@ -385,6 +398,19 @@ public class StackUpscaleActions {
                 return new StackEvent(StackUpscaleEvent.UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
+    }
+
+    private Map<String, Integer> getHostGroupsWithInstanceCountToCreate(StackScalingFlowContext context) {
+        LOGGER.debug("Assembling upscale stack event for stack: {}", context.getStack());
+        Map<String, Integer> hostGroupsWithAdjustment = context.getHostGroupWithAdjustment();
+        Map<String, Integer> hostGroupWithInstanceCountToCreate = new HashMap<>();
+        for (Map.Entry<String, Integer> hostGroupWithAdjustment : hostGroupsWithAdjustment.entrySet()) {
+            String hostGroup = hostGroupWithAdjustment.getKey();
+            int instanceCountToCreate = stackUpscaleService.getInstanceCountToCreate(context.getStack(), hostGroup,
+                    hostGroupWithAdjustment.getValue(), context.isRepair());
+            hostGroupWithInstanceCountToCreate.put(hostGroup, instanceCountToCreate);
+        }
+        return hostGroupWithInstanceCountToCreate;
     }
 
     private boolean isRepair(Map<Object, Object> variables) {

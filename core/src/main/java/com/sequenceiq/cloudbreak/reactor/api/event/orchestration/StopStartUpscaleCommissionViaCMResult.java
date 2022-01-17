@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleResult;
 
-public class StopStartUpscaleCommissionViaCMResult extends AbstractClusterScaleResult<StopStartUpscaleCommissionViaCMRequest> {
+public class StopStartUpscaleCommissionViaCMResult extends ClusterPlatformResult<StopStartUpscaleCommissionViaCMRequest> {
 
     private final Set<String> successfullyCommissionedFqdns;
 

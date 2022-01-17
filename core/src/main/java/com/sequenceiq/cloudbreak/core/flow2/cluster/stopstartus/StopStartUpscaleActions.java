@@ -80,7 +80,6 @@ public class StopStartUpscaleActions {
             protected void prepareExecution(StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
                 variables.put(ADJUSTMENT, payload.getAdjustment());
-                variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
             }
 
             @Override
@@ -278,8 +277,6 @@ public class StopStartUpscaleActions {
 
         static final String ADJUSTMENT = "ADJUSTMENT";
 
-        static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
-
         @Inject
         private StackService stackService;
 
@@ -326,7 +323,7 @@ public class StopStartUpscaleActions {
             return new StopStartUpscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
                     cloudContext, cloudCredential, cloudStack,
                     getHostgroupName(variables), getAdjustment(variables),
-                    getClusterManagerType(variables));
+                    ClusterManagerType.CLOUDERA_MANAGER);
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {
@@ -335,10 +332,6 @@ public class StopStartUpscaleActions {
 
         private Integer getAdjustment(Map<Object, Object> variables) {
             return (Integer) variables.get(ADJUSTMENT);
-        }
-
-        ClusterManagerType getClusterManagerType(Map<Object, Object> variables) {
-            return (ClusterManagerType) variables.get(CLUSTER_MANAGER_TYPE);
         }
     }
 }

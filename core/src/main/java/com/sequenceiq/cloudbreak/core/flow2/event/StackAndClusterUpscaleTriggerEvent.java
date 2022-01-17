@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -25,9 +26,10 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
 
     private final ClusterManagerType clusterManagerType;
 
-    public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
+    public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment, ScalingType scalingType,
             NetworkScaleDetails networkScaleDetails, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold, String triggeredStackVariant) {
-        super(selector, stackId, instanceGroup, adjustment, Collections.emptySet(), networkScaleDetails, adjustmentTypeWithThreshold, triggeredStackVariant);
+        super(selector, stackId, hostGroupWithAdjustment, Collections.emptyMap(), Collections.emptyMap(), networkScaleDetails, adjustmentTypeWithThreshold,
+                triggeredStackVariant);
         this.scalingType = scalingType;
         singleMasterGateway = false;
         kerberosSecured = false;
@@ -36,11 +38,14 @@ public class StackAndClusterUpscaleTriggerEvent extends StackScaleTriggerEvent {
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
-    public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Integer adjustment, ScalingType scalingType,
-            Set<String> hostNames, boolean singlePrimaryGateway, boolean kerberosSecured, Promise<AcceptResult> accepted, boolean singleNodeCluster,
+    public StackAndClusterUpscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
+            Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostgroupWithHostnames, ScalingType scalingType,
+            boolean singlePrimaryGateway,
+            boolean kerberosSecured, Promise<AcceptResult> accepted, boolean singleNodeCluster,
             boolean restartServices, ClusterManagerType clusterManagerType, AdjustmentTypeWithThreshold adjustmentTypeWithThreshold,
             String triggeredStackVariant) {
-        super(selector, stackId, instanceGroup, adjustment, hostNames, adjustmentTypeWithThreshold, triggeredStackVariant, accepted);
+        super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostgroupWithHostnames, adjustmentTypeWithThreshold, triggeredStackVariant,
+                accepted);
         this.scalingType = scalingType;
         singleMasterGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;

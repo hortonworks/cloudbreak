@@ -1,14 +1,15 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.upscale;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.ClusterViewContext;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.flow.core.FlowParameters;
 
 public class ClusterUpscaleContext extends ClusterViewContext {
-    private final String hostGroupName;
-
-    private final Integer adjustment;
+    private final Map<String, Integer> hostGroupWithAdjustment;
 
     private final Boolean singlePrimaryGateway;
 
@@ -20,24 +21,23 @@ public class ClusterUpscaleContext extends ClusterViewContext {
 
     private final Boolean restartServices;
 
-    public ClusterUpscaleContext(FlowParameters flowParameters, StackView stack, String hostGroupName, Integer adjustment, Boolean singlePrimaryGateway,
+    public ClusterUpscaleContext(FlowParameters flowParameters, StackView stack, Map<String, Integer> hostGroupWithAdjustment, Boolean singlePrimaryGateway,
             String hostName, ClusterManagerType clusterManagerType, Boolean repair, Boolean restartServices) {
         super(flowParameters, stack);
-        this.hostGroupName = hostGroupName;
-        this.adjustment = adjustment;
+        this.hostGroupWithAdjustment = hostGroupWithAdjustment;
         this.singlePrimaryGateway = singlePrimaryGateway;
-        primaryGatewayHostName = hostName;
+        this.primaryGatewayHostName = hostName;
         this.clusterManagerType = clusterManagerType;
         this.repair = repair;
         this.restartServices = restartServices;
     }
 
-    public String getHostGroupName() {
-        return hostGroupName;
+    public Map<String, Integer> getHostGroupWithAdjustment() {
+        return hostGroupWithAdjustment;
     }
 
-    public Integer getAdjustment() {
-        return adjustment;
+    public Set<String> getHostGroups() {
+        return hostGroupWithAdjustment.keySet();
     }
 
     public Boolean isSinglePrimaryGateway() {

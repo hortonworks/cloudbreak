@@ -166,42 +166,55 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     @Override
-    public List<String> upscaleCluster(HostGroup hostGroup, Collection<InstanceMetaData> instanceMetaDatas) throws CloudbreakException {
+    public List<String> upscaleCluster(Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup) throws CloudbreakException {
         ClustersResourceApi clustersResourceApi = clouderaManagerApiFactory.getClustersResourceApi(apiClient);
-        String hostGroupName = hostGroup.getName();
+        Set<InstanceMetaData> instanceMetaDatas = instanceMetaDatasByHostGroup.values().stream().flatMap(Collection::stream).collect(Collectors.toSet());
         try {
-            LOGGER.debug("Starting cluster upscale. Host group: [{}].", hostGroupName);
+            LOGGER.debug("Starting cluster upscale with hosts: {}.", instanceMetaDatas.stream()
+                    .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(", ")));
             String clusterName = stack.getName();
             Set<String> clusterHostnames = getClusterHostnamesFromCM(clustersResourceApi, clusterName);
             List<ApiHost> hosts = getHostsFromCM();
 
-            LOGGER.debug("Processing outdated cluster hosts. Host group: [{}].", hostGroupName);
+            LOGGER.debug("Processing outdated cluster hosts. Cluster hostnames from CM: {}", clusterHostnames);
             setHostRackIdForOutdatedClusterHosts(instanceMetaDatas, clusterHostnames, hosts);
 
-            LOGGER.debug("Processing upscaled cluster hosts. Host group: [{}].", hostGroupName);
+            LOGGER.debug("Processing upscaled cluster hosts.");
             Map<String, InstanceMetaData> upscaleInstancesMap = getInstancesMap(clusterHostnames, instanceMetaDatas, true);
             if (!upscaleInstancesMap.isEmpty()) {
                 Map<String, ApiHost> upscaleHostsMap = getHostsMap(upscaleInstancesMap, hosts);
                 setHostRackIdBatch(upscaleInstancesMap, upscaleHostsMap);
-                ApiHostRefList body = createUpscaledHostRefList(upscaleInstancesMap, upscaleHostsMap);
-                clustersResourceApi.addHosts(clusterName, body);
+                ApiHostRefList bodyForAddHosts = createUpscaledHostRefList(upscaleInstancesMap, upscaleHostsMap);
+                clustersResourceApi.addHosts(clusterName, bodyForAddHosts);
                 activateParcels(clustersResourceApi);
-                applyHostGroupRolesOnUpscaledHosts(body, hostGroupName);
+                for (HostGroup hostGroup : instanceMetaDatasByHostGroup.keySet()) {
+                    ApiHostRefList bodyForApplyHostGroupRoles = getBodyForApplyHostGroupRoles(upscaleInstancesMap, upscaleHostsMap, hostGroup);
+                    applyHostGroupRolesOnUpscaledHosts(bodyForApplyHostGroupRoles, hostGroup.getName());
+                }
             } else {
                 redistributeParcelsForRecovery();
                 activateParcels(clustersResourceApi);
             }
             deployClientConfig(clustersResourceApi, stack);
             clouderaManagerRoleRefreshService.refreshClusterRoles(apiClient, stack);
-            LOGGER.debug("Cluster upscale completed. Host group: [{}].", hostGroupName);
+            LOGGER.debug("Cluster upscale completed.");
             return instanceMetaDatas.stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .map(InstanceMetaData::getDiscoveryFQDN)
                     .collect(Collectors.toList());
         } catch (ApiException e) {
-            LOGGER.error(String.format("Failed to upscale. Host group: [%s]. Response: %s", hostGroupName, e.getResponseBody()), e);
+            LOGGER.error(String.format("Failed to upscale. Response: %s", e.getResponseBody()), e);
             throw new CloudbreakException("Failed to upscale", e);
         }
+    }
+
+    private ApiHostRefList getBodyForApplyHostGroupRoles(Map<String, InstanceMetaData> upscaleInstancesMap, Map<String, ApiHost> upscaleHostsMap,
+            HostGroup hostGroup) {
+        Map<String, InstanceMetaData> upscaleInstancesMapForHostGroup =
+                upscaleInstancesMap.entrySet().stream()
+                        .filter(instanceEntry -> hostGroup.getName().equals(instanceEntry.getValue().getInstanceGroupName()))
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        return createUpscaledHostRefList(upscaleInstancesMapForHostGroup, upscaleHostsMap);
     }
 
     private BigDecimal deployClientConfig(ClustersResourceApi clustersResourceApi, Stack stack) throws ApiException, CloudbreakException {
@@ -641,7 +654,11 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                                     .hostId(host.getHostId());
                             body.addItemsItem(apiHostRef);
                         }));
-        LOGGER.debug("Created ApiHostRefList from upscaled hosts. Host count: [{}]", body.getItems().size());
+        if (body.getItems() != null) {
+            LOGGER.debug("Created ApiHostRefList from upscaled hosts. Host count: [{}]", body.getItems().size());
+        } else {
+            LOGGER.debug("Created ApiHostRefList is empty.");
+        }
         return body;
     }
 

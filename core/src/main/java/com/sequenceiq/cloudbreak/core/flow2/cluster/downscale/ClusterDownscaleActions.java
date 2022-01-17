@@ -63,10 +63,10 @@ public class ClusterDownscaleActions {
             protected void doExecute(ClusterViewContext context, ClusterDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 ClusterDownscaleDetails clusterDownscaleDetails = payload.getDetails();
                 variables.put(REPAIR, clusterDownscaleDetails == null ? Boolean.FALSE : Boolean.valueOf(payload.getDetails().isRepair()));
-                clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupName(), payload.getAdjustment(),
-                        payload.getPrivateIds(), payload.getDetails());
-                CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupName(),
-                        payload.getAdjustment(), payload.getPrivateIds(), payload.getDetails());
+                clusterDownscaleService.clusterDownscaleStarted(context.getStackId(), payload.getHostGroupsWithAdjustment(),
+                        payload.getHostGroupsWithPrivateIds(), payload.getDetails());
+                CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(context.getStackId(), payload.getHostGroupsWithAdjustment(),
+                        payload.getHostGroupsWithPrivateIds(), payload.getDetails());
                 sendEvent(context, request.selector(), request);
             }
         };
@@ -83,7 +83,7 @@ public class ClusterDownscaleActions {
                     Boolean repair = (Boolean) variables.get(REPAIR);
                     Stack stack = stackService.getByIdWithListsInTransaction(context.getStackId());
                     DecommissionRequest decommissionRequest =
-                            new DecommissionRequest(context.getStackId(), payload.getHostGroupName(), payload.getPrivateIds(),
+                            new DecommissionRequest(context.getStackId(), payload.getHostGroupNames(), payload.getPrivateIds(),
                                     payload.getRequest().getDetails());
                     if (repair && stack.hasCustomHostname()) {
                         LOGGER.debug("Cluster decommission state identified that the current action is a repair, hence we're going that way from now.");
@@ -93,8 +93,8 @@ public class ClusterDownscaleActions {
                     }
                 } else {
                     LOGGER.info("Handler wasn't able to collect any candidate [stackId:{}, host group name: {}] for downscaling, therefore we're handling " +
-                            "it as a success (since nothing to decommission)", context.getStackId(), payload.getHostGroupName());
-                    event = new RemoveHostsSuccess(context.getStackId(), payload.getHostGroupName(), emptySet());
+                            "it as a success (since nothing to decommission)", context.getStackId(), payload.getHostGroupNames());
+                    event = new RemoveHostsSuccess(context.getStackId(), payload.getHostGroupNames(), emptySet());
                 }
                 sendEvent(context, event.selector(), event);
             }
@@ -106,7 +106,7 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<>(DecommissionResult.class) {
             @Override
             protected void doExecute(ClusterViewContext context, DecommissionResult payload, Map<Object, Object> variables) {
-                RemoveHostsRequest request = new RemoveHostsRequest(context.getStackId(), payload.getHostGroupName(), payload.getHostNames());
+                RemoveHostsRequest request = new RemoveHostsRequest(context.getStackId(), payload.getHostGroupNames(), payload.getHostNames());
                 sendEvent(context, request.selector(), request);
             }
         };
@@ -120,7 +120,7 @@ public class ClusterDownscaleActions {
                 if (isEmpty(payload.getHostNames())) {
                     clusterDownscaleService.finalizeClusterScaleDown(context.getStackId(), null);
                 } else {
-                    clusterDownscaleService.finalizeClusterScaleDown(context.getStackId(), payload.getHostGroupName());
+                    clusterDownscaleService.finalizeClusterScaleDown(context.getStackId(), payload.getHostGroups());
                 }
                 sendEvent(context);
             }
@@ -150,7 +150,7 @@ public class ClusterDownscaleActions {
         return new AbstractClusterAction<>(RemoveHostsFailed.class) {
             @Override
             protected void doExecute(ClusterViewContext context, RemoveHostsFailed payload, Map<Object, Object> variables) {
-                clusterDownscaleService.updateMetadataStatus(payload);
+                clusterDownscaleService.updateMetadataStatusToFailed(payload);
                 sendEvent(context, FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getException()));
             }
         };

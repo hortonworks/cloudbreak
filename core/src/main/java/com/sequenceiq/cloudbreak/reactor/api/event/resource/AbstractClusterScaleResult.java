@@ -1,10 +1,11 @@
 package com.sequenceiq.cloudbreak.reactor.api.event.resource;
 
+import java.util.Set;
+
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
-import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 
-public abstract class AbstractClusterScaleResult<R extends AbstractClusterScaleRequest> extends ClusterPlatformResult<R> implements HostGroupPayload {
+public abstract class AbstractClusterScaleResult<R extends AbstractClusterScaleRequest> extends ClusterPlatformResult<R> {
 
     protected AbstractClusterScaleResult(R request) {
         super(request);
@@ -18,8 +19,7 @@ public abstract class AbstractClusterScaleResult<R extends AbstractClusterScaleR
         super(status, statusReason, errorDetails, request);
     }
 
-    @Override
-    public String getHostGroupName() {
-        return getRequest().getHostGroupName();
+    public Set<String> getHostGroupNames() {
+        return getRequest().getHostGroupNames();
     }
 }

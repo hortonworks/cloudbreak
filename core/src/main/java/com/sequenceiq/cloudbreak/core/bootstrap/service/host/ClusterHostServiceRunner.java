@@ -340,13 +340,12 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    public NodeReachabilityResult addClusterServices(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean repair) {
+    public NodeReachabilityResult addClusterServices(Long stackId, Map<String, Integer> hostGroupWithAdjustment, boolean repair) {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();
-        Map<String, String> candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
+        Map<String, String> candidates = collectUpscaleCandidates(cluster.getId(), hostGroupWithAdjustment);
         Set<String> gatewayHosts = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
-                .map(InstanceMetaData::getDiscoveryFQDN)
-                .collect(Collectors.toSet());
+                .map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
         boolean candidatesContainGatewayNode = candidates.keySet().stream().anyMatch(gatewayHosts::contains);
         NodeReachabilityResult nodeReachabilityResult;
         if (!repair && !candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
@@ -867,20 +866,23 @@ public class ClusterHostServiceRunner {
         servicePillar.put("docker", new SaltPillarProperties("/docker/init.sls", singletonMap("docker", dockerMap)));
     }
 
-    private Map<String, String> collectUpscaleCandidates(Long clusterId, String hostGroupName, Integer adjustment) {
-        HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupName)
-                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
-        if (hostGroup.getInstanceGroup() != null) {
-            Long instanceGroupId = hostGroup.getInstanceGroup().getId();
-            Map<String, String> hostNames = new HashMap<>();
-            instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
-                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
-                    .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
-                    .limit(adjustment.longValue())
-                    .forEach(im -> hostNames.put(im.getDiscoveryFQDN(), im.getPrivateIp()));
-            return hostNames;
+    private Map<String, String> collectUpscaleCandidates(Long clusterId, Map<String, Integer> hostGroupWithAdjustment) {
+        Map<String, String> hostNames = new HashMap<>();
+        for (Map.Entry<String, Integer> entry : hostGroupWithAdjustment.entrySet()) {
+            String hostGroupName = entry.getKey();
+            Integer adjustment = entry.getValue();
+            HostGroup hostGroup = hostGroupService.findHostGroupInClusterByName(clusterId, hostGroupName)
+                    .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
+            if (hostGroup.getInstanceGroup() != null) {
+                Long instanceGroupId = hostGroup.getInstanceGroup().getId();
+                instanceMetaDataService.findUnusedHostsInInstanceGroup(instanceGroupId).stream()
+                        .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                        .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
+                        .limit(adjustment.longValue())
+                        .forEach(im -> hostNames.put(im.getDiscoveryFQDN(), im.getPrivateIp()));
+            }
         }
-        return Collections.emptyMap();
+        return hostNames;
     }
 
     private void putIfNotNull(Map<String, String> context, Object variable, String key) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.repository;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -26,6 +28,9 @@ public interface InstanceGroupRepository extends CrudRepository<InstanceGroup, L
 
     @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName = :groupName")
     Optional<InstanceGroup> findOneByStackIdAndGroupName(@Param("stackId") Long stackId, @Param("groupName") String groupName);
+
+    @Query("SELECT i from InstanceGroup i WHERE i.stack.id = :stackId AND i.groupName IN :groupNames")
+    List<InstanceGroup> findByStackIdAndInstanceGroupNames(@Param("stackId") Long stackId, @Param("groupNames") Collection<String> groupNames);
 
     Set<InstanceGroup> findBySecurityGroup(SecurityGroup securityGroup);
 
