@@ -33,6 +33,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentCl
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentEditRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLoadBalancerUpdateRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.aws.UpdateAwsDiskEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
@@ -124,6 +125,15 @@ public interface EnvironmentEndpoint {
             @Valid UpdateAzureResourceEncryptionParametersRequest request);
 
     @PUT
+    @Path("/name/{name}/update_aws_disk_encryption_parameters")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPDATE_AWS_DISK_ENCRYPTION_PARAMETERS_BY_NAME,
+            produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+        nickname = "UpdateAwsDiskEncryptionParametersV1ByName")
+    DetailedEnvironmentResponse updateAwsDiskEncryptionParametersByEnvironmentName(@PathParam("name") String environmentName,
+            @Valid UpdateAwsDiskEncryptionParametersRequest request);
+
+    @PUT
     @Path("/name/{name}/change_telemetry_features")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = EnvironmentOpDescription.CHANGE_TELEMETRY_FEATURES_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
@@ -185,6 +195,15 @@ public interface EnvironmentEndpoint {
             nickname = "UpdateAzureResourceEncryptionParametersV1ByCrn")
     DetailedEnvironmentResponse updateAzureResourceEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
     @PathParam("crn") String crn, @Valid UpdateAzureResourceEncryptionParametersRequest request);
+
+    @PUT
+    @Path("/crn/{crn}/update_aws_disk_encryption_parameters")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPDATE_AWS_DISK_ENCRYPTION_PARAMETERS_BY_CRN,
+            produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+        nickname = "updateAwsDiskEncryptionParametersV1ByCrn")
+    DetailedEnvironmentResponse updateAwsDiskEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @PathParam("crn") String crn, @Valid UpdateAwsDiskEncryptionParametersRequest request);
 
     @PUT
     @Path("/crn/{crn}/change_telemetry_features")

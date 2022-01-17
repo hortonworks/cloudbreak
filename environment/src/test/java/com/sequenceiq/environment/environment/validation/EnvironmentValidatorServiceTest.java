@@ -47,8 +47,6 @@ import com.sequenceiq.environment.environment.validation.validators.EncryptionKe
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
-import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
-import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -384,51 +382,20 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void shouldFailIfEncryptionKeyArnSpecifiedAndEntitlementDisabled() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("AWS")
-                .withParameters(ParametersDto.builder()
-                    .withAwsParameters(AwsParametersDto.builder()
-                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
-                            .withEncryptionKeyArn("dummy-key-arn")
-                        .build())
-                    .build())
-                .build())
-            .build();
+        String encryptionKeyArn = "dummy-key-arn";
         when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(any())).thenReturn(false);
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, ACCOUNT_ID);
         assertTrue(validationResult.hasError());
     }
 
     @Test
-    void testToValidateEncryptionKeyArnNotSpecified() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("AWS")
-                .build();
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(creationDto);
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
     void testValidateEncryptionKeyArnSpecifiedAndEntitlementEnabled() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("AWS")
-                .withParameters(ParametersDto.builder()
-                        .withAwsParameters(AwsParametersDto.builder()
-                                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
-                                        .withEncryptionKeyArn("dummy-key-arn")
-                                        .build())
-                                .build())
-                        .build())
-                .build();
+        String encryptionKeyArn = "dummy-key-arn";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         when(encryptionKeyArnValidator.validateEncryptionKeyArn(any())).thenReturn(validationResultBuilder.build());
         when(entitlementService.isAWSDiskEncryptionWithCMKEnabled(any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateEncryptionKeyArn(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKeyArn(encryptionKeyArn, ACCOUNT_ID);
         assertFalse(validationResult.hasError());
-
     }
 
     @Test

@@ -193,8 +193,15 @@ public class EnvironmentCreationService {
             validationBuilder.merge(validatorService.validateEncryptionKey(creationDto));
         }
         if (AWS.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            validationBuilder.merge(validatorService.validateEncryptionKeyArn(creationDto));
+            String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
+                    .map(paramsDto -> paramsDto.getAwsParametersDto())
+                    .map(awsParamsDto -> awsParamsDto.getAwsDiskEncryptionParametersDto())
+                    .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
+            if (encryptionKeyArn != null) {
+                validationBuilder.merge(validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.getAccountId()));
+            }
         }
+
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
         validationBuilder.merge(parentChildValidation);
         EnvironmentTelemetry environmentTelemetry = creationDto.getTelemetry();
