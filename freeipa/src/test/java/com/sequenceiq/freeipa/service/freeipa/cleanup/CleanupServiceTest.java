@@ -12,6 +12,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,12 +24,16 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.util.Pair;
 
+import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
+import com.sequenceiq.freeipa.client.FreeIpaErrorCodes;
 import com.sequenceiq.freeipa.client.model.Cert;
+import com.sequenceiq.freeipa.client.model.DnsRecord;
+import com.sequenceiq.freeipa.client.model.DnsZone;
 import com.sequenceiq.freeipa.client.model.User;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.kerberos.KerberosConfigService;
@@ -482,6 +487,50 @@ public class CleanupServiceTest {
         assertEquals(hosts, result.getFirst());
         assertTrue(result.getSecond().isEmpty());
         verify(freeIpaDeletionPollerService, times(1)).pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt());
+    }
+
+    @Test
+    public void testRemoveDnsEntries() throws FreeIpaClientException {
+        FreeIpaClient client = mock(FreeIpaClient.class);
+        when(freeIpaClientFactory.getFreeIpaClientForStackId(STACK_ID)).thenReturn(client);
+        DnsZone dnsZone = new DnsZone();
+        String domain = "test.com";
+        dnsZone.setIdnsname(domain);
+        DnsZone reverseZone = new DnsZone();
+        reverseZone.setIdnsname("0.10.in-addr.arpa.");
+        DnsZone disappearingZone = new DnsZone();
+        disappearingZone.setIdnsname("disappear");
+        when(client.findAllDnsZone()).thenReturn(Set.of(dnsZone, reverseZone, disappearingZone));
+        DnsRecord deleteMe = new DnsRecord();
+        deleteMe.setIdnsname("deleteMe");
+        deleteMe.setArecord(List.of("ignored"));
+        DnsRecord notFound = new DnsRecord();
+        notFound.setIdnsname("notfound");
+        notFound.setArecord(List.of("ignored"));
+        DnsRecord failed = new DnsRecord();
+        failed.setIdnsname("failed");
+        failed.setArecord(List.of("ignored"));
+        DnsRecord ptrRecord = new DnsRecord();
+        ptrRecord.setIdnsname("1.0");
+        ptrRecord.setPtrrecord(List.of("ptrRecord"));
+        when(client.findAllDnsRecordInZone(dnsZone.getIdnsname())).thenReturn(Set.of(deleteMe, notFound, failed));
+        when(client.deleteDnsRecord(failed.getIdnsname(), domain)).thenThrow(new FreeIpaClientException("delete failed"));
+        when(client.deleteDnsRecord(notFound.getIdnsname(), domain))
+                .thenThrow(new FreeIpaClientException("Not found", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)));
+        when(client.findAllDnsRecordInZone(reverseZone.getIdnsname())).thenReturn(Set.of(ptrRecord));
+        when(client.findAllDnsRecordInZone(disappearingZone.getIdnsname()))
+                .thenThrow(new FreeIpaClientException("Not found zone", new JsonRpcClientException(FreeIpaErrorCodes.NOT_FOUND.getValue(), "Not found", null)));
+
+        Pair<Set<String>, Map<String, String>> result = cleanupService.removeDnsEntries(STACK_ID,
+                Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), failed.getIdnsname(), "ptrRecord"),
+                Set.of("10.0.0.1", "10.1.0.1"), domain);
+
+        verify(client).deleteDnsRecord(deleteMe.getIdnsname(), domain);
+        assertTrue(result.getFirst().containsAll(Set.of(deleteMe.getIdnsname(), notFound.getIdnsname(), "10.0.0.1")));
+        assertTrue(result.getSecond().containsKey(failed.getIdnsname()));
+        assertEquals("delete failed", result.getSecond().get(failed.getIdnsname()));
+        assertEquals(1, result.getSecond().size());
+        assertEquals(3, result.getFirst().size());
     }
 
     private Cert createCert(String subject, long serialNumber, boolean revoked) {
