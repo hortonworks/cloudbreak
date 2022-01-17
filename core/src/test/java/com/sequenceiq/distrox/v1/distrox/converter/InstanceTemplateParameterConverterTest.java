@@ -35,6 +35,8 @@ class InstanceTemplateParameterConverterTest {
 
     private static final String ENCRYPTION_KEY = "encryptionKey";
 
+    private static final String ENCRYPTION_KEY_URL = "encryptionKeyUrl";
+
     private static final String DATAHUB_ENCRYPTION_KEY = "awsDatahubEncryptionKey";
 
     private  static final String ENVIRONMENT_ENCRYPTION_KEY = "awsEnvironmentEncryptionKey";
@@ -50,7 +52,7 @@ class InstanceTemplateParameterConverterTest {
     void convertTestAzureInstanceTemplateV1ParametersToAzureInstanceTemplateV4ParametersWhenBasicFields() {
         AzureInstanceTemplateV1Parameters source = new AzureInstanceTemplateV1Parameters();
         source.setPrivateId(PRIVATE_ID);
-        DetailedEnvironmentResponse environment = createDetailedEnvironmentResponseForAzureEncryption(false, false, null);
+        DetailedEnvironmentResponse environment = createDetailedEnvironmentResponseForAzureEncryption(false, false, null, null);
 
         AzureInstanceTemplateV4Parameters azureInstanceTemplateV4Parameters = underTest.convert(source, environment);
 
@@ -62,21 +64,24 @@ class InstanceTemplateParameterConverterTest {
 
     static Object[][] convertTestAzureInstanceTemplateV1ParametersToAzureInstanceTemplateV4ParametersWhenEncryptionDataProvider() {
         return new Object[][]{
-                // testCaseName withAzure withResourceEncryption diskEncryptionSetId expectedEncryption expectedDiskEncryptionSetId
-                {"withAzure=false", false, false, null, false, null},
-                {"withAzure=true, withResourceEncryption=false", true, false, null, false, null},
-                {"withAzure=true, withResourceEncryption=true, diskEncryptionSetId=null", true, true, null, false, null},
-                {"withAzure=true, withResourceEncryption=true, diskEncryptionSetId=DISK_ENCRYPTION_SET_ID", true, true, DISK_ENCRYPTION_SET_ID, true,
-                        DISK_ENCRYPTION_SET_ID},
+                // testCaseName withAzure withResourceEncryption diskEncryptionSetId encryptionKeyUrl expectedEncryption expectedDiskEncryptionSetId
+                // expectedEncryptionKeyUrl
+                {"withAzure=false", false, false, null, null, false, null, null},
+                {"withAzure=true, withResourceEncryption=false", true, false, null, null, false, null, null},
+                {"withAzure=true, withResourceEncryption=true, diskEncryptionSetId=null", true, true, null, null, false, null, null},
+                {"withAzure=true, withResourceEncryption=true, diskEncryptionSetId=DISK_ENCRYPTION_SET_ID, encryptionKeyUrl=ENCRYPTION_KEY_URL", true, true,
+                        DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY_URL, true, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY_URL},
         };
     }
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("convertTestAzureInstanceTemplateV1ParametersToAzureInstanceTemplateV4ParametersWhenEncryptionDataProvider")
     void convertTestAzureInstanceTemplateV1ParametersToAzureInstanceTemplateV4ParametersWhenEncryption(String testCaseName, boolean withAzure,
-            boolean withResourceEncryption, String diskEncryptionSetId, boolean expectedEncryption, String expectedDiskEncryptionSetId) {
+            boolean withResourceEncryption, String diskEncryptionSetId, String encryptionKeyUrl, boolean expectedEncryption,
+            String expectedDiskEncryptionSetId, String expectedEncryptionKeyUrl) {
         AzureInstanceTemplateV1Parameters source = new AzureInstanceTemplateV1Parameters();
-        DetailedEnvironmentResponse environment = createDetailedEnvironmentResponseForAzureEncryption(withAzure, withResourceEncryption, diskEncryptionSetId);
+        DetailedEnvironmentResponse environment = createDetailedEnvironmentResponseForAzureEncryption(withAzure, withResourceEncryption,
+                diskEncryptionSetId, encryptionKeyUrl);
 
         AzureInstanceTemplateV4Parameters azureInstanceTemplateV4Parameters = underTest.convert(source, environment);
 
@@ -87,13 +92,14 @@ class InstanceTemplateParameterConverterTest {
             assertThat(encryption).isNotNull();
             assertThat(encryption.getType()).isEqualTo(EncryptionType.CUSTOM);
             assertThat(encryption.getDiskEncryptionSetId()).isEqualTo(expectedDiskEncryptionSetId);
+            assertThat(encryption.getKey()).isEqualTo(expectedEncryptionKeyUrl);
         } else {
             assertThat(encryption).isNull();
         }
     }
 
     private DetailedEnvironmentResponse createDetailedEnvironmentResponseForAzureEncryption(boolean withAzure, boolean withResourceEncryption,
-            String diskEncryptionSetId) {
+            String diskEncryptionSetId, String encryptionKeyUrl) {
         DetailedEnvironmentResponse environment = new DetailedEnvironmentResponse();
         if (withAzure) {
             AzureEnvironmentParameters parameters = new AzureEnvironmentParameters();
@@ -101,6 +107,7 @@ class InstanceTemplateParameterConverterTest {
             if (withResourceEncryption) {
                 AzureResourceEncryptionParameters encryption = new AzureResourceEncryptionParameters();
                 parameters.setResourceEncryptionParameters(encryption);
+                encryption.setEncryptionKeyUrl(encryptionKeyUrl);
                 encryption.setDiskEncryptionSetId(diskEncryptionSetId);
             }
         }
