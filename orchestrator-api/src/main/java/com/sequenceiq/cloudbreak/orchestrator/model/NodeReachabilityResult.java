@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.orchestrator.model;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,10 +36,18 @@ public class NodeReachabilityResult {
                 .collect(Collectors.toSet());
     }
 
+    public Map<String, String> getReachableHostsForHostGroups() {
+        return reachableNodes.stream().collect(Collectors.toMap(Node::getHostGroup, Node::getHostname));
+    }
+
     public Set<String> getUnreachableHosts() {
         return unreachableNodes.stream()
                 .map(node -> node.getHostname())
                 .collect(Collectors.toSet());
+    }
+
+    public Map<String, String> getUnReachableHostsForHostGroups() {
+        return unreachableNodes.stream().collect(Collectors.toMap(Node::getHostGroup, Node::getHostname));
     }
 
     @Override

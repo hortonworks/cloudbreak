@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import org.junit.Test;
@@ -105,13 +106,14 @@ public class CollectDownscaleCandidatesHandlerTest {
     }
 
     private Event<CollectDownscaleCandidatesRequest> generateTestDataEvent(Set<Long> privateIds) {
-        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(STACK_ID, HOST_GROUP_NAME, SCALING_ADJUSTMENT, privateIds,
-                new ClusterDownscaleDetails());
+        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(STACK_ID, Map.of(HOST_GROUP_NAME, SCALING_ADJUSTMENT),
+                Map.of(HOST_GROUP_NAME, privateIds), new ClusterDownscaleDetails());
         return new Event<>(request);
     }
 
     private Event<CollectDownscaleCandidatesRequest> generateTestDataEvent(Set<Long> privateIds, ClusterDownscaleDetails details) {
-        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(STACK_ID, HOST_GROUP_NAME, SCALING_ADJUSTMENT, privateIds, details);
+        CollectDownscaleCandidatesRequest request = new CollectDownscaleCandidatesRequest(STACK_ID, Map.of(HOST_GROUP_NAME, SCALING_ADJUSTMENT),
+                Map.of(HOST_GROUP_NAME, privateIds), details);
         return new Event<>(request);
     }
 }

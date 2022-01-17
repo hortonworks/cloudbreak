@@ -74,9 +74,9 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SINGLE_MASTER_REPAIR_FINISHED);
     }
 
-    void upscalingClusterManager(long stackId, String hostGroupName) {
-        clusterService.updateClusterStatusByStackId(stackId, UPSCALE_IN_PROGRESS, String.format("Scaling up host group: %s", hostGroupName));
-        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_UP, hostGroupName);
+    void upscalingClusterManager(long stackId, Set<String> hostGroups) {
+        clusterService.updateClusterStatusByStackId(stackId, UPSCALE_IN_PROGRESS, String.format("Scaling up host group: %s", hostGroups));
+        flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_UP, String.join(", ", hostGroups));
     }
 
     void reRegisterWithClusterProxy(long stackId) {
@@ -117,13 +117,13 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), resourceEvent);
     }
 
-    void clusterUpscaleFinished(StackView stackView, String hostgroupName, boolean repair) {
-        int numOfFailedHosts = updateMetadata(stackView, hostgroupName, repair);
+    void clusterUpscaleFinished(StackView stackView, Set<String> hostGroups, boolean repair) {
+        int numOfFailedHosts = updateMetadata(stackView, hostGroups, repair);
         boolean success = numOfFailedHosts == 0;
         if (success) {
             LOGGER.debug("Cluster upscaled successfully");
             clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.AVAILABLE);
-            flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALED_UP, hostgroupName);
+            flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALED_UP, String.join(", ", hostGroups));
         } else {
             LOGGER.debug("Cluster upscale (partially) failed. {} hosts failed to upscale", numOfFailedHosts);
             clusterService.updateClusterStatusByStackId(stackView.getId(), DetailedStackStatus.UPSCALE_FAILED);
@@ -139,16 +139,18 @@ class ClusterUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_FAILED, "added to", errorDetails.getMessage());
     }
 
-    private int updateMetadata(StackView stackView, String hostGroupName, boolean repair) {
+    private int updateMetadata(StackView stackView, Set<String> hostGroups, boolean repair) {
         LOGGER.info("Start update metadata");
-        Optional<HostGroup> hostGroupOptional = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroupName);
-        if (hostGroupOptional.isPresent()) {
-            InstanceGroup instanceGroup = hostGroupOptional.get().getInstanceGroup();
-            Set<InstanceMetaData> notDeletedInstanceMetaDataSet = instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet();
-            return updateMissingHostsMetaDatas(notDeletedInstanceMetaDataSet, instanceGroup, repair);
-        } else {
-            return 0;
+        int failedInstances = 0;
+        for (String hostGroup : hostGroups) {
+            Optional<HostGroup> hostGroupOptional = hostGroupService.getByClusterIdAndName(stackView.getClusterView().getId(), hostGroup);
+            if (hostGroupOptional.isPresent()) {
+                InstanceGroup instanceGroup = hostGroupOptional.get().getInstanceGroup();
+                Set<InstanceMetaData> notDeletedInstanceMetaDataSet = instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet();
+                failedInstances += updateMissingHostsMetaDatas(notDeletedInstanceMetaDataSet, instanceGroup, repair);
+            }
         }
+        return failedInstances;
     }
 
     private int updateMissingHostsMetaDatas(Collection<InstanceMetaData> instanceMetaData, InstanceGroup instanceGroup, boolean repair) {

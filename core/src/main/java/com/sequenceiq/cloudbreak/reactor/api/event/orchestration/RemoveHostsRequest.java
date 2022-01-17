@@ -7,8 +7,8 @@ import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScale
 public class RemoveHostsRequest extends AbstractClusterScaleRequest {
     private Set<String> hostNames;
 
-    public RemoveHostsRequest(Long stackId, String hostGroupName, Set<String> hostNames) {
-        super(stackId, hostGroupName);
+    public RemoveHostsRequest(Long stackId, Set<String> hostGroups, Set<String> hostNames) {
+        super(stackId, hostGroups);
         this.hostNames = hostNames;
     }
 

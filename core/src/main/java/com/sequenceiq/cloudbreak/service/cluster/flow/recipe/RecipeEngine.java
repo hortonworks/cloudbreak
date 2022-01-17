@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.checkedMeasure;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -72,20 +71,19 @@ public class RecipeEngine {
         LOGGER.info("Upload recipes finished successfully for stack with name {}", stack.getName());
     }
 
-    public void uploadUpscaleRecipes(Stack stack, HostGroup hostGroup, Set<HostGroup> hostGroups)
+    public void uploadUpscaleRecipes(Stack stack, Set<HostGroup> targetHostGroups, Set<HostGroup> allHostGroups)
             throws CloudbreakException {
-        Set<HostGroup> hgs = Collections.singleton(hostGroup);
-        if (recipesFound(hgs)) {
-            Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, hostGroups);
+        if (recipesFound(targetHostGroups)) {
+            Map<HostGroup, List<RecipeModel>> recipeModels = recipeTemplateService.createRecipeModels(stack, allHostGroups);
             Map<HostGroup, Set<GeneratedRecipe>> generatedRecipeTemplates = recipeTemplateService.createGeneratedRecipes(recipeModels,
-                    getRecipeNameMap(hostGroups), stack.getWorkspace());
-            if (hostGroup.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY) {
+                    getRecipeNameMap(allHostGroups), stack.getWorkspace());
+            if (targetHostGroups.stream().anyMatch(hostGroup -> hostGroup.getInstanceGroup().getInstanceGroupType() == InstanceGroupType.GATEWAY)) {
                 orchestratorRecipeExecutor.uploadRecipes(stack, recipeModels);
             }
-            measure(() -> recipeTemplateService.updateAllGeneratedRecipes(Set.of(hostGroup), generatedRecipeTemplates), LOGGER,
+            measure(() -> recipeTemplateService.updateAllGeneratedRecipes(targetHostGroups, generatedRecipeTemplates), LOGGER,
                     "Updating all the generated recipes took {} ms");
         } else {
-            LOGGER.debug("Not found any recipes for host group '{}'. No recipe uploaad will happen during upscale.", hostGroup.getName());
+            LOGGER.debug("Not found any recipes for host groups '{}'. No recipe uploaad will happen during upscale.", targetHostGroups);
         }
     }
 

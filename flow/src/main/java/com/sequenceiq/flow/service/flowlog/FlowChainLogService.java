@@ -103,6 +103,7 @@ public class FlowChainLogService {
                     .findFirst()
                     .get();
             LOGGER.debug("Checking if chain with id {} has any event in it's queue", latestFlowChain.getFlowChainId());
+            LOGGER.trace("Chain string in db: {}", latestFlowChain.getChain());
             Queue<Selectable> chain = (Queue<Selectable>) JsonReader.jsonToJava(latestFlowChain.getChain());
             return !chain.isEmpty();
         });

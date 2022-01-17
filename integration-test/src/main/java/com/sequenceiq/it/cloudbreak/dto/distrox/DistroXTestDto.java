@@ -66,6 +66,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private Optional<String> removableInstanceId = Optional.empty();
 
+    private Optional<List<String>> repairableInstanceIds = Optional.empty();
+
     private String initiatorUserCrn;
 
     @Inject
@@ -348,4 +350,13 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     public Optional<String> getRemovableInstanceId() {
         return removableInstanceId;
     }
+
+    public void setRepairableInstanceIds(List<String> repairableInstanceIds) {
+        this.repairableInstanceIds = Optional.of(repairableInstanceIds);
+    }
+
+    public Optional<List<String>> getRepairableInstanceIds() {
+        return repairableInstanceIds;
+    }
+
 }

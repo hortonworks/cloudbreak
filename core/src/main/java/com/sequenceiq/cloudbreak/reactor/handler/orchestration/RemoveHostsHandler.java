@@ -78,9 +78,9 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
             } else {
                 LOGGER.warn("Primary gateway is not reachable, can't remove hosts from orchestrator");
             }
-            result = new RemoveHostsSuccess(request.getResourceId(), request.getHostGroupName(), hostNames);
+            result = new RemoveHostsSuccess(request.getResourceId(), request.getHostGroupNames(), hostNames);
         } catch (Exception e) {
-            result = new RemoveHostsFailed(removeHostsRequestEvent.getData().getResourceId(), e, request.getHostGroupName(), hostNames);
+            result = new RemoveHostsFailed(removeHostsRequestEvent.getData().getResourceId(), e, request.getHostGroupNames(), hostNames);
         }
         eventBus.notify(result.selector(), new Event<>(removeHostsRequestEvent.getHeaders(), result));
     }

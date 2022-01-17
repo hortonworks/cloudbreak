@@ -1,21 +1,34 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
-import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 
 import reactor.rx.Promise;
 
-public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPayload {
-    private final String hostGroup;
+public class ClusterScaleTriggerEvent extends StackEvent {
 
-    private final Integer adjustment;
+    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
+    @Deprecated
+    private String hostGroup;
 
-    private final Set<String> hostNames;
+    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
+    @Deprecated
+    private Integer adjustment;
+
+    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
+    @Deprecated
+    private Set<String> hostNames;
+
+    private Map<String, Set<Long>> hostGroupsWithPrivateIds;
+
+    private Map<String, Integer> hostGroupsWithAdjustment;
+
+    private Map<String, Set<String>> hostGroupsWithHostNames;
 
     private final boolean singlePrimaryGateway;
 
@@ -27,12 +40,13 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
 
     private final ClusterManagerType clusterManagerType;
 
-    public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Set<String> hostNames, boolean singlePrimaryGateway,
+    public ClusterScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
+            Map<String, Set<Long>> hostGroupsWithPrivateIds, Map<String, Set<String>> hostGroupsWithHostNames, boolean singlePrimaryGateway,
             boolean kerberosSecured, boolean singleNodeCluster, boolean restartServices, ClusterManagerType clusterManagerType) {
         super(selector, stackId);
-        this.hostGroup = hostGroup;
-        this.adjustment = adjustment;
-        this.hostNames = hostNames;
+        this.hostGroupsWithAdjustment = hostGroupsWithAdjustment;
+        this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;
+        this.hostGroupsWithHostNames = hostGroupsWithHostNames;
         this.singlePrimaryGateway = singlePrimaryGateway;
         this.kerberosSecured = kerberosSecured;
         this.singleNodeCluster = singleNodeCluster;
@@ -40,15 +54,18 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         this.clusterManagerType = clusterManagerType;
     }
 
-    public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment) {
-        this(selector, stackId, hostGroup, adjustment, Collections.emptySet(), false, false, false, false, ClusterManagerType.CLOUDERA_MANAGER);
+    public ClusterScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
+            Map<String, Set<Long>> hostGroupsWithPrivateIds, Map<String, Set<String>> hostGroupsWithHostNames) {
+        this(selector, stackId, hostGroupsWithAdjustment, hostGroupsWithPrivateIds, hostGroupsWithHostNames, false, false, false, false,
+                ClusterManagerType.CLOUDERA_MANAGER);
     }
 
-    public ClusterScaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Promise<AcceptResult> accepted) {
+    public ClusterScaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupsWithAdjustment,
+            Map<String, Set<Long>> hostGroupsWithPrivateIds, Map<String, Set<String>> hostGroupsWithHostNames, Promise<AcceptResult> accepted) {
         super(selector, stackId, accepted);
-        this.hostGroup = hostGroup;
-        this.adjustment = adjustment;
-        hostNames = Collections.emptySet();
+        this.hostGroupsWithAdjustment = hostGroupsWithAdjustment;
+        this.hostGroupsWithPrivateIds = hostGroupsWithPrivateIds;
+        this.hostGroupsWithHostNames = hostGroupsWithHostNames;
         singlePrimaryGateway = false;
         kerberosSecured = false;
         singleNodeCluster = false;
@@ -56,17 +73,37 @@ public class ClusterScaleTriggerEvent extends StackEvent implements HostGroupPay
         clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
-    @Override
-    public String getHostGroupName() {
-        return hostGroup;
+    public Map<String, Set<Long>> getHostGroupsWithPrivateIds() {
+        if (hostGroupsWithPrivateIds == null) {
+            hostGroupsWithPrivateIds = Collections.emptyMap();
+        }
+        return hostGroupsWithPrivateIds;
     }
 
-    public Integer getAdjustment() {
-        return adjustment;
+    public Map<String, Integer> getHostGroupsWithAdjustment() {
+        if (hostGroupsWithAdjustment == null) {
+            if (hostGroup != null && adjustment != null) {
+                hostGroupsWithAdjustment = Collections.singletonMap(hostGroup, adjustment);
+            } else {
+                hostGroupsWithAdjustment = Collections.emptyMap();
+            }
+        }
+        return hostGroupsWithAdjustment;
     }
 
-    public Set<String> getHostNames() {
-        return hostNames;
+    public Map<String, Set<String>> getHostGroupsWithHostNames() {
+        if (hostGroupsWithHostNames == null) {
+            if (hostGroup != null && hostNames != null && !hostNames.isEmpty()) {
+                hostGroupsWithHostNames = Collections.singletonMap(hostGroup, hostNames);
+            } else {
+                hostGroupsWithHostNames = Collections.emptyMap();
+            }
+        }
+        return hostGroupsWithHostNames;
+    }
+
+    public Set<String> getHostGroups() {
+        return getHostGroupsWithAdjustment().keySet();
     }
 
     public boolean isKerberosSecured() {

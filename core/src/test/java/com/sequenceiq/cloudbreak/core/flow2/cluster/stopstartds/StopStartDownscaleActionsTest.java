@@ -145,7 +145,7 @@ public class StopStartDownscaleActionsTest {
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleTriggerEvent payload = new StopStartDownscaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME_ACTIONABLE,
-                instanceIdsToRemove, ClusterManagerType.CLOUDERA_MANAGER);
+                instanceIdsToRemove);
 
         mockStackEtc();
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);

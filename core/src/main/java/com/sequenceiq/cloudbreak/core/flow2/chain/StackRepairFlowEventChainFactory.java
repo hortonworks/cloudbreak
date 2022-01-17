@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.core.flow2.chain;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedDeque;
@@ -43,8 +44,8 @@ public class StackRepairFlowEventChainFactory implements FlowEventChainFactory<S
         for (String hostGroupName : unhealthyInstances.getHostGroups()) {
             List<String> instances = unhealthyInstances.getInstancesForGroup(hostGroupName);
             flowEventChain.add(
-                    new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getResourceId(), hostGroupName,
-                            instances.size(), ScalingType.UPSCALE_TOGETHER, NetworkScaleDetails.getEmpty(),
+                    new StackAndClusterUpscaleTriggerEvent(fullUpscaleTriggerEvent, event.getResourceId(), Collections.singletonMap(hostGroupName,
+                            instances.size()), ScalingType.UPSCALE_TOGETHER, NetworkScaleDetails.getEmpty(),
                             new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) instances.size()), variant.getVariant().value()));
         }
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);

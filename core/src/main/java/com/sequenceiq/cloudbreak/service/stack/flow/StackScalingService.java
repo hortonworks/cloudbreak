@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -35,28 +35,24 @@ public class StackScalingService {
     @Inject
     private Clock clock;
 
-    public int updateRemovedResourcesState(Collection<String> instanceIds, InstanceGroup instanceGroup) throws TransactionService.TransactionExecutionException {
-        return transactionService.required(() -> {
-            int nodesRemoved = 0;
-            List<InstanceMetaData> notTerminatedInstanceMetadataSet = instanceMetaDataService.findAliveInstancesInInstanceGroup(instanceGroup.getId());
+    public void updateInstancesToTerminated(Collection<Long> privateIds, long stackId) throws TransactionService.TransactionExecutionException {
+        transactionService.required(() -> {
+            Set<InstanceMetaData> notTerminatedInstanceMetadataSet = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(stackId);
             for (InstanceMetaData instanceMetaData : notTerminatedInstanceMetadataSet) {
-                if (instanceIds.contains(instanceMetaData.getInstanceId())) {
+                if (privateIds.contains(instanceMetaData.getPrivateId())) {
                     instanceMetaData.setTerminationDate(clock.getCurrentTimeMillis());
                     instanceMetaData.setInstanceStatus(InstanceStatus.TERMINATED);
-                    nodesRemoved++;
                 }
             }
             instanceMetaDataService.saveAll(notTerminatedInstanceMetadataSet);
-            int nodeCount = instanceGroup.getNodeCount() - nodesRemoved;
-            LOGGER.debug("Successfully terminated metadata of instances '{}' in stack.", instanceIds);
-            return nodeCount;
+            LOGGER.debug("Successfully terminated metadata of instances '{}' in stack.", privateIds);
         });
     }
 
-    public Map<String, String> getUnusedInstanceIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
+    public Set<Long> getUnusedPrivateIds(String instanceGroupName, Integer scalingAdjustment, Stack stack) {
         if (scalingAdjustment > 0) {
             LOGGER.error("Scaling adjustment shouldn't be a positive number, we are trying to downscaling..");
-            return new HashMap<>();
+            return Collections.emptySet();
         }
         InstanceGroup instanceGroup = stack.getInstanceGroupByInstanceGroupName(instanceGroupName);
         List<InstanceMetaData> unattachedInstanceMetaDatas = new ArrayList<>(instanceGroup.getUnattachedInstanceMetaDataSet());
@@ -65,7 +61,8 @@ public class StackScalingService {
                 .filter(instanceMetaData -> instanceMetaData.getInstanceId() != null && instanceMetaData.getDiscoveryFQDN() != null)
                 .sorted(Comparator.comparing(InstanceMetaData::getStartDate))
                 .limit(Math.abs(scalingAdjustment))
-                .collect(Collectors.toMap(InstanceMetaData::getInstanceId, InstanceMetaData::getDiscoveryFQDN));
+                .map(InstanceMetaData::getPrivateId)
+                .collect(Collectors.toSet());
     }
 
 }

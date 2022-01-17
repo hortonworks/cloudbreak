@@ -4,8 +4,9 @@ import static java.lang.String.format;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,7 +17,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -55,23 +55,30 @@ public class ClusterUpscaleService {
     @Inject
     private ParcelService parcelService;
 
-    public void uploadRecipesOnNewHosts(Long stackId, String hostGroupName) throws CloudbreakException {
+    public void uploadRecipesOnNewHosts(Long stackId, Set<String> hostGroupNames) throws CloudbreakException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Start executing pre recipes");
-        HostGroup hostGroup = getHostGroup(hostGroupName, stack);
         Set<HostGroup> hostGroups = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
-        recipeEngine.uploadUpscaleRecipes(stack, hostGroup, hostGroups);
+        Set<HostGroup> targetHostGroups = hostGroups.stream().filter(hostGroup -> hostGroupNames.contains(hostGroup.getName())).collect(Collectors.toSet());
+        recipeEngine.uploadUpscaleRecipes(stack, targetHostGroups, hostGroups);
     }
 
-    public void installServicesOnNewHosts(Long stackId, String hostGroupName, Boolean repair, Boolean restartServices) throws CloudbreakException {
+    public void installServicesOnNewHosts(Long stackId, Set<String> hostGroupNames, Boolean repair, Boolean restartServices) throws CloudbreakException {
         Stack stack = stackService.getByIdWithClusterInTransaction(stackId);
         LOGGER.debug("Start installing CM services");
         removeUnusedParcelComponents(stack);
-        HostGroup hostGroup = getHostGroup(hostGroupName, stack);
-        recipeEngine.executePostAmbariStartRecipes(stack, Set.of(hostGroup));
-        Set<InstanceMetaData> runningInstanceMetaDataSet = hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet();
+        Set<HostGroup> hostGroupSetWithRecipes = hostGroupService.getByClusterWithRecipes(stack.getCluster().getId());
+        Set<HostGroup> hostGroupSetWithInstanceMetadas = hostGroupService.getByCluster(stack.getCluster().getId());
+        Map<HostGroup, Set<InstanceMetaData>> instanceMetaDatasByHostGroup = hostGroupSetWithInstanceMetadas.stream()
+                .filter(hostGroup -> hostGroupNames.contains(hostGroup.getName()))
+                .collect(Collectors.toMap(Function.identity(), hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet()));
+        recipeEngine.executePostAmbariStartRecipes(stack, hostGroupSetWithRecipes);
+        Set<InstanceMetaData> runningInstanceMetaDataSet =
+                hostGroupSetWithInstanceMetadas.stream()
+                        .flatMap(hostGroup -> hostGroup.getInstanceGroup().getRunningInstanceMetaDataSet().stream())
+                        .collect(Collectors.toSet());
         ClusterApi connector = getClusterConnector(stack);
-        List<String> upscaledHosts = connector.upscaleCluster(hostGroup, runningInstanceMetaDataSet);
+        List<String> upscaledHosts = connector.upscaleCluster(instanceMetaDatasByHostGroup);
         restartServicesIfNecessary(repair, restartServices, stack, connector);
         setInstanceStatus(runningInstanceMetaDataSet, upscaledHosts);
     }
@@ -91,11 +98,6 @@ public class ClusterUpscaleService {
                     instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_HEALTHY);
                     instanceMetaDataService.save(instanceMetaData);
                 });
-    }
-
-    private HostGroup getHostGroup(String hostGroupName, Stack stack) {
-        return Optional.ofNullable(hostGroupService.getByClusterIdAndNameWithRecipes(stack.getCluster().getId(), hostGroupName))
-                .orElseThrow(NotFoundException.notFound("hostgroup", hostGroupName));
     }
 
     private void restartServicesIfNecessary(Boolean repair, Boolean restartServices, Stack stack, ClusterApi connector) throws CloudbreakException {

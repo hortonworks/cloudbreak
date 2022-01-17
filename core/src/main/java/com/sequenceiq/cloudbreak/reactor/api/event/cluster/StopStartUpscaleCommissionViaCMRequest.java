@@ -5,9 +5,12 @@ import java.util.List;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleRequest;
+import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformRequest;
+import com.sequenceiq.cloudbreak.reactor.api.event.HostGroupPayload;
 
-public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScaleRequest {
+public class StopStartUpscaleCommissionViaCMRequest extends ClusterPlatformRequest implements HostGroupPayload {
+
+    private final String hostGroupName;
 
     private final List<InstanceMetaData> startedInstancesToCommission;
 
@@ -15,10 +18,10 @@ public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScale
 
     private final Stack stack;
 
-    public StopStartUpscaleCommissionViaCMRequest(Stack stack, String hostGroupName,
-            List<InstanceMetaData> startedInstancesToCommission,
+    public StopStartUpscaleCommissionViaCMRequest(Stack stack, String hostGroupName, List<InstanceMetaData> startedInstancesToCommission,
             List<InstanceMetaData> servicesNotRunningInstancesToCommission) {
-        super(stack.getId(), hostGroupName);
+        super(stack.getId());
+        this.hostGroupName = hostGroupName;
         this.stack = stack;
         this.startedInstancesToCommission = startedInstancesToCommission == null ? Collections.emptyList() : startedInstancesToCommission;
         this.servicesNotRunningInstancesToCommission =
@@ -38,6 +41,11 @@ public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScale
     }
 
     @Override
+    public String getHostGroupName() {
+        return hostGroupName;
+    }
+
+    @Override
     public String toString() {
         return "StopStartUpscaleCommissionViaCMRequest{" +
                 "startedInstancesToCommissionCount=" + startedInstancesToCommission.size() +
@@ -45,4 +53,5 @@ public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScale
                 ", stack=" + stack +
                 '}';
     }
+
 }

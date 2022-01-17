@@ -5,25 +5,27 @@ import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscal
 import static org.slf4j.LoggerFactory.getLogger;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.springframework.stereotype.Component;
 
-import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.common.type.ScalingType;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.repair.master.ha.ChangePrimaryGatewayEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.AwsVariantMigrationTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterAndStackDownscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.ClusterDownscaleDetails;
@@ -36,7 +38,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.InstanceGroupView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ChangePrimaryGatewayTriggerEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.ClusterRepairTriggerEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
 import com.sequenceiq.cloudbreak.service.hostgroup.HostGroupService;
@@ -114,34 +116,51 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
     private Queue<Selectable> createFlowTriggers(ClusterRepairTriggerEvent event, RepairConfig repairConfig) {
         Queue<Selectable> flowTriggers = new ConcurrentLinkedDeque<>();
         flowTriggers.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
-        if (repairConfig.getSinglePrimaryGateway().isPresent()) {
-            Repair repair = repairConfig.getSinglePrimaryGateway().get();
-            flowTriggers.add(stackDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
-            addAwsNativeMigrationIfNeed(flowTriggers, event.getResourceId(), repair.getHostGroupName(), event.isUpgrade(), event.getTriggeredStackVariant());
-            flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), true,
-                    event.isRestartServices(), isKerberosSecured(event.getStackId())));
-        }
-        for (Repair repair : repairConfig.getRepairs()) {
-            flowTriggers.add(fullDownscaleEvent(event, repair.getHostGroupName(), repair.getHostNames()));
-            addAwsNativeMigrationIfNeed(flowTriggers, event.getResourceId(), repair.getHostGroupName(), event.isUpgrade(),
-                    event.getTriggeredStackVariant());
-            flowTriggers.add(fullUpscaleEvent(event, repair.getHostGroupName(), repair.getHostNames(), false,
-                    event.isRestartServices(), false));
-        }
+        Map<String, Set<String>> repairableGroupsWithHostNames = new HashMap<>();
+        boolean singlePrimaryGW = fillRepairableGroupsWithHostNames(repairConfig, repairableGroupsWithHostNames);
+        LOGGER.info("Repairable groups with host names: {}", repairableGroupsWithHostNames);
+        addDownscaleAndUpscaleEvents(event, flowTriggers, repairableGroupsWithHostNames, singlePrimaryGW);
         flowTriggers.add(rescheduleStatusCheckEvent(event));
         flowTriggers.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return flowTriggers;
     }
 
-    private StackDownscaleTriggerEvent stackDownscaleEvent(ClusterRepairTriggerEvent event, String groupName, List<String> hostNames) {
-        Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(event.getStackId());
-        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(instanceMetaData, new HashSet<>(hostNames));
-        return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupName, privateIdsForHostNames,
-                event.getTriggeredStackVariant(), event.accepted())
-                .setRepair();
+    private boolean fillRepairableGroupsWithHostNames(RepairConfig repairConfig, Map<String, Set<String>> repairableGroupsWithHostNames) {
+        boolean singlePrimaryGW = addGatewayGroupWithHostNames(repairConfig, repairableGroupsWithHostNames);
+        repairableGroupsWithHostNames.putAll(repairConfig.getRepairs().stream().collect(Collectors.toMap(Repair::getHostGroupName,
+                repair -> new HashSet<>(repair.getHostNames()))));
+        return singlePrimaryGW;
     }
 
-    void addAwsNativeMigrationIfNeed(Queue<Selectable> flowTriggers, Long resourceId, String groupName, boolean upgrade, String triggeredVariant) {
+    private void addDownscaleAndUpscaleEvents(ClusterRepairTriggerEvent event, Queue<Selectable> flowTriggers, Map<String,
+            Set<String>> repairableGroupsWithHostNames, boolean singlePrimaryGW) {
+        if (!repairableGroupsWithHostNames.isEmpty()) {
+            flowTriggers.add(downscaleEvent(singlePrimaryGW, event, repairableGroupsWithHostNames));
+            LOGGER.info("Downscale event added for: {}", repairableGroupsWithHostNames);
+            for (Entry<String, Set<String>> groupWithHostNames : repairableGroupsWithHostNames.entrySet()) {
+                addAwsNativeEventMigrationIfNeed(flowTriggers, event.getResourceId(), groupWithHostNames.getKey(), event.isUpgrade(),
+                        event.getTriggeredStackVariant());
+            }
+            flowTriggers.add(fullUpscaleEvent(event, repairableGroupsWithHostNames, singlePrimaryGW,
+                    event.isRestartServices(), isKerberosSecured(event.getStackId())));
+            LOGGER.info("Upscale event added for: {}", repairableGroupsWithHostNames);
+        }
+    }
+
+    private boolean addGatewayGroupWithHostNames(RepairConfig repairConfig, Map<String, Set<String>> groupsWithHostNames) {
+        if (repairConfig.getSinglePrimaryGateway().isPresent()) {
+            LOGGER.info("Single primary GW flag true");
+            Repair repair = repairConfig.getSinglePrimaryGateway().get();
+            Map<String, Set<String>> gatewayGroupWithHostNames = Collections.singletonMap(repair.getHostGroupName(), new HashSet<>(repair.getHostNames()));
+            groupsWithHostNames.putAll(gatewayGroupWithHostNames);
+            LOGGER.info("GW group with hostnames are added: {}", gatewayGroupWithHostNames);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    void addAwsNativeEventMigrationIfNeed(Queue<Selectable> flowTriggers, Long resourceId, String groupName, boolean upgrade, String triggeredVariant) {
         if (upgrade) {
             LOGGER.debug("Upgrade flow, check the variant to migration, variant: {}, groupName: {}", triggeredVariant, groupName);
             if (AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.variant().value().equals(triggeredVariant)) {
@@ -157,17 +176,31 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
         return new AwsVariantMigrationTriggerEvent(AwsVariantMigrationEvent.CREATE_RESOURCES_EVENT.event(), resourceId, groupName);
     }
 
-    private ClusterAndStackDownscaleTriggerEvent fullDownscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames) {
+    private StackEvent downscaleEvent(boolean singlePrimaryGW, ClusterRepairTriggerEvent event,
+            Map<String, Set<String>> groupsWithHostNames) {
         Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.getAllInstanceMetadataWithoutInstanceGroupByStackId(event.getStackId());
-        Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(instanceMetaData, hostNames);
-        return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(),
-                hostGroupName, Sets.newHashSet(privateIdsForHostNames), ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
-                new ClusterDownscaleDetails(true, true));
-    }
-
-    private ChangePrimaryGatewayTriggerEvent changePrimaryGatewayEvent(ClusterRepairTriggerEvent event) {
-        return new ChangePrimaryGatewayTriggerEvent(ChangePrimaryGatewayEvent.CHANGE_PRIMARY_GATEWAY_TRIGGER_EVENT.event(),
-                event.getResourceId(), event.accepted());
+        Map<String, Set<Long>> groupsWithPrivateIds = new HashMap<>();
+        Map<String, Integer> groupsWithAdjustment = new HashMap<>();
+        for (Entry<String, Set<String>> groupWithHostNames : groupsWithHostNames.entrySet()) {
+            Set<String> hostNames = groupWithHostNames.getValue();
+            String group = groupWithHostNames.getKey();
+            Set<Long> privateIdsForHostNames = stackService.getPrivateIdsForHostNames(instanceMetaData, hostNames);
+            groupsWithPrivateIds.put(group, privateIdsForHostNames);
+            int size = hostNames != null ? hostNames.size() : 0;
+            groupsWithAdjustment.put(group, size);
+        }
+        LOGGER.info("Downscale groups with adjustments: {}", groupsWithAdjustment);
+        LOGGER.info("Downscale groups with privateIds: {}", groupsWithPrivateIds);
+        if (!singlePrimaryGW) {
+            LOGGER.info("Full downscale for the following: {}", groupsWithHostNames);
+            return new ClusterAndStackDownscaleTriggerEvent(FlowChainTriggers.FULL_DOWNSCALE_TRIGGER_EVENT, event.getResourceId(), groupsWithAdjustment,
+                    groupsWithPrivateIds, groupsWithHostNames, ScalingType.DOWNSCALE_TOGETHER, event.accepted(),
+                    new ClusterDownscaleDetails(true, true));
+        } else {
+            LOGGER.info("Stack downscale for the following: {}", groupsWithHostNames);
+            return new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), groupsWithAdjustment, groupsWithPrivateIds,
+                    groupsWithHostNames, event.getTriggeredStackVariant(), event.accepted()).setRepair();
+        }
     }
 
     private RescheduleStatusCheckTriggerEvent rescheduleStatusCheckEvent(ClusterRepairTriggerEvent event) {
@@ -175,16 +208,19 @@ public class ClusterRepairFlowEventChainFactory implements FlowEventChainFactory
                 event.getResourceId(), event.accepted());
     }
 
-    private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, String hostGroupName, List<String> hostNames,
+    private StackAndClusterUpscaleTriggerEvent fullUpscaleEvent(ClusterRepairTriggerEvent event, Map<String, Set<String>> groupsWithHostNames,
             boolean singlePrimaryGateway, boolean restartServices, boolean kerberosSecured) {
         Set<InstanceGroupView> instanceGroupViews = instanceGroupService.findViewByStackId(event.getStackId());
         boolean singleNodeCluster = isSingleNode(instanceGroupViews);
-        ClusterManagerType cmType = ClusterManagerType.CLOUDERA_MANAGER;
-        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) hostNames.size());
-        return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(), hostGroupName,
-                hostNames.size(), ScalingType.UPSCALE_TOGETHER, Sets.newHashSet(hostNames), singlePrimaryGateway,
-                kerberosSecured, event.accepted(), singleNodeCluster, restartServices, cmType, adjustmentTypeWithThreshold, event.getTriggeredStackVariant())
-                .setRepair();
+        Integer adjustmentSize = groupsWithHostNames.values().stream().map(Set::size).reduce(0, Integer::sum);
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) adjustmentSize);
+        Map<String, Integer> hostGroupAdjustments = groupsWithHostNames.entrySet().stream().collect(Collectors.toMap(Entry::getKey, o -> o.getValue().size()));
+        LOGGER.info("Full upscale with host groups and adjustments: {}", hostGroupAdjustments);
+        LOGGER.info("Full upscale with host groups and host names: {}", groupsWithHostNames);
+        return new StackAndClusterUpscaleTriggerEvent(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.getResourceId(),
+                hostGroupAdjustments, null, groupsWithHostNames, ScalingType.UPSCALE_TOGETHER, singlePrimaryGateway,
+                kerberosSecured, event.accepted(), singleNodeCluster, restartServices, ClusterManagerType.CLOUDERA_MANAGER, adjustmentTypeWithThreshold,
+                event.getTriggeredStackVariant()).setRepair();
     }
 
     public boolean isSingleNode(Set<InstanceGroupView> instanceGroupViews) {

@@ -100,9 +100,12 @@ public class ReactorFlowManagerTest {
     public void shouldReturnTheNextFailureTransition() {
         InstanceGroupAdjustmentV4Request instanceGroupAdjustment = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustment.setScalingAdjustment(5);
+        instanceGroupAdjustment.setInstanceGroup("hostgroup");
         HostGroupAdjustmentV4Request hostGroupAdjustment = new HostGroupAdjustmentV4Request();
+        hostGroupAdjustment.setHostGroup("hostgroup");
+        hostGroupAdjustment.setScalingAdjustment(5);
         Map<String, Set<Long>> instanceIdsByHostgroup = new HashMap<>();
-        instanceIdsByHostgroup.put("hostrgroup", Collections.singleton(1L));
+        instanceIdsByHostgroup.put("hostgroup", Collections.singleton(1L));
         ImageChangeDto imageChangeDto = new ImageChangeDto(STACK_ID, "imageid");
 
         when(stackService.getPlatformVariantByStackId(STACK_ID)).thenReturn(cloudPlatformVariant);
@@ -194,8 +197,8 @@ public class ReactorFlowManagerTest {
         StackAndClusterUpscaleTriggerEvent event = (StackAndClusterUpscaleTriggerEvent) captor.getValue();
         assertEquals(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.selector());
         assertEquals(stack.getId(), event.getResourceId());
-        assertEquals(instanceGroupAdjustment.getInstanceGroup(), event.getInstanceGroup());
-        assertEquals(instanceGroupAdjustment.getScalingAdjustment(), event.getAdjustment());
+        assertEquals(instanceGroupAdjustment.getInstanceGroup(), event.getHostGroupsWithAdjustment().keySet().stream().findFirst().get());
+        assertEquals(instanceGroupAdjustment.getScalingAdjustment(), event.getHostGroupsWithAdjustment().values().stream().findFirst().get());
         assertEquals(ScalingType.UPSCALE_ONLY_STACK, event.getScalingType());
     }
 
@@ -215,8 +218,8 @@ public class ReactorFlowManagerTest {
         StackAndClusterUpscaleTriggerEvent event = (StackAndClusterUpscaleTriggerEvent) captor.getValue();
         assertEquals(FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT, event.selector());
         assertEquals(stack.getId(), event.getResourceId());
-        assertEquals(instanceGroupAdjustment.getInstanceGroup(), event.getInstanceGroup());
-        assertEquals(instanceGroupAdjustment.getScalingAdjustment(), event.getAdjustment());
+        assertEquals(instanceGroupAdjustment.getInstanceGroup(), event.getHostGroupsWithAdjustment().keySet().stream().findFirst().get());
+        assertEquals(instanceGroupAdjustment.getScalingAdjustment(), event.getHostGroupsWithAdjustment().values().stream().findFirst().get());
         assertEquals(ScalingType.UPSCALE_TOGETHER, event.getScalingType());
     }
 

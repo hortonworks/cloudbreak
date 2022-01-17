@@ -1,5 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.event;
 
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.common.event.AcceptResult;
@@ -10,23 +12,26 @@ import reactor.rx.Promise;
 
 public class StackDownscaleTriggerEvent extends StackScaleTriggerEvent {
 
-    private final Set<Long> privateIds;
+    // @deprecated haven't removed for compatibility reasons, we should remove it in 2.54
+    @Deprecated
+    private Set<Long> privateIds;
 
-    public StackDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, String triggeredStackVariant) {
-        super(selector, stackId, hostGroup, adjustment, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, adjustment.longValue()), triggeredStackVariant);
-        privateIds = null;
+    public StackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment, String triggeredStackVariant) {
+        super(selector, stackId, hostGroupWithAdjustment, Collections.emptyMap(), Collections.emptyMap(),
+                new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null), triggeredStackVariant);
     }
 
-    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds, String triggeredStackVariant) {
-        super(selector, stackId, instanceGroup, null, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) privateIds.size()), triggeredStackVariant);
-        this.privateIds = privateIds;
+    public StackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
+            Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames, String triggeredStackVariant) {
+        super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames,
+                new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null), triggeredStackVariant);
     }
 
-    public StackDownscaleTriggerEvent(String selector, Long stackId, String instanceGroup, Set<Long> privateIds, String triggeredStackVariant,
+    public StackDownscaleTriggerEvent(String selector, Long stackId, Map<String, Integer> hostGroupWithAdjustment,
+            Map<String, Set<Long>> hostGroupWithPrivateIds, Map<String, Set<String>> hostGroupWithHostNames, String triggeredStackVariant,
             Promise<AcceptResult> accepted) {
-        super(selector, stackId, instanceGroup, null, new AdjustmentTypeWithThreshold(AdjustmentType.EXACT, (long) privateIds.size()), triggeredStackVariant,
-                accepted);
-        this.privateIds = privateIds;
+        super(selector, stackId, hostGroupWithAdjustment, hostGroupWithPrivateIds, hostGroupWithHostNames,
+                new AdjustmentTypeWithThreshold(AdjustmentType.BEST_EFFORT, null), triggeredStackVariant, accepted);
     }
 
     @Override
@@ -35,7 +40,16 @@ public class StackDownscaleTriggerEvent extends StackScaleTriggerEvent {
         return this;
     }
 
-    public Set<Long> getPrivateIds() {
-        return privateIds;
+    @Override
+    public Map<String, Set<Long>> getHostGroupsWithPrivateIds() {
+        if (super.getHostGroupsWithPrivateIds() == null) {
+            if (getInstanceGroup() != null && privateIds != null) {
+                super.setHostGroupsWithPrivateIds(Map.of(getInstanceGroup(), privateIds));
+            } else {
+                super.setHostGroupsWithPrivateIds(Map.of());
+            }
+        }
+        return super.getHostGroupsWithPrivateIds();
     }
+
 }

@@ -3,9 +3,8 @@ package com.sequenceiq.cloudbreak.core.flow2.chain;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.downscale.ClusterDownscaleEvent.DECOMMISSION_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.stack.downscale.StackDownscaleEvent.STACK_DOWNSCALE_EVENT;
 
-import java.util.Map.Entry;
+import java.util.Collections;
 import java.util.Queue;
-import java.util.Set;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.inject.Inject;
@@ -41,16 +40,14 @@ public class MultiHostgroupDownscaleFlowEventChainFactory implements FlowEventCh
     public FlowTriggerEventQueue createFlowTriggerEventQueue(MultiHostgroupClusterAndStackDownscaleTriggerEvent event) {
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
         flowEventChain.add(new FlowChainInitPayload(getName(), event.getResourceId(), event.accepted()));
-        for (Entry<String, Set<Long>> entry : event.getInstanceIdsByHostgroupMap().entrySet()) {
-            ClusterScaleTriggerEvent cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), entry.getKey(),
-                    entry.getValue(), event.accepted(), event.getDetails());
-            flowEventChain.add(cste);
-            if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
-                CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(event.getResourceId());
-                StackScaleTriggerEvent sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(), entry.getKey(),
-                        entry.getValue(), cloudPlatformVariant.getVariant().value());
-                flowEventChain.add(sste);
-            }
+        ClusterScaleTriggerEvent cste = new ClusterDownscaleTriggerEvent(DECOMMISSION_EVENT.event(), event.getResourceId(), Collections.emptyMap(),
+                event.getPrivateIdsByHostgroupMap(), Collections.emptyMap(), event.accepted(), event.getDetails());
+        flowEventChain.add(cste);
+        if (event.getScalingType() == ScalingType.DOWNSCALE_TOGETHER) {
+            CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(event.getResourceId());
+            StackScaleTriggerEvent sste = new StackDownscaleTriggerEvent(STACK_DOWNSCALE_EVENT.event(), event.getResourceId(),
+                    Collections.emptyMap(), event.getPrivateIdsByHostgroupMap(), Collections.emptyMap(), cloudPlatformVariant.getVariant().value());
+            flowEventChain.add(sste);
         }
         flowEventChain.add(new FlowChainFinalizePayload(getName(), event.getResourceId(), event.accepted()));
         return new FlowTriggerEventQueue(getName(), event, flowEventChain);

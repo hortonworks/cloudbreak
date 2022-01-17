@@ -10,8 +10,8 @@ public class DecommissionRequest extends AbstractClusterScaleRequest {
 
     private final ClusterDownscaleDetails details;
 
-    public DecommissionRequest(Long stackId, String hostGroupName, Set<Long> privateIds, ClusterDownscaleDetails details) {
-        super(stackId, hostGroupName);
+    public DecommissionRequest(Long stackId, Set<String> hostGroups, Set<Long> privateIds, ClusterDownscaleDetails details) {
+        super(stackId, hostGroups);
         this.privateIds = privateIds;
         this.details = details;
     }

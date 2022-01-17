@@ -2,14 +2,12 @@ package com.sequenceiq.cloudbreak.reactor.handler.cluster.upgrade.recover;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -78,7 +76,7 @@ class DatalakeRecoverySetupNewInstancesHandlerTest {
         verify(stackService).getByIdWithClusterInTransaction(STACK_ID);
         verify(clusterService).updateClusterStatusByStackId(STACK_ID, DetailedStackStatus.CLUSTER_RECOVERY_IN_PROGRESS);
         verify(stackCreatorService).sortInstanceGroups(stack);
-        verify(instanceMetaDataService, times(2)).saveInstanceAndGetUpdatedStack(eq(stack), anyInt(), any(), eq(true), eq(Collections.emptySet()), eq(false),
+        verify(instanceMetaDataService, times(2)).saveInstanceAndGetUpdatedStack(eq(stack), any(), any(), eq(true), eq(false),
                 any());
     }
 

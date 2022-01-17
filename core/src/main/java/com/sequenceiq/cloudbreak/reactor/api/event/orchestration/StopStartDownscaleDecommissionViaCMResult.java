@@ -4,10 +4,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.reactor.api.ClusterPlatformResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
-import com.sequenceiq.cloudbreak.reactor.api.event.resource.AbstractClusterScaleResult;
 
-public class StopStartDownscaleDecommissionViaCMResult extends AbstractClusterScaleResult<StopStartDownscaleDecommissionViaCMRequest> {
+public class StopStartDownscaleDecommissionViaCMResult extends ClusterPlatformResult<StopStartDownscaleDecommissionViaCMRequest> {
 
     private final Set<String> decommissionedHostFqdns;
 

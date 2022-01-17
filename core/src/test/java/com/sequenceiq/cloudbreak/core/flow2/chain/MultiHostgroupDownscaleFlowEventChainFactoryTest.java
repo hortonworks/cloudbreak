@@ -61,10 +61,8 @@ public class MultiHostgroupDownscaleFlowEventChainFactoryTest {
         when(cloudPlatformVariant.getVariant()).thenReturn(Variant.variant("AWS"));
 
         Queue<Selectable> queue = underTest.createFlowTriggerEventQueue(event).getQueue();
-        assertEquals(6L, queue.size());
+        assertEquals(4L, queue.size());
         assertEquals(FLOWCHAIN_INIT_TRIGGER_EVENT.event(), queue.poll().selector());
-        assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());
-        assertEquals(STACK_DOWNSCALE_EVENT.event(), queue.poll().selector());
         assertEquals(DECOMMISSION_EVENT.event(), queue.poll().selector());
         assertEquals(STACK_DOWNSCALE_EVENT.event(), queue.poll().selector());
         assertEquals(FLOWCHAIN_FINALIZE_TRIGGER_EVENT.event(), queue.poll().selector());
