@@ -152,7 +152,7 @@ public class OpdbServiceEndpointCollectorTest {
         services.add("AVATICA");
         services.add("CM-UI");
         services.add("CM-API");
-        when(exposedServiceCollector.getFullServiceListBasedOnList(any())).thenReturn(services);
+        when(exposedServiceCollector.getFullServiceListBasedOnList(any(), any())).thenReturn(services);
         when(entitlementService.getEntitlements(anyString())).thenReturn(new ArrayList<>());
         when(serviceEndpointCollectorEntitlementComparator.entitlementSupported(anyList(), eq(null))).thenReturn(true);
         // Skip exposed service validation

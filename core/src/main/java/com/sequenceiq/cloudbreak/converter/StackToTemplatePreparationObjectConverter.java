@@ -84,6 +84,7 @@ import com.sequenceiq.cloudbreak.template.filesystem.FileSystemConfigurationProv
 import com.sequenceiq.cloudbreak.template.filesystem.StorageLocationView;
 import com.sequenceiq.cloudbreak.template.model.GeneralClusterConfigs;
 import com.sequenceiq.cloudbreak.template.views.AccountMappingView;
+import com.sequenceiq.cloudbreak.template.views.BlueprintView;
 import com.sequenceiq.cloudbreak.template.views.ClusterExposedServiceView;
 import com.sequenceiq.cloudbreak.template.views.CustomConfigurationsView;
 import com.sequenceiq.cloudbreak.template.views.DatalakeView;
@@ -233,16 +234,19 @@ public class StackToTemplatePreparationObjectConverter {
                             source.getEnvironmentCrn(),
                             MDCUtils.getRequestId());
 
+            BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(cluster.getBlueprint());
+            Optional<String> version = Optional.ofNullable(blueprintView.getVersion());
+
             Builder builder = Builder.builder()
                     .withCloudPlatform(CloudPlatform.valueOf(source.getCloudPlatform()))
                     .withRdsConfigs(postgresConfigService.createRdsConfigIfNeeded(source, cluster))
                     .withRdsSslCertificateFilePath(dbCertificateProvider.getSslCertsFilePath())
-                    .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
+                    .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed(version))
                     .withIdBroker(idbroker)
                     .withCustomConfigurationsView(getCustomConfigurationsView(source, cluster))
                     .withCustomInputs(stackInputs.getCustomInputs() == null ? new HashMap<>() : stackInputs.getCustomInputs())
                     .withFixInputs(fixInputs)
-                    .withBlueprintView(blueprintViewProvider.getBlueprintView(cluster.getBlueprint()))
+                    .withBlueprintView(blueprintView)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(calculateGeneralClusterConfigs(source, cluster))
                     .withLdapConfig(ldapView.orElse(null))

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.template.views;
 
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -30,6 +31,12 @@ public class BlueprintView {
         this.processor = processor;
         componentsByHostGroup = processor.getComponentsByHostGroup();
         components = prepareComponents();
+    }
+
+    // just for testing
+    public BlueprintView() {
+        processor = null;
+        componentsByHostGroup = new HashMap<>();
     }
 
     private Set<String> prepareComponents() {

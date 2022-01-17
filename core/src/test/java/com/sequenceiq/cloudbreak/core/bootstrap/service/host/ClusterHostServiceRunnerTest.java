@@ -41,6 +41,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.Postg
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -172,6 +173,9 @@ public class ClusterHostServiceRunnerTest {
     private Cluster cluster;
 
     @Mock
+    private Blueprint blueprint;
+
+    @Mock
     private DatalakeService datalakeService;
 
     @Mock
@@ -293,6 +297,8 @@ public class ClusterHostServiceRunnerTest {
         when(stack.getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         when(cluster.getName()).thenReturn("clustername");
         when(cluster.getStack()).thenReturn(stack);
+        when(cluster.getBlueprint()).thenReturn(blueprint);
+        when(blueprint.getStackVersion()).thenReturn("7.2.12");
         when(componentLocator.getComponentLocation(any(), any())).thenReturn(new HashMap<>());
         when(exposedServiceCollector.getImpalaService()).thenReturn(mock(ExposedService.class));
         when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com");

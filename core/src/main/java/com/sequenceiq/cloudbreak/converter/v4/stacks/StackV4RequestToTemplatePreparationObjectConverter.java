@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -155,6 +156,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
             Set<HostgroupView> hostgroupViews = getHostgroupViews(source);
             Gateway gateway = source.getCluster().getGateway() == null ? null : stackV4RequestToGatewayConverter.convert(source);
             BlueprintView blueprintView = blueprintViewProvider.getBlueprintView(blueprint);
+            Optional<String> version = Optional.ofNullable(blueprintView.getVersion());
             GeneralClusterConfigs generalClusterConfigs = generalClusterConfigsProvider.generalClusterConfigs(source, cloudbreakUser.getEmail(),
                     blueprintService.getBlueprintVariant(blueprint));
             String gatewaySignKey = null;
@@ -168,7 +170,7 @@ public class StackV4RequestToTemplatePreparationObjectConverter {
                     .withCloudPlatform(source.getCloudPlatform())
                     .withRdsConfigs(rdsConfigs)
                     .withHostgroupViews(hostgroupViews)
-                    .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed())
+                    .withGateway(gateway, gatewaySignKey, exposedServiceCollector.getAllKnoxExposed(version))
                     .withBlueprintView(blueprintView)
                     .withFileSystemConfigurationView(fileSystemConfigurationView)
                     .withGeneralClusterConfigs(generalClusterConfigs)
