@@ -90,6 +90,8 @@ public class StackRequestManifesterTest {
 
     private static final String AWS_ENCRYPTION_KEY = "dummyAwsKey";
 
+    private static final String DISK_ENCRYPTION_SET_ID = "dummyDiskEncryptionSetId";
+
     @Mock
     private GrpcIdbmmsClient idbmmsClient;
 
@@ -305,7 +307,8 @@ public class StackRequestManifesterTest {
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
         envResponse.setAzure(AzureEnvironmentParameters.builder()
                 .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
-                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                        .withEncryptionKeyUrl(ENCRYPTION_KEY)
                         .build())
                 .build());
 
@@ -323,7 +326,8 @@ public class StackRequestManifesterTest {
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
         envResponse.setAzure(AzureEnvironmentParameters.builder()
                 .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
-                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                        .withEncryptionKeyUrl(ENCRYPTION_KEY)
                         .build())
                 .build());
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
@@ -331,7 +335,7 @@ public class StackRequestManifesterTest {
 
         underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
-        verifyAzureEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
+        verifyAzureEncryption(instanceGroupV4Request.getTemplate(), EncryptionType.CUSTOM, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY);
     }
 
     @Test
@@ -340,7 +344,8 @@ public class StackRequestManifesterTest {
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
         envResponse.setAzure(AzureEnvironmentParameters.builder()
                 .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
-                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                        .withEncryptionKeyUrl(ENCRYPTION_KEY)
                         .build())
                 .build());
         InstanceGroupV4Request instanceGroupV4Request = createInstanceGroupV4Request();
@@ -350,7 +355,7 @@ public class StackRequestManifesterTest {
 
         underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
 
-        verifyAzureEncryption(instanceTemplateV4Request, EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
+        verifyAzureEncryption(instanceTemplateV4Request, EncryptionType.CUSTOM, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY);
     }
 
     @Test
@@ -358,7 +363,8 @@ public class StackRequestManifesterTest {
         DetailedEnvironmentResponse envResponse = new DetailedEnvironmentResponse();
         envResponse.setAzure(AzureEnvironmentParameters.builder()
                 .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
-                        .withDiskEncryptionSetId("dummyDiskEncryptionSetId")
+                        .withDiskEncryptionSetId(DISK_ENCRYPTION_SET_ID)
+                        .withEncryptionKeyUrl(ENCRYPTION_KEY)
                         .build())
                 .build());
         envResponse.setCloudPlatform(CloudPlatform.AZURE.name());
@@ -373,8 +379,8 @@ public class StackRequestManifesterTest {
         when(stackV4Request.getInstanceGroups()).thenReturn(List.of(instanceGroupV4Request1, instanceGroupV4Request2));
 
         underTest.setupInstanceVolumeEncryption(stackV4Request, envResponse);
-        verifyAzureEncryption(instanceTemplateV4Request1, EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
-        verifyAzureEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, "dummyDiskEncryptionSetId");
+        verifyAzureEncryption(instanceTemplateV4Request1, EncryptionType.CUSTOM, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY);
+        verifyAzureEncryption(instanceTemplateV4Request2, EncryptionType.CUSTOM, DISK_ENCRYPTION_SET_ID, ENCRYPTION_KEY);
     }
 
     @Test
@@ -613,12 +619,13 @@ public class StackRequestManifesterTest {
     }
 
     private void verifyAzureEncryption(InstanceTemplateV4Request instanceTemplateV4Request, EncryptionType expectedEncryptionType,
-            String expectedDiskEncryptionSetId) {
+            String expectedDiskEncryptionSetId, String expectedEncryptionKeyUrl) {
         AzureInstanceTemplateV4Parameters azure = instanceTemplateV4Request.getAzure();
         assertThat(azure).isNotNull();
         AzureEncryptionV4Parameters encryption = azure.getEncryption();
         assertThat(encryption).isNotNull();
         assertThat(encryption.getType()).isEqualTo(expectedEncryptionType);
+        assertThat(encryption.getKey()).isEqualTo(expectedEncryptionKeyUrl);
         assertThat(encryption.getDiskEncryptionSetId()).isEqualTo(expectedDiskEncryptionSetId);
     }
 

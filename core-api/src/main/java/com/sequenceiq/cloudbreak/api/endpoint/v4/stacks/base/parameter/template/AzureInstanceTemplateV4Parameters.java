@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceTemplateV4ParameterBase;
+import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.cloudbreak.cloud.model.instance.AzureInstanceTemplate;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions.TemplateModelDescription;
@@ -70,6 +71,7 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
         encrypted = getBoolean(parameters, "encrypted");
         encryption = new AzureEncryptionV4Parameters();
         encryption.setType(getBoolean(parameters, AzureInstanceTemplate.MANAGED_DISK_ENCRYPTION_WITH_CUSTOM_KEY_ENABLED) ? EncryptionType.CUSTOM : null);
+        encryption.setKey(getParameterOrNull(parameters, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID));
         encryption.setDiskEncryptionSetId(getParameterOrNull(parameters, AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID));
         managedDisk = getBoolean(parameters, "managedDisk");
     }
@@ -97,6 +99,7 @@ public class AzureInstanceTemplateV4Parameters extends InstanceTemplateV4Paramet
     public Map<String, Object> asSecretMap() {
         Map<String, Object> secretMap = super.asSecretMap();
         if (encryption != null) {
+            putIfValueNotNull(secretMap, InstanceTemplate.VOLUME_ENCRYPTION_KEY_ID, encryption.getKey());
             putIfValueNotNull(secretMap, AzureInstanceTemplate.DISK_ENCRYPTION_SET_ID, encryption.getDiskEncryptionSetId());
         }
         return secretMap;

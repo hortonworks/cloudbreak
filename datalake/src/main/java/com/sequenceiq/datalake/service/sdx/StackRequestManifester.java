@@ -397,11 +397,15 @@ public class StackRequestManifester {
 
     @VisibleForTesting
     void setupInstanceVolumeEncryptionForAzure(StackV4Request stackRequest, DetailedEnvironmentResponse environmentResponse) {
+        Optional<String> encryptionKeyUrl = Optional.of(environmentResponse)
+                .map(DetailedEnvironmentResponse::getAzure)
+                .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
+                .map(AzureResourceEncryptionParameters::getEncryptionKeyUrl);
         Optional<String> diskEncryptionSetId = Optional.of(environmentResponse)
                 .map(DetailedEnvironmentResponse::getAzure)
                 .map(AzureEnvironmentParameters::getResourceEncryptionParameters)
                 .map(AzureResourceEncryptionParameters::getDiskEncryptionSetId);
-        if (diskEncryptionSetId.isPresent()) {
+        if (encryptionKeyUrl.isPresent() && diskEncryptionSetId.isPresent()) {
             stackRequest.getInstanceGroups().forEach(ig -> {
                 AzureInstanceTemplateV4Parameters azure = ig.getTemplate().createAzure();
                 AzureEncryptionV4Parameters encryption = azure.getEncryption();
@@ -409,6 +413,7 @@ public class StackRequestManifester {
                     encryption = new AzureEncryptionV4Parameters();
                     azure.setEncryption(encryption);
                 }
+                azure.getEncryption().setKey(encryptionKeyUrl.get());
                 azure.getEncryption().setType(EncryptionType.CUSTOM);
                 azure.getEncryption().setDiskEncryptionSetId(diskEncryptionSetId.get());
             });
