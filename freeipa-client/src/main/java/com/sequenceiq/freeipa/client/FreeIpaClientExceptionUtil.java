@@ -8,6 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -108,7 +109,8 @@ public class FreeIpaClientExceptionUtil {
 
     @VisibleForTesting
     static boolean isExceptionWithIOExceptionCause(FreeIpaClientException e) {
-        return Stream.of(getAncestorCauseBeforeFreeIpaClientExceptions(e))
+        return ExceptionUtils.getThrowableList(e)
+                .stream()
                 .anyMatch(IOException.class::isInstance);
     }
 
