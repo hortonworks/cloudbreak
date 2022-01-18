@@ -1,0 +1,30 @@
+{
+  "name": "7.2.10 COD Edge Node for Google Cloud",
+  "description": "",
+  "type": "OPERATIONALDATABASE",
+  "featureState": "RELEASED",
+  "cloudPlatform": "GCP",
+  "distroXTemplate": {
+    "cluster": {
+      "blueprintName": "7.2.10 COD Edge Node"
+    },
+    "instanceGroups": [
+      {
+        "name": "leader",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 1,
+        "type": "GATEWAY",
+        "recoveryMode": "MANUAL"
+      }
+    ]
+  }
+}
