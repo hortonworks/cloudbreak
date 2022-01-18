@@ -55,6 +55,7 @@ import com.sequenceiq.environment.environment.validation.EnvironmentValidatorSer
 import com.sequenceiq.environment.network.CloudNetworkService;
 import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.service.LoadBalancerEntitlementService;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
@@ -505,6 +506,13 @@ class EnvironmentCreationServiceTest {
                 .withCreator(CRN)
                 .withAccountId(ACCOUNT_ID)
                 .withAuthentication(AuthenticationDto.builder().build())
+                .withParameters(ParametersDto.builder()
+                        .withAwsParameters(AwsParametersDto.builder()
+                                .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                        .withEncryptionKeyArn("dummy-key-arn")
+                                        .build())
+                                .build())
+                        .build())
                 .build();
         final Environment environment = new Environment();
         environment.setName(ENVIRONMENT_NAME);
@@ -515,7 +523,7 @@ class EnvironmentCreationServiceTest {
 
         ValidationResultBuilder validationResultBuilder = new ValidationResultBuilder();
         validationResultBuilder.error("error");
-        when(validatorService.validateEncryptionKeyArn(any())).thenReturn(validationResultBuilder.build());
+        when(validatorService.validateEncryptionKeyArn(any(), any())).thenReturn(validationResultBuilder.build());
 
         when(environmentService.isNameOccupied(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(false);
         when(environmentDtoConverter.creationDtoToEnvironment(eq(environmentCreationDto))).thenReturn(environment);

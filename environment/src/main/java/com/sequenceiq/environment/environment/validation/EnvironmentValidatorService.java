@@ -290,24 +290,16 @@ public class EnvironmentValidatorService {
         return resultBuilder.build();
     }
 
-    public ValidationResult validateEncryptionKeyArn(EnvironmentCreationDto creationDto) {
+    public ValidationResult validateEncryptionKeyArn(String encryptionKeyArn, String accountId) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (AWS.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
-                    .map(paramsDto -> paramsDto.getAwsParametersDto())
-                    .map(awsParametersDto -> awsParametersDto.getAwsDiskEncryptionParametersDto())
-                    .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
-            if (StringUtils.isNotEmpty(encryptionKeyArn)) {
-                if (!entitlementService.isAWSDiskEncryptionWithCMKEnabled(creationDto.getAccountId())) {
-                    resultBuilder.error(String.format("You specified encryptionKeyArn to use Server Side Encryption for " +
-                            "AWS Managed disks with CMK, "
-                            + "but that feature is currently disabled. Get 'CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK' " +
-                            "enabled for your account to use SSE with CMK."));
-                } else {
-                    ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn);
-                    resultBuilder.merge(validationResult);
-                }
-            }
+        if (!entitlementService.isAWSDiskEncryptionWithCMKEnabled(accountId)) {
+            resultBuilder.error(String.format("You specified encryptionKeyArn to use Server Side Encryption for " +
+                    "AWS Managed disks with CMK, "
+                    + "but that feature is currently disabled. Get 'CDP_CB_AWS_DISK_ENCRYPTION_WITH_CMK' " +
+                    "enabled for your account to use SSE with CMK."));
+        } else {
+            ValidationResult validationResult = encryptionKeyArnValidator.validateEncryptionKeyArn(encryptionKeyArn);
+            resultBuilder.merge(validationResult);
         }
         return resultBuilder.build();
     }

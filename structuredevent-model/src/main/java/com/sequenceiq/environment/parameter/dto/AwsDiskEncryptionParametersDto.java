@@ -18,7 +18,7 @@ public class AwsDiskEncryptionParametersDto {
 
     @Override
     public String toString() {
-        return "AzureResourceEncryptionParametersDto{" +
+        return "AwsDiskEncryptionParametersDto{" +
                 "encryptionKeyArn=" + encryptionKeyArn +
                 '}';
     }
