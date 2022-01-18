@@ -5,6 +5,7 @@ import static com.sequenceiq.freeipa.api.v1.operation.model.OperationState.RUNNI
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
@@ -13,6 +14,7 @@ import javax.inject.Inject;
 import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.Test;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.InstanceGroupV4Response;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsARecordRequest;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsCnameRecordRequest;
@@ -20,14 +22,22 @@ import com.sequenceiq.cloudbreak.polling.AbsolutTimeBasedTimeoutChecker;
 import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
+import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
+import com.sequenceiq.it.cloudbreak.cloud.HostGroupType;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.telemetry.TelemetryTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.ssh.action.SshJClientActions;
+import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class FreeIpaUpgradeTests extends AbstractE2ETest {
 
@@ -38,7 +48,13 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
     private static final long TWO_HOURS_IN_SEC = 2L * 60 * 60;
 
     @Inject
+    private SdxTestClient sdxTestClient;
+
+    @Inject
     private FreeIpaTestClient freeIpaTestClient;
+
+    @Inject
+    private SshJClientActions sshJClientActions;
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
@@ -48,6 +64,9 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
             then = "the stack should be available AND deletable")
     public void testSingleFreeIpaInstanceUpgrade(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabaseRequest.setCreate(false);
 
         testContext
                 .given("telemetry", TelemetryTestDto.class)
@@ -58,6 +77,12 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .withUpgradeCatalogAndImage()
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
+                .given(SdxTestDto.class)
+                .withCloudStorage()
+                .withExternalDatabase(sdxDatabaseRequest)
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.upgrade())
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .given(FreeIpaOperationStatusTestDto.class)
@@ -79,6 +104,9 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
             then = "the stack should be available AND deletable")
     public void testHAFreeIpaInstanceUpgrade(TestContext testContext) {
         String freeIpa = resourcePropertyProvider().getName();
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+        sdxDatabaseRequest.setCreate(false);
 
         testContext
                 .given("telemetry", TelemetryTestDto.class)
@@ -90,6 +118,12 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 .withUpgradeCatalogAndImage()
                 .when(freeIpaTestClient.create(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
+                .given(SdxTestDto.class)
+                .withCloudStorage()
+                .withExternalDatabase(sdxDatabaseRequest)
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .given(freeIpa, FreeIpaTestDto.class)
                 .when(freeIpaTestClient.upgrade())
                 .await(Status.UPDATE_IN_PROGRESS, waitForFlow().withWaitForFlow(Boolean.FALSE))
                 .given(FreeIpaOperationStatusTestDto.class)
@@ -114,6 +148,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 addAndDeleteDnsARecord(ipaClient, environmentCrn);
                 addAndDeleteDnsCnameRecord(ipaClient, environmentCrn);
                 addListDeleteDnsZonesBySubnet(ipaClient, environmentCrn);
+                kinit(testContext.given(SdxTestDto.class), testContext.getSdxClient());
             }
         } catch (TestFailException e) {
             throw e;
@@ -172,5 +207,17 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
             logger.error("DNS ZONE test failed during upgrade", e);
             throw new TestFailException("DNS ZONE test failed during upgrade with: " + e.getMessage(), e);
         }
+    }
+
+    private void kinit(SdxTestDto sdxTestDto, SdxClient sdxClient) {
+        sshJClientActions.checkKinitDuringFreeipaUpgrade(sdxTestDto, getInstanceGroups(sdxTestDto, sdxClient),
+                List.of(HostGroupType.MASTER.getName()));
+    }
+
+    private List<InstanceGroupV4Response> getInstanceGroups(SdxTestDto testDto, SdxClient client) {
+        return client.getDefaultClient()
+                .sdxEndpoint()
+                .getDetailByCrn(testDto.getCrn(), Collections.emptySet())
+                .getStackV4Response().getInstanceGroups();
     }
 }
