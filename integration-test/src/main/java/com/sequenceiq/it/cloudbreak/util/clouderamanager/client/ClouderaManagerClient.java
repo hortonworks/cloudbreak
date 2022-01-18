@@ -22,9 +22,19 @@ public class ClouderaManagerClient {
     }
 
     public ApiClient getCmApiClient(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
+        String basePath = "https://" + serverFqdn + "/" + clusterName + "/cdp-proxy-api/cm-api" + apiVersion;
+        return getApiClient(serverFqdn, cmUser, cmPassword, basePath);
+    }
+
+    public ApiClient getCmApiClientDirect(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
+        String basePath = "https://" + serverFqdn + "/clouderamanager/api/" + apiVersion;
+        return getApiClient(serverFqdn, cmUser, cmPassword, basePath);
+    }
+
+    private ApiClient getApiClient(String serverFqdn, String cmUser, String cmPassword, String basePath) {
         LOGGER.info(String.format("Cloudera Manager Server access details: %nserverFqdn: %s %ncmUser: %s %ncmPassword: %s", serverFqdn, cmUser, cmPassword));
         ApiClient cmClient = new ApiClient();
-        cmClient.setBasePath("https://" + serverFqdn + "/" + clusterName + "/cdp-proxy-api/cm-api" + apiVersion);
+        cmClient.setBasePath(basePath);
         cmClient.setUsername(cmUser);
         cmClient.setPassword(cmPassword);
         cmClient.setVerifyingSsl(false);
@@ -35,6 +45,13 @@ public class ClouderaManagerClient {
 
     public ApiClient getCmApiClientWithTimeoutDisabled(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
         ApiClient cmClient = getCmApiClient(serverFqdn, clusterName, apiVersion, cmUser, cmPassword);
+        cmClient.setConnectTimeout(0);
+        cmClient.getHttpClient().setReadTimeout(0, TimeUnit.MILLISECONDS);
+        return cmClient;
+    }
+
+    public ApiClient getCmApiClientWithTimeoutDisabledDirect(String serverFqdn, String clusterName, String apiVersion, String cmUser, String cmPassword) {
+        ApiClient cmClient = getCmApiClientDirect(serverFqdn, clusterName, apiVersion, cmUser, cmPassword);
         cmClient.setConnectTimeout(0);
         cmClient.getHttpClient().setReadTimeout(0, TimeUnit.MILLISECONDS);
         return cmClient;

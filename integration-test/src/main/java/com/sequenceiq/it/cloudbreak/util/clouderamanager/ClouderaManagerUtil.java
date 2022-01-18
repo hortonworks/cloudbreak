@@ -27,6 +27,10 @@ public class ClouderaManagerUtil {
         return clouderaManagerClientActions.checkCmYarnNodemanagerRoleConfigGroups(testDto, user, password);
     }
 
+    public DistroXTestDto checkClouderaManagerYarnNodemanagerRoleConfigGroupsDirect(DistroXTestDto testDto, String user, String password) {
+        return clouderaManagerClientActions.checkCmYarnNodemanagerRoleConfigGroupsDirect(testDto, user, password);
+    }
+
     public DistroXTestDto checkClouderaManagerHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
         return clouderaManagerClientActions.checkCmHdfsNamenodeRoleConfigGroups(testDto, user, password, mountPoints);
     }
