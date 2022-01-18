@@ -163,7 +163,10 @@ public class SdxReactorFlowManager {
         } else if (isVersionOlderThan(cluster, "7.2.1")) {
             retVal = false;
             reason = "Unsupported runtime: " + cluster.getRuntime();
-        } else if (cluster.getCloudStorageFileSystemType().isGcs()) {
+        } else if (cluster.getCloudStorageFileSystemType() == null) {
+            retVal = false;
+            reason = "Cloud storage not initialized";
+        }  else if (cluster.getCloudStorageFileSystemType().isGcs()) {
             retVal = false;
             reason = "Unsupported cloud provider GCS ";
         } else if (cluster.getCloudStorageFileSystemType().isAdlsGen2() &&
