@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -9,6 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -17,6 +19,7 @@ import static org.mockito.Mockito.when;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -34,11 +37,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceLifeCycle;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceLifeCycle;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstanceMetaData;
+import com.sequenceiq.cloudbreak.cloud.model.CloudLoadBalancerMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmMetaDataStatus;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -48,18 +54,37 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.Clock;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.domain.stack.loadbalancer.LoadBalancer;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigConverter;
+import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceGroupService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.LoadBalancerPersistenceService;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.TargetGroupPersistenceService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
+import com.sequenceiq.common.api.type.LoadBalancerType;
 
 @ExtendWith(MockitoExtension.class)
 public class MetadataSetupServiceTest {
 
     private static final Long STACK_ID = 1L;
+
+    private static final Long OLD_STACK_ID = 4L;
+
+    private static final String STACK_NAME = "STACK_NAME";
+
+    private static final String STACK_DISPLAY_NAME = "STACK_DISPLAY_NAME";
+
+    private static final String OLD_STACK_NAME = "OLD_STACK_NAME";
+
+    private static final String STACK_CRN = "STACK_CRN";
 
     private static final String GROUP_NAME = "GROUP_NAME";
 
@@ -94,6 +119,12 @@ public class MetadataSetupServiceTest {
     private static final com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus SERVICES_RUNNING =
             com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 
+    private static final String CLOUD_DNS = "CLOUD_DNS";
+
+    private static final String HOSTED_ZONE = "HOSTED_ZONE";
+
+    private static final String LB_NAME = "LB_NAME";
+
     @Mock
     private ImageService imageService;
 
@@ -104,6 +135,21 @@ public class MetadataSetupServiceTest {
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
+    private LoadBalancerPersistenceService loadBalancerPersistenceService;
+
+    @Mock
+    private LoadBalancerConfigService loadBalancerConfigService;
+
+    @Mock
+    private TargetGroupPersistenceService targetGroupPersistenceService;
+
+    @Mock
+    private LoadBalancerConfigConverter loadBalancerConfigConverter;
+
+    @Mock
+    private StackService stackService;
+
+    @Mock
     private Clock clock;
 
     @InjectMocks
@@ -111,6 +157,9 @@ public class MetadataSetupServiceTest {
 
     @Captor
     private ArgumentCaptor<InstanceMetaData> instanceMetaDataCaptor;
+
+    @Captor
+    private ArgumentCaptor<LoadBalancer> loadBalancerCaptor;
 
     @Test
     public void saveInstanceMetaDataTestShouldNotSaveInstancesWhenImageNotFound() throws CloudbreakImageNotFoundException {
@@ -157,6 +206,110 @@ public class MetadataSetupServiceTest {
         assertCommonProperties(instanceMetaData);
         assertEquals(CREATED, instanceMetaData.getInstanceStatus());
         assertNotNull(instanceMetaData.getImage());
+    }
+
+    @Test
+    public void saveLoadBalancerMetadata() {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setName(STACK_NAME);
+        stack.setCloudPlatform("DEFAULT");
+        stack.setEnvironmentCrn(STACK_CRN);
+
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setStack(stack);
+        loadBalancer.setType(LoadBalancerType.PUBLIC);
+
+        Set<LoadBalancer> loadBalancerSet = new HashSet<>();
+        loadBalancerSet.add(loadBalancer);
+        when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancerSet);
+        when(loadBalancerConfigService.generateLoadBalancerEndpoint(stack)).thenCallRealMethod();
+
+        TestStackStatusView stackStatusView = new TestStackStatusView();
+        stackStatusView.setId(STACK_ID);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setStatus(Status.AVAILABLE);
+        stackStatusView.setStatus(stackStatus);
+
+        when(stackService.getByEnvironmentCrnAndStackType(STACK_CRN, StackType.DATALAKE)).thenReturn(List.of(stackStatusView));
+
+        when(targetGroupPersistenceService.findByLoadBalancerId(any())).thenReturn(Set.of());
+        Iterable<CloudLoadBalancerMetadata> cloudLoadBalancerMetaDataStatuses = getCloudLoadBalancerMetaDataStatuses();
+
+        underTest.saveLoadBalancerMetadata(stack, cloudLoadBalancerMetaDataStatuses);
+
+        verify(loadBalancerPersistenceService).save(loadBalancerCaptor.capture());
+        LoadBalancer loadBalancerValue = loadBalancerCaptor.getValue();
+        assertThat(loadBalancerValue.getHostedZoneId()).isSameAs(HOSTED_ZONE);
+        assertThat(loadBalancerValue.getIp()).isSameAs(PUBLIC_IP);
+        assertThat(loadBalancerValue.getDns()).isSameAs(CLOUD_DNS);
+        assertThat(loadBalancerValue.getEndpoint()).isEqualTo("STACK_NAME-gateway");
+    }
+
+    @Test
+    public void saveLoadBalancerMetadataAndSetEndpointToOldStack() {
+        Stack oldStack = new Stack();
+        oldStack.setId(OLD_STACK_ID);
+        oldStack.setName(OLD_STACK_NAME);
+        oldStack.setCloudPlatform("DEFAULT");
+        oldStack.setEnvironmentCrn(STACK_CRN);
+        oldStack.setDisplayName(STACK_DISPLAY_NAME);
+
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(INSTANCE_GROUP_ID);
+        instanceGroup.setGroupName(GROUP_NAME);
+        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
+        InstanceMetaData pgwInstanceMetadata = new InstanceMetaData();
+        pgwInstanceMetadata.setInstanceStatus(STOPPED);
+        pgwInstanceMetadata.setDiscoveryFQDN("master0.subdomain.cldr.work");
+        pgwInstanceMetadata.setInstanceMetadataType(GATEWAY_PRIMARY);
+        instanceGroup.setInstanceMetaData(Set.of(pgwInstanceMetadata));
+        oldStack.setInstanceGroups(Set.of(instanceGroup));
+
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        stack.setName(STACK_NAME);
+        stack.setCloudPlatform("DEFAULT");
+        stack.setEnvironmentCrn(STACK_CRN);
+        stack.setDisplayName(STACK_DISPLAY_NAME);
+
+        LoadBalancer loadBalancer = new LoadBalancer();
+        loadBalancer.setStack(stack);
+        loadBalancer.setType(LoadBalancerType.PUBLIC);
+
+        Set<LoadBalancer> loadBalancerSet = new HashSet<>();
+        loadBalancerSet.add(loadBalancer);
+        when(loadBalancerPersistenceService.findByStackId(STACK_ID)).thenReturn(loadBalancerSet);
+        when(loadBalancerPersistenceService.findByStackId(OLD_STACK_ID)).thenReturn(new HashSet<>());
+        when(loadBalancerConfigService.generateLoadBalancerEndpoint(stack)).thenCallRealMethod();
+
+        TestStackStatusView stackStatusView = new TestStackStatusView();
+        stackStatusView.setId(STACK_ID);
+        StackStatus stackStatus = new StackStatus();
+        stackStatus.setStatus(Status.AVAILABLE);
+        stackStatusView.setStatus(stackStatus);
+        TestStackStatusView stackStatusViewOld = new TestStackStatusView();
+
+        stackStatusViewOld.setId(OLD_STACK_ID);
+        StackStatus stoppedStackStatus = new StackStatus();
+        stoppedStackStatus.setStatus(Status.STOPPED);
+        stackStatusViewOld.setStatus(stoppedStackStatus);
+
+        when(stackService.getByEnvironmentCrnAndStackType(STACK_CRN, StackType.DATALAKE)).thenReturn(List.of(stackStatusView, stackStatusViewOld));
+        when(stackService.getByIdWithGatewayInTransaction(OLD_STACK_ID)).thenReturn(oldStack);
+
+        when(targetGroupPersistenceService.findByLoadBalancerId(any())).thenReturn(Set.of());
+        Iterable<CloudLoadBalancerMetadata> cloudLoadBalancerMetaDataStatuses = getCloudLoadBalancerMetaDataStatuses();
+
+        underTest.saveLoadBalancerMetadata(stack, cloudLoadBalancerMetaDataStatuses);
+
+        verify(loadBalancerPersistenceService).save(loadBalancerCaptor.capture());
+        LoadBalancer loadBalancerValue = loadBalancerCaptor.getValue();
+        assertThat(loadBalancerValue.getHostedZoneId()).isSameAs(HOSTED_ZONE);
+        assertThat(loadBalancerValue.getIp()).isSameAs(PUBLIC_IP);
+        assertThat(loadBalancerValue.getDns()).isSameAs(CLOUD_DNS);
+        assertThat(loadBalancerValue.getEndpoint()).isEqualTo("master0");
+
     }
 
     @Test
@@ -394,6 +547,13 @@ public class MetadataSetupServiceTest {
         return List.of(cloudVmMetaDataStatus);
     }
 
+    private Iterable<CloudLoadBalancerMetadata> getCloudLoadBalancerMetaDataStatuses() {
+        return List.of(new CloudLoadBalancerMetadata.Builder().withType(LoadBalancerType.PUBLIC)
+                .withCloudDns(CLOUD_DNS)
+                .withHostedZoneId(HOSTED_ZONE)
+                .withIp(PUBLIC_IP).withName(LB_NAME).build());
+    }
+
     private void assertCommonProperties(InstanceMetaData instanceMetaData) {
         assertEquals(PRIVATE_IP, instanceMetaData.getPrivateIp());
         assertEquals(PUBLIC_IP, instanceMetaData.getPublicIp());
@@ -413,4 +573,30 @@ public class MetadataSetupServiceTest {
         assertEquals(InstanceLifeCycle.SPOT, instanceMetaData.getLifeCycle());
     }
 
+    private static class TestStackStatusView implements StackStatusView {
+        private Long id;
+
+        private StackStatus status;
+
+        public Long getId() {
+            return id;
+        }
+
+        @Override
+        public String getName() {
+            return null;
+        }
+
+        public StackStatus getStatus() {
+            return status;
+        }
+
+        public void setId(Long id) {
+            this.id = id;
+        }
+
+        public void setStatus(StackStatus status) {
+            this.status = status;
+        }
+    }
 }
