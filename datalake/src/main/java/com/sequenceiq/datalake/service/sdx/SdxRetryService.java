@@ -10,26 +10,36 @@ import static com.sequenceiq.datalake.flow.stop.SdxStopEvent.SDX_STOP_IN_PROGRES
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.InternalServerErrorException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupFlowConfig;
+import com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreFlowConfig;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowEvent;
+import com.sequenceiq.flow.core.config.FlowConfiguration;
 import com.sequenceiq.flow.domain.FlowLog;
 
 @Service
 public class SdxRetryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRetryService.class);
+
+    private static final Set<Class<? extends FlowConfiguration<?>>> FULLY_RESTARTABLE_FLOWS =  Sets.newHashSet(
+            DatalakeRestoreFlowConfig.class,
+            DatalakeBackupFlowConfig.class);
 
     @Inject
     private Flow2Handler flow2Handler;
@@ -38,7 +48,16 @@ public class SdxRetryService {
     private StackV4Endpoint stackV4Endpoint;
 
     public FlowIdentifier retrySdx(SdxCluster sdxCluster) {
-        return flow2Handler.retryLastFailedFlow(sdxCluster.getId(), lastSuccessfulStateLog -> retryCloudbreakIfNecessary(sdxCluster, lastSuccessfulStateLog));
+        FlowLog flowLog = flow2Handler.getFirstStateLogfromLatestFlow(sdxCluster.getId());
+        if (!flowLog.getFlowType().isOnClassPath()) {
+            throw new InternalServerErrorException(String.format("Flow type %s is not on classpath", flowLog.getFlowType().getName()));
+        }
+        if (FULLY_RESTARTABLE_FLOWS.contains(flowLog.getFlowType().getClassValue())) {
+            return flow2Handler.retryLastFailedFlowFromStart(sdxCluster.getId());
+        } else {
+            return flow2Handler.retryLastFailedFlow(sdxCluster.getId(), lastSuccessfulStateLog -> retryCloudbreakIfNecessary(sdxCluster,
+                    lastSuccessfulStateLog));
+        }
     }
 
     private void retryCloudbreakIfNecessary(SdxCluster sdxCluster, FlowLog lastSuccessfulStateLog) {
@@ -68,5 +87,4 @@ public class SdxRetryService {
                 CERT_RENEWAL_STARTED_EVENT
         );
     }
-
 }
