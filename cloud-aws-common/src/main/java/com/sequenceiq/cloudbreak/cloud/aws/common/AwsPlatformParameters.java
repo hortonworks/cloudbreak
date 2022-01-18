@@ -74,21 +74,21 @@ public class AwsPlatformParameters implements PlatformParameters {
 
     private VmRecommendations vmRecommendations;
 
-    private String credentialPoliciesJson;
+    private Map<PolicyType, String> credentialPoliciesJson;
 
-    private String auditPoliciesJson;
+    private Map<PolicyType, String> auditPoliciesJson;
 
-    private String environmentMinimalPoliciesJson;
+    private Map<PolicyType, String> environmentMinimalPoliciesJson;
 
-    private String cdpBucketAccessPolicyJson;
+    private Map<PolicyType, String> cdpBucketAccessPolicyJson;
 
-    private String cdpDatalakeAdminS3PolicyJson;
+    private Map<PolicyType, String> cdpDatalakeAdminS3PolicyJson;
 
-    private String cdpDynamoDbPolicyJson;
+    private Map<PolicyType, String> cdpDynamoDbPolicyJson;
 
-    private String cdpLogPolicyJson;
+    private Map<PolicyType, String> cdpLogPolicyJson;
 
-    private String cdpRangerAuditS3PolicyJson;
+    private Map<PolicyType, String> cdpRangerAuditS3PolicyJson;
 
     @PostConstruct
     public void init() {
@@ -191,35 +191,35 @@ public class AwsPlatformParameters implements PlatformParameters {
         return true;
     }
 
-    public String getAuditPoliciesJson() {
+    public Map<PolicyType, String> getAuditPoliciesJson() {
         return auditPoliciesJson;
     }
 
-    public String getCredentialPoliciesJson() {
+    public Map<PolicyType, String> getCredentialPoliciesJson() {
         return credentialPoliciesJson;
     }
 
-    public String getEnvironmentMinimalPoliciesJson() {
+    public Map<PolicyType, String> getEnvironmentMinimalPoliciesJson() {
         return environmentMinimalPoliciesJson;
     }
 
-    public String getCdpBucketAccessPolicyJson() {
+    public Map<PolicyType, String> getCdpBucketAccessPolicyJson() {
         return cdpBucketAccessPolicyJson;
     }
 
-    public String getCdpDatalakeAdminS3PolicyJson() {
+    public Map<PolicyType, String> getCdpDatalakeAdminS3PolicyJson() {
         return cdpDatalakeAdminS3PolicyJson;
     }
 
-    public String getCdpDynamoDbPolicyJson() {
+    public Map<PolicyType, String> getCdpDynamoDbPolicyJson() {
         return cdpDynamoDbPolicyJson;
     }
 
-    public String getCdpLogPolicyJson() {
+    public Map<PolicyType, String> getCdpLogPolicyJson() {
         return cdpLogPolicyJson;
     }
 
-    public String getCdpRangerAuditS3PolicyJson() {
+    public Map<PolicyType, String> getCdpRangerAuditS3PolicyJson() {
         return cdpRangerAuditS3PolicyJson;
     }
 
@@ -234,54 +234,57 @@ public class AwsPlatformParameters implements PlatformParameters {
         return result;
     }
 
-    private String initCBPolicyJson() {
+    private Map<PolicyType, String> initCBPolicyJson() {
         String resourceDefinition = resourceDefinition("cb-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String initAuditPolicyJson() {
+    private Map<PolicyType, String> initAuditPolicyJson() {
         String resourceDefinition = resourceDefinition("audit-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String initEnvironmentMinimalJson() {
+    private Map<PolicyType, String> initEnvironmentMinimalJson() {
         String resourceDefinition = resourceDefinition("environment-minimal-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String initCdpBucketAccessPolicyJson() {
+    private Map<PolicyType, String> initCdpBucketAccessPolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-bucket-access-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String initCdpDatalakeAdminS3PolicyJson() {
+    private Map<PolicyType, String> initCdpDatalakeAdminS3PolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-datalake-admin-s3-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String initCdpDynamoDbPolicyJson() {
+    private Map<PolicyType, String> initCdpDynamoDbPolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-dynamodb-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String initCdpLogPolicyJson() {
+    private Map<PolicyType, String> initCdpLogPolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-log-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String initCdpRangerAuditS3PolicyJson() {
+    private Map<PolicyType, String> initCdpRangerAuditS3PolicyJson() {
         String resourceDefinition = resourceDefinitionInSubDir(CDP_SUB_RESOURCE_DIR, "cdp-ranger-audit-s3-policy");
         return getPolicyJson(resourceDefinition);
     }
 
-    private String getPolicyJson(String resourceDefinition) {
+    private Map<PolicyType, String> getPolicyJson(String resourceDefinition) {
         String minified = JsonUtil.minify(resourceDefinition);
         if (JsonUtil.INVALID_JSON_CONTENT.equals(minified)) {
             String message = String.format("Cannot initialize Cloudbreak's policies JSON for AWS: %s", minified);
             LOGGER.info(message);
             throw new CloudConnectorException(message);
         }
-        return Base64.encodeBase64String(minified.getBytes());
+        Map<PolicyType, String> policy = new HashMap<>();
+        policy.put(PolicyType.GOV, Base64.encodeBase64String(minified.replaceAll(":aws:", ":aws-us-gov:").getBytes()));
+        policy.put(PolicyType.PUBLIC, Base64.encodeBase64String(minified.getBytes()));
+        return policy;
     }
 
 }

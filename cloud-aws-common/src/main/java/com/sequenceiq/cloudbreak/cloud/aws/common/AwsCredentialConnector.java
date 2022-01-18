@@ -49,6 +49,9 @@ public class AwsCredentialConnector implements CredentialConnector {
     @Value("${cb.aws.account.id:}")
     private String accountId;
 
+    @Value("${cb.aws.gov.account.id:}")
+    private String govAccountId;
+
     @Inject
     private AwsSessionCredentialClient credentialClient;
 
@@ -127,30 +130,44 @@ public class AwsCredentialConnector implements CredentialConnector {
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
         String policyJson;
+        boolean govCloud = cloudContext.isGovCloud();
         switch (type) {
             case ENVIRONMENT:
-                policyJson = awsPlatformParameters.getCredentialPoliciesJson();
+                policyJson = awsPlatformParameters.getCredentialPoliciesJson().get(getPolicyType(govCloud));
                 break;
             case AUDIT:
-                policyJson = awsPlatformParameters.getAuditPoliciesJson();
+                policyJson = awsPlatformParameters.getAuditPoliciesJson().get(getPolicyType(govCloud));
                 break;
             default:
                 policyJson = null;
         }
-        AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, policyJson);
-        awsPrerequisites.setPolicies(collectNecessaryPolicies());
-        return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
+        AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(
+                externalId,
+                policyJson);
+        awsPrerequisites.setPolicies(collectNecessaryPolicies(govCloud));
+        return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), getAccountId(govCloud), awsPrerequisites);
     }
 
-    private Map<String, String> collectNecessaryPolicies() {
+    private PolicyType getPolicyType(boolean govCloud) {
+        return govCloud ? PolicyType.GOV : PolicyType.PUBLIC;
+    }
+
+    private String getAccountId(boolean govCloud) {
+        if (govCloud) {
+            return govAccountId;
+        } else {
+            return accountId;
+        }
+    }
+
+    private Map<String, String> collectNecessaryPolicies(boolean govCloud) {
         return Map.of(
-                "Log", awsPlatformParameters.getCdpLogPolicyJson(),
-                "Audit", awsPlatformParameters.getAuditPoliciesJson(),
-                "DynamoDB", awsPlatformParameters.getCdpDynamoDbPolicyJson(),
-                "Bucket_Access", awsPlatformParameters.getCdpBucketAccessPolicyJson(),
-                "Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson(),
-                "Ranger_Audit", awsPlatformParameters.getCdpRangerAuditS3PolicyJson(),
-                "Datalake_Admin", awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson()
+                "Audit", awsPlatformParameters.getAuditPoliciesJson().get(getPolicyType(govCloud)),
+                "DynamoDB", awsPlatformParameters.getCdpDynamoDbPolicyJson().get(getPolicyType(govCloud)),
+                "Bucket_Access", awsPlatformParameters.getCdpBucketAccessPolicyJson().get(getPolicyType(govCloud)),
+                "Environment", awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(getPolicyType(govCloud)),
+                "Ranger_Audit", awsPlatformParameters.getCdpRangerAuditS3PolicyJson().get(getPolicyType(govCloud)),
+                "Datalake_Admin", awsPlatformParameters.getCdpDatalakeAdminS3PolicyJson().get(getPolicyType(govCloud))
         );
     }
 
@@ -231,7 +248,8 @@ public class AwsCredentialConnector implements CredentialConnector {
             CloudCredentialStatus credentialStatus) {
         if (cloudCredential.isVerifyPermissions()) {
             try {
-                String environmentMinimalPoliciesJson = awsPlatformParameters.getEnvironmentMinimalPoliciesJson();
+                String environmentMinimalPoliciesJson = awsPlatformParameters.getEnvironmentMinimalPoliciesJson()
+                        .get(getPolicyType(new AwsCredentialView(cloudCredential).isGovernmentCloudEnabled()));
                 verifyCredentialsPermission(awsCredential, environmentMinimalPoliciesJson);
             } catch (AwsPermissionMissingException e) {
                 credentialStatus = new CloudCredentialStatus(cloudCredential, PERMISSIONS_MISSING, new Exception(e.getMessage()), e.getMessage());

@@ -43,6 +43,8 @@ public class CredentialResponse extends CredentialBase {
     @ApiModelProperty(value = CredentialModelDescription.CREDENTIAL_TYPE, required = true)
     private CredentialType type;
 
+    private Boolean govCloud;
+
     public String getName() {
         return name;
     }
@@ -99,6 +101,14 @@ public class CredentialResponse extends CredentialBase {
         this.type = type;
     }
 
+    public Boolean getGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(Boolean govCloud) {
+        this.govCloud = govCloud;
+    }
+
     public String getAccountId() {
         return accountId;
     }
@@ -116,6 +126,7 @@ public class CredentialResponse extends CredentialBase {
                 ", creator='" + creator + '\'' +
                 ", accountId='" + accountId + '\'' +
                 ", created=" + created +
+                ", govCloud=" + govCloud +
                 ", type=" + type +
                 '}';
     }

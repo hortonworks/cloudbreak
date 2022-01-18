@@ -444,7 +444,7 @@ public class StackRequestManifester {
 
     private void setupMultiAz(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId()) && sdxCluster.isEnableMultiAz()) {
-            multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest);
+            multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest, environment);
             multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment, sdxCluster.getClusterShape());
         }
     }

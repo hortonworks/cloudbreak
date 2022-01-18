@@ -6,6 +6,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+import javax.ws.rs.QueryParam;
 
 import org.springframework.stereotype.Controller;
 
@@ -104,9 +105,9 @@ public class AuditCredentialV1Controller extends NotificationController implemen
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_AUDIT_CREDENTIAL)
-    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, String govCloud, String deploymentAddress) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return credentialService.getPrerequisites(platform, deploymentAddress, userCrn, AUDIT);
+        return credentialService.getPrerequisites(platform, govCloud, deploymentAddress, userCrn, AUDIT);
     }
 
     @Override

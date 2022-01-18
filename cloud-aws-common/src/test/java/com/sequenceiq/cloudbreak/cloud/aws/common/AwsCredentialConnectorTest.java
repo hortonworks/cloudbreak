@@ -101,7 +101,7 @@ public class AwsCredentialConnectorTest {
                 "external ID. Cause: '%s'", roleArn, exceptionMessageComesFromSdk);
         Exception sdkException = new SdkBaseException(exceptionMessageComesFromSdk);
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         doThrow(sdkException).when(awsCredentialVerifier).validateAws(credentialView, encodedAwsEnvPolicy);
         CloudCredentialStatus result = underTest.verify(authenticatedContext, CREDENTIAL_VERIFICATION_CONTEXT);
 
@@ -135,7 +135,7 @@ public class AwsCredentialConnectorTest {
         String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         when(credentialView.getRoleArn()).thenReturn(roleArn);
 
         CloudCredentialStatus result = underTest.verify(authenticatedContext, new CredentialVerificationContext(Boolean.TRUE));
@@ -155,7 +155,7 @@ public class AwsCredentialConnectorTest {
         String awsEnvPolicy = Resources.toString(url, UTF_8);
         String encodedAwsEnvPolicy = Base64.getEncoder().encodeToString(awsEnvPolicy.getBytes());
         String roleArn = "someRoleArn";
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         when(credentialView.getRoleArn()).thenReturn(roleArn);
         AmazonClientException amazonClientException = new AmazonClientException(ROLE_IS_NOT_ASSUMABLE_ERROR_MESSAGE_INDICATOR);
         when(credentialClient.retrieveSessionCredentialsWithoutExternalId(any())).thenThrow(amazonClientException);
@@ -209,7 +209,7 @@ public class AwsCredentialConnectorTest {
                 "external ID. Cause: '%s'", roleArn, exceptionMessageComesFromSdk);
         Exception sdkException = new SdkBaseException(exceptionMessageComesFromSdk);
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
         CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
 
@@ -236,7 +236,7 @@ public class AwsCredentialConnectorTest {
                 "and it's created with the correct external ID. Cause: 'SomethingTerribleHappened!!";
         Exception sdkException = new AwsConfusedDeputyException("SomethingTerribleHappened");
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
         CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
 
@@ -258,7 +258,7 @@ public class AwsCredentialConnectorTest {
         when(credentialView.getRoleArn()).thenReturn("someRoleArn");
         Exception sdkException = new AwsConfusedDeputyException("SomethingTerribleHappened");
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
 
         CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
@@ -287,7 +287,7 @@ public class AwsCredentialConnectorTest {
                 "and it's created with the correct external ID. Cause: 'SomethingTerribleHappened!!";
         Exception sdkException = new AwsConfusedDeputyException("SomethingTerribleHappened");
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
         CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
 
@@ -314,7 +314,7 @@ public class AwsCredentialConnectorTest {
         String exceptionMessageComesFromSdk = "Unable to verify AWS credential due to: 'SomethingTerribleHappened'";
         Exception sdkException = new AmazonClientException("SomethingTerribleHappened");
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         when(credentialClient.retrieveSessionCredentials(any())).thenThrow(sdkException);
         CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
 
@@ -342,7 +342,7 @@ public class AwsCredentialConnectorTest {
 
         String exceptionMessageComesFromSdk = "Please provide both the 'access' and 'secret key'";
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
 
         assertNotNull(result);
@@ -369,7 +369,7 @@ public class AwsCredentialConnectorTest {
 
         String exceptionMessageComesFromSdk = "Please provide both the 'access' and 'secret key'";
 
-        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson()).thenReturn(encodedAwsEnvPolicy);
+        when(awsPlatformParameters.getEnvironmentMinimalPoliciesJson().get(PolicyType.PUBLIC)).thenReturn(encodedAwsEnvPolicy);
         CDPServicePolicyVerificationResponses result = underTest.verifyByServices(authenticatedContext, services, experiencePrerequisites);
 
         assertNotNull(result);

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.controller.validation.network;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_GOV_VARIANT;
 import static com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants.AwsVariant.AWS_NATIVE_VARIANT;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class MultiAzValidator {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiAzValidator.class);
 
-    @Value("${cb.multiaz.supported.variants:AWS_NATIVE}")
+    @Value("${cb.multiaz.supported.variants:AWS_NATIVE,AWS_GOV}")
     private Set<String> supportedMultiAzVariants;
 
     @Value("${cb.multiaz.supported.instancemetadata.platforms:AWS,GCP,AZURE,YARN}")
@@ -36,7 +37,7 @@ public class MultiAzValidator {
     @PostConstruct
     public void initSupportedVariants() {
         if (supportedMultiAzVariants.isEmpty()) {
-            supportedMultiAzVariants = Set.of(AWS_NATIVE_VARIANT.variant().value());
+            supportedMultiAzVariants = Set.of(AWS_NATIVE_VARIANT.variant().value(), AWS_GOV_VARIANT.variant().value());
         }
         if (supportedInstanceMetadataPlatforms.isEmpty()) {
             supportedInstanceMetadataPlatforms = Set.of(

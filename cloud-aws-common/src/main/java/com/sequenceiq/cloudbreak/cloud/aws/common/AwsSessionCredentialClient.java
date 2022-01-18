@@ -16,6 +16,9 @@ import org.springframework.stereotype.Component;
 
 import com.amazonaws.ClientConfiguration;
 import com.amazonaws.SdkClientException;
+import com.amazonaws.auth.AWSCredentialsProvider;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.retry.PredefinedRetryPolicies;
@@ -46,6 +49,9 @@ public class AwsSessionCredentialClient {
 
     @Inject
     private AwsDefaultZoneProvider awsDefaultZoneProvider;
+
+    @Inject
+    private AwsEnvironmentVariableChecker awsEnvironmentVariableChecker;
 
     @Inject
     private Tracer tracer;
@@ -104,9 +110,25 @@ public class AwsSessionCredentialClient {
         return AWSSecurityTokenServiceClientBuilder.standard()
                 .withEndpointConfiguration(getEndpointConfiguration(defaultZone))
                 .withClientConfiguration(getDefaultClientConfiguration())
-                .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
+                .withCredentials(getCredential(awsCredential))
                 .withRequestHandlers(new AwsTracingRequestHandler(tracer))
                 .build();
+    }
+
+    private AWSCredentialsProvider getCredential(AwsCredentialView awsCredential) {
+        if (isLocalDev(awsCredential)) {
+            BasicAWSCredentials awsCredentials = new BasicAWSCredentials(
+                    awsEnvironmentVariableChecker.getAwsAccessKey(awsCredential),
+                    awsEnvironmentVariableChecker.getAwsSecretAccessKey(awsCredential));
+            return new AWSStaticCredentialsProvider(awsCredentials);
+        } else {
+            return DefaultAWSCredentialsProviderChain.getInstance();
+        }
+    }
+
+    private boolean isLocalDev(AwsCredentialView awsCredential) {
+        return awsEnvironmentVariableChecker.isAwsAccessKeyAvailable(awsCredential)
+                && awsEnvironmentVariableChecker.isAwsSecretAccessKeyAvailable(awsCredential);
     }
 
     private ClientConfiguration getDefaultClientConfiguration() {

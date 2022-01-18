@@ -18,6 +18,8 @@ public class CloudContext {
 
     private final Platform platform;
 
+    private final boolean govCloud;
+
     private final Variant variant;
 
     private final Location location;
@@ -36,7 +38,8 @@ public class CloudContext {
             String variant,
             Location location,
             String accountId,
-            String userName) {
+            String userName,
+            boolean govCloud) {
         this.id = id;
         this.name = name;
         this.crn = crn;
@@ -45,6 +48,7 @@ public class CloudContext {
         this.location = location;
         this.accountId = accountId;
         this.userName = userName;
+        this.govCloud = govCloud;
     }
 
     public Long getId() {
@@ -83,6 +87,10 @@ public class CloudContext {
         return crn;
     }
 
+    public boolean isGovCloud() {
+        return govCloud;
+    }
+
     @Override
     public String toString() {
         return "CloudContext{" +
@@ -94,6 +102,7 @@ public class CloudContext {
                 ", userName='" + userName + '\'' +
                 ", accountId='" + accountId + '\'' +
                 ", crn='" + crn + '\'' +
+                ", govCloud='" + govCloud + '\'' +
                 '}';
     }
 
@@ -113,6 +122,8 @@ public class CloudContext {
         private String accountId;
 
         private String crn;
+
+        private boolean govCloud;
 
         public Builder withId(Long id) {
             this.id = id;
@@ -164,6 +175,11 @@ public class CloudContext {
             return this;
         }
 
+        public Builder withGovCloud(boolean govCloud) {
+            this.govCloud = govCloud;
+            return this;
+        }
+
         public static Builder builder() {
             return new Builder();
         }
@@ -177,7 +193,8 @@ public class CloudContext {
                     variant,
                     location,
                     accountId,
-                    userName
+                    userName,
+                    govCloud
             );
         }
     }

@@ -240,10 +240,11 @@ public class CredentialService extends AbstractCredentialService implements Reso
         }
     }
 
-    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, String userCrn, CredentialType type) {
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String govCloud,
+        String deploymentAddress, String userCrn, CredentialType type) {
         String cloudPlatformInUpperCase = cloudPlatform.toUpperCase();
         credentialValidator.validateCredentialCloudPlatform(cloudPlatformInUpperCase, userCrn, type);
-        return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, deploymentAddress, type);
+        return credentialPrerequisiteService.getPrerequisites(cloudPlatformInUpperCase, Boolean.valueOf(govCloud), deploymentAddress, type);
     }
 
     public String initCodeGrantFlow(String accountId, @Nonnull Credential credential, String creatorUserCrn) {

@@ -14,7 +14,6 @@ import com.amazonaws.ClientConfiguration;
 import com.amazonaws.auth.AWSCredentialsProvider;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.retry.PredefinedRetryPolicies;
 import com.amazonaws.services.cloudwatch.AmazonCloudWatch;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
@@ -155,17 +154,6 @@ public abstract class AwsClient {
         return new AmazonSecurityTokenServiceClient(client);
     }
 
-    public AmazonSecurityTokenServiceClient createCdpSecurityTokenServiceClient(AwsCredentialView awsCredential) {
-        String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
-        AWSSecurityTokenService client = proxy(com.amazonaws.services.securitytoken.AWSSecurityTokenServiceClient.builder()
-                .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
-                .withClientConfiguration(getDefaultClientConfiguration())
-                .withRequestHandlers(new AwsTracingRequestHandler(tracer))
-                .withRegion(region)
-                .build(), awsCredential, region);
-        return new AmazonSecurityTokenServiceClient(client);
-    }
-
     public AmazonIdentityManagementClient createAmazonIdentityManagement(AwsCredentialView awsCredential) {
         String region = awsDefaultZoneProvider.getDefaultZone(awsCredential);
         AmazonIdentityManagement client = proxy(AmazonIdentityManagementClientBuilder.standard()
@@ -284,7 +272,7 @@ public abstract class AwsClient {
 
     public void validateEnvironmentForRoleAssuming(AwsCredentialView awsCredential, boolean awsAccessKeyAvailable, boolean awsSecretAccessKeyAvailable) {
         String accessKeyString = awsEnvironmentVariableChecker.getAwsAccessKeyString(awsCredential);
-        String secretAccessKeyString = awsEnvironmentVariableChecker.getAwsSecretAccessKey(awsCredential);
+        String secretAccessKeyString = awsEnvironmentVariableChecker.getAwsSecretAccessKeyString(awsCredential);
 
         if (awsAccessKeyAvailable && !awsSecretAccessKeyAvailable) {
             throw new CredentialVerificationException(String.format("If '%s' available then '%s' must be set!", accessKeyString, secretAccessKeyString));

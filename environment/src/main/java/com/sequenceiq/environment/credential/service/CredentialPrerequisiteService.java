@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.util.Map;
 
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.QueryParam;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,8 +56,8 @@ public class CredentialPrerequisiteService {
         this.eventBus = eventBus;
     }
 
-    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, String deploymentAddress, CredentialType type) {
-        CredentialPrerequisitesResponse result = getCloudbreakPrerequisites(cloudPlatform, deploymentAddress, type);
+    public CredentialPrerequisitesResponse getPrerequisites(String cloudPlatform, boolean govCloud, String deploymentAddress, CredentialType type) {
+        CredentialPrerequisitesResponse result = getCloudbreakPrerequisites(cloudPlatform, govCloud, deploymentAddress, type);
         if (isPolicyFetchFromExperiencesAllowed()) {
             if (AWS.name().equalsIgnoreCase(cloudPlatform)) {
                 try {
@@ -80,9 +81,11 @@ public class CredentialPrerequisiteService {
         return result;
     }
 
-    public CredentialPrerequisitesResponse getCloudbreakPrerequisites(String cloudPlatform, String deploymentAddress, CredentialType type) {
+    public CredentialPrerequisitesResponse getCloudbreakPrerequisites(String cloudPlatform, boolean govCloud,
+        String deploymentAddress, CredentialType type) {
         CloudContext cloudContext = CloudContext.Builder.builder()
                 .withPlatform(cloudPlatform)
+                .withGovCloud(govCloud)
                 .withWorkspaceId(TEMP_WORKSPACE_ID)
                 .build();
         CredentialPrerequisitesRequest request = new CredentialPrerequisitesRequest(cloudContext,

@@ -5,6 +5,8 @@ public class CloudConstants {
 
     public static final String AWS_NATIVE = "AWS_NATIVE";
 
+    public static final String AWS_GOV = "AWS_GOV";
+
     public static final String GCP = "GCP";
 
     public static final String AZURE = "AZURE";

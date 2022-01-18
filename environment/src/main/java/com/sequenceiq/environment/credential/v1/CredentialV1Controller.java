@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.validation.Valid;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
@@ -166,9 +167,9 @@ public class CredentialV1Controller extends NotificationController implements Cr
 
     @Override
     @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CREDENTIAL)
-    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, String deploymentAddress) {
+    public CredentialPrerequisitesResponse getPrerequisitesForCloudPlatform(String platform, String govCloud, String deploymentAddress) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        return credentialService.getPrerequisites(platform, deploymentAddress, userCrn, ENVIRONMENT);
+        return credentialService.getPrerequisites(platform, govCloud, deploymentAddress, userCrn, ENVIRONMENT);
     }
 
     @Override

@@ -72,6 +72,7 @@ include 'mock-infrastructure'
 include 'node-status-monitor-client'
 include 'cloud-aws-common'
 include 'cloud-aws-native'
+include 'cloud-aws-gov'
 include 'custom-configurations'
 include 'custom-configurations-api'
 
