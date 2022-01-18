@@ -135,7 +135,10 @@ bootRun {
   environment "AWS_ACCESS_KEY_ID", System.getenv('AWS_ACCESS_KEY_ID')
   environment "AWS_SECRET_ACCESS_KEY", System.getenv('AWS_SECRET_ACCESS_KEY')
   environment "CB_AWS_ACCOUNT_ID", System.getenv('CB_AWS_ACCOUNT_ID')
-  //Probably will need to add more for AZURE, GOV_CLOUD, GCE, etc
+  environment "AWS_GOV_ACCESS_KEY_ID", System.getenv('AWS_GOV_ACCESS_KEY_ID')
+  environment "AWS_GOV_SECRET_ACCESS_KEY", System.getenv('AWS_GOV_SECRET_ACCESS_KEY')
+  environment "CB_AWS_GOV_ACCOUNT_ID", System.getenv('CB_AWS_GOV_ACCOUNT_ID')
+  //Probably will need to add more for AZURE, GCE, etc
 
   if (project.hasProperty("jvmArgs")) {
     jvmArgs += project.jvmArgs.split("\\s+").toList()

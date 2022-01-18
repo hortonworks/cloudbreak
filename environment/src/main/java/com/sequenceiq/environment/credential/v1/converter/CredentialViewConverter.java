@@ -18,6 +18,7 @@ public class CredentialViewConverter {
         response.setDescription(credentialView.getDescription());
         response.setVerificationStatusText(credentialView.getVerificationStatusText());
         response.setType(credentialView.getType());
+        response.setGovCloud(credentialView.getGovCloud());
         return response;
     }
 

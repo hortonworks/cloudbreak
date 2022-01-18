@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service;
 
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getCMStackDescriptorResponse;
 import static com.sequenceiq.cloudbreak.RepoTestUtil.getDefaultCDHInfo;
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.RepositoryInfoToClouderaManagerInfoV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.StackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackMatrixServiceTest {
@@ -34,6 +36,8 @@ public class StackMatrixServiceTest {
     private static final Long WORKSPACE_ID = 0L;
 
     private static final String PLATFORM = CloudPlatform.AWS.name();
+
+    private static final ImageCatalogPlatform IMAGECATALOGPLATFORM = imageCatalogPlatform(PLATFORM);
 
     private static final String IMAGE_CATALOG_NAME = "image catalog name";
 
@@ -55,7 +59,7 @@ public class StackMatrixServiceTest {
 
         when(repositoryInfoToClouderaManagerInfoV4ResponseConverter.convert(any(RepositoryInfo.class))).thenReturn(new ClouderaManagerInfoV4Response());
 
-        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(WORKSPACE_ID, PLATFORM, IMAGE_CATALOG_NAME);
+        StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(WORKSPACE_ID, IMAGECATALOGPLATFORM, IMAGE_CATALOG_NAME);
 
         assertEquals(1L, stackMatrixV4Response.getCdh().size());
 
@@ -72,6 +76,6 @@ public class StackMatrixServiceTest {
         when(stackInfoToClouderaManagerStackDescriptorV4ResponseConverter.convert(cdhInfo))
                 .thenReturn(getCMStackDescriptorResponse("6.1.0-1.cdh6.1.0.p0.770702"));
 
-        when(imageBasedDefaultCDHEntries.getEntries(WORKSPACE_ID, PLATFORM, IMAGE_CATALOG_NAME)).thenReturn(cdhEntries);
+        when(imageBasedDefaultCDHEntries.getEntries(WORKSPACE_ID, IMAGECATALOGPLATFORM, IMAGE_CATALOG_NAME)).thenReturn(cdhEntries);
     }
 }

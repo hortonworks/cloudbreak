@@ -33,7 +33,12 @@ public class CloudPlatformConnectors {
     @Value("${cb.platform.default.variants:}")
     private String platformDefaultVariants;
 
+    @Value("${cb.platform.default.govVariants:}")
+    private String platformDefaultGovVariants;
+
     private final Map<Platform, Variant> defaultVariants = new HashMap<>();
+
+    private final Map<Platform, Variant> defaultGovVariants = new HashMap<>();
 
     @Inject
     private List<CloudConnector> cloudConnectors;
@@ -45,18 +50,24 @@ public class CloudPlatformConnectors {
     @PostConstruct
     public void cloudPlatformConnectors() {
         platformToVariants = HashMultimap.create();
+
         cloudConnectors.forEach(connector -> {
             map.put(new CloudPlatformVariant(connector.platform(), connector.variant()), connector);
             platformToVariants.put(connector.platform(), connector.variant());
         });
-        Map<Platform, Variant> environmentDefaults = extractEnvironmentDefaultVariants();
-        setupDefaultVariants(platformToVariants, environmentDefaults);
+        setupDefaultVariants(platformToVariants, extractEnvironmentDefaultVariants());
+        setupDefaultGovVariants(platformToVariants, extractEnvironmentDefaultGovVariants());
         LOGGER.debug(map.toString());
         LOGGER.debug(defaultVariants.toString());
+        LOGGER.debug(defaultGovVariants.toString());
     }
 
     private Map<Platform, Variant> extractEnvironmentDefaultVariants() {
         return toMap(platformDefaultVariants);
+    }
+
+    private Map<Platform, Variant> extractEnvironmentDefaultGovVariants() {
+        return toMap(platformDefaultGovVariants);
     }
 
     private Map<Platform, Variant> toMap(String s) {
@@ -85,8 +96,25 @@ public class CloudPlatformConnectors {
         }
     }
 
+    private void setupDefaultGovVariants(Multimap<Platform, Variant> platformToVariants, Map<Platform, Variant> environmentDefaults) {
+        for (Entry<Platform, Collection<Variant>> platformVariants : platformToVariants.asMap().entrySet()) {
+            if (platformVariants.getValue().size() == 1) {
+                Collection<Variant> value = platformVariants.getValue();
+                defaultGovVariants.put(platformVariants.getKey(), value.toArray(new Variant[value.size()])[0]);
+            } else {
+                if (platformVariants.getValue().contains(environmentDefaults.get(platformVariants.getKey()))) {
+                    defaultGovVariants.put(platformVariants.getKey(), environmentDefaults.get(platformVariants.getKey()));
+                }
+            }
+        }
+    }
+
     public Variant getDefaultVariant(Platform platform) {
         return defaultVariants.get(platform);
+    }
+
+    public Variant getDefaultGovVariant(Platform platform) {
+        return defaultGovVariants.get(platform);
     }
 
     public CloudConnector<Object> getDefault(Platform platform) {
@@ -94,8 +122,17 @@ public class CloudPlatformConnectors {
         return map.get(new CloudPlatformVariant(platform, variant));
     }
 
+    public CloudConnector<Object> getGovDefault(Platform platform) {
+        Variant variant = getDefaultGovVariant(platform);
+        return map.get(new CloudPlatformVariant(platform, variant));
+    }
+
     public CloudConnector<Object> get(Platform platform, Variant variant) {
         return get(new CloudPlatformVariant(platform, variant));
+    }
+
+    public CloudConnector<Object> getGov(Platform platform, Variant variant) {
+        return getGov(new CloudPlatformVariant(platform, variant));
     }
 
     public CloudConnector<Object> get(CloudPlatformVariant variant) {
@@ -103,8 +140,17 @@ public class CloudPlatformConnectors {
         return cloudConnector == null ? getDefault(variant.getPlatform()) : cloudConnector;
     }
 
+    public CloudConnector<Object> getGov(CloudPlatformVariant variant) {
+        CloudConnector<Object> cloudConnector = map.get(variant);
+        return cloudConnector == null ? getGovDefault(variant.getPlatform()) : cloudConnector;
+    }
+
     public PlatformVariants getPlatformVariants() {
         return new PlatformVariants(platformToVariants.asMap(), defaultVariants);
+    }
+
+    public PlatformVariants getPlatformGovVariants() {
+        return new PlatformVariants(platformToVariants.asMap(), defaultGovVariants);
     }
 
 }

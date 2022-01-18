@@ -55,7 +55,7 @@ public class CoreImageProvider implements ImageProvider {
     public List<ImageWrapper> getImages(ImageSettingsRequest imageSettings, String region, String platform) {
         try {
             ImagesV4Response imagesV4Response = imageCatalogV4Endpoint.getImagesByName(WORKSPACE_ID_DEFAULT, imageSettings.getCatalog(), null, platform, null,
-                    null);
+                    null, false);
             LOGGER.debug("Images received: {}", imagesV4Response);
             return Optional.ofNullable(imagesV4Response.getFreeipaImages()).
                     orElseGet(List::of).stream()

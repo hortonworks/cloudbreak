@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.lenient;
@@ -23,14 +24,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @RunWith(MockitoJUnitRunner.class)
 @ExtendWith(MockitoExtension.class)
 public class LatestDefaultImageUuidProviderTest {
 
-    private static final Set<String> SINGLE_PLATFORM = new HashSet<>(Set.of("AWS"));
+    private static final Set<ImageCatalogPlatform> SINGLE_PLATFORM = new HashSet<>(Set.of(imageCatalogPlatform("AWS")));
 
-    private static final Set<String> MULTIPLE_PLATFORMS = new HashSet<>(Set.of("AWS", "AZURE", "YARN"));
+    private static final Set<ImageCatalogPlatform> MULTIPLE_PLATFORMS = new HashSet<>(Set.of(
+            imageCatalogPlatform("AWS"),
+            imageCatalogPlatform("AZURE"),
+            imageCatalogPlatform("YARN")));
 
     private static final Map<String, Map<String, String>> AWS_IMAGE_SET_BY_PROVIDER =
             Map.of("aws", Map.of("ap-northeast-1", "ami-03c40802e9db52480", "ap-northeast-2", "ami-09b13f03cae650994"));

@@ -3,12 +3,13 @@ package com.sequenceiq.cloudbreak.service.image;
 import java.util.Set;
 
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 public class ImageFilter {
 
     private final ImageCatalog imageCatalog;
 
-    private final Set<String> platforms;
+    private final Set<ImageCatalogPlatform> platforms;
 
     private final String cbVersion;
 
@@ -18,13 +19,13 @@ public class ImageFilter {
 
     private String clusterVersion;
 
-    public ImageFilter(ImageCatalog imageCatalog, Set<String> platforms, String cbVersion) {
+    public ImageFilter(ImageCatalog imageCatalog, Set<ImageCatalogPlatform> platforms, String cbVersion) {
         this.imageCatalog = imageCatalog;
         this.platforms = platforms;
         this.cbVersion = cbVersion;
     }
 
-    public ImageFilter(ImageCatalog imageCatalog, Set<String> platforms, String cbVersion, boolean baseImageEnabled, Set<String> operatingSystems,
+    public ImageFilter(ImageCatalog imageCatalog, Set<ImageCatalogPlatform> platforms, String cbVersion, boolean baseImageEnabled, Set<String> operatingSystems,
             String clusterVersion) {
         this.imageCatalog = imageCatalog;
         this.platforms = platforms;
@@ -38,7 +39,7 @@ public class ImageFilter {
         return imageCatalog;
     }
 
-    public Set<String> getPlatforms() {
+    public Set<ImageCatalogPlatform> getPlatforms() {
         return platforms;
     }
 
@@ -57,4 +58,5 @@ public class ImageFilter {
     public String getClusterVersion() {
         return clusterVersion;
     }
+
 }

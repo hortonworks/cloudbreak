@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -38,6 +39,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public class StackImageFilterServiceTest {
@@ -45,6 +47,8 @@ public class StackImageFilterServiceTest {
     private static final String CUSTOM_IMAGE_CATALOG_URL = "http://localhost/custom-imagecatalog-url";
 
     private static final String PROVIDER_AWS = "AWS";
+
+    public static final ImageCatalogPlatform AWS = imageCatalogPlatform(PROVIDER_AWS);
 
     private static final String STACK_NAME = "stackName";
 
@@ -80,6 +84,9 @@ public class StackImageFilterServiceTest {
     @Mock
     private ComponentConfigProviderService componentConfigProviderService;
 
+    @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
     @InjectMocks
     private StackImageFilterService underTest;
 
@@ -92,16 +99,17 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesCdh() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(""));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
         assertEquals(IMAGE_CDH_ID, images.getCdhImages().get(0).getUuid());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(AWS));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -112,15 +120,16 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesFiltersCurrentImage() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(true);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(IMAGE_HDP_ID));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertEquals(IMAGE_BASE_ID, images.getBaseImages().get(0).getUuid());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(AWS));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
         verify(stackImageUpdateService, never()).isValidImage(eq(stack), eq(IMAGE_HDP_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
@@ -131,15 +140,16 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesWhenStackImageUpdateServiceRejectsAll() throws CloudbreakImageCatalogException, CloudbreakImageNotFoundException {
         Stack stack = getStack(DetailedStackStatus.AVAILABLE);
         setupLoggedInUser();
-        when(imageCatalogService.getImages(anyLong(), anyString(), anyString())).thenReturn(getStatedImages());
+        when(imageCatalogService.getImages(anyLong(), anyString(), any())).thenReturn(getStatedImages());
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
         when(stackImageUpdateService.isValidImage(any(), anyString(), anyString(), anyString())).thenReturn(false);
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(getImage(""));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
 
         Images images = underTest.getApplicableImages(ORG_ID, IMAGE_CATALOG_NAME, STACK_NAME);
 
         assertThat(images.getBaseImages(), empty());
-        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(PROVIDER_AWS));
+        verify(imageCatalogService).getImages(eq(ORG_ID), eq(IMAGE_CATALOG_NAME), eq(AWS));
         verify(componentConfigProviderService).getImage(STACK_ID);
         verify(stackImageUpdateService).isValidImage(eq(stack), eq(IMAGE_BASE_ID), eq(IMAGE_CATALOG_NAME), eq(CUSTOM_IMAGE_CATALOG_URL));
     }
@@ -148,6 +158,8 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesWhenStackNotInAvailableState() throws CloudbreakImageCatalogException {
         Stack stack = getStack(DetailedStackStatus.UPSCALE_IN_PROGRESS);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
+
         setupLoggedInUser();
         thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
@@ -159,6 +171,8 @@ public class StackImageFilterServiceTest {
     public void testGetApplicableImagesWhenClusterNotInAvailableState() throws CloudbreakImageCatalogException {
         Stack stack = getStack(DetailedStackStatus.CLUSTER_UPGRADE_FAILED);
         when(stackService.getByNameInWorkspaceWithLists(eq(STACK_NAME), eq(ORG_ID))).thenReturn(Optional.ofNullable(stack));
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(AWS);
+
         setupLoggedInUser();
         thrown.expectMessage("To retrieve list of images for upgrade cluster have to be in AVAILABLE state");
         thrown.expect(BadRequestException.class);
@@ -191,6 +205,7 @@ public class StackImageFilterServiceTest {
         Stack stack = new Stack();
         stack.setId(STACK_ID);
         stack.setCloudPlatform(PROVIDER_AWS);
+        stack.setPlatformVariant(PROVIDER_AWS);
         stack.setName(STACK_NAME);
         stack.setStackStatus(new StackStatus(stack, detailedStackStatus.getStatus(), "", detailedStackStatus));
         Cluster cluster = new Cluster();

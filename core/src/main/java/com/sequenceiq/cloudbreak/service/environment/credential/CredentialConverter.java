@@ -46,6 +46,7 @@ public class CredentialConverter {
                 .azure(getIfNotNull(source.getAzure(), this::azure))
                 .crn(source.getCrn())
                 .description(source.getDescription())
+                .govCloud(source.getGovCloud())
                 .account(source.getAccountId())
                 .creator(source.getCreator())
                 .name(source.getName())

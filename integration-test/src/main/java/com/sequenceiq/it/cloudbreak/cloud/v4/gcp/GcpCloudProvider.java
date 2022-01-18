@@ -427,7 +427,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
                         .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.GCP.name(), null, null).getCdhImages();
+                                CloudPlatform.GCP.name(), null, null, false).getCdhImages();
 
                 ImageV4Response olderImage = images.get(images.size() - 2);
                 Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
@@ -452,7 +452,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (gcpProperties.getBaseimage().getImageId() == null || gcpProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name());
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.GCP.name(), false);
             gcpProperties.getBaseimage().setImageId(imageId);
             return imageId;
         } else {

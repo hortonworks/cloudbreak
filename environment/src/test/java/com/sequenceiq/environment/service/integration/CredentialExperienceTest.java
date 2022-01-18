@@ -187,7 +187,7 @@ public class CredentialExperienceTest {
         when(commonExperienceConnectorService.collectPolicy(anyString(), anyString())).thenReturn(getExperiencePolicyJson(cloudProvider, COMMON_POLICY));
         when(liftieApi.getPolicy(anyString())).thenReturn(getExperiencePolicyJson(cloudProvider, LIFTIE_POLICY));
 
-        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> credentialV1Controller.getPrerequisitesForCloudPlatform(cloudProvider, "addr"));
+        return ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> credentialV1Controller.getPrerequisitesForCloudPlatform(cloudProvider, false, "addr"));
     }
 
     private ExperiencePolicyResponse getExperiencePolicyJson(String cloudProvider, String policy) {

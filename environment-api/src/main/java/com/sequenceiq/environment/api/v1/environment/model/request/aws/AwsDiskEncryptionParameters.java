@@ -18,7 +18,7 @@ public class AwsDiskEncryptionParameters implements Serializable {
             "customer master key (CMK) to use for Amazon EBS encryption.\n" +
             "You can specify the key ARN in the below format:\n" +
             "Key ARN: arn:partition:service:region:account-id:resource-type/resource-id. " +
-            "For example, arn:aws:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab.\n";
+            "For example, arn:[aws|aws-us-gov]:kms:us-east-1:012345678910:key/1234abcd-12ab-34cd-56ef-1234567890ab.\n";
 
     @VisibleForTesting
     static final String REG_EXP_FOR_ENCRYPTION_KEY_ARN =

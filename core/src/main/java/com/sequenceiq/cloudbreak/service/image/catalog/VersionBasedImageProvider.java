@@ -11,6 +11,8 @@ import com.sequenceiq.cloudbreak.service.image.LatestDefaultImageUuidProvider;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatchImages;
 import com.sequenceiq.cloudbreak.service.image.PrefixMatcherService;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -104,15 +106,17 @@ public class VersionBasedImageProvider {
                 : imageFilter.getCbVersion();
     }
 
-    private List<Image> filterImagesByPlatforms(Collection<String> platforms, Collection<Image> images, Collection<String> vMImageUUIDs) {
+    private List<Image> filterImagesByPlatforms(Collection<ImageCatalogPlatform> platforms, Collection<Image> images, Collection<String> vMImageUUIDs) {
         return images.stream()
                 .filter(isPlatformMatching(platforms, vMImageUUIDs))
                 .collect(toList());
     }
 
-    private static Predicate<Image> isPlatformMatching(Collection<String> platforms, Collection<String> vMImageUUIDs) {
+    private static Predicate<Image> isPlatformMatching(Collection<ImageCatalogPlatform> platforms, Collection<String> vMImageUUIDs) {
         return img -> vMImageUUIDs.contains(img.getUuid())
-                && img.getImageSetsByProvider().keySet().stream().anyMatch(p -> platforms.stream().anyMatch(platform -> platform.equalsIgnoreCase(p)));
+                && img.getImageSetsByProvider().keySet()
+                .stream()
+                .anyMatch(p -> platforms.stream().anyMatch(platform -> platform.nameToLowerCase().equalsIgnoreCase(p)));
     }
 
     private Optional<? extends Image> getImage(String imageId, Images images) {

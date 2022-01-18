@@ -36,6 +36,8 @@ public class CredentialViewResponse implements Serializable {
     @ApiModelProperty(CredentialModelDescription.CREDENTIAL_TYPE)
     private CredentialType type;
 
+    private Boolean govCloud;
+
     public String getName() {
         return name;
     }
@@ -92,6 +94,14 @@ public class CredentialViewResponse implements Serializable {
         this.type = type;
     }
 
+    public Boolean getGovCloud() {
+        return govCloud;
+    }
+
+    public void setGovCloud(Boolean govCloud) {
+        this.govCloud = govCloud;
+    }
+
     @Override
     public String toString() {
         return "CredentialViewResponse{" +
@@ -102,6 +112,7 @@ public class CredentialViewResponse implements Serializable {
                 ", description='" + description + '\'' +
                 ", verificationStatusText='" + verificationStatusText + '\'' +
                 ", type=" + type +
+                ", govCloud=" + govCloud +
                 '}';
     }
 }

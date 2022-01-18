@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.component.RepositoryInfo;
 import com.sequenceiq.cloudbreak.cloud.model.component.StackType;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Service
 public class DefaultClouderaManagerRepoService {
@@ -30,7 +31,8 @@ public class DefaultClouderaManagerRepoService {
 
     private Map<String, RepositoryInfo> entries = new HashMap<>();
 
-    public ClouderaManagerRepo getDefault(String osType, String clusterType, String clusterVersion, String platform) throws CloudbreakImageCatalogException {
+    public ClouderaManagerRepo getDefault(String osType, String clusterType, String clusterVersion,
+        ImageCatalogPlatform platform) throws CloudbreakImageCatalogException {
         if (StackType.CDH.name().equals(clusterType)) {
             StackMatrixV4Response stackMatrixV4Response = stackMatrixService.getStackMatrix(platform);
             Map<String, ClouderaManagerStackDescriptorV4Response> stackDescriptorMap = stackMatrixV4Response.getCdh();

@@ -28,6 +28,7 @@ import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.Rep
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cluster.clouderamanager.StackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.cli.cm.ClouderaManagerProductToClouderaManagerProductV4Response;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Service
 public class StackMatrixService {
@@ -43,16 +44,18 @@ public class StackMatrixService {
     @Inject
     private StackInfoToClouderaManagerStackDescriptorV4ResponseConverter stackInfoToClouderaManagerStackDescriptorV4ResponseConverter;
 
-    public StackMatrixV4Response getStackMatrix(String platform) throws CloudbreakImageCatalogException {
+    public StackMatrixV4Response getStackMatrix(ImageCatalogPlatform platform) throws CloudbreakImageCatalogException {
         return getStackMatrix(0L, platform, null);
     }
 
-    public StackMatrixV4Response getStackMatrix(Long workspaceId, String platform, String imageCatalogName) throws CloudbreakImageCatalogException {
+    public StackMatrixV4Response getStackMatrix(Long workspaceId,
+        ImageCatalogPlatform platform, String imageCatalogName) throws CloudbreakImageCatalogException {
         LOGGER.debug("Generate stack matrix from images using '{}' image catalog and '{}' platform.", imageCatalogName, platform);
         return getImageBasedStackMatrix(workspaceId, platform, imageCatalogName);
     }
 
-    private StackMatrixV4Response getImageBasedStackMatrix(Long workspaceId, String platform, String imageCatalogName) throws CloudbreakImageCatalogException {
+    private StackMatrixV4Response getImageBasedStackMatrix(Long workspaceId,
+        ImageCatalogPlatform platform, String imageCatalogName) throws CloudbreakImageCatalogException {
         Map<String, ImageBasedDefaultCDHInfo> cdhEntries = imageBasedDefaultCDHEntries.getEntries(workspaceId, platform, imageCatalogName);
         StackMatrixV4Response stackMatrixV4Response = new StackMatrixV4Response();
 
@@ -68,7 +71,8 @@ public class StackMatrixService {
         return stackMatrixV4Response;
     }
 
-    public Set<String> getSupportedOperatingSystems(Long workspaceId, String clusterVersion, String platform, String imageCatalogName) throws Exception {
+    public Set<String> getSupportedOperatingSystems(Long workspaceId, String clusterVersion,
+        ImageCatalogPlatform platform, String imageCatalogName) throws Exception {
         StackMatrixV4Response stackMatrix = getStackMatrix(workspaceId, platform, imageCatalogName);
         LOGGER.debug("Get Cloudera Manager stack info for determinigetSupportedOperationSystemsng the supported OS types for version: {}", clusterVersion);
         ClouderaManagerStackDescriptorV4Response cmStackDescriptor = stackMatrix.getCdh().get(clusterVersion);

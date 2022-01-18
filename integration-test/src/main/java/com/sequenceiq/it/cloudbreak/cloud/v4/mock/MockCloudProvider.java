@@ -219,7 +219,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
                         .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.MOCK.name(), null, null).getCdhImages();
+                                CloudPlatform.MOCK.name(), null, null, false).getCdhImages();
 
                 ImageV4Response olderImage = images.get(images.size() - 2);
                 Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
@@ -249,7 +249,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (mockProperties.getBaseimage().getRedhat7().getImageId() == null || mockProperties.getBaseimage().getRedhat7().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name());
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.MOCK.name(), false);
             mockProperties.getBaseimage().getRedhat7().setImageId(imageId);
             return imageId;
         } else {

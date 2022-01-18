@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -566,6 +567,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
 
     private ImageFilterParams createImageFilterParams(Stack stack, Image currentImageFromCatalog) {
         return new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
-                stack.getType(), null, STACK_ID, INTERNAL_UPGRADE_SETTINGS, CLOUD_PLATFORM);
+                stack.getType(), null, STACK_ID, INTERNAL_UPGRADE_SETTINGS, imageCatalogPlatform(CLOUD_PLATFORM));
     }
 }

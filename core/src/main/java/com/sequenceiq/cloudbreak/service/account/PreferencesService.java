@@ -15,6 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.google.common.base.Strings;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.responses.FeatureSwitchV4;
 import com.sequenceiq.cloudbreak.cloud.CloudConstant;
@@ -30,6 +31,9 @@ public class PreferencesService {
 
     @Value("${cb.enabledplatforms:}")
     private String enabledPlatforms;
+
+    @Value("${cb.enabledgovplatforms:}")
+    private String enabledGovPlatforms;
 
     @Inject
     private List<CloudConstant> cloudConstants;
@@ -57,6 +61,12 @@ public class PreferencesService {
         return platforms;
     }
 
+    public Set<String> enabledGovPlatforms() {
+        return Strings.isNullOrEmpty(enabledGovPlatforms)
+                ? Sets.newHashSet()
+                : Sets.newHashSet(enabledGovPlatforms.split(","));
+    }
+
     public Map<String, Boolean> platformEnablement() {
         Map<String, Boolean> result = new HashMap<>();
         if (StringUtils.isEmpty(enabledPlatforms)) {
@@ -65,6 +75,25 @@ public class PreferencesService {
             }
         } else {
             for (String platform : enabledPlatforms()) {
+                result.put(platform, true);
+            }
+            for (CloudConstant cloudConstant : cloudConstants) {
+                if (!result.keySet().contains(cloudConstant.platform().value())) {
+                    result.put(cloudConstant.platform().value(), false);
+                }
+            }
+        }
+        return result;
+    }
+
+    public Map<String, Boolean> govPlatformEnablement() {
+        Map<String, Boolean> result = new HashMap<>();
+        if (StringUtils.isEmpty(enabledGovPlatforms)) {
+            for (CloudConstant cloudConstant : cloudConstants) {
+                result.put(cloudConstant.platform().value(), true);
+            }
+        } else {
+            for (String platform : enabledGovPlatforms()) {
                 result.put(platform, true);
             }
             for (CloudConstant cloudConstant : cloudConstants) {

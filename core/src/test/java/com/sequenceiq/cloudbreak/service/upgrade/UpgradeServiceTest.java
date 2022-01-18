@@ -119,7 +119,7 @@ public class UpgradeServiceTest {
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
                 .determineImageFromCatalog(
-                        eq(WORKSPACE_ID), captor.capture(), eq("aws"),
+                        eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"),
                         eq(stack.getCluster().getBlueprint()), eq(false), eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo(null);
@@ -193,7 +193,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false),
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(stack.getCluster().getBlueprint()), eq(false),
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
@@ -223,7 +223,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false),
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(stack.getCluster().getBlueprint()), eq(false),
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo("Please stop connected DataHub clusters before upgrade.");
@@ -260,7 +260,7 @@ public class UpgradeServiceTest {
         verify(distroXV1Endpoint).list(eq(null), eq("env-crn"));
         verify(componentConfigProviderService).getImage(1L);
         verify(imageService)
-                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq(stack.getCluster().getBlueprint()), eq(false),
+                .determineImageFromCatalog(eq(WORKSPACE_ID), captor.capture(), eq("aws"), eq("AWS"), eq(stack.getCluster().getBlueprint()), eq(false),
                         eq(false), eq(user), any());
         assertThat(result.getUpgrade().getImageName()).isEqualTo("id-2");
         assertThat(result.getReason()).isEqualTo(null);
@@ -291,7 +291,8 @@ public class UpgradeServiceTest {
         StatedImage currentImageFromCatalog = imageFromCatalog(prewarmedImage, oldImage);
         when(imageCatalogService.getImage(anyString(), anyString(), anyString())).thenReturn(currentImageFromCatalog);
         StatedImage latestImage = imageFromCatalog(true, newImage);
-        when(imageService.determineImageFromCatalog(anyLong(), any(), anyString(), any(), anyBoolean(), anyBoolean(), any(), any())).thenReturn(latestImage);
+        when(imageService.determineImageFromCatalog(anyLong(), any(), anyString(), any(), any(), anyBoolean(),
+                anyBoolean(), any(), any())).thenReturn(latestImage);
     }
 
     public void setupAttachedClusterMocks() {

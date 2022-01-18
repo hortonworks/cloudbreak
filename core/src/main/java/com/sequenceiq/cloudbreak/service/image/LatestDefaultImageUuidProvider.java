@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform;
 
 @Component
 public class LatestDefaultImageUuidProvider {
@@ -28,10 +29,10 @@ public class LatestDefaultImageUuidProvider {
         this.comparator = comparator;
     }
 
-    public Collection<String> getLatestDefaultImageUuids(Set<String> platforms, List<Image> defaultImages) {
+    public Collection<String> getLatestDefaultImageUuids(Set<ImageCatalogPlatform> platforms, List<Image> defaultImages) {
         Collection<String> latestDefaultImageUuids = platforms.stream()
                 .flatMap(p -> defaultImages.stream()
-                        .filter(isPlatformMatching(p))
+                        .filter(isPlatformMatching(p.nameToLowerCase()))
                         .collect(Collectors.toMap(Image::getVersion, Function.identity(), BinaryOperator.maxBy(comparator)))
                         .values().stream())
                 .map(Image::getUuid)

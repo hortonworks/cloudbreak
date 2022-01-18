@@ -406,7 +406,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
                         .getDefaultClient()
                         .imageCatalogV4Endpoint()
                         .getImagesByName(cloudbreakClient.getWorkspaceId(), imageCatalogTestDto.getRequest().getName(), null,
-                                CloudPlatform.AWS.name(), null, null).getCdhImages();
+                                CloudPlatform.AWS.name(), null, null, false).getCdhImages();
 
                 ImageV4Response olderImage = images.get(images.size() - 2);
                 Log.log(LOGGER, format(" Image Catalog Name: %s ", imageCatalogTestDto.getRequest().getName()));
@@ -431,7 +431,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
     @Override
     public String getLatestBaseImageID(TestContext testContext, ImageCatalogTestDto imageCatalogTestDto, CloudbreakClient cloudbreakClient) {
         if (awsProperties.getBaseimage().getImageId() == null || awsProperties.getBaseimage().getImageId().isEmpty()) {
-            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name());
+            String imageId = getLatestBaseImage(imageCatalogTestDto, cloudbreakClient, CloudPlatform.AWS.name(), false);
             awsProperties.getBaseimage().setImageId(imageId);
             return imageId;
         } else {

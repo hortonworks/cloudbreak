@@ -159,6 +159,7 @@ public class StackRequestManifester {
             setupCloudStorageAccountMapping(stackRequest, environment.getCrn(), environment.getIdBrokerMappingSource(), environment.getCloudPlatform());
             validateCloudStorage(sdxCluster, environment, stackRequest);
             setupInstanceVolumeEncryption(stackRequest, environment);
+            setupGovCloud(sdxCluster, environment, stackRequest);
             setupMultiAz(sdxCluster, environment, stackRequest);
             return stackRequest;
         } catch (IOException e) {
@@ -442,9 +443,15 @@ public class StackRequestManifester {
         }
     }
 
+    private void setupGovCloud(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
+        if (environment.getCredential().getGovCloud()) {
+            stackRequest.setVariant("AWS_NATIVE_GOV");
+        }
+    }
+
     private void setupMultiAz(SdxCluster sdxCluster, DetailedEnvironmentResponse environment, StackV4Request stackRequest) {
         if (entitlementService.awsNativeDataLakeEnabled(ThreadBasedUserCrnProvider.getAccountId()) && sdxCluster.isEnableMultiAz()) {
-            multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest);
+            multiAzDecorator.decorateStackRequestWithAwsNative(stackRequest, environment);
             multiAzDecorator.decorateStackRequestWithMultiAz(stackRequest, environment, sdxCluster.getClusterShape());
         }
     }

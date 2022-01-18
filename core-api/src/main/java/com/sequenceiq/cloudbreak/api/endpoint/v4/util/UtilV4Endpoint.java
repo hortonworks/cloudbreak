@@ -49,7 +49,10 @@ public interface UtilV4Endpoint {
     @Path("stack_matrix")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UtilityOpDescription.STACK_MATRIX, produces = MediaType.APPLICATION_JSON, nickname = "getStackMatrixUtilV4")
-    StackMatrixV4Response getStackMatrix(@QueryParam("imageCatalogName") String imageCatalogName, @QueryParam("platform") String platform) throws Exception;
+    StackMatrixV4Response getStackMatrix(
+        @QueryParam("imageCatalogName") String imageCatalogName,
+        @QueryParam("platform") String platform,
+        @QueryParam("govCloud") boolean govCloud) throws Exception;
 
     @GET
     @Path("cloud_storage_matrix")

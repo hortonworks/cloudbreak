@@ -1,7 +1,9 @@
 package com.sequenceiq.cloudbreak.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,6 +28,7 @@ import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
+import com.sequenceiq.cloudbreak.service.image.PlatformStringTransformer;
 import com.sequenceiq.cloudbreak.service.parcel.ParcelService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 
@@ -48,6 +51,9 @@ public class ImageFilterParamsFactoryTest {
     @Mock
     private Blueprint blueprint;
 
+    @Mock
+    private PlatformStringTransformer platformStringTransformer;
+
     @Test
     public void testCreateShouldReturnsANewImageFilterParamsInstanceWhenTheStackTypeIsDataLake() {
         Image image = mock(Image.class);
@@ -55,7 +61,7 @@ public class ImageFilterParamsFactoryTest {
         Set<ClusterComponent> clusterComponents = createCdhClusterComponent();
         String cdhName = com.sequenceiq.cloudbreak.cloud.model.component.StackType.CDH.name();
         String cdhVersion = "7.2.0";
-
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(CLOUD_PLATFORM));
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(clusterComponents);
         when(clouderaManagerProductsProvider.findCdhProduct(clusterComponents)).thenReturn(Optional.of(createCMProduct(cdhName, cdhVersion)));
 
@@ -67,7 +73,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(StackType.DATALAKE, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
         assertEquals(STACK_ID, actual.getStackId());
-        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform());
+        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform().nameToUpperCase());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).findCdhProduct(clusterComponents);
     }
@@ -83,7 +89,7 @@ public class ImageFilterParamsFactoryTest {
         String nifiName = "Nifi";
         String nifiVersion = "456";
         ClouderaManagerProduct nifi = createCMProduct(nifiName, nifiVersion);
-
+        when(platformStringTransformer.getPlatformStringForImageCatalog(anyString(), anyString())).thenReturn(imageCatalogPlatform(CLOUD_PLATFORM));
         when(parcelService.getParcelComponentsByBlueprint(stack)).thenReturn(cdhClusterComponent);
         when(clouderaManagerProductsProvider.getProducts(cdhClusterComponent)).thenReturn(Set.of(spark, nifi));
 
@@ -97,7 +103,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(StackType.WORKLOAD, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
         assertEquals(STACK_ID, actual.getStackId());
-        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform());
+        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform().nameToUpperCase());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).getProducts(cdhClusterComponent);
     }
@@ -126,6 +132,7 @@ public class ImageFilterParamsFactoryTest {
         stack.setCluster(createCluster());
         stack.setId(STACK_ID);
         stack.setCloudPlatform(CLOUD_PLATFORM);
+        stack.setPlatformVariant(CLOUD_PLATFORM);
         return stack;
     }
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.service.image;
 
+import static com.sequenceiq.cloudbreak.service.image.catalog.model.ImageCatalogPlatform.imageCatalogPlatform;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.eq;
@@ -178,7 +179,7 @@ public class ImageCatalogServiceDefaultTest {
             operatingSystems = Collections.singleton(os);
         }
         setupLatestDefaultImageUuidProvider(expectedImageId);
-        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(provider), cbVersion, true, operatingSystems, clusterVersion);
+        ImageFilter imageFilter = new ImageFilter(imageCatalog, Set.of(imageCatalogPlatform(provider)), cbVersion, true, operatingSystems, clusterVersion);
         StatedImage statedImage = underTest.getImagePrewarmedDefaultPreferred(imageFilter, image -> true);
         // THEN
         Assert.assertEquals("Wrong default image has been selected", expectedImageId, statedImage.getImage().getUuid());
