@@ -52,7 +52,8 @@ public class Crn {
         @Deprecated
         ALTUS("altus", "ccs"),
 
-        CDP("cdp", null);
+        CDP("cdp", null),
+        CDP_GOV("cdp-gov", null);
 
         private static final ImmutableMap<String, Partition> FROM_STRING;
 
