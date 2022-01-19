@@ -6,6 +6,10 @@ import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+/**
+ * @deprecated Use {@link SHA512PasswordGenerator} instead.
+ */
+@Deprecated
 public class FreeIpaPasswordUtil {
 
     private static final int PWD_PREFIX_LENGTH = 3;

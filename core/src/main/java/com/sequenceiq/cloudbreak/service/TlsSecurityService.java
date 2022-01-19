@@ -25,18 +25,18 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyEnablementService;
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.provision.service.ClusterProxyService;
 import com.sequenceiq.cloudbreak.domain.SaltSecurityConfig;
 import com.sequenceiq.cloudbreak.domain.SecurityConfig;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.service.securityconfig.SecurityConfigService;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.FixedSizePreloadCache;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.util.SHA512PasswordGenerator;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @Component
@@ -62,6 +62,9 @@ public class TlsSecurityService {
     @Inject
     private ClusterProxyService clusterProxyService;
 
+    @Inject
+    private SHA512PasswordGenerator passwordGenerator;
+
     @Value("${cb.security.keypair.cache.size:10}")
     private int keyPairCacheSize;
 
@@ -78,8 +81,8 @@ public class TlsSecurityService {
         securityConfig.setWorkspace(workspace);
         SaltSecurityConfig saltSecurityConfig = new SaltSecurityConfig();
         saltSecurityConfig.setWorkspace(workspace);
-        saltSecurityConfig.setSaltBootPassword(PasswordUtil.generatePassword());
-        saltSecurityConfig.setSaltPassword(PasswordUtil.generatePassword());
+        saltSecurityConfig.setSaltBootPassword(passwordGenerator.generate());
+        saltSecurityConfig.setSaltPassword(passwordGenerator.generate());
         securityConfig.setSaltSecurityConfig(saltSecurityConfig);
 
         setClientKeys(securityConfig, keyPairCache.pop(), keyPairCache.pop());
