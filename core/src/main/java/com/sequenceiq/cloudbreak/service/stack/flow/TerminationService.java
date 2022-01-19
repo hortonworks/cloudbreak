@@ -155,7 +155,7 @@ public class TerminationService {
     }
 
     private void deleteMetaDataInstances(Stack stack) {
-        for (InstanceMetaData metaData : stack.getNotDeletedInstanceMetaDataSet()) {
+        for (InstanceMetaData metaData : stack.getNotTerminatedInstanceMetaDataSet()) {
             LOGGER.debug("Deleting instance metadata entry {}", metaData);
             instanceMetaDataService.delete(metaData);
         }
