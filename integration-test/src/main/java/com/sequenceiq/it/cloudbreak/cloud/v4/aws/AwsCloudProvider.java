@@ -80,7 +80,7 @@ public class AwsCloudProvider extends AbstractCloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AwsCloudProvider.class);
 
-    private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
+    private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
 
     private static final String KEY_BASED_CREDENTIAL = "key";
 

@@ -72,7 +72,7 @@ public class MockCloudProvider extends AbstractCloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MockCloudProvider.class);
 
-    private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
+    private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
 
     @Value("${mock.infrastructure.host:localhost}")
     private String mockInfrastructureHost;
