@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.client;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
 import java.util.Optional;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonParser;
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 
 public class FreeIpaClientExceptionUtilV1Test {
@@ -123,6 +126,9 @@ public class FreeIpaClientExceptionUtilV1Test {
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new IOException()))));
         Assertions.assertFalse(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
                 new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE, new IllegalStateException()))));
+        Assertions.assertTrue(FreeIpaClientExceptionUtil.isExceptionWithIOExceptionCause(
+                new FreeIpaClientException(MESSAGE, new FreeIpaClientException(MESSAGE,
+                        new RuntimeException("stream closed", new JsonParseException(mock(JsonParser.class), "stream closed"))))));
     }
 
     @Test
