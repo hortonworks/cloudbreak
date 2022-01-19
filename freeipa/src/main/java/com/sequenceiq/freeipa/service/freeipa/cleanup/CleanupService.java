@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -155,10 +156,13 @@ public class CleanupService {
     private void removeIpRelatedRecords(Set<String> ips, FreeIpaClient client, Set<String> dnsCleanupSuccess, Map<String, String> dnsCleanupFailed,
             String zone) throws FreeIpaClientException {
         if (ips != null && !ips.isEmpty()) {
-            Set<DnsRecord> allDnsRecordInZone = client.findAllDnsRecordInZone(zone);
-            for (String ip : ips) {
-                allDnsRecordInZone.stream().filter(record -> record.isIpRelatedRecord(ip, zone))
-                        .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, ip, record));
+            Optional<Set<DnsRecord>> allDnsRecordInZone = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(() -> client.findAllDnsRecordInZone(zone),
+                    "DNS zone [{}] is not found", zone);
+            if (allDnsRecordInZone.isPresent()) {
+                for (String ip : ips) {
+                    allDnsRecordInZone.get().stream().filter(record -> record.isIpRelatedRecord(ip, zone))
+                            .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, ip, record));
+                }
             }
         }
     }
@@ -166,14 +170,17 @@ public class CleanupService {
     private void removeHostNameRelatedDnsRecords(Set<String> hosts, String domain, FreeIpaClient client, Set<String> dnsCleanupSuccess,
             Map<String, String> dnsCleanupFailed, String zone) throws FreeIpaClientException {
         if (hosts != null && !hosts.isEmpty()) {
-            Set<DnsRecord> allDnsRecordInZone = client.findAllDnsRecordInZone(zone);
-            for (String host : hosts) {
-                allDnsRecordInZone.stream().filter(record -> record.isHostRelatedRecord(host, domain))
-                        .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
+            Optional<Set<DnsRecord>> allDnsRecordInZone = FreeIpaClientExceptionUtil.ignoreNotFoundExceptionWithValue(() -> client.findAllDnsRecordInZone(zone),
+                    "DNS zone [{}] is not found", zone);
+            if (allDnsRecordInZone.isPresent()) {
+                for (String host : hosts) {
+                    allDnsRecordInZone.get().stream().filter(record -> record.isHostRelatedRecord(host, domain))
+                            .forEach(record -> deleteRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
 
-                allDnsRecordInZone.stream()
-                        .filter(record -> record.isHostRelatedSrvRecord(host))
-                        .forEach(record -> deleteSrvRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
+                    allDnsRecordInZone.get().stream()
+                            .filter(record -> record.isHostRelatedSrvRecord(host))
+                            .forEach(record -> deleteSrvRecord(client, dnsCleanupSuccess, dnsCleanupFailed, zone, host, record));
+                }
             }
         }
     }
