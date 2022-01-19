@@ -18,6 +18,9 @@ public class ExistingStackPatcherConfig {
     @Value("${existingstackpatcher.enabled}")
     private boolean existingStackPatcherEnabled;
 
+    @Value("${existingstackpatcher.maxInitialStartDelayInHours}")
+    private int maxInitialStartDelayInHours;
+
     @PostConstruct
     void logEnablement() {
         LOGGER.info("Existing stack patcher is {}", existingStackPatcherEnabled ? "enabled" : "disabled");
@@ -29,5 +32,9 @@ public class ExistingStackPatcherConfig {
 
     public int getIntervalInHours() {
         return intervalInHours;
+    }
+
+    public int getMaxInitialStartDelayInHours() {
+        return maxInitialStartDelayInHours;
     }
 }

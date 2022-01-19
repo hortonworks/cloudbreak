@@ -15,8 +15,6 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -32,7 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -52,16 +50,15 @@ import com.sequenceiq.cloudbreak.util.CompressUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @ExtendWith(MockitoExtension.class)
-public class LoggingAgentAutoRestartPatchServiceTest {
+public class MeteringAzureMetadataPatchServiceTest {
+
+    private static final String CUSTOM_RPM_URL_SAMPLE =
+            "https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm";
+
+    private static final String DATE_SAMPLE = "2022-01-02";
 
     @InjectMocks
-    private LoggingAgentAutoRestartPatchService underTest;
-
-    @Mock
-    private StackImageService stackImageService;
-
-    @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+    private MeteringAzureMetadataPatchService underTest;
 
     @Mock
     private CompressUtil compressUtil;
@@ -70,13 +67,19 @@ public class LoggingAgentAutoRestartPatchServiceTest {
     private TelemetryOrchestrator telemetryOrchestrator;
 
     @Mock
-    private ClusterBootstrapper clusterBootstrapper;
+    private StackImageService stackImageService;
 
     @Mock
     private InstanceMetaDataService instanceMetaDataService;
 
     @Mock
     private GatewayConfigService gatewayConfigService;
+
+    @Mock
+    private ClusterComponentConfigProvider clusterComponentConfigProvider;
+
+    @Mock
+    private ClusterBootstrapper clusterBootstrapper;
 
     @Mock
     private ImageCatalogService imageCatalogService;
@@ -86,81 +89,68 @@ public class LoggingAgentAutoRestartPatchServiceTest {
 
     @BeforeEach
     public void setUp() {
-        underTest = new LoggingAgentAutoRestartPatchService("0.2.13", "2022-01-01", "2022-02-01");
+        underTest = new MeteringAzureMetadataPatchService(DATE_SAMPLE, CUSTOM_RPM_URL_SAMPLE);
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
-    public void testIsAffected() throws CloudbreakImageNotFoundException {
+    public void testIsAffected() throws Exception {
         // GIVEN
-        Stack stack = createStack();
-        Image image = mock(Image.class);
-        given(stackImageService.getCurrentImage(stack)).willReturn(image);
-        given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.11"));
+        Image imageMock = mock(Image.class);
+        ImageCatalog imageCatalogMock = mock(ImageCatalog.class);
+        StatedImage statedImageMock = mock(StatedImage.class);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageFromStated = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        given(internalCrnModifier.getInternalCrnWithAccountId(anyString())).willReturn("accountId");
+        given(stackImageService.getCurrentImage(any())).willReturn(imageMock);
+        given(imageMock.getImageCatalogName()).willReturn("myCatalog");
+        given(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).willReturn(imageCatalogMock);
+        given(imageCatalogService.getImageByCatalogName(anyLong(), isNull(), isNull())).willReturn(statedImageMock);
+        given(statedImageMock.getImage()).willReturn(imageFromStated);
+        long sampleTimestamp = underTest.dateStringToTimestampForImage("2021-12-24");
+        given(imageFromStated.getCreated()).willReturn(sampleTimestamp);
         // WHEN
-        underTest.init();
-        boolean result = underTest.isAffected(stack);
+        boolean result = underTest.isAffected(createStack());
         // THEN
         assertTrue(result);
     }
 
     @Test
-    public void testIsAffectedIfVersionEquals() throws CloudbreakImageNotFoundException {
+    public void testIsNotAffectedByDate() throws Exception {
         // GIVEN
-        Stack stack = createStack();
-        Image image = mock(Image.class);
-        given(stackImageService.getCurrentImage(stack)).willReturn(image);
-        given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.13"));
+        Image imageMock = mock(Image.class);
+        ImageCatalog imageCatalogMock = mock(ImageCatalog.class);
+        StatedImage statedImageMock = mock(StatedImage.class);
+        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageFromStated = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
+        given(internalCrnModifier.getInternalCrnWithAccountId(anyString())).willReturn("accountId");
+        given(stackImageService.getCurrentImage(any())).willReturn(imageMock);
+        given(imageMock.getImageCatalogName()).willReturn("myCatalog");
+        given(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).willReturn(imageCatalogMock);
+        given(imageCatalogService.getImageByCatalogName(anyLong(), isNull(), isNull())).willReturn(statedImageMock);
+        given(statedImageMock.getImage()).willReturn(imageFromStated);
+        long sampleTimestamp = underTest.dateStringToTimestampForImage("2022-02-02");
+        given(imageFromStated.getCreated()).willReturn(sampleTimestamp);
         // WHEN
-        underTest.init();
-        boolean result = underTest.isAffected(stack);
+        boolean result = underTest.isAffected(createStack());
         // THEN
-        assertTrue(result);
+        assertFalse(result);
     }
 
     @Test
-    public void testIsNotAffected() throws CloudbreakImageNotFoundException {
+    public void testIsNotAffectedByCloudPlatform() {
         // GIVEN
         Stack stack = createStack();
-        Image image = mock(Image.class);
-        given(stackImageService.getCurrentImage(stack)).willReturn(image);
-        given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.15"));
+        stack.setCloudPlatform(CloudPlatform.AWS.name());
         // WHEN
-        underTest.init();
         boolean result = underTest.isAffected(stack);
         // THEN
         assertFalse(result);
     }
 
     @Test
-    public void testIsAffectedByDate() throws Exception {
-        // GIVEN
-        Stack stack = createStack();
-        Image image = mock(Image.class);
-        ImageCatalog imageCatalogMock = mock(ImageCatalog.class);
-        StatedImage statedImageMock = mock(StatedImage.class);
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageFromStated = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        given(image.getPackageVersions()).willReturn(new HashMap<>());
-        given(internalCrnModifier.getInternalCrnWithAccountId(anyString())).willReturn("accountId");
-        given(stackImageService.getCurrentImage(any())).willReturn(image);
-        given(image.getImageCatalogName()).willReturn("myCatalog");
-        given(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).willReturn(imageCatalogMock);
-        given(imageCatalogService.getImageByCatalogName(anyLong(), isNull(), isNull())).willReturn(statedImageMock);
-        given(statedImageMock.getImage()).willReturn(imageFromStated);
-        long sampleTimestamp = underTest.dateStringToTimestampForImage("2022-01-10");
-        given(imageFromStated.getCreated()).willReturn(sampleTimestamp);
-        // WHEN
-        underTest.init();
-        boolean result = underTest.isAffected(stack);
-        // THEN
-        assertTrue(result);
-    }
-
-    @Test
     public void testDoApply() throws ExistingStackPatchApplyException, IOException {
         // GIVEN
         byte[] currentSaltState = "[current_state]".getBytes(StandardCharsets.UTF_8);
-        byte[] fluentConfig = "[fluent_state]".getBytes(StandardCharsets.UTF_8);
+        byte[] meteringConfig = "[metering_state]".getBytes(StandardCharsets.UTF_8);
         byte[] updatedState = "[updated_state]".getBytes(StandardCharsets.UTF_8);
         InstanceMetaData instanceMetaData = createInstanceMetaData();
         InstanceGroup instanceGroup = createInstanceGroup();
@@ -168,7 +158,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
         given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
-        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
+        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
         given(compressUtil.updateCompressedOutputFolders(any(), any(), any())).willReturn(updatedState);
         // WHEN
@@ -181,15 +171,16 @@ public class LoggingAgentAutoRestartPatchServiceTest {
     public void testDoApplyWithoutResponsiveNodes() throws ExistingStackPatchApplyException, IOException, CloudbreakOrchestratorFailedException {
         // GIVEN
         byte[] currentSaltState = "[current_state]".getBytes(StandardCharsets.UTF_8);
-        byte[] fluentConfig = "[fluent_state]".getBytes(StandardCharsets.UTF_8);
+        byte[] meteringConfig = "[metering_state]".getBytes(StandardCharsets.UTF_8);
         InstanceMetaData instanceMetaData = createInstanceMetaData();
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
         given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
-        given(telemetryOrchestrator.collectUnresponsiveNodes(any(), any(), any())).willReturn(Set.of(new Node(null, null, null, null)));
+        given(telemetryOrchestrator.collectUnresponsiveNodes(any(), any(), any())).willReturn(
+                Set.of(new Node(null, null, null, null)));
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
-        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
+        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
         // WHEN
         ExistingStackPatchApplyException exception = assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(createStack()));
@@ -202,9 +193,9 @@ public class LoggingAgentAutoRestartPatchServiceTest {
     public void testDoApplyWithMatchingStates() throws ExistingStackPatchApplyException, IOException {
         // GIVEN
         byte[] currentSaltState = "[current_state]".getBytes(StandardCharsets.UTF_8);
-        byte[] fluentConfig = "[fluent_state]".getBytes(StandardCharsets.UTF_8);
+        byte[] meteringConfig = "[metering_state]".getBytes(StandardCharsets.UTF_8);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
-        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
+        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(true);
         // WHEN
         underTest.doApply(createStack());
@@ -227,17 +218,17 @@ public class LoggingAgentAutoRestartPatchServiceTest {
     public void testDoApplyWithSaltOrchestratorError() throws IOException, CloudbreakOrchestratorFailedException {
         // GIVEN
         byte[] currentSaltState = "[current_state]".getBytes(StandardCharsets.UTF_8);
-        byte[] fluentConfig = "[fluent_state]".getBytes(StandardCharsets.UTF_8);
+        byte[] meteringConfig = "[metering_state]".getBytes(StandardCharsets.UTF_8);
         InstanceMetaData instanceMetaData = createInstanceMetaData();
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
         given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
-        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(fluentConfig);
+        given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
         doThrow(new CloudbreakOrchestratorFailedException("salt error")).when(telemetryOrchestrator)
-                .executeLoggingAgentDiagnostics(any(), any(), any(), any());
+                .upgradeMetering(any(), any(), any(), any(), any());
         // WHEN
         ExistingStackPatchApplyException exception = assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(createStack()));
         // THEN
@@ -248,13 +239,14 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         Stack stack = new Stack();
         stack.setId(1L);
         stack.setType(StackType.WORKLOAD);
+        stack.setCloudPlatform(CloudPlatform.AZURE.name());
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:accountId:cluster:name");
         Cluster cluster = new Cluster();
         cluster.setId(1L);
         Workspace workspace = new Workspace();
         workspace.setId(1L);
         stack.setWorkspace(workspace);
         stack.setCluster(cluster);
-        stack.setResourceCrn("crn:cdp:datahub:us-west-1:accountId:cluster:name");
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceGroup.setInstanceMetaData(Set.of(createInstanceMetaData()));
         stack.setInstanceGroups(Set.of(instanceGroup));
