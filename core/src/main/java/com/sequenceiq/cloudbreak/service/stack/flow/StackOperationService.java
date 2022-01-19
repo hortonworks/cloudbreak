@@ -53,7 +53,6 @@ import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.flow.service.FlowCancelService;
 
 @Service
 public class StackOperationService {
@@ -98,9 +97,6 @@ public class StackOperationService {
 
     @Inject
     private StackStopRestrictionService stackStopRestrictionService;
-
-    @Inject
-    private FlowCancelService flowCancelService;
 
     public FlowIdentifier removeInstance(Stack stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);

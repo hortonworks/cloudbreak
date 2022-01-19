@@ -2,7 +2,6 @@ package com.sequenceiq.periscope.monitor.evaluator;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -98,14 +97,7 @@ public class CronTimeEvaluatorTest {
     public void testRunCallsFinished() {
         underTest.setContext(new ClusterIdEvaluatorContext(CLUSTER_ID));
         when(clusterService.findById(anyLong())).thenThrow(new RuntimeException("exception from the test"));
-
-        try {
-            underTest.run();
-            fail("expected runtimeException");
-        } catch (RuntimeException e) {
-            assertEquals("exception from the test", e.getMessage());
-        }
-
+        underTest.run();
         verify(executorServiceWithRegistry).finished(underTest, CLUSTER_ID);
     }
 

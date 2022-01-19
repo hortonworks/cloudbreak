@@ -1,6 +1,5 @@
 package com.sequenceiq.periscope.monitor.evaluator;
 
-import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -42,11 +41,7 @@ public class EvaluatorExecutorTest {
     public void testRunCallsFinishedWhenThrows() {
         underTest.setExceptionForExecute(true);
 
-        try {
-            underTest.run();
-            fail("expected exception");
-        } catch (RuntimeException e) {
-        }
+        underTest.run();
 
         verify(executorServiceWithRegistry).finished(any(), anyLong());
     }
