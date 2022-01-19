@@ -8,9 +8,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.MapUtils;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
@@ -42,46 +44,70 @@ class GrainPropertiesService {
 
     List<GrainProperties> createGrainProperties(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster, Set<Node> nodes) {
         List<GrainProperties> grainPropertiesList = new ArrayList<>();
-        Optional.ofNullable(addGatewayAddress(gatewayConfigs)).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addNameNodeRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addKnoxRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
-        Optional.ofNullable(addIdBrokerRoleForHosts(cluster)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addGatewayAddress(gatewayConfigs, Set.of())).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addNameNodeRoleForHosts(cluster, Set.of())).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addKnoxRoleForHosts(cluster, Set.of())).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addIdBrokerRoleForHosts(cluster, Set.of())).ifPresent(grainPropertiesList::add);
         Optional.ofNullable(addCloudIdentityRolesForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
         return grainPropertiesList;
     }
 
-    private GrainProperties addGatewayAddress(Iterable<GatewayConfig> gatewayConfigs) {
+    List<GrainProperties> createGrainPropertiesForTargetedUpscale(Iterable<GatewayConfig> gatewayConfigs, Cluster cluster, Set<Node> nodes) {
+        List<GrainProperties> grainPropertiesList = new ArrayList<>();
+        Optional.ofNullable(addGatewayAddress(gatewayConfigs, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addNameNodeRoleForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addKnoxRoleForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addIdBrokerRoleForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
+        Optional.ofNullable(addCloudIdentityRolesForHosts(cluster, nodes)).ifPresent(grainPropertiesList::add);
+        return grainPropertiesList;
+    }
+
+    private GrainProperties addGatewayAddress(Iterable<GatewayConfig> gatewayConfigs, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
         for (GatewayConfig gatewayConfig : gatewayConfigs) {
-            Map<String, String> hostGrain = new HashMap<>();
-            hostGrain.put("gateway-address", gatewayConfig.getPublicAddress());
-            grainProperties.put(gatewayConfig.getHostname(), hostGrain);
+            boolean nodesContainsGateway = nodes.stream().map(node -> node.getPrivateIp())
+                    .collect(Collectors.toList()).contains(gatewayConfig.getPrivateAddress());
+            if (nodes.isEmpty() || nodesContainsGateway) {
+                grainProperties.put(gatewayConfig.getHostname(), Map.of("gateway-address", gatewayConfig.getPublicAddress()));
+            }
         }
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private GrainProperties addNameNodeRoleForHosts(Cluster cluster) {
+    private Map<String, List<String>> filteredLocations(Cluster cluster, String serviceName, Set<Node> nodes) {
+        Map<String, List<String>> locations = getComponentLocationByHostname(cluster, serviceName);
+        if (!nodes.isEmpty() && !MapUtils.isEmpty(locations) && locations.containsKey(serviceName)) {
+            List<String> filteredFqdns = locations.get(serviceName).stream().filter(fqdn ->
+                    nodes.stream().map(node -> node.getHostname()).collect(Collectors.toSet()).contains(fqdn)).collect(Collectors.toList());
+            return Map.of(serviceName, filteredFqdns);
+        }
+        return locations;
+    }
+
+    private GrainProperties addNameNodeRoleForHosts(Cluster cluster, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
         ExposedService nameNodeService = exposedServiceCollector.getNameNodeService();
-        Map<String, List<String>> nameNodeServiceLocations = getComponentLocationByHostname(cluster,
-                nameNodeService.getServiceName());
-        nameNodeServiceLocations.getOrDefault(nameNodeService.getServiceName(), List.of())
+        Map<String, List<String>> nameNodeServiceLocations = filteredLocations(cluster, nameNodeService.getServiceName(), nodes);
+        nameNodeServiceLocations
+                .getOrDefault(nameNodeService.getServiceName(), List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "namenode"));
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private GrainProperties addKnoxRoleForHosts(Cluster cluster) {
+    private GrainProperties addKnoxRoleForHosts(Cluster cluster, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
-        Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, KnoxRoles.KNOX_GATEWAY);
-        knoxServiceLocations.getOrDefault(KnoxRoles.KNOX_GATEWAY, List.of())
+        Map<String, List<String>> knoxServiceLocations = filteredLocations(cluster, KnoxRoles.KNOX_GATEWAY, nodes);
+        knoxServiceLocations
+                .getOrDefault(KnoxRoles.KNOX_GATEWAY, List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "knox"));
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }
 
-    private GrainProperties addIdBrokerRoleForHosts(Cluster cluster) {
+    private GrainProperties addIdBrokerRoleForHosts(Cluster cluster, Set<Node> nodes) {
         GrainProperties grainProperties = new GrainProperties();
-        Map<String, List<String>> knoxServiceLocations = getComponentLocationByHostname(cluster, KnoxRoles.IDBROKER);
-        knoxServiceLocations.getOrDefault(KnoxRoles.IDBROKER, List.of())
+        Map<String, List<String>> idBrokerServiceLocations = filteredLocations(cluster, KnoxRoles.IDBROKER, nodes);
+        idBrokerServiceLocations
+                .getOrDefault(KnoxRoles.IDBROKER, List.of())
                 .forEach(nmn -> grainProperties.computeIfAbsent(nmn, s -> new HashMap<>()).put(ROLES, "idbroker"));
         return grainProperties.getProperties().isEmpty() ? null : grainProperties;
     }

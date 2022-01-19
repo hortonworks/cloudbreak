@@ -9,8 +9,11 @@ import static org.hamcrest.Matchers.hasEntry;
 import static org.hamcrest.Matchers.hasKey;
 import static org.hamcrest.Matchers.hasProperty;
 import static org.hamcrest.Matchers.hasValue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -60,6 +63,8 @@ class GrainPropertiesServiceTest {
 
     private CollectionMatcher<String> knoxGatewayMatcher = new CollectionMatcher<>(List.of("KNOX_GATEWAY"));
 
+    private CollectionMatcher<String> idBrokerMatcher = new CollectionMatcher<>(List.of("IDBROKER"));
+
     private Cluster cluster = new Cluster();
 
     @BeforeEach
@@ -75,20 +80,41 @@ class GrainPropertiesServiceTest {
 
     @Test
     public void testGwAddressSet() {
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
-        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
-        GatewayConfig gwconfig = mock(GatewayConfig.class);
-        when(gwconfig.getPublicAddress()).thenReturn("GWPUBADDR");
-        when(gwconfig.getHostname()).thenReturn("GWHOSTNAME");
-        GatewayConfig gwconfig2 = mock(GatewayConfig.class);
-        when(gwconfig2.getPublicAddress()).thenReturn("GWPUBADDR2");
-        when(gwconfig2.getHostname()).thenReturn("GWHOSTNAME2");
-        List<GrainProperties> result = underTest.createGrainProperties(List.of(gwconfig, gwconfig2), cluster, Set.of());
+        List<GatewayConfig> gatewayConfigs = setupGwAddresses();
+        List<GrainProperties> result = underTest.createGrainProperties(gatewayConfigs, cluster, Set.of());
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(
                 hasEntry("GWHOSTNAME", Map.of("gateway-address", "GWPUBADDR")),
                 hasEntry("GWHOSTNAME2", Map.of("gateway-address", "GWPUBADDR2"))
                 )))));
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(hasKey("roles"))))))));
+    }
+
+    @Test
+    public void testGwAddressSetDuringTargetedUpscale() {
+        List<GatewayConfig> gatewayConfigs = setupGwAddresses();
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(gatewayConfigs, cluster,
+                Set.of(getNode("GWHOSTNAME", "GWPRIVADDR", "GWPUBADDR")));
+        assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("GWHOSTNAME")).findFirst().isPresent());
+        assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("GWHOSTNAME2")).findFirst().isPresent());
+        assertTrue(result.stream().filter(gp -> gp.getProperties().values()
+                .contains(Map.of("gateway-address", "GWPUBADDR"))).findFirst().isPresent());
+        assertFalse(result.stream().filter(gp -> gp.getProperties().values()
+                .contains(Map.of("gateway-address", "GWPUBADDR2"))).findFirst().isPresent());
+        assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(hasKey("roles"))))))));
+    }
+
+    private List<GatewayConfig> setupGwAddresses() {
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        GatewayConfig gwconfig = mock(GatewayConfig.class);
+        when(gwconfig.getPublicAddress()).thenReturn("GWPUBADDR");
+        lenient().when(gwconfig.getPrivateAddress()).thenReturn("GWPRIVADDR");
+        when(gwconfig.getHostname()).thenReturn("GWHOSTNAME");
+        GatewayConfig gwconfig2 = mock(GatewayConfig.class);
+        lenient().when(gwconfig2.getPublicAddress()).thenReturn("GWPUBADDR2");
+        lenient().when(gwconfig2.getPrivateAddress()).thenReturn("GWPRIVADDR2");
+        lenient().when(gwconfig2.getHostname()).thenReturn("GWHOSTNAME2");
+        return List.of(gwconfig, gwconfig2);
     }
 
     @Test
@@ -102,6 +128,19 @@ class GrainPropertiesServiceTest {
     }
 
     @Test
+    public void testNameNodeRoleSetDuringTargetedUpscale() {
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(
+                Map.of("NAMENODE", List.of("NMHOST", "NMHOST2")));
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), cluster,
+                Set.of(getNode("NMHOST", null, null)));
+        assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("NMHOST")).findFirst().isPresent());
+        assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("NMHOST2")).findFirst().isPresent());
+        assertTrue(result.stream().filter(gp -> gp.getProperties().values()
+                .contains(Map.of("roles", "namenode"))).findFirst().isPresent());
+    }
+
+    @Test
     public void testKnoxGwRoleSet() {
         when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
         when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY", List.of("KWGHOST")));
@@ -109,6 +148,33 @@ class GrainPropertiesServiceTest {
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(hasKey("gateway-address"))))))));
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("KWGHOST", Map.of("roles", "knox")))))));
         assertThat(result, not(hasItem(allOf(hasProperty("properties", allOf(hasValue(Map.of("roles", "namenode"))))))));
+    }
+
+    @Test
+    public void testKnoxGwRoleSetDuringTargetedUpscale() {
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of("KNOX_GATEWAY",
+                List.of("KWGHOST", "KWGHOST2")));
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), cluster,
+                Set.of(getNode("KWGHOST", null, null)));
+        assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("KWGHOST")).findFirst().isPresent());
+        assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("KWGHOST2")).findFirst().isPresent());
+        assertTrue(result.stream().filter(gp -> gp.getProperties().values()
+                .contains(Map.of("roles", "knox"))).findFirst().isPresent());
+    }
+
+    @Test
+    public void testIdBrokerSetDuringTargetedUpscale() {
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(namenodeMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(knoxGatewayMatcher))).thenReturn(Map.of());
+        when(componentLocator.getComponentLocationByHostname(eq(cluster), argThat(idBrokerMatcher))).thenReturn(Map.of("IDBROKER",
+                List.of("IDBH1", "IDBH2")));
+        List<GrainProperties> result = underTest.createGrainPropertiesForTargetedUpscale(List.of(), cluster,
+                Set.of(getNode("IDBH1", null, null)));
+        assertTrue(result.stream().filter(gp -> gp.getProperties().keySet().contains("IDBH1")).findFirst().isPresent());
+        assertFalse(result.stream().filter(gp -> gp.getProperties().keySet().contains("IDBH2")).findFirst().isPresent());
+        assertTrue(result.stream().filter(gp -> gp.getProperties().values()
+                .contains(Map.of("roles", "idbroker"))).findFirst().isPresent());
     }
 
     @Test
@@ -178,6 +244,10 @@ class GrainPropertiesServiceTest {
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("NMHOST", Map.of("roles", "namenode")))))));
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("KWGHOST", Map.of("roles", "knox")))))));
         assertThat(result, hasItem(allOf(hasProperty("properties", allOf(hasEntry("node1fqdn", Map.of("roles", "LOG_CLOUD_IDENTITY_ROLE")))))));
+    }
+
+    private Node getNode(String host, String privateIp, String publicIp) {
+        return new Node(privateIp, publicIp, null, null, host, null);
     }
 
     public static class CollectionMatcher<T> implements ArgumentMatcher<Collection<T>> {
