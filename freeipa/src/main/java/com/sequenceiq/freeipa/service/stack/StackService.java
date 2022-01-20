@@ -76,6 +76,12 @@ public class StackService implements ResourcePropertyProvider {
         return stackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", id)));
     }
 
+    public Stack getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(String environmentCrn, String accountId) {
+        Stack stack = getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
+        MDCBuilder.buildMdcContext(stack);
+        return stack;
+    }
+
     public Stack save(Stack stack) {
         return stackRepository.save(stack);
     }

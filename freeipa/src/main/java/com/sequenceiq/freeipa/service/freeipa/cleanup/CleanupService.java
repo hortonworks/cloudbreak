@@ -23,7 +23,6 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
@@ -108,8 +107,7 @@ public class CleanupService {
 
     public OperationStatus cleanup(String accountId, CleanupRequest request) {
         String environmentCrn = request.getEnvironmentCrn();
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
-        MDCBuilder.buildMdcContext(stack);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         Operation operation =
                 operationService.startOperation(accountId, OperationType.CLEANUP, Set.of(environmentCrn), Collections.emptySet());
         Set<String> statesToSkip = cleanupStepToStateNameConverter.convert(request.getCleanupStepsToSkip());

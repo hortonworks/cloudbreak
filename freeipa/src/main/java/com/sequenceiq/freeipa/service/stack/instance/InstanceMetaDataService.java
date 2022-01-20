@@ -3,6 +3,7 @@ package com.sequenceiq.freeipa.service.stack.instance;
 import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -19,7 +20,9 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.Group;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
+import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -143,4 +146,19 @@ public class InstanceMetaDataService {
         return stack;
     }
 
+    public Set<InstanceMetaData> getNonPrimaryGwInstances(Set<InstanceMetaData> allInstances) {
+        Set<InstanceMetaData> nonPgwInstanceMetadataSet = allInstances.stream()
+                .filter(instanceMetaData -> InstanceMetadataType.GATEWAY_PRIMARY != instanceMetaData.getInstanceMetadataType())
+                .collect(Collectors.toCollection(HashSet::new));
+        LOGGER.debug("Non-primary gateway instances: {}", nonPgwInstanceMetadataSet);
+        return nonPgwInstanceMetadataSet;
+    }
+
+    public InstanceMetaData getPrimaryGwInstance(Set<InstanceMetaData> allInstances) {
+        InstanceMetaData primaryGateway = allInstances.stream()
+                .filter(instanceMetaData -> InstanceMetadataType.GATEWAY_PRIMARY == instanceMetaData.getInstanceMetadataType())
+                .findFirst().orElseThrow(() -> new BadRequestException("No primary Gateway found"));
+        LOGGER.debug("Found primary gateway with instance id: [{}]", primaryGateway.getInstanceId());
+        return primaryGateway;
+    }
 }

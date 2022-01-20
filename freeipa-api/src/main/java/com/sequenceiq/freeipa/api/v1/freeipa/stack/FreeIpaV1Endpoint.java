@@ -43,6 +43,10 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 
 import io.swagger.annotations.Api;
@@ -57,6 +61,7 @@ import io.swagger.annotations.Authorization;
         authorizations = {@Authorization(value = FreeIpaApi.CRN_HEADER_API_KEY)},
         consumes = MediaType.APPLICATION_JSON)
 public interface FreeIpaV1Endpoint {
+
     @POST
     @Path("")
     @Produces(MediaType.APPLICATION_JSON)
@@ -230,6 +235,20 @@ public interface FreeIpaV1Endpoint {
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = UPDATE_SALT, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES, nickname = "updateSaltV1")
     FlowIdentifier updateSaltByName(@QueryParam("environment") @NotEmpty String environmentCrn, @AccountId @QueryParam("accountId") String accountId);
+
+    @PUT
+    @Path("/upscale")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.UPSCALE_FREEIPA, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "upscaleFreeIpaV1")
+    UpscaleResponse upscale(@Valid UpscaleRequest request);
+
+    @PUT
+    @Path("/downscale")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = FreeIpaOperationDescriptions.DOWNSCALE_FREEIPA, produces = MediaType.APPLICATION_JSON, notes = FreeIpaNotes.FREEIPA_NOTES,
+            nickname = "downscaleFreeIpaV1")
+    DownscaleResponse downscale(@Valid DownscaleRequest request);
 
     @PUT
     @Path("retry")

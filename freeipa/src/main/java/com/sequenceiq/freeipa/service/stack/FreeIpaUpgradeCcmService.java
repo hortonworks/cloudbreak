@@ -44,8 +44,7 @@ public class FreeIpaUpgradeCcmService {
     public OperationStatus upgradeCcm(String environmentCrn, String accountId) {
         MDCBuilder.addEnvCrn(environmentCrn);
         MDCBuilder.addAccountId(accountId);
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(environmentCrn, accountId);
-        MDCBuilder.buildMdcContext(stack);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(environmentCrn, accountId);
         validateCcmUpgrade(stack);
 
         LOGGER.info("Start 'UPGRADE_CCM' operation");

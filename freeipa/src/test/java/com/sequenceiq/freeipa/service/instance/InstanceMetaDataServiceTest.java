@@ -1,6 +1,7 @@
 package com.sequenceiq.freeipa.service.instance;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -24,6 +25,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceTemplate;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.entity.FreeIpa;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
@@ -155,5 +157,36 @@ public class InstanceMetaDataServiceTest {
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
         verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subentUsage, instanceMetaData, instanceGroup);
+    }
+
+    @Test
+    public void testGetNonPrimaryGwInstances() {
+
+        Set<InstanceMetaData> nonPrimaryGwInstances = underTest.getNonPrimaryGwInstances(createValidImSet());
+        assertEquals(2, nonPrimaryGwInstances.size());
+        assertTrue(nonPrimaryGwInstances.stream().anyMatch(im -> im.getInstanceId().equals("im2")));
+        assertTrue(nonPrimaryGwInstances.stream().anyMatch(im -> im.getInstanceId().equals("im3")));
+        assertTrue(nonPrimaryGwInstances.stream().noneMatch(im -> im.getInstanceId().equals("pgw")));
+    }
+
+    @Test
+    public void testGetPrimaryGwInstance() {
+
+        InstanceMetaData primaryGwInstance = underTest.getPrimaryGwInstance(createValidImSet());
+        assertEquals("pgw", primaryGwInstance.getInstanceId());
+        assertEquals(InstanceMetadataType.GATEWAY_PRIMARY, primaryGwInstance.getInstanceMetadataType());
+    }
+
+    private Set<InstanceMetaData> createValidImSet() {
+        InstanceMetaData im1 = new InstanceMetaData();
+        im1.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
+        im1.setInstanceId("pgw");
+        InstanceMetaData im2 = new InstanceMetaData();
+        im2.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        im2.setInstanceId("im2");
+        InstanceMetaData im3 = new InstanceMetaData();
+        im3.setInstanceMetadataType(InstanceMetadataType.GATEWAY);
+        im3.setInstanceId("im3");
+        return Set.of(im1, im2, im3);
     }
 }

@@ -21,6 +21,7 @@ public enum AuthorizationResourceAction {
     ACCESS_ENVIRONMENT("environments/accessEnvironment", AuthorizationResourceType.ENVIRONMENT),
     ADMIN_FREEIPA("environments/adminFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     REPAIR_FREEIPA("environments/repairFreeIPA", AuthorizationResourceType.ENVIRONMENT),
+    SCALE_FREEIPA("environments/scaleFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     UPGRADE_FREEIPA("environments/upgradeFreeIPA", AuthorizationResourceType.ENVIRONMENT),
     CREATE_CREDENTIAL("environments/createCredential", AuthorizationResourceType.CREDENTIAL),
     CREATE_ENVIRONMENT("environments/createEnvironment", AuthorizationResourceType.ENVIRONMENT),

@@ -4,6 +4,7 @@ import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.EDIT_ENVIRONMENT;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.ENVIRONMENT_CHANGE_FREEIPA_IMAGE;
 import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.REPAIR_FREEIPA;
+import static com.sequenceiq.authorization.resource.AuthorizationResourceAction.SCALE_FREEIPA;
 import static com.sequenceiq.authorization.resource.AuthorizationVariableType.CRN;
 
 import java.util.List;
@@ -53,6 +54,10 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaRespons
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.reboot.RebootInstancesRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.rebuild.RebuildRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.repair.RepairInstancesRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.freeipa.authorization.FreeIpaFiltering;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -79,6 +84,7 @@ import com.sequenceiq.freeipa.service.stack.FreeIpaStartService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaStopService;
 import com.sequenceiq.freeipa.service.stack.FreeIpaUpgradeCcmService;
 import com.sequenceiq.freeipa.service.stack.RepairInstancesService;
+import com.sequenceiq.freeipa.service.stack.FreeIpaScalingService;
 import com.sequenceiq.freeipa.util.CrnService;
 
 @Controller
@@ -113,6 +119,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private RepairInstancesService repairInstancesService;
+
+    @Inject
+    private FreeIpaScalingService freeIpaScalingService;
 
     @Inject
     private CrnService crnService;
@@ -287,6 +296,20 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public DescribeFreeIpaResponse rebuild(@RequestObject @Valid RebuildRequest request) {
         String accountId = crnService.getCurrentAccountId();
         return repairInstancesService.rebuild(accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = SCALE_FREEIPA)
+    public UpscaleResponse upscale(@RequestObject @Valid UpscaleRequest request) {
+        String accountId = crnService.getCurrentAccountId();
+        return freeIpaScalingService.upscale(accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = SCALE_FREEIPA)
+    public DownscaleResponse downscale(@RequestObject @Valid DownscaleRequest request) {
+        String accountId = crnService.getCurrentAccountId();
+        return freeIpaScalingService.downscale(accountId, request);
     }
 
     @Override

@@ -27,6 +27,8 @@ public final class FreeIpaOperationDescriptions {
     public static final String CHANGE_IMAGE = "Changes the image used for creating instances";
     public static final String UPGRADE_FREEIPA = "Upgrades FreeIPA to the latest or defined image";
     public static final String UPGRADE_OPTIONS = "Get available images for FreeIPA upgrade. If catalog is defined use the catalog as image source.";
+    public static final String UPSCALE_FREEIPA = "Upscales FreeIPA instances";
+    public static final String DOWNSCALE_FREEIPA = "Downscales FreeIPA instances";
     public static final String RETRY = "Retries the latest failed operation";
     public static final String LIST_RETRYABLE_FLOWS = "List retryable failed flows";
     public static final String CHANGE_IMAGE_CATALOG = "Changes the image catalog used for creating instances";
