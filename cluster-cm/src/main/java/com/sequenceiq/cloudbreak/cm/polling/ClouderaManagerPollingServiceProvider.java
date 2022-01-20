@@ -6,13 +6,11 @@ import java.util.concurrent.TimeUnit;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.api.swagger.client.ApiClient;
-import com.google.common.base.Joiner;
 import com.google.common.collect.Multimap;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
@@ -81,13 +79,6 @@ public class ClouderaManagerPollingServiceProvider {
         LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}]", stack.getClusterManagerIp());
         return pollCommandWithTimeListener(stack, apiClient, null, POLL_FOR_ONE_HOUR,
                 new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService));
-    }
-
-    public PollingResult startPollingCmHostStatus(Stack stack, ApiClient apiClient, List<String> targets) {
-        LOGGER.debug("Waiting for Cloudera Manager hosts to connect. [Server address: {}, target hosts: {}]",
-                stack.getClusterManagerIp(), Joiner.on(",").join(CollectionUtils.emptyIfNull(targets)));
-        return pollCommandWithTimeListener(stack, apiClient, null, POLL_FOR_ONE_HOUR,
-                new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, targets));
     }
 
     public PollingResult startPollingCmTemplateInstallation(Stack stack, ApiClient apiClient, BigDecimal commandId) {
