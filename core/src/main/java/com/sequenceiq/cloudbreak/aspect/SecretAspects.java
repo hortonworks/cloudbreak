@@ -16,12 +16,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.common.service.Clock;
+import com.sequenceiq.cloudbreak.service.secret.domain.AccountIdAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
 import com.sequenceiq.cloudbreak.service.secret.domain.SecretProxy;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.workspace.model.Tenant;
 import com.sequenceiq.cloudbreak.workspace.model.TenantAwareResource;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 
@@ -95,10 +96,10 @@ public class SecretAspects {
                     }
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
+                LOGGER.error("Given entity isn't instance of TenantAwareResource or AccountIdAwareResource. Secret is not saved!", e);
                 throw new CloudbreakServiceException(e);
             } catch (Exception e) {
-                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
+                LOGGER.warn("Looks like something went wrong with Secret store. Secret is not saved!", e);
                 throw new CloudbreakServiceException(e);
             }
         }
@@ -135,7 +136,7 @@ public class SecretAspects {
                     }
                 }
             } catch (IllegalArgumentException e) {
-                LOGGER.error("Given entity isn't instance of TenantAwareResource. Secret is not deleted!", e);
+                LOGGER.error("Given entity isn't instance of TenantAwareResource or AccountIdAwareResource. Secret is not deleted!", e);
                 throw new CloudbreakServiceException(e);
             } catch (Exception e) {
                 LOGGER.warn("Looks like something went wrong with Secret store. Secret is not deleted!", e);
@@ -162,12 +163,26 @@ public class SecretAspects {
     }
 
     private String findTenant(Object entity) {
-        return Optional.ofNullable(entity)
-                .filter(e -> e instanceof TenantAwareResource)
-                .map(e -> (TenantAwareResource) e)
-                .map(TenantAwareResource::getTenant)
-                .map(Tenant::getName)
-                .orElseThrow(() -> new IllegalArgumentException(
-                        entity.getClass().getSimpleName() + " must be a subclass of " + TenantAwareResource.class.getSimpleName()));
+        if (entity != null) {
+            if (entity instanceof TenantAwareResource) {
+                String tenant = ((TenantAwareResource) entity).getTenant().getName();
+                if (Strings.isNullOrEmpty(tenant)) {
+                    throw new IllegalArgumentException(String.format("Tenant name is null on %s object", entity));
+                }
+                return tenant;
+            } else if (entity instanceof AccountIdAwareResource) {
+                String accountId = ((AccountIdAwareResource) entity).getAccountId();
+                if (Strings.isNullOrEmpty(accountId)) {
+                    throw new IllegalArgumentException(String.format("Account Id is null on %s object", entity));
+                }
+                return accountId;
+            } else {
+                throw new IllegalArgumentException(
+                        String.format("%s must be a subclass of %s or %s", entity.getClass().getSimpleName(), TenantAwareResource.class.getSimpleName(),
+                                AccountIdAwareResource.class.getSimpleName()));
+            }
+        } else {
+            throw new IllegalArgumentException("The entity is null");
+        }
     }
 }

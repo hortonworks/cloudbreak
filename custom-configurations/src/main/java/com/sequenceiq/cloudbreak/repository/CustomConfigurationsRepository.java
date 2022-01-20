@@ -6,8 +6,8 @@ import java.util.Optional;
 
 import javax.transaction.Transactional;
 
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 
 @EntityType(entityClass = CustomConfigurations.class)
 @Transactional(Transactional.TxType.REQUIRED)
-public interface CustomConfigurationsRepository extends JpaRepository<CustomConfigurations, Long> {
+public interface CustomConfigurationsRepository extends CrudRepository<CustomConfigurations, Long> {
 
     @Query("SELECT c FROM CustomConfigurations c LEFT JOIN FETCH c.configurations WHERE c.name = :customConfigsName AND c.account = :accountId")
     Optional<CustomConfigurations> findByNameAndAccountId(@Param("customConfigsName") String customConfigsName, @Param("accountId") String accountId);

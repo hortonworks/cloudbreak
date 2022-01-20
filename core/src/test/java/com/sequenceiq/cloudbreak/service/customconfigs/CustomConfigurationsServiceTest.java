@@ -4,20 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
+import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -34,8 +34,10 @@ import com.sequenceiq.cloudbreak.domain.CustomConfigurationProperty;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.exception.CustomConfigurationsCreationException;
+import com.sequenceiq.cloudbreak.repository.CustomConfigurationPropertyRepository;
 import com.sequenceiq.cloudbreak.repository.CustomConfigurationsRepository;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
+import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.CustomConfigurationsValidator;
 
 @ExtendWith(MockitoExtension.class)
@@ -66,7 +68,13 @@ class CustomConfigurationsServiceTest {
     private CustomConfigurationsRepository customConfigurationsRepository;
 
     @Mock
+    private CustomConfigurationPropertyRepository customConfigurationPropertyRepository;
+
+    @Mock
     private ClusterService clusterService;
+
+    @Mock
+    private SecretService secretService;
 
     @Mock
     private CustomConfigurationsValidator validator;
@@ -77,8 +85,8 @@ class CustomConfigurationsServiceTest {
     @Mock
     private OwnerAssignmentService ownerAssignmentService;
 
-    @Mock
-    private TransactionService transactionService;
+    @Captor
+    private ArgumentCaptor<Set<CustomConfigurationProperty>> argumentCaptor;
 
     @InjectMocks
     private CustomConfigurationsService underTest;
@@ -107,17 +115,16 @@ class CustomConfigurationsServiceTest {
 
     @Test
     void testIfCustomConfigsAreBeingAddedCorrectly() throws TransactionService.TransactionExecutionException {
-        doAnswer(invocation -> ((Supplier<?>) invocation.getArgument(0)).get()).when(transactionService).required(any(Supplier.class));
         doNothing().when(ownerAssignmentService).assignResourceOwnerRoleIfEntitled(anyString(), anyString(), anyString());
         CrnTestUtil.mockCrnGenerator(regionAwareCrnGenerator);
-        when(customConfigurationsRepository.save(any(CustomConfigurations.class))).thenReturn(customConfigurations);
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> underTest.create(customConfigurations, TEST_ACCOUNT_ID_1));
 
-        ArgumentCaptor<CustomConfigurations> customConfigsArgumentCaptor = ArgumentCaptor.forClass(CustomConfigurations.class);
-        verify(customConfigurationsRepository).save(customConfigsArgumentCaptor.capture());
-        CustomConfigurations capturedValue = customConfigsArgumentCaptor.getValue();
-        assertEquals(customConfigurations, capturedValue);
+        verify(customConfigurationPropertyRepository).saveAll(argumentCaptor.capture());
+        Set<CustomConfigurationProperty> capturedValue = argumentCaptor.getValue();
+        Set<CustomConfigurationProperty> expectedValue = customConfigurations.getConfigurations();
+        assertEquals(expectedValue, capturedValue);
+        assertEquals(customConfigurations, new ArrayList<>(expectedValue).get(0).getCustomConfigs());
     }
 
     @Test
@@ -147,7 +154,7 @@ class CustomConfigurationsServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> {
             CustomConfigurations result = underTest.deleteByName(TEST_NAME, TEST_ACCOUNT_ID_1);
-            verify(customConfigurationsRepository, times(1)).deleteById(result.getId());
+            verify(customConfigurationPropertyRepository, times(1)).deleteAll(result.getConfigurations());
         });
     }
 
@@ -158,7 +165,7 @@ class CustomConfigurationsServiceTest {
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN_1, () -> {
             CustomConfigurations result = underTest.deleteByCrn(TEST_CRN_1);
-            verify(customConfigurationsRepository, times(1)).deleteById(result.getId());
+            verify(customConfigurationPropertyRepository, times(1)).deleteAll(result.getConfigurations());
         });
     }
 }
