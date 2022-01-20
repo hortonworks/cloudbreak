@@ -162,6 +162,10 @@
                 "value": "-Xms8g"
               },
               {
+                "name": "java.arg.7",
+                "value": "-Djava.io.tmpdir=${nifi.working.directory}/tmp"
+              },
+              {
                 "name": "nifi.registry.client.name",
                 "value": "Default NiFi Registry Client"
               },
