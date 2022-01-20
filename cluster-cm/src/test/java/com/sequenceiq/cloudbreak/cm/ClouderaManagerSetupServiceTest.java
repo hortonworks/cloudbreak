@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
@@ -625,13 +624,15 @@ public class ClouderaManagerSetupServiceTest {
 
         when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class)))
                 .thenReturn(apiClient);
-        when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(any(Stack.class), any(ApiClient.class), anyList()))
+        when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(any(Stack.class), any(ApiClient.class)))
                 .thenReturn(PollingResult.EXIT);
 
         underTest.waitForHosts(Set.of());
 
         verify(clouderaManagerPollingServiceProvider, times(1)).startPollingCmHostStatus(
-                any(Stack.class), any(ApiClient.class), anyList());
+                any(Stack.class),
+                any(ApiClient.class)
+        );
     }
 
     @Test

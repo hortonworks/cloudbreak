@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -28,7 +29,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.template.model.ServiceAttributes;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
-import com.sequenceiq.cloudbreak.util.StackUtil;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HostAttributeDecoratorTest {
@@ -44,12 +44,9 @@ public class HostAttributeDecoratorTest {
     @Mock
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
-    @Mock
-    private StackUtil stackUtil;
-
     @Before
     public void setup() {
-        underTest = new HostAttributeDecorator(cmTemplateProcessorFactory, stackUtil);
+        underTest = new HostAttributeDecorator(cmTemplateProcessorFactory);
     }
 
     @Test
@@ -58,10 +55,6 @@ public class HostAttributeDecoratorTest {
         Blueprint blueprint = mock(Blueprint.class);
         when(stack.getCluster()).thenReturn(cluster);
         when(cluster.getBlueprint()).thenReturn(blueprint);
-        when(stackUtil.collectNodes(any())).thenReturn(Set.of(new Node(null, null, null, null, "fqdn1", "hg1"),
-                new Node(null, null, null, null, "fqdn2", "hg2"),
-                new Node(null, null, null, null, "fqdn3", "hg3"),
-                new Node(null, null, null, null, "fqdn4", null)));
         when(blueprint.getBlueprintText()).thenReturn("");
 
         Map<String, Map<String, ServiceAttributes>> yarnAttrs = new HashMap<>();
@@ -78,7 +71,13 @@ public class HostAttributeDecoratorTest {
 
         when(cmTemplateProcessorFactory.get(any(String.class))).thenReturn(blueprintTextProcessor);
 
-        Map<String, SaltPillarProperties> result = underTest.createHostAttributePillars(stack);
+        Set<Node> nodes = new HashSet<>();
+        nodes.add(new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn1", "hg1"));
+        nodes.add(new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn2", "domain", "hg2"));
+        nodes.add(new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn3", "domain", "hg3"));
+        nodes.add(new Node("privateIp", "publicIp", "instanceId", "instanceType", "fqdn4", null));
+
+        Map<String, SaltPillarProperties> result = underTest.createHostAttributePillars(stack, nodes);
 
         SaltPillarProperties resultPillar = result.get("hostattrs");
         assertEquals("/nodes/hostattrs.sls", resultPillar.getPath());

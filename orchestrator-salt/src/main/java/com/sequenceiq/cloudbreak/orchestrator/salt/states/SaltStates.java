@@ -407,10 +407,4 @@ public class SaltStates {
         }
         return versionCommandOutput;
     }
-
-    public static boolean unboundClusterConfigPresentOnAnyNodes(SaltConnector sc, Target<String> target) {
-        return measure(() -> sc.run(target, "file.file_exists", LOCAL, PingResponse.class, "/etc/unbound/conf.d/00-cluster.conf"), LOGGER,
-                "Getting information about existence of unbound config took {}ms").getResult().stream()
-                .anyMatch(map -> map.values().stream().anyMatch(Boolean::booleanValue));
-    }
 }
