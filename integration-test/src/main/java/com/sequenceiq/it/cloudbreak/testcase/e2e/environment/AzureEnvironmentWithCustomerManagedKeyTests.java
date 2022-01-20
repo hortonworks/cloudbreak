@@ -4,7 +4,10 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
@@ -71,7 +74,10 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
     }
 
     @AfterMethod(onlyForGroups = { "withrg" })
-    public void tearDown() {
+    public void tearDown(Object[] data) {
+        LOGGER.info("Tear down context");
+        ((TestContext) data[0]).cleanupTestContext();
+
         LOGGER.info("Delete the '{}' resource group after test has been done!", resourceGroupForTest);
         deleteResourceGroupCreatedForEnvironment(resourceGroupForTest);
     }
@@ -86,8 +92,7 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
     public void testWithEnvironmentResourceGroup(TestContext testContext) {
         String environmentName = resourcePropertyProvider().getName();
 
-        resourceGroupForTest = resourcePropertyProvider().getName();
-        createResourceGroupForEnvironment(resourceGroupForTest);
+        createResourceGroupForEnvironment(testContext);
 
         testContext
                 .given(CredentialTestDto.class)
@@ -110,7 +115,7 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
                     .withEnvironment()
                     .withTelemetry("telemetry")
                     .withCatalog(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
-                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
+                            commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
                 .when(freeIpaTestClient.create())
                 .await(Status.AVAILABLE)
                 .awaitForHealthyInstances()
@@ -121,7 +126,7 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
                 .when(environmentTestClient.describe())
                 .then(this::verifyEnvironmentResponseDesParameters)
                 .given(FreeIpaTestDto.class)
-                .then((context, testDto, testClient) -> verifyFreeIpaVolumeDesKey(context, testDto, testClient, environmentName))
+                .then((context, testDto, testClient) -> verifyFreeIpaVolumeDesKey(context, testDto, testClient, resourceGroupForTest))
                 .validate();
     }
 
@@ -166,13 +171,19 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
                 .when(environmentTestClient.describe())
                 .then(this::verifyEnvironmentResponseDesParameters)
                 .given(FreeIpaTestDto.class)
-                .then((context, testDto, testClient) -> verifyFreeIpaVolumeDesKey(context, testDto, testClient, environmentName))
+                .then(this::verifyFreeIpaVolumeDesKey)
                 .validate();
     }
 
-    private ResourceGroup createResourceGroupForEnvironment(String resourceGroupName) {
+    private ResourceGroup createResourceGroupForEnvironment(TestContext testContext) {
         CloudFunctionality cloudFunctionality = azureCloudProvider.getCloudFunctionality();
-        return cloudFunctionality.createResourceGroup(resourceGroupName);
+        resourceGroupForTest = resourcePropertyProvider().getName();
+        String username = StringUtils.substringBefore(testContext.getActingUserCrn().getResource(), "@").toLowerCase();
+        Map<String, String> tags = new HashMap<>() {{
+            put("owner", username);
+            put("creation-timestamp", String.valueOf(new Date().getTime()));
+        }};
+        return cloudFunctionality.createResourceGroup(resourceGroupForTest, tags);
     }
 
     private void deleteResourceGroupCreatedForEnvironment(String resourceGroupName) {
@@ -199,14 +210,19 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
         return testDto;
     }
 
-    private FreeIpaTestDto verifyFreeIpaVolumeDesKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient, String environmentName) {
+    private FreeIpaTestDto verifyFreeIpaVolumeDesKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
+        return verifyFreeIpaVolumeDesKey(testContext, testDto, freeIpaClient, null);
+    }
+
+    private FreeIpaTestDto verifyFreeIpaVolumeDesKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient, String resourceGroupName) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = freeIpaInstanceUtil.getInstanceIds(testDto, freeIpaClient, MASTER.getName());
         String desKeyUrl = azureCloudProvider.getEncryptionKeyUrl();
 
-        List<String> volumesDesId = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(testDto.getRequest().getName(), instanceIds));
+        List<String> volumesDesId = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(testDto.getRequest().getName(), resourceGroupName,
+                instanceIds));
         volumesDesId.forEach(desId -> {
-            if (desId.contains("diskEncryptionSets/" + environmentName)) {
+            if (desId.contains("diskEncryptionSets/" + testContext.given(EnvironmentTestDto.class).getRequest().getName())) {
                 LOGGER.info(format("FreeIpa volume has been encrypted with '%s' DES key!", desId));
                 Log.then(LOGGER, format(" FreeIpa volume has not been encrypted with '%s' DES key! ", desId));
             } else {
