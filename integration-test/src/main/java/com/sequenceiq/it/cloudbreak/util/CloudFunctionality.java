@@ -29,7 +29,7 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds);
+    List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds);
 
     @Retryable(
             maxAttempts = ATTEMPTS,
@@ -53,7 +53,7 @@ public interface CloudFunctionality {
             maxAttempts = ATTEMPTS,
             backoff = @Backoff(delay = DELAY, multiplier = MULTIPLIER, maxDelay = MAX_DELAY)
     )
-    ResourceGroup createResourceGroup(String resourceGroupName);
+    ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags);
 
     @Retryable(
             maxAttempts = ATTEMPTS,

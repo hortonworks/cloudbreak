@@ -32,7 +32,7 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds) {
+    public List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds) {
         return amazonEC2Util.listVolumeKmsKeyIds(instanceIds);
     }
 
@@ -52,7 +52,7 @@ public class AwsCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public ResourceGroup createResourceGroup(String resourceGroupName) {
+    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
         LOGGER.debug("createResourceGroup: nothing to do for AWS");
         throw new NotImplementedException("Resource group creation is not applicable for AWS!");
     }
