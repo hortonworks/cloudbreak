@@ -22,7 +22,9 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventContainer;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
+import com.sequenceiq.cloudbreak.structuredevent.event.StructuredNotificationEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPOperationDetails;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredEvent;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotificationEvent;
@@ -48,7 +50,32 @@ public class SdxEventsService {
     @Inject
     private EventV4Endpoint eventV4Endpoint;
 
-    public List<CDPStructuredEvent> getDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types, Integer page, Integer size) {
+    public List<CDPStructuredEvent> getDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types) {
+        List<CDPStructuredEvent> dlEvents;
+        List<CDPStructuredEvent> cbEvents;
+
+        SdxCluster sdxCluster = getDatalake(environmentCrn);
+        if (sdxCluster == null) {
+            LOGGER.error("Datalake not found for environment with Crn:{}", environmentCrn);
+            return List.of();
+        }
+
+        List<String> datalakeCrns = getDatalakeCrns(environmentCrn);
+        dlEvents = retrieveDatalakeServiceEvents(types, datalakeCrns);
+        cbEvents = retrieveCloudbreakServiceEvents(sdxCluster);
+
+        List<CDPStructuredEvent> combinedEvents = new ArrayList<>();
+        combinedEvents.addAll(cbEvents);
+        combinedEvents.addAll(dlEvents);
+
+        if (combinedEvents.isEmpty()) {
+            LOGGER.info("No events from datalake and cloudbreak service");
+            return List.of();
+        }
+        return getSortedEvents(combinedEvents);
+    }
+
+    public List<CDPStructuredEvent> getPagedDatalakeAuditEvents(String environmentCrn, List<StructuredEventType> types, Integer page, Integer size) {
         List<CDPStructuredEvent> dlEvents;
         List<CDPStructuredEvent> cbEvents;
 
@@ -60,8 +87,8 @@ public class SdxEventsService {
         }
 
         List<String> datalakeCrns = getDatalakeCrns(environmentCrn);
-        dlEvents = retrieveDatalakeServiceEvents(types, datalakeCrns, pageable);
-        cbEvents = retrieveCloudbreakServiceEvents(sdxCluster, page, size);
+        dlEvents = retrievePagableDatalakeServiceEvents(types, datalakeCrns, pageable);
+        cbEvents = retrievePagedCloudbreakServiceEvents(sdxCluster, page, size);
 
         List<CDPStructuredEvent> combinedEvents = new ArrayList<>();
         combinedEvents.addAll(cbEvents);
@@ -74,7 +101,7 @@ public class SdxEventsService {
         return sortAndFilterBasedOnPageSize(combinedEvents, size);
     }
 
-    private List<CDPStructuredEvent> retrieveDatalakeServiceEvents(List<StructuredEventType> types, List<String> datalakeCrns, PageRequest pageable) {
+    private List<CDPStructuredEvent> retrievePagableDatalakeServiceEvents(List<StructuredEventType> types, List<String> datalakeCrns, PageRequest pageable) {
         Page<CDPStructuredEvent> pagedResponse = cdpStructuredEventDBService.getPagedEventsOfResources(types, datalakeCrns, pageable);
         if (pagedResponse != null && pagedResponse.getContent().size() > 0) {
             return pagedResponse.getContent();
@@ -84,7 +111,17 @@ public class SdxEventsService {
         }
     }
 
-    private List<CDPStructuredEvent> retrieveCloudbreakServiceEvents(SdxCluster sdxCluster, Integer page, Integer size) {
+    private List<CDPStructuredEvent> retrieveDatalakeServiceEvents(List<StructuredEventType> types, List<String> datalakeCrns) {
+        List<CDPStructuredEvent> response = cdpStructuredEventDBService.getEventsOfResources(types, datalakeCrns);
+        if (response != null && response.size() > 0) {
+            return response;
+        } else {
+            LOGGER.info("No events from datalake service");
+            return List.of();
+        }
+    }
+
+    private List<CDPStructuredEvent> retrievePagedCloudbreakServiceEvents(SdxCluster sdxCluster, Integer page, Integer size) {
         List<CloudbreakEventV4Response> cloudbreakEventV4Responses;
         try {
             cloudbreakEventV4Responses = eventV4Endpoint.getPagedCloudbreakEventListByStack(sdxCluster.getName(), page, size,
@@ -96,9 +133,24 @@ public class SdxEventsService {
         return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(Collectors.toList());
     }
 
+    private List<CDPStructuredEvent> retrieveCloudbreakServiceEvents(SdxCluster sdxCluster) {
+        try {
+            StructuredEventContainer structuredEventContainer = eventV4Endpoint.structured(sdxCluster.getName(), getAccountId(sdxCluster.getEnvCrn()));
+            // Translate the cloudbreak events
+            return structuredEventContainer.getNotification().stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(Collectors.toList());
+        } catch (Exception exception) {
+            return List.of();
+        }
+
+    }
+
     private List<CDPStructuredEvent> sortAndFilterBasedOnPageSize(List<CDPStructuredEvent> eventList, Integer size) {
         return eventList.stream().sorted(Comparator.comparingLong(f -> f.getOperation().getTimestamp())).collect(Collectors.toList())
                 .subList(0, (eventList.size() > size) ? size : eventList.size());
+    }
+
+    private List<CDPStructuredEvent> getSortedEvents(List<CDPStructuredEvent> eventList) {
+        return eventList.stream().sorted(Comparator.comparingLong(f -> f.getOperation().getTimestamp())).collect(Collectors.toList());
     }
 
     private String getAccountId(String crnString) {
@@ -158,6 +210,31 @@ public class SdxEventsService {
 
         cdpStructuredNotificationEvent.setOperation(cdpOperationDetails);
         cdpStructuredNotificationEvent.setStatusReason(cloudbreakEventV4Response.getEventMessage());
+
+        return cdpStructuredNotificationEvent;
+    }
+
+    /**
+     * Converts a collection of {@code StructuredNotificationEvent} to {@code CDPStructuredEvent}.
+     *
+     * @param StructuredNotificationEvent Event response from cloudbreak.
+     * @param datalakeCrn               Crn of data lake.
+     * @return CDP structured Event
+     */
+    private CDPStructuredEvent convert(StructuredNotificationEvent structuredNotificationEvent, String datalakeCrn) {
+        CDPStructuredNotificationEvent cdpStructuredNotificationEvent = new CDPStructuredNotificationEvent();
+        CDPOperationDetails cdpOperationDetails = new CDPOperationDetails();
+        cdpOperationDetails.setTimestamp(structuredNotificationEvent.getOperation().getTimestamp());
+        cdpOperationDetails.setEventType(StructuredEventType.NOTIFICATION);
+        cdpOperationDetails.setResourceName(structuredNotificationEvent.getOperation().getResourceName());
+        cdpOperationDetails.setResourceId(structuredNotificationEvent.getOperation().getResourceId());
+        cdpOperationDetails.setResourceCrn(datalakeCrn);
+        cdpOperationDetails.setResourceEvent(structuredNotificationEvent.getOperation().getEventType().name());
+
+        cdpOperationDetails.setResourceType(CloudbreakEventService.DATALAKE_RESOURCE_TYPE);
+
+        cdpStructuredNotificationEvent.setOperation(cdpOperationDetails);
+        cdpStructuredNotificationEvent.setStatusReason(structuredNotificationEvent.getNotificationDetails().getNotification());
 
         return cdpStructuredNotificationEvent;
     }

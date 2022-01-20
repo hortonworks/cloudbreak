@@ -138,6 +138,23 @@ public class CDPStructuredEventDBService extends AbstractAccountAwareResourceSer
         }
     }
 
+    @Override
+    public <T extends CDPStructuredEvent> List<T> getEventsOfResources(List<StructuredEventType> eventTypes, List<String> resourceCrns) {
+        LOGGER.debug("Gathering events for type: '{}' and resource CRN's: '{}'", eventTypes, resourceCrns);
+        List<StructuredEventType> types = getAllEventTypeIfEmpty(eventTypes);
+        try {
+            List<CDPStructuredEventEntity> events = structuredEventRepository.findByEventTypeInAndResourceCrnIn(types, resourceCrns);
+            return (List<T>) Optional.ofNullable(events).orElse(new ArrayList<>()).stream()
+                    .map(event -> cdpStructuredEventEntityToCDPStructuredEventConverter
+                            .convert(event))
+                    .collect(Collectors.toList());
+        } catch (Exception ex) {
+            String msg = String.format("Failed get events for types: '%s' and resource CRNs: '%s'", types, resourceCrns);
+            LOGGER.warn(msg, ex);
+            throw new CloudbreakServiceException(msg, ex);
+        }
+    }
+
     private List<StructuredEventType> getAllEventTypeIfEmpty(List<StructuredEventType> eventTypes) {
         List<StructuredEventType> types = new ArrayList<>(eventTypes);
         if (CollectionUtils.isEmpty(eventTypes)) {

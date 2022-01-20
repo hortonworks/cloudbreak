@@ -78,7 +78,7 @@ public class SdxEventsServiceTests {
         when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(mockPage);
 
-        List<CDPStructuredEvent> result = sdxEventsService.getDatalakeAuditEvents(DATALAKE_CRN, TEST_EVENT_TYPES, TEST_PAGE, TEST_SIZE);
+        List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN, TEST_EVENT_TYPES, TEST_PAGE, TEST_SIZE);
 
         assertNotNull(result);
         assertEquals(2, result.size());
@@ -94,7 +94,7 @@ public class SdxEventsServiceTests {
                 .thenReturn(mockPage);
         when(eventV4Endpoint.getPagedCloudbreakEventListByStack(any(), any(), any(), any())).thenReturn(Collections.EMPTY_LIST);
 
-        List<CDPStructuredEvent> result = sdxEventsService.getDatalakeAuditEvents(DATALAKE_CRN,
+        List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,
                 Collections.singletonList(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
 
         assertNotNull(result);
@@ -112,7 +112,7 @@ public class SdxEventsServiceTests {
         when(eventV4Endpoint.getPagedCloudbreakEventListByStack(any(), any(), any(), any()))
                 .thenReturn(List.of(createCloudbreakEventV4Response()));
 
-        List<CDPStructuredEvent> result = sdxEventsService.getDatalakeAuditEvents(DATALAKE_CRN,
+        List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,
                 Collections.singletonList(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
 
         assertNotNull(result);
@@ -131,7 +131,7 @@ public class SdxEventsServiceTests {
         when(eventV4Endpoint.getPagedCloudbreakEventListByStack(any(), any(), any(), any()))
                 .thenReturn(List.of(createCloudbreakEventV4Response(1L)));
 
-        List<CDPStructuredEvent> result = sdxEventsService.getDatalakeAuditEvents(DATALAKE_CRN,
+        List<CDPStructuredEvent> result = sdxEventsService.getPagedDatalakeAuditEvents(DATALAKE_CRN,
                 Collections.singletonList(StructuredEventType.NOTIFICATION), TEST_PAGE, TEST_SIZE);
 
         assertNotNull(result);

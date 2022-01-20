@@ -61,7 +61,7 @@ class SdxEventControllerTest {
     void testNoAuthorizationWhenEventsReturnedIsEmpty() {
         when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(Page.empty());
-        when(sdxEventsService.getDatalakeAuditEvents(any(), eq(TEST_EVENT_TYPES), any(), any()))
+        when(sdxEventsService.getPagedDatalakeAuditEvents(any(), eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(Collections.emptyList());
         List<CDPStructuredEvent> result = datalakeEventController.getAuditEvents(RESOURCE_CRN, TEST_EVENT_TYPES, TEST_PAGE, TEST_SIZE);
 
@@ -73,7 +73,7 @@ class SdxEventControllerTest {
     void testNoAuthorizationWhenEventsReturnedIsNotEmpty() {
         when(mockCdpStructuredEventDBService.getPagedEventsOfResources(eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(Page.empty());
-        when(sdxEventsService.getDatalakeAuditEvents(any(), eq(TEST_EVENT_TYPES), any(), any()))
+        when(sdxEventsService.getPagedDatalakeAuditEvents(any(), eq(TEST_EVENT_TYPES), any(), any()))
                 .thenReturn(Collections.singletonList(createCDPStructuredFlowEvent(1L)));
         List<CDPStructuredEvent> result = datalakeEventController.getAuditEvents(RESOURCE_CRN, TEST_EVENT_TYPES, TEST_PAGE, TEST_SIZE);
 

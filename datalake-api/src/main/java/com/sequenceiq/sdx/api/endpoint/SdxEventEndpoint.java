@@ -2,6 +2,7 @@ package com.sequenceiq.sdx.api.endpoint;
 
 import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AUDIT_EVENTS_NOTES;
 import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_FOR_RESOURCE;
+import static com.sequenceiq.cloudbreak.structuredevent.rest.endpoint.CDPStructuredEventOperationDescriptions.AuditOpDescription.LIST_FOR_RESOURCE_ZIP;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.springframework.validation.annotation.Validated;
 
@@ -40,4 +42,13 @@ public interface SdxEventEndpoint {
             @QueryParam("types") List<StructuredEventType> types,
             @QueryParam("page") @DefaultValue("0") Integer page,
             @QueryParam("size") @DefaultValue("100") Integer size);
+
+    @GET
+    @Path("zip")
+    @Produces(MediaType.APPLICATION_OCTET_STREAM)
+    @ApiOperation(value = LIST_FOR_RESOURCE_ZIP, produces = MediaType.APPLICATION_OCTET_STREAM, notes = AUDIT_EVENTS_NOTES,
+            nickname = "getDatalakeEventsZipForResource")
+    Response getDatalakeEventsZip(
+            @QueryParam("environmentCrn") @NotNull(message = "The 'environmentCrn' query parameter must be specified.") String environmentCrn,
+            @QueryParam("types") List<StructuredEventType> types);
 }
