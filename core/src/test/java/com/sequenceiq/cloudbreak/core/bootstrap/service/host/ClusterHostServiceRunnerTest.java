@@ -31,6 +31,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
@@ -307,6 +308,7 @@ public class ClusterHostServiceRunnerTest {
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
         assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
         assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
         assertFalse(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
         assertFalse(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
@@ -358,8 +360,7 @@ public class ClusterHostServiceRunnerTest {
         createInstanceGroup(template, instanceGroups, "fqdn2", null, "1.1.2.1", "1.1.2.2");
         InstanceGroup gwIg = createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
 
-        when(stack.getPrimaryGatewayInstance()).thenReturn(
-                gwIg.getInstanceMetaDataSet().stream().filter(imd -> StringUtils.equals(imd.getDiscoveryFQDN(), "gateway1")).findFirst().get());
+        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
         when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3")));
 

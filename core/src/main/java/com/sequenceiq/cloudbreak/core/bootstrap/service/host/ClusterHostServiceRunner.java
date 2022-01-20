@@ -272,7 +272,7 @@ public class ClusterHostServiceRunner {
             Set<Node> reachableCandidates = getReachableCandidates(stack, candidateAddresses);
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             List<GrainProperties> grainsProperties = grainPropertiesService
-                    .createGrainProperties(gatewayConfigs, cluster, reachableCandidates);
+                    .createGrainPropertiesForTargetedUpscale(gatewayConfigs, cluster, reachableCandidates);
             Set<String> reachableCandidateHostNames = org.apache.commons.collections4.CollectionUtils.emptyIfNull(reachableCandidates)
                     .stream().map(Node::getHostname).collect(Collectors.toSet());
             LOGGER.debug("We are about to execute cluster services (salt highstate, pre cluster manager recipe execution, mount disks, etc.) " +
@@ -299,12 +299,12 @@ public class ClusterHostServiceRunner {
     }
 
     public Set<Node> getReachableCandidates(Stack stack, Map<String, String> candidateAddresses) {
-        InstanceMetaData primaryGwImd = stack.getPrimaryGatewayInstance();
+        List<InstanceMetaData> gwImds = stack.getNotTerminatedGatewayInstanceMetadata();
         try {
             Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stack, candidateAddresses.keySet());
             Set<Node> reachableCandidates = reachableNodes.stream().filter(node ->
                     candidateAddresses.containsKey(node.getHostname())).collect(Collectors.toSet());
-            addPrimaryGatewayToCandidatesIfNeeded(primaryGwImd, reachableCandidates);
+            addGatewaysToCandidatesIfNeeded(gwImds, reachableCandidates);
             return reachableCandidates;
         } catch (NodesUnreachableException e) {
             String errorMessage = "Can not run cluster services on new nodes because the configuration management service is not responding on these nodes: "
@@ -314,17 +314,18 @@ public class ClusterHostServiceRunner {
         }
     }
 
-    private void addPrimaryGatewayToCandidatesIfNeeded(InstanceMetaData primaryGwImd, Set<Node> reachableCandidates) {
-        boolean candidatesMissingPrimaryGateway = reachableCandidates.stream().noneMatch(node ->
-                StringUtils.equals(node.getHostname(), primaryGwImd.getDiscoveryFQDN()));
-        if (candidatesMissingPrimaryGateway) {
-            Node primaryGatewayNode = new Node(primaryGwImd.getPrivateIp(), primaryGwImd.getPublicIp(), primaryGwImd.getInstanceId(),
-                    primaryGwImd.getInstanceGroup().getTemplate().getInstanceType(), primaryGwImd.getDiscoveryFQDN(),
-                    primaryGwImd.getInstanceGroupName());
-            // in case of upscale we should add primary gateway to candidates
-            reachableCandidates.add(primaryGatewayNode);
-            LOGGER.debug("{} gateway node has been added to targets of targeted operation, since we need that to update certain pillars and configurations.",
-                    primaryGatewayNode.getHostname());
+    private void addGatewaysToCandidatesIfNeeded(List<InstanceMetaData> gwImds, Set<Node> reachableCandidates) {
+        Set<String> gatewayHosts = gwImds.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        Set<String> candidatesHosts = reachableCandidates.stream().map(Node::getHostname).collect(Collectors.toSet());
+        if (!candidatesHosts.containsAll(gatewayHosts)) {
+            Set<Node> gatewayNodes = gwImds.stream()
+                    .map(imd -> new Node(imd.getPrivateIp(), imd.getPublicIp(), imd.getInstanceId(), imd.getInstanceGroup().getTemplate().getInstanceType(),
+                            imd.getDiscoveryFQDN(), imd.getInstanceGroupName()))
+                    .collect(Collectors.toSet());
+            // in case of upscale we should add gateways to candidates
+            reachableCandidates.addAll(gatewayNodes);
+            LOGGER.debug("{} gateway nodes has been added to targets of targeted operation, since we need those to update certain pillars and configurations.",
+                    Joiner.on(",").join(gatewayHosts));
         }
     }
 
@@ -356,8 +357,9 @@ public class ClusterHostServiceRunner {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         Cluster cluster = stack.getCluster();
         candidates = collectUpscaleCandidates(cluster.getId(), hostGroupName, scalingAdjustment);
-        if (!candidates.keySet().contains(stack.getPrimaryGatewayInstance().getDiscoveryFQDN())
-            && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
+        Set<String> gatewayHosts = stack.getNotTerminatedGatewayInstanceMetadata().stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.toSet());
+        boolean candidatesContainGatewayNode = candidates.keySet().stream().anyMatch(gatewayHosts::contains);
+        if (!candidatesContainGatewayNode && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
             runTargetedClusterServices(stack, cluster, candidates);
         } else {
             runClusterServices(stack, cluster, candidates);
