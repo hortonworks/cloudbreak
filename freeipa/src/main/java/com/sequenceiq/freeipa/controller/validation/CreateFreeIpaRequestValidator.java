@@ -40,7 +40,7 @@ public class CreateFreeIpaRequestValidator implements Validator<CreateFreeIpaReq
             validationBuilder.error("FreeIPA request must contain at least one instance group.");
         } else {
             int nodesPerInstanceGroup = subject.getInstanceGroups().get(0).getNodeCount();
-            if (subject.getInstanceGroups().stream().filter(ig -> ig.getNodeCount() != nodesPerInstanceGroup || ig.getNodeCount() < 1).count() > 0) {
+            if (subject.getInstanceGroups().stream().anyMatch(ig -> ig.getNodeCount() != nodesPerInstanceGroup || ig.getNodeCount() < 1)) {
                 validationBuilder.error("All instance groups in the FreeIPA request must contain the same number of nodes per instance group " +
                         "and there must be at least 1 instance per instance group.");
             }
