@@ -113,8 +113,8 @@ public class StackUtil {
         if (unReachableCandidateNodes.isEmpty()) {
             return reachableNodes;
         } else {
-            LOGGER.error("Some nodes are unreachable: {}", unReachableCandidateNodes);
-            throw new NodesUnreachableException("Some nodes are unreachable", unReachableCandidateNodes);
+            LOGGER.error("Some of necessary nodes are unreachable: {}", unReachableCandidateNodes);
+            throw new NodesUnreachableException("Some of necessary nodes are unreachable", unReachableCandidateNodes);
         }
     }
 

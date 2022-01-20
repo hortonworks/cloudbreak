@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -16,9 +18,12 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 
 @Service
 public class ClusterManagerUpscaleService {
@@ -40,6 +45,9 @@ public class ClusterManagerUpscaleService {
     @Inject
     private ClusterApiConnectors clusterApiConnectors;
 
+    @Inject
+    private TargetedUpscaleSupportService targetedUpscaleSupportService;
+
     public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged)
             throws ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
@@ -59,6 +67,15 @@ public class ClusterManagerUpscaleService {
         clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
 
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
+        if (!primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
+            Set<Node> reachableCandidates = hostRunner.getReachableCandidates(stack, hosts);
+            List<String> reachableCandidatesHostname = reachableCandidates.stream().map(Node::getHostname).collect(Collectors.toList());
+            Set<InstanceMetaData> reachableInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(md -> reachableCandidatesHostname.contains(md.getDiscoveryFQDN()))
+                    .collect(Collectors.toSet());
+            connector.waitForHosts(reachableInstances);
+        } else {
+            connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
+        }
     }
 }
