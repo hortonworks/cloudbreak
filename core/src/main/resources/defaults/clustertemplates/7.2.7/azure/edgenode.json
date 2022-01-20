@@ -1,12 +1,12 @@
 {
-  "name": "7.2.7 COD Edge Node for Azure",
+  "name": "7.2.7 - COD Edge Node for Azure",
   "description": "",
   "type": "OPERATIONALDATABASE",
   "featureState": "RELEASED",
   "cloudPlatform": "AZURE",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.7 COD Edge Node"
+      "blueprintName": "7.2.7 - COD Edge Node"
     },
     "instanceGroups": [
       {

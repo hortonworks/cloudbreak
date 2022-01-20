@@ -1,12 +1,12 @@
 {
-  "name": "7.2.10 COD Edge Node for Google Cloud",
+  "name": "7.2.10 - COD Edge Node for Google Cloud",
   "description": "",
   "type": "OPERATIONALDATABASE",
   "featureState": "RELEASED",
   "cloudPlatform": "GCP",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.10 COD Edge Node"
+      "blueprintName": "7.2.10 - COD Edge Node"
     },
     "instanceGroups": [
       {
