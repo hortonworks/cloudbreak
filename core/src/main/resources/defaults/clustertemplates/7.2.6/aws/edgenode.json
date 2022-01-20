@@ -1,12 +1,12 @@
 {
-  "name": "7.2.6 COD Edge Node for AWS",
+  "name": "7.2.6 - COD Edge Node for AWS",
   "description": "",
   "type": "OPERATIONALDATABASE",
   "featureState": "RELEASED",
   "cloudPlatform": "AWS",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.6 COD Edge Node"
+      "blueprintName": "7.2.6 - COD Edge Node"
     },
     "instanceGroups": [
       {

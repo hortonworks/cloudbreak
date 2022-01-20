@@ -1,12 +1,12 @@
 {
-  "name": "7.2.14 COD Edge Node for YCloud",
+  "name": "7.2.14 - COD Edge Node for YCloud",
   "description": "",
   "type": "OPERATIONALDATABASE",
   "featureState": "RELEASED",
   "cloudPlatform": "YARN",
   "distroXTemplate": {
     "cluster": {
-      "blueprintName": "7.2.14 COD Edge Node"
+      "blueprintName": "7.2.14 - COD Edge Node"
     },
     "instanceGroups": [
       {
