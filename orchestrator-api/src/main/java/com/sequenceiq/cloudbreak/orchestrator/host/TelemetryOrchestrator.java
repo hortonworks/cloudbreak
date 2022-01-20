@@ -47,4 +47,10 @@ public interface TelemetryOrchestrator {
 
     void executeLoggingAgentDiagnostics(byte[] loggingAgentSaltState, List<GatewayConfig> gatewayConfigs, Set<Node> allNodes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;
+
+    void updateMeteringSaltDefinition(byte[] meteringSaltState, List<GatewayConfig> gatewayConfigs, ExitCriteriaModel exitModel)
+            throws CloudbreakOrchestratorFailedException;
+
+    void upgradeMetering(List<GatewayConfig> gatewayConfigs, Set<Node> nodes, ExitCriteriaModel exitModel, String upgradeFromDate, String customRpmUrl)
+            throws CloudbreakOrchestratorFailedException;
 }
