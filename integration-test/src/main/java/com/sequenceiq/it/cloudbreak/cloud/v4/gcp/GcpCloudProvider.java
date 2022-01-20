@@ -72,7 +72,7 @@ public class GcpCloudProvider extends AbstractCloudProvider {
 
     private static final String JSON_CREDENTIAL_TYPE = "json";
 
-    private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
+    private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GcpCloudProvider.class);
 

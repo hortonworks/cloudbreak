@@ -72,7 +72,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureCloudProvider.class);
 
-    private static final String DEFAULT_STORAGE_NAME = "testsdx" + UUID.randomUUID().toString().replaceAll("-", "");
+    private static final String DEFAULT_STORAGE_NAME = "apitest" + UUID.randomUUID().toString().replaceAll("-", "");
 
     @Inject
     private AzureProperties azureProperties;
@@ -376,7 +376,7 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public String getBaseLocation() {
-        return azureProperties.getCloudStorage().getBaseLocation();
+        return String.join("/", azureProperties.getCloudStorage().getBaseLocation(), DEFAULT_STORAGE_NAME);
     }
 
     public String getAssumerIdentity() {
