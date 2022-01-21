@@ -29,7 +29,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStartUpscaleStartInstancesHandler.class);
 
-    private static final Long START_POLL_TIMEBOUND_MS = 180_000L;
+    private static final Long START_POLL_TIMEBOUND_MS = 300_000L;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
