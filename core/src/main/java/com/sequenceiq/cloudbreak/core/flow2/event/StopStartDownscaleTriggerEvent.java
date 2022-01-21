@@ -10,34 +10,24 @@ public class StopStartDownscaleTriggerEvent extends StackEvent implements HostGr
 
     private final String hostGroup;
 
-    private final Integer adjustment;
-
     private final Set<Long> hostIds;
 
     private final boolean singlePrimaryGateway;
 
-    private final boolean restartServices;
-
     private final ClusterManagerType clusterManagerType;
 
-    public StopStartDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Integer adjustment, Set<Long> hostIds, boolean singlePrimaryGateway,
-            boolean restartServices, ClusterManagerType clusterManagerType) {
+    public StopStartDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Set<Long> hostIds, boolean singlePrimaryGateway,
+            ClusterManagerType clusterManagerType) {
         super(selector, stackId);
         this.hostGroup = hostGroup;
-        this.adjustment = adjustment == null ? Integer.valueOf(0) : adjustment;
         this.hostIds = hostIds;
         this.singlePrimaryGateway = singlePrimaryGateway;
-        this.restartServices = restartServices;
         this.clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
     @Override
     public String getHostGroupName() {
         return hostGroup;
-    }
-
-    public Integer getAdjustment() {
-        return adjustment;
     }
 
     public Set<Long> getHostIds() {
@@ -48,10 +38,6 @@ public class StopStartDownscaleTriggerEvent extends StackEvent implements HostGr
         return singlePrimaryGateway;
     }
 
-    public boolean isRestartServices() {
-        return restartServices;
-    }
-
     public ClusterManagerType getClusterManagerType() {
         return clusterManagerType;
     }
@@ -60,10 +46,8 @@ public class StopStartDownscaleTriggerEvent extends StackEvent implements HostGr
     public String toString() {
         return "StopStartDownscaleTriggerEvent{" +
                 "hostGroup='" + hostGroup + '\'' +
-                ", adjustment=" + adjustment +
                 ", hostIds=" + hostIds +
                 ", singlePrimaryGateway=" + singlePrimaryGateway +
-                ", restartServices=" + restartServices +
                 ", clusterManagerType=" + clusterManagerType +
                 '}';
     }

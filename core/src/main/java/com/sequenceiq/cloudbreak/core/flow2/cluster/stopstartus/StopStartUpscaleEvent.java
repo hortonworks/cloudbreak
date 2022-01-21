@@ -14,7 +14,6 @@ public enum StopStartUpscaleEvent implements FlowEvent {
     STOPSTART_UPSCALE_FAILURE_EVENT("STOPSTART_UPSCALE_FAILURE_EVENT"),
     STOPSTART_UPSCALE_FAIL_HANDLED_EVENT("STOPSTART_UPSCALE_FAIL_HANDLED_EVENT");
 
-
     private final String event;
 
     StopStartUpscaleEvent(String event) {
