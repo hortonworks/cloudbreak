@@ -36,10 +36,16 @@ public class StopStartDownscaleFlowConfig extends AbstractFlowConfiguration<Stop
                 .to(STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE)
                 .event(STOPSTART_DOWNSCALE_CLUSTER_MANAGER_DECOMMISSIONED_EVENT)
                 .defaultFailureEvent()
+                // TODO CB-14929: Error handling. Add a failureState() + failureEvent() transition - for any repair action that may be necessary.
+                // This likely involves adding a new set of transitions from this failure state to the final failed state
+                //  (i.e. STOPSTART_DOWNSCALE_FAILED_STATE)
             .from(STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE)
                 .to(STOPSTART_DOWNSCALE_FINALIZE_STATE)
                 .event(STOPSTART_DOWNSCALE_INSTANCES_STOPPED_EVENT)
                 .defaultFailureEvent()
+                // TODO CB-14929: Error handling. Add a failureState() + failureEvent() transition - for any repair action that may be necessary.
+                // This likely involves adding a new set of transitions from this failure state to the final failed state
+                //  (i.e. STOPSTART_DOWNSCALE_FAILED_STATE)
             .from(STOPSTART_DOWNSCALE_FINALIZE_STATE)
                 .to(FINAL_STATE)
                 .event(STOPSTART_DOWNSCALE_FINALIZED_EVENT)

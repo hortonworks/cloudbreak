@@ -86,7 +86,6 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         lenient().when(cloudConnector.authentication()).thenReturn(authenticator);
         lenient().when(authenticator.authenticate(any(CloudContext.class), any(CloudCredential.class))).thenReturn(ac);
         lenient().when(cloudConnector.instances()).thenReturn(instanceConnector);
-
     }
 
     @Test
