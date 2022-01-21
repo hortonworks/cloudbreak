@@ -124,6 +124,26 @@ public class AwsInstanceConnector implements InstanceConnector {
                 "Failed to send stop request to AWS: ");
     }
 
+    @Retryable(
+            value = SdkClientException.class,
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 5000)
+    )
+    @Override
+    public List<CloudVmInstanceStatus> stopWithLimitedRetry(AuthenticatedContext ac, List<CloudResource> resources, List<CloudInstance> vms,
+            Long timeboundInMs) {
+        Set<InstanceStatus> completedStatuses = EnumSet.of(
+                InstanceStatus.FAILED,
+                InstanceStatus.TERMINATED,
+                InstanceStatus.TERMINATED_BY_PROVIDER,
+                InstanceStatus.DELETE_REQUESTED,
+                AwsInstanceStatusMapper.getInstanceStatusByAwsStatus("Stopped"));
+        return setCloudVmInstanceStatuses(ac, vms, "Stopped",
+                (ec2Client, instances) -> ec2Client.stopInstances(new StopInstancesRequest().withInstanceIds(instances)),
+                completedStatuses,
+                "Failed to send stop request to AWS: ", timeboundInMs);
+    }
+
     private List<CloudVmInstanceStatus> setCloudVmInstanceStatuses(AuthenticatedContext ac, List<CloudInstance> vms, String status,
             BiConsumer<AmazonEc2Client, Collection<String>> consumer, Set<InstanceStatus> completedStatuses, String exceptionText,
             Long timeboundInMs) {
