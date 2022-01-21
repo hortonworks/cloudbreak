@@ -104,7 +104,7 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
 
     @Override
     void doApply(Stack stack) throws ExistingStackPatchApplyException {
-        if (isCmServerReachable(stack)) {
+        if (isPrimaryGatewayReachable(stack)) {
             try {
                 byte[] currentSaltState = getCurrentSaltStateStack(stack);
                 List<String> saltStateDefinitions = Arrays.asList("salt-common", "salt");
@@ -129,7 +129,7 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
                 throw new ExistingStackPatchApplyException(e.getMessage(), e);
             }
         } else {
-            String message = "Salt partial update cannot run, because CM server is unreachable of stack: " + stack.getResourceCrn();
+            String message = "Salt partial update cannot run, because primary gateway is unreachable of stack: " + stack.getResourceCrn();
             LOGGER.info(message);
             throw new ExistingStackPatchApplyException(message);
         }

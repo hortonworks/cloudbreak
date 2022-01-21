@@ -84,7 +84,7 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
 
     @Override
     void doApply(Stack stack) throws ExistingStackPatchApplyException {
-        if (isCmServerReachable(stack)) {
+        if (isPrimaryGatewayReachable(stack)) {
             try {
                 upgradeMeteringOnNodes(stack);
             } catch (ExistingStackPatchApplyException e) {
@@ -93,7 +93,7 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
                 throw new ExistingStackPatchApplyException(e.getMessage(), e);
             }
         } else {
-            String message = "Salt partial update and metering upgrade cannot run, because CM server is unreachable of stack: " + stack.getResourceCrn();
+            String message = "Salt partial update and metering upgrade cannot run, because primary gateway is unreachable of stack: " + stack.getResourceCrn();
             LOGGER.info(message);
             throw new ExistingStackPatchApplyException(message);
         }
