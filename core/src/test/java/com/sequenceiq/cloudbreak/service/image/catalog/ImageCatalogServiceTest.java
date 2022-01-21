@@ -5,7 +5,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +15,6 @@ import org.testcontainers.shaded.org.apache.commons.lang.NotImplementedException
 
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.ImageFilter;
 import com.sequenceiq.cloudbreak.service.image.StatedImages;
@@ -48,8 +46,7 @@ public class ImageCatalogServiceTest {
         when(runtimeImage722.getVersion()).thenReturn(RUNTIME_722);
         when(runtimeImage7210.getVersion()).thenReturn(RUNTIME_7210);
 
-        Images images = new Images(List.of(), List.of(runtimeImage722, runtimeImage7210, runtimeImage721, runtimeImage721), List.of(), Set.of());
-        ImageFilterResult imageFilterResult = new ImageFilterResult(images, null);
+        ImageFilterResult imageFilterResult = new ImageFilterResult(List.of(runtimeImage722, runtimeImage7210, runtimeImage721, runtimeImage721), null);
 
         victim = new TestImplementation(imageCatalogV3, imageFilterResult);
     }

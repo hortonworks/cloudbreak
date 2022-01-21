@@ -17,7 +17,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.image.ImageComponentVersions;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -58,7 +57,7 @@ public class UpgradeOptionsResponseFactoryTest {
         ImageFilterResult availableImages = createAvailableImages(packageVersions);
 
         when(imageService.determineImageName(CLOUD_PLATFORM, REGION, currentImage)).thenReturn(IMAGE_NAME);
-        when(imageService.determineImageName(CLOUD_PLATFORM, REGION, availableImages.getAvailableImages().getCdhImages().get(0))).thenReturn(IMAGE_NAME);
+        when(imageService.determineImageName(CLOUD_PLATFORM, REGION, availableImages.getImages().get(0))).thenReturn(IMAGE_NAME);
         when(componentVersionProvider.getComponentVersions(eq(packageVersions), any(), any())).thenReturn(expectedPackageVersions);
 
         UpgradeV4Response actual = underTest.createV4Response(currentImage, availableImages, CLOUD_PLATFORM, REGION, IMAGE_CATALOG_NAME);
@@ -76,7 +75,7 @@ public class UpgradeOptionsResponseFactoryTest {
     }
 
     private ImageFilterResult createAvailableImages(Map<String, String> packageVersions) {
-        return new ImageFilterResult(new Images(null, List.of(createImage(packageVersions)), null, null), null);
+        return new ImageFilterResult(List.of(createImage(packageVersions)), null);
     }
 
     private Image createImage(Map<String, String> packageVersions) {

@@ -26,7 +26,7 @@ interface ImageCatalogService {
 
     default ImageCatalogMetaData getImageCatalogMetaData(CloudbreakImageCatalogV3 imageCatalogV3) {
         ImageFilterResult imageFilterResult = getImageFilterResult(imageCatalogV3);
-        List<String> runtimes = imageFilterResult.getAvailableImages().getCdhImages()
+        List<String> runtimes = imageFilterResult.getImages()
                 .stream()
                 .map(Image::getVersion)
                 .distinct()

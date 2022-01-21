@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ClusterUpgradeImageFilter;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterParams;
 import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
@@ -65,6 +64,7 @@ import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClusterUpgradeAvailabilityServiceTest {
+
     private static final String ACCOUNT_ID = "cloudera";
 
     private static final String CATALOG_NAME = "catalog";
@@ -98,6 +98,8 @@ public class ClusterUpgradeAvailabilityServiceTest {
     private static final String REGION = "region";
 
     private static final long STACK_ID = 2L;
+
+    private static final InternalUpgradeSettings INTERNAL_UPGRADE_SETTINGS = new InternalUpgradeSettings(false, true, true);
 
     @InjectMocks
     private ClusterUpgradeAvailabilityService underTest;
@@ -152,30 +154,27 @@ public class ClusterUpgradeAvailabilityServiceTest {
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         Image otherImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         CloudbreakImageCatalogV3 imageCatalog = createImageCatalog(List.of(properImage, otherImage, currentImageFromCatalog));
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
-                stack.getType(), null, STACK_ID, new InternalUpgradeSettings(false, true, true));
+        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImageFromCatalog);
         UpgradeV4Response response = new UpgradeV4Response();
 
-        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack,
-                new InternalUpgradeSettings(false, true, true))).thenReturn(imageFilterParams);
+        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
         when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(result);
         when(result.isError()).thenReturn(false);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
 
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, new InternalUpgradeSettings(false, true,
-                true));
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
         assertEquals(response, actual);
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV3(CATALOG_URL);
-        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams);
+        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());
     }
@@ -190,30 +189,27 @@ public class ClusterUpgradeAvailabilityServiceTest {
         Image properImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         Image otherImage = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         CloudbreakImageCatalogV3 imageCatalog = createImageCatalog(List.of(properImage, otherImage, currentImageFromCatalog));
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
-                stack.getType(), null, STACK_ID, new InternalUpgradeSettings(false, true, true));
+        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImageFromCatalog);
         UpgradeV4Response response = new UpgradeV4Response();
 
-        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack,
-                new InternalUpgradeSettings(false, true, true))).thenReturn(imageFilterParams);
+        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
         when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(result);
         when(result.isError()).thenReturn(false);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenThrow(new NotFoundException("not found"));
         when(imageCatalogProvider.getImageCatalogV3(FALLBACK_CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
 
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, new InternalUpgradeSettings(false, true,
-                true));
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
         assertEquals(response, actual);
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV3(FALLBACK_CATALOG_URL);
-        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams);
+        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());
     }
@@ -234,22 +230,19 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
-                stack.getType(), null, STACK_ID, new InternalUpgradeSettings(false, true, true));
-        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack,
-                new InternalUpgradeSettings(false, true, true))).thenReturn(imageFilterParams);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
+        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImageFromCatalog);
+        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
+        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
 
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, false, new InternalUpgradeSettings(false, true,
-                true));
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, false, INTERNAL_UPGRADE_SETTINGS);
 
         assertEquals(response, actual);
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV3(CATALOG_URL);
-        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams);
+        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());
         verifyNoInteractions(clusterRepairService);
@@ -260,8 +253,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         Stack stack = createStack(createStackStatus(Status.AVAILABLE), DATALAKE_STACK_TYPE);
         when(imageService.getImage(stack.getId())).thenThrow(new CloudbreakImageNotFoundException("Image not found."));
 
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, new InternalUpgradeSettings(false, true,
-                true));
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
         assertNull(actual.getCurrent());
         assertNull(actual.getUpgradeCandidates());
@@ -281,24 +273,21 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo));
         Stack stack = createStack(createStackStatus(Status.CREATE_FAILED), StackType.WORKLOAD);
+        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImageFromCatalog);
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
-                stack.getType(), null, STACK_ID, new InternalUpgradeSettings(false, true, true));
-        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack,
-                new InternalUpgradeSettings(false, true, true))).thenReturn(imageFilterParams);
+        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
 
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, new InternalUpgradeSettings(false, true,
-                true));
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
         assertNull(actual.getCurrent());
         assertEquals(1, actual.getUpgradeCandidates().size());
@@ -321,10 +310,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo));
         Stack stack = createStack(createStackStatus(Status.AVAILABLE), StackType.WORKLOAD);
         RepairValidation repairValidation = mock(RepairValidation.class);
+        ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImageFromCatalog);
 
         when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(result);
         when(clusterRepairService.repairWithDryRun(stack.getId())).thenReturn(result);
@@ -332,12 +322,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
-        ImageFilterParams imageFilterParams = new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels, stack.getType(), null,
-                STACK_ID, new InternalUpgradeSettings(false, true, true));
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, new InternalUpgradeSettings(false, true, true)))
-                .thenReturn(imageFilterParams);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, stack.getCloudPlatform(), imageFilterParams)).thenReturn(filteredImages);
+        when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
+        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -345,8 +332,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(result.getError()).thenReturn(repairValidation);
         when(repairValidation.getValidationErrors()).thenReturn(Collections.singletonList(validationError));
 
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, new InternalUpgradeSettings(false, true,
-                true));
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
         assertNull(actual.getCurrent());
         assertEquals(1, actual.getUpgradeCandidates().size());
@@ -360,11 +346,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         when(entitlementService.runtimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
@@ -382,11 +368,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
         underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
@@ -403,11 +389,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true));
@@ -423,11 +409,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
         underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
@@ -444,11 +430,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
 
         Exception e = Assertions.assertThrows(BadRequestException.class, () -> underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true));
@@ -464,11 +450,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
@@ -485,11 +471,11 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageInfoV4Response imageInfo = new ImageInfoV4Response();
         imageInfo.setImageId(IMAGE_ID);
         imageInfo.setCreated(1);
-        imageInfo.setComponentVersions(creatExpectedPackageVersions());
+        imageInfo.setComponentVersions(createExpectedPackageVersions());
         ImageInfoV4Response lastImageInfo = new ImageInfoV4Response();
         lastImageInfo.setImageId(IMAGE_ID_LAST);
         lastImageInfo.setCreated(2);
-        lastImageInfo.setComponentVersions(creatExpectedPackageVersions());
+        lastImageInfo.setComponentVersions(createExpectedPackageVersions());
         response.setUpgradeCandidates(List.of(imageInfo, lastImageInfo));
         underTest.filterUpgradeOptions(ACCOUNT_ID, response, request, true);
 
@@ -506,18 +492,29 @@ public class ClusterUpgradeAvailabilityServiceTest {
         Image imageAvailableForUpgrade = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         ImageFilterResult filteredImages = createFilteredImages(imageAvailableForUpgrade);
         UpgradeV4Response upgradeResponse = mock(UpgradeV4Response.class);
+        CloudbreakImageCatalogV3 imageCatalog = createImageCatalog(List.of(image));
+        ImageCatalog imageCatalogDomain = createImageCatalogDomain();
 
         when(imageService.getImage(stack.getId())).thenReturn(currentImage);
-        when(imageCatalogService.getImage(null, CATALOG_NAME, currentImage.getImageId())).thenReturn(StatedImage.statedImage(image, null, null));
-        when(imageFilterParamsFactory.create(image, lockComponents, stack, new InternalUpgradeSettings(false, true, true))).thenReturn(imageFilterParams);
-        when(clusterUpgradeImageFilter.filter(accountId, WORKSPACE_ID, CATALOG_NAME, CLOUD_PLATFORM, imageFilterParams)).thenReturn(filteredImages);
+        when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(image);
+        when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
+        when(imageCatalogProvider.getImageCatalogV3(imageCatalogDomain.getImageCatalogUrl())).thenReturn(imageCatalog);
+        when(imageFilterParamsFactory.create(image, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
+        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(image, filteredImages, CLOUD_PLATFORM, REGION, CATALOG_NAME)).thenReturn(upgradeResponse);
         when(upgradeResponse.getReason()).thenReturn("done");
 
-        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, new InternalUpgradeSettings(false, true,
-                true));
+        UpgradeV4Response actual = underTest.checkForUpgradesByName(stack, lockComponents, true, INTERNAL_UPGRADE_SETTINGS);
 
         assertEquals(upgradeResponse, actual);
+
+        verify(imageService).getImage(stack.getId());
+        verify(imageProvider).getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog);
+        verify(imageCatalogService).getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME);
+        verify(imageCatalogProvider).getImageCatalogV3(imageCatalogDomain.getImageCatalogUrl());
+        verify(imageFilterParamsFactory).create(image, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS);
+        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
+        verify(upgradeOptionsResponseFactory).createV4Response(image, filteredImages, CLOUD_PLATFORM, REGION, CATALOG_NAME);
     }
 
     private StackStatus createStackStatus(Status status) {
@@ -567,13 +564,18 @@ public class ClusterUpgradeAvailabilityServiceTest {
     }
 
     private ImageFilterResult createFilteredImages(com.sequenceiq.cloudbreak.cloud.model.catalog.Image image) {
-        return new ImageFilterResult(new Images(null, List.of(image), null, null), null);
+        return new ImageFilterResult(List.of(image), null);
     }
 
-    private ImageComponentVersions creatExpectedPackageVersions() {
+    private ImageComponentVersions createExpectedPackageVersions() {
         ImageComponentVersions imageComponentVersions = new ImageComponentVersions();
         imageComponentVersions.setCm(V_7_0_3);
         imageComponentVersions.setCdp(V_7_0_2);
         return imageComponentVersions;
+    }
+
+    private ImageFilterParams createImageFilterParams(Stack stack, Image currentImageFromCatalog) {
+        return new ImageFilterParams(currentImageFromCatalog, lockComponents, activatedParcels,
+                stack.getType(), null, STACK_ID, INTERNAL_UPGRADE_SETTINGS, CLOUD_PLATFORM);
     }
 }

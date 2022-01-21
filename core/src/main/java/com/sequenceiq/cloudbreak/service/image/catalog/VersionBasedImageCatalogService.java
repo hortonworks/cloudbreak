@@ -19,7 +19,6 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakVersion;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.service.image.CloudbreakVersionListProvider;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogVersionFilter;
@@ -73,11 +72,11 @@ public class VersionBasedImageCatalogService implements ImageCatalogService {
         List<Image> freeipaImages = imageCatalogV3.getImages().getFreeIpaImages();
         if (!freeipaImages.isEmpty()) {
             List<Image> images = freeipaImages.stream().filter(image -> imageIds.contains(image.getUuid())).collect(Collectors.toList());
-            return new ImageFilterResult(new Images(null, null, images, null), message);
+            return new ImageFilterResult(images, message);
         } else {
             List<Image> cdhImages = imageCatalogV3.getImages().getCdhImages();
             List<Image> images = cdhImages.stream().filter(image -> imageIds.contains(image.getUuid())).collect(Collectors.toList());
-            return new ImageFilterResult(new Images(null, images, null, null), message);
+            return new ImageFilterResult(images, message);
         }
     }
 

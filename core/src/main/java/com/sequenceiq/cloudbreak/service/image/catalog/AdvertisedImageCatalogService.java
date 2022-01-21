@@ -1,20 +1,21 @@
 package com.sequenceiq.cloudbreak.service.image.catalog;
 
-import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
-import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.service.image.ImageFilter;
-import com.sequenceiq.cloudbreak.service.image.StatedImages;
-import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
-import java.util.List;
-
-import static java.util.stream.Collectors.toList;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.service.image.ImageFilter;
+import com.sequenceiq.cloudbreak.service.image.StatedImages;
+import com.sequenceiq.cloudbreak.service.upgrade.image.ImageFilterResult;
 
 @Component
 public class AdvertisedImageCatalogService implements ImageCatalogService {
@@ -32,7 +33,7 @@ public class AdvertisedImageCatalogService implements ImageCatalogService {
     @Override
     public void validate(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
         validateVersion(imageCatalogV3);
-        validateAdvertisedImageExistance(imageCatalogV3);
+        validateAdvertisedImageExistence(imageCatalogV3);
     }
 
     @Override
@@ -40,11 +41,9 @@ public class AdvertisedImageCatalogService implements ImageCatalogService {
         List<Image> cdhImages = imageCatalogV3.getImages().getCdhImages().stream().filter(Image::isAdvertised).collect(toList());
         List<Image> freeipaImages = imageCatalogV3.getImages().getFreeIpaImages().stream().filter(Image::isAdvertised).collect(toList());
         List<Image> images = !freeipaImages.isEmpty() ? freeipaImages : cdhImages;
-        LOGGER.debug("{} images found by the advertised flag", images.size());
         String message = String.format("%d images found by the advertised flag", images.size());
-        return !freeipaImages.isEmpty() ?
-                new ImageFilterResult(new Images(null, null, images, null), message) :
-                new ImageFilterResult(new Images(null, images, null, null), message);
+        LOGGER.debug(message);
+        return new ImageFilterResult(images, message);
     }
 
     private void validateVersion(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
@@ -53,11 +52,11 @@ public class AdvertisedImageCatalogService implements ImageCatalogService {
         }
     }
 
-    private void validateAdvertisedImageExistance(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
+    private void validateAdvertisedImageExistence(CloudbreakImageCatalogV3 imageCatalogV3) throws CloudbreakImageCatalogException {
         List<Image> cdhImages = imageCatalogV3.getImages().getCdhImages();
         List<Image> freeipaImages = imageCatalogV3.getImages().getFreeIpaImages();
         List<Image> images = !freeipaImages.isEmpty() ? freeipaImages : cdhImages;
-        if (images.stream().noneMatch(i -> i.isAdvertised())) {
+        if (images.stream().noneMatch(Image::isAdvertised)) {
             throw new CloudbreakImageCatalogException("There should be at least one advertised image.");
         }
     }

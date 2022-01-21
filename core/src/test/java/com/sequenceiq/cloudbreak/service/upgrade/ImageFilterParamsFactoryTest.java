@@ -34,6 +34,8 @@ public class ImageFilterParamsFactoryTest {
 
     private static final Long STACK_ID = 1L;
 
+    private static final String CLOUD_PLATFORM = "AWS";
+
     @InjectMocks
     private ImageFilterParamsFactory underTest;
 
@@ -65,6 +67,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(StackType.DATALAKE, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
         assertEquals(STACK_ID, actual.getStackId());
+        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).findCdhProduct(clusterComponents);
     }
@@ -94,6 +97,7 @@ public class ImageFilterParamsFactoryTest {
         assertEquals(StackType.WORKLOAD, actual.getStackType());
         assertEquals(blueprint, actual.getBlueprint());
         assertEquals(STACK_ID, actual.getStackId());
+        assertEquals(CLOUD_PLATFORM, actual.getCloudPlatform());
         verify(parcelService).getParcelComponentsByBlueprint(stack);
         verify(clouderaManagerProductsProvider).getProducts(cdhClusterComponent);
     }
@@ -121,6 +125,7 @@ public class ImageFilterParamsFactoryTest {
         stack.setType(stackType);
         stack.setCluster(createCluster());
         stack.setId(STACK_ID);
+        stack.setCloudPlatform(CLOUD_PLATFORM);
         return stack;
     }
 

@@ -83,7 +83,7 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createCbVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getCloudbreakVersions());
 
-        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getAvailableImages().getCdhImages();
+        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getImages();
 
         assertTrue(actual.contains(properImage));
         assertEquals(1, actual.size());
@@ -100,7 +100,7 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createFreeipaVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getFreeipaVersions());
 
-        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getAvailableImages().getFreeIpaImages();
+        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getImages();
 
         assertTrue(actual.contains(properImage));
         assertEquals(1, actual.size());
@@ -120,7 +120,7 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createCbVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getCloudbreakVersions());
 
-        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getAvailableImages().getCdhImages();
+        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getImages();
 
         assertTrue(actual.isEmpty());
     }
@@ -139,7 +139,7 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createFreeipaVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getFreeipaVersions());
 
-        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getAvailableImages().getFreeIpaImages();
+        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getImages();
 
         assertTrue(actual.isEmpty());
     }
@@ -157,7 +157,7 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createCbVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getCloudbreakVersions());
 
-        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getAvailableImages().getCdhImages();
+        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getImages();
 
         assertTrue(actual.contains(properImage1));
         assertTrue(actual.contains(properImage2));
@@ -177,7 +177,7 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createFreeipaVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getFreeipaVersions());
 
-        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getAvailableImages().getFreeIpaImages();
+        List<Image> actual = victim.getImageFilterResult(imageCatalogV3).getImages();
 
         assertTrue(actual.contains(properImage1));
         assertTrue(actual.contains(properImage2));
@@ -186,30 +186,23 @@ public class VersionBasedImageCatalogServiceTest {
 
     @Test
     public void testValidateWithNullVersionBlock() {
-
-        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> {
-            victim.validate(createCatalog(null));
-        });
+        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> victim.validate(createCatalog(null)));
 
         assertEquals("Cloudbreak versions cannot be NULL", exception.getMessage());
     }
 
     @Test
     public void testValidateWithEmptyVersionBlock() {
-
         CloudbreakImageCatalogV3 catalog = createCatalog(new Versions(Collections.emptyList(), Collections.emptyList()));
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(catalog.getVersions().getCloudbreakVersions());
 
-        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> {
-            victim.validate(catalog);
-        });
+        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> victim.validate(catalog));
 
         assertEquals("Cloudbreak versions cannot be NULL", exception.getMessage());
     }
 
     @Test
     public void testValidateCbImagesWhichAllStoredInVersionBlock() throws CloudbreakImageCatalogException {
-
         Image properImage1 = createImage(PROPER_IMAGE_ID);
         Image properImage2 = createImage(PROPER_IMAGE_ID_2);
         Image otherImage = createImage(OTHER_IMAGE_ID);
@@ -224,7 +217,6 @@ public class VersionBasedImageCatalogServiceTest {
 
     @Test
     public void testValidateCbImagesWhichAnyStoredInVersionBlock() {
-
         Image properImage1 = createImage(PROPER_IMAGE_ID);
         Image properImage2 = createImage(PROPER_IMAGE_ID_2);
 
@@ -233,16 +225,13 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createCbVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getCloudbreakVersions());
 
-        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> {
-            victim.validate(createCatalog(versions));
-        });
+        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> victim.validate(createCatalog(versions)));
 
         assertEquals("Images with ids: " + OTHER_IMAGE_ID + " is not present in cdh-images block", exception.getMessage());
     }
 
     @Test
     public void testValidateFreeipaImagesWhichAllStoredInVersionBlock() throws CloudbreakImageCatalogException {
-
         Image properImage1 = createImage(PROPER_IMAGE_ID);
         Image properImage2 = createImage(PROPER_IMAGE_ID_2);
         Image otherImage = createImage(OTHER_IMAGE_ID);
@@ -257,7 +246,6 @@ public class VersionBasedImageCatalogServiceTest {
 
     @Test
     public void testValidateFreeipaImagesWhichAnyStoredInVersionBlock() {
-
         Image properImage1 = createImage(PROPER_IMAGE_ID);
         Image properImage2 = createImage(PROPER_IMAGE_ID_2);
 
@@ -266,9 +254,7 @@ public class VersionBasedImageCatalogServiceTest {
         Versions versions = createFreeipaVersions();
         when(cloudbreakVersionListProvider.getVersions(any())).thenReturn(versions.getFreeipaVersions());
 
-        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> {
-            victim.validate(createCatalog(versions));
-        });
+        Exception exception = assertThrows(CloudbreakImageCatalogException.class, () -> victim.validate(createCatalog(versions)));
 
         assertEquals("Images with ids: " + OTHER_IMAGE_ID + " is not present in cdh-images block", exception.getMessage());
     }
