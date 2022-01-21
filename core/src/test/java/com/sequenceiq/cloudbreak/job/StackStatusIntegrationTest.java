@@ -83,6 +83,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderMetadataAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.util.UsageLoggingUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
@@ -136,6 +137,9 @@ class StackStatusIntegrationTest {
 
     @Mock
     private JobExecutionContext jobExecutionContext;
+
+    @MockBean
+    private StackUtil stackUtil;
 
     @MockBean
     private StackInstanceStatusChecker stackStatusChecker;
