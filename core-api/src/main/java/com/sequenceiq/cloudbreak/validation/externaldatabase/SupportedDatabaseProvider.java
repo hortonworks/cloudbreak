@@ -21,6 +21,7 @@ public final class SupportedDatabaseProvider {
     static {
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Hive", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Hive DAS", POSTGRES));
+        SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Hue Query Processor", POSTGRES));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Oozie", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Ranger", POSTGRES, MYSQL, ORACLE11, ORACLE12));
         SUPPORTED_EXTERNAL_DATABASES.add(getSupportedServiceEntry("Other", POSTGRES, MYSQL, ORACLE11, ORACLE12));

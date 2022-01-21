@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 
 public class DasConfigProviderTest {
 
-    private static final String HIVE_DAS = "QUERY_PROCESSOR";
+    private static final String HIVE_DAS = "HIVE_DAS";
 
     private static final String DB_PROVIDER = "postgres";
 

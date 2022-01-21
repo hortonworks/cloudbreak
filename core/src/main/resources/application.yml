@@ -816,7 +816,9 @@ cb:
         TEZ: 7.2.9,
         YARN: 7.2.9,
         ZEPPELIN: 7.2.9,
-        ZOOKEEPER: 7.2.9
+        ZOOKEEPER: 7.2.9,
+        QUERY_STORE: 7.2.9
+        
 
 cluster:
   monitoring:
