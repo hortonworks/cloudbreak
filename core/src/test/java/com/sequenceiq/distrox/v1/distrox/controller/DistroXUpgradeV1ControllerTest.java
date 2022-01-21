@@ -1,9 +1,11 @@
 package com.sequenceiq.distrox.v1.distrox.controller;
 
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,20 +18,26 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.common.model.UpgradeShowAvailableImages;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
-class DistroxUpgradeV1ControllerTest {
+class DistroXUpgradeV1ControllerTest {
 
     private static final String USER_CRN = "crn:cdp:iam:us-west-1:1234:user:1";
 
     private static final String CLUSTER_NAME = "clusterName";
+
+    private static final String DATAHUB_CRN = "crn:cdp:iam:us-west-1:1234:datahub:1";
 
     private static final Long WORKSPACE_ID = 1L;
 
@@ -47,12 +55,15 @@ class DistroxUpgradeV1ControllerTest {
     @Mock
     private DistroXUpgradeService upgradeService;
 
+    @Mock
+    private StackCcmUpgradeService stackCcmUpgradeService;
+
     @InjectMocks
     private DistroXUpgradeV1Controller underTest;
 
     @BeforeEach
     public void init() {
-        when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
+        lenient().when(restRequestThreadLocalService.getRequestedWorkspaceId()).thenReturn(WORKSPACE_ID);
     }
 
     @Test
@@ -125,6 +136,14 @@ class DistroxUpgradeV1ControllerTest {
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.upgradeClusterByCrn(CLUSTER_NAME, distroxUpgradeRequest));
 
         verify(upgradeService).triggerUpgrade(NameOrCrn.ofCrn(CLUSTER_NAME), WORKSPACE_ID, USER_CRN, upgradeV4Request);
+    }
+
+    @Test
+    public void testCcmUpgrade() {
+        FlowIdentifier expected = new FlowIdentifier(FlowType.FLOW, "1");
+        when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(DATAHUB_CRN))).thenReturn(expected);
+        DistroXCcmUpgradeV1Response result = underTest.upgradeCcmByCrnInternal(DATAHUB_CRN, USER_CRN);
+        Assertions.assertSame(expected, result.getFlowIdentifier());
     }
 
 }
