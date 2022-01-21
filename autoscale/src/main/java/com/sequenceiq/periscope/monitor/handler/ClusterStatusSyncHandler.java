@@ -46,7 +46,7 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         boolean clusterNodesUnhealthy = false;
         if (cluster.isStopStartScalingEnabled()) {
             clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false);
-            clusterNodesUnhealthy = Optional.ofNullable(statusResponse.getStatus()).map(s -> s == Status.NODE_FAILURE).orElse(false);
+            clusterNodesUnhealthy = Optional.ofNullable(statusResponse.getStatus()).map(s -> s == Status.AVAILABLE_WITH_STOPPED_INSTANCES).orElse(false);
             clusterAvailable |= clusterNodesUnhealthy;
         } else {
             clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
