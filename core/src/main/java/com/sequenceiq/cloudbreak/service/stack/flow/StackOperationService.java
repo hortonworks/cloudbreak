@@ -332,8 +332,6 @@ public class StackOperationService {
                     }
                 }
                 if (upscale) {
-                    // TODO CB-14929: When should DB status be updated. Should the DetailStackStatus be something other than UPSCALE_REQUESTED. i.e. differentiate between
-                    //  an actual upscale and a 'VM pool / start-stop'
                     stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
                             "Requested node count for upscaling: " + instanceGroupAdjustmentJson.getScalingAdjustment());
                     return flowManager.triggerStackUpscale(

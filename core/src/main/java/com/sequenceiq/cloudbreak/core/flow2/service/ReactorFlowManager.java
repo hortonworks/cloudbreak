@@ -120,10 +120,11 @@ public class ReactorFlowManager {
         String selector = FlowChainTriggers.STOPSTART_UPSCALE_CHAIN_TRIGGER_EVENT;
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(instanceGroupAdjustment.getAdjustmentType(),
                 instanceGroupAdjustment.getThreshold());
+        CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(stackId);
         Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
                 stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
                 withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK,
-                getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold);
+                getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold, cloudPlatformVariant.getVariant().value());
         return reactorNotifier.notify(stackId, selector, stackAndClusterUpscaleTriggerEvent);
     }
 
