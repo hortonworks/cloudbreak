@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,10 +27,20 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
 
     private final Instant start;
 
+    private final List<String> targets;
+
+    public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
+            ClusterEventService clusterEventService, List<String> targets) {
+        super(clouderaManagerApiPojoFactory, clusterEventService);
+        start = Instant.now();
+        this.targets = targets;
+    }
+
     public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
             ClusterEventService clusterEventService) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
         start = Instant.now();
+        this.targets = List.of();
     }
 
     @Override
@@ -48,6 +59,7 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerCom
         return pollerObject.getStack().getInstanceMetaDataAsList().stream()
                 .filter(metaData -> metaData.getDiscoveryFQDN() != null)
                 .filter(InstanceMetaData::isReachable)
+                .filter(md -> CollectionUtils.isEmpty(targets) || targets.contains(md.getPrivateIp()))
                 .filter(metaData -> !hostIpsFromManager.contains(metaData.getPrivateIp()))
                 .collect(Collectors.toList());
     }

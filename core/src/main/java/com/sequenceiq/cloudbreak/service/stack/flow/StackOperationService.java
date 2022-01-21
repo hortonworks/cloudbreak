@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.service.spot.SpotInstanceUsageCondition;
 import com.sequenceiq.cloudbreak.service.stack.StackApiViewService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
+import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 import com.sequenceiq.cloudbreak.service.workspace.WorkspaceService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.util.NotAllowedStatusUpdate;
@@ -103,6 +104,9 @@ public class StackOperationService {
 
     @Inject
     private StackApiViewService stackApiViewService;
+
+    @Inject
+    private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
     public FlowIdentifier removeInstance(Stack stack, String instanceId, boolean forced) {
         InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForDownscale(instanceId, stack);
@@ -228,19 +232,25 @@ public class StackOperationService {
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
         try {
             return transactionService.required(() -> {
+                boolean upscale = instanceGroupAdjustmentJson.getScalingAdjustment() > 0;
                 Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
                 updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateStackStatus(stackWithLists);
                 updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
                 updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
-                updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                boolean instanceStatusValidationNeeded = !upscale || !targetedUpscaleSupportService.targetedUpscaleOperationSupported(stackWithLists);
+                if (instanceStatusValidationNeeded) {
+                    updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                }
                 if (withClusterEvent) {
                     updateNodeCountValidator.validateClusterStatus(stackWithLists);
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
-                    updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                    if (instanceStatusValidationNeeded) {
+                        updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);
+                    }
                 }
-                if (instanceGroupAdjustmentJson.getScalingAdjustment() > 0) {
+                if (upscale) {
                     stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_REQUESTED,
                             "Requested node count for upscaling: " + instanceGroupAdjustmentJson.getScalingAdjustment());
                     return flowManager.triggerStackUpscale(
