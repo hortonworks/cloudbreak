@@ -413,8 +413,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 && !((Acceptable) payload).accepted().isComplete();
     }
 
-    public FlowIdentifier retryLastFailedFlow(Long resourceId, java.util.function.Consumer<FlowLog> beforeRestart) {
-        List<FlowLog> flowLogs = flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId);
+    private void checkRetryable(List<FlowLog> flowLogs) {
         Optional<FlowLog> pendingFlowLog = FlowLogUtil.getPendingFlowLog(flowLogs);
         if (pendingFlowLog.isPresent()) {
             LOGGER.info("Retry cannot be performed, because there is already an active flow: {}", pendingFlowLog.get());
@@ -423,6 +422,11 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         if (!FlowLogUtil.isFlowFailHandled(flowLogs, failHandledEvents)) {
             throw new BadRequestException("Retry cannot be performed, because the last action was successful.");
         }
+    }
+
+    public FlowIdentifier retryLastFailedFlow(Long resourceId, java.util.function.Consumer<FlowLog> beforeRestart) {
+        List<FlowLog> flowLogs = flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId);
+        checkRetryable(flowLogs);
         return FlowLogUtil.getMostRecentFailedLog(flowLogs)
                 .map(log -> FlowLogUtil.getLastSuccessfulStateLog(log.getCurrentState(), flowLogs))
                 .map(lastSuccessfulStateLog -> {
@@ -437,6 +441,25 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                     }
                 })
                 .orElseThrow(() -> new BadRequestException("Retry cannot be performed, because the last action was successful."));
+    }
+
+    /**
+     * Retry the failed flow completely
+     * @param resourceId Datalake ID
+     * @return Identifier of flow or a flow chain
+     */
+    public FlowIdentifier retryLastFailedFlowFromStart(Long resourceId) {
+        List<FlowLog> flowLogs = flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId);
+        checkRetryable(flowLogs);
+        FlowLog firstSuccessfulStateLog = FlowLogUtil.getFirstStateLog(flowLogs);
+        LOGGER.info("Trying to restart flow {}", firstSuccessfulStateLog.getFlowType().getName());
+        restartFlow(firstSuccessfulStateLog);
+        LOGGER.info("Restarted flow : {}", firstSuccessfulStateLog.getFlowType().getName());
+        if (firstSuccessfulStateLog.getFlowChainId() != null) {
+            return new FlowIdentifier(FlowType.FLOW_CHAIN, firstSuccessfulStateLog.getFlowChainId());
+        } else {
+            return new FlowIdentifier(FlowType.FLOW, firstSuccessfulStateLog.getFlowId());
+        }
     }
 
     public void restartFlow(String flowId) {
@@ -537,5 +560,10 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private void logFlowId(String flowId) {
         String requestId = MDCBuilder.getOrGenerateRequestId();
         LOGGER.debug("Flow has been created with id: '{}' and the related request id: '{}'.", flowId, requestId);
+    }
+
+    public FlowLog getFirstStateLogfromLatestFlow(Long resourceId) {
+        List<FlowLog> flowLogs = flowLogService.findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId);
+        return FlowLogUtil.getFirstStateLog(flowLogs);
     }
 }
