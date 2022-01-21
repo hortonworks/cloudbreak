@@ -1,8 +1,10 @@
 package com.sequenceiq.distrox.api.v1.distrox.endpoint;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -11,7 +13,10 @@ import javax.ws.rs.core.MediaType;
 
 import org.springframework.validation.annotation.Validated;
 
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 
@@ -50,5 +55,12 @@ public interface DistroXUpgradeV1Endpoint {
     @ApiOperation(value = "upgrades the distrox cluster internal", nickname = "upgradeDistroxClusterByCrnInternal")
     DistroXUpgradeV1Response upgradeClusterByCrnInternal(@PathParam("crn") String crn, @Valid DistroXUpgradeV1Request distroxUpgradeRequest,
             @QueryParam("initiatorUserCrn") String initiatorUserCrn);
+
+    @PUT
+    @Path("internal/crn/{crn}/upgrade_ccm")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = "Initiates the CCM tunnel type upgrade to the latest available version", nickname = "upgradeCcmByDatahubCrnInternal")
+    DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @PathParam("crn") String crn,
+            @ValidCrn(resource = CrnResourceDescriptor.USER) @NotEmpty @QueryParam("initiatorUserCrn") String initiatorUserCrn);
 
 }

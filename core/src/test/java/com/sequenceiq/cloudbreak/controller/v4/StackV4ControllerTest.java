@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.controller.v4;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -11,9 +12,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.ChangeImageCatalogV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.StackCcmUpgradeV4Response;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackOperationService;
+import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
 import com.sequenceiq.distrox.v1.distrox.StackOperations;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
+import com.sequenceiq.flow.api.model.FlowType;
 
 @ExtendWith(MockitoExtension.class)
 class StackV4ControllerTest {
@@ -32,6 +37,9 @@ class StackV4ControllerTest {
 
     @Mock
     private CloudbreakRestRequestThreadLocalService restRequestThreadLocalService;
+
+    @Mock
+    private StackCcmUpgradeService stackCcmUpgradeService;
 
     @InjectMocks
     private StackV4Controller underTest;
@@ -66,5 +74,13 @@ class StackV4ControllerTest {
         underTest.generateImageCatalogInternal(WORKSPACE_ID, STACK_NAME, USER_CRN);
 
         verify(stackOperations).generateImageCatalog(NameOrCrn.ofName(STACK_NAME), WORKSPACE_ID);
+    }
+
+    @Test
+    public void testCcmUpgrade() {
+        FlowIdentifier actual = new FlowIdentifier(FlowType.FLOW, "1");
+        when(stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofName(STACK_NAME))).thenReturn(actual);
+        StackCcmUpgradeV4Response result = underTest.upgradeCcmByNameInternal(WORKSPACE_ID, STACK_NAME, USER_CRN);
+        Assertions.assertSame(actual, result.getFlowIdentifier());
     }
 }
