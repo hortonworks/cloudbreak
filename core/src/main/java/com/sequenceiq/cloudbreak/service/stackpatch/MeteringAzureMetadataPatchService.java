@@ -5,13 +5,13 @@ import static com.sequenceiq.cloudbreak.domain.stack.StackPatchType.METERING_AZU
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -28,6 +28,8 @@ import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.stackpatch.config.MeteringAzureMetadataPatchConfig;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 @Service
@@ -47,15 +49,11 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
     @Inject
     private ClusterBootstrapper clusterBootstrapper;
 
-    private final String dateBefore;
+    @Inject
+    private StackImageService stackImageService;
 
-    private final String customRpmUrl;
-
-    public MeteringAzureMetadataPatchService(@Value("${existingstackpatcher.activePatches.meteringAzureMetadata.dateBefore}") String dateBefore,
-            @Value("${existingstackpatcher.activePatches.meteringAzureMetadata.customRpmUrl}") String customRpmUrl) {
-        this.dateBefore = dateBefore;
-        this.customRpmUrl = customRpmUrl;
-    }
+    @Inject
+    private MeteringAzureMetadataPatchConfig meteringAzureMetadataPatchConfig;
 
     @Override
     public boolean isAffected(Stack stack) {
@@ -64,9 +62,10 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
             if (StackType.WORKLOAD.equals(stack.getType())
                     && CloudPlatform.AZURE.equalsIgnoreCase(stack.getCloudPlatform())) {
                 try {
-                    final Long dateBeforeTimestamp = dateStringToTimestampForImage(dateBefore);
-                    StatedImage statedImage = getStatedImageForStack(stack);
-                    if (statedImage == null || statedImage.getImage() == null || statedImage.getImage().getCreated() < dateBeforeTimestamp) {
+                    final Long dateBeforeTimestamp = dateStringToTimestampForImage(meteringAzureMetadataPatchConfig.getDateBefore());
+                    Optional<StatedImage> statedImageOpt = stackImageService.getStatedImageInternal(stack);
+                    if (statedImageOpt.isEmpty() || statedImageOpt.get().getImage() == null
+                            || statedImageOpt.get().getImage().getCreated() < dateBeforeTimestamp) {
                         affected = true;
                     }
                 } catch (Exception e) {
@@ -111,7 +110,8 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
             ClusterDeletionBasedExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
             getTelemetryOrchestrator().updateMeteringSaltDefinition(meteringSaltStateConfig, gatewayConfigs, exitModel);
             Set<Node> availableNodes = getAvailableNodes(stack.getName(), instanceMetaDataSet, gatewayConfigs, exitModel);
-            getTelemetryOrchestrator().upgradeMetering(gatewayConfigs, availableNodes, exitModel, dateBefore, customRpmUrl);
+            getTelemetryOrchestrator().upgradeMetering(gatewayConfigs, availableNodes, exitModel,
+                    meteringAzureMetadataPatchConfig.getDateBefore(), meteringAzureMetadataPatchConfig.getCustomRpmUrl());
             byte[] newFullSaltState = compressUtil.updateCompressedOutputFolders(saltStateDefinitions, meteringSaltStateDef, currentSaltState);
             clusterBootstrapper.updateSaltComponent(stack, newFullSaltState);
             LOGGER.debug("Metering partial salt refresh successfully finished for stack {}", stack.getName());

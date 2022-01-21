@@ -4,6 +4,7 @@ import java.lang.module.ModuleDescriptor.Version;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -11,7 +12,6 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -30,6 +30,8 @@ import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
+import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.stackpatch.config.LoggingAgentAutoRestartPatchConfig;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 
 @Service
@@ -52,11 +54,11 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
     @Inject
     private ImageCatalogService imageCatalogService;
 
-    private final String affectedVersionFrom;
+    @Inject
+    private StackImageService stackImageService;
 
-    private final String dateAfter;
-
-    private final String dateBefore;
+    @Inject
+    private LoggingAgentAutoRestartPatchConfig loggingAgentAutoRestartPatchConfig;
 
     private Version affectedVersion;
 
@@ -64,20 +66,11 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
 
     private Long dateBeforeTimestamp;
 
-    public LoggingAgentAutoRestartPatchService(
-            @Value("${existingstackpatcher.activePatches.loggingAgentAutoRestart.affectedVersionFrom}") String affectedVersionFrom,
-            @Value("${existingstackpatcher.activePatches.loggingAgentAutoRestart.dateAfter}") String dateAfter,
-            @Value("${existingstackpatcher.activePatches.loggingAgentAutoRestart.dateBefore}") String dateBefore) {
-        this.affectedVersionFrom = affectedVersionFrom;
-        this.dateAfter = dateAfter;
-        this.dateBefore = dateBefore;
-    }
-
     @PostConstruct
     public void init() {
-        affectedVersion = Version.parse(affectedVersionFrom);
-        dateAfterTimestamp = dateStringToTimestampForImage(dateAfter);
-        dateBeforeTimestamp = dateStringToTimestampForImage(dateBefore);
+        affectedVersion = Version.parse(loggingAgentAutoRestartPatchConfig.getAffectedVersionFrom());
+        dateAfterTimestamp = dateStringToTimestampForImage(loggingAgentAutoRestartPatchConfig.getDateAfter());
+        dateBeforeTimestamp = dateStringToTimestampForImage(loggingAgentAutoRestartPatchConfig.getDateBefore());
     }
 
     @Override
@@ -85,7 +78,7 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
         try {
             boolean affected = false;
             if (StackType.WORKLOAD.equals(stack.getType())) {
-                Image image = getImageByStack(stack);
+                Image image = stackImageService.getCurrentImage(stack);
                 Map<String, String> packageVersions = image.getPackageVersions();
                 boolean hasCdpLoggingAgentPackageVersion = packageVersions.containsKey(ImagePackageVersion.CDP_LOGGING_AGENT.getKey());
                 if (hasCdpLoggingAgentPackageVersion
@@ -142,11 +135,11 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
 
     private boolean isAffectedByImageTimestamp(Stack stack, Image image, long dateAfterTimestamp, long dateBeforeTimestamp) {
         boolean affected = false;
-        ImageCatalog imageCatalog = getImageCatalogFromStackAndImage(stack, image);
+        ImageCatalog imageCatalog = stackImageService.getImageCatalogFromStackAndImage(stack, image);
         if (!imageCatalogService.isCustomImageCatalog(imageCatalog)) {
-            StatedImage statedImage = getStatedImage(stack, image, imageCatalog);
-            if (statedImage == null || statedImage.getImage() == null || (dateAfterTimestamp <= statedImage.getImage().getCreated()
-                    && statedImage.getImage().getCreated() < dateBeforeTimestamp)) {
+            Optional<StatedImage> statedImageOpt = stackImageService.getStatedImageInternal(stack, image, imageCatalog);
+            if (statedImageOpt.isEmpty() || statedImageOpt.get().getImage() == null || (dateAfterTimestamp <= statedImageOpt.get().getImage().getCreated()
+                    && statedImageOpt.get().getImage().getCreated() < dateBeforeTimestamp)) {
                 affected = true;
             }
         }

@@ -31,3 +31,10 @@ telemetry:
         - key: "@cluster"
           value: dps
       forceLogging: false
+  salt:
+    retry:
+      cloud-storage-validation: 3
+      logging-agent-stop: 5
+      node-status-collect: 3
+      diagnostics-collect: 360
+      metering-upgrade: 5

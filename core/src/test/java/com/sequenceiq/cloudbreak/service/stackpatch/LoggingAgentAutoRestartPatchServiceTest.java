@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -17,6 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +29,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
@@ -49,6 +47,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.stackpatch.config.LoggingAgentAutoRestartPatchConfig;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -84,11 +83,11 @@ public class LoggingAgentAutoRestartPatchServiceTest {
     private ImageCatalogService imageCatalogService;
 
     @Mock
-    private InternalCrnModifier internalCrnModifier;
+    private LoggingAgentAutoRestartPatchConfig loggingAgentAutoRestartPatchConfig;
 
     @BeforeEach
     public void setUp() {
-        underTest = new LoggingAgentAutoRestartPatchService("0.2.13", "2022-01-01", "2022-02-01");
+        underTest = new LoggingAgentAutoRestartPatchService();
         MockitoAnnotations.openMocks(this);
     }
 
@@ -99,6 +98,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         Image image = mock(Image.class);
         given(stackImageService.getCurrentImage(stack)).willReturn(image);
         given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.11"));
+        initIsAffectedMocks();
         // WHEN
         underTest.init();
         boolean result = underTest.isAffected(stack);
@@ -113,6 +113,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         Image image = mock(Image.class);
         given(stackImageService.getCurrentImage(stack)).willReturn(image);
         given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.13"));
+        initIsAffectedMocks();
         // WHEN
         underTest.init();
         boolean result = underTest.isAffected(stack);
@@ -127,6 +128,7 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         Image image = mock(Image.class);
         given(stackImageService.getCurrentImage(stack)).willReturn(image);
         given(image.getPackageVersions()).willReturn(Map.of("cdp-logging-agent", "0.2.15"));
+        initIsAffectedMocks();
         // WHEN
         underTest.init();
         boolean result = underTest.isAffected(stack);
@@ -139,18 +141,17 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         // GIVEN
         Stack stack = createStack();
         Image image = mock(Image.class);
-        ImageCatalog imageCatalogMock = mock(ImageCatalog.class);
+        ImageCatalog imageCatalog = mock(ImageCatalog.class);
         StatedImage statedImageMock = mock(StatedImage.class);
         com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageFromStated = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
         given(image.getPackageVersions()).willReturn(new HashMap<>());
-        given(internalCrnModifier.getInternalCrnWithAccountId(anyString())).willReturn("accountId");
-        given(stackImageService.getCurrentImage(any())).willReturn(image);
-        given(image.getImageCatalogName()).willReturn("myCatalog");
-        given(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).willReturn(imageCatalogMock);
-        given(imageCatalogService.getImageByCatalogName(anyLong(), isNull(), isNull())).willReturn(statedImageMock);
+        given(stackImageService.getCurrentImage(stack)).willReturn(image);
+        given(stackImageService.getImageCatalogFromStackAndImage(any(), any())).willReturn(imageCatalog);
+        given(stackImageService.getStatedImageInternal(any(Stack.class), any(Image.class), any(ImageCatalog.class))).willReturn(Optional.of(statedImageMock));
         given(statedImageMock.getImage()).willReturn(imageFromStated);
         long sampleTimestamp = underTest.dateStringToTimestampForImage("2022-01-10");
         given(imageFromStated.getCreated()).willReturn(sampleTimestamp);
+        initIsAffectedMocks();
         // WHEN
         underTest.init();
         boolean result = underTest.isAffected(stack);
@@ -280,5 +281,11 @@ public class LoggingAgentAutoRestartPatchServiceTest {
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         return instanceMetaData;
+    }
+
+    private void initIsAffectedMocks() {
+        given(loggingAgentAutoRestartPatchConfig.getAffectedVersionFrom()).willReturn("0.2.13");
+        given(loggingAgentAutoRestartPatchConfig.getDateAfter()).willReturn("2022-01-01");
+        given(loggingAgentAutoRestartPatchConfig.getDateBefore()).willReturn("2022-02-01");
     }
 }
