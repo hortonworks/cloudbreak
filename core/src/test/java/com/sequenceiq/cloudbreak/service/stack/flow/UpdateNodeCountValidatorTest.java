@@ -1,7 +1,7 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -115,13 +115,13 @@ public class UpdateNodeCountValidatorTest {
         when(cluster.getName()).thenReturn("master-stack");
         if (status == AVAILABLE) {
             when(stack.isAvailable()).thenReturn(true);
-            when(stack.hasNodeFailure()).thenReturn(false);
-        } else if (status == NODE_FAILURE) {
+            when(stack.isAvailableWithStoppedInstances()).thenReturn(false);
+        } else if (status == AVAILABLE_WITH_STOPPED_INSTANCES) {
             when(stack.isAvailable()).thenReturn(false);
-            when(stack.hasNodeFailure()).thenReturn(true);
+            when(stack.isAvailableWithStoppedInstances()).thenReturn(true);
         } else {
             when(stack.isAvailable()).thenReturn(false);
-            when(stack.hasNodeFailure()).thenReturn(false);
+            when(stack.isAvailableWithStoppedInstances()).thenReturn(false);
         }
 
         if (errorMessageSegment.isPresent()) {
@@ -141,9 +141,9 @@ public class UpdateNodeCountValidatorTest {
     private static Stream<Arguments> testValidateStatusForStartHostGroupData() {
         return Stream.of(
                 Arguments.of(AVAILABLE, NO_ERROR),
-                Arguments.of(NODE_FAILURE, NO_ERROR),
-                Arguments.of(DELETE_IN_PROGRESS,
-                        Optional.of("Data Hub 'master-stack' has 'DELETE_IN_PROGRESS' state." +
+                Arguments.of(AVAILABLE_WITH_STOPPED_INSTANCES, NO_ERROR),
+                Arguments.of(NODE_FAILURE,
+                        Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state." +
                                 " Node group start operation is not allowed for this state."))
         );
     }
