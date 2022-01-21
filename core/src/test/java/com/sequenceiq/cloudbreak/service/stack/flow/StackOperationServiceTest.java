@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_UPGRADE_FAILED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
@@ -117,9 +116,6 @@ public class StackOperationServiceTest {
 
     @Mock
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
-
-    @Mock
-    private UpdateNodeCountValidator updateNodeCountValidator;
 
     @Spy
     private UpdateNodeCountValidator updateNodeCountValidator = new UpdateNodeCountValidator();
@@ -350,7 +346,7 @@ public class StackOperationServiceTest {
     public static Stream<Arguments> stackStatusForUpdateNodeCount() {
         return Stream.of(
                 Arguments.of("Stack is available", AVAILABLE),
-                Arguments.of("Stack has node failure", NODE_FAILURE),
+                Arguments.of("Stack has stopped instances", AVAILABLE_WITH_STOPPED_INSTANCES),
                 Arguments.of("Stack upgrade failure", CLUSTER_UPGRADE_FAILED)
         );
     }
