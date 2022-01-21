@@ -96,7 +96,7 @@ public class UpdateNodeCountValidator {
     }
 
     public void validateStackStatusForStartHostGroup(Stack stack) {
-        if (!(stack.isAvailable() || stack.hasNodeFailure())) {
+        if (!(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
             throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
                     stack.getName(), stack.getStatus()));
         }
@@ -137,7 +137,7 @@ public class UpdateNodeCountValidator {
 
     public void validateClusterStatusForStartHostGroup(Stack stack) {
         Cluster cluster = stack.getCluster();
-        if (cluster != null && !(stack.isAvailable() || stack.hasNodeFailure())) {
+        if (cluster != null && !(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
             throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
                     cluster.getName(), stack.getStatus()));
         }
