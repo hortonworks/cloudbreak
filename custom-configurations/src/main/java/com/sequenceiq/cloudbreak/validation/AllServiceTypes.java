@@ -33,5 +33,6 @@ public enum AllServiceTypes {
     KAFKA,
     LIVY_FOR_SPARK3,
     IMPALA,
-    FLINK
+    FLINK,
+    QUERY_STORE
 }

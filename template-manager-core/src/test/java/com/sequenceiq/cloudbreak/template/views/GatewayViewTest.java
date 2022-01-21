@@ -49,7 +49,8 @@ public class GatewayViewTest {
             "PROFILER_SCHEDULER_AGENT",
             "DAS_WEBAPP",
             "KUDU_MASTER",
-            "KUDU_TSERVER"
+            "KUDU_TSERVER",
+            "HUE_QUERYPROCESSOR"
     );
 
     @Test
