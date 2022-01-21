@@ -92,6 +92,10 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
             } catch (Exception e) {
                 throw new ExistingStackPatchApplyException(e.getMessage(), e);
             }
+        } else {
+            String message = "Salt partial update and metering upgrade cannot run, because CM server is unreachable of stack: " + stack.getResourceCrn();
+            LOGGER.info(message);
+            throw new ExistingStackPatchApplyException(message);
         }
     }
 
