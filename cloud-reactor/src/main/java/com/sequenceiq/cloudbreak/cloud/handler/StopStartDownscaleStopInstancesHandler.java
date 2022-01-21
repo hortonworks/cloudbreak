@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud.handler;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
@@ -26,6 +27,8 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStartDownscaleStopInstancesHandler.class);
 
+    private static final Long STOP_POLL_TIMEBOUND_MS = 300_000L;
+
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
@@ -40,8 +43,7 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
     @Override
     public void accept(Event<StopStartDownscaleStopInstancesRequest> event) {
         StopStartDownscaleStopInstancesRequest request = event.getData();
-        LOGGER.info("StopStartDownscaleStopInstancesHandler: {}", request);
-
+        LOGGER.info("StopStartDownscaleStopInstancesHandler: {}", event.getData().getResourceId());
 
         CloudContext cloudContext = request.getCloudContext();
         try {
@@ -51,7 +53,9 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
             List<CloudInstance> cloudInstancesToStop = request.getCloudInstancesToStop();
             List<CloudVmInstanceStatus> cloudVmInstanceStatusList = Collections.emptyList();
             if (cloudInstancesToStop.size() > 0) {
-                LOGGER.info("ZZZ: Attempting to stop instances");
+                LOGGER.info("Attempting to stop instances with a timebound of {}ms. count={}, instances=[{}]",
+                        STOP_POLL_TIMEBOUND_MS, cloudInstancesToStop.size(), cloudInstancesToStop.stream().map(CloudInstance::getInstanceId)
+                                .collect(Collectors.toList()));
                 // TODO CB-14929: Error handlnig. Currently - an error from the following command (e.g. NPE)
                 //  results in no WARNINGS on the console. The stop is just ignored, and the cluster goes into a
                 //  RUNNING state, with the nodes in a DECOMMISSIONED state. The error handling needs to make sure
@@ -59,23 +63,22 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
                 //  to indicate what happened.
                 // TODO CB-14929: Also, after re-provisioning nodes via CM, the CB UI does not seem to be refreshing the node
                 //  status to RUNNING, and instead the nodes stay in a STUCK state. Is the CM sync task not taking care of this?
-                cloudVmInstanceStatusList = connector.instances().stop(ac, null, cloudInstancesToStop);
-                LOGGER.info("ZZZ: CloudVMInstanceStatusesPostStop={}", cloudVmInstanceStatusList);
+                // TODO CB-15132: What happens if the cloud provider does not know about an instance for which a STOP was requested. How does the API
+                //  behave.
+                cloudVmInstanceStatusList = connector.instances().stopWithLimitedRetry(ac, null, cloudInstancesToStop, STOP_POLL_TIMEBOUND_MS);
             } else {
-                LOGGER.info("ZZZ: Did not find any instances to stop");
+                LOGGER.info("No cloud VM instances to stop. Succeeding flow step with no action taken");
             }
+            LOGGER.trace("CloudVMInstanceStatusesPostStop={}", cloudVmInstanceStatusList);
 
-            // TODO CB-14929: If we fail to STOP all instances - one potential path for error handling would be to allow a subsequent upscale operation
+            // TODO CB-15132: If we fail to STOP all instances - one potential path for error handling would be to allow a subsequent upscale operation
             //  to consider nodes which are in DECOMMISSIONED state, but RUNNING - as candidates for UPSCALE.
-            // TODO CB-14929: If we fail to STOP all instances - make sure the information is at least available on the Activity log
-            //  (ideally in some easily accessible alerting mechanism / cluster needs attention section)
-            // TODO CB-14929: Potentially introduce a new node-state for such instances
-
             StopStartDownscaleStopInstancesResult result = new StopStartDownscaleStopInstancesResult(request.getResourceId(),
-                    cloudInstancesToStop, cloudVmInstanceStatusList);
+                    request, cloudVmInstanceStatusList);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
-            // TODO CB-14929: How should exceptions from handlers be handled?
+            // TODO CB-14929: Error handling. Any exceptions from here need to be handled properly. Moving the nodes into appropriate states,
+            //  failing the action. Potential trying to recover in a subsequent change.
             throw e;
         }
     }

@@ -46,17 +46,12 @@ public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFa
         HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterView.getId(), event.getHostGroupName())
                 .orElseThrow(NotFoundException.notFound("hostgroup", event.getHostGroupName()));
 
-
-
         StopStartDownscaleTriggerEvent te = new StopStartDownscaleTriggerEvent(
                 StopStartDownscaleEvent.STOPSTART_DOWNSCALE_TRIGGER_EVENT.event(),
                 stackView.getId(),
                 hostGroup.getName(),
-                event.getAdjustment(),
-                // TODO CB-14929: This seems sub-optimal. Will need to lookup the hostnames again in a subsequent operation.
                 Sets.newHashSet(event.getPrivateIds()),
                 event.isSinglePrimaryGateway(),
-                event.isRestartServices(),
                 event.getClusterManagerType()
         );
 

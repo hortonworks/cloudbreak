@@ -11,9 +11,9 @@ enum StopStartUpscaleState implements FlowState {
     STOPSTART_UPSCALE_HOSTS_COMMISSION_STATE,
     STOPSTART_UPSCALE_FINALIZE_STATE,
     STOPSTART_UPSCALE_FAILED_STATE,
-    STOPSTART_UPSCALE_HOSTS_COMMISSION_FAILED_STATE,
     FINAL_STATE;
 
+    // TODO CB-14929: Error handling: Additional states as part of improved error handling
 
     private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 
