@@ -100,12 +100,12 @@ public class ClouderaManagerClusterDecommissionService implements ClusterDecomis
 
     @Override
     public Set<String> decommissionClusterNodesStopStart(Map<String, InstanceMetaData> hostsToRemove, long pollingTimeout) {
-        return clouderaManagerDecomissioner.decommissionNodesStopStart(stack, hostsToRemove, client, pollingTimeout);
+        return clouderaManagerDecomissioner.decommissionNodesStopStart(stack, hostsToRemove, v31Client, pollingTimeout);
     }
 
     @Override
     public void enterMaintenanceMode(Stack stack, Set<String> hostFqdnList) {
-        clouderaManagerDecomissioner.enterMaintenanceMode(stack, hostFqdnList, client);
+        clouderaManagerDecomissioner.enterMaintenanceMode(stack, hostFqdnList, v31Client);
     }
 
     @Override
