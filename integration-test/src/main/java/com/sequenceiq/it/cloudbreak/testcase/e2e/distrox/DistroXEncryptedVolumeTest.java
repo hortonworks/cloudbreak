@@ -239,7 +239,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
             CloudFunctionality cloudFunctionality, String environmentName) {
         if (CloudPlatform.AWS.equals(cloudPlatform)) {
             String kmsKeyArn = awsCloudProvider.getEncryptionKeyArn(true);
-            List<String> volumeKmsKeyIds = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, instanceIds));
+            List<String> volumeKmsKeyIds = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, null, instanceIds));
             if (volumeKmsKeyIds.stream().noneMatch(keyId -> keyId.equalsIgnoreCase(kmsKeyArn))) {
                 LOGGER.error(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
                 throw new TestFailException(format("Volume has not been encrypted with '%s' KMS key!", kmsKeyArn));
@@ -249,7 +249,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
             }
         } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
             String desKeyUrl = azureCloudProvider.getEncryptionKeyUrl();
-            List<String> volumesDesId = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, instanceIds));
+            List<String> volumesDesId = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, null, instanceIds));
             volumesDesId.forEach(desId -> {
                 if (desId.contains("diskEncryptionSets/" + environmentName)) {
                     LOGGER.info(format("Volume has been encrypted with '%s' DES key.", desId));

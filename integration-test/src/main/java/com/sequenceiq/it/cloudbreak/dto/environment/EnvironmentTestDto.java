@@ -98,6 +98,14 @@ public class EnvironmentTestDto
         return getRequest().getParentEnvironmentName();
     }
 
+    public AzureEnvironmentParameters getAzure() {
+        return getRequest().getAzure();
+    }
+
+    public void setAzure(AzureEnvironmentParameters azure) {
+        getRequest().setAzure(azure);
+    }
+
     @Override
     public EnvironmentTestDto valid() {
         return getCloudProvider()

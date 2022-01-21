@@ -90,7 +90,7 @@ public class ExistingStackPatcherJobService {
     }
 
     private Date delayedFirstStart() {
-        int delayInMinutes = RANDOM.nextInt((int) TimeUnit.HOURS.toMinutes(properties.getIntervalInHours()));
+        int delayInMinutes = RANDOM.nextInt((int) TimeUnit.HOURS.toMinutes(properties.getMaxInitialStartDelayInHours()));
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(delayInMinutes)));
     }
 }
