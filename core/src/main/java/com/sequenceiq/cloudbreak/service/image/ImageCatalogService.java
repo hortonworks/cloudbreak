@@ -346,7 +346,7 @@ public class ImageCatalogService extends AbstractWorkspaceAwareResourceService<I
         }
     }
 
-    private boolean isCustomImageCatalog(ImageCatalog imageCatalog) {
+    public boolean isCustomImageCatalog(ImageCatalog imageCatalog) {
         return imageCatalog != null && Strings.isNullOrEmpty(imageCatalog.getImageCatalogUrl()) && imageCatalog.getCustomImages() != null;
     }
 

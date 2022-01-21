@@ -34,7 +34,7 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds) {
+    public List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds) {
         throw new NotImplementedException("Not yet implemented on GCP");
     }
 
@@ -60,7 +60,7 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public ResourceGroup createResourceGroup(String resourceGroupName) {
+    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
         LOGGER.debug("createResourceGroup: nothing to do for GCP");
         throw new NotImplementedException("Resource group creation is not applicable for GCP!");
     }

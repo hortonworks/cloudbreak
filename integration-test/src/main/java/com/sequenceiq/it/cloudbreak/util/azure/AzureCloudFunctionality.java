@@ -28,8 +28,8 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds) {
-        return azureClientActions.getVolumesDesId(clusterName, instanceIds);
+    public List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds) {
+        return azureClientActions.getVolumesDesId(clusterName, resourceGroupName, instanceIds);
     }
 
     @Override
@@ -48,8 +48,8 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public ResourceGroup createResourceGroup(String resourceGroupName) {
-        return azureClientActions.createResourceGroup(resourceGroupName);
+    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
+        return azureClientActions.createResourceGroup(resourceGroupName, tags);
     }
 
     @Override

@@ -323,12 +323,16 @@ public class AzureCloudProvider extends AbstractCloudProvider {
                 ? ResourceGroupUsage.SINGLE
                 : ResourceGroupUsage.MULTIPLE;
 
-        return environmentTestDto.withAzure(AzureEnvironmentParameters.builder()
-                .withAzureResourceGroup(AzureResourceGroup.builder()
-                        .withResourceGroupUsage(resourceGroupUsage)
-                        .withName(resourceGroupName)
-                        .build())
+        if (environmentTestDto.getAzure() == null) {
+            environmentTestDto.setAzure(AzureEnvironmentParameters.builder().build());
+        }
+        AzureEnvironmentParameters azureEnvironmentParameters = environmentTestDto.getAzure();
+        azureEnvironmentParameters.setResourceGroup(AzureResourceGroup.builder()
+                .withResourceGroupUsage(resourceGroupUsage)
+                .withName(resourceGroupName)
                 .build());
+        environmentTestDto.setAzure(azureEnvironmentParameters);
+        return environmentTestDto;
     }
 
     @Override
@@ -476,12 +480,16 @@ public class AzureCloudProvider extends AbstractCloudProvider {
 
     @Override
     public EnvironmentTestDto withResourceEncryption(EnvironmentTestDto environmentTestDto) {
-        return environmentTestDto.withAzure(AzureEnvironmentParameters.builder()
-                .withResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
-                        .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
-                        .withEncryptionKeyUrl(getEncryptionKeyUrl())
-                        .build())
+        if (environmentTestDto.getAzure() == null) {
+            environmentTestDto.setAzure(AzureEnvironmentParameters.builder().build());
+        }
+        AzureEnvironmentParameters azureEnvironmentParameters = environmentTestDto.getAzure();
+        azureEnvironmentParameters.setResourceEncryptionParameters(AzureResourceEncryptionParameters.builder()
+                .withEncryptionKeyResourceGroupName(getEncryptionResourceGroupName())
+                .withEncryptionKeyUrl(getEncryptionKeyUrl())
                 .build());
+        environmentTestDto.setAzure(azureEnvironmentParameters);
+        return environmentTestDto;
     }
 
     @Override
