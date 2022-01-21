@@ -323,9 +323,6 @@ public enum ResourceEvent {
     CLUSTER_UPGRADE_VALIDATION_FAILED("cluster.upgrade.validation.failed"),
     CLUSTER_PROVISION_CLOUD_STORAGE_VALIDATION_ON_IDBROKER_FAILED("cluster.provision.idbrokerhost.cloudstorage.vmvalidation.failed"),
 
-    // TODO CB-14929: Add additional messsages here, especially for the partial operations.
-    // TODO CB-14929: hostnames vs instanceIds when logging requests
-    // TODO CB-14929: Requests must include instanceCounts (Ideally change this for the current scaling operations as well)
     CLUSTER_SCALING_STOPSTART_UPSCALE_INIT("cluster.scaling.stopstart.upscale.init"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED("cluster.scaling.stopstart.upscale.nodes.started"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_NOT_STARTED("cluster.scaling.stopstart.upscale.nodes.notstarted"),
@@ -340,11 +337,14 @@ public enum ResourceEvent {
 
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_INIT("cluster.scaling.stopstart.downscale.init"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING("cluster.scaling.stopstart.downscale.starting"),
-    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING2("cluster.scaling.stopstart.downscale.starting2"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_COULDNOTDECOMMISSION("cluster.scaling.stopstart.downscale.couldnotdecommission"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTERINGCMMAINTMODE("cluster.scaling.stopstart.downscale.enteringcmmaintmode"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_ENTEREDCMMAINTMODE("cluster.scaling.stopstart.downscale.enteredcmmaintmode"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING("cluster.scaling.stopstart.downscale.nodes.stopping"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_STOPPED("cluster.scaling.stopstart.downscale.nodes.stopped"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_NOT_STOPPED("cluster.scaling.stopstart.downscale.nodes.notstopped"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED("cluster.scaling.stopstart.downscale.finished"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_FAILED("cluster.scaling.stopstart.downscale.failed"),
 
 
     CLUSTER_SALT_UPDATE_STARTED("cluster.salt.update.started"),
