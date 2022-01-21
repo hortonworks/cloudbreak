@@ -203,11 +203,11 @@ public class ClusterStatusSyncHandlerTest {
 
     @Test
     public void testOnApplicationEventWhenStopStartScalingEnabledAndClusterIsScaledDown() {
-        // Scale down with StopStart results in NODE_FAILURE Stack status, but Periscope shouldn't mark the cluster as SUSPENDED.
+        // Scale down with StopStart results in AVAILABLE_WITH_STOPPED_INSTANCES Stack status, but Periscope shouldn't mark the cluster as SUSPENDED.
         Cluster cluster = getACluster(ClusterState.RUNNING);
         cluster.setStopStartScalingEnabled(Boolean.TRUE);
         when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.NODE_FAILURE));
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.AVAILABLE_WITH_STOPPED_INSTANCES));
 
         underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
 
