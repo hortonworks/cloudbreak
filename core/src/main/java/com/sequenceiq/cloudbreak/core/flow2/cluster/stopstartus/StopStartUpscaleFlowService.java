@@ -105,19 +105,22 @@ class StopStartUpscaleFlowService {
     }
 
     void clusterUpscaleFinished(StackView stackView, String hostgroupName, List<InstanceMetaData> commissioned) {
+        // TODO CB-14929: CB-15341 follow up. The DetailedStackStatus here needs to be updated based on the number of instances.
+        //  That determines AVAILABLE vs AVAILABLE_WITH_STOPPED_INSTANCES
         LOGGER.debug("StopStart upscale finished successfully. CommissionedCount={}", commissioned.size());
         commissioned.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.SERVICES_HEALTHY));
         stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.AVAILABLE, String.format("finished starting nodes"));
-            flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED,
-                    hostgroupName, String.valueOf(commissioned.size()),
-                    commissioned.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.joining(", ")));
+        flowMessageService.fireEventAndLog(stackView.getId(), AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED,
+                hostgroupName, String.valueOf(commissioned.size()),
+                commissioned.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.joining(", ")));
     }
 
     void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.info("Error during stopstart upscale flow: " + errorDetails.getMessage(), errorDetails);
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_BY_START_FAILED, errorDetails.getMessage());
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_BY_START_FAILED,
                 String.format("Node(s) could not be upscaled via startstop: %s", errorDetails));
+        // TODO CB-14929: Error handling. In the absence of specific error handlers, should the affected instances be moved into an
+        //  ORCHESTRATOR_FAILED or some such state?
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FAILED, errorDetails.getMessage());
     }
 

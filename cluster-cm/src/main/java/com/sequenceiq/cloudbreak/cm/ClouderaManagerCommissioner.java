@@ -68,7 +68,9 @@ public class ClouderaManagerCommissioner {
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
         // TODO CB-14929 Maybe move this to a trace level log.
-        LOGGER.debug("hostsAvailableFromCM: [{}]", hostRefList.getItems().stream().map(ApiHost::getHostname));
+        LOGGER.debug("Target recommissionNodes: count={}, hosts=[{}]", hostsToRecommission.size(), hostsToRecommission.keySet());
+        LOGGER.debug("hostsAvailableFromCM: count={}, hosts=[{}]", hostRefList.getItems().size(),
+                hostRefList.getItems().stream().map(ApiHost::getHostname));
 
         // Not considering the commission states of the nodes. Nodes could be COMMISSIONED with services in STOPPED state.
         List<String> hostsAvailableForRecommission = hostRefList.getItems().stream()
@@ -90,6 +92,7 @@ public class ClouderaManagerCommissioner {
 
         return hostsAvailableForRecommission.stream()
                 .map(hostsToRecommission::get)
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(Collectors.toSet());
 
@@ -113,7 +116,7 @@ public class ClouderaManagerCommissioner {
             PollingResult pollingResult = clouderaManagerPollingServiceProvider
                     .startPollingCmHostsRecommission(stack, client, apiCommand.getId());
             if (isExited(pollingResult)) {
-                throw new CancellationException("Cluster was terminated while waiting for host decommission");
+                throw new CancellationException("Cluster was terminated while waiting for host commission");
             } else if (isTimeout(pollingResult)) {
                 String warningMessage = "Cloudera Manager recommission host command {} polling timed out, " +
                         "thus we are aborting the recommission operation.";
@@ -144,8 +147,8 @@ public class ClouderaManagerCommissioner {
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, hostMetadata -> hostMetadata));
         if (hostsToCommission.size() != hostNames.size()) {
             List<String> missingHosts = hostNames.stream().filter(h -> !hostsToCommission.containsKey(h)).collect(Collectors.toList());
-            LOGGER.debug("Not all requested hosts found in CB. MissingCount={}, missingHosts=[{}]. Requested hosts: [{}]",
-                    missingHosts.size(), missingHosts, hostNames);
+            LOGGER.debug("Not all requested hosts found in CB for host group: {}. MissingCount={}, missingHosts=[{}]. Requested hosts: [{}]",
+                    hostGroup.getName(), missingHosts.size(), missingHosts, hostNames);
         }
 
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);

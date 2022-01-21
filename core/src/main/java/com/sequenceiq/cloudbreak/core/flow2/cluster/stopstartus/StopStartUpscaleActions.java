@@ -50,7 +50,6 @@ import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
-import com.sequenceiq.cloudbreak.service.metrics.MetricType;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
@@ -76,9 +75,6 @@ public class StopStartUpscaleActions {
 
             @Override
             protected void prepareExecution(StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) {
-                // TODO CB-15132 - setting these variables is likely unnecessary. A simpler mechanism may be to have
-                //  AbstractStopStartUpscaleActions explicitly specify StopStartUpscaleTriggerEvent as the Payload type,
-                //  so that it can extract information directly from this, instead of modifying the round-about mechanism with this map.
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
                 variables.put(ADJUSTMENT, payload.getAdjustment());
                 variables.put(SINGLE_PRIMARY_GATEWAY, payload.isSinglePrimaryGateway());
@@ -167,16 +163,21 @@ public class StopStartUpscaleActions {
             }
 
             private void handleInstanceUnsuccessfulStart(StopStartUpscaleContext context, List<CloudVmInstanceStatus> cloudVmInstanceStatusList) {
-                List<CloudVmInstanceStatus> instancesNotInDesiredState = cloudVmInstanceStatusList.stream()
-                        .filter(i -> i.getStatus() != InstanceStatus.STARTED).collect(Collectors.toList());
-                if (instancesNotInDesiredState.size() > 0) {
-                    // Not updating the status of these instances in the DB. Instead letting the regular syncer threads take care of this.
-                    // This is in case there is additional logic in the syncers while processing Instance state changes.
+                try {
+                    List<CloudVmInstanceStatus> instancesNotInDesiredState = cloudVmInstanceStatusList.stream()
+                            .filter(i -> i.getStatus() != InstanceStatus.STARTED).collect(Collectors.toList());
+                    if (instancesNotInDesiredState.size() > 0) {
+                        // Not updating the status of these instances in the DB. Instead letting the regular syncer threads take care of this.
+                        // This is in case there is additional logic in the syncers while processing Instance state changes.
 
-                    clusterUpscaleFlowService.logInstancesFailedToStart(context.getStack().getId(), instancesNotInDesiredState);
-                    LOGGER.warn("Some instances could not be started: count={}, instances={}", instancesNotInDesiredState.size(), instancesNotInDesiredState);
+                        LOGGER.warn("Some instances could not be started: count={}, instances={}",
+                                instancesNotInDesiredState.size(), instancesNotInDesiredState);
+                        clusterUpscaleFlowService.logInstancesFailedToStart(context.getStack().getId(), instancesNotInDesiredState);
 
-                    // TODO CB-15132: Eventually, we may want to take some corrective action.
+                        // TODO CB-15132: Eventually, we may want to take some corrective action.
+                    }
+                } catch (Exception e) {
+                    LOGGER.warn("Failed while attempting to log info about instances which did not start. Ignoring, and letting flow proceed", e);
                 }
             }
         };
@@ -201,7 +202,6 @@ public class StopStartUpscaleActions {
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStackView(), context.getHostGroupName(),
                         instancesCommissioned);
 
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context, STOPSTART_UPSCALE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -229,7 +229,7 @@ public class StopStartUpscaleActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 // TODO CB-15132: Implement actual error handling. i.e. reverting whatever is possible. Updating DB state etc.
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(),  payload.getException());
-                getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_FAILED, context.getStackView(), payload.getException());
+                // TODO CB-14929: Error Hanling. This request is likely invalid since the current active state machine does not know how to process it.
                 ClusterUpscaleFailedConclusionRequest request = new ClusterUpscaleFailedConclusionRequest(context.getStackView().getId());
                 sendEvent(context, request.selector(), request);
             }
@@ -278,7 +278,6 @@ public class StopStartUpscaleActions {
             Map<Object, Object> variables = stateContext.getExtendedState().getVariables();
             Stack stack = stackService.getByIdWithListsInTransaction(payload.getResourceId());
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
-            // TODO CB-14929: Is this OK to do? In a stack operation.
             MDCBuilder.buildMdcContext(stack.getCluster());
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
 

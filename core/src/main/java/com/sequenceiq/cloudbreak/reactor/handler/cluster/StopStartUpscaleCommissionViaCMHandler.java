@@ -126,7 +126,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                 List<String> additionalMissingRecommissionHostnames = hostsToRecommission.keySet().stream()
                         .filter(h -> !finalRecommissionedHostnames.contains(h))
                         .collect(Collectors.toList());
-                LOGGER.info("Recommissioned fewer instances then requested. recommissionedCount={}, expectedCount={}, initialCount={}, notRecommissioned={}",
+                LOGGER.info("Recommissioned fewer instances than requested. recommissionedCount={}, expectedCount={}, initialCount={}, notRecommissioned=[{}]",
                         recommissionedHostnames.size(), hostsToRecommission.size(), hostNames.size(), additionalMissingRecommissionHostnames);
                 if (allMissingRecommissionHostnames == null) {
                     allMissingRecommissionHostnames = new LinkedList<>();
