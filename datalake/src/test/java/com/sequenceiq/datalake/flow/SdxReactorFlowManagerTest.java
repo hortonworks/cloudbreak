@@ -123,7 +123,7 @@ public class SdxReactorFlowManagerTest {
     public void testSdxBackupOnUpgradeForMockPlatform() {
         DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
         detailedEnvironmentResponse.setCloudPlatform("MOCK");
-        sdxCluster = getValidSdxCluster("7.2.2");
+        sdxCluster = getValidSdxCluster("7.2.");
         sdxCluster.setRangerRazEnabled(true);
         when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
         when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
@@ -131,6 +131,25 @@ public class SdxReactorFlowManagerTest {
         when(datalakeDrConfig.isConfigured()).thenReturn(true);
 
         sdxCluster.setCloudStorageFileSystemType(FileSystemType.ADLS_GEN_2);
+        try {
+            ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
+                    underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP));
+        } catch (Exception ignored) {
+        }
+        verify(reactor, times(1)).notify(eq(DatalakeUpgradeFlowChainStartEvent.DATALAKE_UPGRADE_FLOW_CHAIN_EVENT), any(Event.class));
+    }
+
+    @Test
+    public void testSdxBackupOnUpgradeForMockPlatformWithEmptyFIleSystemType() {
+        DetailedEnvironmentResponse detailedEnvironmentResponse = new DetailedEnvironmentResponse();
+        detailedEnvironmentResponse.setCloudPlatform("MOCK");
+        sdxCluster = getValidSdxCluster("7.2.9");
+        sdxCluster.setRangerRazEnabled(false);
+        sdxCluster.setCloudStorageFileSystemType(null);
+        when(environmentClientService.getByName(anyString())).thenReturn(detailedEnvironmentResponse);
+        when(environmentClientService.getBackupLocation(ENV_CRN)).thenReturn(BACKUP_LOCATION);
+        when(entitlementService.isDatalakeBackupOnUpgradeEnabled(any())).thenReturn(true);
+        when(datalakeDrConfig.isConfigured()).thenReturn(true);
         try {
             ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                     underTest.triggerDatalakeRuntimeUpgradeFlow(sdxCluster, IMAGE_ID, SdxUpgradeReplaceVms.DISABLED, SKIP_BACKUP));
