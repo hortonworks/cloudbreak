@@ -91,14 +91,14 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     }
 
     private String getContainerName(String baseLocation) {
-        final String containerName = baseLocation.substring(baseLocation.lastIndexOf("/") + 1, baseLocation.lastIndexOf("@"));
+        final String containerName = baseLocation.substring(baseLocation.lastIndexOf("//") + 1, baseLocation.lastIndexOf("@"));
         LOGGER.info("Container Name: {} at Base Location: {}", containerName, baseLocation);
         return containerName;
     }
 
     private String getContainerName() {
         String fullPath = azureProperties.getCloudStorage().getBaseLocation();
-        final String containerName = fullPath.substring(fullPath.lastIndexOf("/") + 1, fullPath.lastIndexOf("@"));
+        final String containerName = fullPath.substring(fullPath.lastIndexOf("//") + 1, fullPath.lastIndexOf("@"));
         LOGGER.info("Container Name: {} at Path: {}", containerName, fullPath);
         return containerName;
     }
@@ -289,6 +289,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
 
         Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
         Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
+        Log.log(LOGGER, format(" Azure Blob Location: %s", baseLocation));
 
         try {
             for (ListBlobItem blob : cloudBlobContainer.listBlobs()) {
