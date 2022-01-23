@@ -1,15 +1,11 @@
 {%- set configure_remote_db = salt['pillar.get']('postgres:configure_remote_db', 'None') %}
 
-
-{% if 'None' != configure_remote_db %}
-
-# Ensure that we remove the unnecessary db backage if embedded db is not used, to avoid upgrade issues
+# Ensure that we remove the unnecessary db package to avoid upgrade issues
 cloudera-manager-server-db-2:
   pkg.removed
 
-{% else %}
-
 # In case of Embedded database we just need to upgrade the database to the right version
+{% if 'None' == configure_remote_db %}
 
 {% if grains['os_family'] == 'RedHat' %}
 
