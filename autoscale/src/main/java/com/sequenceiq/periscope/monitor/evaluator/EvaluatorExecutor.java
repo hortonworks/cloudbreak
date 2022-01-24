@@ -33,7 +33,8 @@ public abstract class EvaluatorExecutor implements Runnable {
             // TODO CB-14972: Have the evaluatorExecutors implement toString with relevant context information.
             execute();
         } catch (Exception e) {
-            LOGGER.warn("Ignoring exception while running EvaluatorExecutor: {}", this, e);
+            LOGGER.warn("Exception occurred while running EvaluatorExecutor: {}", this, e);
+            throw e;
             // TODO CB-14972: The threadpoolexecutor which handles this needs to take care of Exceptions.
             //  At least log them.
             // TODO AS-Improvement: Do we need to generate alerts if there are too many failures. This could be a result
