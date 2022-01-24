@@ -48,16 +48,6 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
-        return azureClientActions.createResourceGroup(resourceGroupName, tags);
-    }
-
-    @Override
-    public void deleteResourceGroup(String resourceGroupName) {
-        azureClientActions.deleteResourceGroup(resourceGroupName);
-    }
-
-    @Override
     public void cloudStorageInitialize() {
         azureCloudBlobUtil.createContainerIfNotExist();
     }
@@ -106,5 +96,13 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return azureCloudBlobUtil.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
+        return azureClientActions.createResourceGroup(resourceGroupName, tags);
+    }
+
+    public void deleteResourceGroup(String resourceGroupName) {
+        azureClientActions.deleteResourceGroup(resourceGroupName);
     }
 }

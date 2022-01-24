@@ -7,6 +7,7 @@ tests:
       scale_down_target: 3,
       times: 2,
     }
+    excludedGroups: [ azure_singlerg ]
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkWithNoInternetEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaTests
