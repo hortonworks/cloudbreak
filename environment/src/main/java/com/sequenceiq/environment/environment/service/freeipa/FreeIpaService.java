@@ -24,6 +24,7 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.detachchildenv.DetachCh
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.HealthDetailsFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.UserV1Endpoint;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
 import com.sequenceiq.freeipa.api.v1.operation.OperationV1Endpoint;
 
@@ -158,8 +159,15 @@ public class FreeIpaService {
 
     SyncOperationStatus synchronizeAllUsersInEnvironment(String environmentCrn) {
         try {
-            SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest(Set.of(environmentCrn), Set.of());
-            return userV1Endpoint.synchronizeAllUsers(request);
+            SyncOperationStatus lastSyncOperationStatus = userV1Endpoint.getLastSyncOperationStatus(environmentCrn);
+            if (!SynchronizationStatus.RUNNING.equals(lastSyncOperationStatus.getStatus())) {
+                SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest(Set.of(environmentCrn), Set.of());
+                return userV1Endpoint.synchronizeAllUsers(request);
+            } else {
+                LOGGER.debug("There is already an ongoing user sync operation for environment {} with operationId {}, " +
+                        "thus there is no need to trigger another one.", environmentCrn, lastSyncOperationStatus.getOperationId());
+                return lastSyncOperationStatus;
+            }
         } catch (WebApplicationException e) {
             String errorMessage = webApplicationExceptionMessageExtractor.getErrorMessage(e);
             LOGGER.error(String.format("Failed to synchronize users with FreeIpa for environment '%s' due to: '%s'", environmentCrn, errorMessage), e);

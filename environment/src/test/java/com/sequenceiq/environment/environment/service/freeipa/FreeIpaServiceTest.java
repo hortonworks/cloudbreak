@@ -4,6 +4,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
@@ -82,8 +84,18 @@ class FreeIpaServiceTest {
     }
 
     @Test
+    void synchronizeAllUsersInEnvironmentOngoing() {
+        SyncOperationStatus status = createStatus(SynchronizationStatus.RUNNING, "");
+        when(userV1Endpoint.getLastSyncOperationStatus(any())).thenReturn(status);
+        SyncOperationStatus result = underTest.synchronizeAllUsersInEnvironment(ENVCRN);
+        assertThat(result).isEqualTo(status);
+        verify(userV1Endpoint, times(0)).synchronizeAllUsers(any());
+    }
+
+    @Test
     void synchronizeAllUsersInEnvironmentSuccess() {
         SyncOperationStatus status = createStatus(SynchronizationStatus.REQUESTED, "");
+        when(userV1Endpoint.getLastSyncOperationStatus(any())).thenReturn(createStatus(SynchronizationStatus.COMPLETED, ""));
         when(userV1Endpoint.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenReturn(status);
         SyncOperationStatus result = underTest.synchronizeAllUsersInEnvironment(ENVCRN);
         assertThat(result).isEqualTo(status);
@@ -91,6 +103,7 @@ class FreeIpaServiceTest {
 
     @Test
     void synchronizeAllUsersInEnvironmentFailure() {
+        when(userV1Endpoint.getLastSyncOperationStatus(any())).thenReturn(createStatus(SynchronizationStatus.COMPLETED, ""));
         when(webApplicationExceptionMessageExtractor.getErrorMessage(any())).thenReturn("custom error");
         when(userV1Endpoint.synchronizeAllUsers(any(SynchronizeAllUsersRequest.class))).thenThrow(new WebApplicationException("network error"));
         assertThatThrownBy(() -> underTest.synchronizeAllUsersInEnvironment(ENVCRN)).isInstanceOf(FreeIpaOperationFailedException.class);
