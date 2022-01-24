@@ -85,6 +85,12 @@ public abstract class ExistingStackPatchService {
                 .isReachable();
     }
 
+    protected boolean isPrimaryGatewayReachable(Stack stack) throws ExistingStackPatchApplyException {
+        return Optional.ofNullable(stack.getPrimaryGatewayInstance())
+                .orElseThrow(() -> new ExistingStackPatchApplyException("Could not find Primary gateway for stack: " + stack.getResourceCrn()))
+                .isReachable();
+    }
+
     protected StatedImage getStatedImage(Stack stack, Image image, ImageCatalog imageCatalog) {
         return ThreadBasedUserCrnProvider.doAs(
                 internalCrnModifier.getInternalCrnWithAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId()),
