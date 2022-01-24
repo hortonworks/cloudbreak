@@ -10,6 +10,8 @@ tests:
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkEnvironmentTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXEncryptedVolumeTest
+        includedMethods:
+          - testCreateDistroXWithEncryptedVolumesInSingleRG
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXRepairTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXScaleTest
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.imagevalidation.PrewarmImageValidatorE2ETest

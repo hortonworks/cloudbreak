@@ -5,15 +5,20 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.Test;
 
+import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
@@ -25,9 +30,9 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
+import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.assertion.distrox.AwsAvailabilityZoneAssertion;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
@@ -52,6 +57,7 @@ import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 import com.sequenceiq.it.cloudbreak.util.FreeIpaInstanceUtil;
 import com.sequenceiq.it.cloudbreak.util.SdxUtil;
+import com.sequenceiq.it.cloudbreak.util.azure.AzureCloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.it.cloudbreak.util.ssh.action.SshEnaDriverCheckActions;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -63,14 +69,13 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DistroXEncryptedVolumeTest.class);
 
+    private String resourceGroupForTest;
+
     @Inject
     private DistroXTestClient distroXTestClient;
 
     @Inject
     private SshEnaDriverCheckActions sshEnaDriverCheckActions;
-
-    @Inject
-    private CredentialTestClient credentialTestClient;
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
@@ -96,6 +101,9 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     @Inject
     private DistroxUtil distroxUtil;
 
+    @Inject
+    private AzureCloudFunctionality azureCloudFunctionality;
+
     @Override
     protected void setupTest(TestContext testContext) {
         assertNotSupportedCloudPlatform(CloudPlatform.GCP);
@@ -105,13 +113,23 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
         createDefaultCredential(testContext);
     }
 
+    @AfterMethod(onlyForGroups = { "azure_singlerg" })
+    public void tearDown(Object[] data) {
+        LOGGER.info("Tear down context");
+        ((TestContext) data[0]).cleanupTestContext();
+
+        LOGGER.info("Delete the '{}' resource group after test has been done!", resourceGroupForTest);
+        deleteResourceGroupCreatedForEnvironment(resourceGroupForTest);
+    }
+
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
     @Description(
-            given = "there is a running cloudbreak",
-            when = "create an environment then a valid distroX with disk encryption",
-            then = "freeIpa, sdx and distroX volumes should be encrypted with provided keys")
-    public void testCreateDistroXWithEncryptedVolume(TestContext testContext) {
+            given = "there is a valid credential for the selected provider",
+            when = "new environment and freeIpa with encrypted volume should be created",
+                and = "SDX then distroX with encrypted volumes also should be created for environment",
+            then = "freeIpa, sdx and distroX volumes should be encrypted with the provided key")
+    public void testCreateDistroXWithEncryptedVolumes(TestContext testContext) {
         DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
         List<DistroXInstanceGroupTestDto> distroXInstanceGroupTestDtos = new DistroXInstanceGroupsBuilder(testContext)
                 .defaultHostGroup()
@@ -167,6 +185,86 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
                 .validate();
     }
 
+    @Test(dataProvider = TEST_CONTEXT, groups = { "azure_singlerg" })
+    @UseSpotInstances
+    @Description(
+            given = "there is a valid Azure credential and a new resource group",
+            when = "environment with freeIpa should be created in the resource group with encrypted volume",
+                and = "SDX then distroX also with encrypted volumes should be created for environment",
+            then = "freeIpa, sdx and distroX volumes should be encrypted with the provided key")
+    public void testCreateDistroXWithEncryptedVolumesInSingleRG(TestContext testContext) {
+        DistroXDatabaseRequest distroXDatabaseRequest = new DistroXDatabaseRequest();
+        List<DistroXInstanceGroupTestDto> distroXInstanceGroupTestDtos = new DistroXInstanceGroupsBuilder(testContext)
+                .defaultHostGroup()
+                .withDiskEncryption()
+                .build();
+        distroXDatabaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+
+        createResourceGroupForEnvironment(testContext);
+
+        testContext
+                .given(EnvironmentNetworkTestDto.class)
+                .given("telemetry", TelemetryTestDto.class)
+                    .withLogging()
+                    .withReportClusterLogs()
+                .given(EnvironmentTestDto.class)
+                    .withNetwork()
+                    .withResourceGroup(ResourceGroupTest.AZURE_RESOURCE_GROUP_USAGE_SINGLE, resourceGroupForTest)
+                    .withResourceEncryption()
+                    .withTelemetry("telemetry")
+                    .withTunnel(Tunnel.CLUSTER_PROXY)
+                    .withCreateFreeIpa(Boolean.FALSE)
+                .when(environmentTestClient.create())
+                .await(EnvironmentStatus.AVAILABLE)
+                .given(FreeIpaTestDto.class)
+                    .withEnvironment()
+                    .withTelemetry("telemetry")
+                    .withCatalog(commonCloudProperties().getImageValidation().getFreeIpaImageCatalog(),
+                        commonCloudProperties().getImageValidation().getFreeIpaImageUuid())
+                .when(freeIpaTestClient.create())
+                .await(Status.AVAILABLE)
+                .awaitForHealthyInstances()
+                .given(FreeIpaUserSyncTestDto.class)
+                .when(freeIpaTestClient.getLastSyncOperationStatus())
+                .await(OperationState.COMPLETED)
+                .given(EnvironmentTestDto.class)
+                .when(environmentTestClient.describe())
+                .then(this::verifyEnvironmentResponseDiskEncryptionKey)
+                .given(FreeIpaTestDto.class)
+                .then((context, testDto, testClient) -> verifyFreeIpaVolumeEncryptionKey(context, testDto, testClient, resourceGroupForTest))
+                .given(SdxTestDto.class)
+                    .withCloudStorage()
+                .when(sdxTestClient.create())
+                .await(SdxClusterStatusResponse.RUNNING)
+                .awaitForHealthyInstances()
+                .then((context, testDto, testClient) -> verifySdxVolumeEncryptionKey(context, testDto, testClient, resourceGroupForTest))
+                .given(DistroXTestDto.class)
+                    .withInstanceGroupsEntity(distroXInstanceGroupTestDtos)
+                    .withExternalDatabase(distroXDatabaseRequest)
+                .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .then((context, testDto, testClient) -> verifyDistroxVolumeEncryptionKey(context, testDto, testClient, resourceGroupForTest))
+                .then(this::verifyAwsEnaDriver)
+                .then(new AwsAvailabilityZoneAssertion())
+                .then(validateTemplateContainsExternalDatabaseHostname())
+                .validate();
+    }
+
+    private ResourceGroup createResourceGroupForEnvironment(TestContext testContext) {
+        resourceGroupForTest = resourcePropertyProvider().getName();
+        String username = StringUtils.substringBefore(testContext.getActingUserCrn().getResource(), "@").toLowerCase();
+        Map<String, String> tags = new HashMap<>() {{
+            put("owner", username);
+            put("creation-timestamp", String.valueOf(new Date().getTime()));
+        }};
+        return azureCloudFunctionality.createResourceGroup(resourceGroupForTest, tags);
+    }
+
+    private void deleteResourceGroupCreatedForEnvironment(String resourceGroupName) {
+        azureCloudFunctionality.deleteResourceGroup(resourceGroupName);
+    }
+
     private DistroXTestDto verifyAwsEnaDriver(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
         if (CloudPlatform.AWS.equals(testDto.getCloudPlatform())) {
             sshEnaDriverCheckActions.checkEnaDriverOnAws(testDto.getResponse(), cloudbreakClient);
@@ -212,31 +310,45 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     }
 
     private FreeIpaTestDto verifyFreeIpaVolumeEncryptionKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient) {
+        return verifyFreeIpaVolumeEncryptionKey(testContext, testDto, freeIpaClient, null);
+    }
+
+    private FreeIpaTestDto verifyFreeIpaVolumeEncryptionKey(TestContext testContext, FreeIpaTestDto testDto, FreeIpaClient freeIpaClient,
+            String resourceGroupName) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = freeIpaInstanceUtil.getInstanceIds(testDto, freeIpaClient, MASTER.getName());
         verifyVolumeEncryptionKey(testDto.getCloudPlatform(), testDto.getName(), instanceIds, cloudFunctionality,
-                testContext.given(EnvironmentTestDto.class).getRequest().getName());
+                testContext.given(EnvironmentTestDto.class).getRequest().getName(), resourceGroupName);
         return testDto;
     }
 
     private SdxTestDto verifySdxVolumeEncryptionKey(TestContext testContext, SdxTestDto testDto, SdxClient sdxClient) {
+        return verifySdxVolumeEncryptionKey(testContext, testDto, sdxClient, null);
+    }
+
+    private SdxTestDto verifySdxVolumeEncryptionKey(TestContext testContext, SdxTestDto testDto, SdxClient sdxClient, String resourceGroupName) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = sdxUtil.getInstanceIds(testDto, sdxClient, MASTER.getName());
         verifyVolumeEncryptionKey(testDto.getCloudPlatform(), testDto.getName(), instanceIds, cloudFunctionality,
-                testContext.given(EnvironmentTestDto.class).getRequest().getName());
+                testContext.given(EnvironmentTestDto.class).getRequest().getName(), resourceGroupName);
         return testDto;
     }
 
     private DistroXTestDto verifyDistroxVolumeEncryptionKey(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient) {
+        return verifyDistroxVolumeEncryptionKey(testContext, testDto, cloudbreakClient, null);
+    }
+
+    private DistroXTestDto verifyDistroxVolumeEncryptionKey(TestContext testContext, DistroXTestDto testDto, CloudbreakClient cloudbreakClient,
+            String resourceGroupName) {
         CloudFunctionality cloudFunctionality = testContext.getCloudProvider().getCloudFunctionality();
         List<String> instanceIds = distroxUtil.getInstanceIds(testDto, cloudbreakClient, MASTER.getName());
         verifyVolumeEncryptionKey(testDto.getCloudPlatform(), testDto.getName(), instanceIds, cloudFunctionality,
-                testContext.given(EnvironmentTestDto.class).getRequest().getName());
+                testContext.given(EnvironmentTestDto.class).getRequest().getName(), resourceGroupName);
         return testDto;
     }
 
     private void verifyVolumeEncryptionKey(CloudPlatform cloudPlatform, String resourceName, List<String> instanceIds,
-            CloudFunctionality cloudFunctionality, String environmentName) {
+            CloudFunctionality cloudFunctionality, String environmentName, String resourceGroupName) {
         if (CloudPlatform.AWS.equals(cloudPlatform)) {
             String kmsKeyArn = awsCloudProvider.getEncryptionKeyArn(true);
             List<String> volumeKmsKeyIds = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, null, instanceIds));
@@ -249,7 +361,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
             }
         } else if (CloudPlatform.AZURE.equals(cloudPlatform)) {
             String desKeyUrl = azureCloudProvider.getEncryptionKeyUrl();
-            List<String> volumesDesId = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, null, instanceIds));
+            List<String> volumesDesId = new ArrayList<>(cloudFunctionality.listVolumeEncryptionKeyIds(resourceName, resourceGroupName, instanceIds));
             volumesDesId.forEach(desId -> {
                 if (desId.contains("diskEncryptionSets/" + environmentName)) {
                     LOGGER.info(format("Volume has been encrypted with '%s' DES key.", desId));

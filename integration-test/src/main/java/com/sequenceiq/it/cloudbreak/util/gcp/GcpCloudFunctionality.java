@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.microsoft.azure.management.resources.ResourceGroup;
 import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpLabelUtil;
 import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 
@@ -57,18 +56,6 @@ public class GcpCloudFunctionality implements CloudFunctionality {
     @Override
     public void stopInstances(String clusterName, List<String> instanceIds) {
         gcpUtil.stopHostGroupInstances(instanceIds);
-    }
-
-    @Override
-    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
-        LOGGER.debug("createResourceGroup: nothing to do for GCP");
-        throw new NotImplementedException("Resource group creation is not applicable for GCP!");
-    }
-
-    @Override
-    public void deleteResourceGroup(String resourceGroupName) {
-        LOGGER.debug("deleteResourceGroup: nothing to do for GCP");
-        throw new NotImplementedException("Resource group deletion is not applicable for GCP!");
     }
 
     @Override
