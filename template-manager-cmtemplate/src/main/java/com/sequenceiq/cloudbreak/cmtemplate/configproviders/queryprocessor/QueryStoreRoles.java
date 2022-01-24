@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.querystore;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.queryprocessor;
 
 public class QueryStoreRoles {
     // Service name.

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.querystore;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.queryprocessor;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
