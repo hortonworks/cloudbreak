@@ -1,4 +1,4 @@
-FROM docker-private.infra.cloudera.com/cloudera_base/cldr-java:11.0.13-cldr-jre-slim-buster-15122021
+FROM docker-private.infra.cloudera.com/cloudera_base/ubi8/cldr-ubi-minimal-java:jdk11-ubi8.5-218
 MAINTAINER info@cloudera.com
 
 # REPO URL to download jar

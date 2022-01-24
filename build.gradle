@@ -141,7 +141,9 @@ subprojects {
                         '**/converter/mapper/**',
                         '**/sequenceiq/it/**',
                         '**/cloudbreak/api/endpoint/**',
-                        '**/cloudbreak/domain/**'
+                        '**/cloudbreak/domain/**',
+                        '**/environment/**/domain/**',
+                        '**/environment/**/attributes/**'
                 ]
         )
       })
