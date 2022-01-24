@@ -139,8 +139,9 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     }
 
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleState(Cluster cluster, AutoscaleClusterState autoscaleState) {
-        // TODO CB-15673 Use alertValidator to check for StopStart scaling entitlement
-        //  alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled().
+        if (Boolean.TRUE.equals(autoscaleState.getUseStopStartMechanism())) {
+            alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
+        }
         try {
             transactionService.required(() -> asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
         } catch (TransactionService.TransactionExecutionException e) {
@@ -155,6 +156,10 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
 
         alertValidator.validateEntitlementAndDisableIfNotEntitled(cluster);
         alertValidator.validateDistroXAutoscaleClusterRequest(cluster, autoscaleClusterRequest);
+
+        if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())) {
+            alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
+        }
 
         try {
             transactionService.required(() -> {
