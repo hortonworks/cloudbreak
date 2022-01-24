@@ -26,6 +26,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
@@ -48,6 +49,7 @@ import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
+import com.sequenceiq.common.api.type.InstanceGroupType;
 
 @ExtendWith(MockitoExtension.class)
 public class MeteringAzureMetadataPatchServiceTest {
@@ -257,6 +259,7 @@ public class MeteringAzureMetadataPatchServiceTest {
         InstanceMetaData instanceMetaData = createInstanceMetaData();
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName("master");
+        instanceGroup.setInstanceGroupType(InstanceGroupType.GATEWAY);
         instanceGroup.setInstanceMetaData(Set.of(instanceMetaData));
         Template template = new Template();
         template.setInstanceType("myInstanceType");
@@ -267,7 +270,7 @@ public class MeteringAzureMetadataPatchServiceTest {
     private InstanceMetaData createInstanceMetaData() {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
-        instanceMetaData.setClusterManagerServer(true);
+        instanceMetaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
         return instanceMetaData;
     }
 }
