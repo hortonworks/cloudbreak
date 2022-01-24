@@ -18,6 +18,8 @@ public class MessageCode {
 
     public static final String AUTOSCALING_ENTITLEMENT_NOT_ENABLED = "autoscale.entitlement.not.enabled";
 
+    public static final String AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED = "autoscale.stopstart.entitlement.not.enabled";
+
     public static final String AUTOSCALING_ACTIVITY_NOT_REQUIRED = "autoscale.activity.not.required";
 
     public static final String AUTOSCALING_ACTIVITY_SUCCESS = "autoscale.activity.success";

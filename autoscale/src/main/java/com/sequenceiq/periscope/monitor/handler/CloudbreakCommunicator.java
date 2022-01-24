@@ -58,7 +58,7 @@ public class CloudbreakCommunicator {
     public void decommissionInstancesForCluster(Cluster cluster, List<String> decommissionNodeIds) {
         ScalingStrategy scalingStrategy = ScalingStrategy.STOPSTART;
         requestLogging.logResponseTime(() -> {
-            if (cluster.isStopStartScalingEnabled()) {
+            if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
                 cloudbreakInternalCrnClient.withInternalCrn()
                         .autoscaleEndpoint().stopInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
             } else {

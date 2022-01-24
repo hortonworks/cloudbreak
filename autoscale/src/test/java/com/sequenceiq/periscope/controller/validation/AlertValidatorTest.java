@@ -2,6 +2,7 @@ package com.sequenceiq.periscope.controller.validation;
 
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_CLUSTER_LIMIT_EXCEEDED;
 import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_ENTITLEMENT_NOT_ENABLED;
+import static com.sequenceiq.periscope.common.MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED;
 import static com.sequenceiq.periscope.common.MessageCode.UNSUPPORTED_AUTOSCALING_HOSTGROUP;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
@@ -120,6 +121,31 @@ public class AlertValidatorTest {
 
         ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateEntitlementAndDisableIfNotEntitled(aCluster));
         verify(asClusterCommonService, never()).setAutoscaleState(aCluster.getId(), false);
+    }
+
+    @Test
+    public void testValidateStopStartEntitlementNotEnabledForAccount() {
+        aCluster.setCloudPlatform("AWS");
+
+        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(false);
+        when(messagesService.getMessage(AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED,
+                List.of(aCluster.getCloudPlatform(), aCluster.getStackName()))).thenReturn("account.not.entitled");
+
+        expectedException.expect(BadRequestException.class);
+        expectedException.expectMessage("account.not.entitled");
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
+        verify(asClusterCommonService, times(1)).setStopStartScalingState(aCluster.getId(), false);
+    }
+
+    @Test
+    public void testValidateStopStartEntitlementEnabledForAccount() {
+        aCluster.setCloudPlatform("AWS");
+
+        when(entitlementValidationService.stopStartAutoscalingEntitlementEnabled(TEST_ACCOUNT_ID, "AWS")).thenReturn(true);
+
+        ThreadBasedUserCrnProvider.doAs(TEST_USER_CRN, () -> underTest.validateStopStartEntitlementAndDisableIfNotEntitled(aCluster));
+        verify(asClusterCommonService, never()).setStopStartScalingState(aCluster.getId(), false);
     }
 
     @Test
