@@ -20,6 +20,8 @@ public class AwsNativeResourceBuilderOrderConstants {
 
     public static final int NATIVE_ROOT_DISK_TAGGING_RESOURCE_BUILDER_ORDER = 8;
 
+    public static final int NATIVE_EIP_RESOURCE_BUILDER_ORDER = 9;
+
     private AwsNativeResourceBuilderOrderConstants() {
     }
 
