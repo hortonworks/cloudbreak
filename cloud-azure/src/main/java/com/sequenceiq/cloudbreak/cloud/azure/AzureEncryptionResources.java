@@ -272,6 +272,9 @@ public class AzureEncryptionResources implements EncryptionResources {
             try {
                 LOGGER.info("Granting {}.", description);
                 azureClient.grantKeyVaultAccessPolicyToServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
+                if (!azureClient.checkKeyVaultAccessPolicyForServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId)) {
+                    throw new RuntimeException(String.format("Access policy has not been granted to object Id: %s, Retrying ...", desPrincipalObjectId));
+                }
                 LOGGER.info("Granted {}.", description);
                 return true;
             } catch (Exception e) {

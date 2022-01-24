@@ -56,6 +56,7 @@ import com.microsoft.azure.management.compute.implementation.DiskInner;
 import com.microsoft.azure.management.graphrbac.RoleAssignment;
 import com.microsoft.azure.management.graphrbac.RoleAssignments;
 import com.microsoft.azure.management.graphrbac.implementation.RoleAssignmentInner;
+import com.microsoft.azure.management.keyvault.AccessPolicy;
 import com.microsoft.azure.management.keyvault.KeyPermissions;
 import com.microsoft.azure.management.keyvault.Vault;
 import com.microsoft.azure.management.marketplaceordering.v2015_06_01.AgreementTerms;
@@ -1003,6 +1004,20 @@ public class AzureClient {
                     .allowKeyPermissions(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))
                     .attach()
                     .apply();
+        });
+    }
+
+    public boolean checkKeyVaultAccessPolicyForServicePrincipal(String resourceGroupName, String vaultName, String principalObjectId) {
+        return handleAuthException(() -> {
+            List<AccessPolicy> accessPolicies = azure.vaults()
+                    .getByResourceGroup(resourceGroupName, vaultName)
+                    .accessPolicies();
+            for (int i = accessPolicies.size() - 1; i >= 0; i--) {
+                if (accessPolicies.get(i).inner().objectId().equals(principalObjectId)) {
+                    return true;
+                }
+            }
+            return false;
         });
     }
 
