@@ -34,5 +34,5 @@ public enum AllServiceTypes {
     LIVY_FOR_SPARK3,
     IMPALA,
     FLINK,
-    QUERY_STORE
+    HUE_QUERY_PROCESSOR
 }

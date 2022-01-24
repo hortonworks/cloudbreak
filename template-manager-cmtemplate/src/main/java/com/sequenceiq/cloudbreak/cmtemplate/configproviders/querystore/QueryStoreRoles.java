@@ -1,11 +1,11 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.das;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.querystore;
 
-public class DasRoles {
+public class QueryStoreRoles {
     // Service name.
-    public static final String DAS = "HUE_QUERY_STORE";
+    public static final String HUE_QUERY_PROCESSOR = "HUE_QUERY_PROCESSOR";
 
     // Roles
-    public static final String QUERYPROCESSOR = "HUE_QUERY_PROCESSOR";
+    public static final String QUERYPROCESSOR = "QUERY_PROCESSOR";
 
-    private DasRoles() { }
+    private QueryStoreRoles() { }
 }

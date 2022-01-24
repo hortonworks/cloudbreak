@@ -12,15 +12,15 @@ import javax.inject.Inject;
 @Component
 public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
 
-    private static final String PILLAR_KEY = "query_store";
+    private static final String PILLAR_KEY = "query_processor";
 
-    @Value("${cb.query_store.database.user:query_store}")
+    @Value("${cb.query_processor.database.user:query_processor}")
     private String dasDbUser;
 
-    @Value("${cb.query_store.database.db:query_store}")
+    @Value("${cb.query_processor.database.db:query_processor}")
     private String dasDb;
 
-    @Value("${cb.query_store.database.port:5432}")
+    @Value("${cb.query_processor.database.port:5432}")
     private String dasDbPort;
 
     @Inject
@@ -48,15 +48,13 @@ public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
 
     @Override
     protected DatabaseType getRdsType() {
-        return DatabaseType.QUERY_STORE;
+        return DatabaseType.QUERY_PROCESSOR;
     }
 
     @Override
     protected boolean isRdsConfigNeeded(Blueprint blueprint, boolean hasGateway) {
         String blueprintText = blueprint.getBlueprintText();
         CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        return blueprintProcessor.isCMComponentExistsInBlueprint("DAS_EVENT_PROCESSOR")
-                || blueprintProcessor.isCMComponentExistsInBlueprint("DAS_WEBAPP");
-
+        return blueprintProcessor.isCMComponentExistsInBlueprint("QUERY_PROCESSOR");
     }
 }

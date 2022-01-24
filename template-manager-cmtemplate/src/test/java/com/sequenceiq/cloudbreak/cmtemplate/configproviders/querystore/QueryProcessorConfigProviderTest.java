@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.das;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.querystore;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -21,9 +21,9 @@ import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 
-public class DasConfigProviderTest {
+public class QueryProcessorConfigProviderTest {
 
-    private static final String HIVE_DAS = "HIVE_DAS";
+    private static final String HUE_QUERY_PROCESSOR = "HUE_QUERY_PROCESSOR";
 
     private static final String DB_PROVIDER = "postgres";
 
@@ -37,17 +37,17 @@ public class DasConfigProviderTest {
 
     private static final String PASSWORD = "password";
 
-    private DasConfigProvider underTest;
+    private QueryProcessorConfigProvider underTest;
 
     @Before
     public void setUp() {
-        underTest = new DasConfigProvider();
+        underTest = new QueryProcessorConfigProvider();
     }
 
     @Test
     public void getServiceConfigs() {
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HIVE_DAS);
+        rdsConfig.setType(HUE_QUERY_PROCESSOR);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         rdsConfig.setConnectionUserName(USER_NAME);
         rdsConfig.setConnectionPassword(PASSWORD);
@@ -67,23 +67,23 @@ public class DasConfigProviderTest {
     @Test
     public void getRoleConfigs() {
         TemplatePreparationObject tpo = new Builder().build();
-        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(DasRoles.WEBAPP, tpo);
+        List<ApiClusterTemplateConfig> result = underTest.getRoleConfigs(QueryStoreRoles.QUERYPROCESSOR, tpo);
         Map<String, String> paramToVariable =
                 result.stream().collect(Collectors.toMap(ApiClusterTemplateConfig::getName, ApiClusterTemplateConfig::getValue));
         assertThat(paramToVariable).containsOnly(
             new SimpleEntry<>("data_analytics_studio_user_authentication", "KNOX_PROXY"));
-        result = underTest.getRoleConfigs(DasRoles.EVENTPROCESSOR, tpo);
+        result = underTest.getRoleConfigs(QueryStoreRoles.QUERYPROCESSOR, tpo);
         assertThat(result.isEmpty()).isTrue();
     }
 
     @Test
     public void getServiceType() {
-        assertThat(underTest.getServiceType()).isEqualTo(DasRoles.DAS);
+        assertThat(underTest.getServiceType()).isEqualTo(QueryStoreRoles.HUE_QUERY_PROCESSOR);
     }
 
     @Test
     public void getRoleTypes() {
-        assertThat(underTest.getRoleTypes()).containsOnly(DasRoles.WEBAPP, DasRoles.EVENTPROCESSOR);
+        assertThat(underTest.getRoleTypes()).containsOnly(QueryStoreRoles.QUERYPROCESSOR);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class DasConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HIVE_DAS);
+        rdsConfig.setType(HUE_QUERY_PROCESSOR);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         rdsConfig.setConnectionUserName(USER_NAME);
         rdsConfig.setConnectionPassword(PASSWORD);
@@ -105,12 +105,12 @@ public class DasConfigProviderTest {
 
     @Test
     @SuppressWarnings("unchecked")
-    public void isConfigurationNeededFalseWhenNoDasOnClusterr() {
+    public void isConfigurationNeededFalseWhenNoHueQueryProcessorOnClusterr() {
         CmTemplateProcessor mockTemplateProcessor = mock(CmTemplateProcessor.class);
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HIVE_DAS);
+        rdsConfig.setType(HUE_QUERY_PROCESSOR);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         rdsConfig.setConnectionUserName(USER_NAME);
         rdsConfig.setConnectionPassword(PASSWORD);

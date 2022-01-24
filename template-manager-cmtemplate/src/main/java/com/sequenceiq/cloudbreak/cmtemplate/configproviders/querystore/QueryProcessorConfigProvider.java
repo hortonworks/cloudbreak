@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.cmtemplate.configproviders.das;
+package com.sequenceiq.cloudbreak.cmtemplate.configproviders.querystore;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 
@@ -14,39 +14,39 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
 
 @Component
-public class DasConfigProvider extends AbstractRdsRoleConfigProvider {
+public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider {
 
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
-        RdsView dasView = getRdsView(source);
+        RdsView queryProcessorView = getRdsView(source);
         return List.of(
-                config("data_analytics_studio_database_host", dasView.getHost()),
-                config("data_analytics_studio_database_port", dasView.getPort()),
-                config("data_analytics_studio_database_name", dasView.getDatabaseName()),
-                config("data_analytics_studio_database_username", dasView.getConnectionUserName()),
-                config("data_analytics_studio_database_password", dasView.getConnectionPassword())
+                config("data_analytics_studio_database_host", queryProcessorView.getHost()),
+                config("data_analytics_studio_database_port", queryProcessorView.getPort()),
+                config("data_analytics_studio_database_name", queryProcessorView.getDatabaseName()),
+                config("data_analytics_studio_database_username", queryProcessorView.getConnectionUserName()),
+                config("data_analytics_studio_database_password", queryProcessorView.getConnectionPassword())
         );
     }
 
     @Override
     public String getServiceType() {
-        return DasRoles.DAS;
+        return QueryStoreRoles.HUE_QUERY_PROCESSOR;
     }
 
     @Override
     public List<String> getRoleTypes() {
-        return List.of(DasRoles.WEBAPP, DasRoles.EVENTPROCESSOR);
+        return List.of(QueryStoreRoles.QUERY_PROCESSOR);
     }
 
     @Override
     protected DatabaseType dbType() {
-        return DatabaseType.HIVE_DAS;
+        return DatabaseType.QUERY_PROCESSOR;
     }
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
         switch (roleType) {
-            case DasRoles.WEBAPP:
+            case QueryStoreRoles.WEBAPP:
                 return List.of(config("data_analytics_studio_user_authentication", "KNOX_PROXY"));
             default:
                 return List.of();

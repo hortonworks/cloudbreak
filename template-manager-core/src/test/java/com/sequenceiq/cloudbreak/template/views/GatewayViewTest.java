@@ -50,7 +50,7 @@ public class GatewayViewTest {
             "DAS_WEBAPP",
             "KUDU_MASTER",
             "KUDU_TSERVER",
-            "HUE_QUERYPROCESSOR"
+            "QUERY_PROCESSOR"
     );
 
     @Test
