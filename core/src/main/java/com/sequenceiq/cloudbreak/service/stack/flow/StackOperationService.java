@@ -288,7 +288,6 @@ public class StackOperationService {
                 updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
                 updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
-                LOGGER.info("ZZZ: stack.isAvailable: {}, stackStatus: {}", stackWithLists.isAvailable(), stackWithLists.getStatus());
                 if (withClusterEvent) {
                     updateNodeCountValidator.validateClusterStatusForStartHostGroup(stackWithLists);
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);

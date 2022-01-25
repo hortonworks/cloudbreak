@@ -43,20 +43,19 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
 
         boolean clusterAvailable;
-        boolean clusterNodesUnhealthy = false;
+        boolean clusterWithStoppedNodes = false;
         if (cluster.isStopStartScalingEnabled()) {
             clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false);
-            clusterNodesUnhealthy = Optional.ofNullable(statusResponse.getStatus()).map(s -> s == Status.AVAILABLE_WITH_STOPPED_INSTANCES).orElse(false);
-            clusterAvailable |= clusterNodesUnhealthy;
+            clusterWithStoppedNodes =
+                    Optional.ofNullable(statusResponse.getStatus()).map(s -> s == Status.AVAILABLE_WITH_STOPPED_INSTANCES).orElse(false);
+            clusterAvailable |= clusterWithStoppedNodes;
         } else {
             clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
             && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
         }
 
-        LOGGER.info("ZZZ: Computed clusterAvailable: {}, clusterNodesUnhealthy: {}", clusterAvailable, clusterNodesUnhealthy);
-        LOGGER.debug("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
-        LOGGER.info("ZZZ: Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ",
-                statusResponse, cluster.getStackCrn(), clusterAvailable);
+        LOGGER.info("Computed clusterAvailable: {}, clusterWithStoppedNodes: {}", clusterAvailable, clusterWithStoppedNodes);
+        LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
 
         if (DELETE_COMPLETED.equals(statusResponse.getStatus())) {
             clusterService.removeById(autoscaleClusterId);
