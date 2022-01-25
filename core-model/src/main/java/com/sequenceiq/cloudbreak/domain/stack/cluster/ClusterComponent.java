@@ -13,6 +13,7 @@ import javax.persistence.NamedAttributeNode;
 import javax.persistence.NamedEntityGraph;
 import javax.persistence.NamedSubgraph;
 import javax.persistence.SequenceGenerator;
+import javax.persistence.Transient;
 
 import com.sequenceiq.cloudbreak.domain.converter.ComponentTypeConverter;
 import org.hibernate.envers.AuditTable;
@@ -30,6 +31,9 @@ import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 @Audited
 @AuditTable("clustercomponent_history")
 public class ClusterComponent implements ProvisionEntity {
+
+    @Transient
+    public static final String CB_VERSION_KEY = "CB_VERSION";
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "component_generator")
