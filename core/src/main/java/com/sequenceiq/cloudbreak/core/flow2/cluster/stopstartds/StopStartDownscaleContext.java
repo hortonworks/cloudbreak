@@ -17,8 +17,6 @@ public class StopStartDownscaleContext extends StackContext {
 
     private final Set<Long> hostIdsToRemove;
 
-    private final Boolean singlePrimaryGateway;
-
     private final ClusterManagerType clusterManagerType;
 
     private final StackView stackView;
@@ -26,12 +24,10 @@ public class StopStartDownscaleContext extends StackContext {
     public StopStartDownscaleContext(FlowParameters flowParameters, Stack stack, StackView stackView,
             CloudContext cloudContext, CloudCredential cloudCredential, CloudStack cloudStack,
             String hostGroupName, Set<Long> hostIdsToRemove,
-            Boolean singlePrimaryGateway,
             ClusterManagerType clusterManagerType) {
         super(flowParameters, stack, cloudContext, cloudCredential, cloudStack);
         this.hostGroupName = hostGroupName;
         this.hostIdsToRemove = hostIdsToRemove;
-        this.singlePrimaryGateway = singlePrimaryGateway;
         this.clusterManagerType = clusterManagerType;
         this.stackView = stackView;
     }
@@ -42,11 +38,6 @@ public class StopStartDownscaleContext extends StackContext {
 
     public Set<Long> getHostIdsToRemove() {
         return hostIdsToRemove;
-    }
-
-    // TODO CB-14929: Is this ever used? / is this needed in mutli-CM instances?
-    public Boolean getSinglePrimaryGateway() {
-        return singlePrimaryGateway;
     }
 
     public ClusterManagerType getClusterManagerType() {
@@ -62,7 +53,6 @@ public class StopStartDownscaleContext extends StackContext {
         return "StopStartDownscaleContext{" +
                 "hostGroupName='" + hostGroupName + '\'' +
                 ", hostIdsToRemove=" + hostIdsToRemove +
-                ", singlePrimaryGateway=" + singlePrimaryGateway +
                 ", clusterManagerType=" + clusterManagerType +
                 ", stackView=" + stackView +
                 '}';

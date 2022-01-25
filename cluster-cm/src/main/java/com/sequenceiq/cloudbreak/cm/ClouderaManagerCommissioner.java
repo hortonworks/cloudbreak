@@ -67,8 +67,7 @@ public class ClouderaManagerCommissioner {
             LOGGER.error("Failed to communicate with Cloudera Manager", e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
-        // TODO CB-14929 Maybe move this to a trace level log.
-        LOGGER.debug("Target recommissionNodes: count={}, hosts=[{}]", hostsToRecommission.size(), hostsToRecommission.keySet());
+        LOGGER.trace("Target recommissionNodes: count={}, hosts=[{}]", hostsToRecommission.size(), hostsToRecommission.keySet());
         LOGGER.debug("hostsAvailableFromCM: count={}, hosts=[{}]", hostRefList.getItems().size(),
                 hostRefList.getItems().stream().map(ApiHost::getHostname));
 

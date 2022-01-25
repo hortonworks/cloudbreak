@@ -116,7 +116,7 @@ public class ReactorFlowManager {
     }
 
     public FlowIdentifier triggerStopStartStackUpscale(Long stackId, InstanceGroupAdjustmentV4Request instanceGroupAdjustment, boolean withClusterEvent) {
-        LOGGER.info("ZZZ: FlowManager trigger for stopstart-upscale");
+        LOGGER.debug("FlowManager trigger for stopstart-upscale");
         String selector = FlowChainTriggers.STOPSTART_UPSCALE_CHAIN_TRIGGER_EVENT;
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(instanceGroupAdjustment.getAdjustmentType(),
                 instanceGroupAdjustment.getThreshold());
@@ -170,7 +170,7 @@ public class ReactorFlowManager {
 
     public FlowIdentifier triggerStopStartStackDownscale(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
         // TODO CB-14929: stop-start is not meant for multiple hostGroups - set up a different API for this.
-        LOGGER.info("ZZZ: triggerStopStartStackDownscale with instanceIdsByHostgroupMap={}", instanceIdsByHostgroupMap);
+        LOGGER.debug("triggerStopStartStackDownscale with instanceIdsByHostgroupMap={}", instanceIdsByHostgroupMap);
         if (instanceIdsByHostgroupMap.size() != 1) {
             throw new RuntimeException("Expected instancesIdsToHostGroupMap to contain exactly 1 host group. Found" + instanceIdsByHostgroupMap.size());
         }
@@ -178,7 +178,7 @@ public class ReactorFlowManager {
         Map.Entry<String, Set<Long>> entry = instanceIdsByHostgroupMap.entrySet().iterator().next();
         String hostGroup = entry.getKey();
         Set<Long> privateIds = entry.getValue();
-        LOGGER.info("ZZZ: ids to remove. size:{}, ids:{}", privateIds.size(), privateIds);
+        LOGGER.debug("ids to remove(stop). size:{}, ids:{}", privateIds.size(), privateIds);
 
         String selector = FlowChainTriggers.STOPSTART_DOWNSCALE_CHAIN_TRIGGER_EVENT;
 
