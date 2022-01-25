@@ -77,9 +77,7 @@ public class StopStartUpscaleActions {
             protected void prepareExecution(StopStartUpscaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
                 variables.put(ADJUSTMENT, payload.getAdjustment());
-                variables.put(SINGLE_PRIMARY_GATEWAY, payload.isSinglePrimaryGateway());
                 variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
-                variables.put(RESTART_SERVICES, payload.isRestartServices());
             }
 
             @Override
@@ -243,13 +241,7 @@ public class StopStartUpscaleActions {
 
         static final String ADJUSTMENT = "ADJUSTMENT";
 
-        static final String SINGLE_PRIMARY_GATEWAY = "SINGLE_PRIMARY_GATEWAY";
-
-        static final String INSTALLED_COMPONENTS = "INSTALLED_COMPONENTS";
-
         static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
-
-        static final String RESTART_SERVICES = "RESTART_SERVICES";
 
         @Inject
         private StackService stackService;
@@ -297,7 +289,7 @@ public class StopStartUpscaleActions {
             return new StopStartUpscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
                     cloudContext, cloudCredential, cloudStack,
                     getHostgroupName(variables), getAdjustment(variables),
-                    isSinglePrimaryGateway(variables), getClusterManagerType(variables));
+                    getClusterManagerType(variables));
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {
@@ -306,14 +298,6 @@ public class StopStartUpscaleActions {
 
         private Integer getAdjustment(Map<Object, Object> variables) {
             return (Integer) variables.get(ADJUSTMENT);
-        }
-
-        private Boolean isSinglePrimaryGateway(Map<Object, Object> variables) {
-            return (Boolean) variables.get(SINGLE_PRIMARY_GATEWAY);
-        }
-
-        Map<String, String> getInstalledComponents(Map<Object, Object> variables) {
-            return (Map<String, String>) variables.get(INSTALLED_COMPONENTS);
         }
 
         ClusterManagerType getClusterManagerType(Map<Object, Object> variables) {

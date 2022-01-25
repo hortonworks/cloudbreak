@@ -139,7 +139,7 @@ public class StopStartUpscaleActionsTest {
         StopStartUpscaleContext stopStartUpscaleContext = createContext(5);
         StopStartUpscaleTriggerEvent payload = new StopStartUpscaleTriggerEvent(
                 SELECTOR, STACK_ID, INSTANCE_GROUP_NAME_ACTIONABLE,
-                5, Collections.emptySet(), true, false, ClusterManagerType.CLOUDERA_MANAGER);
+                5, ClusterManagerType.CLOUDERA_MANAGER);
 
         List<InstanceMetaData> instancesActionableNotStopped =
                 generateInstances(5, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
@@ -405,7 +405,7 @@ public class StopStartUpscaleActionsTest {
     private StopStartUpscaleContext createContext(int adjustment) {
         return new StopStartUpscaleContext(flowParameters, stack, stackView,
                 cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME_ACTIONABLE,
-                adjustment, true, ClusterManagerType.CLOUDERA_MANAGER);
+                adjustment, ClusterManagerType.CLOUDERA_MANAGER);
     }
 
     private void mockStackEtc(List<InstanceMetaData> instancesActionableNotStopped, List<InstanceMetaData> instancesActionableStopped,

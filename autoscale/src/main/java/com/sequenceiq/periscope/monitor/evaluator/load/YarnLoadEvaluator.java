@@ -87,12 +87,11 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
     @Override
     protected void execute() {
-        LOGGER.info("ZZZ: YarnLoadEvaluator executing for clusterId: {}", clusterId);
+        LOGGER.info("YarnLoadEvaluator executing for clusterId: {}", clusterId);
         long start = System.currentTimeMillis();
         String stackCrn = null;
         try {
             cluster = clusterService.findById(clusterId);
-            LOGGER.info("ZZZ: YarnLoadEvaluator executing for clusterId:{}, stackCrn: {}", clusterId, cluster.getStackCrn());
             LoggingUtils.buildMdcContext(cluster);
             stackCrn = cluster.getStackCrn();
             loadAlert = cluster.getLoadAlerts().stream().findFirst().get();
@@ -121,7 +120,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
 
         int maxAllowedUpScale = configMaxNodeCount < 0 ? 0 : configMaxNodeCount;
         int maxAllowedDownScale = configMinNodeCount > 0 ? configMinNodeCount : 0;
-        LOGGER.info("ZZZ: Various counts: hostFqdnsToInstanceId={}, configMaxNodeCount={}, configMinNodeCount={}, maxAllowedUpScale={}, maxAllowedDownScale={}",
+        LOGGER.info("Various counts: hostFqdnsToInstanceId={}, configMaxNodeCount={}, configMinNodeCount={}, maxAllowedUpScale={}, maxAllowedDownScale={}",
                 existingHostGroupSize, configMaxNodeCount, configMinNodeCount, maxAllowedUpScale, maxAllowedDownScale);
 
         Optional<Integer> mandatoryUpScaleCount = Optional.of(configMinNodeCount)
@@ -139,7 +138,7 @@ public class YarnLoadEvaluator extends EvaluatorExecutor {
                 getYarnRecommendedDecommissionHostsForHostGroup(cluster.getStackCrn(), yarnResponse,
                         hostFqdnsToInstanceId, maxAllowedDownScale, mandatoryDownScaleCount, loadAlertConfiguration.getMaxScaleDownStepSize());
 
-        LOGGER.info("ZZZ: yarnRecommendedScaleUpCount={}, yarnRecommendedDecommssion={}", yarnRecommendedScaleUpCount, yarnRecommendedDecommissionHosts);
+        LOGGER.info("yarnRecommendedScaleUpCount={}, yarnRecommendedDecommssion={}", yarnRecommendedScaleUpCount, yarnRecommendedDecommissionHosts);
 
         if (yarnRecommendedScaleUpCount > 0 && isCoolDownTimeElapsed(cluster.getStackCrn(), "scaled-up",
                 loadAlertConfiguration.getScaleUpCoolDownMillis(), cluster.getLastScalingActivity()))  {

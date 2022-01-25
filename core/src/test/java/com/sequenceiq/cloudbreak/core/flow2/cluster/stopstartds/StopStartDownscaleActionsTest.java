@@ -140,7 +140,7 @@ public class StopStartDownscaleActionsTest {
 
         StopStartDownscaleContext stopStartDownscaleContext = createContext(instanceIdsToRemove);
         StopStartDownscaleTriggerEvent payload = new StopStartDownscaleTriggerEvent(SELECTOR, STACK_ID, INSTANCE_GROUP_NAME_ACTIONABLE,
-                instanceIdsToRemove, true, ClusterManagerType.CLOUDERA_MANAGER);
+                instanceIdsToRemove, ClusterManagerType.CLOUDERA_MANAGER);
 
         mockStackEtc();
         when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
@@ -368,7 +368,7 @@ public class StopStartDownscaleActionsTest {
     private StopStartDownscaleContext createContext(Set<Long> instanceIdsToRemove) {
         return new StopStartDownscaleContext(flowParameters, stack, stackView,
                 cloudContext, cloudCredential, cloudStack, INSTANCE_GROUP_NAME_ACTIONABLE,
-                instanceIdsToRemove, true, ClusterManagerType.CLOUDERA_MANAGER);
+                instanceIdsToRemove, ClusterManagerType.CLOUDERA_MANAGER);
     }
 
     private void mockStackEtc() {

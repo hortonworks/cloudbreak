@@ -92,7 +92,6 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Inject
     private LimitConfiguration limitConfiguration;
 
-    // TODO CB-14929: Cleanup as part of API definition. Remove excessive logging.
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public void putStack(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateStackV4Request updateRequest) {
@@ -109,14 +108,14 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public String tmpStartNodes(@TenantAwareParam @ResourceCrn String crn, String userId, String hostGroup, Integer numNodes) {
-        LOGGER.info("ZZZ: Received tmpStartNodes request: crn: {}, hostGroup: {}, numNodes: {}", crn, hostGroup, numNodes);
+        LOGGER.info("Received tmpStartNodes request: crn: {}, hostGroup: {}, numNodes: {}", crn, hostGroup, numNodes);
         UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
         updateStackV4Request.setWithClusterEvent(true);
         InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
         instanceGroupAdjustmentJson.setScalingAdjustment(numNodes);
         instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-        LOGGER.info("ZZZ: Constructed UpdateStackV4Request: {}", updateStackV4Request);
+        LOGGER.info("Constructed UpdateStackV4Request: {}", updateStackV4Request);
         stackCommonService.putStartInstancesInDefaultWorkspace(crn, updateStackV4Request, ScalingStrategy.STOPSTART);
         return "tmpStartNodes";
     }
@@ -182,9 +181,8 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public String tmpStopNodes2(@TenantAwareParam @ResourceCrn String crn, String userId, String hostGroup, String nodeIds) {
-        LOGGER.info("ZZZ: tmpStopNodes2: crn:{}, hostGroup: {}, nodeIdsString: {}", crn, hostGroup, nodeIds);
+        LOGGER.info("tmpStopNodes2: crn:{}, hostGroup: {}, nodeIdsString: {}", crn, hostGroup, nodeIds);
         Set<String> instanceIds = new HashSet(Arrays.asList(nodeIds.split(",")));
-        LOGGER.info("ZZZ: Split nodeIds: {}", instanceIds);
 
         stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 new HashSet(instanceIds), false, ScalingStrategy.STOPSTART);
