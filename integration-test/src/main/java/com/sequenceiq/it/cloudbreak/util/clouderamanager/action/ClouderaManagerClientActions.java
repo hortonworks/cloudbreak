@@ -77,39 +77,7 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
     public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(DistroXTestDto testDto, String user, String password) {
         String serverIp = testDto.getResponse().getCluster().getServerIp();
         ApiClient apiClient = getCmApiClientWithTimeoutDisabled(serverIp, testDto.getName(), V_43, user, password);
-        // CHECKSTYLE:OFF
-        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
-        // CHECKSTYLE:ON
-        try {
-            ApiConfigList knoxConfigs = roleConfigGroupsResourceApi.readConfig(testDto.getName(), "yarn-NODEMANAGER-BASE",
-                    "yarn", "full");
-            knoxConfigs.getItems().stream()
-                    .forEach(knoxConfig -> {
-                        String knoxConfigName = knoxConfig.getName();
-                        String mappingsFromKnoxConfig = knoxConfig.getValue();
-                        if ("yarn_nodemanager_local_dirs".equalsIgnoreCase(knoxConfigName)) {
-                            if (!mappingsFromKnoxConfig.startsWith("/hadoopfs/ephfs")) {
-                                LOGGER.error("{} does not contains the expected '/hadoopfs/ephfs...' mapping!", knoxConfigName);
-                                throw new TestFailException(String.format("%s does not contains the expected '/hadoopfs/ephfs...' mapping!", knoxConfigName));
-                            } else {
-                                Log.log(LOGGER, format(" '%s' contains the expected '%s' mapping. ", knoxConfigName, mappingsFromKnoxConfig));
-                            }
-                        }
-                    });
-            if (knoxConfigs.getItems().isEmpty()) {
-                LOGGER.error("Nodemanager mappings are NOT exist!");
-                throw new TestFailException("Nodemanager mappings are NOT exist!");
-            }
-        } catch (ApiException e) {
-            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig. Response: {}", e.getResponseBody(), e);
-            String message = format("Exception when calling RoleConfigGroupsResourceApi#readConfig at %s. Response: %s",
-                    apiClient.getBasePath(), e.getResponseBody());
-            throw new TestFailException(message, e);
-        } catch (Exception e) {
-            LOGGER.error("Can't get role configs at: '{}'!", apiClient.getBasePath());
-            throw new TestFailException("Can't get role configs at: " + apiClient.getBasePath(), e);
-        }
-        return testDto;
+        return checkCmYarnNodemanagerRoleConfigGroups(apiClient, testDto, user, password);
     }
 
     public DistroXTestDto checkCmHdfsNamenodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
@@ -188,6 +156,48 @@ public class ClouderaManagerClientActions extends ClouderaManagerClient {
         } catch (Exception e) {
             LOGGER.error("Can't read config at: '{}'!", apiClient.getBasePath());
             throw new TestFailException("Can't read config at: " + apiClient.getBasePath(), e);
+        }
+        return testDto;
+    }
+
+    public DistroXTestDto checkCmYarnNodemanagerRoleConfigGroupsDirect(DistroXTestDto testDto, String user, String password) {
+        String serverIp = testDto.getResponse().getCluster().getServerIp();
+        ApiClient apiClient = getCmApiClientWithTimeoutDisabledDirect(serverIp, testDto.getName(), V_43, user, password);
+        return checkCmYarnNodemanagerRoleConfigGroups(apiClient, testDto, user, password);
+    }
+
+    private DistroXTestDto checkCmYarnNodemanagerRoleConfigGroups(ApiClient apiClient, DistroXTestDto testDto, String user, String password) {
+        // CHECKSTYLE:OFF
+        RoleConfigGroupsResourceApi roleConfigGroupsResourceApi = new RoleConfigGroupsResourceApi(apiClient);
+        // CHECKSTYLE:ON
+        try {
+            ApiConfigList knoxConfigs = roleConfigGroupsResourceApi.readConfig(testDto.getName(), "yarn-NODEMANAGER-BASE",
+                    "yarn", "full");
+            knoxConfigs.getItems().stream()
+                    .forEach(knoxConfig -> {
+                        String knoxConfigName = knoxConfig.getName();
+                        String mappingsFromKnoxConfig = knoxConfig.getValue();
+                        if ("yarn_nodemanager_local_dirs".equalsIgnoreCase(knoxConfigName)) {
+                            if (!mappingsFromKnoxConfig.startsWith("/hadoopfs/ephfs")) {
+                                LOGGER.error("{} does not contains the expected '/hadoopfs/ephfs...' mapping!", knoxConfigName);
+                                throw new TestFailException(String.format("%s does not contains the expected '/hadoopfs/ephfs...' mapping!", knoxConfigName));
+                            } else {
+                                Log.log(LOGGER, format(" '%s' contains the expected '%s' mapping. ", knoxConfigName, mappingsFromKnoxConfig));
+                            }
+                        }
+                    });
+            if (knoxConfigs.getItems().isEmpty()) {
+                LOGGER.error("Nodemanager mappings are NOT exist!");
+                throw new TestFailException("Nodemanager mappings are NOT exist!");
+            }
+        } catch (ApiException e) {
+            LOGGER.error("Exception when calling RoleConfigGroupsResourceApi#readConfig. Response: {}", e.getResponseBody(), e);
+            String message = format("Exception when calling RoleConfigGroupsResourceApi#readConfig at %s. Response: %s",
+                    apiClient.getBasePath(), e.getResponseBody());
+            throw new TestFailException(message, e);
+        } catch (Exception e) {
+            LOGGER.error("Can't get role configs at: '{}'!", apiClient.getBasePath());
+            throw new TestFailException("Can't get role configs at: " + apiClient.getBasePath(), e);
         }
         return testDto;
     }
