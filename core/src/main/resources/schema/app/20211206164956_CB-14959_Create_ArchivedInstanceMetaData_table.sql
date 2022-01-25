@@ -35,6 +35,32 @@ ALTER TABLE archivedinstancemetadata ADD CONSTRAINT archivedinstancemetadata_pke
 -- //@UNDO
 -- SQL to undo the change goes here.
 
-INSERT INTO instancemetadata SELECT * FROM archivedinstancemetadata;
+INSERT INTO instancemetadata SELECT
+                                 id,
+                                 ambariserver,
+                                 consulserver,
+                                 instanceid,
+                                 instancestatus,
+                                 discoveryfqdn,
+                                 privateip,
+                                 publicip,
+                                 startdate,
+                                 terminationdate,
+                                 instancegroup_id,
+                                 privateid,
+                                 localityindicator,
+                                 sshport,
+                                 instancemetadatatype,
+                                 servercert,
+                                 subnetid,
+                                 instancename,
+                                 image,
+                                 statusreason,
+                                 clustermanagerserver,
+                                 lifecycle,
+                                 availabilityzone,
+                                 rackid,
+                                 variant
+FROM archivedinstancemetadata;
 
 DROP TABLE IF EXISTS archivedinstancemetadata;
