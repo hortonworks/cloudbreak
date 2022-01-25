@@ -26,6 +26,7 @@ import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.AccountId;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
@@ -154,6 +155,9 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
 
     @Inject
     private FreeIpaUpgradeCcmService upgradeCcmService;
+
+    @Inject
+    private EntitlementService entitlementService;
 
     @Override
     @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
@@ -318,6 +322,18 @@ public class FreeIpaV1Controller implements FreeIpaV1Endpoint {
     public OperationStatus createBindUser(@Valid @NotNull BindUserCreateRequest request, @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
         String accountId = crnService.getCurrentAccountId();
         return bindUserCreateService.createBindUser(accountId, request);
+    }
+
+    @Override
+    @CheckPermissionByRequestProperty(path = "environmentCrn", type = CRN, action = EDIT_ENVIRONMENT)
+    public OperationStatus createE2ETestBindUser(@RequestObject @Valid @NotNull BindUserCreateRequest request,
+            @InitiatorUserCrn @NotEmpty String initiatorUserCrn) {
+        String accountId = crnService.getCurrentAccountId();
+        if (entitlementService.isE2ETestOnlyEnabled(accountId)) {
+            return bindUserCreateService.createBindUser(accountId, request);
+        } else {
+            throw new BadRequestException("E2e test only endpoint!");
+        }
     }
 
     @Override
