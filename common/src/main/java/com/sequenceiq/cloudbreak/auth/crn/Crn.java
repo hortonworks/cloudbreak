@@ -53,7 +53,7 @@ public class Crn {
         ALTUS("altus", "ccs"),
 
         CDP("cdp", null),
-        CDP_GOV("cdp-gov", null);
+        CDP_GOV("cdp-us-gov", null);
 
         private static final ImmutableMap<String, Partition> FROM_STRING;
 
