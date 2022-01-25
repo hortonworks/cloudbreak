@@ -69,10 +69,6 @@ public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFact
                             stackView.getId(),
                             hostGroup.getName(),
                             event.getAdjustment(),
-                            // TODO CB-14929: Figure this host. hostnames vs ids. Is an id list required here?
-                            null,
-                            event.isSingleMasterGateway(),
-                            event.isRestartServices(),
                             event.getClusterManagerType())
             );
         }
