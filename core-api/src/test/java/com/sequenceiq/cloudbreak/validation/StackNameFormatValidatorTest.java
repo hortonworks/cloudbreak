@@ -36,5 +36,6 @@ public class StackNameFormatValidatorTest {
         assertFalse(underTest.isValid("stack.stack", context));
         assertFalse(underTest.isValid("stack_stack", context));
         assertFalse(underTest.isValid("stack-", context));
+        assertFalse(underTest.isValid(null, context));
     }
 }
