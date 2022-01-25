@@ -51,7 +51,6 @@ public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFa
                 stackView.getId(),
                 hostGroup.getName(),
                 Sets.newHashSet(event.getPrivateIds()),
-                event.isSinglePrimaryGateway(),
                 event.getClusterManagerType()
         );
 

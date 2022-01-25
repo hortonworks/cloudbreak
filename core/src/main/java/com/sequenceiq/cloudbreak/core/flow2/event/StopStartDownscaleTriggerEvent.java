@@ -12,16 +12,13 @@ public class StopStartDownscaleTriggerEvent extends StackEvent implements HostGr
 
     private final Set<Long> hostIds;
 
-    private final boolean singlePrimaryGateway;
-
     private final ClusterManagerType clusterManagerType;
 
-    public StopStartDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Set<Long> hostIds, boolean singlePrimaryGateway,
+    public StopStartDownscaleTriggerEvent(String selector, Long stackId, String hostGroup, Set<Long> hostIds,
             ClusterManagerType clusterManagerType) {
         super(selector, stackId);
         this.hostGroup = hostGroup;
         this.hostIds = hostIds;
-        this.singlePrimaryGateway = singlePrimaryGateway;
         this.clusterManagerType = ClusterManagerType.CLOUDERA_MANAGER;
     }
 
@@ -34,10 +31,6 @@ public class StopStartDownscaleTriggerEvent extends StackEvent implements HostGr
         return hostIds;
     }
 
-    public boolean isSinglePrimaryGateway() {
-        return singlePrimaryGateway;
-    }
-
     public ClusterManagerType getClusterManagerType() {
         return clusterManagerType;
     }
@@ -47,7 +40,6 @@ public class StopStartDownscaleTriggerEvent extends StackEvent implements HostGr
         return "StopStartDownscaleTriggerEvent{" +
                 "hostGroup='" + hostGroup + '\'' +
                 ", hostIds=" + hostIds +
-                ", singlePrimaryGateway=" + singlePrimaryGateway +
                 ", clusterManagerType=" + clusterManagerType +
                 '}';
     }
