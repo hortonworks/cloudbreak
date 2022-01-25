@@ -79,7 +79,6 @@ public class StopStartDownscaleActions {
             @Override
             protected void prepareExecution(StopStartDownscaleTriggerEvent payload, Map<Object, Object> variables) {
                 variables.put(HOSTGROUPNAME, payload.getHostGroupName());
-                variables.put(SINGLE_PRIMARY_GATEWAY, payload.isSinglePrimaryGateway());
                 variables.put(CLUSTER_MANAGER_TYPE, payload.getClusterManagerType());
                 variables.put(HOSTS_TO_REMOVE, payload.getHostIds());
             }
@@ -216,8 +215,6 @@ public class StopStartDownscaleActions {
 
         static final String HOSTS_TO_REMOVE = "HOSTS_TO_REMOVE";
 
-        static final String SINGLE_PRIMARY_GATEWAY = "SINGLE_PRIMARY_GATEWAY";
-
         static final String CLUSTER_MANAGER_TYPE = "CLUSTER_MANAGER_TYPE";
 
         @Inject
@@ -269,7 +266,7 @@ public class StopStartDownscaleActions {
             return new StopStartDownscaleContext(flowParameters, stack, stackService.getViewByIdWithoutAuth(stack.getId()),
                     cloudContext, cloudCredential, cloudStack,
                     getHostgroupName(variables), getHostsToRemove(variables),
-                    isSinglePrimaryGateway(variables), getClusterManagerType(variables));
+                    getClusterManagerType(variables));
         }
 
         private String getHostgroupName(Map<Object, Object> variables) {
@@ -278,10 +275,6 @@ public class StopStartDownscaleActions {
 
         Set<Long> getHostsToRemove(Map<Object, Object> variables) {
             return (Set<Long>) variables.get(HOSTS_TO_REMOVE);
-        }
-
-        private Boolean isSinglePrimaryGateway(Map<Object, Object> variables) {
-            return (Boolean) variables.get(SINGLE_PRIMARY_GATEWAY);
         }
 
         ClusterManagerType getClusterManagerType(Map<Object, Object> variables) {

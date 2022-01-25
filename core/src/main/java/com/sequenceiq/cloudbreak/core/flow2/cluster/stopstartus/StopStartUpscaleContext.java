@@ -15,19 +15,15 @@ public class StopStartUpscaleContext extends StackContext {
 
     private final Integer adjustment;
 
-    private final Boolean singlePrimaryGateway;
-
     private final ClusterManagerType clusterManagerType;
 
     private final StackView stackView;
 
     public StopStartUpscaleContext(FlowParameters flowParameters, Stack stack, StackView stackView, CloudContext cloudContext, CloudCredential cloudCredentials,
-            CloudStack cloudStack, String hostGroupName, Integer adjustment, Boolean singlePrimaryGateway,
-            ClusterManagerType clusterManagerType) {
+            CloudStack cloudStack, String hostGroupName, Integer adjustment, ClusterManagerType clusterManagerType) {
         super(flowParameters, stack, cloudContext, cloudCredentials, cloudStack);
         this.hostGroupName = hostGroupName;
         this.adjustment = adjustment;
-        this.singlePrimaryGateway = singlePrimaryGateway;
         this.clusterManagerType = clusterManagerType;
         this.stackView = stackView;
     }
@@ -38,10 +34,6 @@ public class StopStartUpscaleContext extends StackContext {
 
     public Integer getAdjustment() {
         return adjustment;
-    }
-
-    public Boolean isSinglePrimaryGateway() {
-        return singlePrimaryGateway;
     }
 
     public ClusterManagerType getClusterManagerType() {
