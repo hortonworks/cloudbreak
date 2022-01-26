@@ -49,11 +49,14 @@ public class CleanupUtil extends CleanupClientUtil {
     @Value("${integrationtest.outputdir:.}")
     private String outputDirectory;
 
+    @Value("${integrationtest.cleanup.afterAbort:false}")
+    private boolean cleanupAfterAbort;
+
     @Inject
     private CleanupWaitUtil waitUtil;
 
     public void cleanupAllResources() {
-        if (resourceFilesArePresent()) {
+        if (resourceFilesArePresent() && !cleanupAfterAbort) {
             cleanupDistroxes();
             cleanupSdxes();
             cleanupEnvironments();
