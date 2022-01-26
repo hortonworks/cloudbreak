@@ -13,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -85,4 +86,9 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(e.id, e.resourceCrn) FROM Environment e " +
             "WHERE e.accountId = :accountId AND e.archived = false")
     List<ResourceWithId> findAsAuthorizationResourcesInAccount(@Param("accountId") String accountId);
+
+    @Query("SELECT new com.sequenceiq.cloudbreak.common.event.PayloadContext(e.resourceCrn, e.cloudPlatform) " +
+            "FROM Environment e " +
+            "WHERE e.id = :id")
+    Optional<PayloadContext> findStackAsPayloadContext(@Param("id") Long id);
 }

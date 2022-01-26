@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
@@ -362,4 +363,9 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     int setCcmV2AgentCrnByStackId(@Param("id") Long id, @Param("ccmV2AgentCrn") String ccmV2AgentCrn);
 
     StackPlatformVariantView findPlatformVariantAndCloudPlatformById(Long id);
+
+    @Query("SELECT new com.sequenceiq.cloudbreak.common.event.PayloadContext(s.resourceCrn, s.cloudPlatform) " +
+            "FROM Stack s " +
+            "WHERE s.id = :id")
+    Optional<PayloadContext> findStackAsPayloadContext(@Param("id") Long id);
 }

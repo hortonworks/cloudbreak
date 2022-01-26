@@ -352,12 +352,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     @Override
     public PayloadContext getPayloadContext(Long resourceId) {
-        Optional<EnvironmentDto> environmentDtoOpt = findById(resourceId);
-        if (environmentDtoOpt.isPresent()) {
-            EnvironmentDto environmentDto = environmentDtoOpt.get();
-            return PayloadContext.create(environmentDto.getResourceCrn(), environmentDto.getCloudPlatform());
-        }
-        return null;
+        return environmentRepository.findStackAsPayloadContext(resourceId).orElse(null);
     }
 
     @Override
