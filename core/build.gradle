@@ -125,7 +125,7 @@ dependencyManagement {
       entry 'reactor-bus'
     }
 
-    dependencySet(group: 'io.springfox', version: '2.9.2') {
+    dependencySet(group: 'io.springfox', version: swagger2Version) {
       entry 'springfox-swagger2'
       entry 'springfox-core'
       entry 'springfox-swagger-ui'
