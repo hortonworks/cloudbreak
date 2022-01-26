@@ -42,6 +42,7 @@ auth:
       backup.on.upgrade.enable: false
       backup.on.resize.enable: true
       light.to.medium.migration.enable: true
+      recovery.resize.enable: true
       multiaz.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true

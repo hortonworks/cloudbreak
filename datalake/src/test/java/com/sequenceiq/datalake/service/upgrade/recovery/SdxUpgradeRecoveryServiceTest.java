@@ -14,19 +14,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
-import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.sdx.api.model.SdxRecoverableResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryRequest;
 import com.sequenceiq.sdx.api.model.SdxRecoveryResponse;
 import com.sequenceiq.sdx.api.model.SdxRecoveryType;
@@ -39,9 +37,6 @@ public class SdxUpgradeRecoveryServiceTest {
     private static final String CLUSTER_NAME = "dummyCluster";
 
     private static final long WORKSPACE_ID = 0L;
-
-    @Mock
-    private SdxService sdxService;
 
     @Mock
     private SdxCluster cluster;
@@ -65,7 +60,6 @@ public class SdxUpgradeRecoveryServiceTest {
         request = new SdxRecoveryRequest();
         request.setType(SdxRecoveryType.RECOVER_WITHOUT_DATA);
         when(cluster.getClusterName()).thenReturn(CLUSTER_NAME);
-        when(sdxService.getByNameOrCrn(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME))).thenReturn(cluster);
     }
 
     @Test
@@ -76,20 +70,20 @@ public class SdxUpgradeRecoveryServiceTest {
         when(exceptionMessageExtractor.getErrorMessage(webApplicationException)).thenReturn("web-error");
 
         CloudbreakApiException actual = assertThrows(CloudbreakApiException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME), request)));
+                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster)));
         assertEquals("Stack recovery validation failed on cluster: [dummyCluster]. Message: [web-error]", actual.getMessage());
     }
 
     @Test
-    public void testNonRecoverableStatusShouldThrowBadRequestException() {
+    public void testNonRecoverableStatusShouldReturnNonRecoverable() {
         String errorMessage = "error message";
         RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(errorMessage, RecoveryStatus.NON_RECOVERABLE);
 
         when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
 
-        BadRequestException exception = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.triggerRecovery(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME), request)));
-        assertEquals(errorMessage, exception.getMessage());
+        SdxRecoverableResponse sdxRecoverableResponse =
+                ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster));
+        assertEquals(errorMessage, sdxRecoverableResponse.getReason());
     }
 
     @Test
@@ -101,8 +95,12 @@ public class SdxUpgradeRecoveryServiceTest {
         when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, SdxRecoveryType.RECOVER_WITHOUT_DATA))
                 .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
 
+        SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.validateRecovery(cluster));
+        assertEquals(reason, sdxRecoverableResponse.getReason());
+
         SdxRecoveryResponse response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
-                () -> underTest.triggerRecovery(USER_CRN, NameOrCrn.ofName(CLUSTER_NAME), request));
+                () -> underTest.triggerRecovery(cluster, request));
         assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"), response.getFlowIdentifier());
     }
 }
