@@ -16,7 +16,7 @@ import com.sequenceiq.cloudbreak.client.HttpClientConfig;
 import com.sequenceiq.cloudbreak.client.SaltClientConfig;
 import com.sequenceiq.cloudbreak.clusterproxy.ClusterProxyConfiguration;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.util.PasswordUtil;
+import com.sequenceiq.cloudbreak.util.password.DefaultPasswordGenerator;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.SaltSecurityConfig;
@@ -43,6 +43,9 @@ public class TlsSecurityService {
 
     @Inject
     private StackService stackService;
+
+    @Inject
+    private DefaultPasswordGenerator passwordGenerator;
 
     public SecurityConfig generateSecurityKeys(String accountId) {
         SecurityConfig securityConfig = new SecurityConfig();
@@ -94,13 +97,13 @@ public class TlsSecurityService {
     }
 
     private void generateSaltBootPassword(SaltSecurityConfig saltSecurityConfig) {
-        String saltBootPassword = PasswordUtil.generatePassword();
+        String saltBootPassword = passwordGenerator.generate();
         saltSecurityConfig.setSaltBootPassword(saltBootPassword);
         saltSecurityConfig.setSaltBootPasswordVault(saltBootPassword);
     }
 
     private void generateSaltPassword(SaltSecurityConfig saltSecurityConfig) {
-        String saltPassword = PasswordUtil.generatePassword();
+        String saltPassword = passwordGenerator.generate();
         saltSecurityConfig.setSaltPassword(saltPassword);
         saltSecurityConfig.setSaltPasswordVault(saltPassword);
     }
