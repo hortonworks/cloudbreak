@@ -1,5 +1,8 @@
 package com.sequenceiq.cloudbreak.polling;
 
+import java.util.Collections;
+import java.util.Set;
+
 public interface StatusCheckerTask<T> {
 
     boolean checkStatus(T t);
@@ -11,6 +14,10 @@ public interface StatusCheckerTask<T> {
     boolean exitPolling(T t);
 
     void handleException(Exception e);
+
+    default Set<Long> getFailedInstanceIds() {
+        return Collections.emptySet();
+    }
 
     default boolean initialExitCheck(T t) {
         return true;

@@ -72,7 +72,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
                 List<GatewayConfig> allGatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                 PollingResult orchestratorRemovalPollingResult =
                         removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames), hostOrchestrator, allGatewayConfigs);
-                if (!PollingResult.isSuccess(orchestratorRemovalPollingResult)) {
+                if (!orchestratorRemovalPollingResult.isSuccess()) {
                     LOGGER.warn("Can not remove hosts from orchestrator: {}", hostNames);
                 }
             } else {

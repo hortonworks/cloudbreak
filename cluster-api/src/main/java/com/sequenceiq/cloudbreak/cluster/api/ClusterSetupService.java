@@ -9,6 +9,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
@@ -50,7 +51,7 @@ public interface ClusterSetupService {
 
     void configureKerberos(KerberosConfig kerberosConfig) throws CloudbreakException;
 
-    void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
+    ExtendedPollingResult waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 
     void waitForHostsHealthy(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 

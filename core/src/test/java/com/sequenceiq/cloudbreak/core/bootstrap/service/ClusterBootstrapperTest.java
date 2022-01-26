@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -129,6 +131,8 @@ public class ClusterBootstrapperTest {
         GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 
@@ -165,6 +169,8 @@ public class ClusterBootstrapperTest {
         GatewayConfig gatewayConfig = new GatewayConfig("host1", "1.1.1.1", "1.1.1.1", 22, "i-1839", false);
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(gatewayConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 
@@ -202,6 +208,8 @@ public class ClusterBootstrapperTest {
         GatewayConfig aliveConfig = new GatewayConfig("host2", "1.1.1.2", "1.1.1.2", 22, "i-1839", false);
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(deadConfig, aliveConfig));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1"));
 
@@ -247,6 +255,8 @@ public class ClusterBootstrapperTest {
         GatewayConfig deadConfig2 = new GatewayConfig("host2", "1.1.1.2", "1.1.1.2", 22, "i-1839", false);
         when(gatewayConfigService.getAllGatewayConfigs(any())).thenReturn(List.of(deadConfig1, deadConfig2));
         when(componentConfigProviderService.getImage(anyLong())).thenReturn(image);
+        when(hostClusterAvailabilityPollingService.pollWithAbsoluteTimeout(any(), any(), anyInt(), anyLong()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.bootstrapNewNodes(1L, Set.of("1.1.1.1", "1.1.1.2"));
 

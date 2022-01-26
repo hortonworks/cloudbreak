@@ -20,6 +20,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceR
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -67,15 +68,21 @@ public class ClusterManagerUpscaleService {
         clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
 
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
+        ExtendedPollingResult result;
         if (!primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
             Set<Node> reachableCandidates = hostRunner.getReachableCandidates(stack, hosts);
             List<String> reachableCandidatesHostname = reachableCandidates.stream().map(Node::getHostname).collect(Collectors.toList());
             Set<InstanceMetaData> reachableInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
                     .filter(md -> reachableCandidatesHostname.contains(md.getDiscoveryFQDN()))
                     .collect(Collectors.toSet());
-            connector.waitForHosts(reachableInstances);
+            result = connector.waitForHosts(reachableInstances);
         } else {
-            connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
+            result = connector.waitForHosts(stackService.getByIdWithListsInTransaction(stackId).getRunningInstanceMetaDataSet());
+        }
+        if (result != null && result.isTimeout()) {
+            LOGGER.info("Upscaling cluster manager were not successful for nodes: {}", result.getFailedInstanceIds());
+            //instanceMetaDataService.updateInstanceStatus(result.getFailedInstanceIds(), InstanceStatus.ZOMBIE,
+            //        "Upscaling cluster manager were not successful.";
         }
     }
 }

@@ -154,6 +154,12 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     int updateStatusIfNotTerminated(@Param("id") Long id, @Param("newInstanceStatus") InstanceStatus newInstanceStatus,
             @Param("newStatusReason") String newStatusReason);
 
+    @Modifying
+    @Query("UPDATE InstanceMetaData SET instanceStatus = :newInstanceStatus, statusReason = :newStatusReason " +
+            "WHERE id IN (:ids) AND instanceStatus <> 'TERMINATED'")
+    int updateStatusIfNotTerminated(@Param("ids") Set<Long> ids, @Param("newInstanceStatus") InstanceStatus newInstanceStatus,
+            @Param("newStatusReason") String newStatusReason);
+
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceStatus = 'TERMINATED' AND i.instanceGroup.stack.id= :stackId " +
             "AND i.terminationDate < :thresholdTerminationDate ORDER BY i.terminationDate ASC")
     Page<InstanceMetaData> findTerminatedInstanceMetadataByStackIdAndTerminatedBefore(@Param("stackId") Long stackId,

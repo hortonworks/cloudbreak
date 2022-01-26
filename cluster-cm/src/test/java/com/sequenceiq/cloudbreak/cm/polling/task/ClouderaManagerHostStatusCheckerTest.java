@@ -50,7 +50,7 @@ public class ClouderaManagerHostStatusCheckerTest {
 
     @Before
     public void init() {
-        underTest = new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService);
+        underTest = new ClouderaManagerHostStatusChecker(clouderaManagerApiPojoFactory, clusterEventService, false);
         when(clouderaManagerApiPojoFactory.getHostsResourceApi(any(ApiClient.class))).thenReturn(hostsResourceApi);
     }
 

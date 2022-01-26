@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
-
 import java.math.BigDecimal;
 
 import javax.annotation.PostConstruct;
@@ -32,7 +29,7 @@ import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.CmDiagnosticsParameters;
@@ -84,10 +81,11 @@ public class ClouderaManagerDiagnosticsService implements ClusterDiagnosticsServ
             Boolean globalPhoneHomeConfig = getPhoneHomeConfig(configList);
             preUpdatePhoneHomeConfig(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
             ApiCommand collectDiagnostics = resourceApi.collectDiagnosticDataCommand(convertToCollectDiagnosticDataArguments(parameters));
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCollectDiagnostics(stack, client, collectDiagnostics.getId());
-            if (isExited(pollingResult)) {
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
+                    .startPollingCollectDiagnostics(stack, client, collectDiagnostics.getId());
+            if (pollingResult.isExited()) {
                 throw new CancellationException("Cluster was terminated while waiting for command API to be available for diagnostics collections");
-            } else if (isTimeout(pollingResult)) {
+            } else if (pollingResult.isTimeout()) {
                 throw new CloudbreakException("Timeout during waiting for command API to be available (diagnostics collections).");
             }
             postUpdatePhoneHomeConfig(parameters.getDestination(), resourceApi, globalPhoneHomeConfig);
