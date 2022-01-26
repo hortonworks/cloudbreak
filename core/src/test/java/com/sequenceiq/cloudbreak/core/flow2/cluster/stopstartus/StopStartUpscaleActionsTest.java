@@ -33,6 +33,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.statemachine.action.Action;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
@@ -325,7 +326,7 @@ public class StopStartUpscaleActionsTest {
                 = (AbstractStopStartUpscaleActions<StopStartUpscaleCommissionViaCMResult>) underTest.upscaleFinishedAction();
         initActionPrivateFields(action);
 
-        int adjustment = 5;
+        int adjustment = 10;
 
         StopStartUpscaleContext stopStartUpscaleContext = createContext(adjustment);
 
@@ -352,7 +353,8 @@ public class StopStartUpscaleActionsTest {
 
         new AbstractActionTestSupport<>(action).doExecute(stopStartUpscaleContext, payload, Collections.emptyMap());
 
-        verify(stopStartUpscaleFlowService).clusterUpscaleFinished(any(), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(startedInstances));
+        verify(stopStartUpscaleFlowService).clusterUpscaleFinished(
+                any(), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(startedInstances), eq(DetailedStackStatus.AVAILABLE));
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
         verify(eventBus).notify("STOPSTART_UPSCALE_FINALIZED_EVENT", event);
@@ -395,7 +397,8 @@ public class StopStartUpscaleActionsTest {
         new AbstractActionTestSupport<>(action).doExecute(stopStartUpscaleContext, payload, Collections.emptyMap());
 
         verify(stopStartUpscaleFlowService).logInstancesFailedToCommission(eq(STACK_ID), eq(notCommissionedFqdns));
-        verify(stopStartUpscaleFlowService).clusterUpscaleFinished(any(), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(startedInstances));
+        verify(stopStartUpscaleFlowService).clusterUpscaleFinished(
+                any(), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(startedInstances), eq(DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES));
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
         verify(eventBus).notify("STOPSTART_UPSCALE_FINALIZED_EVENT", event);
