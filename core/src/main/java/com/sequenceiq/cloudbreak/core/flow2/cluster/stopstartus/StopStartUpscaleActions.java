@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus;
 
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
@@ -24,6 +25,7 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
@@ -95,7 +97,7 @@ public class StopStartUpscaleActions {
                         x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
 
                 List<InstanceMetaData> stoppedInstancesInHg = instanceMetaDataForHg.stream()
-                        .filter(s -> s.getInstanceStatus() == com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED)
+                        .filter(s -> s.getInstanceStatus() == STOPPED)
                         .collect(Collectors.toList());
 
                 LOGGER.info("NotDeletedInstanceMetadata totalCount={}. count for hostGroup: {}={}, stoppedInstancesInHgCount={}",
@@ -193,12 +195,27 @@ public class StopStartUpscaleActions {
 
                 logInstancesNotCommissioned(context, payload.getNotRecommissionedFqdns());
 
-                List<InstanceMetaData> instancesCommissioned = context.getStack().getNotDeletedInstanceMetaDataList().stream()
+                List<InstanceMetaData> notDeletedInstanceMetaDataList = context.getStack().getNotDeletedInstanceMetaDataList();
+                List<InstanceMetaData> instancesCommissioned = notDeletedInstanceMetaDataList.stream()
                         .filter(i -> payload.getSuccessfullyCommissionedFqdns().contains(i.getDiscoveryFQDN()))
                         .collect(Collectors.toList());
 
+                // Is there any stopped instance in the actionable group
+                Optional<InstanceMetaData> instanceInStoppedState = notDeletedInstanceMetaDataList.stream()
+                        .filter(i -> context.getHostGroupName().equals(i.getInstanceGroupName()))
+                        .filter(i -> !payload.getSuccessfullyCommissionedFqdns().contains(i.getDiscoveryFQDN()))
+                        .filter(i -> i.getInstanceStatus().equals(STOPPED))
+                        .findFirst();
+
+                DetailedStackStatus finalStackStatus;
+                if (instanceInStoppedState.isEmpty()) {
+                    finalStackStatus = DetailedStackStatus.AVAILABLE;
+                } else {
+                    finalStackStatus = DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES;
+                }
+
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStackView(), context.getHostGroupName(),
-                        instancesCommissioned);
+                        instancesCommissioned, finalStackStatus);
 
                 sendEvent(context, STOPSTART_UPSCALE_FINALIZED_EVENT.event(), payload);
             }
