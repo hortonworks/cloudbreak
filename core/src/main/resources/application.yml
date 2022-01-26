@@ -854,14 +854,14 @@ existingstackpatcher:
   intervalhours: 24
   maxInitialStartDelayInHours: 2
   enabled: true
-  activePatches:
-    meteringAzureMetadata:
-      dateBefore: 2022-01-18
-      customRpmUrl: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
-    loggingAgentAutoRestart:
-      affectedVersionFrom: 0.2.13
-      dateAfter: 2019-11-24
-      dateBefore: 2022-01-18
+  active-patches:
+    metering-azure-metadata:
+      date-before: 2022-01-18
+      custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
+    logging-agent-auto-restart:
+      affected-version-from: 0.2.13
+      date-after: 2019-11-24
+      date-before: 2022-01-18
 
 clusterdns:
   host: localhost

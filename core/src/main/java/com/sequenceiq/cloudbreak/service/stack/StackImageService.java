@@ -11,6 +11,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -39,6 +42,9 @@ public class StackImageService {
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
+
+    @Inject
+    private InternalCrnModifier internalCrnModifier;
 
     public void storeNewImageComponent(Stack stack, StatedImage targetImage) {
         try {
@@ -113,5 +119,33 @@ public class StackImageService {
         Component targetImageComponent = componentConfigProviderService.getComponent(stackId, ComponentType.IMAGE, componentName);
         LOGGER.debug("The following target image found for stack {}, {}", stackId, targetImageComponent);
         return Optional.ofNullable(targetImageComponent);
+    }
+
+    public Optional<StatedImage> getStatedImageInternal(Stack stack, com.sequenceiq.cloudbreak.cloud.model.Image image, ImageCatalog imageCatalog) {
+        return ThreadBasedUserCrnProvider.doAs(getInternalUserCrn(stack),
+                () -> {
+                    try {
+                        return Optional.ofNullable(imageCatalogService.getImageByCatalogName(
+                                stack.getWorkspace().getId(), image.getImageId(), imageCatalog.getName()));
+                    } catch (Exception e) {
+                        LOGGER.warn("Error during obtaining image catalog", e);
+                        return Optional.empty();
+                    }
+                });
+    }
+
+    public Optional<StatedImage> getStatedImageInternal(Stack stack) throws CloudbreakImageNotFoundException {
+        com.sequenceiq.cloudbreak.cloud.model.Image image = getCurrentImage(stack);
+        ImageCatalog imageCatalog = getImageCatalogFromStackAndImage(stack, image);
+        return getStatedImageInternal(stack, image, imageCatalog);
+    }
+
+    public ImageCatalog getImageCatalogFromStackAndImage(Stack stack, com.sequenceiq.cloudbreak.cloud.model.Image image) {
+        return ThreadBasedUserCrnProvider.doAs(getInternalUserCrn(stack),
+                () -> imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), image.getImageCatalogName()));
+    }
+
+    private String getInternalUserCrn(Stack stack) {
+        return internalCrnModifier.getInternalCrnWithAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId());
     }
 }

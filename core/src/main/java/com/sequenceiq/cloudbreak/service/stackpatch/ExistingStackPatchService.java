@@ -9,19 +9,10 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
-import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatch;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.repository.StackPatchRepository;
-import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
-import com.sequenceiq.cloudbreak.service.stack.StackImageService;
 import com.sequenceiq.flow.core.FlowLogService;
 import com.sequenceiq.flow.domain.FlowLog;
 import com.sequenceiq.flow.service.FlowRetryService;
@@ -38,15 +29,6 @@ public abstract class ExistingStackPatchService {
 
     @Inject
     private FlowRetryService flowRetryService;
-
-    @Inject
-    private StackImageService stackImageService;
-
-    @Inject
-    private ImageCatalogService imageCatalogService;
-
-    @Inject
-    private InternalCrnModifier internalCrnModifier;
 
     public boolean isStackAlreadyFixed(Stack stack) {
         return stackPatchRepository.findByStackAndType(stack, getStackFixType()).isPresent();
@@ -89,34 +71,6 @@ public abstract class ExistingStackPatchService {
         return Optional.ofNullable(stack.getPrimaryGatewayInstance())
                 .orElseThrow(() -> new ExistingStackPatchApplyException("Could not find Primary gateway for stack: " + stack.getResourceCrn()))
                 .isReachable();
-    }
-
-    protected StatedImage getStatedImage(Stack stack, Image image, ImageCatalog imageCatalog) {
-        return ThreadBasedUserCrnProvider.doAs(
-                internalCrnModifier.getInternalCrnWithAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId()),
-                () -> {
-                    try {
-                        return imageCatalogService.getImageByCatalogName(stack.getWorkspace().getId(), image.getImageId(), imageCatalog.getName());
-                    } catch (Exception e) {
-                        return null;
-                    }
-                });
-    }
-
-    protected StatedImage getStatedImageForStack(Stack stack) throws CloudbreakImageNotFoundException {
-        Image image = getImageByStack(stack);
-        ImageCatalog imageCatalog = getImageCatalogFromStackAndImage(stack, image);
-        return getStatedImage(stack, image, imageCatalog);
-    }
-
-    protected ImageCatalog getImageCatalogFromStackAndImage(Stack stack, Image image) {
-        return ThreadBasedUserCrnProvider.doAs(
-                internalCrnModifier.getInternalCrnWithAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId()),
-                () -> imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), image.getImageCatalogName()));
-    }
-
-    protected Image getImageByStack(Stack stack) throws CloudbreakImageNotFoundException {
-        return stackImageService.getCurrentImage(stack);
     }
 
     /**

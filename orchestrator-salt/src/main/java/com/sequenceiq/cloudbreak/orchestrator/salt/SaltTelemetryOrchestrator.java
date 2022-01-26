@@ -27,7 +27,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -55,6 +54,7 @@ import com.sequenceiq.cloudbreak.orchestrator.salt.states.SaltStates;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.service.Retry;
+import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltRetryConfig;
 
 @Component
 public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
@@ -115,39 +115,20 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final String METERING_COMPONENT = "metering";
 
-    private final ExitCriteria exitCriteria;
+    @Inject
+    private ExitCriteria exitCriteria;
 
-    private final SaltService saltService;
+    @Inject
+    private SaltService saltService;
 
-    private final SaltRunner saltRunner;
-
-    private final int maxTelemetryStopRetry;
-
-    private final int maxNodeStatusCollectRetry;
-
-    private final int maxDiagnosticsCollectionRetry;
-
-    private final int maxMeterigUpgradeRetry;
-
-    @Value("${cb.max.salt.cloudstorage.validation.retry:3}")
-    private int maxCloudStorageValidationRetry;
+    @Inject
+    private SaltRunner saltRunner;
 
     @Inject
     private Retry retry;
 
-    public SaltTelemetryOrchestrator(ExitCriteria exitCriteria, SaltService saltService, SaltRunner saltRunner,
-            @Value("${cb.max.salt.new.service.telemetry.stop.retry:5}") int maxTelemetryStopRetry,
-            @Value("${cb.max.salt.new.service.telemetry.nodestatus.collect.retry:3}") int maxNodeStatusCollectRetry,
-            @Value("${cb.max.salt.new.service.diagnostics.collection.retry:360}") int maxDiagnosticsCollectionRetry,
-            @Value("${cb.max.salt.metering.upgrade.retry:5}") int maxMeterigUpgradeRetry) {
-        this.exitCriteria = exitCriteria;
-        this.saltService = saltService;
-        this.saltRunner = saltRunner;
-        this.maxTelemetryStopRetry = maxTelemetryStopRetry;
-        this.maxNodeStatusCollectRetry = maxNodeStatusCollectRetry;
-        this.maxDiagnosticsCollectionRetry = maxDiagnosticsCollectionRetry;
-        this.maxMeterigUpgradeRetry = maxMeterigUpgradeRetry;
-    }
+    @Inject
+    private TelemetrySaltRetryConfig telemetrySaltRetryConfig;
 
     @Override
     public void validateCloudStorage(List<GatewayConfig> allGateways, Set<Node> allNodes, Set<String> targetHostNames,
@@ -174,7 +155,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     private void runValidation(SaltConnector sc, BaseSaltJobRunner baseSaltJobRunner, ExitCriteriaModel exitCriteriaModel) throws Exception {
         OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, baseSaltJobRunner, true);
         Callable<Boolean> saltJobRunBootstrapRunner =
-                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, maxCloudStorageValidationRetry, false);
+                saltRunner.runner(saltJobIdTracker, exitCriteria, exitCriteriaModel, telemetrySaltRetryConfig.getCloudStorageValidation(), false);
         saltJobRunBootstrapRunner.call();
     }
 
@@ -198,14 +179,14 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     public void stopTelemetryAgent(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, Collections.emptyMap(), exitModel, FLUENT_AGENT_STOP,
-                "Error occurred during telemetry agent stop.", maxTelemetryStopRetry, true);
+                "Error occurred during telemetry agent stop.", telemetrySaltRetryConfig.getLoggingAgentStop(), true);
     }
 
     @Override
     public void initDiagnosticCollection(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, parameters, exitModel, FILECOLLECTOR_INIT,
-                "Error occurred during diagnostics filecollector init.", maxDiagnosticsCollectionRetry, false);
+                "Error occurred during diagnostics filecollector init.", telemetrySaltRetryConfig.getDiagnosticsCollect(), false);
     }
 
     @Override
@@ -256,28 +237,28 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     public void executeDiagnosticCollection(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, parameters, exitModel, FILECOLLECTOR_COLLECT,
-                "Error occurred during diagnostics filecollector collect.", maxDiagnosticsCollectionRetry, false);
+                "Error occurred during diagnostics filecollector collect.", telemetrySaltRetryConfig.getDiagnosticsCollect(), false);
     }
 
     @Override
     public void uploadCollectedDiagnostics(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, parameters, exitModel, FILECOLLECTOR_UPLOAD,
-                "Error occurred during diagnostics filecollector upload.", maxDiagnosticsCollectionRetry, false);
+                "Error occurred during diagnostics filecollector upload.", telemetrySaltRetryConfig.getDiagnosticsCollect(), false);
     }
 
     @Override
     public void cleanupCollectedDiagnostics(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         runSaltState(allGateways, nodes, parameters, exitModel, FILECOLLECTOR_CLEANUP,
-                "Error occurred during diagnostics filecollector cleanup.", maxDiagnosticsCollectionRetry, false);
+                "Error occurred during diagnostics filecollector cleanup.", telemetrySaltRetryConfig.getDiagnosticsCollect(), false);
     }
 
     @Override
     public void executeNodeStatusCollection(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         runSimpleSaltState(allGateways, nodes, exitModel, NODESTATUS_COLLECT, "Error occurred during nodestatus telemetry collect.",
-                maxNodeStatusCollectRetry, false);
+                telemetrySaltRetryConfig.getNodeStatusCollect(), false);
     }
 
     @Override
@@ -342,7 +323,7 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
                     METERING_UPGRADE, upgradeParameters);
             OrchestratorBootstrap saltJobIdTracker = new SaltJobIdTracker(sc, stateRunner, false);
             Callable<Boolean> saltJobRunBootstrapRunner =
-                    saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, maxMeterigUpgradeRetry, false);
+                    saltRunner.runner(saltJobIdTracker, exitCriteria, exitModel, telemetrySaltRetryConfig.getMeteringUpgrade(), false);
             saltJobRunBootstrapRunner.call();
         } catch (Exception e) {
             LOGGER.info("Error occurred during metering upgrade.", e);

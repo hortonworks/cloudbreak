@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -15,6 +13,7 @@ import static org.mockito.Mockito.verify;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -28,12 +27,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
-import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
-import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
-import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -47,6 +44,7 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackImageService;
+import com.sequenceiq.cloudbreak.service.stackpatch.config.MeteringAzureMetadataPatchConfig;
 import com.sequenceiq.cloudbreak.util.CompressUtil;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.common.api.type.InstanceGroupType;
@@ -87,31 +85,27 @@ public class MeteringAzureMetadataPatchServiceTest {
     private ImageCatalogService imageCatalogService;
 
     @Mock
-    private InternalCrnModifier internalCrnModifier;
+    private MeteringAzureMetadataPatchConfig meteringAzureMetadataPatchConfig;
 
     @BeforeEach
     public void setUp() {
-        underTest = new MeteringAzureMetadataPatchService(DATE_SAMPLE, CUSTOM_RPM_URL_SAMPLE);
+        underTest = new MeteringAzureMetadataPatchService();
         MockitoAnnotations.openMocks(this);
     }
 
     @Test
     public void testIsAffected() throws Exception {
         // GIVEN
-        Image imageMock = mock(Image.class);
-        ImageCatalog imageCatalogMock = mock(ImageCatalog.class);
+        Stack stack = createStack();
         StatedImage statedImageMock = mock(StatedImage.class);
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageFromStated = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        given(internalCrnModifier.getInternalCrnWithAccountId(anyString())).willReturn("accountId");
-        given(stackImageService.getCurrentImage(any())).willReturn(imageMock);
-        given(imageMock.getImageCatalogName()).willReturn("myCatalog");
-        given(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).willReturn(imageCatalogMock);
-        given(imageCatalogService.getImageByCatalogName(anyLong(), isNull(), isNull())).willReturn(statedImageMock);
+        Image imageFromStated = mock(Image.class);
+        given(stackImageService.getStatedImageInternal(stack)).willReturn(Optional.of(statedImageMock));
         given(statedImageMock.getImage()).willReturn(imageFromStated);
+        given(meteringAzureMetadataPatchConfig.getDateBefore()).willReturn(DATE_SAMPLE);
         long sampleTimestamp = underTest.dateStringToTimestampForImage("2021-12-24");
         given(imageFromStated.getCreated()).willReturn(sampleTimestamp);
         // WHEN
-        boolean result = underTest.isAffected(createStack());
+        boolean result = underTest.isAffected(stack);
         // THEN
         assertTrue(result);
     }
@@ -119,20 +113,16 @@ public class MeteringAzureMetadataPatchServiceTest {
     @Test
     public void testIsNotAffectedByDate() throws Exception {
         // GIVEN
-        Image imageMock = mock(Image.class);
-        ImageCatalog imageCatalogMock = mock(ImageCatalog.class);
+        Stack stack = createStack();
         StatedImage statedImageMock = mock(StatedImage.class);
-        com.sequenceiq.cloudbreak.cloud.model.catalog.Image imageFromStated = mock(com.sequenceiq.cloudbreak.cloud.model.catalog.Image.class);
-        given(internalCrnModifier.getInternalCrnWithAccountId(anyString())).willReturn("accountId");
-        given(stackImageService.getCurrentImage(any())).willReturn(imageMock);
-        given(imageMock.getImageCatalogName()).willReturn("myCatalog");
-        given(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).willReturn(imageCatalogMock);
-        given(imageCatalogService.getImageByCatalogName(anyLong(), isNull(), isNull())).willReturn(statedImageMock);
+        Image imageFromStated = mock(Image.class);
+        given(stackImageService.getStatedImageInternal(stack)).willReturn(Optional.of(statedImageMock));
         given(statedImageMock.getImage()).willReturn(imageFromStated);
+        given(meteringAzureMetadataPatchConfig.getDateBefore()).willReturn(DATE_SAMPLE);
         long sampleTimestamp = underTest.dateStringToTimestampForImage("2022-02-02");
         given(imageFromStated.getCreated()).willReturn(sampleTimestamp);
         // WHEN
-        boolean result = underTest.isAffected(createStack());
+        boolean result = underTest.isAffected(stack);
         // THEN
         assertFalse(result);
     }
@@ -163,6 +153,7 @@ public class MeteringAzureMetadataPatchServiceTest {
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
         given(compressUtil.updateCompressedOutputFolders(any(), any(), any())).willReturn(updatedState);
+        given(meteringAzureMetadataPatchConfig.getCustomRpmUrl()).willReturn(CUSTOM_RPM_URL_SAMPLE);
         // WHEN
         underTest.doApply(createStack());
         // THEN
