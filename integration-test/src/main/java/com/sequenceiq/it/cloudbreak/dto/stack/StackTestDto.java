@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,7 +24,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.StackTestClient;
@@ -75,13 +75,12 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up stack with name: {}", getName());
-        if (getResponse() != null) {
-            when(stackTestClient.forceDeleteV4(), key("delete-stack-" + getName()).withSkipOnFail(false));
-            await(STACK_DELETED, new RunningParameter().withSkipOnFail(true));
-        } else {
-            LOGGER.info("Stack: {} response is null!", getName());
+    public void deleteForCleanup(CloudbreakClient client) {
+        try {
+            client.getDefaultClient().stackV4Endpoint().delete(0L, getName(), true, Crn.fromString(getCrn()).getAccountId());
+            awaitWithClient(STACK_DELETED, client);
+        } catch (NotFoundException nfe) {
+            LOGGER.info("resource not found, thus cleanup not needed.");
         }
     }
 

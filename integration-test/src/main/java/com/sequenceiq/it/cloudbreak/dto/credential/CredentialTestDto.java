@@ -1,10 +1,6 @@
 package com.sequenceiq.it.cloudbreak.dto.credential;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import java.util.Collection;
-
-import javax.inject.Inject;
 
 import com.sequenceiq.environment.api.v1.credential.model.parameters.aws.AwsCredentialParameters;
 import com.sequenceiq.environment.api.v1.credential.model.parameters.azure.AzureCredentialRequestParameters;
@@ -15,9 +11,7 @@ import com.sequenceiq.environment.api.v1.credential.model.request.CredentialRequ
 import com.sequenceiq.environment.api.v1.credential.model.request.EditCredentialRequest;
 import com.sequenceiq.environment.api.v1.credential.model.response.CredentialResponse;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.CredentialTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
@@ -28,9 +22,6 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     public static final String CREDENTIAL = "CREDENTIAL";
 
     private static final String CREDENTIAL_RESOURCE_NAME = "credentialName";
-
-    @Inject
-    private CredentialTestClient credentialTestClient;
 
     public CredentialTestDto(TestContext testContext) {
         super(new CredentialRequest(), testContext);
@@ -110,13 +101,8 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up credential with name: {}", getName());
-        if (getResponse() != null) {
-            when(credentialTestClient.delete(), key("delete-credential-" + getName()).withSkipOnFail(false));
-        } else {
-            LOGGER.info("Credential: {} response is null!", getName());
-        }
+    public void deleteForCleanup(EnvironmentClient client) {
+        client.getDefaultClient().credentialV1Endpoint().deleteByResourceCrn(getCrn());
     }
 
     @Override

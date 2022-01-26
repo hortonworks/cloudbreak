@@ -11,14 +11,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.util.Strings;
 
-import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
 import com.sequenceiq.common.api.telemetry.request.TelemetryRequest;
 import com.sequenceiq.common.api.type.Tunnel;
@@ -41,12 +40,10 @@ import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnviro
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.it.cloudbreak.EnvironmentClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourceGroupTest;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.client.EnvironmentTestClient;
-import com.sequenceiq.it.cloudbreak.cloud.v4.aws.AwsProperties;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
@@ -70,9 +67,6 @@ public class EnvironmentTestDto
 
     @Inject
     private EnvironmentTestClient environmentTestClient;
-
-    @Inject
-    private AwsProperties awsProperties;
 
     private Collection<SimpleEnvironmentResponse> simpleResponses;
 
@@ -215,12 +209,6 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withAuthentication() {
-        EnvironmentAuthenticationTestDto authenticationTestDto = getTestContext().get(EnvironmentAuthenticationTestDto.class);
-        getRequest().setAuthentication(authenticationTestDto.getRequest());
-        return this;
-    }
-
     public EnvironmentTestDto withSecurityAccess() {
         EnvironmentSecurityAccessTestDto securityAccessTestDto = getTestContext().get(EnvironmentSecurityAccessTestDto.class);
         getRequest().setSecurityAccess(securityAccessTestDto.getRequest());
@@ -272,11 +260,6 @@ public class EnvironmentTestDto
         return withNetwork(environmentNetwork.getRequest());
     }
 
-    public EnvironmentTestDto withS3Guard(String tableName) {
-        getCloudProvider().setS3Guard(this, tableName);
-        return this;
-    }
-
     public EnvironmentTestDto withResourceGroup(String resourceGroupUsage, String resourceGroupName) {
         return getCloudProvider().withResourceGroup(this, resourceGroupUsage, resourceGroupName);
     }
@@ -290,23 +273,8 @@ public class EnvironmentTestDto
         return this;
     }
 
-    public EnvironmentTestDto withAzure(AzureEnvironmentParameters azureEnvironmentParameters) {
-        getRequest().setAzure(azureEnvironmentParameters);
-        return this;
-    }
-
     public EnvironmentTestDto withGcp(GcpEnvironmentParameters gcpEnvironmentParameters) {
         getRequest().setGcp(gcpEnvironmentParameters);
-        return this;
-    }
-
-    public EnvironmentTestDto withS3Guard() {
-        if (CloudPlatform.AWS.equals(getTestContext().getCloudProvider().getCloudPlatform())) {
-            String tableName = awsProperties.getDynamoTableName() + '-' + UUID.randomUUID().toString();
-            return withS3Guard(tableName);
-        } else {
-            LOGGER.info("S3guard is ignored on cloudplatform {}.", getTestContext().getCloudProvider().getCloudPlatform());
-        }
         return this;
     }
 
@@ -343,10 +311,6 @@ public class EnvironmentTestDto
         this.simpleResponses = simpleResponses;
     }
 
-    public SimpleEnvironmentResponse getResponseSimpleEnv() {
-        return simpleResponse;
-    }
-
     public void setResponseSimpleEnv(SimpleEnvironmentResponse simpleResponse) {
         this.simpleResponse = simpleResponse;
     }
@@ -375,13 +339,12 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up environment with name: {}", getName());
-        if (getResponse() != null) {
-            when(environmentTestClient.cascadingDelete(), key("delete-environment-" + getName()).withSkipOnFail(false));
-            await(ARCHIVED, new RunningParameter().withSkipOnFail(true));
-        } else {
-            LOGGER.info("Environment: {} response is null!", getName());
+    public void deleteForCleanup(EnvironmentClient client) {
+        try {
+            client.getDefaultClient().environmentV1Endpoint().deleteByCrn(getCrn(), true, false);
+            getTestContext().awaitWithClient(this, Map.of("status", ARCHIVED), client);
+        } catch (NotFoundException nfe) {
+            LOGGER.info("resource not found, thus cleanup not needed.");
         }
     }
 
@@ -468,13 +431,6 @@ public class EnvironmentTestDto
             throw new IllegalStateException("Environment response hasn't been set, therefore 'getResourceCrn' cannot be fulfilled.");
         }
         return getResponse().getCrn();
-    }
-
-    public String getParentEnvironmentCrn() {
-        if (getResponse() == null) {
-            throw new IllegalStateException("Environment response hasn't been set, therefore 'getParentEnvironmentCrn' cannot be fulfilled.");
-        }
-        return getResponse().getParentEnvironmentCrn();
     }
 
     @Override
