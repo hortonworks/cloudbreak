@@ -34,7 +34,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerCommissionerTest extends BaseClouderaManagerCommDecommTest {
@@ -147,7 +147,7 @@ public class ClouderaManagerCommissionerTest extends BaseClouderaManagerCommDeco
         Set<InstanceMetaData> instanceMetaDataSet = createRunningInstanceMetadata(hostNames);
         Map<String, InstanceMetaData> hostsToCommission = instanceMetaDataSet.stream().collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, e -> e));
 
-        mockCommissionAndExitMaintenanceMode(PollingResult.SUCCESS);
+        mockCommissionAndExitMaintenanceMode(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         Set<String> result = underTest.recommissionNodes(getStack(), hostsToCommission, client);
 
         assertEquals(3, result.size());
@@ -166,7 +166,7 @@ public class ClouderaManagerCommissionerTest extends BaseClouderaManagerCommDeco
         Set<InstanceMetaData> instanceMetaDataSet = createRunningInstanceMetadata(hostNames);
         Map<String, InstanceMetaData> hostsToCommission = instanceMetaDataSet.stream().collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, e -> e));
 
-        mockCommissionAndExitMaintenanceMode(PollingResult.SUCCESS);
+        mockCommissionAndExitMaintenanceMode(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         Set<String> result = underTest.recommissionNodes(getStack(), hostsToCommission, client);
 
         assertEquals(2, result.size());
@@ -185,7 +185,7 @@ public class ClouderaManagerCommissionerTest extends BaseClouderaManagerCommDeco
 
         // TODO CB-15132: What are the other PollingResults that CM can return. How about entities like FAILURE?.
         //  Is an explicit check for SUCCESS required?
-        mockCommissionAndExitMaintenanceMode(PollingResult.TIMEOUT);
+        mockCommissionAndExitMaintenanceMode(new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build());
         mockAbortCommission();
 
         assertThrows(CloudbreakServiceException.class, () -> underTest.recommissionNodes(getStack(), hostsToCommission, client));
@@ -208,7 +208,7 @@ public class ClouderaManagerCommissionerTest extends BaseClouderaManagerCommDeco
         mockListClusterHosts(apiHostList, hostsResourceApi, clouderaManagerApiFactory, client);
     }
 
-    private void mockCommissionAndExitMaintenanceMode(PollingResult pollingResult) throws ApiException {
+    private void mockCommissionAndExitMaintenanceMode(ExtendedPollingResult pollingResult) throws ApiException {
         ApiCommand apiCommand = getApiCommand(BigDecimal.valueOf(1));
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.hostsRecommissionAndExitMaintenanceModeCommand(any(), any())).thenReturn(apiCommand);

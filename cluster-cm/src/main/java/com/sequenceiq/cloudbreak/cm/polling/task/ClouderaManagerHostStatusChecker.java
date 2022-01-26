@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.collections4.CollectionUtils;
@@ -28,18 +29,29 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
 
     private final List<String> targets;
 
+    private Set<Long> notKnownInstanceIds;
+
+    private boolean resilientPollerEnabled;
+
     public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService, List<String> targets) {
+            ClusterEventService clusterEventService, List<String> targets, boolean resilientPollerEnabled) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
         start = Instant.now();
         this.targets = targets;
+        this.resilientPollerEnabled = resilientPollerEnabled;
     }
 
     public ClouderaManagerHostStatusChecker(ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory,
-            ClusterEventService clusterEventService) {
+            ClusterEventService clusterEventService, boolean resilientPollerEnabled) {
         super(clouderaManagerApiPojoFactory, clusterEventService);
         start = Instant.now();
         this.targets = List.of();
+        this.resilientPollerEnabled = resilientPollerEnabled;
+    }
+
+    @Override
+    public Set<Long> getFailedInstanceIds() {
+        return notKnownInstanceIds;
     }
 
     @Override
@@ -48,9 +60,19 @@ public class ClouderaManagerHostStatusChecker extends AbstractClouderaManagerApi
         List<InstanceMetaData> notKnownInstancesByManager = collectNotKnownInstancesByManager(pollerObject, hostIpsFromManager);
         if (!notKnownInstancesByManager.isEmpty()) {
             LOGGER.warn("there are missing nodes from cloudera manager, not known instances: {}", notKnownInstancesByManager);
+            notKnownInstanceIds = notKnownInstancesByManager.stream()
+                    .map(InstanceMetaData::getId)
+                    .collect(Collectors.toSet());
             return false;
         } else {
             return true;
+        }
+    }
+
+    @Override
+    public void handleTimeout(ClouderaManagerPollerObject pollerObject) {
+        if (!resilientPollerEnabled) {
+            super.handleTimeout(pollerObject);
         }
     }
 

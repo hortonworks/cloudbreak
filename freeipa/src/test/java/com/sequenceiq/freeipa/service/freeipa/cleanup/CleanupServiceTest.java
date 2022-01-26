@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -26,7 +25,7 @@ import org.springframework.data.util.Pair;
 
 import com.googlecode.jsonrpc4j.JsonRpcClientException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
@@ -476,11 +475,14 @@ public class CleanupServiceTest {
     public void testRemoveFreeIpaServer() throws FreeIpaClientException {
         Set<String> hosts = Set.of("example1.com", "example2.com");
         FreeIpaClient client = mock(FreeIpaClient.class);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
         when(freeIpaClientFactory.getFreeIpaClientForStackId(anyLong())).thenReturn(client);
         when(hostDeletionService.removeServers(any(), any())).thenReturn(Pair.of(hosts, Map.of()));
         when(client.findAllService()).thenReturn(Set.of());
         when(freeIpaDeletionPollerService.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt()))
-                .thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
+                .thenReturn(extendedPollingResult);
 
         Pair<Set<String>, Map<String, String>> result = cleanupService.removeServers(STACK_ID, hosts);
 

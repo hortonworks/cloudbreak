@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.freeipa;
 
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNull;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteHandlerSelectors.DELETE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteStateSelectors.START_RDBMS_DELETE_EVENT;
@@ -11,12 +10,11 @@ import java.util.Optional;
 
 import javax.ws.rs.NotFoundException;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -143,15 +141,15 @@ public class FreeIpaDeletionHandler extends EventSenderAwareHandler<EnvironmentD
 
     private void deleteFreeIpa(Environment environment, boolean forced) {
         freeIpaService.delete(environment.getResourceCrn(), forced);
-        Pair<PollingResult, Exception> result = freeIpaPollingService.pollWithTimeout(
+        ExtendedPollingResult result = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaDeletionRetrievalTask(freeIpaService),
                 new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaDeletionRetrievalTask.FREEIPA_FAILURE_COUNT);
-        if (!isSuccess(result.getLeft())) {
-            String message = "Failed to delete FreeIpa! (" + result.getLeft().name() + ") "
-                    + getIfNotNull(result.getRight(), Throwable::getMessage);
+        if (!result.isSuccess()) {
+            String message = "Failed to delete FreeIpa! (" + result.getPollingResult().name() + ") "
+                    + getIfNotNull(result.getException(), Throwable::getMessage);
             LOGGER.info(message);
             throw new FreeIpaOperationFailedException(message);
         }

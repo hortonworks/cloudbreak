@@ -67,6 +67,21 @@ public class InstanceMetaDataService {
     @Inject
     private ResourceRetriever resourceRetriever;
 
+    public void updateInstanceStatus(Set<Long> instanceIds, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus,
+            String statusReason) {
+        try {
+            LOGGER.info("Update {} status to {} with statusReason {}", instanceIds, newStatus, statusReason);
+            transactionService.requiresNew(() -> {
+                int modifiedRows = repository.updateStatusIfNotTerminated(instanceIds, newStatus, statusReason);
+                LOGGER.debug("{} row was updated", modifiedRows);
+                return modifiedRows;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Can't update instance status", e);
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
+    }
+
     public void updateInstanceStatus(final InstanceMetaData instanceMetaData, com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus newStatus) {
         updateInstanceStatus(instanceMetaData, newStatus, null);
     }

@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -32,7 +29,7 @@ import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
 @Component
 public class ClouderaManagerCommissioner {
@@ -112,11 +109,11 @@ public class ClouderaManagerCommissioner {
         ApiCommand apiCommand;
         try {
             apiCommand = apiInstance.hostsRecommissionAndExitMaintenanceModeCommand("recommission_with_start", body);
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                     .startPollingCmHostsRecommission(stack, client, apiCommand.getId());
-            if (isExited(pollingResult)) {
+            if (pollingResult.isExited()) {
                 throw new CancellationException("Cluster was terminated while waiting for host commission");
-            } else if (isTimeout(pollingResult)) {
+            } else if (pollingResult.isTimeout()) {
                 String warningMessage = "Cloudera Manager recommission host command {} polling timed out, " +
                         "thus we are aborting the recommission operation.";
                 abortRecommissionWithWarnMessage(apiCommand, client, warningMessage);

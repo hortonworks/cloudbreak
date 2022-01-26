@@ -1,12 +1,25 @@
 package com.sequenceiq.freeipa.service.freeipa.user;
 
-import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
+
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.CloudIdentity;
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.configuration.CloudIdSyncConfig;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -16,18 +29,6 @@ import com.sequenceiq.freeipa.service.polling.usersync.CloudIdSyncStatusListener
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
 import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 import com.sequenceiq.sdx.api.model.SetRangerCloudIdentityMappingRequest;
-import org.apache.commons.lang3.tuple.Pair;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import javax.inject.Inject;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 @Service
 public class CloudIdentitySyncService {
@@ -115,12 +116,11 @@ public class CloudIdentitySyncService {
 
     private void pollSyncStatus(String environmentCrn, long commandId, BiConsumer<String, String> warnings) {
         CloudIdSyncPollerObject pollerObject = new CloudIdSyncPollerObject(environmentCrn, commandId);
-        Pair<PollingResult, Exception> resultPair = cloudIdSyncPollingService.pollWithAbsoluteTimeout(cloudIdSyncStatusListenerTask, pollerObject,
+        ExtendedPollingResult result = cloudIdSyncPollingService.pollWithAbsoluteTimeout(cloudIdSyncStatusListenerTask, pollerObject,
                 config.getPollerSleepIntervalMs(), config.getPollerTimeoutSeconds(), ONE_MAX_CONSECUTIVE_FAILURE);
-        PollingResult result = resultPair.getLeft();
-        if (!result.equals(PollingResult.SUCCESS)) {
-            String errMsg = String.format("Failed to poll cloud id sync status, envCrn = %s, polling result = %s", environmentCrn, result);
-            Exception ex = resultPair.getRight();
+        if (!result.isSuccess()) {
+            String errMsg = String.format("Failed to poll cloud id sync status, envCrn = %s, polling result = %s", environmentCrn, result.getPollingResult());
+            Exception ex = result.getException();
             LOGGER.error(errMsg, ex);
             warnings.accept(environmentCrn, "Failed to sync cloud identity into environment");
         }
