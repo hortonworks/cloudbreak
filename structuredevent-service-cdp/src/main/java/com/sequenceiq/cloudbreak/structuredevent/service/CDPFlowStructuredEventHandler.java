@@ -89,13 +89,16 @@ public class CDPFlowStructuredEventHandler<S, E> extends StateMachineListenerAda
             String toId = getToId(transition);
             String eventId = getEventId(transition);
             Boolean detailed = toId.equals(initState.toString()) || toId.equals(finalState.toString());
+            LOGGER.debug("New transition arrived: from: {}, to: {}, eventId: {}, detailed: {}", fromId, toId, eventId, detailed);
 
             Long currentTime = System.currentTimeMillis();
             long duration = lastStateChange == null ? 0L : currentTime - lastStateChange;
 
+            LOGGER.debug("Build new CDP structured event");
             CDPStructuredEvent structuredEvent = buildCdpStructuredEvent(fromId, toId, eventId, detailed, duration);
+            LOGGER.debug("New CDP structured event built, send to all consumers");
             cdpDefaultStructuredEventClient.sendStructuredEvent(structuredEvent);
-
+            LOGGER.debug("CDP structured events sent to all consumers");
             lastStateChange = currentTime;
         } catch (RuntimeException ex) {
             LOGGER.error("Error happened during structured flow event generation! The event won't be stored!", ex);
