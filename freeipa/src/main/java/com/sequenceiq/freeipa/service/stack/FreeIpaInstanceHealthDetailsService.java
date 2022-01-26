@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static java.util.function.Predicate.not;
+
+import java.util.List;
 import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,6 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.client.RPCMessage;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
@@ -20,9 +26,9 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClient;
 import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClientFactory;
 import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
+import com.sequenceiq.freeipa.client.healthcheckmodel.CheckEntry;
 import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
-import com.sequenceiq.cloudbreak.client.RPCMessage;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.freeipa.client.healthcheckmodel.PluginStatusEntry;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.freeipa.FreeIpaClientFactory;
@@ -46,6 +52,8 @@ public class FreeIpaInstanceHealthDetailsService {
     private static final Pattern RESULT_PATTERN = Pattern.compile("(ecure port|: TCP) \\([0-9]*\\): (.*)");
 
     private static final Pattern NEW_NODE_PATTERN = Pattern.compile("Check connection from master to remote replica '(.[^\']*)");
+
+    private static final String HEALTHY = "HEALTHY";
 
     @Inject
     private FreeIpaClientFactory freeIpaClientFactory;
@@ -106,16 +114,56 @@ public class FreeIpaInstanceHealthDetailsService {
     }
 
     private RPCResponse<Boolean> toBooleanRpcResponse(RPCResponse<CheckResult> nodeHealth) {
+        RPCMessage rpcMessage = createRpcMessageFromCheckResult(nodeHealth);
         RPCResponse<Boolean> response = new RPCResponse<>();
         response.setSummary(nodeHealth.getSummary());
         response.setResult(isHealthCheckPassing(nodeHealth));
         response.setCount(nodeHealth.getCount());
         response.setTruncated(nodeHealth.getTruncated());
-        response.setMessages(nodeHealth.getMessages());
+        response.setMessages(List.of(rpcMessage));
         response.setCompleted(nodeHealth.getCompleted());
         response.setFailed(nodeHealth.getFailed());
         response.setValue(nodeHealth.getValue());
         return response;
+    }
+
+    private RPCMessage createRpcMessageFromCheckResult(RPCResponse<CheckResult> nodeHealth) {
+        List<CheckEntry> checkEntries = filterCheckEntries(nodeHealth);
+        List<PluginStatusEntry> pluginStatusEntries = filterPluginStatusEntries(nodeHealth);
+        CheckResult filteredCheckResult = new CheckResult();
+        filteredCheckResult.setChecks(checkEntries);
+        filteredCheckResult.setPluginStats(pluginStatusEntries);
+        if (nodeHealth.getResult() != null) {
+            filteredCheckResult.setStatus(nodeHealth.getResult().getStatus());
+            filteredCheckResult.setHost(nodeHealth.getResult().getHost());
+        }
+        RPCMessage rpcMessage = new RPCMessage();
+        rpcMessage.setName("node health check");
+        rpcMessage.setMessage(JsonUtil.writeValueAsStringSilent(filteredCheckResult));
+        if (nodeHealth.getFirstRpcMessage() != null) {
+            rpcMessage.setCode(nodeHealth.getFirstRpcMessage().getCode());
+        }
+        return rpcMessage;
+    }
+
+    private List<PluginStatusEntry> filterPluginStatusEntries(RPCResponse<CheckResult> nodeHealth) {
+        if (nodeHealth.getResult() == null || nodeHealth.getResult().getPluginStats() == null) {
+            return List.of();
+        } else {
+            return nodeHealth.getResult().getPluginStats().stream()
+                    .filter(not(check -> HEALTHY.equals(check.getStatus())))
+                    .collect(Collectors.toList());
+        }
+    }
+
+    private List<CheckEntry> filterCheckEntries(RPCResponse<CheckResult> nodeHealth) {
+        if (nodeHealth.getResult() == null || nodeHealth.getResult().getChecks() == null) {
+            return List.of();
+        } else {
+            return nodeHealth.getResult().getChecks().stream()
+                    .filter(not(check -> HEALTHY.equals(check.getStatus())))
+                    .collect(Collectors.toList());
+        }
     }
 
     private NodeHealthDetails parseMessages(RPCResponse<CheckResult> rpcResponse, InstanceMetaData instanceMetaData) {
