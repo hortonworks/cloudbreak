@@ -24,9 +24,11 @@ import com.sequenceiq.authorization.resource.AuthorizationResourceType;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.dto.StackIdWithStatus;
@@ -35,7 +37,7 @@ import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.repository.StackRepository;
 
 @Service
-public class StackService implements ResourcePropertyProvider {
+public class StackService implements ResourcePropertyProvider, PayloadContextProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StackService.class);
 
@@ -74,6 +76,11 @@ public class StackService implements ResourcePropertyProvider {
 
     public Stack getStackById(Long id) {
         return stackRepository.findById(id).orElseThrow(() -> new NotFoundException(String.format("FreeIPA stack [%s] not found", id)));
+    }
+
+    @Override
+    public PayloadContext getPayloadContext(Long resourceId) {
+        return stackRepository.getStackAsPayloadContextById(resourceId).orElse(null);
     }
 
     public Stack getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(String environmentCrn, String accountId) {

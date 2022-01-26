@@ -415,6 +415,10 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
         return stackRepository.findById(id);
     }
 
+    public Optional<PayloadContext> findStackAsPayloadContext(Long id) {
+        return stackRepository.findStackAsPayloadContext(id);
+    }
+
     public Stack getByIdWithTransaction(Long id) {
         try {
             return transactionService.required(() -> stackRepository.findById(id).orElseThrow(notFound("Stack", id)));
@@ -767,12 +771,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     @Override
     public PayloadContext getPayloadContext(Long resourceId) {
-        Optional<Stack> stackOpt = findById(resourceId);
-        if (stackOpt.isPresent()) {
-            Stack stack = stackOpt.get();
-            return PayloadContext.create(stack.getResourceCrn(), stack.getCloudPlatform());
-        }
-        return null;
+        return findStackAsPayloadContext(resourceId).orElse(null);
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
