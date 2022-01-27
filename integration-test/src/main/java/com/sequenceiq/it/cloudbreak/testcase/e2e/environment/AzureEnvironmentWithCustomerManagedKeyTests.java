@@ -73,11 +73,8 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
         createDefaultUser(testContext);
     }
 
-    @AfterMethod(onlyForGroups = { "withrg" })
-    public void tearDown(Object[] data) {
-        LOGGER.info("Tear down context");
-        ((TestContext) data[0]).cleanupTestContext();
-
+    @AfterMethod(onlyForGroups = { "withrg" }, dependsOnMethods = { "tearDown", "tearDownSpot" })
+    public void singleResourceGroupTearDown() {
         LOGGER.info("Delete the '{}' resource group after test has been done!", resourceGroupForTest);
         deleteResourceGroupCreatedForEnvironment(resourceGroupForTest);
     }
@@ -224,7 +221,7 @@ public class AzureEnvironmentWithCustomerManagedKeyTests extends AbstractE2ETest
         volumesDesId.forEach(desId -> {
             if (desId.contains("diskEncryptionSets/" + testContext.given(EnvironmentTestDto.class).getRequest().getName())) {
                 LOGGER.info(format("FreeIpa volume has been encrypted with '%s' DES key!", desId));
-                Log.then(LOGGER, format(" FreeIpa volume has not been encrypted with '%s' DES key! ", desId));
+                Log.then(LOGGER, format(" FreeIpa volume has been encrypted with '%s' DES key! ", desId));
             } else {
                 LOGGER.error(format("FreeIpa volume has not been encrypted with '%s' DES key!", desKeyUrl));
                 throw new TestFailException(format("FreeIpa volume has not been encrypted with '%s' DES key!", desKeyUrl));
