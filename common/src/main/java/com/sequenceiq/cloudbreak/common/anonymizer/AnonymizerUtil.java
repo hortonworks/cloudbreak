@@ -18,6 +18,7 @@ public class AnonymizerUtil {
                     + "credentialJson:[\"']|credentialJson=[\"']|credentialJson=|credentialJson\":\"|credentialJson:|credentialJson |"
                     + "pass:[\"']|pass=[\"']|pass=|pass\":\"|pass:|pass |"
                     + "secret:[\"']|secret=[\"']|secret=|secret\":\"|secret:|secret |"
+                    + "secretKey:[\"']|secretKey=[\"']|secretKey=|secretKey\":\"|secretKey:|secretKey |"
                     + "key:[\"']|key=[\"']|key=|key\":\"|key:|key |"
                     + "credential:[\"']|credential=[\"']|credential=|credential\":\"|credential:|credential "
                     + ")([^\\s'\"]*)", REPLACEMENT),
