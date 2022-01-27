@@ -114,7 +114,7 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
     }
 
     @AfterMethod(onlyForGroups = { "azure_singlerg" })
-    public void tearDown(Object[] data) {
+    public void singleResourceGroupTearDown(Object[] data) {
         LOGGER.info("Tear down context");
         ((TestContext) data[0]).cleanupTestContext();
 
