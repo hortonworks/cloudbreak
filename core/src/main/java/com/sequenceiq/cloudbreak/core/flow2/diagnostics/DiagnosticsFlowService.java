@@ -119,6 +119,7 @@ public class DiagnosticsFlowService {
         setIfNotNull(eventBuilder::setAccountId, parameters.getAccountId());
         setIfNotNull(eventBuilder::setInputParameters, parameters.toMap().toString());
         setIfNotNull(eventBuilder::setResourceCrn, resourceCrn);
+        setIfNotNull(eventBuilder::setCaseNumber, parameters.getIssue());
         UsageProto.CDPVMDiagnosticsDestination.Value dest = convertUsageDestination(parameters.getDestination());
         setIfNotNull(eventBuilder::setDestination, dest);
         usageReporter.cdpVmDiagnosticsEvent(eventBuilder.build());
