@@ -14,6 +14,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.assertj.core.util.Sets;
 import org.slf4j.Logger;
@@ -35,7 +36,6 @@ import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsIns
 import com.sequenceiq.distrox.api.v1.distrox.model.instancegroup.template.AwsInstanceTemplateV1SpotParameters;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.DistroXTestClient;
 import com.sequenceiq.it.cloudbreak.context.Clue;
@@ -61,8 +61,6 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     private GeneratedBlueprintV4Response generatedBlueprint;
 
     private StackViewV4Response internalStackResponse;
-
-    private GeneratedBlueprintV4Response generatedBlueprintV4Response;
 
     private Optional<String> removableInstanceId = Optional.empty();
 
@@ -91,13 +89,12 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient cloudbreakClient) {
-        LOGGER.info("Cleaning up distrox with name: {}", getName());
-        if (getResponse() != null) {
-            when(distroXTestClient.forceDelete(), key("delete-distrox-" + getName()).withSkipOnFail(false));
-            await(STACK_DELETED, new RunningParameter().withSkipOnFail(true));
-        } else {
-            LOGGER.info("Distrox: {} response is null!", getName());
+    public void deleteForCleanup(CloudbreakClient cloudbreakClient) {
+        try {
+            cloudbreakClient.getDefaultClient().distroXV1Endpoint().deleteByCrn(getCrn(), true);
+            awaitWithClient(STACK_DELETED, cloudbreakClient);
+        } catch (NotFoundException nfe) {
+            LOGGER.info("resource not found, thus cleanup not needed.");
         }
     }
 
@@ -212,29 +209,8 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         }
     }
 
-    public DistroXTestDto awaitForHostGroups(List<String> hostGroups, InstanceStatus instanceStatus) {
-        Optional<InstanceGroupV4Response> instanceGroup = getResponse().getInstanceGroups().stream()
-                .filter(instanceGroupV4Response -> hostGroups.contains(instanceGroupV4Response.getName()))
-                .filter(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream()
-                        .anyMatch(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId())))
-                .findAny();
-        if (instanceGroup.isPresent()) {
-            List<String> instanceIds = instanceGroup.get().getMetadata().stream()
-                    .filter(instanceMetaDataV4Response -> Objects.nonNull(instanceMetaDataV4Response.getInstanceId()))
-                    .map(InstanceMetaDataV4Response::getInstanceId)
-                    .collect(Collectors.toList());
-            return awaitForInstance(Map.of(instanceIds, instanceStatus));
-        } else {
-            throw new IllegalStateException("Can't find valid instance group with this name: " + hostGroups);
-        }
-    }
-
     public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
         return awaitForInstance(statuses, emptyRunningParameter());
-    }
-
-    public DistroXTestDto awaitForInstance(DistroXTestDto entity, Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().awaitForInstance(entity, statuses, runningParameter);
     }
 
     public DistroXTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {

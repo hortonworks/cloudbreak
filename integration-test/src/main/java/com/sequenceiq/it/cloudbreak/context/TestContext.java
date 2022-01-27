@@ -925,7 +925,19 @@ public abstract class TestContext implements ApplicationContextAware {
         return await(entity, desiredStatuses, emptyRunningParameter());
     }
 
+    public <T extends CloudbreakTestDto, E extends Enum<E>> T awaitWithClient(T entity, Map<String, E> desiredStatuses, MicroserviceClient client) {
+        return awaitWithClient(entity, desiredStatuses, emptyRunningParameter(), client);
+    }
+
     public <T extends CloudbreakTestDto, E extends Enum<E>> T await(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter) {
+        MicroserviceClient client = getTestContext().getMicroserviceClient(entity.getClass(), getTestContext().setActingUser(runningParameter)
+                .getAccessKey());
+
+        return awaitWithClient(entity, desiredStatuses, runningParameter, client);
+    }
+
+    private <T extends CloudbreakTestDto, E extends Enum<E>> T awaitWithClient(T entity, Map<String, E> desiredStatuses, RunningParameter runningParameter,
+            MicroserviceClient client) {
         checkShutdown();
         if (!getExceptionMap().isEmpty() && runningParameter.isSkipOnFail()) {
             Log.await(LOGGER, String.format("Cloudbreak await should be skipped because of previous error. await [%s]", desiredStatuses));
@@ -948,7 +960,7 @@ public abstract class TestContext implements ApplicationContextAware {
         }
 
         resourceAwait.await(awaitEntity, desiredStatuses, getTestContext(), runningParameter,
-                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry, maxRetryCount);
+                flowUtilSingleStatus.getPollingDurationOrTheDefault(runningParameter), maxRetry, maxRetryCount, client);
         return entity;
     }
 
@@ -1167,8 +1179,10 @@ public abstract class TestContext implements ApplicationContextAware {
         List<CloudbreakTestDto> orderedTestDtos = testDtos.stream().sorted(new CompareByOrder()).collect(Collectors.toList());
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
-                testDto.cleanUp(this, getAdminMicroserviceClient(testDto.getClass(), Objects.requireNonNull(Crn.fromString(testDto.getCrn())).
-                        getAccountId()));
+                LOGGER.info("Starting to clean up {} {}", testDto.getClass().getSimpleName(), testDto.getName());
+                String accountId = Objects.requireNonNull(Crn.fromString(testDto.getCrn())).getAccountId();
+                MicroserviceClient adminMicroserviceClient = getAdminMicroserviceClient(testDto.getClass(), accountId);
+                testDto.cleanUp(adminMicroserviceClient);
             } catch (Exception e) {
                 LOGGER.info("Cleaning up of tests context with {} resource is failing, because of: {}", testDto.getName(), e.getMessage());
             }

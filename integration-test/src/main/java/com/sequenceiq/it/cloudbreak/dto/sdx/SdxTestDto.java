@@ -28,7 +28,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.I
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
@@ -49,7 +48,6 @@ import com.sequenceiq.sdx.api.model.SdxAwsSpotParameters;
 import com.sequenceiq.sdx.api.model.SdxCloudStorageRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterDetailResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterRequest;
-import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterResponse;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
@@ -87,17 +85,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
                 .withTags(getCloudProvider().getTags())
                 .withRuntimeVersion(commonClusterManagerProperties.getRuntimeVersion());
         return getCloudProvider().sdx(this);
-    }
-
-    @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up sdx with name: {}", getName());
-        if (getResponse() != null) {
-            when(sdxTestClient.forceDelete(), key("delete-sdx-" + getName()).withSkipOnFail(false));
-            await(DELETED, new RunningParameter().withSkipOnFail(true));
-        } else {
-            LOGGER.info("Sdx: {} response is null!", getName());
-        }
     }
 
     @Override
@@ -211,10 +198,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return awaitForInstance(statuses, emptyRunningParameter());
     }
 
-    public SdxTestDto awaitForInstance(SdxTestDto entity, Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().awaitForInstance(entity, statuses, runningParameter);
-    }
-
     public SdxTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
@@ -274,18 +257,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
-    }
-
-    private SdxTestDto withEnvironmentDto(EnvironmentTestDto environmentTestDto) {
-        return withEnvironmentName(environmentTestDto.getResponse().getName());
-    }
-
-    public SdxTestDto withEnvironmentKey(RunningParameter environmentKey) {
-        EnvironmentTestDto env = getTestContext().get(environmentKey.getKey());
-        if (env == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
-        }
-        return withEnvironmentName(env.getResponse().getName());
     }
 
     public SdxTestDto withEnvironmentName(String environmentName) {
@@ -351,14 +322,6 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
             throw new IllegalArgumentException("SDX Recovery does not exist!");
         }
         return recovery.getRequest();
-    }
-
-    public SdxClusterResizeRequest getSdxResizeRequest() {
-        SdxResizeTestDto resize = given(SdxResizeTestDto.class);
-        if (resize == null) {
-            throw new IllegalArgumentException("SDX Resize does not exist!");
-        }
-        return resize.getRequest();
     }
 
     public SdxTestDto withRuntimeVersion(String runtimeVersion) {

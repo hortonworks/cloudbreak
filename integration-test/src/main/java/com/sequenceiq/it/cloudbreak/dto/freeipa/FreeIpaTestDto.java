@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.ws.rs.NotFoundException;
 
 import org.testng.util.Strings;
 
@@ -48,7 +49,6 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.create.CreateFreeIpaReq
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.describe.DescribeFreeIpaResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.list.ListFreeIpaResponse;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.client.FreeIpaTestClient;
 import com.sequenceiq.it.cloudbreak.context.Clue;
@@ -347,11 +347,6 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
         return awaitForFreeIpaInstance(statuses, emptyRunningParameter());
     }
 
-    public FreeIpaTestDto awaitForFreeIpaInstance(FreeIpaTestDto entity, Map<List<String>,
-            com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().awaitForInstance(entity, statuses, runningParameter);
-    }
-
     public FreeIpaTestDto awaitForFreeIpaInstance(Map<List<String>, com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus> statuses,
             RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
@@ -406,13 +401,12 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient cloudbreakClient) {
-        LOGGER.info("Cleaning up freeIpa with name: {}", getName());
-        if (getResponse() != null) {
-            when(freeIpaTestClient.delete(), key("delete-freeipa-" + getName()).withSkipOnFail(false));
-            await(DELETE_COMPLETED, new RunningParameter().withSkipOnFail(true));
-        } else {
-            LOGGER.info("FreeIpa: {} response is null!", getName());
+    public void deleteForCleanup(FreeIpaClient client) {
+        try {
+            client.getDefaultClient().getFreeIpaV1Endpoint().delete(getResponse().getEnvironmentCrn(), false);
+            getTestContext().awaitWithClient(this, Map.of("status", DELETE_COMPLETED), client);
+        } catch (NotFoundException nfe) {
+            LOGGER.info("resource not found, thus cleanup not needed.");
         }
     }
 

@@ -1,19 +1,13 @@
 package com.sequenceiq.it.cloudbreak.dto.clustertemplate;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import java.util.Collection;
-
-import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.ClusterTemplateV4Type;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.requests.ClusterTemplateV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.clustertemplate.responses.ClusterTemplateV4Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.DistroXV1Request;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.ClusterTemplateTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.clouderamanager.DistroXClouderaManagerTestDto;
@@ -25,9 +19,6 @@ import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
 @Prototype
 public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Request, ClusterTemplateV4Response,
         ClusterTemplateTestDto, ClusterTemplateV4Response> {
-
-    @Inject
-    private ClusterTemplateTestClient clusterTemplateTestClient;
 
     public ClusterTemplateTestDto(TestContext testContext) {
         super(new ClusterTemplateV4Request(), testContext);
@@ -85,11 +76,6 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
         return this;
     }
 
-    public ClusterTemplateTestDto withGatewayPort(Integer gatewayPort) {
-        getRequest().getDistroXTemplate().setGatewayPort(gatewayPort);
-        return this;
-    }
-
     public ClusterTemplateTestDto withCM(String key) {
         DistroXClouderaManagerTestDto clouderaManagerTestDto = getTestContext().get(key);
         getRequest().getDistroXTemplate().getCluster().setCm(clouderaManagerTestDto.getRequest());
@@ -116,13 +102,8 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up cluster template with name: {}", getName());
-        if (getResponse() != null) {
-            when(clusterTemplateTestClient.deleteV4(), key("delete-clustertemplate-" + getName()).withSkipOnFail(false));
-        } else {
-            LOGGER.info("Cluster template: {} response is null!", getName());
-        }
+    public void deleteForCleanup(CloudbreakClient client) {
+        client.getDefaultClient().clusterTemplateV4EndPoint().deleteByCrn(0L, getCrn());
     }
 
     public Long count() {

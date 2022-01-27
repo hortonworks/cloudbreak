@@ -11,9 +11,8 @@ import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.assign.Assignable;
 import com.sequenceiq.it.cloudbreak.context.Orderable;
 import com.sequenceiq.it.cloudbreak.context.RunningParameter;
-import com.sequenceiq.it.cloudbreak.context.TestContext;
 
-public interface CloudbreakTestDto extends Orderable, Assignable {
+public interface CloudbreakTestDto<U extends MicroserviceClient> extends Orderable, Assignable {
 
     Logger LOGGER = LoggerFactory.getLogger(CloudbreakTestDto.class);
 
@@ -31,8 +30,16 @@ public interface CloudbreakTestDto extends Orderable, Assignable {
 
     CloudPlatform getCloudPlatform();
 
-    default void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.warn(String.format("Cleanup WARN: 'cleanUp' is not implemented for TestDto: %s with name: %s", getClass().getSimpleName(), getName()));
+    default void cleanUp(U client) {
+        try {
+            deleteForCleanup(client);
+        } catch (Exception ignore) {
+            LOGGER.error(String.format("%s cleanup failed because: ", getClass().getSimpleName()), ignore);
+        }
+    }
+
+    default void deleteForCleanup(U client) {
+        LOGGER.warn("cleanUp logic is not implemented for TestDto: {}", getClass().getSimpleName());
     }
 
     default CloudbreakTestDto refresh() {

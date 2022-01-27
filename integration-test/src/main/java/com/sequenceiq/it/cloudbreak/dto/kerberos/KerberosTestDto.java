@@ -1,15 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto.kerberos;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
+import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.KerberosTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -17,27 +11,13 @@ import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 @Prototype
 public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfigRequest, DescribeKerberosConfigResponse, KerberosTestDto> {
 
-    public static final String DEFAULT_MASTERKEY = "masterkey";
-
-    public static final String DEFAULT_ADMIN_USER = "admin";
-
-    public static final String DEFAULT_ADMIN_PASSWORD = "password";
-
-    @Inject
-    private KerberosTestClient kerberosTestClient;
-
     public KerberosTestDto(TestContext testContext) {
         super(new CreateKerberosConfigRequest(), testContext);
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up kerberos config with name: {}", getName());
-        try {
-            when(kerberosTestClient.deleteV1(), key("delete-kerberos-" + getName()).withSkipOnFail(false));
-        } catch (WebApplicationException ignore) {
-            LOGGER.warn("Something went wrong during {} kerberos config delete, because of: {}", getName(), ignore.getMessage(), ignore);
-        }
+    public void deleteForCleanup(FreeIpaClient client) {
+        client.getDefaultClient().getKerberosConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
     }
 
     @Override
@@ -94,18 +74,8 @@ public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfig
         return this;
     }
 
-    public KerberosTestDto withActiveDirectoryDescriptor(ActiveDirectoryKerberosDescriptorTestDto activeDirectoryDescriptor) {
-        getRequest().setActiveDirectory(activeDirectoryDescriptor.getRequest());
-        return this;
-    }
-
     public KerberosTestDto withFreeIpaDescriptor() {
         getRequest().setFreeIpa(getTestContext().get(FreeIpaKerberosDescriptorTestDto.class).getRequest());
-        return this;
-    }
-
-    public KerberosTestDto withFreeIpaDescriptor(FreeIpaKerberosDescriptorTestDto freeIpaDescriptor) {
-        getRequest().setFreeIpa(freeIpaDescriptor.getRequest());
         return this;
     }
 }

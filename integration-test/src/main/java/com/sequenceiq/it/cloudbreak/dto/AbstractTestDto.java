@@ -40,7 +40,7 @@ import com.sequenceiq.it.cloudbreak.finder.Finder;
 import com.sequenceiq.it.cloudbreak.log.Log;
 import com.sequenceiq.it.cloudbreak.mock.ExecuteQueryToMockInfrastructure;
 
-public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> extends Entity implements CloudbreakTestDto {
+public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U extends MicroserviceClient> extends Entity implements CloudbreakTestDto<U> {
 
     @Inject
     private TestParameter testParameter;
@@ -250,6 +250,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
 
     public T await(Map<String, Status> statuses) {
         return await(statuses, emptyRunningParameter());
+    }
+
+    public T awaitWithClient(Map<String, Status> statuses, U client) {
+        return getTestContext().awaitWithClient((T) this, statuses, client);
     }
 
     public T await(Map<String, Status> statuses, RunningParameter runningParameter) {
