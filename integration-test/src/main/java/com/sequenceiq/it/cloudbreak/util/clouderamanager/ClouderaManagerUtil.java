@@ -38,4 +38,8 @@ public class ClouderaManagerUtil {
     public DistroXTestDto checkClouderaManagerHdfsDatanodeRoleConfigGroups(DistroXTestDto testDto, String user, String password, Set<String> mountPoints) {
         return clouderaManagerClientActions.checkCmHdfsDatanodeRoleConfigGroups(testDto, user, password, mountPoints);
     }
+
+    public DistroXTestDto checkCmServicesStartedSuccessfully(DistroXTestDto testDto, String user, String password) {
+        return clouderaManagerClientActions.checkCmServicesStartedSuccessfully(testDto, user, password);
+    }
 }
