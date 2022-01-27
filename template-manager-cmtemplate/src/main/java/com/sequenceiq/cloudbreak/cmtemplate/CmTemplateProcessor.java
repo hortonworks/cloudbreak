@@ -361,6 +361,15 @@ public class CmTemplateProcessor implements BlueprintTextProcessor {
         return result;
     }
 
+    @Override
+    public Set<String> getComputeHostGroups(Versioned version) {
+        Map<String, Set<String>> componentsByHostGroup = collectComponentsByHostGroupWithYarnNMs();
+        // Re-using the current LoadBasedAutoScaling recommendation to determine hostGroups which can be autoscaled
+        Set<String> computeHostGroups = getRecommendationByBlacklist(BlackListedLoadBasedAutoscaleRole.class,
+                true, componentsByHostGroup, version, List.of());
+        return computeHostGroups;
+    }
+
     private Map<String, Set<String>> collectComponentsByHostGroupWithYarnNMs() {
         Map<String, Set<ServiceComponent>> hgToNonGwServiceComponents = getNonGatewayServicesByHostGroup();
         Map<String, Set<ServiceComponent>> hgToNonGwServiceComponentsWithYarnNMs = hgToNonGwServiceComponents.entrySet().stream()
