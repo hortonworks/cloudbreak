@@ -531,6 +531,14 @@ public class CmTemplateProcessorTest {
     }
 
     @Test
+    public void testGetComputeHostGroups() {
+        Versioned blueprintVersion = () -> "7.2.11";
+
+        underTest = new CmTemplateProcessor(getBlueprintText("input/custom-hostgroups-for-nms.bp"));
+        assertEquals(2, underTest.getComputeHostGroups(blueprintVersion).size());
+    }
+
+    @Test
     public void testYARNServiceAttributes() {
         Versioned blueprintVersion = () -> "7.2.11";
 
