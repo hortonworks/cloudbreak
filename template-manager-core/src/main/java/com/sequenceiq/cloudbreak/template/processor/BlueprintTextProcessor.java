@@ -71,6 +71,8 @@ public interface BlueprintTextProcessor {
      */
     Map<String, Map<String, ServiceAttributes>> getHostGroupBasedServiceAttributes(Versioned version);
 
+    Set<String> getComputeHostGroups(Versioned version);
+
     String getStackVersion();
 
     List<String> getHostTemplateNames();

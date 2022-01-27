@@ -36,9 +36,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
@@ -105,6 +109,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     @Inject
     private StackUtil stackUtil;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     public StackStatusCheckerJob(Tracer tracer) {
         super(tracer, "Stack Status Checker Job");
@@ -265,8 +272,8 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             if (stackUtil.stopStartScalingEntitlementEnabled(stack)) {
                 Set<InstanceMetaData> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
                 long stoppedInstancesCount = stoppedInstances.size();
-                // TODO: CB-15341 Is this a sufficient check for compute hostgroup in the long run?
-                boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroup().getGroupName()).allMatch(g -> g.contains("compute"));
+                Set<String> computeGroups = getComputeHostGroups(stack.getCluster());
+                boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroup().getGroupName()).allMatch(computeGroups::contains);
                 if (stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
                     clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
                 }
@@ -352,6 +359,13 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             return failedHosts.get(imd.getDiscoveryFQDN());
         }
         return Optional.empty();
+    }
+
+    private Set<String> getComputeHostGroups(Cluster cluster) {
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        Versioned blueprintVersion = () -> blueprintProcessor.getVersion().get();
+        return blueprintProcessor.getComputeHostGroups(blueprintVersion);
     }
 
     private Long getStackId() {
