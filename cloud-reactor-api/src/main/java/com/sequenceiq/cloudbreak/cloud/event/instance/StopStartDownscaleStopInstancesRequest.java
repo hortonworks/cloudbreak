@@ -8,7 +8,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
-public class StopStartDownscaleStopInstancesRequest<T> extends CloudStackRequest<T> {
+public class StopStartDownscaleStopInstancesRequest extends CloudStackRequest<StopStartDownscaleStopInstancesResult> {
 
     private final List<CloudInstance> cloudInstancesToStop;
 
