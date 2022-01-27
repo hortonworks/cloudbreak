@@ -10,7 +10,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudStack;
 
-public class StopStartUpscaleStartInstancesRequest<T> extends CloudStackRequest<T> {
+public class StopStartUpscaleStartInstancesRequest extends CloudStackRequest<StopStartUpscaleStartInstancesResult> {
 
     private final String hostGroupName;
 

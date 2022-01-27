@@ -72,7 +72,7 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StopStartDownscaleDecommissionViaCMRequest> event) {
-        return new StackFailureEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLE_EVENT.event(), resourceId, e);
+        return new StackFailureEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT.event(), resourceId, e);
     }
 
     @Override
@@ -159,7 +159,7 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
         } catch (Exception e) {
             // TODO CB-15132: This can be improved based on where and when the Exception occurred to potentially rollback certain aspects.
             // ClusterClientInitException is one which is explicitly thrown.
-            return new StackFailureEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLE_EVENT.event(), request.getResourceId(), e);
+            return new StackFailureEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT.event(), request.getResourceId(), e);
         }
     }
 
