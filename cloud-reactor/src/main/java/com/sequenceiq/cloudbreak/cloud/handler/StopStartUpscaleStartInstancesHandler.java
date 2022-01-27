@@ -168,7 +168,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
     }
 
-    private AuthenticatedContext getAuthenticatedContext(StopStartUpscaleStartInstancesRequest<StopStartUpscaleStartInstancesResult> request,
+    private AuthenticatedContext getAuthenticatedContext(StopStartUpscaleStartInstancesRequest request,
             CloudContext cloudContext, CloudConnector<?> connector) {
         return connector.authentication().authenticate(cloudContext, request.getCloudCredential());
     }
