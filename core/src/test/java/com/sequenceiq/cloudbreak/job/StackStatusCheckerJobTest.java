@@ -13,6 +13,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -40,10 +41,13 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterStatusService;
 import com.sequenceiq.cloudbreak.cluster.status.ClusterStatusResult;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckResult;
 import com.sequenceiq.cloudbreak.common.type.HealthCheckType;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
+import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -67,6 +71,8 @@ import io.opentracing.Tracer;
 
 @RunWith(MockitoJUnitRunner.class)
 public class StackStatusCheckerJobTest {
+
+    private static final String BLUEPRINT_TEXT = "blueprintText";
 
     @InjectMocks
     private StackStatusCheckerJob underTest;
@@ -131,6 +137,18 @@ public class StackStatusCheckerJobTest {
     @Mock
     private StackUtil stackUtil;
 
+    @Mock
+    private Cluster cluster;
+
+    @Mock
+    private Blueprint blueprint;
+
+    @Mock
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
+    @Mock
+    private CmTemplateProcessor cmTemplateProcessor;
+
     @Before
     public void init() {
         Tracer tracer = Mockito.mock(Tracer.class);
@@ -146,7 +164,7 @@ public class StackStatusCheckerJobTest {
         workspace = new Workspace();
         workspace.setId(1L);
         stack.setWorkspace(workspace);
-        stack.setCluster(new Cluster());
+        stack.setCluster(cluster);
         user = new User();
         user.setUserId("1");
         stack.setCreator(user);
@@ -154,6 +172,12 @@ public class StackStatusCheckerJobTest {
 
         when(stackService.get(anyLong())).thenReturn(stack);
         when(jobExecutionContext.getMergedJobDataMap()).thenReturn(new JobDataMap());
+        when(cluster.getBlueprint()).thenReturn(blueprint);
+        when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
+        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
+        Set<String> computeGroups = new HashSet<>();
+        computeGroups.add("compute");
+        when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
     }
 
     @After
