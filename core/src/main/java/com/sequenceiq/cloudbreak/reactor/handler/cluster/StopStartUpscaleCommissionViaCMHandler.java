@@ -60,7 +60,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StopStartUpscaleCommissionViaCMRequest> event) {
-        return new StackFailureEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAIL_HANDLED_EVENT.event(), resourceId, e);
+        return new StackFailureEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT.event(), resourceId, e);
     }
 
     @Override
@@ -140,7 +140,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
         } catch (Exception e) {
             // TODO CB-15132: This can be improved based on where and when the Exception occurred to potentially rollback certain aspects.
             // ClusterClientInitException is one which is explicitly thrown.
-            return new StackFailureEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAIL_HANDLED_EVENT.event(), request.getResourceId(), e);
+            return new StackFailureEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT.event(), request.getResourceId(), e);
         }
     }
 }

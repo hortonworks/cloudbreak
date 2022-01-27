@@ -242,6 +242,7 @@ public class StopStartUpscaleActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Handling a failure from Upscale via Instance Start");
                 // TODO CB-15132: Implement actual error handling. i.e. reverting whatever is possible. Updating DB state etc.
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(),  payload.getException());
                 // TODO CB-14929: Error Hanling. This request is likely invalid since the current active state machine does not know how to process it.

@@ -198,6 +198,7 @@ public class StopStartDownscaleActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
+                LOGGER.info("Handling a failure from Downscale via Instance Stop");
                 stopStartDownscaleFlowService.handleClusterDownscaleFailure(context.getStackView().getId(), payload.getException());
                 // TODO CB-14929: Error handling. Likely needs to be more specific, and need to update states in the CB DB - for CM/cloud state appropriately.
                 // TODO CB-14929: Error Hanling. This request is likely invalid since the current active state machine does not know how to process it.
