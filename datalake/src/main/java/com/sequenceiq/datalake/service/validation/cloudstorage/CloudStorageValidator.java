@@ -19,6 +19,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.base.ResponseStatus;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateRequest;
 import com.sequenceiq.cloudbreak.cloud.model.objectstorage.ObjectStorageValidateResponse;
+import com.sequenceiq.cloudbreak.common.anonymizer.AnonymizerUtil;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.service.secret.service.SecretService;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
@@ -79,7 +80,7 @@ public class CloudStorageValidator {
             ObjectStorageValidateResponse response = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                     cloudProviderServicesV4Endpoint.validateObjectStorage(request));
 
-            LOGGER.info("ValidateObjectStorage: request: {}, response: {}", JsonUtil.writeValueAsStringSilent(request),
+            LOGGER.info("ValidateObjectStorage: request: {}, response: {}", AnonymizerUtil.anonymize(JsonUtil.writeValueAsStringSilent(request)),
                     JsonUtil.writeValueAsStringSilent(response));
 
             if (ResponseStatus.ERROR.equals(response.getStatus())) {
