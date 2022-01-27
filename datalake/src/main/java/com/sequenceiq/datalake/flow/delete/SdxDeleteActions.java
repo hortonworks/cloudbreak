@@ -19,8 +19,11 @@ import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionSuccessEvent;
 import com.sequenceiq.datalake.flow.delete.event.RdsDeletionWaitRequest;
@@ -37,7 +40,6 @@ import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.flow.core.FlowEvent;
 import com.sequenceiq.flow.core.FlowParameters;
 import com.sequenceiq.flow.core.FlowState;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Configuration
 public class SdxDeleteActions {
@@ -60,6 +62,9 @@ public class SdxDeleteActions {
     private SdxMetricService metricService;
 
     @Inject
+    private EventSenderService eventSenderService;
+
+    @Inject
     private WebApplicationExceptionMessageExtractor webApplicationExceptionMessageExtractor;
 
     @Bean(name = "SDX_DELETION_START_STATE")
@@ -76,6 +81,7 @@ public class SdxDeleteActions {
                 LOGGER.info("Start stack deletion for SDX: {}", payload.getResourceId());
                 jobService.unschedule(String.valueOf(context.getSdxId()));
                 provisionerService.startStackDeletion(payload.getResourceId(), payload.isForced());
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_DELETION_STARTED);
                 sendEvent(context, SDX_STACK_DELETION_IN_PROGRESS_EVENT.event(), payload);
             }
 
@@ -147,6 +153,7 @@ public class SdxDeleteActions {
                 if (sdxCluster != null) {
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FINISHED, sdxCluster);
                 }
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_DELETION_FINISHED);
                 sendEvent(context, SDX_DELETE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -181,6 +188,7 @@ public class SdxDeleteActions {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.DELETE_FAILED, statusReason,
                             payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_DELETION_FAILED, sdxCluster);
+                    eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_DELETION_FAILED);
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Can not set status to SDX_DELETION_FAILED because data lake was not found");
                 }

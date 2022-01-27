@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAK
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_FINALIZED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_DATABASE_BACKUP_IN_PROGRESS_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -323,9 +324,9 @@ public class DatalakeBackupActions {
 
                 metricService.incrementMetricCounter(MetricType.SDX_BACKUP_FAILED, sdxCluster);
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
-                flow.setFlowFailed(payload.getException());
-
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_BACKUP_FAILED);
+                flow.setFlowFailed(exception);
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(),
+                        ResourceEvent.DATALAKE_BACKUP_FAILED, List.of(exception.getMessage()));
 
                 sendEvent(context, DATALAKE_BACKUP_FAILURE_HANDLED_EVENT.event(), payload);
             }

@@ -5,6 +5,9 @@ import static java.lang.String.format;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
+
+import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,8 @@ import com.sequenceiq.cloudbreak.structuredevent.event.cdp.CDPStructuredNotifica
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResource;
 import com.sequenceiq.cloudbreak.structuredevent.service.CDPDefaultStructuredEventClient;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.flow.SdxContext;
+import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.flow.ha.NodeConfig;
 
 @Service
@@ -35,6 +40,9 @@ public class EventSenderService {
 
     private final String serviceVersion;
 
+    @Inject
+    private SdxService sdxService;
+
     private final CloudbreakMessagesService cloudbreakMessagesService;
 
     public EventSenderService(SdxClusterDtoConverter sdxClusterDtoConverter,
@@ -45,6 +53,19 @@ public class EventSenderService {
         this.nodeConfig = nodeConfig;
         this.serviceVersion = serviceVersion;
         this.cloudbreakMessagesService = cloudbreakMessagesService;
+    }
+
+    public void notifyEvent(SdxContext context, ResourceEvent resourceEvent) {
+        SdxCluster sdxCluster = sdxService.getById(context.getSdxId());
+        if (sdxCluster != null) {
+            sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), resourceEvent, List.of(sdxCluster.getName()));
+        }
+    }
+
+    public void notifyEvent(SdxCluster sdxCluster, SdxContext context, ResourceEvent resourceEvent) {
+        if (sdxCluster != null) {
+            sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), resourceEvent);
+        }
     }
 
     public void sendEventAndNotification(SdxCluster sdxCluster, String userCrn, ResourceEvent resourceEvent) {
