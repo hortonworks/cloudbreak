@@ -90,6 +90,8 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     private static final String DEFAULT_STATUS_REASON = "Cloudera Manager reported bad health for this host.";
 
+    private static final String MAINTENANCE_MODE = "This host is in maintenance mode.";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterStatusService.class);
 
     private static final Set<ApiServiceState> IGNORED_SERVICE_STATES = Sets.immutableEnumSet(
@@ -223,7 +225,10 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary healthSummary) {
+    private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary healthSummary, Boolean maintenanceMode) {
+        if (Boolean.TRUE.equals(maintenanceMode)) {
+            return HealthCheckResult.UNHEALTHY;
+        }
         switch (healthSummary) {
             case GOOD:
             case CONCERNING:
@@ -333,12 +338,17 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                 .filter(health -> HOST_SCM_HEALTH.equals(health.getName()))
                 .filter(health -> !IGNORED_HEALTH_SUMMARIES.contains(health.getSummary()))
                 .findFirst()
-                .map(apiHealthCheck -> new HealthCheck(HealthCheckType.HOST, healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()),
-                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation())));
+                .map(apiHealthCheck -> new HealthCheck(
+                        HealthCheckType.HOST,
+                        healthSummaryToHealthCheckResult(apiHealthCheck.getSummary(), apiHost.getMaintenanceMode()),
+                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation(), apiHost.getMaintenanceMode())));
     }
 
-    private static Optional<String> getHostHealthMessage(ApiHealthSummary healthSummary, String explanation) {
-        if (healthSummaryToHealthCheckResult(healthSummary) == HealthCheckResult.UNHEALTHY) {
+    private static Optional<String> getHostHealthMessage(ApiHealthSummary healthSummary, String explanation, Boolean maintenanceMode) {
+        if (Boolean.TRUE.equals(maintenanceMode)) {
+            return Optional.of(MAINTENANCE_MODE);
+        }
+        if (healthSummaryToHealthCheckResult(healthSummary, false) == HealthCheckResult.UNHEALTHY) {
             if (StringUtils.isNotBlank(explanation)) {
                 return Optional.of(explanation.endsWith(".") ? explanation : explanation + ".");
             } else {
