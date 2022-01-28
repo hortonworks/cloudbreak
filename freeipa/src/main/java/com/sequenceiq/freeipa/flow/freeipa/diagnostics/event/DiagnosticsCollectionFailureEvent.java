@@ -9,9 +9,12 @@ public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEven
 
     private final Exception exception;
 
-    public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, DiagnosticParameters parameters) {
+    private final String failureType;
+
+    public DiagnosticsCollectionFailureEvent(Long resourceId, Exception exception, String resourceCrn, DiagnosticParameters parameters, String failureType) {
         super(FAILED_DIAGNOSTICS_COLLECTION_EVENT.name(), resourceId, resourceCrn, parameters);
         this.exception = exception;
+        this.failureType = failureType;
     }
 
     @Override
@@ -21,6 +24,10 @@ public class DiagnosticsCollectionFailureEvent extends DiagnosticsCollectionEven
 
     public Exception getException() {
         return exception;
+    }
+
+    public String getFailureType() {
+        return failureType;
     }
 }
 

@@ -2425,6 +2425,8 @@ message CDPVMDiagnosticsEvent {
   string failureMessage = 8;
   // Input parameters of the diagnostics collections in string format.
   string inputParameters = 9;
+  // Identifier for the diagnostics bundle that can be a case number (for SUPPORT destination) or anything else like a Jira issue.
+  string caseNumber = 10;
 }
 
 // Destination of CDP VM diagnostics.
