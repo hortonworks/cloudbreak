@@ -198,7 +198,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
+                String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);

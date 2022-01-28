@@ -214,7 +214,7 @@ public class ChangePrimaryGatewayActions {
                 if (payload.getFailureDetails() != null) {
                     failureDetails.getAdditionalDetails().putAll(payload.getFailureDetails());
                 }
-                String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
+                String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.REPAIR_FAILED, errorReason);
                 operationService.failOperation(stack.getAccountId(), getOperationId(variables), message, List.of(successDetails), List.of(failureDetails));
                 LOGGER.info("Enabling the status checker for stack ID {} after failing repairing", stack.getId());

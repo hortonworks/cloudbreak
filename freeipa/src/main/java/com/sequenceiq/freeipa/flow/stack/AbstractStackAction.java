@@ -19,4 +19,8 @@ public abstract class AbstractStackAction<S extends FlowState, E extends FlowEve
     public void init() {
         super.init();
     }
+
+    protected String getErrorReason(Exception payloadException) {
+        return (payloadException == null || payloadException.getMessage() == null) ? "Unknown error" : payloadException.getMessage();
+    }
 }
