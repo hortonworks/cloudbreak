@@ -14,6 +14,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.StackScaleV4Requ
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.network.NetworkScaleV4Request;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateStackV4RequestConverter;
 import com.sequenceiq.cloudbreak.domain.ImageCatalog;
@@ -87,6 +89,9 @@ class StackCommonServiceTest {
 
     @Mock
     private NodeCountLimitValidator nodeCountLimitValidator;
+
+    @Mock
+    private TransactionService transactionService;
 
     @InjectMocks
     private StackCommonService underTest;
@@ -193,51 +198,44 @@ class StackCommonServiceTest {
     }
 
     @Test
-    public void testPutScalingInWorkspaceWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
+    public void testvalidateNetworkScaleRequestWhenVariantIsNotSupportedForMultiAzButAzHasBeenPreferredInTheRequest() {
         Stack stack = new Stack();
         String variant = AwsConstants.AwsVariant.AWS_VARIANT.name();
         stack.setPlatformVariant(variant);
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.FALSE);
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
-        StackScaleV4Request updateRequest = new StackScaleV4Request();
-        updateRequest.setStackNetworkScaleV4Request(networkScaleV4Request);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, WORKSPACE_ID, updateRequest));
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
 
         Mockito.verify(multiAzValidator, times(1)).supportedVariant(variant);
         Mockito.verify(multiAzValidator, times(0)).collectSubnetIds(any());
     }
 
     @Test
-    public void testPutScalingInWorkspaceWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
+    public void testValidateNetworkScaleRequestWhenThereIsPreferredAzAndStackProvisionedToASingleSubnet() {
         Stack stack = new Stack();
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         stack.setPlatformVariant(variant);
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
         when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.TRUE);
         when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID));
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
-        StackScaleV4Request updateRequest = new StackScaleV4Request();
-        updateRequest.setStackNetworkScaleV4Request(networkScaleV4Request);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, WORKSPACE_ID, updateRequest));
+        Assertions.assertThrows(BadRequestException.class, () -> underTest.validateNetworkScaleRequest(stack, networkScaleV4Request));
 
         Mockito.verify(multiAzValidator, times(1)).supportedVariant(variant);
         Mockito.verify(multiAzValidator, times(1)).collectSubnetIds(any());
     }
 
     @Test
-    public void testPutScalingInWorkspaceWhenThereIsPreferredAzAndStackProvisionedInMultipleSubnetButScalingIsNotSupportedOnPlatform() {
+    public void testPutScalingInWorkspaceWhenThereIsPreferredAzAndStackProvisionedInMultipleSubnetButScalingIsNotSupportedOnPlatform()
+            throws TransactionService.TransactionExecutionException {
         Stack stack = new Stack();
         stack.setCloudPlatform(AwsConstants.AWS_PLATFORM.value());
         String variant = AwsConstants.AwsVariant.AWS_NATIVE_VARIANT.name();
         stack.setPlatformVariant(variant);
-        when(stackService.getByNameOrCrnInWorkspace(STACK_NAME, WORKSPACE_ID)).thenReturn(stack);
-        when(multiAzValidator.supportedVariant(variant)).thenReturn(Boolean.TRUE);
-        when(multiAzValidator.collectSubnetIds(any())).thenReturn(Set.of(SUBNET_ID, "anotherSubnetId"));
+        when(transactionService.required(any(Supplier.class))).thenReturn(stack);
         NetworkScaleV4Request networkScaleV4Request = new NetworkScaleV4Request();
         networkScaleV4Request.setPreferredSubnetIds(List.of(SUBNET_ID));
         StackScaleV4Request updateRequest = new StackScaleV4Request();
@@ -249,9 +247,8 @@ class StackCommonServiceTest {
         when(stackScaleV4RequestToUpdateStackV4RequestConverter.convert(any())).thenReturn(updateStackV4Request);
         when(cloudParameterCache.isUpScalingSupported(anyString())).thenReturn(Boolean.FALSE);
 
-        Assertions.assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, WORKSPACE_ID, updateRequest));
+        BadRequestException actual = assertThrows(BadRequestException.class, () -> underTest.putScalingInWorkspace(STACK_NAME, WORKSPACE_ID, updateRequest));
+        assertEquals(actual.getMessage(), "Upscaling is not supported on AWS cloudplatform");
 
-        Mockito.verify(multiAzValidator, times(1)).supportedVariant(variant);
-        Mockito.verify(multiAzValidator, times(1)).collectSubnetIds(any());
     }
 }

@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -35,6 +36,7 @@ import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
 import com.sequenceiq.cloudbreak.common.ScalingHardLimitsService;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.controller.StackCreatorService;
 import com.sequenceiq.cloudbreak.controller.validation.network.MultiAzValidator;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.StackScaleV4RequestToUpdateClusterV4RequestConverter;
@@ -131,6 +133,9 @@ public class StackCommonService {
     @Inject
     private MultiAzValidator multiAzValidator;
 
+    @Inject
+    private TransactionService transactionService;
+
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
     }
@@ -226,13 +231,22 @@ public class StackCommonService {
         return put(stack, updateStackJson);
     }
 
-    public FlowIdentifier putScalingInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, StackScaleV4Request updateRequest) {
+    public FlowIdentifier putScalingInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, StackScaleV4Request stackScaleV4Request) {
         User user = userService.getOrCreate(restRequestThreadLocalService.getCloudbreakUser());
-        Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+        Stack stack;
+        try {
+            stack = transactionService.required(() -> {
+                Stack stackInTransaction = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
+                validateNetworkScaleRequest(stackInTransaction, stackScaleV4Request.getStackNetworkScaleV4Request());
+                return stackInTransaction;
+            });
+        } catch (TransactionService.TransactionExecutionException e) {
+            LOGGER.error("Cannot validate network scaling: {}", e.getMessage(), e);
+            throw new TransactionService.TransactionRuntimeExecutionException(e);
+        }
         MDCBuilder.buildMdcContext(stack);
-        updateRequest.setStackId(stack.getId());
-        validateNetworkScaleRequest(stack, updateRequest.getStackNetworkScaleV4Request());
-        UpdateStackV4Request updateStackJson = stackScaleV4RequestToUpdateStackV4RequestConverter.convert(updateRequest);
+        stackScaleV4Request.setStackId(stack.getId());
+        UpdateStackV4Request updateStackJson = stackScaleV4RequestToUpdateStackV4RequestConverter.convert(stackScaleV4Request);
         Integer scalingAdjustment = updateStackJson.getInstanceGroupAdjustment().getScalingAdjustment();
         validateScalingRequest(stack, scalingAdjustment);
 
@@ -240,7 +254,7 @@ public class StackCommonService {
         if (scalingAdjustment > 0) {
             flowIdentifier = put(stack, updateStackJson);
         } else {
-            UpdateClusterV4Request updateClusterJson = stackScaleV4RequestToUpdateClusterV4RequestConverter.convert(updateRequest);
+            UpdateClusterV4Request updateClusterJson = stackScaleV4RequestToUpdateClusterV4RequestConverter.convert(stackScaleV4Request);
             workspaceService.get(workspaceId, user);
             flowIdentifier = clusterCommonService.put(stack.getResourceCrn(), updateClusterJson);
         }
@@ -371,7 +385,8 @@ public class StackCommonService {
         }
     }
 
-    private void validateNetworkScaleRequest(Stack stack, NetworkScaleV4Request stackNetworkScaleV4Request) {
+    @VisibleForTesting
+    void validateNetworkScaleRequest(Stack stack, NetworkScaleV4Request stackNetworkScaleV4Request) {
         if (stackNetworkScaleV4Request != null && CollectionUtils.isNotEmpty(stackNetworkScaleV4Request.getPreferredSubnetIds())) {
             String platformVariant = stack.getPlatformVariant();
             boolean supportedVariant = multiAzValidator.supportedVariant(platformVariant);
