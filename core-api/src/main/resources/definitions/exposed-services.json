@@ -605,10 +605,10 @@
       "visibleForDatahub": true
     },
     {
-      "name": "HUE_QUERY_PROCESSOR",
+      "name": "QUERY_PROCESSOR",
       "displayName": "Hue Query Processor",
       "serviceName": "QUERY_PROCESSOR",
-      "knoxService": "HUE_QUERY_PROCESSOR",
+      "knoxService": "QUERY_PROCESSOR",
       "knoxUrl": "/query_processor/",
       "ssoSupported": true,
       "port": 30800,

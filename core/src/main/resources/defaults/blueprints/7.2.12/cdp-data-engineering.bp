@@ -409,23 +409,6 @@
         ]
       },
       {
-        "refName": "hue_query_processor",
-        "serviceType": "HUE_QUERY_PROCESSOR",
-        "serviceConfigs": [
-          {
-            "name": "hue_service_safety_valve",
-            "value": "[desktop]\napp_blacklist=spark,zookeeper,hbase,impala,search,sqoop,security,pig"
-          }
-        ],
-        "roleConfigGroups": [
-          {
-            "refName": "hue-QUERY_PROCESSOR",
-            "roleType": "QUERY_PROCESSOR",
-            "base": true,
-          }
-        ]
-      },
-      {
         "refName": "oozie",
         "serviceType": "OOZIE",
         "roleConfigGroups": [
@@ -504,7 +487,6 @@
           "zookeeper-SERVER-BASE",
           "das-DAS_WEBAPP",
           "das-DAS_EVENT_PROCESSOR",
-          "hue-HUE_QUERY_PROCESSOR",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
           "yarn-QUEUEMANAGER_STORE-BASE",
           "yarn-GATEWAY-BASE"

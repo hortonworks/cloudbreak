@@ -23,7 +23,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject.Builder;
 
 public class QueryProcessorConfigProviderTest {
 
-    private static final String HUE_QUERY_PROCESSOR = "HUE_QUERY_PROCESSOR";
+    private static final String QUERY_PROCESSOR = "QUERY_PROCESSOR";
 
     private static final String DB_PROVIDER = "postgres";
 
@@ -47,7 +47,7 @@ public class QueryProcessorConfigProviderTest {
     @Test
     public void getServiceConfigs() {
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HUE_QUERY_PROCESSOR);
+        rdsConfig.setType(QUERY_PROCESSOR);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         rdsConfig.setConnectionUserName(USER_NAME);
         rdsConfig.setConnectionPassword(PASSWORD);
@@ -78,7 +78,7 @@ public class QueryProcessorConfigProviderTest {
 
     @Test
     public void getServiceType() {
-        assertThat(underTest.getServiceType()).isEqualTo(QueryStoreRoles.HUE_QUERY_PROCESSOR);
+        assertThat(underTest.getServiceType()).isEqualTo(QueryStoreRoles.QUERY_PROCESSOR);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class QueryProcessorConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(true);
 
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HUE_QUERY_PROCESSOR);
+        rdsConfig.setType(QUERY_PROCESSOR);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         rdsConfig.setConnectionUserName(USER_NAME);
         rdsConfig.setConnectionPassword(PASSWORD);
@@ -110,7 +110,7 @@ public class QueryProcessorConfigProviderTest {
         when(mockTemplateProcessor.isRoleTypePresentInService(anyString(), any(List.class))).thenReturn(false);
 
         RDSConfig rdsConfig = new RDSConfig();
-        rdsConfig.setType(HUE_QUERY_PROCESSOR);
+        rdsConfig.setType(QUERY_PROCESSOR);
         rdsConfig.setConnectionURL(String.format("jdbc:%s://%s:%s/%s", DB_PROVIDER, HOST, PORT, DB_NAME));
         rdsConfig.setConnectionUserName(USER_NAME);
         rdsConfig.setConnectionPassword(PASSWORD);

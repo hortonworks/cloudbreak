@@ -30,7 +30,7 @@ public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider 
 
     @Override
     public String getServiceType() {
-        return QueryStoreRoles.HUE_QUERY_PROCESSOR;
+        return QueryStoreRoles.QUERY_PROCESSOR;
     }
 
     @Override

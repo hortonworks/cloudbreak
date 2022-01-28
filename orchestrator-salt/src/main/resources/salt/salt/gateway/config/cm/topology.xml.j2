@@ -70,7 +70,7 @@
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
              <param>
-                 <name>{{ aclsauthz_prefix ~ "hue_query_processor.acl" }}</name>
+                 <name>{{ aclsauthz_prefix ~ "query_processor.acl" }}</name>
                  <value>*;{{ salt['pillar.get']('gateway:envAccessGroup') }};*</value>
              </param>
              <param>
@@ -385,9 +385,9 @@
              </param>
              {%- endif %}
 
-             {% if 'HUE_QUERY_PROCESSOR' in exposed and 'QUERY_PROCESSOR' in salt['pillar.get']('gateway:location') -%}
+             {% if 'QUERY_PROCESSOR' in exposed and 'QUERY_PROCESSOR' in salt['pillar.get']('gateway:location') -%}
              <param>
-                 <name>HUE_QUERY_PROCESSOR</name>
+                 <name>QUERY_PROCESSOR</name>
                  <value>enabled=true;maxFailoverAttempts=3;failoverSleep=1000</value>
              </param>
              {%- endif %}
@@ -836,11 +836,11 @@
     {%- endif %}
 
     {% if 'QUERY_PROCESSOR' in salt['pillar.get']('gateway:location') -%}
-    {% if 'HUE_QUERY_PROCESSOR' in exposed -%}
+    {% if 'QUERY_PROCESSOR' in exposed -%}
     <service>
-        <role>HUE_QUERY_PROCESSOR</role>
+        <role>QUERY_PROCESSOR</role>
         {% for hostloc in salt['pillar.get']('gateway:location')['QUERY_PROCESSOR'] -%}
-        <url>{{ protocol }}://{{ hostloc }}:{{ ports['HUE_QUERY_PROCESSOR'] }}</url>
+        <url>{{ protocol }}://{{ hostloc }}:{{ ports['QUERY_PROCESSOR'] }}</url>
         {%- endfor %}
     </service>
     {%- endif %}

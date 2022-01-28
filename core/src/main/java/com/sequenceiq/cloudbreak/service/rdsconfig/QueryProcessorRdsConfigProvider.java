@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import javax.inject.Inject;
 
 @Component
-public class DasRdsConfigProvider extends AbstractRdsConfigProvider {
+public class QueryProcessorRdsConfigProvider extends AbstractRdsConfigProvider {
 
     private static final String PILLAR_KEY = "query_processor";
 

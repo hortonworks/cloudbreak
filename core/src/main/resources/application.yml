@@ -817,7 +817,7 @@ cb:
         YARN: 7.2.9,
         ZEPPELIN: 7.2.9,
         ZOOKEEPER: 7.2.9,
-        HUE_QUERY_PROCESSOR: 7.2.9
+        QUERY_PROCESSOR: 7.2.13
         
 
 cluster:
