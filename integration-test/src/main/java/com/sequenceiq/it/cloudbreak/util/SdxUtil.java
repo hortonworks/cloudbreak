@@ -24,6 +24,11 @@ public class SdxUtil {
                 .getClusterShape().name();
     }
 
+    public String getCrn(AbstractSdxTestDto testDto, SdxClient sdxClient) {
+        return getSdxClusterDetailResponse(testDto, sdxClient)
+                .getCrn();
+    }
+
     public String getImageId(AbstractSdxTestDto testDto, SdxClient sdxClient) {
         return getSdxClusterDetailResponse(testDto, sdxClient)
                 .getStackV4Response().getImage().getId();
