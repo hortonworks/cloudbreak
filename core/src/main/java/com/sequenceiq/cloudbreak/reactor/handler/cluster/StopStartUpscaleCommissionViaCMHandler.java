@@ -83,7 +83,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                     String.valueOf(allInstancesToCommission.size()));
 
             ClusterSetupService clusterSetupService = clusterApiConnectors.getConnector(stack).clusterSetupService();
-            clusterSetupService.waitForHostsHealthy(new HashSet(allInstancesToCommission));
+            clusterSetupService.waitForHostsHealthy(new HashSet<>(allInstancesToCommission));
 
             flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED,
                     String.valueOf(allInstancesToCommission.size()));
