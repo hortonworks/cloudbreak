@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
@@ -46,7 +45,6 @@ import com.sequenceiq.cloudbreak.domain.ImageCatalog;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterRepairService;
-import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
 import com.sequenceiq.cloudbreak.service.cluster.flow.ClusterOperationService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.ImageChangeDto;
@@ -59,12 +57,12 @@ import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLoca
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.cloudbreak.template.BlueprintUpdaterConnectors;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.cloudbreak.workspace.model.User;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.domain.RetryResponse;
 import com.sequenceiq.flow.domain.RetryableFlow;
-import com.sequenceiq.flow.service.FlowCancelService;
 import com.sequenceiq.flow.service.FlowRetryService;
 
 @Service
@@ -83,9 +81,6 @@ public class StackCommonService {
 
     @Inject
     private ClusterCommonService clusterCommonService;
-
-    @Inject
-    private ClusterService clusterService;
 
     @Inject
     private CloudParameterCache cloudParameterCache;
@@ -110,9 +105,6 @@ public class StackCommonService {
 
     @Inject
     private StackService stackService;
-
-    @Inject
-    private StackUpdater stackUpdater;
 
     @Inject
     private StackOperationService stackOperationService;
@@ -142,7 +134,7 @@ public class StackCommonService {
     private MultiAzValidator multiAzValidator;
 
     @Inject
-    private FlowCancelService flowCancelService;
+    private StackUtil stackUtil;
 
     public StackV4Response createInWorkspace(StackV4Request stackRequest, User user, Workspace workspace, boolean distroxRequest) {
         return stackCreatorService.createStack(user, workspace, stackRequest, distroxRequest);
@@ -182,6 +174,9 @@ public class StackCommonService {
     public void putStartInstancesInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest, ScalingStrategy scalingStrategy) {
         LOGGER.info("Received putStack on crn: {}, with scalingStrategy: {}, updateRequest: {}", crn, scalingStrategy, updateRequest);
         Stack stack = stackService.getByCrn(crn);
+        if (!stackUtil.stopStartScalingEntitlementEnabled(stack)) {
+            throw new BadRequestException("The entitlement for scaling via stop/start is not enabled");
+        }
         MDCBuilder.buildMdcContext(stack);
         putStartInstances(stack, updateRequest, scalingStrategy);
     }
@@ -222,21 +217,25 @@ public class StackCommonService {
         return syncComponentVersionsFromCm(stack, candidateImageUuids);
     }
 
-    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced,
-            ScalingStrategy scalingStrategy) {
+    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
         Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
         if (stack.isEmpty()) {
             throw new BadRequestException("The requested Data Hub does not exist.");
         }
         validateStackIsNotDataLake(stack.get(), instanceIds);
-        if (scalingStrategy != null) {
-            return stackOperationService.stopInstances(stack.get(), instanceIds, forced);
-        }
         return stackOperationService.removeInstances(stack.get(), instanceIds, forced);
     }
 
-    public FlowIdentifier deleteMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
-        return deleteMultipleInstancesInWorkspace(nameOrCrn, workspaceId, instanceIds, forced, null);
+    public FlowIdentifier stopMultipleInstancesInWorkspace(NameOrCrn nameOrCrn, Long workspaceId, Set<String> instanceIds, boolean forced) {
+        Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
+        if (stack.isEmpty()) {
+            throw new BadRequestException("The requested Data Hub does not exist.");
+        }
+        if (!stackUtil.stopStartScalingEntitlementEnabled(stack.get())) {
+            throw new BadRequestException("The entitlement for scaling via stop/start is not enabled");
+        }
+        validateStackIsNotDataLake(stack.get(), instanceIds);
+        return stackOperationService.stopInstances(stack.get(), instanceIds, forced);
     }
 
     public FlowIdentifier putStartInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -311,15 +310,6 @@ public class StackCommonService {
         RetryResponse retry = flowRetryService.retry(stackId);
         eventService.fireCloudbreakEvent(stackId, Status.UPDATE_IN_PROGRESS.name(), STACK_RETRY_FLOW_START, List.of(retry.getName()));
         return retry.getFlowIdentifier();
-    }
-
-    public void cancelInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
-        Long stackId = stackService.getIdByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
-
-        LOGGER.info("Cancelling existing flows for the stack : {}", stackId);
-        flowCancelService.cancelRunningFlows(stackId);
-        clusterService.updateClusterStatusByStackId(stackId, DetailedStackStatus.AVAILABLE, "fake update after cancelling the running flows");
-        stackUpdater.updateStackStatus(stackId, DetailedStackStatus.AVAILABLE, "fake update after cancelling the running flows");
     }
 
     public List<RetryableFlow> getRetryableFlows(String name, Long workspaceId) {
