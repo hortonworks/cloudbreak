@@ -37,7 +37,6 @@ public abstract class AbstractMonitor<M extends Monitored> implements Monitor<M>
                 EvaluatorContext evaluatorContext = getContext(monitored);
                 evaluatorExecutor.setContext(evaluatorContext);
                 executorServiceWithRegistry.submitIfAbsent(evaluatorExecutor, evaluatorContext.getItemId());
-                // TODO CB-14972: This needs to log the cluster name as well.
                 // TODO CB-14972: The size of the queue needs to be logged occasionally.
                 LOGGER.debug("Successfully submitted {} for cluster {}.", evaluatorExecutor.getName(), evaluatorContext.getData());
                 rejectedThreadService.remove(evaluatorContext.getData());

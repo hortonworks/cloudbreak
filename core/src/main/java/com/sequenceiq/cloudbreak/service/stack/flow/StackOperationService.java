@@ -282,7 +282,6 @@ public class StackOperationService {
             return transactionService.required(() -> {
                 Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
 
-                // TODO CB-14929: validateServiceRoles needs adjusting - it counts NMs, and could be the place where we allow this only for NMs/gateways.
                 updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateStackStatusForStartHostGroup(stackWithLists);
                 updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
@@ -291,7 +290,7 @@ public class StackOperationService {
                 if (withClusterEvent) {
                     updateNodeCountValidator.validateClusterStatusForStartHostGroup(stackWithLists);
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
-                    updateNodeCountValidator.validataCMStatus(stackWithLists, instanceGroupAdjustmentJson);
+                    updateNodeCountValidator.validateCMStatus(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED,
                         "Requested node count for upscaling (stopstart): " + instanceGroupAdjustmentJson.getScalingAdjustment());
@@ -324,7 +323,7 @@ public class StackOperationService {
                     updateNodeCountValidator.validateInstanceStatuses(stackWithLists, instanceGroupAdjustmentJson);
                 }
                 if (withClusterEvent) {
-                    updateNodeCountValidator.validateClusterStatusForStartHostGroup(stackWithLists);
+                    updateNodeCountValidator.validateClusterStatus(stackWithLists);
                     updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
                     if (instanceStatusValidationNeeded) {
                         updateNodeCountValidator.validataHostMetadataStatuses(stackWithLists, instanceGroupAdjustmentJson);

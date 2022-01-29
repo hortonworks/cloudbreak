@@ -60,7 +60,7 @@ public class CloudbreakCommunicator {
         requestLogging.logResponseTime(() -> {
             if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
                 cloudbreakInternalCrnClient.withInternalCrn()
-                        .autoscaleEndpoint().stopInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
+                        .autoscaleEndpoint().stopInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false, scalingStrategy);
             } else {
                 cloudbreakInternalCrnClient.withInternalCrn()
                         .autoscaleEndpoint().decommissionInternalInstancesForClusterCrn(cluster.getStackCrn(), decommissionNodeIds, false);

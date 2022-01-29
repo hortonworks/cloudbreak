@@ -72,7 +72,7 @@ public class UpdateNodeCountValidator {
         }
     }
 
-    public void validataCMStatus(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+    public void validateCMStatus(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
         List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
         List<InstanceMetaData> unhealthyCM = instanceMetaDataAsList.stream()
                 .filter(instanceMetaData -> (instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY) ||

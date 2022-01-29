@@ -58,16 +58,8 @@ public interface AutoscaleV4Endpoint {
     @Path("/stack/startNodes/crn/{crn}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartStop")
+            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStart")
     void putStackStartInstances(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
-
-    // TODO CB-14929: Remove this API once done with testing, or publish a quick document somewhere on how the put API can be used
-    @GET
-    @Path("/stack/startNodees/crn/{crn}/{userId}")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "start_nodes_by_count", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStartNodes")
-    String tmpStartNodes(@PathParam("crn") String crn, @PathParam("userId") String userId,
-            @QueryParam("hostGroup") String hostGroup, @QueryParam("numNodes") Integer numNodes);
 
     @PUT
     @Path("/stack/crn/{crn}/{userId}/cluster")
@@ -147,22 +139,14 @@ public interface AutoscaleV4Endpoint {
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
 
     @DELETE
-    @Path("/stack/stopNodes/crn/{crn}/internal")
+    @Path("/stack/stopNodes/crn/{crn}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "stopInternalInstancesForClusterCrn")
-    void stopInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+            notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstances")
+    void stopInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("scalingStrategy") ScalingStrategy scalingStrategy);
-
-    // TODO CB-14929: Remove this API once done with testing, or publish a quick document somewhere on how the put API can be used
-    @GET
-    @Path("/stack/stopNodes2/crn/{crn}/{userId}")
-    @Produces(APPLICATION_JSON)
-    @ApiOperation(value = "stop_nodes_by_id", produces = APPLICATION_JSON, notes = "blah", nickname = "tmpStopNodes2")
-    String tmpStopNodes2(@PathParam("crn") String crn, @PathParam("userId") String userId,
-            @QueryParam("hostGroup") String hostGroup, @QueryParam("nodeIds") String nodeIds);
 
     @GET
     @Path("clusterproxy")
