@@ -145,7 +145,6 @@ public class ClusterCommonService {
         if (!hostGroupService.hasHostGroupInCluster(stack.getCluster().getId(), hostGroupName)) {
             throw new BadRequestException(String.format("Host group '%s' not found or not member of the cluster '%s'", hostGroupName, stack.getName()));
         }
-        // TODO CB-14929: CB-15153 May need changes if we need to support downscale without specifying a list of nodes.
         updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, updateJson.getHostGroupAdjustment());
         if (blueprintService.isClouderaManagerTemplate(blueprint)) {
             String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();

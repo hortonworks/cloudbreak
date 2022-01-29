@@ -21,7 +21,6 @@ public class DistroXOpDescription {
     public static final String SYNC_BY_CRN = "syncs the stack by crn";
     public static final String RETRY_BY_NAME = "retries the stack by name";
     public static final String RETRY_BY_CRN = "retries the stack by crn";
-    public static final String CANCEL_BY_CRN = "cancels the running flows by stack crn";
     public static final String STOP_BY_NAME = "stops the stack by name";
     public static final String STOP_BY_CRN = "stops the stack by crn";
     public static final String START_BY_NAME = "starts the stack by name";

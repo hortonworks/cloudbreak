@@ -56,11 +56,7 @@ public class StopStartDownscaleFlowEventChainFactory implements FlowEventChainFa
 
         Queue<Selectable> flowEventChain = new ConcurrentLinkedQueue<>();
 
-        // TODO CB-14929: Figure out how this event is supposed to be accepted.
-        //  Adding this (stack sync) temporarily, just to make sure the event gets accepted. The flow is otherwise not being accepted.
-
-        // TODO CB-14929: Is a stack sync really required here. What does it do ?
-        // TODO CB-14929: Is a stack sync required after a downscale completes.
+        // TODO CB-14929: Is a stack sync really required here. What does it do ? (As of now it also serves to accept the event)
         addStackSyncTriggerEvent(event, flowEventChain);
 
         flowEventChain.add(te);

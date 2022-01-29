@@ -13,7 +13,6 @@ import com.sequenceiq.flow.core.FlowTriggerCondition;
 import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 
 @Component
-// TODO CB-14929: Do we need a similar FlowTriggerCondition for stop-start upscale/downscale?
 public class StackStopFlowTriggerCondition implements FlowTriggerCondition {
     private static final Logger LOGGER = LoggerFactory.getLogger(StackStopFlowTriggerCondition.class);
 
