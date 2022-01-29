@@ -28,6 +28,9 @@ public interface InstanceConnector {
     /**
      * A version of instance start which limits the retries that the operation may normally perform.
      *
+     * This falls back to the existing {@link #start(AuthenticatedContext, List, List)} implementation
+     * if a specific connector does not implement the API.
+     * 
      * @param authenticatedContext the authenticated context which holds the client object
      * @param resources            resources managed by Cloudbreak, can be used to figure out which resources are associated with the given VMs
      *                             (e.g. floating IP) and they can be started as well
@@ -55,6 +58,9 @@ public interface InstanceConnector {
 
     /**
      * A version of instance stop which limits the retries that operation may normally perform.
+     *
+     * This falls back to the existing {@link #stop(AuthenticatedContext, List, List)} implementation
+     * if a specific connector does not implement the API.
      *
      * @param authenticatedContext the authenticated context which holds the client object
      * @param resources            resources managed by Cloudbreak, can be used to figure out which resources are associated with the given VMs

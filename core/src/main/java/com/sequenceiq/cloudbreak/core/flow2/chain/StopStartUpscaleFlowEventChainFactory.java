@@ -11,11 +11,10 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.type.ScalingType;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
-import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackAndClusterUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StackSyncTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.event.StopStartUpscaleTriggerEvent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.view.ClusterView;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -60,17 +59,15 @@ public class StopStartUpscaleFlowEventChainFactory implements FlowEventChainFact
 
     private void addClusterScaleTriggerEventIfNeeded(StackAndClusterUpscaleTriggerEvent event, StackView stackView, ClusterView clusterView,
             Queue<Selectable> flowEventChain) {
-        if (ScalingType.isClusterUpScale(event.getScalingType()) && clusterView != null) {
-            HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterView.getId(), event.getInstanceGroup())
-                    .orElseThrow(NotFoundException.notFound("hostgroup", event.getInstanceGroup()));
-            flowEventChain.add(
-                    new StopStartUpscaleTriggerEvent(
-                            StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT.event(),
-                            stackView.getId(),
-                            hostGroup.getName(),
-                            event.getAdjustment(),
-                            event.getClusterManagerType())
-            );
-        }
+        HostGroup hostGroup = hostGroupService.getByClusterIdAndName(clusterView.getId(), event.getInstanceGroup())
+                .orElseThrow(NotFoundException.notFound("hostgroup", event.getInstanceGroup()));
+        flowEventChain.add(
+                new StopStartUpscaleTriggerEvent(
+                        StopStartUpscaleEvent.STOPSTART_UPSCALE_TRIGGER_EVENT.event(),
+                        stackView.getId(),
+                        hostGroup.getName(),
+                        event.getAdjustment(),
+                        event.getClusterManagerType())
+        );
     }
 }
