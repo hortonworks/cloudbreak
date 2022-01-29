@@ -286,12 +286,6 @@ public class DistroXV1Controller implements DistroXV1Endpoint {
     }
 
     @Override
-    @InternalOnly
-    public void cancelByCrn(@ValidCrn(resource = CrnResourceDescriptor.DATAHUB) @TenantAwareParam @ResourceCrn String crn) {
-        stackOperations.cancel(NameOrCrn.ofCrn(crn), getWorkspaceIdForCurrentUser());
-    }
-
-    @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.STOP_DATAHUB)
     public FlowIdentifier putStopByName(@ResourceName String name) {
         return stackOperations.putStop(NameOrCrn.ofName(name), getWorkspaceIdForCurrentUser());

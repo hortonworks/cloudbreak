@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.controller.v4;
 
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +27,6 @@ import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.AutoscaleV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
@@ -104,22 +102,6 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
         stackCommonService.putStartInstancesInDefaultWorkspace(crn, updateRequest, ScalingStrategy.STOPSTART);
     }
 
-    // TODO CB-14929: Remove this API once done with testing, or publish a quick document somewhere on how the put API can be used
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public String tmpStartNodes(@TenantAwareParam @ResourceCrn String crn, String userId, String hostGroup, Integer numNodes) {
-        LOGGER.info("Received tmpStartNodes request: crn: {}, hostGroup: {}, numNodes: {}", crn, hostGroup, numNodes);
-        UpdateStackV4Request updateStackV4Request = new UpdateStackV4Request();
-        updateStackV4Request.setWithClusterEvent(true);
-        InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson = new InstanceGroupAdjustmentV4Request();
-        instanceGroupAdjustmentJson.setScalingAdjustment(numNodes);
-        instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
-        updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
-        LOGGER.info("Constructed UpdateStackV4Request: {}", updateStackV4Request);
-        stackCommonService.putStartInstancesInDefaultWorkspace(crn, updateStackV4Request, ScalingStrategy.STOPSTART);
-        return "tmpStartNodes";
-    }
-
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public void putCluster(@TenantAwareParam @ResourceCrn String crn, String userId, @Valid UpdateClusterV4Request updateRequest) {
@@ -165,28 +147,13 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     }
 
     @Override
-    @InternalOnly
-    public void stopInternalInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public void stopInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
             Boolean forced, ScalingStrategy scalingStrategy) {
         LOGGER.info("stopInternalInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterCrn, instanceIds);
-        if (scalingStrategy == null) {
-            scalingStrategy = ScalingStrategy.STOPSTART;
-            LOGGER.debug("Scaling strategy is null, and has been set to the default: {}", scalingStrategy);
-        }
-        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
-                new HashSet(instanceIds), forced, scalingStrategy);
-    }
-
-    @Override
-    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public String tmpStopNodes2(@TenantAwareParam @ResourceCrn String crn, String userId, String hostGroup, String nodeIds) {
-        LOGGER.info("tmpStopNodes2: crn:{}, hostGroup: {}, nodeIdsString: {}", crn, hostGroup, nodeIds);
-        Set<String> instanceIds = new HashSet(Arrays.asList(nodeIds.split(",")));
-
-        stackCommonService.deleteMultipleInstancesInWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(),
-                new HashSet(instanceIds), false, ScalingStrategy.STOPSTART);
-        return "tmpStopNodes2";
+        stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                new HashSet(instanceIds), forced);
     }
 
     @Override
