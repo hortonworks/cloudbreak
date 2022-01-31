@@ -137,7 +137,7 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
 
     @Override
     public StackPatchType getStackFixType() {
-        return StackPatchType.LOGGING_AGENT_AUTO_RESTART;
+        return StackPatchType.LOGGING_AGENT_AUTO_RESTART_V2;
     }
 
     private boolean isAffectedByImageTimestamp(Stack stack, Image image, long dateAfterTimestamp, long dateBeforeTimestamp) {
