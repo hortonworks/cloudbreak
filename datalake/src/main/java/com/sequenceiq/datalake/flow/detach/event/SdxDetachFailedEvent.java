@@ -15,6 +15,6 @@ public class SdxDetachFailedEvent extends SdxFailedEvent {
 
     @Override
     public String selector() {
-        return "SdxStartDetachEvent";
+        return "SdxDetachFailedEvent";
     }
 }
