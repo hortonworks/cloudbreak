@@ -108,7 +108,6 @@ public class ScalingRequestTest {
     @MethodSource("scaleUpNodeCountTesting")
     public void testScaleUpNodeCount(String testCase, int existingClusterNodeCount, int existingHostGroupNodeCount,
             int desiredHostGroupNodeCount, int expectedNodeCount) {
-        // TODO CB-14929: Test needs adjustment based on the scaling strategy being used
         ArgumentCaptor<UpdateStackV4Request> captor = ArgumentCaptor.forClass(UpdateStackV4Request.class);
 
         if (expectedNodeCount > 0) {

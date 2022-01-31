@@ -109,9 +109,6 @@ class StackCommonServiceTest {
     @Mock
     private ScalingHardLimitsService scalingHardLimitsService;
 
-    @Mock
-    private StackUtil stackUtil;
-
     @InjectMocks
     private StackCommonService underTest;
 
