@@ -115,6 +115,8 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
 
     private static final String METERING_COMPONENT = "metering";
 
+    private static final int LOGGING_DOCTOR_MAX_RETRY = 3;
+
     private final ExitCriteria exitCriteria;
 
     private final SaltService saltService;
@@ -524,8 +526,9 @@ public class SaltTelemetryOrchestrator implements TelemetryOrchestrator {
     private void distributeAndExecuteLoggingAgentDoctor(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel) {
         try {
             runSimpleSaltState(allGateways, nodes, exitModel, FLUENT_CRONTAB, "Logging agent crontab distribution operation failed.",
-                    1, false);
-            runSimpleSaltState(allGateways, nodes, exitModel, FLUENT_DOCTOR, "Logging agent doctor failed.", 1, false);
+                    LOGGING_DOCTOR_MAX_RETRY, false);
+            runSimpleSaltState(allGateways, nodes, exitModel, FLUENT_DOCTOR, "Logging agent doctor failed.",
+                    LOGGING_DOCTOR_MAX_RETRY, false);
         } catch (Exception e) {
             LOGGER.warn("Logging agent doctor operation failed. Skipping...", e);
         }
