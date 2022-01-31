@@ -58,7 +58,6 @@ import com.sequenceiq.environment.credential.service.CredentialPrerequisiteServi
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.service.ServiceProviderCredentialAdapter;
 import com.sequenceiq.environment.credential.v1.CredentialV1Controller;
-import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
 import com.sequenceiq.environment.credential.v1.converter.CredentialToCredentialV1ResponseConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.environment.flow.EnvEventParameterFactory;
@@ -238,7 +237,6 @@ public class CredentialExperienceTest {
             CredentialPrerequisitesHandler.class,
             CredentialExperiencePolicyHandler.class,
             CloudbreakMessagesService.class,
-            CredentialRequestToCreateAWSCredentialRequestConverter.class,
 
             CloudPlatformInitializer.class,
             ConversionConfig.class,
