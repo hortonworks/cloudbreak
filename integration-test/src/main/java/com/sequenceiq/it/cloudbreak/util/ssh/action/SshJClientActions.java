@@ -257,6 +257,24 @@ public class SshJClientActions extends SshJClient {
         }
     }
 
+    public SdxTestDto checkKinitDuringFreeipaUpgrade(SdxTestDto testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
+        getSdxInstanceGroupIps(instanceGroups, hostGroupNames, false).stream().findFirst().ifPresent(ip -> checkKinitDuringFreeipaUpgrade(ip));
+        return testDto;
+    }
+
+    private void checkKinitDuringFreeipaUpgrade(String instanceIp) {
+        // TODO remove sleep 31 after unbound removal has been done, this is because unbound cached for 30 sec the dns records
+        Pair<Integer, String> cmdOut = executeSshCommand(instanceIp,
+                "set -x kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 " +
+                        "|| sleep 31 && kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 && klist | grep fakemockuser0");
+        if (cmdOut.getKey() == 1) {
+            String errorMsg = "Kinit wasn't successfull on instance [" +
+                    instanceIp + "] during freeipa upgrade! Cmd exit code: " + cmdOut.getKey() + ", Cmd output: " + cmdOut.getValue();
+            LOGGER.error(errorMsg);
+            throw new TestFailException(errorMsg);
+        }
+    }
+
     private Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
         try (SSHClient sshClient = createSshClient(instanceIp, null, null, null)) {
             Pair<Integer, String> cmdOut = execute(sshClient, command);

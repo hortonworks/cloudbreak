@@ -127,6 +127,7 @@ dependencies {
   implementation project(':freeipa-api')
   implementation project(':freeipa-client')
   implementation project(':node-status-monitor-client')
+  implementation project(':usage-collection')
   implementation project(':common')
   implementation project(':core-api')
   implementation project(':databus-connector')
