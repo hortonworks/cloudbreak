@@ -4,10 +4,12 @@ import static java.lang.String.format;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
@@ -254,6 +256,30 @@ public class SshJClientActions extends SshJClient {
         Pair<Integer, String> cmdOut = executeSshCommand(instanceIp, "curl --max-time 30 cloudera.com");
         if (cmdOut.getKey() == 0) {
             throw new TestFailException("Instance [" + instanceIp + "] has internet coonection but shouldn't have!");
+        }
+    }
+
+    public SdxTestDto checkKinitDuringFreeipaUpgrade(SdxTestDto testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames)
+            throws TestFailException {
+        Optional<String> instanceGroupIp = getSdxInstanceGroupIps(instanceGroups, hostGroupNames, false).stream().findFirst();
+        if (instanceGroupIp.isEmpty()) {
+            String error = "No instance found for kinit testing inside the datalake cluster";
+            throw new TestFailException(error);
+        } else {
+            return testDto;
+        }
+    }
+
+    private void checkKinitDuringFreeipaUpgrade(String instanceIp) {
+        // TODO remove sleep 31 after unbound removal has been done, this is because unbound cached for 30 sec the dns records
+        Pair<Integer, String> cmdOut = executeSshCommand(instanceIp,
+                "set -x kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 " +
+                        "|| sleep 31 && kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 && klist | grep fakemockuser0");
+        if (cmdOut.getKey() != 0) {
+            String errorMsg = "Kinit wasn't successfull on instance [" +
+                    instanceIp + "] during freeipa upgrade! Cmd exit code: " + cmdOut.getKey() + ", Cmd output: " + cmdOut.getValue();
+            LOGGER.error(errorMsg);
+            throw new TestFailException(errorMsg);
         }
     }
 

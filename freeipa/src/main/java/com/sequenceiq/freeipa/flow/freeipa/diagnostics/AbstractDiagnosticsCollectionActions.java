@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.statemachine.StateContext;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.common.event.ResourceCrnPayload;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
@@ -33,7 +34,8 @@ abstract class AbstractDiagnosticsCollectionActions<P extends ResourceCrnPayload
 
     @Override
     protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-        return new DiagnosticsCollectionFailureEvent(payload.getResourceId(), ex, payload.getResourceCrn(), new DiagnosticParameters());
+        return new DiagnosticsCollectionFailureEvent(payload.getResourceId(), ex, payload.getResourceCrn(), new DiagnosticParameters(),
+                UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET.name());
     }
 
     @Override

@@ -2,12 +2,15 @@ package com.sequenceiq.freeipa.flow.freeipa.diagnostics;
 
 import java.util.Map;
 
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.statemachine.action.Action;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.cloud.store.InMemoryStateStore;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
@@ -21,6 +24,9 @@ import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollecti
 public class DiagnosticsCollectionActions {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsCollectionActions.class);
+
+    @Inject
+    private DiagnosticsFlowService diagnosticsFlowService;
 
     @Bean(name = "DIAGNOSTICS_SALT_VALIDATION_STATE")
     public Action<?, ?> diagnosticsSaltValidateAction() {
@@ -199,6 +205,7 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionStateSelectors.FINALIZE_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .build();
+                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters());
                 sendEvent(context, event);
             }
         };
@@ -222,6 +229,8 @@ public class DiagnosticsCollectionActions {
                         .withSelector(DiagnosticsCollectionStateSelectors.HANDLED_FAILED_DIAGNOSTICS_COLLECTION_EVENT.selector())
                         .withParameters(parameters)
                         .build();
+                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters(),
+                        UsageProto.CDPVMDiagnosticsFailureType.Value.valueOf(payload.getFailureType()), payload.getException());
                 sendEvent(context, event);
             }
         };

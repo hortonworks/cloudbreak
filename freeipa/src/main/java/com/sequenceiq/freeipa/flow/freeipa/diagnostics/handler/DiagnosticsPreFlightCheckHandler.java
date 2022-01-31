@@ -11,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.cloudera.thunderhead.service.common.usage.UsageProto;
 import com.cloudera.thunderhead.telemetry.nodestatus.NodeStatusProto;
 import com.sequenceiq.cloudbreak.client.RPCResponse;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
@@ -21,16 +22,21 @@ import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionEvent;
+import com.sequenceiq.freeipa.flow.freeipa.diagnostics.event.DiagnosticsCollectionFailureEvent;
 import com.sequenceiq.freeipa.service.stack.FreeIpaNodeStatusService;
 import com.sequenceiq.freeipa.service.stack.StackService;
 import com.sequenceiq.freeipa.service.stack.instance.InstanceMetaDataService;
 
 import reactor.bus.Event;
+import reactor.bus.EventBus;
 
 @Component
 public class DiagnosticsPreFlightCheckHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent>  {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsPreFlightCheckHandler.class);
+
+    @Inject
+    private EventBus eventBus;
 
     @Inject
     private StackService stackService;
@@ -56,18 +62,25 @@ public class DiagnosticsPreFlightCheckHandler extends EventSenderAwareHandler<Di
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
-        Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
-        Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(resourceId);
-        instanceMetaDataSet.stream()
-                .filter(im -> im.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY)
-                .forEach(instance -> executeNetworkReport(stack, instance));
-        DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
-                .withResourceCrn(resourceCrn)
-                .withResourceId(resourceId)
-                .withSelector(START_DIAGNOSTICS_INIT_EVENT.selector())
-                .withParameters(parameters)
-                .build();
-        eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
+        try {
+            Stack stack = stackService.getByIdWithListsInTransaction(resourceId);
+            Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(resourceId);
+            instanceMetaDataSet.stream()
+                    .filter(im -> im.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY)
+                    .forEach(instance -> executeNetworkReport(stack, instance));
+            DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
+                    .withResourceCrn(resourceCrn)
+                    .withResourceId(resourceId)
+                    .withSelector(START_DIAGNOSTICS_INIT_EVENT.selector())
+                    .withParameters(parameters)
+                    .build();
+            eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
+        } catch (Exception e) {
+            LOGGER.debug("Diagnostics pre flight check failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameters, e);
+            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters,
+                    UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET.name());
+            eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
+        }
     }
 
     private void executeNetworkReport(Stack stack, InstanceMetaData instance) {
