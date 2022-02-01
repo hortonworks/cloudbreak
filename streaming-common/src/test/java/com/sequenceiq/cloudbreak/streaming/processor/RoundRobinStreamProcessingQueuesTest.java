@@ -34,7 +34,7 @@ public class RoundRobinStreamProcessingQueuesTest {
     public void testProcess() throws InterruptedException {
         // GIVEN
         MockitoAnnotations.openMocks(this);
-        DummyRequest input = new DummyRequest("body", null, new Date().getTime());
+        DummyRequest input = new DummyRequest("body", null, new Date().getTime(), true);
         given(recordProcessor.getServiceName()).willReturn("DummyService");
         doNothing().when(recordProcessor).handleDroppedRecordRequest(input, 2);
         RoundRobinStreamProcessingQueues<AbstractStreamingConfiguration, RecordRequest, RecordWorker> underTest =
@@ -53,8 +53,8 @@ public class RoundRobinStreamProcessingQueuesTest {
 
     static class DummyRequest extends RecordRequest {
 
-        DummyRequest(String rawBody, GeneratedMessageV3 messageBody, long timestamp) {
-            super(rawBody, messageBody, timestamp);
+        DummyRequest(String rawBody, GeneratedMessageV3 messageBody, long timestamp, boolean forceRawOutput) {
+            super(rawBody, messageBody, timestamp, forceRawOutput);
         }
     }
 }
