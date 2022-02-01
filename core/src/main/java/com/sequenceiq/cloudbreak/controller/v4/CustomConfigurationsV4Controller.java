@@ -6,12 +6,10 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.authorization.annotation.AccountIdNotNeeded;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
-import com.sequenceiq.authorization.annotation.InternalOnly;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
@@ -101,15 +99,13 @@ public class CustomConfigurationsV4Controller implements CustomConfigurationsV4E
     }
 
     @Override
-    @AccountIdNotNeeded
-    @InternalOnly
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CUSTOM_CONFIGS)
     public ServiceTypeV4Response getServiceTypes() {
         return new ServiceTypeV4Response(Arrays.stream(AllServiceTypes.values()).map(Enum::toString).collect(Collectors.toList()));
     }
 
     @Override
-    @AccountIdNotNeeded
-    @InternalOnly
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CUSTOM_CONFIGS)
     public RoleTypeV4Response getRoleTypes() {
         return new RoleTypeV4Response(Arrays.stream(AllRoleTypes.values()).map(Enum::toString).collect(Collectors.toList()));
     }
