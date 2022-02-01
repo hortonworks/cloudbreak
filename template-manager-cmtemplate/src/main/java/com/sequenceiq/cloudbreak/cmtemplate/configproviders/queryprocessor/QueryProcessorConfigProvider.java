@@ -45,11 +45,6 @@ public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider 
 
     @Override
     protected List<ApiClusterTemplateConfig> getRoleConfigs(String roleType, TemplatePreparationObject source) {
-        switch (roleType) {
-            case QueryStoreRoles.WEBAPP:
-                return List.of(config("data_analytics_studio_user_authentication", "KNOX_PROXY"));
-            default:
-                return List.of();
-        }
+        return List.of();
     }
 }
