@@ -501,6 +501,7 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
         }
 
         newSdxCluster.setDatabaseAvailabilityType(sdxCluster.getDatabaseAvailabilityType());
+        newSdxCluster.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
         StackV4Request stackRequest = getStackRequest(shape, sdxCluster.isRangerRazEnabled(), null, cloudPlatform, sdxCluster.getRuntime(), null);
         if (shape == SdxClusterShape.MEDIUM_DUTY_HA) {
             // This is added to make sure the host name used by Light and Medium duty are not the same.
