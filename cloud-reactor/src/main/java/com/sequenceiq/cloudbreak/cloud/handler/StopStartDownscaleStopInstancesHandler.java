@@ -77,9 +77,12 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
                     request, cloudVmInstanceStatusList);
             eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         } catch (Exception e) {
-            // TODO CB-14929: Error handling. Any exceptions from here need to be handled properly. Moving the nodes into appropriate states,
-            //  failing the action. Potential trying to recover in a subsequent change.
-            throw e;
+            // TODO CB-15132: Try propagating specific information in the error, so that a later step can potentially attempt
+            //  to recover from this, or proceed with a reduced set of nodes.
+            String message = "Failed while attempting to stop some instances";
+            LOGGER.error(message, e);
+            StopStartDownscaleStopInstancesResult result = new StopStartDownscaleStopInstancesResult(message, e, request.getResourceId(), request);
+            eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         }
     }
 

@@ -45,12 +45,17 @@ import com.sequenceiq.cloudbreak.common.type.ClusterManagerType;
 import com.sequenceiq.cloudbreak.converter.CloudInstanceIdToInstanceMetaDataConverter;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleActions.AbstractStopStartDownscaleActions;
+import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.event.StopStartDownscaleTriggerEvent;
+import com.sequenceiq.cloudbreak.core.flow2.stack.AbstractStackFailureAction;
+import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.StackAuthentication;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -363,6 +368,32 @@ public class StopStartDownscaleActionsTest {
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
         verify(eventBus).notify("STOPSTART_DOWNSCALE_FINALIZED_EVENT", event);
         assertThat(argumentCaptor.getValue()).isInstanceOf(StopStartDownscaleStopInstancesResult.class);
+    }
+
+    @Test
+    void testDownscaleFailedAction() throws Exception {
+        AbstractStackFailureAction<StopStartDownscaleState, StopStartUpscaleEvent> action =
+                (AbstractStackFailureAction<StopStartDownscaleState, StopStartUpscaleEvent>) underTest.clusterDownscaleFailedAction();
+        initActionPrivateFields(action);
+
+        StackFailureContext stackFailureContext = new StackFailureContext(flowParameters, stackView);
+        Exception exception = new Exception("FailedStop");
+        StackFailureEvent stackFailureEvent = new StackFailureEvent(STACK_ID, exception);
+
+        List<InstanceMetaData> instancesActionableStarted = generateInstances(10, 100, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetaData> instancesActionableNotStarted = generateInstances(5, 200, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_ACTIONABLE);
+        List<InstanceMetaData> instancesRandomStarted = generateInstances(8, 300, InstanceStatus.SERVICES_HEALTHY, INSTANCE_GROUP_NAME_RANDOM);
+        List<InstanceMetaData> instancesRandomNotStarted = generateInstances(3, 400, InstanceStatus.STOPPED, INSTANCE_GROUP_NAME_RANDOM);
+
+        mockStackEtc(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted);
+        when(reactorEventFactory.createEvent(anyMap(), isNotNull())).thenReturn(event);
+
+        new AbstractActionTestSupport<>(action).doExecute(stackFailureContext, stackFailureEvent, Collections.emptyMap());
+        verify(stopStartDownscaleFlowService).handleClusterDownscaleFailure(eq(STACK_ID), eq(exception));
+        ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
+        verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
+        verify(eventBus).notify("STOPSTART_DOWNSCALE_FAIL_HANDLED_EVENT", event);
+        assertThat(argumentCaptor.getValue()).isInstanceOf(StackEvent.class);
     }
 
     private StopStartDownscaleContext createContext(Set<Long> instanceIdsToRemove) {
