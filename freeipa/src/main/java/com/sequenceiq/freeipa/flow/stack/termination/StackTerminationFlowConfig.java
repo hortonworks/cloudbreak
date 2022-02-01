@@ -32,11 +32,11 @@ public class StackTerminationFlowConfig extends AbstractFlowConfiguration<StackT
     private static final List<Transition<StackTerminationState, StackTerminationEvent>> TRANSITIONS =
             new Builder<StackTerminationState, StackTerminationEvent>()
                     .defaultFailureEvent(TERMINATION_FAILED_EVENT)
-                    .from(INIT_STATE).to(STOP_TELEMETRY_AGENT_STATE).event(TERMINATION_EVENT).noFailureEvent()
-                    .from(STOP_TELEMETRY_AGENT_STATE).to(DEREGISTER_CLUSTERPROXY_STATE).event(STOP_TELEMETRY_AGENT_FINISHED_EVENT).noFailureEvent()
-                    .from(DEREGISTER_CLUSTERPROXY_STATE).to(DEREGISTER_CCMKEY_STATE).event(CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT).noFailureEvent()
-                    .from(DEREGISTER_CCMKEY_STATE).to(REMOVE_MACHINE_USER_STATE).event(CCM_KEY_DEREGISTRATION_FINISHED_EVENT).noFailureEvent()
-                    .from(REMOVE_MACHINE_USER_STATE).to(TERMINATION_STATE).event(REMOVE_MACHINE_USER_FINISHED_EVENT).noFailureEvent()
+                    .from(INIT_STATE).to(STOP_TELEMETRY_AGENT_STATE).event(TERMINATION_EVENT).defaultFailureEvent()
+                    .from(STOP_TELEMETRY_AGENT_STATE).to(DEREGISTER_CLUSTERPROXY_STATE).event(STOP_TELEMETRY_AGENT_FINISHED_EVENT).defaultFailureEvent()
+                    .from(DEREGISTER_CLUSTERPROXY_STATE).to(DEREGISTER_CCMKEY_STATE).event(CLUSTER_PROXY_DEREGISTRATION_FINISHED_EVENT).defaultFailureEvent()
+                    .from(DEREGISTER_CCMKEY_STATE).to(REMOVE_MACHINE_USER_STATE).event(CCM_KEY_DEREGISTRATION_FINISHED_EVENT).defaultFailureEvent()
+                    .from(REMOVE_MACHINE_USER_STATE).to(TERMINATION_STATE).event(REMOVE_MACHINE_USER_FINISHED_EVENT).defaultFailureEvent()
                     .from(TERMINATION_STATE).to(TERMINATION_FINISHED_STATE).event(TERMINATION_FINISHED_EVENT).defaultFailureEvent()
                     .from(TERMINATION_FINISHED_STATE).to(FINAL_STATE).event(TERMINATION_FINALIZED_EVENT).defaultFailureEvent()
                     .build();
