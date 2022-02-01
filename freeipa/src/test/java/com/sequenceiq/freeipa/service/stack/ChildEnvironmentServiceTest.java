@@ -1,8 +1,9 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -16,6 +17,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.attachchildenv.AttachChildEnvironmentRequest;
@@ -135,5 +137,22 @@ class ChildEnvironmentServiceTest {
 
         Assertions.assertThatThrownBy(() -> underTest.detachChildEnvironment(request, ACCOUNT_ID))
                 .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    void detachChildEnvironmentOptimisticLockingFailure() {
+        ChildEnvironment childEnvironment = new ChildEnvironment();
+        childEnvironment.setEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
+        when(repository.findByParentAndChildEnvironmentCrns(ENVIRONMENT_CRN, CHILD_ENVIRONMENT_CRN, ACCOUNT_ID))
+                .thenReturn(Optional.of(childEnvironment));
+        doThrow(ObjectOptimisticLockingFailureException.class).when(repository).delete(childEnvironment);
+
+        DetachChildEnvironmentRequest request = new DetachChildEnvironmentRequest();
+        request.setParentEnvironmentCrn(ENVIRONMENT_CRN);
+        request.setChildEnvironmentCrn(CHILD_ENVIRONMENT_CRN);
+
+        Assertions.assertThatThrownBy(() -> underTest.detachChildEnvironment(request, ACCOUNT_ID))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("Child env %s is already detached", CHILD_ENVIRONMENT_CRN);
     }
 }
