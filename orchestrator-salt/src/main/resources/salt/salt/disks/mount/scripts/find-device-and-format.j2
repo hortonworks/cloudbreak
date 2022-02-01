@@ -125,6 +125,10 @@ main() {
     ephemeral_device_name_list=$(get_ephemeral_device_names "$device_name_list")
     log $LOG_FILE found devices: $device_name_list $ephemeral_device_name_list
 
+    if [[ "$device_name_list" == "" && "$ephemeral_device_name_list" == "" ]]; then
+        exit_with_code $LOG_FILE $EXIT_CODE_OK "no devices to format"
+    fi
+
     format_disks_if_unformatted "$device_name_list $ephemeral_device_name_list"
     if [ ! $? -eq 0 ]; then
         exit_with_code $LOG_FILE $EXIT_CODE_ERROR "could not format all devices"
