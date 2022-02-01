@@ -75,9 +75,9 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     }
 
     @Override
-    public void deleteForCleanup(CloudbreakClient client) {
+    public void deleteForCleanup() {
         if (!skipCleanup) {
-            client.getDefaultClient().imageCatalogV4Endpoint().deleteByCrn(0L, getCrn());
+            getClientForCleanup().getDefaultClient().imageCatalogV4Endpoint().deleteByCrn(0L, getCrn());
         }
     }
 

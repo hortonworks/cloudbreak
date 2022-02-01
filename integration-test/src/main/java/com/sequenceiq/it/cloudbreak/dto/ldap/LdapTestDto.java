@@ -3,7 +3,6 @@ package com.sequenceiq.it.cloudbreak.dto.ldap;
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
@@ -19,8 +18,8 @@ public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest,
     }
 
     @Override
-    public void deleteForCleanup(FreeIpaClient client) {
-        client.getDefaultClient().getLdapConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().getLdapConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
     }
 
     public String getName() {

@@ -1180,9 +1180,7 @@ public abstract class TestContext implements ApplicationContextAware {
         for (CloudbreakTestDto testDto : orderedTestDtos) {
             try {
                 LOGGER.info("Starting to clean up {} {}", testDto.getClass().getSimpleName(), testDto.getName());
-                String accountId = Objects.requireNonNull(Crn.fromString(testDto.getCrn())).getAccountId();
-                MicroserviceClient adminMicroserviceClient = getAdminMicroserviceClient(testDto.getClass(), accountId);
-                testDto.cleanUp(adminMicroserviceClient);
+                testDto.cleanUp();
             } catch (Exception e) {
                 LOGGER.info("Cleaning up of tests context with {} resource is failing, because of: {}", testDto.getName(), e.getMessage());
             }

@@ -401,8 +401,9 @@ public class FreeIpaTestDto extends AbstractFreeIpaTestDto<CreateFreeIpaRequest,
     }
 
     @Override
-    public void deleteForCleanup(FreeIpaClient client) {
+    public void deleteForCleanup() {
         try {
+            FreeIpaClient client = getClientForCleanup();
             client.getDefaultClient().getFreeIpaV1Endpoint().delete(getResponse().getEnvironmentCrn(), false);
             getTestContext().awaitWithClient(this, Map.of("status", DELETE_COMPLETED), client);
         } catch (NotFoundException nfe) {
