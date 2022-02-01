@@ -9,11 +9,11 @@ enum StopStartDownscaleState implements FlowState {
     INIT_STATE,
     STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE,
     STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE,
+    STOPSTART_DOWNSCALE_DECOMMISSION_VIA_CM_FAILED_STATE,
+    STOPSTART_DOWNSCALE_STOP_INSTANCES_FAILED_STATE,
     STOPSTART_DOWNSCALE_FINALIZE_STATE,
     STOPSTART_DOWNSCALE_FAILED_STATE,
     FINAL_STATE;
-
-    // TODO CB-14929: Error handling: Additional states as part of improved error handling
 
     private final Class<? extends RestartAction> restartAction = FillInMemoryStateStoreRestartAction.class;
 

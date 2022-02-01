@@ -13,7 +13,6 @@ import static org.mockito.Mockito.when;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +28,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartDownscaleStopInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -126,12 +126,20 @@ public class StopStartDownscaleStopInstancesHandlerTest {
                 new StopStartDownscaleStopInstancesRequest(cloudContext, cloudCredential, cloudStack, cloudInstancesToStop);
 
         Event event = new Event(request);
-        try {
-            underTest.accept(event);
-            Assert.fail("Expected an exception");
-        } catch (Exception expected) {
-            assertEquals("CloudProviderStopError", expected.getMessage());
-        }
+        underTest.accept(event);
+
+        ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+
+        assertEquals(1, resultCaptor.getAllValues().size());
+        Event resultEvent = resultCaptor.getValue();
+        assertEquals(StopStartDownscaleStopInstancesResult.class, resultEvent.getData().getClass());
+        StopStartDownscaleStopInstancesResult result = (StopStartDownscaleStopInstancesResult) resultEvent.getData();
+
+        assertEquals(0, result.getAffectedInstanceStatuses().size());
+        assertEquals("CloudProviderStopError", result.getErrorDetails().getMessage());
+        assertEquals("STOPSTARTDOWNSCALESTOPINSTANCESRESULT_ERROR", result.selector());
+        assertEquals(EventStatus.FAILED, result.getStatus());
     }
 
     private void testExpectedResultInernal(List<CloudInstance> cloudInstancesToStop, List<CloudVmInstanceStatus> cloudConnectoReturnList) {

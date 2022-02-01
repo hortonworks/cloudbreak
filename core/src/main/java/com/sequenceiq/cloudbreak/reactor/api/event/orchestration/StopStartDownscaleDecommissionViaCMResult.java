@@ -20,6 +20,12 @@ public class StopStartDownscaleDecommissionViaCMResult extends AbstractClusterSc
         this.notDecommissionedHostFqdns = notDecommissionedHostFqdns == null ? Collections.emptyList() : notDecommissionedHostFqdns;
     }
 
+    public StopStartDownscaleDecommissionViaCMResult(String statusReason, Exception errorDetails, StopStartDownscaleDecommissionViaCMRequest request) {
+        super(statusReason, errorDetails, request);
+        this.decommissionedHostFqdns = Collections.emptySet();
+        this.notDecommissionedHostFqdns = Collections.emptyList();
+    }
+
     public Set<String> getDecommissionedHostFqdns() {
         return decommissionedHostFqdns;
     }

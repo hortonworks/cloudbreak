@@ -25,6 +25,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
@@ -36,7 +37,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -204,10 +204,14 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
 
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
-        assertThat(selectable).isInstanceOf(StackFailureEvent.class);
+        assertThat(selectable).isInstanceOf(StopStartUpscaleCommissionViaCMResult.class);
 
-        StackFailureEvent result = (StackFailureEvent) selectable;
-        assertThat(result.getException().getMessage()).isEqualTo("waitForHostsHealthyException");
+        StopStartUpscaleCommissionViaCMResult result = (StopStartUpscaleCommissionViaCMResult) selectable;
+        assertThat(result.getSuccessfullyCommissionedFqdns()).hasSize(0);
+        assertThat(result.getNotRecommissionedFqdns()).hasSize(0);
+        assertThat(result.getErrorDetails().getMessage()).isEqualTo("waitForHostsHealthyException");
+        assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
+        assertThat(result.selector()).isEqualTo("STOPSTARTUPSCALECOMMISSIONVIACMRESULT_ERROR");
     }
 
     @Test
@@ -229,10 +233,14 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
 
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
-        assertThat(selectable).isInstanceOf(StackFailureEvent.class);
+        assertThat(selectable).isInstanceOf(StopStartUpscaleCommissionViaCMResult.class);
 
-        StackFailureEvent result = (StackFailureEvent) selectable;
-        assertThat(result.getException().getMessage()).isEqualTo("collectHostsToCommissionError");
+        StopStartUpscaleCommissionViaCMResult result = (StopStartUpscaleCommissionViaCMResult) selectable;
+        assertThat(result.getSuccessfullyCommissionedFqdns()).hasSize(0);
+        assertThat(result.getNotRecommissionedFqdns()).hasSize(0);
+        assertThat(result.getErrorDetails().getMessage()).isEqualTo("collectHostsToCommissionError");
+        assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
+        assertThat(result.selector()).isEqualTo("STOPSTARTUPSCALECOMMISSIONVIACMRESULT_ERROR");
     }
 
     @Test
@@ -253,10 +261,14 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
 
         HandlerEvent handlerEvent = new HandlerEvent(Event.wrap(request));
         Selectable selectable = underTest.doAccept(handlerEvent);
-        assertThat(selectable).isInstanceOf(StackFailureEvent.class);
+        assertThat(selectable).isInstanceOf(StopStartUpscaleCommissionViaCMResult.class);
 
-        StackFailureEvent result = (StackFailureEvent) selectable;
-        assertThat(result.getException().getMessage()).isEqualTo("commissionHostsError");
+        StopStartUpscaleCommissionViaCMResult result = (StopStartUpscaleCommissionViaCMResult) selectable;
+        assertThat(result.getSuccessfullyCommissionedFqdns()).hasSize(0);
+        assertThat(result.getNotRecommissionedFqdns()).hasSize(0);
+        assertThat(result.getErrorDetails().getMessage()).isEqualTo("commissionHostsError");
+        assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
+        assertThat(result.selector()).isEqualTo("STOPSTARTUPSCALECOMMISSIONVIACMRESULT_ERROR");
     }
 
     private List<InstanceMetaData> createInstancesToCommission(int count) {

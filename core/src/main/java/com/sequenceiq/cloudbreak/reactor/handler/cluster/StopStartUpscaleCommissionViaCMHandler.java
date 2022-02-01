@@ -22,13 +22,11 @@ import com.sequenceiq.cloudbreak.cluster.api.ClusterCommissionService;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterSetupService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -60,7 +58,9 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StopStartUpscaleCommissionViaCMRequest> event) {
-        return new StackFailureEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT.event(), resourceId, e);
+        String message = "Failed while attempting to commission nodes via CM (defaultFailureEvent)";
+        LOGGER.error(message);
+        return new StopStartUpscaleCommissionViaCMResult(message, e, event.getData());
     }
 
     @Override
@@ -106,7 +106,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                         hostsToRecommission.size(), hostNames.size(), missingHostsInCm);
             }
 
-            // TODO CB-14929: Eventually ensure CM, relevant services (YARN RM) are in a functional state - or fail/delay the operation
+            // TODO CB-15132: Eventually ensure CM, relevant services (YARN RM) are in a functional state - or fail/delay the operation
 
             // TODO CB-15132: Potentially poll nodes for success. Don't fail the entire operation if a single node fails to commission.
             //  What would need to happen to the CM command in this case? (Can only work in the presence of a co-operative CM API call.
@@ -115,7 +115,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
             Set<String> recommissionedHostnames = Collections.emptySet();
             if (hostsToRecommission.size() > 0) {
                 recommissionedHostnames = clusterCommissionService.recommissionClusterNodes(hostsToRecommission);
-                // TODO CB-14929: Maybe wait for services to start / force CM sync.
+                // TODO CB-15132: Maybe wait for services to start / force CM sync.
             }
             List<String> allMissingRecommissionHostnames = null;
             if (missingHostsInCm.size() > 0) {
@@ -139,8 +139,10 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
             return result;
         } catch (Exception e) {
             // TODO CB-15132: This can be improved based on where and when the Exception occurred to potentially rollback certain aspects.
-            // ClusterClientInitException is one which is explicitly thrown.
-            return new StackFailureEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT.event(), request.getResourceId(), e);
+            //  ClusterClientInitException is one which is explicitly thrown.
+            String message = "Failed while attempting to commission nodes via CM";
+            LOGGER.error(message);
+            return new StopStartUpscaleCommissionViaCMResult(message, e, request);
         }
     }
 }
