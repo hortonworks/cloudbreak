@@ -55,8 +55,8 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
@@ -254,8 +254,8 @@ public class StopStartUpscaleActionsTest {
         verify(stopStartUpscaleFlowService).clusterUpscaleFailed(eq(STACK_ID), eq(exception));
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
-        verify(eventBus).notify("CLUSTERUPSCALEFAILEDCONCLUSIONREQUEST", event);
-        assertThat(argumentCaptor.getValue()).isInstanceOf(ClusterUpscaleFailedConclusionRequest.class);
+        verify(eventBus).notify("STOPSTART_UPSCALE_FAIL_HANDLED_EVENT", event);
+        assertThat(argumentCaptor.getValue()).isInstanceOf(StackEvent.class);
     }
 
     @Test

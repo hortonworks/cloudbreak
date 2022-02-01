@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING2;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSION_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_COULDNOTCOMMISSION;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED;
@@ -11,6 +12,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOP
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_INIT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_NOT_STARTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_SCALING_STOPSTART_UPSCALE_START_FAILED;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,6 +26,7 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -112,12 +115,24 @@ class StopStartUpscaleFlowService {
                 commissioned.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.joining(", ")));
     }
 
+    void startInstancesFailed(long stackId, List<CloudInstance> instancesRequested) {
+        // TODO CB-15132. This message can be improved to include a precise list of nodes acted upon, depending on
+        //  where the failure occurred.
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_START_FAILED,
+                String.valueOf(instancesRequested.size()),
+                instancesRequested.stream().map(CloudInstance::getInstanceId).collect(Collectors.joining(", ")));
+    }
+
+    void commissionViaCmFailed(long stackId, List<InstanceMetaData> startedInstancesToCommission) {
+        flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSION_FAILED,
+                String.valueOf(startedInstancesToCommission.size()),
+                getHostNames(startedInstancesToCommission).stream().collect(Collectors.joining(", ")));
+    }
+
     void clusterUpscaleFailed(long stackId, Exception errorDetails) {
         LOGGER.info("Error during stopstart upscale flow: " + errorDetails.getMessage(), errorDetails);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.UPSCALE_BY_START_FAILED,
                 String.format("Node(s) could not be upscaled via startstop: %s", errorDetails));
-        // TODO CB-14929: Error handling. In the absence of specific error handlers, should the affected instances be moved into an
-        //  ORCHESTRATOR_FAILED or some such state?
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FAILED, errorDetails.getMessage());
     }
 

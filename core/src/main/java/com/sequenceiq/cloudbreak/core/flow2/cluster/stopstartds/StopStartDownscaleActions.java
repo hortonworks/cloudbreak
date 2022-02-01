@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FINALIZED_EVENT;
 
 import java.util.HashSet;
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -45,8 +47,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterDownscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -71,7 +73,7 @@ public class StopStartDownscaleActions {
     @Inject
     private CloudInstanceIdToInstanceMetaDataConverter cloudInstanceIdToInstanceMetaDataConverter;
 
-    // TODO CB-14929: Potential pre-flight checks. YARN / appropriate service masters available. CM master available.
+    // TODO CB-15132: Potential pre-flight checks. YARN / appropriate service masters available. CM master available.
     @Bean(name = "STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE")
     public Action<?, ?> decommissionViaCmAction() {
         return new AbstractStopStartDownscaleActions<>(StopStartDownscaleTriggerEvent.class) {
@@ -192,6 +194,44 @@ public class StopStartDownscaleActions {
         };
     }
 
+    @Bean(name = "STOPSTART_DOWNSCALE_DECOMMISSION_VIA_CM_FAILED_STATE")
+    public Action<?, ?> decommissionViaCmFailedAction() {
+        return new AbstractStopStartDownscaleActions<>(StopStartDownscaleDecommissionViaCMResult.class) {
+
+            @Override
+            protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleDecommissionViaCMResult payload, Map<Object, Object> variables)
+                    throws Exception {
+                LOGGER.warn("Failure during the decommissionViaCm step");
+                // TODO CB-14929. Should the nodes be put into an ORCHESTRATOR_FAILED state? What are the manual recovery steps from this state.
+                Set<String> hostnames = getHostNamesForPrivateIds(payload.getRequest().getInstanceIdsToDecommission(), context.getStack());
+                stopStartDownscaleFlowService.decommissionViaCmFailed(payload.getResourceId(), hostnames);
+                sendEvent(context, STOPSTART_DOWNSCALE_FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getErrorDetails()));
+            }
+
+            private Set<String> getHostNamesForPrivateIds(Set<Long> hostIdsToRemove, Stack stack) {
+                return hostIdsToRemove.stream().map(privateId -> {
+                    Optional<InstanceMetaData> instanceMetadata = stackService.getInstanceMetadata(stack.getInstanceMetaDataAsList(), privateId);
+                    return instanceMetadata.map(InstanceMetaData::getDiscoveryFQDN).orElse(null);
+                }).filter(StringUtils::isNotEmpty).collect(Collectors.toSet());
+            }
+        };
+    }
+
+    @Bean(name = "STOPSTART_DOWNSCALE_STOP_INSTANCES_FAILED_STATE")
+    public Action<?, ?> stopInstancesFailedAction() {
+        return new AbstractStopStartDownscaleActions<>(StopStartDownscaleStopInstancesResult.class) {
+
+            @Override
+            protected void doExecute(StopStartDownscaleContext context, StopStartDownscaleStopInstancesResult payload, Map<Object, Object> variables)
+                    throws Exception {
+                LOGGER.warn("Failure during the stopInstancesOnCloudProvider step");
+                // TODO CB-14929. Should the nodes be put into an ORCHESTRATOR_FAILED state? What are the manual recovery steps from this state.
+                stopStartDownscaleFlowService.stopInstancesFailed(payload.getResourceId(), payload.getStopInstancesRequest().getCloudInstancesToStop());
+                sendEvent(context, STOPSTART_DOWNSCALE_FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getErrorDetails()));
+            }
+        };
+    }
+
     @Bean(name = "STOPSTART_DOWNSCALE_FAILED_STATE")
     public Action<?, ?> clusterDownscaleFailedAction() {
         return new AbstractStackFailureAction<StopStartDownscaleState, StopStartDownscaleEvent>() {
@@ -200,10 +240,12 @@ public class StopStartDownscaleActions {
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Handling a failure from Downscale via Instance Stop");
                 stopStartDownscaleFlowService.handleClusterDownscaleFailure(context.getStackView().getId(), payload.getException());
-                // TODO CB-14929: Error handling. Likely needs to be more specific, and need to update states in the CB DB - for CM/cloud state appropriately.
-                // TODO CB-14929: Error Hanling. This request is likely invalid since the current active state machine does not know how to process it.
-                ClusterDownscaleFailedConclusionRequest request = new ClusterDownscaleFailedConclusionRequest(context.getStackView().getId());
-                sendEvent(context, request.selector(), request);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackFailureContext context) {
+                return new StackEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

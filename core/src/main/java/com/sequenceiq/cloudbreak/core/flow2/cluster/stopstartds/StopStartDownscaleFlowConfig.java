@@ -1,16 +1,20 @@
 package com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds;
 
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_CLUSTER_MANAGER_DECOIMMISSION_FAILED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_CLUSTER_MANAGER_DECOMMISSIONED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_INSTANCES_STOPPED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLE_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAIL_HANDLED_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FINALIZED_EVENT;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_FAILED_STATE;
-import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_FINALIZE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_INSTANCES_STOPPED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_INSTANCES_STOP_FAILED_EVENT;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent.STOPSTART_DOWNSCALE_TRIGGER_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.FINAL_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.INIT_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_DECOMMISSION_VIA_CM_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_FAILED_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_FINALIZE_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_STOP_INSTANCES_FAILED_STATE;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleState.STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE;
 
 import java.util.List;
@@ -18,13 +22,10 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.flow.core.config.AbstractFlowConfiguration;
-import com.sequenceiq.flow.core.config.RetryableFlowConfiguration;
 
 @Component
-public class StopStartDownscaleFlowConfig extends AbstractFlowConfiguration<StopStartDownscaleState, StopStartDownscaleEvent>
-        implements RetryableFlowConfiguration<StopStartDownscaleEvent> {
+public class StopStartDownscaleFlowConfig extends AbstractFlowConfiguration<StopStartDownscaleState, StopStartDownscaleEvent> {
 
-    // TODO CB-14929: Add additional transitions and states - specifically tailored towards error handling, and recovering from errors.
     private static final List<Transition<StopStartDownscaleState, StopStartDownscaleEvent>> TRANSITIONS =
             new Transition.Builder<StopStartDownscaleState, StopStartDownscaleEvent>()
             .defaultFailureEvent(STOPSTART_DOWNSCALE_FAILURE_EVENT)
@@ -35,17 +36,21 @@ public class StopStartDownscaleFlowConfig extends AbstractFlowConfiguration<Stop
             .from(STOPSTART_DOWNSCALE_HOSTS_DECOMMISSION_STATE)
                 .to(STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE)
                 .event(STOPSTART_DOWNSCALE_CLUSTER_MANAGER_DECOMMISSIONED_EVENT)
-                .defaultFailureEvent()
-                // TODO CB-14929: Error handling. Add a failureState() + failureEvent() transition - for any repair action that may be necessary.
-                // This likely involves adding a new set of transitions from this failure state to the final failed state
-                //  (i.e. STOPSTART_DOWNSCALE_FAILED_STATE)
+                .failureState(STOPSTART_DOWNSCALE_DECOMMISSION_VIA_CM_FAILED_STATE)
+                .failureEvent(STOPSTART_DOWNSCALE_CLUSTER_MANAGER_DECOIMMISSION_FAILED_EVENT)
             .from(STOPSTART_DOWNSCALE_STOP_INSTANCE_STATE)
                 .to(STOPSTART_DOWNSCALE_FINALIZE_STATE)
                 .event(STOPSTART_DOWNSCALE_INSTANCES_STOPPED_EVENT)
+                .failureState(STOPSTART_DOWNSCALE_STOP_INSTANCES_FAILED_STATE)
+                .failureEvent(STOPSTART_DOWNSCALE_INSTANCES_STOP_FAILED_EVENT)
+            .from(STOPSTART_DOWNSCALE_DECOMMISSION_VIA_CM_FAILED_STATE)
+                .to(STOPSTART_DOWNSCALE_FAILED_STATE)
+                .event(STOPSTART_DOWNSCALE_FAILURE_EVENT)
                 .defaultFailureEvent()
-                // TODO CB-14929: Error handling. Add a failureState() + failureEvent() transition - for any repair action that may be necessary.
-                // This likely involves adding a new set of transitions from this failure state to the final failed state
-                //  (i.e. STOPSTART_DOWNSCALE_FAILED_STATE)
+            .from(STOPSTART_DOWNSCALE_STOP_INSTANCES_FAILED_STATE)
+                .to(STOPSTART_DOWNSCALE_FAILED_STATE)
+                .event(STOPSTART_DOWNSCALE_FAILURE_EVENT)
+                .defaultFailureEvent()
             .from(STOPSTART_DOWNSCALE_FINALIZE_STATE)
                 .to(FINAL_STATE)
                 .event(STOPSTART_DOWNSCALE_FINALIZED_EVENT)
@@ -53,7 +58,7 @@ public class StopStartDownscaleFlowConfig extends AbstractFlowConfiguration<Stop
             .build();
 
     private static final FlowEdgeConfig<StopStartDownscaleState, StopStartDownscaleEvent> EDGE_CONFIG =
-            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STOPSTART_DOWNSCALE_FAILED_STATE, STOPSTART_DOWNSCALE_FAIL_HANDLE_EVENT);
+            new FlowEdgeConfig<>(INIT_STATE, FINAL_STATE, STOPSTART_DOWNSCALE_FAILED_STATE, STOPSTART_DOWNSCALE_FAIL_HANDLED_EVENT);
 
     protected StopStartDownscaleFlowConfig() {
         super(StopStartDownscaleState.class, StopStartDownscaleEvent.class);
@@ -82,10 +87,5 @@ public class StopStartDownscaleFlowConfig extends AbstractFlowConfiguration<Stop
     @Override
     public String getDisplayName() {
         return "StopStart Downscale";
-    }
-
-    @Override
-    public StopStartDownscaleEvent getRetryableEvent() {
-        return STOPSTART_DOWNSCALE_FAIL_HANDLE_EVENT;
     }
 }

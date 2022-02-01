@@ -20,7 +20,7 @@ public class StopStartUpscaleCommissionViaCMRequest extends AbstractClusterScale
             List<InstanceMetaData> servicesNotRunningInstancesToCommission) {
         super(stack.getId(), hostGroupName);
         this.stack = stack;
-        this.startedInstancesToCommission = startedInstancesToCommission;
+        this.startedInstancesToCommission = startedInstancesToCommission == null ? Collections.emptyList() : startedInstancesToCommission;
         this.servicesNotRunningInstancesToCommission =
                 servicesNotRunningInstancesToCommission == null ? Collections.emptyList() : servicesNotRunningInstancesToCommission;
     }
