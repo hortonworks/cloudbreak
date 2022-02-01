@@ -38,7 +38,7 @@ public class AzureDatabaseServerParameterSetterTest {
 
     @Test
     public void testHAServer() {
-        underTest.setParameters(request, SdxDatabaseAvailabilityType.HA);
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.HA, null);
 
         verify(request).setAzure(captor.capture());
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
@@ -48,7 +48,7 @@ public class AzureDatabaseServerParameterSetterTest {
 
     @Test
     public void testNonHAServer() {
-        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA);
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA, null);
 
         verify(request).setAzure(captor.capture());
         AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
@@ -57,9 +57,20 @@ public class AzureDatabaseServerParameterSetterTest {
     }
 
     @Test
+    public void testEngineVersion() {
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA, "13");
+
+        verify(request).setAzure(captor.capture());
+        AzureDatabaseServerV4Parameters azureDatabaseServerV4Parameters = captor.getValue();
+        assertEquals(false, azureDatabaseServerV4Parameters.getGeoRedundantBackup());
+        assertEquals(7, azureDatabaseServerV4Parameters.getBackupRetentionDays());
+        assertEquals("13", azureDatabaseServerV4Parameters.getDbVersion());
+    }
+
+    @Test
     public void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
         IllegalArgumentException result =
-                Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.setParameters(request, SdxDatabaseAvailabilityType.NONE));
+                Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.setParameters(request, SdxDatabaseAvailabilityType.NONE, null));
 
         assertEquals("NONE database availability type is not supported on Azure.", result.getMessage());
     }
