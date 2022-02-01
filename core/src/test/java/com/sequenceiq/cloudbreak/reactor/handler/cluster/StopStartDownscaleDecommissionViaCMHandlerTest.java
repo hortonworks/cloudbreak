@@ -29,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
@@ -38,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -249,10 +249,14 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         Selectable selectable = underTest.doAccept(handlerEvent);
         verify(clusterDecomissionService).collectHostsToRemove(eq(hostGroup), eq(hostnamesToDecommission));
 
-        assertThat(selectable).isInstanceOf(StackFailureEvent.class);
+        assertThat(selectable).isInstanceOf(StopStartDownscaleDecommissionViaCMResult.class);
 
-        StackFailureEvent result = (StackFailureEvent) selectable;
-        assertThat(result.getException().getMessage()).isEqualTo("collectHostsToDecommissionError");
+        StopStartDownscaleDecommissionViaCMResult result = (StopStartDownscaleDecommissionViaCMResult) selectable;
+        assertThat(result.getNotDecommissionedHostFqdns()).hasSize(0);
+        assertThat(result.getDecommissionedHostFqdns()).hasSize(0);
+        assertThat(result.getErrorDetails().getMessage()).isEqualTo("collectHostsToDecommissionError");
+        assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
+        assertThat(result.selector()).isEqualTo("STOPSTARTDOWNSCALEDECOMMISSIONVIACMRESULT_ERROR");
 
         verifyNoMoreInteractions(instanceMetaDataService);
         verifyNoMoreInteractions(flowMessageService);
@@ -286,10 +290,14 @@ public class StopStartDownscaleDecommissionViaCMHandlerTest {
         verify(clusterDecomissionService).collectHostsToRemove(eq(hostGroup), eq(hostnamesToDecommission));
         verify(clusterDecomissionService).decommissionClusterNodesStopStart(eq(collected), anyLong());
 
-        assertThat(selectable).isInstanceOf(StackFailureEvent.class);
+        assertThat(selectable).isInstanceOf(StopStartDownscaleDecommissionViaCMResult.class);
 
-        StackFailureEvent result = (StackFailureEvent) selectable;
-        assertThat(result.getException().getMessage()).isEqualTo("decommissionHostsError");
+        StopStartDownscaleDecommissionViaCMResult result = (StopStartDownscaleDecommissionViaCMResult) selectable;
+        assertThat(result.getNotDecommissionedHostFqdns()).hasSize(0);
+        assertThat(result.getDecommissionedHostFqdns()).hasSize(0);
+        assertThat(result.getErrorDetails().getMessage()).isEqualTo("decommissionHostsError");
+        assertThat(result.getStatus()).isEqualTo(EventStatus.FAILED);
+        assertThat(result.selector()).isEqualTo("STOPSTARTDOWNSCALEDECOMMISSIONVIACMRESULT_ERROR");
 
         verifyNoMoreInteractions(instanceMetaDataService);
         verifyNoMoreInteractions(flowMessageService);

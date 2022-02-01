@@ -101,12 +101,12 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
 
             notify(result, event);
         } catch (Exception e) {
-            // TODO CB-14929: Handle exceptions in a useful way. Ideally need to leave the cluster in a usable state after failure of the flow.
-            //  What happens in this scenario? e.g. if the AWS lookup throws a RuntimeException - how should this be handled?
-            //  More specifically - how should this be handled for Exceptions which we don't otherwise explicitly take care of?
-            //  Also, the error handling needs to be more granular. e.g. looking up instances initially to find STOPPED instances is not a fatal error,
-            //  however - starting instances failing is likely a fatal error
-            throw e;
+            // TODO CB-15132: Try propagating specific information in the error, so that a later step can potentially attempt
+            //  to recover from this, or proceed with a reduced set of nodes.
+            String message = "Failed while attempting to start instances";
+            LOGGER.error(message);
+            StopStartUpscaleStartInstancesResult result = new StopStartUpscaleStartInstancesResult(message, e, request.getResourceId(), request);
+            eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
         }
     }
 

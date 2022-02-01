@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone.availabilityZone;
 import static com.sequenceiq.cloudbreak.cloud.model.Location.location;
 import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
+import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FAILURE_EVENT;
 import static com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartus.StopStartUpscaleEvent.STOPSTART_UPSCALE_FINALIZED_EVENT;
 
 import java.util.Collections;
@@ -48,8 +49,8 @@ import com.sequenceiq.cloudbreak.core.flow2.stack.StackFailureContext;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
+import com.sequenceiq.cloudbreak.reactor.api.event.StackEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
-import com.sequenceiq.cloudbreak.reactor.api.event.cluster.ClusterUpscaleFailedConclusionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartUpscaleCommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartUpscaleCommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
@@ -191,7 +192,6 @@ public class StopStartUpscaleActions {
             protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleCommissionViaCMResult payload,
                     Map<Object, Object> variables) throws Exception {
                 LOGGER.debug("STOPSTART_UPSCALE_FINALIZE_STATE - finalizing upscale via start");
-                // TODO CB-14929: Does this need to force a CM health-sync, to make sure states show up properly on the UI. May need to force a CM sync
 
                 logInstancesNotCommissioned(context, payload.getNotRecommissionedFqdns());
 
@@ -236,6 +236,37 @@ public class StopStartUpscaleActions {
         };
     }
 
+    @Bean(name = "STOPSTART_UPSCALE_START_INSTANCE_FAILED_STATE")
+    public Action<?, ?> startInstancesFailedAction() {
+        return new AbstractStopStartUpscaleActions<>(StopStartUpscaleStartInstancesResult.class) {
+
+            @Override
+            protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleStartInstancesResult payload, Map<Object, Object> variables)
+                    throws Exception {
+                LOGGER.warn("Failure during startInstancesOnCloudProvider");
+                // TODO CB-14929. Should the nodes be put into an ORCHESTRATOR_FAILED state? What are the manual recovery steps from this state.
+                clusterUpscaleFlowService.startInstancesFailed(payload.getResourceId(), payload.getStartInstanceRequest().getStoppedCloudInstancesInHg());
+                sendEvent(context, STOPSTART_UPSCALE_FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getErrorDetails()));
+            }
+        };
+
+    }
+
+    @Bean(name = "STOPSTART_UPSCALE_HOSTS_COMMISSION_FAILED_STATE")
+    public Action<?, ?> commissionViaCmFailedAction() {
+        return new AbstractStopStartUpscaleActions<>(StopStartUpscaleCommissionViaCMResult.class) {
+
+            @Override
+            protected void doExecute(StopStartUpscaleContext context, StopStartUpscaleCommissionViaCMResult payload, Map<Object, Object> variables)
+                    throws Exception {
+                LOGGER.warn("Failure during commissionViaCm");
+                // TODO CB-14929. Should the nodes be put into an ORCHESTRATOR_FAILED state? What are the manual recovery steps from this state.
+                clusterUpscaleFlowService.commissionViaCmFailed(payload.getResourceId(), payload.getRequest().getStartedInstancesToCommission());
+                sendEvent(context, STOPSTART_UPSCALE_FAILURE_EVENT.event(), new StackFailureEvent(payload.getResourceId(), payload.getErrorDetails()));
+            }
+        };
+    }
+
     @Bean(name = "STOPSTART_UPSCALE_FAILED_STATE")
     public Action<?, ?> clusterUpscaleFailedAction() {
         return new AbstractStackFailureAction<StopStartUpscaleState, StopStartUpscaleEvent>() {
@@ -243,11 +274,13 @@ public class StopStartUpscaleActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Handling a failure from Upscale via Instance Start");
-                // TODO CB-15132: Implement actual error handling. i.e. reverting whatever is possible. Updating DB state etc.
                 clusterUpscaleFlowService.clusterUpscaleFailed(context.getStackView().getId(),  payload.getException());
-                // TODO CB-14929: Error Hanling. This request is likely invalid since the current active state machine does not know how to process it.
-                ClusterUpscaleFailedConclusionRequest request = new ClusterUpscaleFailedConclusionRequest(context.getStackView().getId());
-                sendEvent(context, request.selector(), request);
+                sendEvent(context);
+            }
+
+            @Override
+            protected Selectable createRequest(StackFailureContext context) {
+                return new StackEvent(StopStartUpscaleEvent.STOPSTART_UPSCALE_FAIL_HANDLED_EVENT.event(), context.getStackView().getId());
             }
         };
     }

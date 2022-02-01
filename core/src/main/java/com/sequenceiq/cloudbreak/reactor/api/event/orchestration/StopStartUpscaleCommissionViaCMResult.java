@@ -20,6 +20,12 @@ public class StopStartUpscaleCommissionViaCMResult extends AbstractClusterScaleR
         this.notRecommissionedFqdns = notCommissionedFqdns == null ? Collections.emptyList() : notCommissionedFqdns;
     }
 
+    public StopStartUpscaleCommissionViaCMResult(String statusReason, Exception errorDetails, StopStartUpscaleCommissionViaCMRequest request) {
+        super(statusReason, errorDetails, request);
+        this.successfullyCommissionedFqdns = Collections.emptySet();
+        this.notRecommissionedFqdns = Collections.emptyList();
+    }
+
     public Set<String> getSuccessfullyCommissionedFqdns() {
         return successfullyCommissionedFqdns;
     }

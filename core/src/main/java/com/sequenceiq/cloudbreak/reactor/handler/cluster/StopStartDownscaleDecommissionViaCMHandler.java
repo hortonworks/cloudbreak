@@ -24,13 +24,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterDecomissionService;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.core.flow2.cluster.stopstartds.StopStartDownscaleEvent;
 import com.sequenceiq.cloudbreak.core.flow2.stack.CloudbreakFlowMessageService;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StopStartDownscaleDecommissionViaCMRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.StopStartDownscaleDecommissionViaCMResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
@@ -72,7 +70,9 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
 
     @Override
     protected Selectable defaultFailureEvent(Long resourceId, Exception e, Event<StopStartDownscaleDecommissionViaCMRequest> event) {
-        return new StackFailureEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT.event(), resourceId, e);
+        String message = "Failed while attempting to decommission nodes via CM (defaultFailureEvent)";
+        LOGGER.error(message, e);
+        return new StopStartDownscaleDecommissionViaCMResult(message, e, event.getData());
     }
 
     @Override
@@ -158,8 +158,10 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
             return result;
         } catch (Exception e) {
             // TODO CB-15132: This can be improved based on where and when the Exception occurred to potentially rollback certain aspects.
-            // ClusterClientInitException is one which is explicitly thrown.
-            return new StackFailureEvent(StopStartDownscaleEvent.STOPSTART_DOWNSCALE_FAILURE_EVENT.event(), request.getResourceId(), e);
+            //  ClusterClientInitException is one which is explicitly thrown.
+            String message = "Failed while attempting to decommission nodes via CM";
+            LOGGER.error(message, e);
+            return new StopStartDownscaleDecommissionViaCMResult(message, e, request);
         }
     }
 
