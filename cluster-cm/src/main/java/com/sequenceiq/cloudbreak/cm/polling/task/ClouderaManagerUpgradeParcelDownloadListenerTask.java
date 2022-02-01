@@ -4,7 +4,6 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -35,7 +34,7 @@ public class ClouderaManagerUpgradeParcelDownloadListenerTask extends AbstractCl
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
 
         ApiParcel apiParcel = getApiParcel(pollerObject);
         String parcelStage = apiParcel.getStage();

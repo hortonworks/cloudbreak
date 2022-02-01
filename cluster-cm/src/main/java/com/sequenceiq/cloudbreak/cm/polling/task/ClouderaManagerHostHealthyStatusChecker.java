@@ -9,7 +9,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiCommissionState;
@@ -20,14 +19,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.ClouderaManagerOperationFailedException;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
 /**
  * Waits for a CM managed host to heartbeat, and the ApiHealthSummary to go into a Good state.
  * This explicitly ignores maintenance mode and the commissioning state.
  * The intended usage is to reach a point where hosts can be commissioned, and maintenance mode disabled.
  */
-public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaManagerApiCheckerTask<ClouderaManagerPollerObject> {
 
     @VisibleForTesting
     static final String VIEW_TYPE = "FULL";
@@ -54,7 +53,7 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject) throws ApiException {
         Set<String> goodHostsFromManager = fetchGoodHostsFromManager(pollerObject);
 
         int pre = hostnamesToCheckFor.size();
@@ -73,7 +72,7 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
         return hostnamesToCheckFor.size() == 0;
     }
 
-    private Set<String> fetchGoodHostsFromManager(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
+    private Set<String> fetchGoodHostsFromManager(ClouderaManagerPollerObject pollerObject) throws ApiException {
         HostsResourceApi hostsResourceApi = clouderaManagerApiPojoFactory.getHostsResourceApi(pollerObject.getApiClient());
         ApiHostList hostList = hostsResourceApi.readHosts(null, null, VIEW_TYPE);
         return filterForHealthy(hostList);
@@ -103,19 +102,19 @@ public class ClouderaManagerHostHealthyStatusChecker extends AbstractClouderaMan
     }
 
     @Override
-    protected String getCommandName() {
+    protected String getPollingName() {
         return "Host status summary";
     }
 
     @Override
-    public void handleTimeout(ClouderaManagerCommandPollerObject pollerObject) {
+    public void handleTimeout(ClouderaManagerPollerObject pollerObject) {
         throw new ClouderaManagerOperationFailedException(
                 String.format("Operation timed out. Failed while waiting for %d nodes to move into health state. MissingNodeCount=%d, MissingNodes=[%s]",
                         initialNodeCount, hostnamesToCheckFor.size(), hostnamesToCheckFor));
     }
 
     @Override
-    public String successMessage(ClouderaManagerCommandPollerObject pollerObject) {
+    public String successMessage(ClouderaManagerPollerObject pollerObject) {
         return String.format("Hosts (count=%d)moved into healthy state for stack '%s'", initialNodeCount, pollerObject.getStack().getId());
     }
 }

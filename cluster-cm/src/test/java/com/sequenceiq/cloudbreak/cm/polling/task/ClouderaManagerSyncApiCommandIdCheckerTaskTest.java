@@ -53,7 +53,7 @@ public class ClouderaManagerSyncApiCommandIdCheckerTaskTest {
     public void testCheckStatus() throws ApiException, CloudbreakException {
         // GIVEN
         ClouderaManagerSyncCommandPollerObject pollerObject =
-                new ClouderaManagerSyncCommandPollerObject(stack, apiClient, null, COMMAND_NAME);
+                new ClouderaManagerSyncCommandPollerObject(stack, apiClient, new BigDecimal(2L), COMMAND_NAME);
         given(commandRetriever.getCommandId(anyString(), any(), any())).willReturn(Optional.of(new BigDecimal(1L)));
         // WHEN
         boolean result = underTest.checkStatus(pollerObject);
