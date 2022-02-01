@@ -164,6 +164,25 @@ public class ClouderaManagerClusterStatusServiceTest {
     }
 
     @Test
+    public void reportsClusterUnknownWhenARoleStateIsNull() throws ApiException {
+        cmIsReachable();
+        servicesAre(
+                new ApiService().name("service1").serviceState(ApiServiceState.STARTED),
+                new ApiService().name("service2").serviceState(ApiServiceState.STARTED)
+        );
+        rolesAre("service1",
+                new ApiRole().name("role 1.1").roleState(ApiRoleState.STARTED),
+                new ApiRole().name("role 1.2").roleState(ApiRoleState.STARTED)
+        );
+        rolesAre("service2",
+                new ApiRole().name("role 2.1").roleState(null),
+                new ApiRole().name("role 2.2").roleState(ApiRoleState.STARTED)
+        );
+
+        assertEquals(ClusterStatus.UNKNOWN, subject.getStatus(true).getClusterStatus());
+    }
+
+    @Test
     public void ignoresServicesNA() throws ApiException {
         cmIsReachable();
         servicesAre(
