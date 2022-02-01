@@ -339,8 +339,9 @@ public class EnvironmentTestDto
     }
 
     @Override
-    public void deleteForCleanup(EnvironmentClient client) {
+    public void deleteForCleanup() {
         try {
+            EnvironmentClient client = getClientForCleanup();
             client.getDefaultClient().environmentV1Endpoint().deleteByCrn(getCrn(), true, false);
             getTestContext().awaitWithClient(this, Map.of("status", ARCHIVED), client);
         } catch (NotFoundException nfe) {

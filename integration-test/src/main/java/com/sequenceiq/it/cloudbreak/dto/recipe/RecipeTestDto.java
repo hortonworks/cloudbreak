@@ -30,8 +30,8 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     }
 
     @Override
-    public void deleteForCleanup(CloudbreakClient cloudbreakClient) {
-        cloudbreakClient.getDefaultClient().recipeV4Endpoint().deleteByCrn(0L, getCrn());
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().recipeV4Endpoint().deleteByCrn(0L, getCrn());
     }
 
     @Override

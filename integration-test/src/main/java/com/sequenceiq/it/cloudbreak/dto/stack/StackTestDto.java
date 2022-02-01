@@ -75,8 +75,9 @@ public class StackTestDto extends StackTestDtoBase<StackTestDto> implements Purg
     }
 
     @Override
-    public void deleteForCleanup(CloudbreakClient client) {
+    public void deleteForCleanup() {
         try {
+            CloudbreakClient client = getClientForCleanup();
             client.getDefaultClient().stackV4Endpoint().delete(0L, getName(), true, Crn.fromString(getCrn()).getAccountId());
             awaitWithClient(STACK_DELETED, client);
         } catch (NotFoundException nfe) {

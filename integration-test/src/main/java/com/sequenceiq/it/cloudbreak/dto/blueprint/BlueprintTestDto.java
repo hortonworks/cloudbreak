@@ -7,7 +7,6 @@ import java.util.Map;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.requests.BlueprintV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.blueprint.responses.BlueprintV4ViewResponse;
-import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -26,8 +25,8 @@ public class BlueprintTestDto extends AbstractCloudbreakTestDto<BlueprintV4Reque
     }
 
     @Override
-    public void deleteForCleanup(CloudbreakClient cloudbreakClient) {
-        cloudbreakClient.getDefaultClient().blueprintV4Endpoint().deleteByCrn(0L, getCrn());
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().blueprintV4Endpoint().deleteByCrn(0L, getCrn());
     }
 
     public BlueprintTestDto valid() {

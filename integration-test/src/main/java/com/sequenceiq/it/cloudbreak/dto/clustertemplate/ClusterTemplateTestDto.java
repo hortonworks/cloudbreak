@@ -102,8 +102,8 @@ public class ClusterTemplateTestDto extends DeletableTestDto<ClusterTemplateV4Re
     }
 
     @Override
-    public void deleteForCleanup(CloudbreakClient client) {
-        client.getDefaultClient().clusterTemplateV4EndPoint().deleteByCrn(0L, getCrn());
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().clusterTemplateV4EndPoint().deleteByCrn(0L, getCrn());
     }
 
     public Long count() {

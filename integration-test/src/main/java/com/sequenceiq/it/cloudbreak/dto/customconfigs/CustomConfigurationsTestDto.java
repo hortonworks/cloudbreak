@@ -61,8 +61,8 @@ public class CustomConfigurationsTestDto extends
     }
 
     @Override
-    public void deleteForCleanup(CloudbreakClient client) {
-        client.getDefaultClient().customConfigurationsV4Endpoint().deleteByCrn(getCrn());
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().customConfigurationsV4Endpoint().deleteByCrn(getCrn());
     }
 
     @Override

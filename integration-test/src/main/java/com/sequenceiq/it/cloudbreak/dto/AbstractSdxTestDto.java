@@ -117,9 +117,9 @@ public abstract class AbstractSdxTestDto<R, S, T extends CloudbreakTestDto> exte
     }
 
     @Override
-    public void deleteForCleanup(SdxClient client) {
+    public void deleteForCleanup() {
         try {
-            setFlow("SDX deletion", client.getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
+            setFlow("SDX deletion", getClientForCleanup().getDefaultClient().sdxEndpoint().deleteByCrn(getCrn(), true));
             awaitForFlow();
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");

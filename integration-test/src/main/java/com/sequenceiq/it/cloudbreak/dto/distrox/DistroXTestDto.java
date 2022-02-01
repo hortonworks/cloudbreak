@@ -91,10 +91,11 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
     }
 
     @Override
-    public void deleteForCleanup(CloudbreakClient cloudbreakClient) {
+    public void deleteForCleanup() {
         try {
-            cloudbreakClient.getDefaultClient().distroXV1Endpoint().deleteByCrn(getCrn(), true);
-            awaitWithClient(STACK_DELETED, cloudbreakClient);
+            CloudbreakClient clientForCleanup = getClientForCleanup();
+            clientForCleanup.getDefaultClient().distroXV1Endpoint().deleteByCrn(getCrn(), true);
+            awaitWithClient(STACK_DELETED, clientForCleanup);
         } catch (NotFoundException nfe) {
             LOGGER.info("resource not found, thus cleanup not needed.");
         }

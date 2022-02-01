@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.dto.kerberos;
 
 import com.sequenceiq.freeipa.api.v1.kerberos.model.create.CreateKerberosConfigRequest;
 import com.sequenceiq.freeipa.api.v1.kerberos.model.describe.DescribeKerberosConfigResponse;
-import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
@@ -16,8 +15,8 @@ public class KerberosTestDto extends AbstractFreeIpaTestDto<CreateKerberosConfig
     }
 
     @Override
-    public void deleteForCleanup(FreeIpaClient client) {
-        client.getDefaultClient().getKerberosConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().getKerberosConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
     }
 
     @Override

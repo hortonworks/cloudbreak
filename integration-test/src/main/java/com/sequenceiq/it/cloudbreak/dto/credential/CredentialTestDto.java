@@ -101,8 +101,8 @@ public class CredentialTestDto extends DeletableEnvironmentTestDto<CredentialReq
     }
 
     @Override
-    public void deleteForCleanup(EnvironmentClient client) {
-        client.getDefaultClient().credentialV1Endpoint().deleteByResourceCrn(getCrn());
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().credentialV1Endpoint().deleteByResourceCrn(getCrn());
     }
 
     @Override
