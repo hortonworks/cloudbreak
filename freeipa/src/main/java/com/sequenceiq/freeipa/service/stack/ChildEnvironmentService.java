@@ -7,6 +7,7 @@ import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -69,6 +70,11 @@ public class ChildEnvironmentService {
                             request.getParentEnvironmentCrn(), request.getChildEnvironmentCrn())));
         MDCBuilder.buildMdcContext(childEnvironment.getStack());
         LOGGER.info("Detaching child env: {}", childEnvironment);
-        repository.delete(childEnvironment);
+        try {
+            repository.delete(childEnvironment);
+        } catch (ObjectOptimisticLockingFailureException e) {
+            LOGGER.info("Child env {} is already detached", childEnvironment);
+            throw new NotFoundException(String.format("Child env %s is already detached", childEnvironment.getEnvironmentCrn()));
+        }
     }
 }
