@@ -335,6 +335,8 @@ public enum ResourceEvent {
     CLUSTER_SCALING_STOPSTART_UPSCALE_COULDNOTCOMMISSION("cluster.scaling.stopstart.upscale.couldnotcommission"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_WAITING_HOSTSTART("cluster.scaling.stopstart.upscale.waiting.hoststart"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_CMHOSTSSTARTED("cluster.scaling.stopstart.upscale.cmhostsstarted"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_START_FAILED("cluster.scaling.stopstart.upscale.start.failed"),
+    CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSION_FAILED("cluster.scaling.stopstart.upscale.commission.failed"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED("cluster.scaling.stopstart.upscale.finished"),
     CLUSTER_SCALING_STOPSTART_UPSCALE_FAILED("cluster.scaling.stopstart.upscale.failed"),
 
@@ -346,6 +348,8 @@ public enum ResourceEvent {
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING("cluster.scaling.stopstart.downscale.nodes.stopping"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_STOPPED("cluster.scaling.stopstart.downscale.nodes.stopped"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_NOT_STOPPED("cluster.scaling.stopstart.downscale.nodes.notstopped"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_DECOMMISSION_FAILED("cluster.scaling.stopstart.downscale.decommission.failed"),
+    CLUSTER_SCALING_STOPSTART_DOWNSCALE_STOP_FAILED("cluster.scaling.stopstart.downscale.stop.failed"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED("cluster.scaling.stopstart.downscale.finished"),
     CLUSTER_SCALING_STOPSTART_DOWNSCALE_FAILED("cluster.scaling.stopstart.downscale.failed"),
 

@@ -15,7 +15,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.junit.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -31,6 +30,7 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.instance.StopStartUpscaleStartInstancesResult;
+import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudInstance;
@@ -226,7 +226,6 @@ public class StopStartUpscaleStartInstancesHandlerTest {
 
     @Test
     void testUnableToCollectInstancesFromCloudPovider() {
-        // TODO CB-14929: Enhance when the error handling in the Handler and overall flow is figured out better.
         List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(5);
         List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
         List<CloudInstance> startedInstancesWithServicesNotRunning = null;
@@ -242,17 +241,24 @@ public class StopStartUpscaleStartInstancesHandlerTest {
                         "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
 
         Event event = new Event(request);
-        try {
-            underTest.accept(event);
-            Assert.fail("Expected an exception");
-        } catch (Exception expected) {
-            assertEquals("CloudProviderStartError", expected.getMessage());
-        }
+
+        underTest.accept(event);
+        ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+
+        assertEquals(1, resultCaptor.getAllValues().size());
+        Event resultEvent = resultCaptor.getValue();
+        assertEquals(StopStartUpscaleStartInstancesResult.class, resultEvent.getData().getClass());
+        StopStartUpscaleStartInstancesResult result = (StopStartUpscaleStartInstancesResult) resultEvent.getData();
+
+        assertEquals("CloudProviderStartError", result.getErrorDetails().getMessage());
+        assertEquals(0, result.getAffectedInstanceStatuses().size());
+        assertEquals(EventStatus.FAILED, result.getStatus());
+        assertEquals("STOPSTARTUPSCALESTARTINSTANCESRESULT_ERROR", result.selector());
     }
 
     @Test
     void testFailureFromCloudProviderWhenStartingInstances() {
-        // TODO CB-14929: Enhance when the error handling in the Handler and overall flow is figured out better.
         List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(3);
         List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
         List<CloudInstance> startedInstancesWithServicesNotRunning = null;
@@ -267,12 +273,20 @@ public class StopStartUpscaleStartInstancesHandlerTest {
                         "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
 
         Event event = new Event(request);
-        try {
-            underTest.accept(event);
-            Assert.fail("Expected an exception");
-        } catch (Exception expected) {
-            assertEquals("CloudProviderCheckStateError", expected.getMessage());
-        }
+
+        underTest.accept(event);
+        ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
+        verify(eventBus).notify(any(Object.class), resultCaptor.capture());
+
+        assertEquals(1, resultCaptor.getAllValues().size());
+        Event resultEvent = resultCaptor.getValue();
+        assertEquals(StopStartUpscaleStartInstancesResult.class, resultEvent.getData().getClass());
+        StopStartUpscaleStartInstancesResult result = (StopStartUpscaleStartInstancesResult) resultEvent.getData();
+
+        assertEquals("CloudProviderCheckStateError", result.getErrorDetails().getMessage());
+        assertEquals(0, result.getAffectedInstanceStatuses().size());
+        assertEquals(EventStatus.FAILED, result.getStatus());
+        assertEquals("STOPSTARTUPSCALESTARTINSTANCESRESULT_ERROR", result.selector());
     }
 
     private void testNotEnoughInstancesAvailableToStartTestInternal(
