@@ -68,7 +68,7 @@ public class ClouderaManagerUpgradeParcelDistributeListenerTaskTest {
         when(parcelResourceApi.readParcel("clusterName", "CDH", "7.2.8")).thenReturn(apiParcel);
         when(apiParcel.getStage()).thenReturn(parcelStatus.name());
         ClouderaManagerCommandPollerObject pollerObject = new ClouderaManagerCommandPollerObject(null, apiClient, BigDecimal.ONE);
-        boolean result = underTest.doStatusCheck(pollerObject, null);
+        boolean result = underTest.doStatusCheck(pollerObject);
 
         Assertions.assertEquals(expected, result);
     }

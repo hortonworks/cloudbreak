@@ -8,15 +8,14 @@ import org.apache.commons.lang3.ArrayUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ToolsResourceApi;
 import com.cloudera.api.swagger.client.ApiException;
 import com.cloudera.api.swagger.model.ApiEcho;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
 import com.sequenceiq.cloudbreak.cm.client.ClouderaManagerApiPojoFactory;
-import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerCommandPollerObject;
+import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollerObject;
 
-public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerCommandCheckerTask<ClouderaManagerCommandPollerObject> {
+public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerApiCheckerTask<ClouderaManagerPollerObject> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerStartupListenerTask.class);
 
@@ -30,7 +29,7 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerPollerObject pollerObject) throws ApiException {
         try {
             ToolsResourceApi toolsResourceApi = clouderaManagerApiPojoFactory.getToolsResourceApi(pollerObject.getApiClient());
             String testMessage = "test";
@@ -53,7 +52,7 @@ public class ClouderaManagerStartupListenerTask extends AbstractClouderaManagerC
     }
 
     @Override
-    protected String getCommandName() {
+    protected String getPollingName() {
         return "API Echo";
     }
 }

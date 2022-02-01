@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
@@ -20,7 +19,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -63,7 +61,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, false, ApiCommissionState.COMMISSIONED)));
 
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
-        boolean result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        boolean result = underTest.doStatusCheck(getPollerObject());
         assertTrue(result);
     }
 
@@ -80,7 +78,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h1", underTest.start, ApiHealthSummary.GOOD, false, ApiCommissionState.COMMISSIONED)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
 
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertFalse(result);
 
         // HealthSummary - CONCERNING
@@ -88,7 +86,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.CONCERNING, false, ApiCommissionState.COMMISSIONED)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
 
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertFalse(result);
 
         // HealthSummary - BAD
@@ -96,7 +94,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.BAD, false, ApiCommissionState.COMMISSIONED)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
 
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertFalse(result);
     }
 
@@ -113,7 +111,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
 
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertTrue(result);
 
         // Commission state: DECOMMISSIONED
@@ -121,7 +119,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, false, ApiCommissionState.DECOMMISSIONED)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
 
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertTrue(result);
 
         // Commission state: UNKNOWN
@@ -129,7 +127,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, false, ApiCommissionState.UNKNOWN)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
 
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertTrue(result);
     }
 
@@ -144,7 +142,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
         apiHostList = new ApiHostList().items(List.of(
                 constructApiHost("h1", underTest.start, ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertFalse(result);
         assertEquals(3, underTest.hostnamesToCheckFor.size());
 
@@ -152,7 +150,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
         apiHostList = new ApiHostList().items(List.of(
                 constructApiHost("h1", underTest.start.plusMillis(1), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertFalse(result);
         assertEquals(2, underTest.hostnamesToCheckFor.size());
 
@@ -163,7 +161,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h3", underTest.start, ApiHealthSummary.CONCERNING, true, ApiCommissionState.DECOMMISSIONED)
                 ));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertFalse(result);
         assertEquals(1, underTest.hostnamesToCheckFor.size());
 
@@ -174,7 +172,7 @@ public class ClouderaManagerHostHealthyStatusCheckerTest {
                 constructApiHost("h3", underTest.start.plusMillis(300), ApiHealthSummary.GOOD, true, ApiCommissionState.DECOMMISSIONED)
         ));
         when(hostsResourceApi.readHosts(null, null, VIEW_TYPE)).thenReturn(apiHostList);
-        result = underTest.doStatusCheck(getPollerObject(), mock(CommandsResourceApi.class));
+        result = underTest.doStatusCheck(getPollerObject());
         assertTrue(result);
         assertEquals(0, underTest.hostnamesToCheckFor.size());
     }
