@@ -393,7 +393,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         return services.stream()
                 .flatMap(service -> readRoles(api, stack, service))
                 .filter(role -> !IGNORED_ROLE_STATES.contains(role.getRoleState()))
-                .collect(groupingBy(role -> toClusterStatus(role.getRoleState()),
+                .collect(groupingBy(role -> toClusterStatus(Optional.ofNullable(role.getRoleState()).orElse(ApiRoleState.UNKNOWN)),
                         mapping(ApiRole::getName, toList())));
     }
 
