@@ -23,8 +23,11 @@ import com.sequenceiq.freeipa.api.v1.dns.model.AddDnsZoneForSubnetsRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.binduser.BindUserCreateRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SyncOperationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizationStatus;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.SynchronizeAllUsersRequest;
+import com.sequenceiq.freeipa.api.v1.freeipa.user.model.WorkloadCredentialsUpdateType;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostKeytabRequest;
-import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationStatus;
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -155,10 +158,11 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 addAndDeleteDnsARecord(ipaClient, environmentCrn);
                 addAndDeleteDnsCnameRecord(ipaClient, environmentCrn);
                 addListDeleteDnsZonesBySubnet(ipaClient, environmentCrn);
-                createBindUser(testContext, ipaClient, environmentCrn, accountId);
+                createBindUser(testContext, ipaClient, environmentCrn);
                 generateHostKeyTab(ipaClient, environmentCrn);
-                cleanUp(testContext, ipaClient, environmentCrn, accountId);
+                cleanUp(testContext, ipaClient, environmentCrn);
                 kinit(testContext.given(SdxTestDto.class), testContext.getSdxClient());
+                syncUsers(testContext, ipaClient, environmentCrn, accountId);
             }
         } catch (TestFailException e) {
             throw e;
@@ -167,6 +171,24 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
             throw new TestFailException("Unexpected error during FreeIPA upgrade availability test: " + e.getMessage(), e);
         }
         return testDto;
+    }
+
+    private void syncUsers(TestContext testContext, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn, String accountId) {
+        try {
+            SyncOperationStatus lastSyncOperationStatus = ipaClient.getUserV1Endpoint().getLastSyncOperationStatus(environmentCrn);
+            if (lastSyncOperationStatus.getStatus() == SynchronizationStatus.RUNNING) {
+                waitToCompleted(testContext, lastSyncOperationStatus.getOperationId(), "Initial or periodic usersync");
+            }
+            SynchronizeAllUsersRequest request = new SynchronizeAllUsersRequest();
+            request.setAccountId(accountId);
+            request.setEnvironments(Set.of(environmentCrn));
+            request.setWorkloadCredentialsUpdateType(WorkloadCredentialsUpdateType.FORCE_UPDATE);
+            SyncOperationStatus syncOperationStatus = ipaClient.getUserV1Endpoint().synchronizeAllUsers(request);
+            waitToCompleted(testContext, syncOperationStatus.getOperationId(), "Full forced usersync");
+        } catch (Exception e) {
+            logger.error("Full forced usersync test failed during upgrade", e);
+            throw new TestFailException("Full forced usersync test failed during upgrade with: " + e.getMessage(), e);
+        }
     }
 
     private void addAndDeleteDnsARecord(com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
@@ -219,15 +241,17 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         }
     }
 
-    private void createBindUser(TestContext testContext, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn, String accountId) {
-        BindUserCreateRequest bindUserCreateRequest = new BindUserCreateRequest();
-        bindUserCreateRequest.setEnvironmentCrn(environmentCrn);
-        bindUserCreateRequest.setBindUserNameSuffix("testuser");
-        String initiatorUserCrn = "__internal__actor__";
-        OperationStatus operationStatus = ipaClient.getFreeIpaV1Endpoint().createE2ETestBindUser(bindUserCreateRequest, initiatorUserCrn);
-        operationStatus = waitToCompleted(testContext, ipaClient, operationStatus, accountId, "createBindUserOperation");
-        if (!isSuccess(operationStatus)) {
-            throw new TestFailException("Freeipa createBindUser() test has failed: " + operationStatus);
+    private void createBindUser(TestContext testContext, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
+        try {
+            BindUserCreateRequest bindUserCreateRequest = new BindUserCreateRequest();
+            bindUserCreateRequest.setEnvironmentCrn(environmentCrn);
+            bindUserCreateRequest.setBindUserNameSuffix("testuser");
+            String initiatorUserCrn = "__internal__actor__";
+            OperationStatus operationStatus = ipaClient.getFreeIpaV1Endpoint().createE2ETestBindUser(bindUserCreateRequest, initiatorUserCrn);
+            waitToCompleted(testContext, operationStatus.getOperationId(), "createBindUserOperation");
+        } catch (Exception e) {
+            logger.error("CREATE BIND USER test failed during upgrade", e);
+            throw new TestFailException("CREATE BIND USER test failed during upgrade with: " + e.getMessage(), e);
         }
     }
 
@@ -244,30 +268,25 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         }
     }
 
-    private void cleanUp(TestContext testContext, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn, String accountId) {
-        CleanupRequest cleanupRequest = new CleanupRequest();
-        cleanupRequest.setEnvironmentCrn(environmentCrn);
-        cleanupRequest.setClusterName("testuser");
-        cleanupRequest.setUsers(Set.of("kerberosbind-testuser", "ldapbind-testuser"));
-        OperationStatus operationStatus = ipaClient.getFreeIpaV1Endpoint().cleanup(cleanupRequest);
-        operationStatus = waitToCompleted(testContext, ipaClient, operationStatus, accountId, "cleanupOperation");
-        if (!isSuccess(operationStatus)) {
-            throw new TestFailException("Freeipa cleanUp() test has failed: " + operationStatus);
+    private void cleanUp(TestContext testContext, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, String environmentCrn) {
+        try {
+            CleanupRequest cleanupRequest = new CleanupRequest();
+            cleanupRequest.setEnvironmentCrn(environmentCrn);
+            cleanupRequest.setClusterName("testuser");
+            cleanupRequest.setUsers(Set.of("kerberosbind-testuser", "ldapbind-testuser"));
+            OperationStatus operationStatus = ipaClient.getFreeIpaV1Endpoint().cleanup(cleanupRequest);
+            waitToCompleted(testContext, operationStatus.getOperationId(), "cleanupOperation");
+        } catch (Exception e) {
+            logger.error("CLEANUP test failed during upgrade", e);
+            throw new TestFailException("CLEANUP test failed during upgrade with: " + e.getMessage(), e);
         }
     }
 
-    private OperationStatus waitToCompleted(TestContext testContext, com.sequenceiq.freeipa.api.client.FreeIpaClient ipaClient, OperationStatus operationStatus,
-            String accountId, String operationName) {
+    private void waitToCompleted(TestContext testContext, String operationId, String operationName) {
         testContext
                 .given(operationName, FreeIpaOperationStatusTestDto.class)
-                .withOperationId(operationStatus.getOperationId())
+                .withOperationId(operationId)
                 .await(COMPLETED, waitForFlow().withWaitForFlow(Boolean.FALSE).withTimeoutChecker(new AbsolutTimeBasedTimeoutChecker(FIVE_MINUTES_IN_SEC)));
-        return ipaClient.getOperationV1Endpoint().getOperationStatus(operationStatus.getOperationId(), accountId);
-    }
-
-    private boolean isSuccess(OperationStatus operationStatus) {
-        OperationState operationState = operationStatus.getStatus();
-        return COMPLETED == operationState;
     }
 
     private void kinit(SdxTestDto sdxTestDto, SdxClient sdxClient) {
