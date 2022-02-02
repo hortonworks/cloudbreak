@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -140,6 +141,24 @@ public class YarnLoadEvaluatorTest {
         testUpScaleBasedOnYarnResponse(currentHostGroupCount, yarnRecommendedUpScaleCount, expectedUpScaleCount);
     }
 
+    // TODO CB-15142: Add more scenarios for this parameterized test
+    public static Stream<Arguments> dataUpScalingForStopStart() {
+        return Stream.of(
+                //TestCase,runningHostGroupNodeCount, stoppedHostGroupNodeCount, YarnRecommendedUpScaleCount, ExpectedDesiredNodeCount
+                Arguments.of("STOP_START_SCALE_UP_ALLOWED", 1, 3, 3, 4),
+                Arguments.of("STOP_START_SCALE_UP_ALLOWED_AT_LIMIT", TEST_HOSTGROUP_MAX_SIZE - 10, 10, 10, TEST_HOSTGROUP_MAX_SIZE),
+                Arguments.of("STOP_START_SCALE_UP_BEYOND_MAX_LIMIT", TEST_HOSTGROUP_MAX_SIZE - 10, 10, 20, TEST_HOSTGROUP_MAX_SIZE)
+        );
+    }
+
+    @ParameterizedTest(name = "{0}: With runningHostGroupNodeCount={1}, stoppedHostGroupNodeCount={2}, yarnRecommendedUpscaleCount={3}, " +
+            "expectedUpscaleCount={4}")
+    @MethodSource("dataUpScalingForStopStart")
+    public void testLoadBasedStopStartScaling(String testType, int runningHostGroupNodeCount, int stoppedHostGroupNodeCount,
+            int yarnRecommendedUpscaleCount, int expectedUpscaleCount) throws Exception {
+        testUpscaleBasedOnYarnResponseForStopStart(runningHostGroupNodeCount, stoppedHostGroupNodeCount, yarnRecommendedUpscaleCount, expectedUpscaleCount);
+    }
+
     public static Stream<Arguments> dataDownScaling() {
         return Stream.of(
                 //TestCase,CurrentHostGroupCount,YarnRecommendedDecommissionCount,ExpectedDecommissionCount
@@ -184,6 +203,19 @@ public class YarnLoadEvaluatorTest {
         }
     }
 
+    private void testUpscaleBasedOnYarnResponseForStopStart(int runningHostGroupNodeCount, int stoppedHostGroupNodeCount, int yarnUpscaleCount,
+            int expectedUpscaleCount) throws Exception {
+        boolean scalingEventExpected = expectedUpscaleCount != 0;
+
+        Optional<ScalingEvent> scalingEvent = captureScalingEvent(runningHostGroupNodeCount, stoppedHostGroupNodeCount, yarnUpscaleCount, 0,
+                scalingEventExpected);
+        if (scalingEventExpected) {
+            assertEquals(expectedUpscaleCount, scalingEvent.get().getDesiredAbsoluteHostGroupNodeCount().intValue());
+            // including the 2 worker and 1 master node from MockStackResponseGenerator
+            assertEquals(runningHostGroupNodeCount + 3, scalingEvent.get().getExistingClusterNodeCount().intValue());
+        }
+    }
+
     private Optional<ScalingEvent> captureScalingEvent(int currentHostGroupCount, int yarnUpScaleCount,
             int yarnDownScaleCount, boolean scalingEventExpected) throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -194,20 +226,37 @@ public class YarnLoadEvaluatorTest {
 
         YarnScalingServiceV1Response upScale = getMockYarnScalingResponse(hostGroup, yarnUpScaleCount, yarnDownScaleCount);
 
-        when(clusterService.findById(anyLong())).thenReturn(cluster);
-        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4Response);
-        when(stackResponseUtils.getCloudInstanceIdsForHostGroup(any(), any())).thenCallRealMethod();
-        when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class)))
-                .thenReturn(upScale);
-        when(yarnResponseUtils.getYarnRecommendedScaleUpCount(any(YarnScalingServiceV1Response.class), anyString(), anyInt(), any(Optional.class), anyInt()))
-                .thenCallRealMethod();
-        when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
-                any(Map.class), anyInt(), any(Optional.class), anyInt())).thenCallRealMethod();
+        setupMocks(cluster, upScale, stackV4Response);
 
         underTest.setContext(new ClusterIdEvaluatorContext(AUTOSCALE_CLUSTER_ID));
         underTest.execute();
 
         Optional scalingEventCaptured = Optional.empty();
+        if (scalingEventExpected) {
+            ArgumentCaptor<ScalingEvent> captor = ArgumentCaptor.forClass(ScalingEvent.class);
+            verify(eventPublisher).publishEvent(captor.capture());
+            scalingEventCaptured = Optional.of(captor.getValue());
+        }
+        return scalingEventCaptured;
+    }
+
+    private Optional<ScalingEvent> captureScalingEvent(int runningNodeHostGroupCount, int stoppedNodeHostGroupCount, int yarnUpscaleCount,
+            int yarnDownscaleCount, boolean scalingEventExpected) throws Exception {
+        MockitoAnnotations.openMocks(this);
+        Cluster cluster = getARunningCluster();
+        cluster.setStopStartScalingEnabled(true);
+        String hostGroup = "compute";
+        StackV4Response stackV4Response = MockStackResponseGenerator.getMockStackV4Response(CLOUDBREAK_STACK_CRN, hostGroup, fqdnBase,
+                runningNodeHostGroupCount, stoppedNodeHostGroupCount);
+
+        YarnScalingServiceV1Response upScale = getMockYarnScalingResponse(hostGroup, yarnUpscaleCount, yarnDownscaleCount);
+
+        setupMocks(cluster, upScale, stackV4Response);
+
+        underTest.setContext(new ClusterIdEvaluatorContext(AUTOSCALE_CLUSTER_ID));
+        underTest.execute();
+
+        Optional<ScalingEvent> scalingEventCaptured = Optional.empty();
         if (scalingEventExpected) {
             ArgumentCaptor<ScalingEvent> captor = ArgumentCaptor.forClass(ScalingEvent.class);
             verify(eventPublisher).publishEvent(captor.capture());
@@ -266,5 +315,18 @@ public class YarnLoadEvaluatorTest {
         cluster.setLastScalingActivity(Instant.now()
                 .minus(45, ChronoUnit.MINUTES).toEpochMilli());
         return cluster;
+    }
+
+    private void setupMocks(Cluster cluster, YarnScalingServiceV1Response upScale, StackV4Response stackV4Response) throws Exception {
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getByCrn(anyString())).thenReturn(stackV4Response);
+        when(stackResponseUtils.getCloudInstanceIdsForHostGroup(any(), any())).thenCallRealMethod();
+        lenient().when(stackResponseUtils.getStoppedInstanceCountInHostGroup(any(), any())).thenCallRealMethod();
+        when(yarnMetricsClient.getYarnMetricsForCluster(any(Cluster.class), any(StackV4Response.class), anyString(), any(Optional.class)))
+                .thenReturn(upScale);
+        when(yarnResponseUtils.getYarnRecommendedScaleUpCount(any(YarnScalingServiceV1Response.class), anyString(), anyInt(), any(Optional.class), anyInt()))
+                .thenCallRealMethod();
+        when(yarnResponseUtils.getYarnRecommendedDecommissionHostsForHostGroup(anyString(), any(YarnScalingServiceV1Response.class),
+                any(Map.class), anyInt(), any(Optional.class), anyInt())).thenCallRealMethod();
     }
 }
