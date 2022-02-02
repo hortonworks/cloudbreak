@@ -4,24 +4,25 @@ import static com.google.common.collect.Maps.newHashMap;
 import static java.util.Collections.emptyMap;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
@@ -35,13 +36,13 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeParameterType;
 import com.sequenceiq.cloudbreak.cloud.service.CloudParameterService;
 import com.sequenceiq.cloudbreak.controller.validation.LocationService;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToExtendedCloudCredentialConverter;
-import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
+import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.service.stack.DefaultRootVolumeSizeProvider;
 import com.sequenceiq.common.api.type.CdpResourceType;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class TemplateDecoratorTest {
 
     private static final String REGION = "region";
@@ -57,7 +58,7 @@ public class TemplateDecoratorTest {
     private static final String VOLUME_TYPE = "volumeType";
 
     @InjectMocks
-    private final TemplateDecorator underTest = new TemplateDecorator();
+    private TemplateDecorator underTest;
 
     @Mock
     private CloudParameterService cloudParameterService;
@@ -71,16 +72,11 @@ public class TemplateDecoratorTest {
     @Mock
     private CredentialToExtendedCloudCredentialConverter extendedCloudCredentialConverter;
 
+    @Mock
     private Credential cloudCredential;
 
+    @Mock
     private ExtendedCloudCredential extendedCloudCredential;
-
-    @Before
-    public void init() {
-        cloudCredential = mock(Credential.class);
-        extendedCloudCredential = mock(ExtendedCloudCredential.class);
-        when(extendedCloudCredentialConverter.convert(cloudCredential)).thenReturn(extendedCloudCredential);
-    }
 
     @Test
     public void testDecorator() {
@@ -110,6 +106,7 @@ public class TemplateDecoratorTest {
         Map<String, Set<VmType>> region1 = singletonMap(REGION, Collections.singleton(VmType.vmTypeWithMeta(VM_TYPE, vmTypeMeta, true)));
         cloudVmTypes.setCloudVmResponses(region1);
 
+        when(extendedCloudCredentialConverter.convert(cloudCredential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
         when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT),
                 eq(CdpResourceType.DATAHUB), anyMap())).thenReturn(cloudVmTypes);
@@ -120,15 +117,34 @@ public class TemplateDecoratorTest {
         VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
         assertEquals(maximumNumber, next.getVolumeCount().longValue());
         assertEquals(maximumSize, next.getVolumeSize().longValue());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), any(), any(), any(), any());
     }
 
     @Test
     public void testDecoratorWhenNoLocation() {
         Template template = initTemplate();
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(VOLUME_TYPE);
+        template.setVolumeTemplates(Sets.newHashSet(volumeTemplate));
+        template.setCloudPlatform(PLATFORM_1);
 
-        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        CloudVmTypes cloudVmTypes = new CloudVmTypes();
+        Map<String, Set<VmType>> region1 = singletonMap(REGION, emptySet());
+        cloudVmTypes.setCloudVmResponses(region1);
 
-        Assert.assertTrue(actual.getVolumeTemplates().isEmpty());
+        when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn("anylocation");
+        when(extendedCloudCredentialConverter.convert(cloudCredential)).thenReturn(extendedCloudCredential);
+        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT),
+                eq(CdpResourceType.DATAHUB), anyMap())).thenReturn(cloudVmTypes);
+        Map<String, VolumeParameterType> map = Map.of(VOLUME_TYPE, VolumeParameterType.MAGNETIC);
+        Platform platform = Platform.platform(PLATFORM_1);
+        when(cloudParameterService.getDiskTypes()).thenReturn(new PlatformDisks(emptyMap(), emptyMap(), Map.of(platform, map), emptyMap()));
+
+        underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+
+        assertNull(volumeTemplate.getVolumeSize());
+        assertNull(volumeTemplate.getVolumeCount());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -159,6 +175,7 @@ public class TemplateDecoratorTest {
         Map<String, Set<VmType>> region1 = singletonMap(REGION, Collections.singleton(VmType.vmTypeWithMeta(VM_TYPE, vmTypeMeta, true)));
         cloudVmTypes.setCloudVmResponses(region1);
 
+        when(extendedCloudCredentialConverter.convert(cloudCredential)).thenReturn(extendedCloudCredential);
         when(cloudParameterService.getDiskTypes()).thenReturn(platformDisk);
         when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT),
                 eq(CdpResourceType.DATAHUB), anyMap())).thenReturn(cloudVmTypes);
@@ -167,38 +184,52 @@ public class TemplateDecoratorTest {
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
 
         VolumeTemplate next = actual.getVolumeTemplates().iterator().next();
-        Assert.assertNull(next.getVolumeCount());
-        Assert.assertNull(next.getVolumeSize());
+        assertNull(next.getVolumeCount());
+        assertNull(next.getVolumeSize());
+        verify(cloudParameterService, times(1)).getVmTypesV2(any(), any(), any(), any(), any());
     }
 
     @Test
-    public void testConvertWithRootVolumeSizeInRequestAndDefaultIsSet() {
+    public void testDecorateWithRootVolumeSizeInRequestAndDefaultIsSet() {
         Template template = initTemplate();
 
         template.setRootVolumeSize(70);
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
         assertEquals(70L, (long) actual.getRootVolumeSize());
+        verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());
     }
 
     @Test
-    public void testConvertWithoutRootVolumeSizeInRequestAndDefaultIsSet() {
+    public void testDecorateWithoutRootVolumeSizeInRequestAndDefaultIsSet() {
         Template template = initTemplate();
 
         when(defaultRootVolumeSizeProvider.getForPlatform(any())).thenReturn(100);
 
         Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
         assertEquals(100L, (long) actual.getRootVolumeSize());
+        verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());
+    }
+
+    @Test
+    public void testDecorateWhenVolumeCountAndSizeSet() {
+        Template template = initTemplate();
+        VolumeTemplate volumeTemplate = new VolumeTemplate();
+        volumeTemplate.setVolumeType(VOLUME_TYPE);
+        volumeTemplate.setVolumeSize(1);
+        volumeTemplate.setVolumeCount(1);
+        template.setVolumeTemplates(Sets.newHashSet(volumeTemplate));
+        when(defaultRootVolumeSizeProvider.getForPlatform(any())).thenReturn(100);
+
+        Template actual = underTest.decorate(cloudCredential, template, REGION, AVAILABILITY_ZONE, VARIANT, CdpResourceType.DATAHUB);
+        assertEquals(1, actual.getVolumeTemplates().iterator().next().getVolumeSize());
+        assertEquals(1, actual.getVolumeTemplates().iterator().next().getVolumeCount());
+        verify(cloudParameterService, never()).getVmTypesV2(any(), any(), any(), any(), any());
     }
 
     private Template initTemplate() {
         Template template = new Template();
         template.setVolumeTemplates(Sets.newHashSet());
-
-        CloudVmTypes cloudVmTypes = new CloudVmTypes(singletonMap(REGION, emptySet()), emptyMap());
-        when(cloudParameterService.getVmTypesV2(eq(extendedCloudCredential), eq(REGION), eq(VARIANT), eq(CdpResourceType.DATAHUB), anyMap()))
-                .thenReturn(cloudVmTypes);
-        when(locationService.location(REGION, AVAILABILITY_ZONE)).thenReturn(null);
         return template;
     }
 }
