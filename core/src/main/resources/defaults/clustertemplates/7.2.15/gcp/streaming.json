@@ -112,6 +112,22 @@
         "nodeCount": 0,
         "type": "CORE",
         "recoveryMode": "MANUAL"
+      },
+      {
+        "name": "connect",
+        "template": {
+          "attachedVolumes": [
+            {
+              "count": 1,
+              "size": 100,
+              "type": "pd-standard"
+            }
+          ],
+          "instanceType": "e2-standard-8"
+        },
+        "nodeCount": 0,
+        "type": "CORE",
+        "recoveryMode": "MANUAL"
       }
     ]
   }

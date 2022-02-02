@@ -45,6 +45,11 @@
             "refName": "kafka-KAFKA_BROKER-BASE",
             "roleType": "KAFKA_BROKER",
             "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_CONNECT-BASE",
+            "roleType": "KAFKA_CONNECT",
+            "base": true
           }
         ]
       },
@@ -148,6 +153,14 @@
         "roleConfigGroupsRefNames": [
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE"
+        ]
+      },
+      {
+        "refName": "connect",
+        "cardinality": 0,
+        "roleConfigGroupsRefNames": [
+          "kafka-GATEWAY-BASE",
+          "kafka-KAFKA_CONNECT-BASE"
         ]
       }
     ]
