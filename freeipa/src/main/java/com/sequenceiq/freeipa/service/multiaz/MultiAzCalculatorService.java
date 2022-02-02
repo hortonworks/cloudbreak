@@ -42,11 +42,13 @@ public class MultiAzCalculatorService {
         if (environment != null && environment.getNetwork() != null && environment.getNetwork().getSubnetMetas() != null) {
             for (Map.Entry<String, CloudSubnet> entry : environment.getNetwork().getSubnetMetas().entrySet()) {
                 CloudSubnet value = entry.getValue();
-                if (!Strings.isNullOrEmpty(value.getName())) {
-                    subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
-                }
-                if (!Strings.isNullOrEmpty(value.getId())) {
-                    subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                if (value != null && value.getAvailabilityZone() != null) {
+                    if (!Strings.isNullOrEmpty(value.getName())) {
+                        subnetAzPairs.put(value.getName(), value.getAvailabilityZone());
+                    }
+                    if (!Strings.isNullOrEmpty(value.getId())) {
+                        subnetAzPairs.put(value.getId(), value.getAvailabilityZone());
+                    }
                 }
             }
         }
@@ -101,12 +103,16 @@ public class MultiAzCalculatorService {
             String subnetId = instanceMetaData.getSubnetId();
             if (!isNullOrEmpty(subnetId)) {
                 String az = subnetAzPairs.get(subnetId);
-                Integer countOfInstances = azUsage.get(az);
-                if (countOfInstances != null) {
-                    azUsage.put(az, countOfInstances + 1);
+                if (StringUtils.isNotEmpty(az)) {
+                    Integer countOfInstances = azUsage.get(az);
+                    if (countOfInstances != null) {
+                        azUsage.put(az, countOfInstances + 1);
+                    } else {
+                        LOGGER.warn("AZ with subnet ID {} is not present in the environment networks. Current usage: {}",
+                                subnetId, azUsage.keySet());
+                    }
                 } else {
-                    LOGGER.warn("AZ with subnet ID {} is not present in the environment networks. Current usage: {}",
-                            subnetId, azUsage.keySet());
+                    LOGGER.debug("There is no availability zone data for subnet id: '{}', It is normal on Azure for now", subnetId);
                 }
             }
         }
