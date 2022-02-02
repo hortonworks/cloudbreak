@@ -59,9 +59,9 @@ public class TargetedUpscaleSupportService {
     private boolean isUnboundEliminationSupported(Stack stack) {
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         if (entitlementService.isUnboundEliminationSupported(accountId)) {
-            LOGGER.info("Unbound elimination is disabled for account {}, thus targeted upscale is not supported!", accountId);
             return true;
         } else {
+            LOGGER.info("Unbound elimination is disabled for account {}, thus targeted upscale is not supported!", accountId);
             return false;
         }
     }
