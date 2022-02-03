@@ -163,8 +163,9 @@ public class DatalakeService {
     private String getDatalakeClusterManagerFqdn(Stack datalakeStack) {
         String fqdn;
         try {
-            fqdn = transactionService.required(() -> datalakeStack.getNotTerminatedGatewayInstanceMetadata().isEmpty()
-                    ? datalakeStack.getClusterManagerIp() : datalakeStack.getNotTerminatedGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN());
+            fqdn = transactionService.required(() -> datalakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().isEmpty()
+                    ? datalakeStack.getClusterManagerIp()
+                    : datalakeStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next().getDiscoveryFQDN());
         } catch (Exception ignored) {
             LOGGER.debug("Get instance metadata transaction failed, giving back IP as FQDN");
             fqdn = datalakeStack.getClusterManagerIp();

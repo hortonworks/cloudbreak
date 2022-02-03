@@ -29,7 +29,7 @@ public class AllHostPublicDnsEntryService extends BaseDnsEntryService {
             LOGGER.info("No running gateway or all node is terminated, we skip the dns entry deletion.");
         } else {
             InstanceMetaData primaryGatewayInstance = gateway.get();
-            Map<String, List<String>> hostnamesByInstanceGroupName = stack.getNotTerminatedInstanceMetaDataList()
+            Map<String, List<String>> hostnamesByInstanceGroupName = stack.getNotTerminatedGatewayInstanceMetadata()
                     .stream()
                     .filter(im -> StringUtils.isNoneEmpty(im.getDiscoveryFQDN()) && !im.getDiscoveryFQDN().equals(primaryGatewayInstance.getDiscoveryFQDN()))
                     .collect(groupingBy(InstanceMetaData::getInstanceGroupName, mapping(InstanceMetaData::getDiscoveryFQDN, toList())));

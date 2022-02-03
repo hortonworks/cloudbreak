@@ -330,7 +330,7 @@ public class StackUpscaleActions {
 
             @Override
             protected void doExecute(StackScalingFlowContext context, ExtendHostMetadataResult payload, Map<Object, Object> variables) {
-                Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
+                Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(context.getStack().getId());
                 Set<String> ips = payload.getRequest().getUpscaleCandidateAddresses();
                 Set<String> hostNames = instanceMetaData.stream()
                         .filter(im -> ips.contains(im.getPrivateIp()))
@@ -351,7 +351,7 @@ public class StackUpscaleActions {
                 final Stack stack = context.getStack();
                 stackUpscaleService.finishExtendHostMetadata(stack);
                 final Set<String> newAddresses = payload.getIps();
-                final Map<String, String> newAddressesByFqdn = stack.getNotDeletedInstanceMetaDataSet().stream()
+                final Map<String, String> newAddressesByFqdn = stack.getNotDeletedAndNotZombieInstanceMetaDataSet().stream()
                         .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, InstanceMetaData::getPublicIpWrapper));

@@ -66,9 +66,9 @@ public class AbstractRdsConfigProviderTest {
     public void createServicePillarForLocalRdsConfig() {
         when(rdsConfigService.createIfNotExists(any(), any(), any())).thenAnswer(i -> i.getArguments()[1]);
         Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getNotTerminatedGatewayInstanceMetadata().iterator().next();
+        InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        testStack.getNotTerminatedGatewayInstanceMetadata().add(metaData);
+        testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
 
         Map<String, Object> result = underTest.createServicePillarConfigMapIfNeeded(testStack, testCluster);
@@ -96,9 +96,9 @@ public class AbstractRdsConfigProviderTest {
         when(secretService.getByResponse(username)).thenReturn(REMOTE_ADMIN);
         when(secretService.getByResponse(password)).thenReturn(REMOTE_ADMIN_PASSWORD);
         Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getNotTerminatedGatewayInstanceMetadata().iterator().next();
+        InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        testStack.getNotTerminatedGatewayInstanceMetadata().add(metaData);
+        testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         Cluster testCluster = TestUtil.cluster();
         testStack.setCluster(testCluster);
 

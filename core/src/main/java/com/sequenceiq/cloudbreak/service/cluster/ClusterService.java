@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_HEALTHY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_RUNNING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.SERVICES_UNHEALTHY;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE;
 import static com.sequenceiq.cloudbreak.cloud.model.HostName.hostName;
 import static com.sequenceiq.cloudbreak.cloud.model.component.StackRepoDetails.REPO_ID_TAG;
 import static com.sequenceiq.cloudbreak.common.exception.NotFoundException.notFound;
@@ -46,6 +47,7 @@ import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionRuntimeExecutionException;
@@ -58,7 +60,6 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.gateway.Gateway;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
-import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.repository.cluster.ClusterRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -185,14 +186,6 @@ public class ClusterService {
         return savedCluster;
     }
 
-    public boolean isSingleNode(Stack stack) {
-        int nodeCount = 0;
-        for (InstanceGroup ig : stack.getInstanceGroups()) {
-            nodeCount += ig.getNodeCount();
-        }
-        return nodeCount == 1;
-    }
-
     public Iterable<Cluster> saveAll(Iterable<Cluster> clusters) {
         return repository.saveAll(clusters);
     }
@@ -226,6 +219,26 @@ public class ClusterService {
                     });
                 }
                 return null;
+            });
+        } catch (TransactionExecutionException e) {
+            throw new TransactionRuntimeExecutionException(e);
+        }
+    }
+
+    public void updateInstancesToZombie(Long stackId, Set<Node> unreachableNodes) {
+        Set<String> unreachableInstanceIds = unreachableNodes.stream()
+                .map(Node::getInstanceId)
+                .collect(Collectors.toSet());
+        LOGGER.debug("Update instance statuses to ZOMBIE, instanceIds: {}", unreachableInstanceIds);
+        try {
+            transactionService.required(() -> {
+                Set<InstanceMetaData> notDeletedInstanceMetadatas = instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stackId);
+                notDeletedInstanceMetadatas.stream()
+                        .filter(instanceMetadata -> unreachableInstanceIds.contains(instanceMetadata.getInstanceId()))
+                        .forEach(instanceMetadata -> {
+                            instanceMetadata.setInstanceStatus(ZOMBIE);
+                            instanceMetaDataService.save(instanceMetadata);
+                        });
             });
         } catch (TransactionExecutionException e) {
             throw new TransactionRuntimeExecutionException(e);
@@ -300,7 +313,7 @@ public class ClusterService {
         Stack stack = stackService.getById(stackId);
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         if (!connector.clusterStatusService().isClusterManagerRunning()) {
-            Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
+            Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
             InstanceMetaData cmInstance = updateClusterManagerHostStatus(notTerminatedInstanceMetaDatas);
             eventService.fireCloudbreakEvent(stack.getId(), AVAILABLE.name(), CLUSTER_HOST_STATUS_UPDATED,
                     Arrays.asList(cmInstance.getDiscoveryFQDN(), cmInstance.getInstanceStatus().name()));
@@ -311,7 +324,7 @@ public class ClusterService {
             updateClusterCertExpirationState(stack.getCluster(), extendedHostStatuses.isAnyCertExpiring());
             try {
                 return transactionService.required(() -> {
-                    Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedForStack(stackId);
+                    Set<InstanceMetaData> notTerminatedInstanceMetaDatas = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
                     List<InstanceMetaData> updatedInstanceMetaData = updateInstanceStatuses(notTerminatedInstanceMetaDatas, extendedHostStatuses);
                     instanceMetaDataService.saveAll(updatedInstanceMetaData);
                     fireHostStatusUpdateNotification(stack, updatedInstanceMetaData);

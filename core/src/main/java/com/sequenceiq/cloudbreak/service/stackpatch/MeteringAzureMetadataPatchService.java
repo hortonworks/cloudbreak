@@ -105,7 +105,7 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
         byte[] meteringSaltStateConfig = compressUtil.generateCompressedOutputFromFolders(saltStateDefinitions, meteringSaltStateDef);
         boolean meteringContentMatches = compressUtil.compareCompressedContent(currentSaltState, meteringSaltStateConfig, meteringSaltStateDef);
         if (!meteringContentMatches) {
-            Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+            Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             ClusterDeletionBasedExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
             getTelemetryOrchestrator().updateMeteringSaltDefinition(meteringSaltStateConfig, gatewayConfigs, exitModel);

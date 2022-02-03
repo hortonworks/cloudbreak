@@ -82,7 +82,7 @@ public class InstanceMetadataUpdater {
                 updateInstanceMetaDataIfVersionQueryFailed(packageVersionsByNameByHost, stack);
         notifyIfVersionsCannotBeQueried(stack, failedVersionQueriesByHost);
 
-        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
 
         updateInstanceMetaDataWithPackageVersions(packageVersionsByNameByHost, instanceMetaDataSet);
 
@@ -99,7 +99,7 @@ public class InstanceMetadataUpdater {
 
     private List<String> updateInstanceMetaDataIfVersionQueryFailed(Map<String, Map<String, String>> packageVersionsByNameByHost,
             Stack stack) throws IOException {
-        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedInstanceMetaDataSet();
+        Set<InstanceMetaData> instanceMetaDataSet = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
 
         List<String> failedVersionQueriesByHost = Lists.newArrayList();
         for (InstanceMetaData im : instanceMetaDataSet) {

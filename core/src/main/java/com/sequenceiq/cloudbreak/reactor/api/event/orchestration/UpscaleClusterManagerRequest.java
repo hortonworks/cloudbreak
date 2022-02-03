@@ -8,10 +8,13 @@ public class UpscaleClusterManagerRequest extends AbstractClusterScaleRequest {
 
     private final boolean primaryGatewayChanged;
 
-    public UpscaleClusterManagerRequest(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged) {
+    private final boolean repair;
+
+    public UpscaleClusterManagerRequest(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged, boolean repair) {
         super(stackId, hostGroupName);
         this.scalingAdjustment = scalingAdjustment;
         this.primaryGatewayChanged = primaryGatewayChanged;
+        this.repair = repair;
     }
 
     public Integer getScalingAdjustment() {
@@ -21,4 +24,9 @@ public class UpscaleClusterManagerRequest extends AbstractClusterScaleRequest {
     public boolean isPrimaryGatewayChanged() {
         return primaryGatewayChanged;
     }
+
+    public boolean isRepair() {
+        return repair;
+    }
+
 }
