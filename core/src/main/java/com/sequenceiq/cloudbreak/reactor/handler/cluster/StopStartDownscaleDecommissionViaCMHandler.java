@@ -110,8 +110,6 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
                 decommissionedHostNames = clusterDecomissionService.decommissionClusterNodesStopStart(hostsToRemove, POLL_FOR_10_MINUTES);
                 updateInstanceStatuses(hostsToRemove, decommissionedHostNames,
                         InstanceStatus.DECOMMISSIONED, "decommission requested for instances");
-                // TODO CB-14929: Error Handling: In case of failures, figure out whcih nodes need to be moved into what is likely to be the
-                //  ORCHESTRATION_FAILED state. This will likely be done in
             }
 
             // This doesn't handle failures. It handles scenarios where CM list APIs don't have the necessary hosts available.
@@ -153,9 +151,7 @@ public class StopStartDownscaleDecommissionViaCMHandler extends ExceptionCatcher
             //  The main differentiation is whether the nodes are expected to be running 'old' work,
             //  or are safe to remove fast (i.e. AutoScale downscale - race could only put 20-30s odd worth of work on the new nodes).
 
-            StopStartDownscaleDecommissionViaCMResult result =
-                    new StopStartDownscaleDecommissionViaCMResult(request, decommissionedHostNames, allMissingHostnames);
-            return result;
+            return new StopStartDownscaleDecommissionViaCMResult(request, decommissionedHostNames, allMissingHostnames);
         } catch (Exception e) {
             // TODO CB-15132: This can be improved based on where and when the Exception occurred to potentially rollback certain aspects.
             //  ClusterClientInitException is one which is explicitly thrown.

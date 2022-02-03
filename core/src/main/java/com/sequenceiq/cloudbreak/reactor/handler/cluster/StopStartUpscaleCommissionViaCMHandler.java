@@ -134,9 +134,7 @@ public class StopStartUpscaleCommissionViaCMHandler extends ExceptionCatcherEven
                 allMissingRecommissionHostnames.addAll(additionalMissingRecommissionHostnames);
             }
 
-            StopStartUpscaleCommissionViaCMResult result =
-                    new StopStartUpscaleCommissionViaCMResult(request, recommissionedHostnames, allMissingRecommissionHostnames);
-            return result;
+            return new StopStartUpscaleCommissionViaCMResult(request, recommissionedHostnames, allMissingRecommissionHostnames);
         } catch (Exception e) {
             // TODO CB-15132: This can be improved based on where and when the Exception occurred to potentially rollback certain aspects.
             //  ClusterClientInitException is one which is explicitly thrown.

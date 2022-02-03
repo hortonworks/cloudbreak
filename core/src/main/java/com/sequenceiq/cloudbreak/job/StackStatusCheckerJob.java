@@ -233,7 +233,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
         try {
             if (isClusterManagerRunning(stack, connector)) {
-                // TODO CB-15341 Node in maintenance mode does not get special treatment, should it?
                 ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
                         runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()));
                 Map<HostName, Set<HealthCheck>> hostStatuses = extendedHostStatuses.getHostsHealth();
@@ -274,8 +273,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 long stoppedInstancesCount = stoppedInstances.size();
                 Set<String> computeGroups = getComputeHostGroups(stack.getCluster());
                 boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroup().getGroupName()).allMatch(computeGroups::contains);
-                if (stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
+                if (stoppedInstancesCount > 0 && stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
                     clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
+                } else {
+                    LOGGER.debug("WithStopStartEntitlement, putting cluster into NODE_FAILURE. Counts: stoppedInstanceCount={}, failedInstanceCount={}",
+                            stoppedInstancesCount, failedInstances.size());
+                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
                 }
             } else {
                 clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
