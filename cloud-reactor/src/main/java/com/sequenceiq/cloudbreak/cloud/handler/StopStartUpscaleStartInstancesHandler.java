@@ -106,7 +106,7 @@ public class StopStartUpscaleStartInstancesHandler implements CloudPlatformEvent
             String message = "Failed while attempting to start instances";
             LOGGER.error(message);
             StopStartUpscaleStartInstancesResult result = new StopStartUpscaleStartInstancesResult(message, e, request.getResourceId(), request);
-            eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+            notify(result, event);
         }
     }
 

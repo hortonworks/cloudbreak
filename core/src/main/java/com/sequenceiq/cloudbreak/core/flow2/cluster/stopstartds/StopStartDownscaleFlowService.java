@@ -68,26 +68,27 @@ public class StopStartDownscaleFlowService {
         LOGGER.debug("stopstart scaling Decommissioning from group: {}, hostnames: [{}]", hostGroupName, decomissionedHostNames);
         flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
                 CLUSTER_SCALING_STOPSTART_DOWNSCALE_STARTING,
-                String.valueOf(decomissionedHostNames.size()), hostGroupName, String.join(",", decomissionedHostNames));
+                String.valueOf(decomissionedHostNames.size()), hostGroupName, String.join(", ", decomissionedHostNames));
     }
 
     public void logCouldNotDecommission(long stackId, List<String> notDecommissionedFqdns) {
         // TODO CB-14929: CB-15418 This needs to be an orange message (i.e. not success, not failure). Need to figure out how the UI
         //  processes these and applies icons.
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_COULDNOTDECOMMISSION,
-                String.valueOf(notDecommissionedFqdns.size()), notDecommissionedFqdns.stream().collect(Collectors.joining(", ")));
+                String.valueOf(notDecommissionedFqdns.size()), String.join(", ", notDecommissionedFqdns));
     }
 
     public void clusterDownscalingStoppingInstances(long stackId, String hostGroupName, Set<String> decommissionedFqdns) {
         flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName,
                 CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODE_STOPPING,
-                String.valueOf(decommissionedFqdns.size()), hostGroupName, String.join(",", decommissionedFqdns));
+                String.valueOf(decommissionedFqdns.size()), hostGroupName, String.join(", ", decommissionedFqdns));
     }
 
     public void instancesStopped(long stackId, List<InstanceMetaData> instancesStopped) {
-        instancesStopped.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STOPPED));
+        instancesStopped.forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STOPPED));
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_STOPPED,
-                String.valueOf(instancesStopped.size()), instancesStopped.stream().map(x -> x.getInstanceId()).collect(Collectors.joining(", ")));
+                String.valueOf(instancesStopped.size()), instancesStopped.stream().map(InstanceMetaData::getInstanceId)
+                        .collect(Collectors.joining(", ")));
     }
 
     public void logInstancesFailedToStop(long stackId, List<CloudVmInstanceStatus> notStoppedInstances) {
@@ -95,7 +96,7 @@ public class StopStartDownscaleFlowService {
         //  processes these and applies icons.
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_NODES_NOT_STOPPED,
                 String.valueOf(notStoppedInstances.size()),
-                        notStoppedInstances.stream().map(x -> x.getCloudInstance().getInstanceId()).collect(Collectors.toList()).toString());
+                        notStoppedInstances.stream().map(x -> x.getCloudInstance().getInstanceId()).collect(Collectors.joining(", ")));
     }
 
     public void clusterDownscaleFinished(Long stackId, String hostGroupName, List<InstanceMetaData> instancesStopped) {
@@ -110,7 +111,7 @@ public class StopStartDownscaleFlowService {
 
     public void decommissionViaCmFailed(long stackId, Set<String> hostnamesAttempted) {
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_DECOMMISSION_FAILED,
-                String.valueOf(hostnamesAttempted.size()), hostnamesAttempted.stream().collect(Collectors.joining(", ")));
+                String.valueOf(hostnamesAttempted.size()), String.join(", ", hostnamesAttempted));
     }
 
     public void stopInstancesFailed(long stackId, List<CloudInstance> attemptedStopInstances) {
@@ -123,8 +124,6 @@ public class StopStartDownscaleFlowService {
         LOGGER.info("Error during stopstart downscale flow: " + errorDetails.getMessage(), errorDetails);
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.DOWNSCALE_BY_STOP_FAILED,
                 String.format("New node(s) (stopstart) could not be removed from the cluster: %s", errorDetails));
-
-        // TODO CB-14929: Error handling. In case of a failure - should the status of the instances be moved to something like ORCHESTRATOR_FAILED?
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FAILED, errorDetails.getMessage());
     }
 }
