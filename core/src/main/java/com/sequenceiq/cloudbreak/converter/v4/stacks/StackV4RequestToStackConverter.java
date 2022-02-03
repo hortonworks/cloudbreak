@@ -204,6 +204,7 @@ public class StackV4RequestToStackConverter {
             gatewaySecurityGroupDecorator.extendGatewaySecurityGroupWithDefaultGatewayCidrs(stack, environment.getTunnel());
         }
         stack.setExternalDatabaseCreationType(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getAvailabilityType));
+        stack.setExternalDatabaseEngineVersion(getIfNotNull(source.getExternalDatabase(), DatabaseRequest::getDatabaseEngineVersion));
         determineServiceTypeTag(stack, source.getTags());
         determineServiceFeatureTag(stack, source.getTags());
 

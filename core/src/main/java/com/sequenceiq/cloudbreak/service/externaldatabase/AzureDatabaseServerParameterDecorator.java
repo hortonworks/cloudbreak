@@ -35,6 +35,7 @@ public class AzureDatabaseServerParameterDecorator implements DatabaseServerPara
         }
         parameters.setBackupRetentionDays(retentionPeriodHa);
         parameters.setGeoRedundantBackup(geoRedundantBackupHa);
+        parameters.setDbVersion(serverParameter.getEngineVersion());
         request.setAzure(parameters);
     }
 

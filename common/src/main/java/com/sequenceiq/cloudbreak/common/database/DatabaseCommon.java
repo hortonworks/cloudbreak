@@ -20,6 +20,9 @@ import com.google.common.base.Strings;
  */
 @Component
 public class DatabaseCommon {
+
+    public static final String POSTGRES_VERSION_REGEX = "^(9\\.6|10|11|12|13|14)$";
+
     private static final String JDBC_REGEX =
             "^(?:jdbc:(oracle|mysql|mariadb|postgresql)(?::[^:]+)?):(?:@|//)(.*?):(\\d*)[:/]?(\\w[-\\w]*)?(?:[?](?:[^=&]*=[^&=]*&?)*)?";
     //                |_______________________________||__________|         |___| |____|     |__________|       |___________________|

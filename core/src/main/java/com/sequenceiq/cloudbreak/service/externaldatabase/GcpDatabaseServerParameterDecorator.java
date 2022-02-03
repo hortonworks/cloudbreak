@@ -13,6 +13,7 @@ public class GcpDatabaseServerParameterDecorator implements DatabaseServerParame
     @Override
     public void setParameters(DatabaseServerV4StackRequest request, DatabaseServerParameter serverParameter) {
         GcpDatabaseServerV4Parameters parameters = new GcpDatabaseServerV4Parameters();
+        parameters.setEngineVersion(serverParameter.getEngineVersion());
         request.setGcp(parameters);
     }
 

@@ -218,6 +218,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
     @OneToMany(mappedBy = "stack", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private Set<LoadBalancer> loadBalancers = new HashSet<>();
 
+    private String externalDatabaseEngineVersion;
+
     public String getResourceCrn() {
         return resourceCrn;
     }
@@ -911,6 +913,14 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
         this.stackVersion = stackVersion;
     }
 
+    public void setExternalDatabaseEngineVersion(String externalDatabaseEngineVersion) {
+        this.externalDatabaseEngineVersion = externalDatabaseEngineVersion;
+    }
+
+    public String getExternalDatabaseEngineVersion() {
+        return externalDatabaseEngineVersion;
+    }
+
     @Override
     public String toString() {
         return "Stack{" +
@@ -958,6 +968,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
                 ", minaSshdServiceId='" + minaSshdServiceId + '\'' +
                 ", ccmV2AgentCrn='" + ccmV2AgentCrn + '\'' +
                 ", externalDatabaseCreationType=" + externalDatabaseCreationType +
+                ", externalDatabaseEngineVersion=" + externalDatabaseEngineVersion +
                 '}';
     }
 

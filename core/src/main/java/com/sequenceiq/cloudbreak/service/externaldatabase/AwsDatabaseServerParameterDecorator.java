@@ -22,6 +22,7 @@ public class AwsDatabaseServerParameterDecorator implements DatabaseServerParame
         AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
         parameters.setBackupRetentionPeriod(serverParameter.isHighlyAvailable() ? retentionPeriodHa : retentionPeriodNonHa);
         parameters.setMultiAZ(Boolean.toString(serverParameter.isHighlyAvailable()));
+        parameters.setEngineVersion(serverParameter.getEngineVersion());
         request.setAws(parameters);
     }
 

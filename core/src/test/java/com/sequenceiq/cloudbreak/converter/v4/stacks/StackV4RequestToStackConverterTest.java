@@ -220,7 +220,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                         "version", "created", "platformVariant", "cloudPlatform",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeCrn", "type", "inputs", "failurePolicy", "resourceCrn", "minaSshdServiceId",
-                        "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
+                        "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion", "externalDatabaseEngineVersion"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
@@ -249,7 +249,7 @@ class StackV4RequestToStackConverterTest extends AbstractJsonConverterTest<Stack
                         "version", "created", "platformVariant", "cloudPlatform", "resourceCrn",
                         "customHostname", "customDomain", "clusterNameAsSubdomain", "hostgroupNameAsHostname", "parameters", "creator",
                         "environmentCrn", "terminated", "datalakeCrn", "type", "inputs", "failurePolicy", "minaSshdServiceId",
-                        "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion"));
+                        "ccmV2AgentCrn", "externalDatabaseCreationType", "stackVersion", "externalDatabaseEngineVersion"));
         assertEquals("eu-west-1", stack.getRegion());
         assertEquals("AWS", stack.getCloudPlatform());
         assertEquals("mystack", stack.getName());
