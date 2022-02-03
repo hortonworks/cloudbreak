@@ -55,7 +55,6 @@ import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.mappable.ProviderParameterCalculator;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.common.service.Clock;
-import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
 import com.sequenceiq.cloudbreak.converter.v4.environment.network.EnvironmentNetworkConverter;
 import com.sequenceiq.cloudbreak.converter.v4.stacks.authentication.StackAuthenticationV4RequestToStackAuthenticationConverter;
@@ -424,7 +423,6 @@ public class StackV4RequestToStackConverter {
                 InstanceGroupNetworkV4Request instanceGroupNetworkV4Request = new InstanceGroupNetworkV4Request();
                 setNetworkByProvider(source, instanceGroup, instanceGroupNetworkV4Request, subnetId);
             }
-            checkVariant(instanceGroup.getNetwork(), stack);
             setupEndpointGatewayNetwork(instanceGroup.getNetwork(), stack, instanceGroup.getName(), environment);
         }
     }
@@ -510,16 +508,6 @@ public class StackV4RequestToStackConverter {
                 .map(attr -> attr.get(NetworkConstants.ENDPOINT_GATEWAY_SUBNET_ID))
                 .map(Object::toString)
                 .orElse(null);
-    }
-
-    private void checkVariant(InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, Stack stack) {
-        if (CloudPlatform.AWS.name().equals(stack.getCloudPlatform()) && instanceGroupNetworkV4Request != null &&
-                instanceGroupNetworkV4Request.getAws() != null) {
-            List<String> subnetIds = instanceGroupNetworkV4Request.getAws().getSubnetIds();
-            if (subnetIds != null && subnetIds.size() > 1) {
-                stack.setPlatformVariant(CloudConstants.AWS_NATIVE);
-            }
-        }
     }
 
     private void setupEndpointGatewayNetwork(InstanceGroupNetworkV4Request instanceGroupNetworkV4Request, Stack stack, String instanceGroupName,
