@@ -197,7 +197,7 @@ public class SdxTestClient {
         return new SdxChangeImageCatalogAction();
     }
 
-    public Action<SdxInternalTestDto, SdxClient> enableRangerRaz() {
+    public Action<SdxTestDto, SdxClient> enableRangerRaz() {
         return new SdxEnableRangerRazAction();
     }
 
