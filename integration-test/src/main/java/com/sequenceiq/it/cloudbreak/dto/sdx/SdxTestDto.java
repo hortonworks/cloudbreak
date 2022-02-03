@@ -215,6 +215,11 @@ public class SdxTestDto extends AbstractSdxTestDto<SdxClusterRequest, SdxCluster
         return this;
     }
 
+    public SdxTestDto withRangerRazEnabled(boolean rangerRazEnabled) {
+        getRequest().setEnableRangerRaz(rangerRazEnabled);
+        return this;
+    }
+
     public SdxTestDto withTags(Map<String, String> tags) {
         getRequest().addTags(tags);
         return this;

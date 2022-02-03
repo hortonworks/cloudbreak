@@ -6,14 +6,14 @@ import org.slf4j.LoggerFactory;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 
-public class SdxEnableRangerRazAction implements Action<SdxInternalTestDto, SdxClient> {
+public class SdxEnableRangerRazAction implements Action<SdxTestDto, SdxClient> {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxEnableRangerRazAction.class);
 
     @Override
-    public SdxInternalTestDto action(TestContext testContext, SdxInternalTestDto testDto, SdxClient client) throws Exception {
+    public SdxTestDto action(TestContext testContext, SdxTestDto testDto, SdxClient client) throws Exception {
         client.getDefaultClient().sdxEndpoint().enableRangerRazByCrn(testDto.getCrn());
         return testDto;
     }
