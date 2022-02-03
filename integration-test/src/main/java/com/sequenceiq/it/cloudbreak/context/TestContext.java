@@ -5,6 +5,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -665,6 +666,14 @@ public abstract class TestContext implements ApplicationContextAware {
                     adminUser.getDescription());
         }
         return adminUser;
+    }
+
+    public String getActingUserOwnerTag() {
+        return getActingUserName().split("@")[0].toLowerCase().replaceAll("[^\\w]", "-");
+    }
+
+    public String getCreationTimestampTag() {
+        return String.valueOf(new Date().getTime());
     }
 
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
