@@ -13,7 +13,7 @@ for (( i=0; i<=26; i++ )); do
             mkdir /hadoopfs/fs${MOUNTPATH_ID}
             echo UUID=$(blkid -o value $DEVICE | head -1) /hadoopfs/fs${MOUNTPATH_ID} ext4  defaults,noatime,nofail 0 2 >> /etc/fstab
             mount /hadoopfs/fs${MOUNTPATH_ID}
-            chmod 777 /hadoopfs/fs${MOUNTPATH_ID}
+            chmod 1777 /hadoopfs/fs${MOUNTPATH_ID}
         fi
     fi
 done

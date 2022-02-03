@@ -118,7 +118,7 @@ mount_one() {
         return_value=1
       fi
       log $LOG_FILE result of mounting $path: $?
-      chmod 777 $path >> $LOG_FILE 2>&1
+      chmod 1777 $path >> $LOG_FILE 2>&1
       return $((return_value))
 }
 
