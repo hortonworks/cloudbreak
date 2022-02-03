@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.util.Benchmark.measure;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -131,8 +132,8 @@ public class InstanceMetaDataService {
         LOGGER.debug("Get first valid PrivateId of instanceGroups");
         long id = instanceGroups.stream()
                 .flatMap(ig -> ig.getAllInstanceMetaData().stream())
-                .filter(im -> im.getPrivateId() != null)
                 .map(InstanceMetaData::getPrivateId)
+                .filter(Objects::nonNull)
                 .map(i -> i + 1)
                 .max(Long::compare)
                 .orElse(0L);
@@ -178,12 +179,11 @@ public class InstanceMetaDataService {
     }
 
     private DetailedEnvironmentResponse getDetailedEnvironmentResponse(String environmentCrn) {
-        DetailedEnvironmentResponse environment = measure(() ->
+        return measure(() ->
                         ThreadBasedUserCrnProvider.doAsInternalActor(() ->
                                 environmentClientService.getByCrn(environmentCrn)),
                 LOGGER,
                 "Get Environment from Environment service took {} ms");
-        return environment;
     }
 
     private String getStackSubnetIdIfExists(Stack stack) {
@@ -294,6 +294,10 @@ public class InstanceMetaDataService {
         return repository.findNotTerminatedForStack(stackId);
     }
 
+    public List<InstanceMetaData> findNotTerminatedAsOrderedListForStack(Long stackId) {
+        return repository.findNotTerminatedAsOrderedListForStack(stackId);
+    }
+
     public InstanceMetaData save(InstanceMetaData instanceMetaData) {
         return repository.save(instanceMetaData);
     }
@@ -357,6 +361,11 @@ public class InstanceMetaDataService {
     public List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup,
             com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus status) {
         return repository.findAllByInstanceGroupAndInstanceStatus(instanceGroup, status);
+    }
+
+    public List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatusOrdered(InstanceGroup instanceGroup,
+            com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus status) {
+        return repository.findAllByInstanceGroupAndInstanceStatusOrderByPrivateIdAsc(instanceGroup, status);
     }
 
     public Optional<InstanceMetaData> findByHostname(Long stackId, String hostName) {
