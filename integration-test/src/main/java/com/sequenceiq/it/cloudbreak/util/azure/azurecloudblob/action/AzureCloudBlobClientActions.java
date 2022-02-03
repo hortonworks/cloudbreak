@@ -50,16 +50,12 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
      * @return              CloudBlobContainer
      */
     private CloudBlobContainer getCloudBlobContainer(String containerName) {
-        CloudBlobContainer cloudBlobContainer = null;
-
         try {
-            cloudBlobContainer = createCloudBlobClient().getContainerReference(containerName);
+            return createCloudBlobClient().getContainerReference(containerName);
         } catch (URISyntaxException | StorageException e) {
             LOGGER.error("The Storage Container is not exist: [{}]\n", containerName, e);
             throw new TestFailException("The Storage Container is not exist: [" + containerName + "]", e);
         }
-
-        return cloudBlobContainer;
     }
 
     private void createCloudBlobContainer(String containerName) {
@@ -91,43 +87,39 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     }
 
     private String getContainerName(String baseLocation) {
-        final String containerName = baseLocation.substring(baseLocation.lastIndexOf("//") + 1, baseLocation.lastIndexOf("@"));
-        LOGGER.info("Container Name: {} at Base Location: {}", containerName, baseLocation);
+        String containerName = baseLocation.substring(baseLocation.lastIndexOf("//") + 1, baseLocation.lastIndexOf("@"));
+        containerName = containerName.replaceFirst("^\\/", "");
+        LOGGER.info("Container Name: {} at path: {}", containerName, baseLocation);
         return containerName;
     }
 
     private String getContainerName() {
         String fullPath = azureProperties.getCloudStorage().getBaseLocation();
-        final String containerName = fullPath.substring(fullPath.lastIndexOf("//") + 1, fullPath.lastIndexOf("@"));
-        LOGGER.info("Container Name: {} at Path: {}", containerName, fullPath);
-        return containerName;
+        return getContainerName(fullPath);
     }
 
-    private void deleteBlobsInDirectory(CloudBlobContainer cloudBlobContainer, String directoryName)
+    private void deleteBlobsInDirectory(CloudBlobDirectory cloudBlobDirectory)
             throws URISyntaxException, StorageException {
 
-        CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(directoryName);
-        for (ListBlobItem blobItem : blobDirectory.listBlobs()) {
+        for (ListBlobItem blobItem : cloudBlobDirectory.listBlobs()) {
             if (blobItem instanceof CloudBlobDirectory) {
-                deleteBlobsInDirectory(cloudBlobContainer, ((CloudBlobDirectory) blobItem).getPrefix());
+                deleteBlobsInDirectory((CloudBlobDirectory) blobItem);
             } else if (blobItem instanceof CloudPageBlob) {
-                CloudPageBlob cloudPageBlob = cloudBlobContainer.getPageBlobReference(((CloudPageBlob) blobItem).getName());
+                CloudPageBlob cloudPageBlob = cloudBlobDirectory.getPageBlobReference(((CloudPageBlob) blobItem).getName());
                 cloudPageBlob.deleteIfExists();
             } else if (blobItem instanceof CloudBlockBlob) {
-                CloudBlockBlob cloudBlockBlob = cloudBlobContainer.getBlockBlobReference(((CloudBlockBlob) blobItem).getName());
+                CloudBlockBlob cloudBlockBlob = cloudBlobDirectory.getBlockBlobReference(((CloudBlockBlob) blobItem).getName());
                 cloudBlockBlob.deleteIfExists();
             }
         }
     }
 
-    private void listBlobsInDirectory(CloudBlobContainer cloudBlobContainer, String directoryName)
+    private void listBlobsInDirectory(CloudBlobDirectory cloudBlobDirectory)
             throws URISyntaxException, StorageException {
 
-        CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(directoryName);
-
-        for (ListBlobItem blobItem : blobDirectory.listBlobs()) {
+        for (ListBlobItem blobItem : cloudBlobDirectory.listBlobs()) {
             if (blobItem instanceof CloudBlobDirectory) {
-                listBlobsInDirectory(cloudBlobContainer, ((CloudBlobDirectory) blobItem).getPrefix());
+                listBlobsInDirectory((CloudBlobDirectory) blobItem);
             } else if (blobItem instanceof CloudPageBlob) {
                 Log.log(LOGGER, format(" Azure Adls Gen 2 Cloud Page Blob is present with Name: [%s] and with bytes of content: [%d] at URI: [%s] ",
                         ((CloudPageBlob) blobItem).getName(), ((CloudPageBlob) blobItem).getProperties().getLength(), blobItem.getUri().getPath()));
@@ -143,15 +135,14 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
         }
     }
 
-    private void listBlobsInDirectoryWithValidation(CloudBlobContainer cloudBlobContainer, String directoryName, Boolean zeroContent)
+    private void listBlobsInDirectoryWithValidation(CloudBlobDirectory cloudBlobDirectory, Boolean zeroContent)
             throws URISyntaxException, StorageException {
 
-        CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(directoryName);
         Set<String> blobsWithZeroLength = new HashSet<>();
 
-        for (ListBlobItem blobItem : blobDirectory.listBlobs()) {
+        for (ListBlobItem blobItem : cloudBlobDirectory.listBlobs()) {
             if (blobItem instanceof CloudBlobDirectory) {
-                listBlobsInDirectoryWithValidation(cloudBlobContainer, ((CloudBlobDirectory) blobItem).getPrefix(), zeroContent);
+                listBlobsInDirectoryWithValidation((CloudBlobDirectory) blobItem, zeroContent);
             } else if (blobItem instanceof CloudPageBlob) {
                 validateBlobItemLength(blobItem, zeroContent, blobsWithZeroLength);
             } else if (blobItem instanceof CloudBlockBlob) {
@@ -247,7 +238,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                         blobName = blobName.replaceAll(".$", "");
                     }
                     CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(blobName);
-                    deleteBlobsInDirectory(cloudBlobContainer, blobDirectory.getPrefix());
+                    deleteBlobsInDirectory(blobDirectory);
                 }
             }
         } catch (StorageException | URISyntaxException e) {
@@ -274,7 +265,7 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                         blobName = blobName.replaceAll(".$", "");
                     }
                     CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(blobName);
-                    deleteBlobsInDirectory(cloudBlobContainer, blobDirectory.getPrefix());
+                    deleteBlobsInDirectory(blobDirectory);
                 }
             }
         } catch (StorageException | URISyntaxException e) {
@@ -286,13 +277,24 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     public void listAllFolders(String baseLocation) {
         String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
+        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
 
         Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
         Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
+        Log.log(LOGGER, format(" Azure Blob Key Prefix: %s", keyPrefix));
         Log.log(LOGGER, format(" Azure Blob Location: %s", baseLocation));
 
         try {
-            for (ListBlobItem blob : cloudBlobContainer.listBlobs()) {
+            CloudBlobDirectory storageDirectory = cloudBlobContainer.getDirectoryReference(keyPrefix);
+
+            Iterable<ListBlobItem> blobListing = storageDirectory.listBlobs();
+            List<ListBlobItem> listBlobItems = StreamSupport
+                    .stream(blobListing.spliterator(), false)
+                    .collect(Collectors.toList());
+            Log.log(LOGGER, format(" Azure Blob Directory: %s contains %d sub-objects.",
+                    keyPrefix, listBlobItems.size()));
+
+            for (ListBlobItem blob : blobListing) {
                 String blobName = blob.getUri().getPath().split("/", 3)[2];
                 String blobUriPath = blob.getUri().getPath();
 
@@ -305,8 +307,8 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                     if (blobName.endsWith("/")) {
                         blobName = blobName.replaceAll(".$", "");
                     }
-                    CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(blobName);
-                    listBlobsInDirectory(cloudBlobContainer, blobDirectory.getPrefix());
+                    CloudBlobDirectory blobDirectory = storageDirectory.getDirectoryReference(blobName);
+                    listBlobsInDirectory(blobDirectory);
                 }
             }
         } catch (StorageException | URISyntaxException e) {
@@ -318,23 +320,26 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     public void listSelectedDirectory(String baseLocation, String selectedDirectory, boolean zeroContent) {
         String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
+        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
 
         Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
         Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
+        Log.log(LOGGER, format(" Azure Blob Key Prefix: %s", keyPrefix));
         Log.log(LOGGER, format(" Azure Blob Directory: %s", selectedDirectory));
 
         try {
-            CloudBlobDirectory selectedLogsDirectory = cloudBlobContainer.getDirectoryReference(selectedDirectory);
+            CloudBlobDirectory selectedStorageDirectory = cloudBlobContainer.getDirectoryReference(keyPrefix);
+            CloudBlobDirectory selectedBlobDirectory = selectedStorageDirectory.getDirectoryReference(selectedDirectory);
             Set<String> blobsWithZeroLength = new HashSet<>();
 
-            Iterable<ListBlobItem> blobListing = cloudBlobContainer.listBlobs(selectedDirectory, true);
+            Iterable<ListBlobItem> blobListing = selectedBlobDirectory.listBlobs();
             List<ListBlobItem> listBlobItems = StreamSupport
                     .stream(blobListing.spliterator(), false)
                     .collect(Collectors.toList());
             Log.log(LOGGER, format(" Azure Blob Directory: %s contains %d sub-objects.",
                     selectedDirectory, listBlobItems.size()));
 
-            for (ListBlobItem blob : selectedLogsDirectory.listBlobs()) {
+            for (ListBlobItem blob : blobListing) {
                 String blobName = blob.getUri().getPath().split("/", 3)[2];
                 String blobUriPath = blob.getUri().getPath();
 
@@ -350,8 +355,8 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
                     if (blobName.endsWith("/")) {
                         blobName = blobName.replaceAll(".$", "");
                     }
-                    CloudBlobDirectory blobDirectory = cloudBlobContainer.getDirectoryReference(blobName);
-                    listBlobsInDirectoryWithValidation(cloudBlobContainer, blobDirectory.getPrefix(), zeroContent);
+                    CloudBlobDirectory blobDirectory = selectedBlobDirectory.getDirectoryReference(blobName);
+                    listBlobsInDirectoryWithValidation(blobDirectory, zeroContent);
                 }
             }
         } catch (StorageException | URISyntaxException e) {
@@ -363,19 +368,24 @@ public class AzureCloudBlobClientActions extends AzureCloudBlobClient {
     public String getLoggingUrl(String baseLocation, String clusterLogPath) {
         String containerName = getContainerName(baseLocation);
         CloudBlobContainer cloudBlobContainer = getCloudBlobContainer(containerName);
+        String keyPrefix = StringUtils.substringAfterLast(baseLocation, "/");
 
         Log.log(LOGGER, format(" Azure Blob Storage URI: %s", cloudBlobContainer.getStorageUri()));
         Log.log(LOGGER, format(" Azure Blob Container: %s", cloudBlobContainer.getName()));
+        Log.log(LOGGER, format(" Azure Blob Key Prefix: %s", keyPrefix));
         Log.log(LOGGER, format(" Azure Blob Cluster Logs: %s", clusterLogPath));
 
         try {
-            CloudBlobDirectory logsDirectory = cloudBlobContainer.getDirectoryReference(clusterLogPath);
+            CloudBlobDirectory storageDirectory = cloudBlobContainer.getDirectoryReference(keyPrefix);
+            CloudBlobDirectory logsDirectory = storageDirectory.getDirectoryReference(clusterLogPath);
             if (logsDirectory.listBlobs().iterator().hasNext()) {
-                return String.format("https://autotestingapi.blob.core.windows.net/%s%s",
-                        containerName, clusterLogPath);
+                return String.format("https://autotestingapi.blob.core.windows.net/%s/%s%s",
+                        containerName, keyPrefix, clusterLogPath);
             } else {
-                LOGGER.error("Azure Adls Gen 2 Blob is NOT present with name: {}", containerName);
-                throw new TestFailException("Azure Adls Gen 2 Blob is NOT present with name: " + containerName);
+                LOGGER.error("Azure Adls Gen 2 Blob is NOT present at '{}' container in '{}' storage directory with path: [{}]", containerName, keyPrefix,
+                        clusterLogPath);
+                throw new TestFailException(format("Azure Adls Gen 2 Blob is NOT present at '%s' container in '%s' storage directory with path: [%s]",
+                        containerName, keyPrefix, clusterLogPath));
             }
         } catch (StorageException | URISyntaxException e) {
             LOGGER.error("Azure Adls Gen 2 Blob couldn't process the call. So it has been returned with error!", e);

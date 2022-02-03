@@ -5,7 +5,6 @@ import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.MASTER;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -250,10 +249,9 @@ public class DistroXEncryptedVolumeTest extends AbstractE2ETest {
 
     private ResourceGroup createResourceGroupForEnvironment(TestContext testContext) {
         resourceGroupForTest = resourcePropertyProvider().getName();
-        String username = StringUtils.substringBefore(testContext.getActingUserCrn().getResource(), "@").toLowerCase();
         Map<String, String> tags = new HashMap<>() {{
-            put("owner", username);
-            put("creation-timestamp", String.valueOf(new Date().getTime()));
+            put("owner", testContext.getActingUserOwnerTag());
+            put("creation-timestamp", testContext.getCreationTimestampTag());
         }};
         return azureCloudFunctionality.createResourceGroup(resourceGroupForTest, tags);
     }
