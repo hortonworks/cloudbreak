@@ -103,6 +103,8 @@ public class StackDetails implements Serializable {
 
     private String databaseType;
 
+    private boolean multiAz;
+
     public Long getId() {
         return id;
     }
@@ -317,5 +319,13 @@ public class StackDetails implements Serializable {
 
     public void setDatabaseType(String databaseType) {
         this.databaseType = databaseType;
+    }
+
+    public boolean isMultiAz() {
+        return multiAz;
+    }
+
+    public void setMultiAz(boolean multiAz) {
+        this.multiAz = multiAz;
     }
 }

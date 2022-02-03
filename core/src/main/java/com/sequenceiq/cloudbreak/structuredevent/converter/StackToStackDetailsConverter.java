@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.structuredevent.converter;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -9,6 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.cloud.model.Image;
+import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -51,6 +54,8 @@ public class StackToStackDetailsConverter {
         stackDetails.setType(source.getType().name());
         stackDetails.setRegion(source.getRegion());
         stackDetails.setAvailabilityZone(source.getAvailabilityZone());
+        stackDetails.setPlatformVariant(source.getPlatformVariant());
+        stackDetails.setMultiAz(getMultiAz(source));
         stackDetails.setDescription(source.getDescription());
         stackDetails.setCloudPlatform(source.cloudPlatform());
         stackDetails.setStatus(source.getStatus().name());
@@ -66,6 +71,22 @@ public class StackToStackDetailsConverter {
         convertComponents(stackDetails, source);
         convertDatabaseType(stackDetails, source);
         return stackDetails;
+    }
+
+    private boolean getMultiAz(Stack stack) {
+        return stack.getInstanceGroups()
+                .stream()
+                .flatMap(e -> getSubnetIds(e).stream())
+                .distinct()
+                .count() > 1;
+    }
+
+    private List<String> getSubnetIds(com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup e) {
+        Json attributes = e.getInstanceGroupNetwork().getAttributes();
+        if (attributes != null && attributes.getMap() != null) {
+            return (List<String>) attributes.getMap().getOrDefault(NetworkConstants.SUBNET_IDS, List.of());
+        }
+        return List.of();
     }
 
     private void convertComponents(StackDetails stackDetails, Stack stack) {
