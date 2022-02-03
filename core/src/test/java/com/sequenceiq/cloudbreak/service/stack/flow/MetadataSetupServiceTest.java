@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType.GATEWAY_PRIMARY;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.STOPPED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -345,6 +346,42 @@ public class MetadataSetupServiceTest {
         assertFalse(instanceMetaData.getClusterManagerServer());
     }
 
+    @Test
+    public void saveInstanceMetaDataTestOneZombieInstance()
+            throws CloudbreakImageNotFoundException {
+        Stack stack = new Stack();
+        stack.setId(STACK_ID);
+        Image image = getEmptyImage();
+        when(imageService.getImage(STACK_ID)).thenReturn(image);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        instanceGroup.setId(INSTANCE_GROUP_ID);
+        instanceGroup.setGroupName(GROUP_NAME);
+        Set<InstanceGroup> instanceGroupSet = new TreeSet<>();
+        instanceGroupSet.add(instanceGroup);
+        when(instanceGroupService.findByStackId(STACK_ID)).thenReturn(instanceGroupSet);
+        when(clock.getCurrentTimeMillis()).thenReturn(CURRENT_TIME);
+        Iterable<CloudVmMetaDataStatus> cloudVmMetaDataStatuses = getCloudVmMetaDataStatuses(InstanceStatus.CREATED);
+
+        InstanceMetaData pgwInstanceMetadata = new InstanceMetaData();
+        pgwInstanceMetadata.setInstanceMetadataType(GATEWAY_PRIMARY);
+        InstanceMetaData zombieInstanceMetadata = new InstanceMetaData();
+        zombieInstanceMetadata.setInstanceStatus(ZOMBIE);
+        zombieInstanceMetadata.setPrivateId(PRIVATE_ID);
+        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(zombieInstanceMetadata, pgwInstanceMetadata));
+
+        int newInstances = underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, SERVICES_RUNNING);
+
+        assertEquals(1, newInstances);
+        verify(imageService).getImage(STACK_ID);
+        verify(instanceMetaDataService).save(instanceMetaDataCaptor.capture());
+        InstanceMetaData instanceMetaData = instanceMetaDataCaptor.getValue();
+        assertThat(instanceMetaData.getInstanceGroup()).isSameAs(instanceGroup);
+        assertCommonProperties(instanceMetaData);
+        assertEquals(ZOMBIE, instanceMetaData.getInstanceStatus());
+        assertNull(instanceMetaData.getImage());
+        assertFalse(instanceMetaData.getClusterManagerServer());
+    }
+
     static Object[][] saveInstanceMetaDataTestServerFlagIsAlreadySetDataProvider() {
         return new Object[][]{
                 // testCaseName subnetId availabilityZone rackId
@@ -441,7 +478,8 @@ public class MetadataSetupServiceTest {
         String gw2DiscoveryFQDN = "gw2.example.com";
         gwInstanceMetadata3.setDiscoveryFQDN(gw2DiscoveryFQDN);
 
-        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, gwInstanceMetadata3));
+        when(instanceMetaDataService.findNotTerminatedForStack(1L))
+                .thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, gwInstanceMetadata3));
         underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, CREATED);
 
         verify(instanceMetaDataService, times(3)).save(instanceMetaDataCaptor.capture());
@@ -511,8 +549,10 @@ public class MetadataSetupServiceTest {
 
         when(instanceGroupService.findByStackId(1L)).thenReturn(Set.of(gwInstanceGroup, workerInstanceGroup));
         when(instanceMetaDataService.findAllByInstanceGroupAndInstanceStatusOrdered(gwInstanceGroup,
-                com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED)).thenReturn(List.of(gwInstanceMetadata1, gwInstanceMetadata2));
-        when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, workerInstanceMetadata3));
+                com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED))
+                .thenReturn(List.of(gwInstanceMetadata1, gwInstanceMetadata2));
+        when(instanceMetaDataService.findNotTerminatedForStack(1L)).
+                thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, workerInstanceMetadata3));
         underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, CREATED);
 
         verify(instanceMetaDataService, times(4)).save(instanceMetaDataCaptor.capture());

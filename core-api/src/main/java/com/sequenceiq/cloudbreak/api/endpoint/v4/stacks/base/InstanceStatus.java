@@ -15,7 +15,8 @@ public enum InstanceStatus {
     DELETE_REQUESTED,
     DECOMMISSIONED,
     DECOMMISSION_FAILED,
-    TERMINATED;
+    TERMINATED,
+    ZOMBIE;
 
     public String getAsHostState() {
         switch (this) {

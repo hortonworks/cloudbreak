@@ -191,7 +191,7 @@ class OrchestratorRecipeExecutor {
     private Set<Node> collectNodes(Stack stack, Set<String> hostNames) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+            for (InstanceMetaData im : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 if (hostNames.contains(im.getDiscoveryFQDN())) {
                     String instanceId = im.getInstanceId();
                     String instanceType = instanceGroup.getTemplate().getInstanceType();

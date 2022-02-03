@@ -152,7 +152,7 @@ public class StackSyncActions {
                     .withAccountId(stack.getTenant().getId())
                     .build();
             CloudCredential cloudCredential = stackUtil.getCloudCredential(stack);
-            return new StackSyncContext(flowParameters, stack, stack.getNotTerminatedInstanceMetaDataList(), cloudContext, cloudCredential,
+            return new StackSyncContext(flowParameters, stack, stack.getNotTerminatedAndNotZombieInstanceMetaDataList(), cloudContext, cloudCredential,
                     isStatusUpdateEnabled(variables));
         }
 

@@ -229,7 +229,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private void doSync(Stack stack) {
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
         try {
             if (isClusterManagerRunning(stack, connector)) {
                 ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
@@ -350,6 +350,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .collect(Collectors.toMap(e -> e.getKey().value(), e -> Optional.ofNullable(hostStatuses.statusReasonForHost(e.getKey()))));
         Set<String> noReportHosts = runningInstances.stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceMetaData -> !instanceMetaData.isZombie())
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .filter(discoveryFQDN -> hostStatuses.getHostsHealth().get(hostName(discoveryFQDN)) == null)
                 .collect(toSet());

@@ -170,7 +170,7 @@ public class ClusterBootstrapper {
     }
 
     private void checkIfAnyInstanceIsNotInStartedState(Stack stack, CloudbreakOrchestratorFailedException e) throws CloudbreakException {
-        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
         List<CloudInstance> cloudInstances = cloudInstanceConverter.convert(runningInstances, stack.getEnvironmentCrn(), stack.getStackAuthentication());
         List<CloudVmInstanceStatus> instanceStatuses = stackInstanceStatusChecker.queryInstanceStatuses(stack, cloudInstances);
         List<CloudVmInstanceStatus> notStartedInstances = instanceStatuses.stream()
@@ -269,13 +269,13 @@ public class ClusterBootstrapper {
     }
 
     private boolean isSaltBootstrapRestartNeededSupported(Stack stack) {
-        return stack.getNotDeletedInstanceMetaDataSet().stream()
+        return stack.getNotDeletedAndNotZombieInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getImage)
                 .allMatch(i -> saltBootstrapVersionChecker.isRestartNeededFlagSupported(i));
     }
 
     private boolean isSaltBootstrapFpSupported(Stack stack) {
-        return stack.getNotDeletedInstanceMetaDataSet().stream()
+        return stack.getNotDeletedAndNotZombieInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getImage)
                 .allMatch(i -> saltBootstrapVersionChecker.isFingerprintingSupported(i));
     }
@@ -283,7 +283,7 @@ public class ClusterBootstrapper {
     private List<GatewayConfig> collectAndCheckGateways(Stack stack) {
         LOGGER.info("Collect and check gateways for {}", stack.getName());
         List<GatewayConfig> allGatewayConfig = new ArrayList<>();
-        for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
+        for (InstanceMetaData gateway : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, isKnoxEnabled(stack));
             LOGGER.info("Add gateway config: {}", gatewayConfig);
             allGatewayConfig.add(gatewayConfig);
@@ -303,7 +303,7 @@ public class ClusterBootstrapper {
         String domain = hostDiscoveryService.determineDomain(stack.getCustomDomain(), stack.getName(), stack.isClusterNameAsSubdomain());
 
         Map<String, AtomicLong> hostGroupNodeIndexes = new HashMap<>();
-        Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
+        Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
         // Ordered list of metadata to guarantee consistent hostname generation across multiple cluster recoveries
@@ -355,7 +355,7 @@ public class ClusterBootstrapper {
         LOGGER.info("Cluster domain: {}", clusterDomain);
 
         Map<String, AtomicLong> hostGroupNodeIndexes = new HashMap<>();
-        Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
+        Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataSet().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
         LOGGER.info("Cluster node names: {}", clusterNodeNames);
@@ -398,7 +398,7 @@ public class ClusterBootstrapper {
         LOGGER.info("Bootstrap new nodes: {}", nodes);
         Cluster cluster = stack.getCluster();
         Boolean enableKnox = cluster.getGateway() != null;
-        for (InstanceMetaData gateway : stack.getNotTerminatedGatewayInstanceMetadata()) {
+        for (InstanceMetaData gateway : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gateway, enableKnox);
             ExtendedPollingResult bootstrapApiPolling = hostBootstrapApiPollingService.pollWithAbsoluteTimeout(
                     hostBootstrapApiCheckerTask, new HostBootstrapApiContext(stack, gatewayConfig, hostOrchestrator), POLL_INTERVAL, MAX_POLLING_ATTEMPTS);

@@ -143,7 +143,7 @@ public class StackStopActions {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
             MDCBuilder.buildMdcContext(stack);
-            List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
+            List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = CloudContext.Builder.builder()
                     .withId(stack.getId())

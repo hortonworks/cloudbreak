@@ -318,7 +318,7 @@ public class ClusterRepairService {
                 .filter(instanceSelectors.getLeft())
                 .map(hostGroup -> Map.entry(hostGroupName(hostGroup.getName()), hostGroup
                         .getInstanceGroup()
-                        .getNotTerminatedInstanceMetaDataSet()
+                        .getNotTerminatedAndNotZombieInstanceMetaDataSet()
                         .stream()
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .filter(instanceSelectors.getRight())
