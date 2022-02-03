@@ -36,6 +36,15 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
             "AND i.instanceStatus <> 'DELETED_BY_PROVIDER'")
     Set<InstanceMetaData> findNotTerminatedForStack(@Param("stackId") Long stackId);
 
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
+    @Query("SELECT i FROM InstanceMetaData i " +
+            "WHERE i.instanceGroup.stack.id= :stackId " +
+            "AND i.instanceStatus <> 'TERMINATED' " +
+            "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
+            "AND i.instanceStatus <> 'DELETED_BY_PROVIDER' " +
+            "ORDER BY i.privateId")
+    List<InstanceMetaData> findNotTerminatedAsOrderedListForStack(@Param("stackId") Long stackId);
+
     @Query("SELECT i FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId " +
             "AND i.instanceStatus <> 'TERMINATED' " +
@@ -90,6 +99,9 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatus(InstanceGroup instanceGroup, InstanceStatus status);
+
+    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
+    List<InstanceMetaData> findAllByInstanceGroupAndInstanceStatusOrderByPrivateIdAsc(InstanceGroup instanceGroup, InstanceStatus status);
 
     @Query("SELECT i.serverCert FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceMetadataType = 'GATEWAY_PRIMARY' "
             + "AND i.instanceStatus <> 'TERMINATED'")

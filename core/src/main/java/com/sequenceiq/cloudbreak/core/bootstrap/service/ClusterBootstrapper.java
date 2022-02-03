@@ -306,7 +306,9 @@ public class ClusterBootstrapper {
         Set<String> clusterNodeNames = stack.getNotTerminatedInstanceMetaDataList().stream()
                 .map(InstanceMetaData::getShortHostname).collect(Collectors.toSet());
 
-        Set<InstanceMetaData> notDeletedInstanceMetaDataSet = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stack.getId());
+        // Ordered list of metadata to guarantee consistent hostname generation across multiple cluster recoveries
+        List<InstanceMetaData> notDeletedInstanceMetaDataSet = instanceMetaDataService.findNotTerminatedAsOrderedListForStack(stack.getId());
+        LOGGER.debug("There are the following available instances: {}", notDeletedInstanceMetaDataSet);
         for (InstanceMetaData im : notDeletedInstanceMetaDataSet) {
             if (im.getPrivateIp() == null && im.getPublicIpWrapper() == null) {
                 LOGGER.debug("Skipping instance metadata because the public ip and private ips are null '{}'.", im);
