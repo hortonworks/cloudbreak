@@ -6,6 +6,11 @@ import java.util.List;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
+/**
+ * @deprecated {@link RandomStringUtils} uses a global, predictable {@link java.util.Random} internally.
+ * Use {@link com.sequenceiq.cloudbreak.util.password.DefaultPasswordGenerator} instead.
+ */
+@Deprecated
 public class FreeIpaPasswordUtil {
 
     private static final int PWD_PREFIX_LENGTH = 3;

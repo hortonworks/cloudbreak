@@ -2,7 +2,7 @@
 
 : ${LOGFILE_FOLDER:="/var/log/cdp-logging-agent-doctor"}
 LIVENESS_THRESHOLD_SECONDS=86400 # 1 day in seconds
-BUFFER_LIMIT_BYTES=10485760 # 10 MB in bytes
+BUFFER_LIMIT_BYTES=100000 # ~100K in bytes
 # increase this to make sure to override the script in case of diagnostics
 # todo: find better solution - pass by cli option?
 VERSION=1
@@ -153,7 +153,7 @@ function create_dump_file_and_upload() {
   log "Compression complete. Cleanup old dump collections ..."
   ls -1tr /tmp/cdp-logging-dump*.tar.gz | head -n -3 | xargs --no-run-if-empty rm
   upload_to_cloud_storage "/tmp/${dump_name}.tar.gz"
-  do_exit 0 "LOCAL DUMP FINSHED"
+  log "LOCAL DUMP FINISHED"
 }
 
 function dump() {
