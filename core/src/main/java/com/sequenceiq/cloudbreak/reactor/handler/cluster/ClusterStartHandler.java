@@ -147,9 +147,12 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
     @VisibleForTesting
     void handleStopStartScalingFeature(Stack stack, CmTemplateProcessor blueprintProcessor) {
         if (stackUtil.stopStartScalingEntitlementEnabled(stack)) {
-            List<String> decommissionedHostsFromCM = apiConnectors.getConnector(stack).clusterStatusService().getDecommissionedHostsFromCM();
             Set<String> computeGroups = getComputeHostGroups(blueprintProcessor);
-            if (computeGroups.isEmpty() || decommissionedHostsFromCM.isEmpty()) {
+            if (computeGroups.isEmpty()) {
+                return;
+            }
+            List<String> decommissionedHostsFromCM = apiConnectors.getConnector(stack).clusterStatusService().getDecommissionedHostsFromCM();
+            if (decommissionedHostsFromCM.isEmpty()) {
                 return;
             }
             Set<String> decommissionedComputeHosts = new HashSet<>();

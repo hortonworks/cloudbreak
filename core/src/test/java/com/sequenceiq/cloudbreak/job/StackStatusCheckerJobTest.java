@@ -175,9 +175,6 @@ public class StackStatusCheckerJobTest {
         when(cluster.getBlueprint()).thenReturn(blueprint);
         when(blueprint.getBlueprintText()).thenReturn(BLUEPRINT_TEXT);
         when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
-        Set<String> computeGroups = new HashSet<>();
-        computeGroups.add("compute");
-        when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
     }
 
     @After
@@ -250,26 +247,49 @@ public class StackStatusCheckerJobTest {
     }
 
     @Test
-    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabled() throws JobExecutionException {
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledInstanceStopped() throws JobExecutionException {
+        internalTestInstanceSyncStopStart("compute", InstanceStatus.STOPPED, DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
+    }
+
+    @Test
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledInstanceUnhealthy() throws JobExecutionException {
+        internalTestInstanceSyncStopStart("compute", InstanceStatus.SERVICES_UNHEALTHY, DetailedStackStatus.NODE_FAILURE);
+    }
+
+    @Test
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledOtherHgStopped() throws JobExecutionException {
+        internalTestInstanceSyncStopStart("notcompute", InstanceStatus.STOPPED, DetailedStackStatus.NODE_FAILURE);
+    }
+
+    @Test
+    public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledOtherHgUnhealthy() throws JobExecutionException {
+        internalTestInstanceSyncStopStart("notcompute", InstanceStatus.SERVICES_UNHEALTHY, DetailedStackStatus.NODE_FAILURE);
+    }
+
+    private void internalTestInstanceSyncStopStart(String instanceHgName, InstanceStatus instanceStatus, DetailedStackStatus expected)
+            throws JobExecutionException {
         setupForCM();
         Set<HealthCheck> healthChecks = Sets.newHashSet(new HealthCheck(HealthCheckType.HOST, HealthCheckResult.UNHEALTHY, Optional.empty()),
                 new HealthCheck(HealthCheckType.CERT, HealthCheckResult.UNHEALTHY, Optional.empty()));
         ExtendedHostStatuses extendedHostStatuses = new ExtendedHostStatuses(Map.of(HostName.hostName("host1"), healthChecks));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(extendedHostStatuses);
-        when(instanceMetaData.getInstanceStatus()).thenReturn(InstanceStatus.STOPPED);
+        when(instanceMetaData.getInstanceStatus()).thenReturn(instanceStatus);
         when(instanceMetaData.getDiscoveryFQDN()).thenReturn("host1");
         InstanceGroup instanceGroup = new InstanceGroup();
-        instanceGroup.setGroupName("compute");
+        instanceGroup.setGroupName(instanceHgName);
         when(instanceMetaData.getInstanceGroup()).thenReturn(instanceGroup);
         when(clusterApiConnectors.getConnector(stack)).thenReturn(clusterApi);
         when(clusterApi.clusterStatusService()).thenReturn(clusterStatusService);
         when(stackUtil.stopStartScalingEntitlementEnabled(any())).thenReturn(true);
+        Set<String> computeGroups = new HashSet<>();
+        computeGroups.add("compute");
+        when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(computeGroups);
         underTest.executeTracedJob(jobExecutionContext);
 
         verify(clusterOperationService, times(1)).reportHealthChange(any(), any(), anySet());
         verify(stackInstanceStatusChecker).queryInstanceStatuses(eq(stack), any());
         verify(clusterService, times(1)).updateClusterCertExpirationState(stack.getCluster(), true);
-        verify(clusterService, times(1)).updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
+        verify(clusterService, times(1)).updateClusterStatusByStackId(stack.getId(), expected);
     }
 
     @Test

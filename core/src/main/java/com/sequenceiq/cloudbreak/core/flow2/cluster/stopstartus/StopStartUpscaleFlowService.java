@@ -58,7 +58,8 @@ class StopStartUpscaleFlowService {
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES,
                 "Instances: " + instancesStarted.size() + " started successfully.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED,
-                String.valueOf(instancesStarted.size()), instancesStarted.stream().map(x -> x.getInstanceId()).collect(Collectors.toList()).toString());
+                String.valueOf(instancesStarted.size()), instancesStarted.stream().map(InstanceMetaData::getInstanceId)
+                        .collect(Collectors.joining(", ")));
     }
 
     void logInstancesFailedToStart(long stackId, List<CloudVmInstanceStatus> notStartedIntances) {
@@ -68,8 +69,7 @@ class StopStartUpscaleFlowService {
                 String.valueOf(notStartedIntances.size()),
                         notStartedIntances.stream()
                                 .map(x -> x.getCloudInstance().getInstanceId())
-                                .collect(Collectors.toList())
-                                .toString());
+                                .collect(Collectors.joining(", ")));
     }
 
     void warnNotEnoughInstances(long stackId, String hostGroupName, int desiredCount, int addedCount) {
@@ -88,14 +88,14 @@ class StopStartUpscaleFlowService {
             flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING2,
                     hostGroupName,
                     String.valueOf(startedInstances.size()),
-                    startedInstances.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.joining(", ")),
+                    startedInstances.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(", ")),
                     String.valueOf(instancesWithServicesNotRunning.size()),
-                    instancesWithServicesNotRunning.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.joining(", ")));
+                    instancesWithServicesNotRunning.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(", ")));
         } else {
             flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_COMMISSIONING,
                     hostGroupName,
                     String.valueOf(startedInstances.size()),
-                    startedInstances.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.joining(", ")));
+                    startedInstances.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(", ")));
         }
     }
 
@@ -103,7 +103,7 @@ class StopStartUpscaleFlowService {
         // TODO CB-14929: CB-15418 This needs to be an orange message (i.e. not success, not failure). Need to figure out how the UI
         //  processes these and applies icons.
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_COULDNOTCOMMISSION,
-                String.valueOf(notCommissionedFqdns.size()), notCommissionedFqdns.stream().collect(Collectors.joining(", ")));
+                String.valueOf(notCommissionedFqdns.size()), String.join(", ", notCommissionedFqdns));
     }
 
     void clusterUpscaleFinished(StackView stackView, String hostgroupName, List<InstanceMetaData> commissioned, DetailedStackStatus finalStackStatus) {
@@ -112,7 +112,7 @@ class StopStartUpscaleFlowService {
         stackUpdater.updateStackStatus(stackView.getId(), finalStackStatus, String.format("finished starting nodes"));
         flowMessageService.fireEventAndLog(stackView.getId(), finalStackStatus.getStatus().name(), CLUSTER_SCALING_STOPSTART_UPSCALE_FINISHED,
                 hostgroupName, String.valueOf(commissioned.size()),
-                commissioned.stream().map(i -> i.getDiscoveryFQDN()).collect(Collectors.joining(", ")));
+                commissioned.stream().map(InstanceMetaData::getDiscoveryFQDN).collect(Collectors.joining(", ")));
     }
 
     void startInstancesFailed(long stackId, List<CloudInstance> instancesRequested) {
