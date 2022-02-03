@@ -251,6 +251,29 @@ public class CentralCmTemplateUpdaterTest {
     }
 
     @Test
+    public void getCmTemplateIfCoresettingspresentedShouldNotOverrideThePropertyWithEmptyString() {
+        List<StorageLocationView> locations = new ArrayList<>();
+
+        StorageLocation hbaseRootDir = new StorageLocation();
+        hbaseRootDir.setProperty("hbase.rootdir");
+        hbaseRootDir.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(hbaseRootDir));
+
+        StorageLocation coresettings = new StorageLocation();
+        coresettings.setProperty("core_defaultfs");
+        coresettings.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(coresettings));
+
+        S3FileSystemConfigurationsView fileSystemConfigurationsView =
+                new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationsView));
+
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/core-settings-empty.bp"));
+        ApiClusterTemplate generated = testGetCmTemplate();
+        assertMatchesBlueprintAtPath("output/core-settings-empty.bp", generated);
+    }
+
+    @Test
     public void getCmTemplateNoMetastoreWithTemplateParams() {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-fixparam.bp"));
         ApiClusterTemplate generated = testGetCmTemplate();
