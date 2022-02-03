@@ -11,6 +11,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRole
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,8 +51,11 @@ public class CoreConfigProvider extends AbstractRoleConfigProvider {
     @Override
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         List<ApiClusterTemplateConfig> apiClusterTemplateConfigs = new ArrayList<>();
-        ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
-                .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
+        Optional<ApiClusterTemplateConfig> roleConfig = templateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CORE_DEFAULTFS);
+        if (roleConfig.isEmpty()) {
+            ConfigUtils.getStorageLocationForServiceProperty(source, CORE_DEFAULTFS)
+                    .ifPresent(location -> apiClusterTemplateConfigs.add(config(CORE_DEFAULTFS, location.getValue())));
+        }
 
         StringBuilder hdfsCoreSiteSafetyValveValue = new StringBuilder();
         s3ConfigProvider.getServiceConfigs(source, hdfsCoreSiteSafetyValveValue);

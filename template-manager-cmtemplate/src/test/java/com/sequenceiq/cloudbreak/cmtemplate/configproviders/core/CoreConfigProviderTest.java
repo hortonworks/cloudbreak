@@ -1,6 +1,8 @@
 package com.sequenceiq.cloudbreak.cmtemplate.configproviders.core;
 
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.CORE_SETTINGS;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.core.CoreRoles.STORAGEOPERATIONS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.HDFS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.hdfs.HdfsRoles.NAMENODE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.kafka.KafkaRoles.KAFKA_BROKER;
@@ -142,12 +144,13 @@ public class CoreConfigProviderTest {
         Optional<BaseFileSystemConfigurationsView> fileSystemConfigurationView = Optional.of(fileSystemConfiguration);
 
         when(mockTemplateProcessor.isRoleTypePresentInService(KAFKA_SERVICE, List.of(KAFKA_BROKER))).thenReturn(true);
+        when(mockTemplateProcessor.getRoleConfig(CORE_SETTINGS, STORAGEOPERATIONS, CoreConfigProvider.CORE_DEFAULTFS)).thenReturn(Optional.empty());
         when(mockTemplateProcessor.isRoleTypePresentInService(HDFS, List.of(NAMENODE))).thenReturn(true);
         when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(fileSystemConfigurationView);
         doNothing().when(s3ConfigProvider).getServiceConfigs(any(TemplatePreparationObject.class), any(StringBuilder.class));
         String coreSafetyValveProperty = ConfigUtils.getSafetyValveProperty("hadoop.security.groups.cache.background.reload", "true");
         List<ApiClusterTemplateConfig> expected = List.of(config("core_site_safety_valve", coreSafetyValveProperty));
 
-        assertThat(underTest.getServiceConfigs(null, templatePreparationObject)).hasSameElementsAs(expected);
+        assertThat(underTest.getServiceConfigs(mockTemplateProcessor, templatePreparationObject)).hasSameElementsAs(expected);
     }
 }
