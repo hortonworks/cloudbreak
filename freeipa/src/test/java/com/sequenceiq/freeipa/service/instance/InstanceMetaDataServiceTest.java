@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -58,10 +57,6 @@ public class InstanceMetaDataServiceTest {
 
     private static final long INSTANCE_PRIVATE_ID_3 = 3L;
 
-    private static Stack stack;
-
-    private static InstanceGroup instanceGroup;
-
     @InjectMocks
     private InstanceMetaDataService underTest;
 
@@ -77,34 +72,15 @@ public class InstanceMetaDataServiceTest {
     @Mock
     private CachedEnvironmentClientService cachedEnvironmentClientService;
 
-    @BeforeAll
-    public static void init() {
-        stack = new Stack();
-        stack.setEnvironmentCrn(ENVIRONMENT_ID);
-        stack.setId(STACK_ID);
-        instanceGroup = new InstanceGroup();
-        stack.getInstanceGroups().add(instanceGroup);
-        instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
-        InstanceMetaData instanceMetaData = new InstanceMetaData();
-        instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
-        instanceGroup.setGroupName(GROUP_NAME);
-        instanceMetaData.setDiscoveryFQDN("host1.domain");
-        instanceMetaData.setInstanceId(INSTANCE_ID_1);
-        instanceMetaData.setPrivateId(INSTANCE_PRIVATE_ID_1);
-        instanceMetaData = new InstanceMetaData();
-        instanceMetaData.setDiscoveryFQDN("host2.domain");
-        instanceMetaData.setInstanceId(INSTANCE_ID_2);
-        instanceMetaData.setPrivateId(INSTANCE_PRIVATE_ID_2);
-        instanceGroup.getInstanceMetaData().add(instanceMetaData);
-    }
-
     private Set<InstanceMetaData> getInstancesFromStack() {
+        Stack stack = initializeStackWithInstanceGroup();
         return stack.getInstanceGroups().stream()
                 .flatMap(instanceGroup -> instanceGroup.getInstanceMetaData().stream()).collect(Collectors.toSet());
     }
 
     @Test
     public void testUpdateStatusSuccess() {
+        Stack stack = initializeStackWithInstanceGroup();
         when(instanceMetaDataRepository.findAllInStack(STACK_ID)).thenReturn(getInstancesFromStack());
 
         underTest.updateStatus(stack, List.of(INSTANCE_ID_1), InstanceStatus.CREATED);
@@ -114,6 +90,7 @@ public class InstanceMetaDataServiceTest {
 
     @Test
     public void testUpdateMultipleStatusSuccess() {
+        Stack stack = initializeStackWithInstanceGroup();
         when(instanceMetaDataRepository.findAllInStack(STACK_ID)).thenReturn(getInstancesFromStack());
 
         underTest.updateStatus(stack, List.of(INSTANCE_ID_1, INSTANCE_ID_2), InstanceStatus.CREATED);
@@ -123,6 +100,7 @@ public class InstanceMetaDataServiceTest {
 
     @Test
     public void testUpdateStatusInvalidId() {
+        Stack stack = initializeStackWithInstanceGroup();
         when(instanceMetaDataRepository.findAllInStack(STACK_ID)).thenReturn(getInstancesFromStack());
 
         underTest.updateStatus(stack, List.of(INSTANCE_ID_3), InstanceStatus.CREATED);
@@ -131,7 +109,42 @@ public class InstanceMetaDataServiceTest {
     }
 
     @Test
-    public void testSaveInstanceAndGetUpdatedStack() {
+    public void testSaveInstanceAndGetUpdatedStackWhenAvailabilityZoneDataIsAvailable() {
+        Stack stack = initializeStackWithInstanceGroup();
+        InstanceGroup instanceGroup = stack.getInstanceGroups().stream().findFirst().get();
+        FreeIpa freeIpa = new FreeIpa();
+        freeIpa.setHostname("ipa");
+        freeIpa.setDomain("dom");
+        when(freeIpaService.findByStack(stack)).thenReturn(freeIpa);
+        InstanceTemplate template = mock(InstanceTemplate.class);
+        when(template.getGroupName()).thenReturn(GROUP_NAME);
+        when(template.getPrivateId()).thenReturn(INSTANCE_PRIVATE_ID_3);
+        List<CloudInstance> cloudInstances = List.of(new CloudInstance(INSTANCE_ID_3, template, null, "subnet-1", "az1"));
+        DetailedEnvironmentResponse environmentResponse = new DetailedEnvironmentResponse();
+        when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_ID)).thenReturn(environmentResponse);
+        Map<String, String> subnetAzMap = Map.of("aSubnetId", "anAvailabilityZoneId");
+        when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
+        Map<String, Integer> subnetUsage = Map.of();
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subnetUsage);
+        when(multiAzCalculatorService.filterSubnetByLeastUsedAz(instanceGroup, subnetAzMap)).thenReturn(subnetAzMap);
+
+        Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances);
+
+        verify(instanceMetaDataRepository).save(any());
+        assertEquals(3, actualStack.getAllInstanceMetaDataList().size());
+        InstanceGroup actualInstanceGroup = actualStack.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
+        InstanceMetaData instanceMetaData = actualInstanceGroup.getInstanceMetaData().stream()
+                .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
+                .findFirst().get();
+        assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
+        verify(multiAzCalculatorService).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
+        verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup);
+    }
+
+    @Test
+    public void testSaveInstanceAndGetUpdatedStackWhenNoAvailabilityZoneDataAvailable() {
+        Stack stack = initializeStackWithInstanceGroup();
+        InstanceGroup instanceGroup = stack.getInstanceGroups().stream().findFirst().get();
         FreeIpa freeIpa = new FreeIpa();
         freeIpa.setHostname("ipa");
         freeIpa.setDomain("dom");
@@ -144,19 +157,20 @@ public class InstanceMetaDataServiceTest {
         when(cachedEnvironmentClientService.getByCrn(ENVIRONMENT_ID)).thenReturn(environmentResponse);
         Map<String, String> subnetAzMap = Map.of();
         when(multiAzCalculatorService.prepareSubnetAzMap(environmentResponse)).thenReturn(subnetAzMap);
-        Map<String, Integer> subentUsage = Map.of();
-        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subentUsage);
+        Map<String, Integer> subnetUsage = Map.of();
+        when(multiAzCalculatorService.calculateCurrentSubnetUsage(subnetAzMap, instanceGroup)).thenReturn(subnetUsage);
 
-        Stack stack1 = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances);
+        Stack actualStack = underTest.saveInstanceAndGetUpdatedStack(stack, cloudInstances);
 
         verify(instanceMetaDataRepository).save(any());
-        assertEquals(3, stack1.getAllInstanceMetaDataList().size());
-        InstanceGroup instanceGroup = stack1.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
-        InstanceMetaData instanceMetaData = instanceGroup.getInstanceMetaData().stream()
+        assertEquals(3, actualStack.getAllInstanceMetaDataList().size());
+        InstanceGroup actualInstanceGroup = actualStack.getInstanceGroups().stream().filter(ig -> GROUP_NAME.equals(ig.getGroupName())).findFirst().get();
+        InstanceMetaData instanceMetaData = actualInstanceGroup.getInstanceMetaData().stream()
                 .filter(im -> INSTANCE_PRIVATE_ID_3 == im.getPrivateId())
                 .findFirst().get();
         assertEquals("ipa3.dom", instanceMetaData.getDiscoveryFQDN());
-        verify(multiAzCalculatorService).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subentUsage, instanceMetaData, instanceGroup);
+        verify(multiAzCalculatorService, times(0)).filterSubnetByLeastUsedAz(actualInstanceGroup, subnetAzMap);
+        verify(multiAzCalculatorService, times(0)).updateSubnetIdForSingleInstanceIfEligible(subnetAzMap, subnetUsage, instanceMetaData, actualInstanceGroup);
     }
 
     @Test
@@ -175,6 +189,27 @@ public class InstanceMetaDataServiceTest {
         InstanceMetaData primaryGwInstance = underTest.getPrimaryGwInstance(createValidImSet());
         assertEquals("pgw", primaryGwInstance.getInstanceId());
         assertEquals(InstanceMetadataType.GATEWAY_PRIMARY, primaryGwInstance.getInstanceMetadataType());
+    }
+
+    private Stack initializeStackWithInstanceGroup() {
+        Stack stack = new Stack();
+        stack.setEnvironmentCrn(ENVIRONMENT_ID);
+        stack.setId(STACK_ID);
+        InstanceGroup instanceGroup = new InstanceGroup();
+        stack.getInstanceGroups().add(instanceGroup);
+        instanceGroup.setInstanceGroupType(InstanceGroupType.MASTER);
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceGroup.setInstanceMetaData(Sets.newHashSet(instanceMetaData));
+        instanceGroup.setGroupName(GROUP_NAME);
+        instanceMetaData.setDiscoveryFQDN("host1.domain");
+        instanceMetaData.setInstanceId(INSTANCE_ID_1);
+        instanceMetaData.setPrivateId(INSTANCE_PRIVATE_ID_1);
+        instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN("host2.domain");
+        instanceMetaData.setInstanceId(INSTANCE_ID_2);
+        instanceMetaData.setPrivateId(INSTANCE_PRIVATE_ID_2);
+        instanceGroup.getInstanceMetaData().add(instanceMetaData);
+        return stack;
     }
 
     private Set<InstanceMetaData> createValidImSet() {

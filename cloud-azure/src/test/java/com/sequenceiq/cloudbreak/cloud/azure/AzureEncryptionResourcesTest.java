@@ -296,6 +296,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.getCurrentSubscription()).thenReturn(subscription);
         when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+                .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
         when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
@@ -309,6 +311,7 @@ public class AzureEncryptionResourcesTest {
         verify(azureClient, never()).createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class));
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -386,6 +389,7 @@ public class AzureEncryptionResourcesTest {
         when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
         when(azureClient.getCurrentSubscription()).thenReturn(subscription);
         when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(desInitial);
+        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal(any(String.class), any(String.class), any(String.class))).thenReturn(true);
         initRetry();
         // Return a different DES instance to simulate that the poller checker task initially indicated incomplete, hence the final DES was obtained by the
         // scheduled execution of the poller
@@ -401,6 +405,7 @@ public class AzureEncryptionResourcesTest {
         verify(azureClient, never()).createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class));
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -439,6 +444,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+                .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
         when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
@@ -449,6 +456,7 @@ public class AzureEncryptionResourcesTest {
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
         assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "dummyResourceGroup");
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -502,6 +510,55 @@ public class AzureEncryptionResourcesTest {
     }
 
     @Test
+    public void testCreateDiskEncryptionSetShouldThrowErrorWhenCheckKeyVaultAccessPolicyForServicePrincipalFails() {
+        DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
+                .withId("uniqueId")
+                .withCloudContext(cloudContext)
+                .withCloudCredential(cloudCredential)
+                .withDiskEncryptionSetResourceGroupName("dummyResourceGroup")
+                .withEncryptionKeyResourceGroupName("dummyResourceGroup")
+                .withTags(new HashMap<>())
+                .withEncryptionKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                .build();
+        EncryptionSetIdentity identity = new EncryptionSetIdentity().withType(DiskEncryptionSetIdentityType.SYSTEM_ASSIGNED);
+        ReflectionTestUtils.setField(identity, "principalId", DES_PRINCIPAL_ID);
+        DiskEncryptionSetInner des = (DiskEncryptionSetInner) new DiskEncryptionSetInner()
+                .withEncryptionType(DiskEncryptionSetType.ENCRYPTION_AT_REST_WITH_CUSTOMER_KEY)
+                .withActiveKey(new KeyForDiskEncryptionSet()
+                        .withKeyUrl("https://dummyVaultName.vault.azure.net/keys/dummyKeyName/dummyKeyVersion")
+                        .withSourceVault(new SourceVault()
+                                .withId("/subscriptions/dummySubs/resourceGroups/dummyResourceGroup/providers/Microsoft.KeyVault/vaults/dummyVaultName")))
+                .withIdentity(identity)
+                .withLocation("dummyRegion")
+                .withTags(new HashMap<>());
+        ReflectionTestUtils.setField(des, "id", DES_RESOURCE_ID);
+        Subscription subscription = mock(Subscription.class);
+        when(persistenceNotifier.notifyAllocation(any(CloudResource.class), eq(cloudContext))).thenReturn(new ResourcePersisted());
+        when(subscription.subscriptionId()).thenReturn("dummySubscriptionId");
+        when(azureUtils.generateDesNameByNameAndId(any(String.class), any(String.class))).thenReturn("dummyEnvName-DES-uniqueId");
+        when(azureClientService.createAuthenticatedContext(cloudContext, cloudCredential)).thenReturn(authenticatedContext);
+        when(authenticatedContext.getParameter(AzureClient.class)).thenReturn(azureClient);
+        when(azureClient.getCurrentSubscription()).thenReturn(subscription);
+        when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(null);
+        when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
+                any(String.class), any(String.class), any(Map.class))).thenReturn(des);
+        when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+                .thenReturn(false);
+        initRetry();
+        // Return the same DES instance to simulate that the poller checker task instantly completed
+        when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
+                .thenReturn(des);
+        initExceptionConversion();
+        initActionFailedExceptionConversion();
+
+        verifyActionFailedException(CloudConnectorException.class, () -> underTest.createDiskEncryptionSet(requestedSet),
+                "Access policy has not been granted to object Id: desPrincipalId, Retrying ...");
+
+        verifyPersistedCloudResource();
+    }
+
+    @Test
     public void testCreateDiskEncryptionSetShouldReturnNewlyCreatedDiskEncryptionSetWhenDesAndVaultResourceGroupAreDifferentAndDesNotAlreadyExists() {
         DiskEncryptionSetCreationRequest requestedSet = new DiskEncryptionSetCreationRequest.Builder()
                 .withId("uniqueId")
@@ -534,6 +591,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.getDiskEncryptionSetByName(any(String.class), any(String.class))).thenReturn(null);
         when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class))).thenReturn(des);
+        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+                .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
         when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
@@ -544,6 +603,7 @@ public class AzureEncryptionResourcesTest {
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
         assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "dummyResourceGroup");
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyVaultResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
 
         verifyPersistedCloudResource();
     }
@@ -604,6 +664,8 @@ public class AzureEncryptionResourcesTest {
         when(azureClient.createDiskEncryptionSet(any(String.class), any(String.class), any(String.class),
                 any(String.class), any(String.class), any(Map.class))).thenReturn(des);
         when(azureClient.keyVaultExists("dummyResourceGroup", "dummyVaultName")).thenReturn(Boolean.TRUE);
+        when(azureClient.checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID))
+                .thenReturn(true);
         initRetry();
         // Return the same DES instance to simulate that the poller checker task instantly completed
         when(diskEncryptionSetCreationPoller.startPolling(eq(authenticatedContext), any(DiskEncryptionSetCreationCheckerContext.class), eq(des)))
@@ -614,6 +676,7 @@ public class AzureEncryptionResourcesTest {
         assertEquals(createdDes.getDiskEncryptionSetLocation(), "dummyRegion");
         assertEquals(createdDes.getDiskEncryptionSetResourceGroupName(), "envName-CDP_DES-uniqueId");
         verify(azureClient).grantKeyVaultAccessPolicyToServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
+        verify(azureClient).checkKeyVaultAccessPolicyForServicePrincipal("dummyResourceGroup", "dummyVaultName", DES_PRINCIPAL_ID);
         verify(azureClient).createResourceGroup(eq("envName-CDP_DES-uniqueId"), eq("dummyRegion"), any(HashMap.class));
         verifyPersistedResourceGroupAndDiskEncryptionSetCloudResource(resourceGroup.id());
     }
