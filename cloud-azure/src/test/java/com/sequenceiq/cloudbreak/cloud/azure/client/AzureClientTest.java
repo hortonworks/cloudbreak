@@ -9,7 +9,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Constructor;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -31,6 +33,10 @@ import com.microsoft.azure.management.compute.Encryption;
 import com.microsoft.azure.management.compute.VirtualMachine;
 import com.microsoft.azure.management.compute.implementation.DiskInner;
 import com.microsoft.azure.management.compute.implementation.VirtualMachineInner;
+import com.microsoft.azure.management.keyvault.AccessPolicy;
+import com.microsoft.azure.management.keyvault.AccessPolicyEntry;
+import com.microsoft.azure.management.keyvault.KeyPermissions;
+import com.microsoft.azure.management.keyvault.Permissions;
 import com.microsoft.azure.management.resources.fluentcore.model.implementation.IndexableRefreshableWrapperImpl;
 import com.sequenceiq.cloudbreak.cloud.azure.util.AzureAuthExceptionHandler;
 
@@ -175,6 +181,42 @@ class AzureClientTest {
         underTest.attachDiskToVm(disk, virtualMachine);
         verify(virtualMachineUpdate, times(1)).withDataDiskDefaultCachingType(captor.capture());
         Assert.assertEquals(CachingTypes.READ_ONLY, captor.getValue());
+    }
+
+    @Test
+    public void testKeyVaultAccessPolicyListForServicePrincipal() {
+        List<AccessPolicy> accessPolicies = new ArrayList<AccessPolicy>();
+        AccessPolicy accessPolicy1 = mock(AccessPolicy.class);
+        AccessPolicy accessPolicy2 = mock(AccessPolicy.class);
+        AccessPolicy accessPolicy3 = mock(AccessPolicy.class);
+        AccessPolicy accessPolicy4 = mock(AccessPolicy.class);
+        accessPolicies.add(accessPolicy1);
+        accessPolicies.add(accessPolicy2);
+        accessPolicies.add(accessPolicy3);
+        accessPolicies.add(accessPolicy4);
+
+        when(accessPolicy1.inner()).thenReturn(new AccessPolicyEntry()
+                .withObjectId("100")
+                .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))));
+
+        when(accessPolicy2.inner()).thenReturn(new AccessPolicyEntry()
+                .withObjectId("200")
+                .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.UNWRAP_KEY, KeyPermissions.GET))));
+
+        when(accessPolicy3.inner()).thenReturn(new AccessPolicyEntry()
+                .withObjectId("300")
+                .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.GET))));
+
+        when(accessPolicy4.inner()).thenReturn(new AccessPolicyEntry()
+                .withObjectId("400")
+                .withPermissions(new Permissions().withKeys(List.of(KeyPermissions.WRAP_KEY, KeyPermissions.UNWRAP_KEY))));
+
+
+        Assert.assertTrue(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "100"));
+        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "200"));
+        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "300"));
+        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "400"));
+        Assert.assertFalse(underTest.checkKeyVaultAccessPolicyListForServicePrincipal(accessPolicies, "dummy"));
     }
 
 }

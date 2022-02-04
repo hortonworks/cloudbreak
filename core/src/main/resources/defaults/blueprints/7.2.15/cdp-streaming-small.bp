@@ -45,6 +45,11 @@
             "refName": "kafka-KAFKA_BROKER-BASE",
             "roleType": "KAFKA_BROKER",
             "base": true
+          },
+          {
+            "refName": "kafka-KAFKA_CONNECT-BASE",
+            "roleType": "KAFKA_CONNECT",
+            "base": true
           }
         ]
       },
@@ -118,7 +123,8 @@
           "zookeeper-SERVER-BASE",
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
           "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE"
+          "kafka-KAFKA_BROKER-BASE",
+          "kafka-KAFKA_CONNECT-BASE"
         ]
       },
       {
@@ -127,7 +133,8 @@
         "roleConfigGroupsRefNames": [
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
           "kafka-GATEWAY-BASE",
-          "kafka-KAFKA_BROKER-BASE"
+          "kafka-KAFKA_BROKER-BASE",
+          "kafka-KAFKA_CONNECT-BASE"
         ]
       }
     ]
