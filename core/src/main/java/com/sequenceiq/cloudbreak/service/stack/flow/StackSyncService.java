@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.STOPPED;
@@ -214,6 +213,7 @@ public class StackSyncService {
         }
     }
 
+    // ZZZ This needs some attention - to go back to the pre AVAILABLE_WITH_STOPPED_INSTANCES state.
     @VisibleForTesting
     void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
             Set<InstanceMetaData> instances) {
@@ -236,7 +236,7 @@ public class StackSyncService {
             }
             if (instanceStateCounts.get(InstanceSyncState.STOPPED) > 0) {
                 checkAndUpdateStackStatus(
-                        stack, status, AVAILABLE_WITH_STOPPED_INSTANCES, DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES, SYNC_STATUS_REASON);
+                        stack, status, AVAILABLE, DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES, SYNC_STATUS_REASON);
                 return;
             }
             checkAndUpdateStackStatus(stack, status, AVAILABLE, DetailedStackStatus.AVAILABLE, SYNC_STATUS_REASON);

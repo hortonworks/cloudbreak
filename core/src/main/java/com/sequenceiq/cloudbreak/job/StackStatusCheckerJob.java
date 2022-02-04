@@ -201,7 +201,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     Set<Status> syncableStates() {
         return EnumSet.of(
                 Status.AVAILABLE,
-                Status.AVAILABLE_WITH_STOPPED_INSTANCES,
                 Status.UPDATE_FAILED,
                 Status.ENABLE_SECURITY_FAILED,
                 Status.START_FAILED,

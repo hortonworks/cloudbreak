@@ -74,7 +74,7 @@ public class StackUpdater {
         StackStatus actualStackStatus = stack.getStackStatus();
         LOGGER.info("Update stack status from: {}/{} to: {}/{} stack: {} reason: {}", actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus(),
                 newStatus, newDetailedStatus, stackId, statusReason);
-        if (actualStackStatus.getStatus().equals(newStatus)) {
+        if (actualStackStatus.getStatus().equals(newStatus) && actualStackStatus.getDetailedStackStatus().equals(newDetailedStatus)) {
             LOGGER.debug("New status is the same as previous status {}/{}, skip status update.",
                     actualStackStatus.getStatus(), actualStackStatus.getDetailedStackStatus());
             return stack;

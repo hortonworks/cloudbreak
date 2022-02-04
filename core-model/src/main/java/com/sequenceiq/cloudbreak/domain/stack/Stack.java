@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
@@ -48,6 +47,7 @@ import javax.persistence.Version;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
@@ -636,7 +636,10 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isAvailableWithStoppedInstances() {
-        return AVAILABLE_WITH_STOPPED_INSTANCES.equals(getStatus());
+        // This is absolutely useless right now. Eventually isAvailable will likely need to ensure that there are
+        //  no stopped instances, since a cluster with stopped instances is also considered to be AVAILABLE.
+        //  Or another method which can check for stopped instances.
+        return isAvailable() || stackStatus.getDetailedStackStatus().equals(DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
     }
 
     public boolean hasNodeFailure() {
@@ -669,7 +672,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isReadyForStop() {
         return AVAILABLE.equals(getStatus())
-                || AVAILABLE_WITH_STOPPED_INSTANCES.equals(getStatus())
                 || STOPPED.equals(getStatus())
                 || STOP_REQUESTED.equals(getStatus())
                 || STOP_IN_PROGRESS.equals(getStatus())
