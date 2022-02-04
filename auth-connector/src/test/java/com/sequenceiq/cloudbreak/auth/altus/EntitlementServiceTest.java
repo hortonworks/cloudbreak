@@ -149,6 +149,9 @@ class EntitlementServiceTest {
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},
 
+                {"CDP_DATALAKE_RESIZE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isDatalakeResizeRecoveryEnabled, false},
+                {"CDP_DATALAKE_RESIZE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isDatalakeResizeRecoveryEnabled, true},
+
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", (EntitlementCheckFunction) EntitlementService::azureEndpointGatewayEnabled, false},
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", (EntitlementCheckFunction) EntitlementService::azureEndpointGatewayEnabled, true},
 
