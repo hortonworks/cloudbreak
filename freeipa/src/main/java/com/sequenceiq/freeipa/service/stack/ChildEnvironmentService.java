@@ -73,7 +73,7 @@ public class ChildEnvironmentService {
         try {
             repository.delete(childEnvironment);
         } catch (ObjectOptimisticLockingFailureException e) {
-            LOGGER.info("Child env {} is already detached", childEnvironment);
+            LOGGER.info("Child env {} is already detached", childEnvironment, e);
             throw new NotFoundException(String.format("Child env %s is already detached", childEnvironment.getEnvironmentCrn()));
         }
     }
