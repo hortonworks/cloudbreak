@@ -100,6 +100,22 @@ add_user_facing_cert_script:
     - template: jinja
     - mode: 755
 
+create_openssl_config:
+  file.managed:
+    - name: /etc/certs-user-facing/openssl.cnf
+    - source: salt://nginx/conf/openssl.cnf
+    - makedirs: True
+    - template: jinja
+    - mode: 600
+
+create_server_cert_ext_config:
+  file.managed:
+    - name: /etc/certs-user-facing/server_cert_ext.cnf
+    - source: salt://nginx/conf/server_cert_ext.cnf
+    - makedirs: True
+    - template: jinja
+    - mode: 600
+
 generate_user_facing_cert:
   cmd.run:
     - name: /opt/salt/scripts/create-user-facing-cert.sh 2>&1 | tee -a /var/log/generate-user-facing-cert.log && exit ${PIPESTATUS[0]}

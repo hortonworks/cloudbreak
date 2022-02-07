@@ -37,6 +37,7 @@ import org.springframework.util.CollectionUtils;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.Account;
 import com.google.common.base.Joiner;
 import com.google.common.collect.Lists;
+import com.google.common.net.InetAddresses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.ExecutorType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.SSOType;
@@ -683,6 +684,11 @@ public class ClusterHostServiceRunner {
             ClouderaManagerRepo clouderaManagerRepo) throws IOException {
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
+        if (gatewayConfig.getPublicAddress() != null) {
+            boolean addressIsIp = InetAddresses.isInetAddress(gatewayConfig.getPublicAddress());
+            LOGGER.debug("Checking if {} is an ip address. Result: {}", gatewayConfig.getPublicAddress(), addressIsIp);
+            gateway.put("address_is_ip", addressIsIp);
+        }
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
         gateway.put("enable_knox_ranger_authorizer", isRangerAuthorizerEnabled(clouderaManagerRepo));
