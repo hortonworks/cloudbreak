@@ -6,11 +6,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-/**
- * @deprecated {@link RandomStringUtils} uses a global, predictable {@link java.util.Random} internally.
- * Use {@link com.sequenceiq.cloudbreak.util.password.DefaultPasswordGenerator} instead.
- */
-@Deprecated
 public class PasswordUtil {
 
     private static final int PWD_LENGTH = 128;
