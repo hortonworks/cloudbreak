@@ -2,7 +2,6 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.CLUSTER_MANAGER_NOT_RESPONDING;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
@@ -69,7 +68,11 @@ class StackSyncServiceTest {
             if (expectedStatus == CLUSTER_MANAGER_NOT_RESPONDING) {
                 statusReason = "Cloudera Manager server not responding.";
             }
-            verify(stackUpdater).updateStackStatus(1L, expectedStatus, statusReason);
+            if (!currentStatus.equals(expectedStatus.getStatus())) {
+                verify(stackUpdater).updateStackStatus(1L, expectedStatus, statusReason);
+            } else {
+                verifyNoInteractions(stackUpdater);
+            }
         } else {
             verifyNoInteractions(stackUpdater);
         }
@@ -85,7 +88,7 @@ class StackSyncServiceTest {
                         1,
                         0,
                         new SyncConfig(true, true),
-                        DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES
+                        null
                         ),
                 Arguments.of(
                         "Stack was available and now all stopped",
@@ -119,7 +122,7 @@ class StackSyncServiceTest {
                         ),
                 Arguments.of(
                         "Stack was running with 1 node stopped and now available",
-                        AVAILABLE_WITH_STOPPED_INSTANCES,
+                        AVAILABLE,
                         5,
                         5,
                         0,
@@ -129,7 +132,7 @@ class StackSyncServiceTest {
                 ),
                 Arguments.of(
                         "Stack was running with 1 node stopped and still running with 1 node stopped",
-                        AVAILABLE_WITH_STOPPED_INSTANCES,
+                        AVAILABLE,
                         5,
                         4,
                         1,
@@ -139,7 +142,7 @@ class StackSyncServiceTest {
                 ),
                 Arguments.of(
                         "Stack was running with 1 node stopped and now running CM is not running",
-                        AVAILABLE_WITH_STOPPED_INSTANCES,
+                        AVAILABLE,
                         5,
                         4,
                         1,

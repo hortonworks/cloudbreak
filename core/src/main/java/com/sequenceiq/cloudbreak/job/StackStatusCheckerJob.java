@@ -201,7 +201,6 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     Set<Status> syncableStates() {
         return EnumSet.of(
                 Status.AVAILABLE,
-                Status.AVAILABLE_WITH_STOPPED_INSTANCES,
                 Status.UPDATE_FAILED,
                 Status.ENABLE_SECURITY_FAILED,
                 Status.START_FAILED,
@@ -274,7 +273,9 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Set<String> computeGroups = getComputeHostGroups(stack.getCluster());
                 boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroup().getGroupName()).allMatch(computeGroups::contains);
                 if (stoppedInstancesCount > 0 && stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
-                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
+                    // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
+                    //  when there are some STOPPED instances
+                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
                 } else {
                     LOGGER.debug("WithStopStartEntitlement, putting cluster into NODE_FAILURE. Counts: stoppedInstanceCount={}, failedInstanceCount={}",
                             stoppedInstancesCount, failedInstances.size());

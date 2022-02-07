@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -116,9 +115,6 @@ public class UpdateNodeCountValidatorTest {
         if (status == AVAILABLE) {
             when(stack.isAvailable()).thenReturn(true);
             when(stack.isAvailableWithStoppedInstances()).thenReturn(false);
-        } else if (status == AVAILABLE_WITH_STOPPED_INSTANCES) {
-            when(stack.isAvailable()).thenReturn(false);
-            when(stack.isAvailableWithStoppedInstances()).thenReturn(true);
         } else {
             when(stack.isAvailable()).thenReturn(false);
             when(stack.isAvailableWithStoppedInstances()).thenReturn(false);
@@ -136,12 +132,12 @@ public class UpdateNodeCountValidatorTest {
     private void checkExecutableThrowsException(Optional<String> errorMessageSegment, Stack stack, Executable executable) {
         BadRequestException badRequestException = assertThrows(BadRequestException.class, executable);
         Assert.assertEquals(errorMessageSegment.get(), badRequestException.getMessage());
+        Assert.assertTrue(badRequestException.getMessage().contains(errorMessageSegment.get()));
     }
 
     private static Stream<Arguments> testValidateStatusForStartHostGroupData() {
         return Stream.of(
                 Arguments.of(AVAILABLE, NO_ERROR),
-                Arguments.of(AVAILABLE_WITH_STOPPED_INSTANCES, NO_ERROR),
                 Arguments.of(NODE_FAILURE,
                         Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state." +
                                 " Node group start operation is not allowed for this state."))

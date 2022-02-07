@@ -278,7 +278,7 @@ public class StopStartUpscaleCommissionViaCMHandlerTest {
         for (int i = 0; i < count; i++) {
             InstanceMetaData instanceMetaData = new InstanceMetaData();
             instanceMetaData.setInstanceId(INSTANCE_ID_PREFIX + i);
-            instanceMetaData.setInstanceStatus(InstanceStatus.STARTED);
+            instanceMetaData.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
             instanceMetaData.setInstanceGroup(instanceGroup);
             instanceMetaData.setDiscoveryFQDN(INSTANCE_ID_PREFIX + i);
             instances.add(instanceMetaData);

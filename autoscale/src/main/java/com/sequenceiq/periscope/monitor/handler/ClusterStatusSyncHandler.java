@@ -43,18 +43,16 @@ public class ClusterStatusSyncHandler implements ApplicationListener<ClusterStat
         StackStatusV4Response statusResponse = cloudbreakCommunicator.getStackStatusByCrn(cluster.getStackCrn());
 
         boolean clusterAvailable;
-        boolean clusterWithStoppedNodes = false;
         if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
             clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false);
-            clusterWithStoppedNodes =
-                    Optional.ofNullable(statusResponse.getStatus()).map(s -> s == Status.AVAILABLE_WITH_STOPPED_INSTANCES).orElse(false);
-            clusterAvailable |= clusterWithStoppedNodes;
+            // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
+            //  when there are some STOPPED instances
         } else {
             clusterAvailable = Optional.ofNullable(statusResponse.getStatus()).map(Status::isAvailable).orElse(false)
             && Optional.ofNullable(statusResponse.getClusterStatus()).map(Status::isAvailable).orElse(false);
         }
 
-        LOGGER.info("Computed clusterAvailable: {}, clusterWithStoppedNodes: {}", clusterAvailable, clusterWithStoppedNodes);
+        LOGGER.info("Computed clusterAvailable: {}", clusterAvailable);
         LOGGER.info("Analysing CBCluster Status '{}' for Cluster '{}. Available(Determined)={}' ", statusResponse, cluster.getStackCrn(), clusterAvailable);
 
         if (DELETE_COMPLETED.equals(statusResponse.getStatus())) {

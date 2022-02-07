@@ -200,22 +200,8 @@ public class StopStartUpscaleActions {
                         .filter(i -> payload.getSuccessfullyCommissionedFqdns().contains(i.getDiscoveryFQDN()))
                         .collect(Collectors.toList());
 
-                // Is there any stopped instance in the actionable group
-                Optional<InstanceMetaData> instanceInStoppedState = notDeletedInstanceMetaDataList.stream()
-                        .filter(i -> context.getHostGroupName().equals(i.getInstanceGroupName()))
-                        .filter(i -> !payload.getSuccessfullyCommissionedFqdns().contains(i.getDiscoveryFQDN()))
-                        .filter(i -> i.getInstanceStatus().equals(STOPPED))
-                        .findFirst();
-
-                DetailedStackStatus finalStackStatus;
-                if (instanceInStoppedState.isEmpty()) {
-                    finalStackStatus = DetailedStackStatus.AVAILABLE;
-                } else {
-                    finalStackStatus = DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES;
-                }
-
                 clusterUpscaleFlowService.clusterUpscaleFinished(context.getStackView(), context.getHostGroupName(),
-                        instancesCommissioned, finalStackStatus);
+                        instancesCommissioned, DetailedStackStatus.AVAILABLE);
 
                 sendEvent(context, STOPSTART_UPSCALE_FINALIZED_EVENT.event(), payload);
             }
