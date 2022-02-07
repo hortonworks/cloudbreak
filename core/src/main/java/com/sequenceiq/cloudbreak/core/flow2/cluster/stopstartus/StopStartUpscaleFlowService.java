@@ -54,7 +54,7 @@ class StopStartUpscaleFlowService {
     }
 
     void instancesStarted(long stackId, List<InstanceMetaData> instancesStarted) {
-        instancesStarted.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.STARTED));
+        instancesStarted.stream().forEach(x -> instanceMetaDataService.updateInstanceStatus(x, InstanceStatus.SERVICES_RUNNING));
         stackUpdater.updateStackStatus(stackId, DetailedStackStatus.STARTING_CLUSTER_MANAGER_SERVICES,
                 "Instances: " + instancesStarted.size() + " started successfully.");
         flowMessageService.fireEventAndLog(stackId, UPDATE_IN_PROGRESS.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_STARTED,
