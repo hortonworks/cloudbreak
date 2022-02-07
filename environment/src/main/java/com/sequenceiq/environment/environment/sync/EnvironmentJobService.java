@@ -2,9 +2,10 @@ package com.sequenceiq.environment.environment.sync;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
 @Component
@@ -16,24 +17,28 @@ public class EnvironmentJobService {
 
     private final StatusCheckerJobService jobService;
 
-    public EnvironmentJobService(AutoSyncConfig autoSyncConfig, StatusCheckerJobService jobService) {
+    private final ApplicationContext applicationContext;
+
+    public EnvironmentJobService(AutoSyncConfig autoSyncConfig, StatusCheckerJobService jobService, ApplicationContext applicationContext) {
         this.autoSyncConfig = autoSyncConfig;
         this.jobService = jobService;
+        this.applicationContext = applicationContext;
     }
 
-    public void schedule(Environment environment) {
+    public void schedule(JobResource jobResource) {
         if (autoSyncConfig.isEnabled()) {
-            jobService.schedule(new EnvironmentJobAdapter(environment));
-            LOGGER.info("{} is scheduled for auto sync", environment.getName());
+            jobService.schedule(new EnvironmentJobAdapter(jobResource));
+        }
+    }
+
+    public void schedule(Long id) {
+        if (autoSyncConfig.isEnabled()) {
+            EnvironmentJobAdapter resourceAdapter = new EnvironmentJobAdapter(id, applicationContext);
+            jobService.schedule(resourceAdapter);
         }
     }
 
     public void unschedule(Long envId) {
         jobService.unschedule(envId.toString());
-    }
-
-    public void unschedule(Environment environment) {
-        unschedule(environment.getId());
-        LOGGER.info("{} is unscheduled, it will not auto sync anymore", environment.getName());
     }
 }
