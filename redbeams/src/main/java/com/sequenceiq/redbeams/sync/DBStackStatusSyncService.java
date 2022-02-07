@@ -71,8 +71,7 @@ public class DBStackStatusSyncService {
 
         if (status != null && Status.getUnscheduleAutoSyncStatuses().contains(status)) {
             LOGGER.debug(":::Auto sync::: Unschedule DB Stack Status sync as the status is '{}'", status);
-
-            dbStackJobService.unschedule(dbStack);
+            dbStackJobService.unschedule(dbStack.getId(), dbStack.getName());
         }
     }
 

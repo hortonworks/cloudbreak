@@ -96,6 +96,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -990,5 +991,13 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     public CloudPlatformVariant getPlatformVariantByStackId(Long resourceId) {
         StackPlatformVariantView variantView = stackRepository.findPlatformVariantAndCloudPlatformById(resourceId);
         return new CloudPlatformVariant(variantView.getCloudPlatform(), variantView.getPlatformVariant());
+    }
+
+    public List<JobResource> getAllAliveForAutoSync(Set<Status> statusesNotIn) {
+        return stackRepository.getJobResourcesNotIn(statusesNotIn);
+    }
+
+    public JobResource getJobResource(Long resourceId) {
+        return stackRepository.getJobResource(resourceId).orElseThrow(notFound("Stack", resourceId));
     }
 }
