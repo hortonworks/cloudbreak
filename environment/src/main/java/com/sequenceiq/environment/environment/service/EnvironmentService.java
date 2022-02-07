@@ -39,6 +39,7 @@ import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.service.AbstractAccountAwareResourceService;
 import com.sequenceiq.environment.environment.EnvironmentDeletionType;
@@ -395,7 +396,7 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
         }
     }
 
-    public List<Environment> findAllForAutoSync() {
+    public List<JobResource> findAllForAutoSync() {
         return environmentRepository.findAllRunningAndStatusIn(List.of(
                 EnvironmentStatus.AVAILABLE,
                 EnvironmentStatus.UPDATE_FAILED,

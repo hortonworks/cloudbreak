@@ -7,9 +7,8 @@ import javax.inject.Inject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.job.StackJobAdapter;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RescheduleStatusCheckTriggerEvent;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
@@ -35,17 +34,10 @@ public class RescheduleStatusCheckChainFactory implements FlowEventChainFactory<
 
     @Override
     public FlowTriggerEventQueue createFlowTriggerEventQueue(RescheduleStatusCheckTriggerEvent event) {
-        StackView stack = stackService.getViewByIdWithoutAuth(event.getResourceId());
-        if (stack != null && stack.isAvailable() && stack.getClusterView() != null) {
-            jobService.schedule(new StackJobAdapter(convertToStack(stack)), repairScheduleDelayInSeconds);
+        JobResource jobResource = stackService.getJobResource(event.getResourceId());
+        if (jobResource != null) {
+            jobService.schedule(new StackJobAdapter(jobResource), repairScheduleDelayInSeconds);
         }
         return new FlowTriggerEventQueue(getName(), event, new ConcurrentLinkedDeque<>());
-    }
-
-    private Stack convertToStack(StackView view) {
-        Stack result = new Stack();
-        result.setId(view.getId());
-        result.setResourceCrn(view.getResourceCrn());
-        return result;
     }
 }

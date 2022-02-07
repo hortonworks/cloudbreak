@@ -222,12 +222,12 @@ public class SdxClusterStatusCheckerJob extends StatusCheckerJob {
         } else if (DatalakeStatusEnum.DELETED_ON_PROVIDER_SIDE.equals(updatedStatus)) {
             if (!isLongSyncJob(context)) {
                 LOGGER.info("Sdx status is {}. Rescheduling sync job to long interval.", updatedStatus);
-                jobService.scheduleLongIntervalCheck(new SdxClusterJobAdapter(sdx));
+                jobService.scheduleLongIntervalCheck(sdx.getId(), SdxClusterJobAdapter.class);
             }
         } else {
             if (isLongSyncJob(context)) {
                 LOGGER.info("Sdx status is {}. Rescheduling sync job to short interval.", updatedStatus);
-                jobService.schedule(new SdxClusterJobAdapter(sdx));
+                jobService.schedule(sdx.getId(), SdxClusterJobAdapter.class);
             }
         }
     }

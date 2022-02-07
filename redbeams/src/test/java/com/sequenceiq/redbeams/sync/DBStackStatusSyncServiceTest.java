@@ -45,6 +45,8 @@ public class DBStackStatusSyncServiceTest {
 
     private static final String ENVIRONMENT_ID = "environment id";
 
+    private static final String DB_NAME = "name";
+
     private static final Long DB_STACK_ID = 1234L;
 
     @Mock
@@ -157,10 +159,11 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getId()).thenReturn(DB_STACK_ID);
         when(dbStack.getStatus()).thenReturn(Status.DELETE_IN_PROGRESS);
         when(dbStack.getOwnerCrn()).thenReturn(crn);
+        when(dbStack.getName()).thenReturn(DB_NAME);
 
         victim.sync(dbStack);
 
         verify(dbStackStatusUpdater).updateStatus(DB_STACK_ID, DetailedDBStackStatus.DELETE_COMPLETED);
-        verify(dbStackJobService).unschedule(dbStack);
+        verify(dbStackJobService).unschedule(DB_STACK_ID, DB_NAME);
     }
 }

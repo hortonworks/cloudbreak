@@ -1,12 +1,19 @@
 package com.sequenceiq.cloudbreak.job;
 
-import java.util.stream.Stream;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
+
+import java.util.List;
+import java.util.Set;
 
 import javax.inject.Inject;
 
-import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
-import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 public abstract class AbstractStackJobInitializer implements JobInitializer {
@@ -14,21 +21,11 @@ public abstract class AbstractStackJobInitializer implements JobInitializer {
     @Inject
     private StackService stackService;
 
-    protected Stream<Stack> getAliveStacksStream() {
-        return stackService.getAllAlive().stream()
-                .map(this::convertToStack);
+    protected List<JobResource> getAliveJobResources() {
+        return getJobResourcesNotIn(Set.of(DELETE_COMPLETED, DELETE_IN_PROGRESS, DELETE_FAILED, CREATE_FAILED, CREATE_IN_PROGRESS));
     }
 
-    protected Stream<Stack> getAliveAndNotDeleteInProgressStacksStream() {
-        return getAliveStacksStream()
-                .filter(s -> !s.isStackInDeletionOrFailedPhase());
-    }
-
-    private Stack convertToStack(StackTtlView view) {
-        Stack result = new Stack();
-        result.setId(view.getId());
-        result.setResourceCrn(view.getCrn());
-        result.setStackStatus(view.getStatus());
-        return result;
+    protected List<JobResource> getJobResourcesNotIn(Set<Status> statusesNotIn) {
+        return stackService.getAllAliveForAutoSync(statusesNotIn);
     }
 }

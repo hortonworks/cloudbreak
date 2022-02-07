@@ -16,6 +16,7 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.exception.NotFoundException;
@@ -81,7 +82,7 @@ public class DBStackServiceTest {
 
     @Test
     public void testFindAllForAutoSync() {
-        Set<DBStack> expected = Collections.emptySet();
+        Set<JobResource> expected = Collections.emptySet();
         when(dbStackRepository.findAllDbStackByStatusIn(Status.getAutoSyncStatuses())).thenReturn(expected);
 
         assertEquals(expected, underTest.findAllForAutoSync());
