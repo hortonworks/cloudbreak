@@ -81,11 +81,12 @@ public class InstanceMetaDataToCloudInstanceConverter {
                 return InstanceStatus.CREATE_REQUESTED;
             case CREATED:
                 return InstanceStatus.CREATED;
-            case STARTED:
             case SERVICES_RUNNING:
             case SERVICES_HEALTHY:
             case SERVICES_UNHEALTHY:
                 return InstanceStatus.STARTED;
+            // TODO ZZZ: Using DECOMMISSIONED is a bad idea based on this conversion. DECOMMISSIONED somehow means DELETE_REQUESTED, which
+            //  is going to cause chaos on the user side. SERVICES_RUNNING is just an extremely STUPID state.
             case DECOMMISSIONED:
             case DELETE_REQUESTED:
                 return InstanceStatus.DELETE_REQUESTED;

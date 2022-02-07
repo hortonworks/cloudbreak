@@ -1,7 +1,6 @@
 package com.sequenceiq.cloudbreak.domain.stack;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE_WITH_STOPPED_INSTANCES;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.CREATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_COMPLETED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAILED;
@@ -636,7 +635,9 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public boolean isAvailableWithStoppedInstances() {
-        return AVAILABLE_WITH_STOPPED_INSTANCES.equals(getStatus());
+        // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
+        //  when there are some STOPPED instances. The entire method may be removed.
+        return isAvailable();
     }
 
     public boolean hasNodeFailure() {
@@ -669,7 +670,6 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isReadyForStop() {
         return AVAILABLE.equals(getStatus())
-                || AVAILABLE_WITH_STOPPED_INSTANCES.equals(getStatus())
                 || STOPPED.equals(getStatus())
                 || STOP_REQUESTED.equals(getStatus())
                 || STOP_IN_PROGRESS.equals(getStatus())

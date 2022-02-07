@@ -248,7 +248,7 @@ public class StackStatusCheckerJobTest {
 
     @Test
     public void testInstanceSyncCMRunningNodeStoppedAndStopStartEnabledInstanceStopped() throws JobExecutionException {
-        internalTestInstanceSyncStopStart("compute", InstanceStatus.STOPPED, DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES);
+        internalTestInstanceSyncStopStart("compute", InstanceStatus.STOPPED, DetailedStackStatus.AVAILABLE);
     }
 
     @Test
