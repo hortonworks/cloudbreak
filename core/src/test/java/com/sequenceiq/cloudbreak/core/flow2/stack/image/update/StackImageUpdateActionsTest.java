@@ -388,7 +388,7 @@ public class StackImageUpdateActionsTest {
         verify(flowMessageService, times(1)).fireEventAndLog(anyLong(), eq(Status.UPDATE_FAILED.name()),
                 eq(ResourceEvent.STACK_IMAGE_UPDATE_FAILED), eq("test"));
         verify(eventBus, times(1)).notify(eq(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event()), any(Event.class));
-        verify(stackUpdater).updateStackStatus(eq(1L), eq(DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED));
+        verify(stackUpdater).updateStackStatus(eq(1L), eq(DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED), eq("test"));
         verifyNoInteractions(componentConfigProviderService);
     }
 }
