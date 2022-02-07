@@ -40,7 +40,8 @@ public class StackStatusFinalizerTest {
 
         underTest.onFinalize(RESOURCE_ID);
 
-        verify(stackUpdater).updateStackStatusAndSetDetailedStatusToUnknown(RESOURCE_ID, Status.UPDATE_FAILED);
+        verify(stackUpdater).updateStackStatusAndSetDetailedStatusToUnknown(RESOURCE_ID, Status.UPDATE_FAILED,
+                "Flow completed with stack is in progress status");
     }
 
     @Test

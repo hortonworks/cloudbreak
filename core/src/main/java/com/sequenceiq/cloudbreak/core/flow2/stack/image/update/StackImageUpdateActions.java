@@ -156,9 +156,9 @@ public class StackImageUpdateActions {
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
                 LOGGER.info("Error during Stack image update flow:", payload.getException());
-                flowMessageService.fireEventAndLog(context.getStackView().getId(), Status.UPDATE_FAILED.name(), STACK_IMAGE_UPDATE_FAILED,
-                        payload.getException().getMessage());
-                stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED);
+                String errorMessage = payload.getException().getMessage();
+                flowMessageService.fireEventAndLog(context.getStackView().getId(), Status.UPDATE_FAILED.name(), STACK_IMAGE_UPDATE_FAILED, errorMessage);
+                stackUpdater.updateStackStatus(context.getStackView().getId(), DetailedStackStatus.STACK_IMAGE_UPDATE_FAILED, errorMessage);
                 sendEvent(context, new StackEvent(StackImageUpdateEvent.STACK_IMAGE_UPDATE_FAILE_HANDLED_EVENT.event(),
                         context.getStackView().getId()));
             }
