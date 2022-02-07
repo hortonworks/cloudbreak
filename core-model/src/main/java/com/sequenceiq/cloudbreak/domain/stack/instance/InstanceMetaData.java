@@ -261,8 +261,7 @@ public class InstanceMetaData implements ProvisionEntity {
     public boolean isRunning() {
         return !isTerminated() && (InstanceStatus.CREATED.equals(instanceStatus) || InstanceStatus.SERVICES_RUNNING.equals(instanceStatus)
                 || InstanceStatus.DECOMMISSIONED.equals(instanceStatus) || InstanceStatus.DECOMMISSION_FAILED.equals(instanceStatus)
-                || InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus)
-                || InstanceStatus.STARTED.equals(instanceStatus));
+                || InstanceStatus.SERVICES_HEALTHY.equals(instanceStatus) || InstanceStatus.SERVICES_UNHEALTHY.equals(instanceStatus));
     }
 
     public boolean isAttached() {

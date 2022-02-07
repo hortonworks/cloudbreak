@@ -398,7 +398,7 @@ public class StopStartUpscaleActionsTest {
 
         verify(stopStartUpscaleFlowService).logInstancesFailedToCommission(eq(STACK_ID), eq(notCommissionedFqdns));
         verify(stopStartUpscaleFlowService).clusterUpscaleFinished(
-                any(), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(startedInstances), eq(DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES));
+                any(), eq(INSTANCE_GROUP_NAME_ACTIONABLE), eq(startedInstances), eq(DetailedStackStatus.AVAILABLE));
         ArgumentCaptor<Object> argumentCaptor = ArgumentCaptor.forClass(Object.class);
         verify(reactorEventFactory).createEvent(anyMap(), argumentCaptor.capture());
         verify(eventBus).notify("STOPSTART_UPSCALE_FINALIZED_EVENT", event);

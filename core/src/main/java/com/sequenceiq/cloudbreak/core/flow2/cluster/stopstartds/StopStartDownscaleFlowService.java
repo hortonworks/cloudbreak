@@ -102,7 +102,7 @@ public class StopStartDownscaleFlowService {
     public void clusterDownscaleFinished(Long stackId, String hostGroupName, List<InstanceMetaData> instancesStopped) {
         stackUpdater.updateStackStatus(
                 stackId,
-                DetailedStackStatus.AVAILABLE_WITH_STOPPED_INSTANCES,
+                DetailedStackStatus.AVAILABLE,
                 "Instances: " + instancesStopped.size() + " stopped successfully.");
         flowMessageService.fireEventAndLog(stackId, AVAILABLE.name(), CLUSTER_SCALING_STOPSTART_DOWNSCALE_FINISHED,
                 hostGroupName, String.valueOf(instancesStopped.size()),
