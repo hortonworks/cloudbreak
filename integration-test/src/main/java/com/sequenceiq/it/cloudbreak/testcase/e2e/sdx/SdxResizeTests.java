@@ -21,6 +21,8 @@ import com.sequenceiq.it.cloudbreak.util.SdxUtil;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class SdxResizeTests extends PreconditionSdxE2ETest {
 
@@ -44,8 +46,13 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
         AtomicReference<String> expectedShape = new AtomicReference<>();
         AtomicReference<String> expectedCrn = new AtomicReference<>();
         AtomicReference<String> expectedName = new AtomicReference<>();
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
         testContext
                 .given(sdx, SdxInternalTestDto.class)
+                .withDatabase(sdxDatabaseRequest)
+                .withCloudStorage(getCloudStorageRequest(testContext))
+                .withClusterShape(SdxClusterShape.CUSTOM)
                 .when(sdxTestClient.createInternal(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdx))
                 .awaitForHealthyInstances()
@@ -62,7 +69,7 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
                 .awaitForHealthyInstances()
                 .then((tc, dto, client) -> validateStackCrn(expectedCrn, dto))
                 .then((tc, dto, client) -> validateCrn(expectedCrn, dto))
-                .then((tc, dto, client) -> validateShape(expectedShape, dto))
+                .then((tc, dto, client) -> validateShape(dto))
                 .then((tc, dto, client) -> validateClusterName(expectedName, dto))
                 .validate();
     }
@@ -85,7 +92,7 @@ public class SdxResizeTests extends PreconditionSdxE2ETest {
         return dto;
     }
 
-    private SdxInternalTestDto validateShape(AtomicReference<String> originalCrn, SdxInternalTestDto dto) {
+    private SdxInternalTestDto validateShape(SdxInternalTestDto dto) {
         SdxClusterShape newShape = dto.getResponse().getClusterShape();
         Log.log(LOGGER, format(" New shape: %s ", newShape.name()));
         if (!SdxClusterShape.MEDIUM_DUTY_HA.equals(newShape)) {

@@ -145,7 +145,7 @@ public class FlowService {
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
             List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
-            validateResourceId(relatedFlowLogs, resourceId);
+            validateResourceId(relatedFlowLogs, relatedChains, resourceId);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowFailHandled(relatedFlowLogs, failHandledEvents));
             return flowCheckResponse;
@@ -155,8 +155,10 @@ public class FlowService {
         }
     }
 
-    private void validateResourceId(List<FlowLog> flowlogs, Long resourceId) {
-        if (flowlogs.stream().anyMatch(l -> !l.getResourceId().equals(resourceId))) {
+    private void validateResourceId(List<FlowLog> flowlogs, List<FlowChainLog> relatedChainIds, Long resourceId) {
+        if (relatedChainIds.size() > 0 && relatedChainIds.get(0).getFlowChainType().equals("DatalakeResizeFlowEventChainFactory")) {
+            return;
+        } else if (flowlogs.stream().anyMatch(l -> !l.getResourceId().equals(resourceId))) {
             throw new BadRequestException(String.format("The requested chain id %s does not belong to that resource", resourceId));
         }
     }

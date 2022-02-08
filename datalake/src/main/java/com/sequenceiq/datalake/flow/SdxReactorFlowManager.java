@@ -74,7 +74,7 @@ import reactor.bus.EventBus;
 @Service
 public class SdxReactorFlowManager {
 
-    private static final long WAIT_FOR_ACCEPT = 10L;
+    private static final long WAIT_FOR_ACCEPT = 20L;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxReactorFlowManager.class);
 
