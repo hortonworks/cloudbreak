@@ -29,9 +29,9 @@ import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.authorization.service.ResourcePropertyProvider;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.service.RoleCrnGenerator;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
@@ -330,24 +330,26 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     public String getCrnByNameAndAccountId(String environmentName, String accountId) {
         return environmentRepository.findResourceCrnByNameAndAccountId(environmentName, accountId)
-                .orElseThrow(() -> new BadRequestException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Environment with name '%s' was not found for account '%s'.", environmentName, accountId)));
     }
 
     public String getNameByCrnAndAccountId(String environmentCrn, String accountId) {
         return environmentRepository.findNameByResourceCrnAndAccountId(environmentCrn, accountId)
-                .orElseThrow(() -> new BadRequestException(
+                .orElseThrow(() -> new NotFoundException(
                         String.format("Environment with crn '%s' was not found for account '%s'.", environmentCrn, accountId)));
     }
 
     @Override
     public Long getResourceIdByResourceCrn(String resourceCrn) {
-        return getByCrnAndAccountId(resourceCrn, ThreadBasedUserCrnProvider.getAccountId()).getId();
+        return environmentRepository.findIdByResourceCrnAndAccountIdAndArchivedIsFalse(resourceCrn, ThreadBasedUserCrnProvider.getAccountId())
+                .orElseThrow(notFound("Environment with crn:", resourceCrn));
     }
 
     @Override
     public Long getResourceIdByResourceName(String resourceName) {
-        return getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getId();
+        return environmentRepository.findIdByNameAndAccountIdAndArchivedIsFalse(resourceName, ThreadBasedUserCrnProvider.getAccountId())
+                .orElseThrow(notFound("Environment with name:", resourceName));
     }
 
     @Override
@@ -357,14 +359,12 @@ public class EnvironmentService extends AbstractAccountAwareResourceService<Envi
 
     @Override
     public String getResourceCrnByResourceName(String resourceName) {
-        return getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn();
+        return getCrnByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
     public List<String> getResourceCrnListByResourceNameList(List<String> resourceNames) {
-        return resourceNames.stream()
-                .map(resourceName -> getByNameAndAccountId(resourceName, ThreadBasedUserCrnProvider.getAccountId()).getResourceCrn())
-                .collect(Collectors.toList());
+        return environmentRepository.findAllCrnByNameAndAccountIdAndArchivedIsFalse(resourceNames, ThreadBasedUserCrnProvider.getAccountId());
     }
 
     @Override
