@@ -39,7 +39,9 @@ public class TargetedUpscaleSupportService {
     @Cacheable(cacheNames = "targetedUpscaleCache", key = "{ #stack.resourceCrn }")
     public boolean targetedUpscaleOperationSupported(Stack stack) {
         try {
-            return isUnboundEliminationSupported(stack) && isUnboundClusterConfigRemoved(stack);
+            String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+            return entitlementService.targetedUpscaleSupported(accountId) &&
+                    isUnboundEliminationSupported(accountId) && isUnboundClusterConfigRemoved(stack);
         } catch (Exception e) {
             LOGGER.error("Error occurred during checking if targeted upscale supported, thus assuming it is not enabled, cause: ", e);
             return false;
@@ -56,8 +58,7 @@ public class TargetedUpscaleSupportService {
         return !unboundClusterConfigPresentOnAnyNodes;
     }
 
-    private boolean isUnboundEliminationSupported(Stack stack) {
-        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+    private boolean isUnboundEliminationSupported(String accountId) {
         if (entitlementService.isUnboundEliminationSupported(accountId)) {
             return true;
         } else {
