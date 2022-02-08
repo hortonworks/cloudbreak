@@ -166,7 +166,7 @@ class StackCommonServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.deleteInstanceInWorkspace(STACK_NAME, WORKSPACE_ID, "node1", true));
 
-        assertEquals("node1 is a node of a data lake cluster, therefore it's not allowed to delete it.", exception.getMessage());
+        assertEquals("node1 is a node of a data lake cluster, therefore it's not allowed to delete/stop it.", exception.getMessage());
         verifyNoInteractions(stackOperationService);
     }
 
@@ -194,7 +194,7 @@ class StackCommonServiceTest {
         BadRequestException exception = assertThrows(BadRequestException.class,
                 () -> underTest.deleteMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, nodes, true));
 
-        assertEquals("node1, node2 are nodes of a data lake cluster, therefore it's not allowed to delete them.", exception.getMessage());
+        assertEquals("node1, node2 are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.", exception.getMessage());
         verifyNoInteractions(stackOperationService);
     }
 
@@ -214,11 +214,45 @@ class StackCommonServiceTest {
     }
 
     @Test
+    public void testStopInstancesInDatahub() {
+        Stack stack = new Stack();
+        stack.setType(StackType.WORKLOAD);
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_NAME, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+        when(stackUtil.stopStartScalingEntitlementEnabled(stack)).thenReturn(true);
+
+        Set<String> instances = new LinkedHashSet<>();
+        instances.add("i-09855f4f334550bce");
+        instances.add("i-0c06d3e9d07bacad8");
+
+        underTest.stopMultipleInstancesInWorkspace(STACK_NAME, WORKSPACE_ID, instances, true);
+
+        verify(stackOperationService).stopInstances(stack, instances, true);
+    }
+
+    @Test
+    public void testThrowsExceptionWhenStopInstancesInDatalake() {
+        Stack stack = new Stack();
+        stack.setType(StackType.DATALAKE);
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_CRN, WORKSPACE_ID)).thenReturn(Optional.of(stack));
+        when(stackUtil.stopStartScalingEntitlementEnabled(stack)).thenReturn(true);
+
+        Set<String> instances = new LinkedHashSet<>();
+        instances.add("i-09855f4f334550bce");
+        instances.add("i-0c06d3e9d07bacad8");
+
+        BadRequestException exception = assertThrows(BadRequestException.class,
+                () -> underTest.stopMultipleInstancesInWorkspace(STACK_CRN, WORKSPACE_ID, instances, true));
+        assertEquals("i-09855f4f334550bce, i-0c06d3e9d07bacad8 are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.",
+                exception.getMessage());
+        verifyNoInteractions(stackOperationService);
+    }
+
+    @Test
     public void testStartInstancesInDefaultWorkspace() {
         Stack stack = new Stack();
         stack.setType(StackType.WORKLOAD);
 
-        when(stackService.getByCrn(STACK_CRN.getCrn())).thenReturn(stack);
+        when(stackService.findStackByNameOrCrnAndWorkspaceId(STACK_CRN, WORKSPACE_ID)).thenReturn(Optional.of(stack));
 
         CloudbreakUser cloudbreakUser = mock(CloudbreakUser.class);
         when(cloudbreakUser.getUserCrn()).thenReturn("crn:cdp:" + Crn.Service.AUTOSCALE.getName() + ":us-west-1:altus:user:__internal__actor__");
@@ -233,18 +267,19 @@ class StackCommonServiceTest {
         updateStackV4Request.setInstanceGroupAdjustment(instanceGroupAdjustmentV4Request);
 
         // Regular flow
-        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
+        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, WORKSPACE_ID, updateStackV4Request, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
         verify(stackOperationService).updateNodeCountStartInstances(stack, updateStackV4Request.getInstanceGroupAdjustment(),
                 true, ScalingStrategy.STOPSTART_FALLBACK_TO_REGULAR);
 
         // Null scaling strategy
-        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request, null);
+        underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, WORKSPACE_ID, updateStackV4Request, null);
         verify(stackOperationService).updateNodeCountStartInstances(stack, updateStackV4Request.getInstanceGroupAdjustment(),
                 true, ScalingStrategy.STOPSTART);
 
         // Status is set - Bad Request
         updateStackV4Request.setStatus(StatusRequest.FULL_SYNC);
-        assertThrows(BadRequestException.class, () -> underTest.putStartInstancesInDefaultWorkspace(STACK_CRN.getCrn(), updateStackV4Request, null));
+        assertThrows(BadRequestException.class, () -> underTest.putStartInstancesInDefaultWorkspace(STACK_CRN, WORKSPACE_ID, updateStackV4Request,
+                null));
     }
 
     @Test
