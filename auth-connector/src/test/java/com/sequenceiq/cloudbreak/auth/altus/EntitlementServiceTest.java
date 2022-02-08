@@ -82,9 +82,6 @@ class EntitlementServiceTest {
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, false},
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, true},
 
-                {"CDP_RAZ", (EntitlementCheckFunction) EntitlementService::razEnabled, false},
-                {"CDP_RAZ", (EntitlementCheckFunction) EntitlementService::razEnabled, true},
-
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, false},
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, true},
 

@@ -55,7 +55,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
@@ -317,9 +316,6 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.datahub.os.upgrade.enable}")
     private boolean datahubOsUpgradeEnabled;
-
-    @Value("${auth.mock.raz.enable}")
-    private boolean razEnabled;
 
     @Value("${auth.mock.raws3.enable}")
     private boolean rawS3Enabled;
@@ -750,9 +746,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datahubOsUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_OS_UPGRADE_DATAHUB));
-        }
-        if (razEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_RAZ));
         }
         if (ccmV2Enabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2));
