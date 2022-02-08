@@ -20,12 +20,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudbreakDetails;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -89,7 +89,7 @@ public class MountDisksTest {
 
         underTest.mountDisksOnNewNodes(1L, newNodeAddresses, reachableNodes);
         verify(stackUtil).collectNewNodesWithDiskData(stack, newNodeAddresses);
-        verify(hostOrchestrator).formatAndMountDisksOnNodes(any(), targetsCaptor.capture(), allNodesCaptor.capture(), any(), eq(CloudConstants.MOCK));
+        verify(hostOrchestrator).formatAndMountDisksOnNodes(any(), any(), targetsCaptor.capture(), allNodesCaptor.capture(), any(), eq(CloudConstants.MOCK));
         Set<Node> capturedTargets = targetsCaptor.getValue();
         Set<Node> capturedAllNode = allNodesCaptor.getValue();
         assertTrue(capturedTargets.contains(node1));

@@ -1,4 +1,4 @@
-package com.sequenceiq.cloudbreak.orchestrator.model;
+package com.sequenceiq.cloudbreak.common.orchestration;
 
 public class NodeVolumes {
     private final int dataBaseVolumeIndex;

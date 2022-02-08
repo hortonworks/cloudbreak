@@ -33,6 +33,7 @@ import javax.persistence.Version;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.service.secret.SecretValue;
 import com.sequenceiq.cloudbreak.service.secret.domain.Secret;
@@ -44,7 +45,7 @@ import com.sequenceiq.freeipa.api.model.Backup;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"accountid", "environmentcrn", "terminated"}))
-public class Stack implements AccountAwareResource {
+public class Stack implements AccountAwareResource, OrchestratorAware {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
     @SequenceGenerator(name = "stack_generator", sequenceName = "stack_id_seq", allocationSize = 1)
@@ -538,5 +539,10 @@ public class Stack implements AccountAwareResource {
         return Objects.hash(id, resourceCrn, name, environmentCrn, accountId, region, created, platformvariant, availabilityZone, cloudPlatform, gatewayport,
                 useCcm, tunnel, clusterProxyRegistered, terminated, tags, telemetry, backup, template, owner, appVersion, minaSshdServiceId, ccmV2AgentCrn,
                 version);
+    }
+
+    @Override
+    public Set<InstanceMetaData> getAllNodesForOrchestration() {
+        return getNotDeletedInstanceMetaDataSet();
     }
 }

@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
@@ -37,8 +38,8 @@ import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
+import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.resource.DecommissionResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
@@ -236,13 +237,14 @@ public class DecommissionHandler implements EventHandler<DecommissionRequest> {
         GatewayConfig gatewayConfig = gatewayConfigService.getPrimaryGatewayConfig(stack);
         Set<Node> allNodes = stackUtil.collectNodes(stack);
         hostOrchestrator.stopClusterManagerAgent(
+                stack,
                 gatewayConfig,
                 allNodes,
                 decommissionedNodes,
                 clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId()),
-                kerberosDetailService.isAdJoinable(kerberosConfig),
-                kerberosDetailService.isIpaJoinable(kerberosConfig),
-                forced);
+                new CmAgentStopFlags(kerberosDetailService.isAdJoinable(kerberosConfig),
+                    kerberosDetailService.isIpaJoinable(kerberosConfig),
+                    forced));
     }
 
     private void cleanUpFreeIpa(Stack stack, Map<String, InstanceMetaData> hostsToRemove) {

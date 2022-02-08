@@ -10,17 +10,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.AmbariStartServerAndAgentRequest;
 import com.sequenceiq.cloudbreak.reactor.api.event.cluster.StartServerAndAgentResult;
-import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.util.StackUtil;
+import com.sequenceiq.flow.event.EventSelectorUtil;
+import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
 import reactor.bus.Event;
 import reactor.bus.EventBus;

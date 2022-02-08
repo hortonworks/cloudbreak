@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -80,7 +81,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
-public class Stack implements ProvisionEntity, WorkspaceAwareResource {
+public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
@@ -935,4 +936,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 '}';
     }
 
+    @Override
+    public Set<InstanceMetaData> getAllNodesForOrchestration() {
+        return instanceGroups.stream()
+                .flatMap(ig -> ig.getNotDeletedInstanceMetaDataSet().stream())
+                .filter(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()))
+                .collect(Collectors.toSet());
+    }
 }
