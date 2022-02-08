@@ -1,5 +1,7 @@
 package com.sequenceiq.flow.core;
 
+import java.util.List;
+
 import org.apache.commons.lang3.NotImplementedException;
 
 public interface ResourceIdProvider {
@@ -11,6 +13,11 @@ public interface ResourceIdProvider {
 
     default Long getResourceIdByResourceName(String resourceName) {
         throw new NotImplementedException("You have to implement getResourceIdByResourceName for your resource "
+                + "to be able to use Flow API endpoints using resource name!");
+    }
+
+    default List<Long> getResourceIdsByResourceCrn(String resourceName) {
+        throw new NotImplementedException("You have to implement getResourceIdsByResourceCrn for your resource "
                 + "to be able to use Flow API endpoints using resource name!");
     }
 }

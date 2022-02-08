@@ -304,6 +304,14 @@ public class FlowLogDBService implements FlowLogService {
         return resourceIdProvider.getResourceIdByResourceName(resource);
     }
 
+    public List<Long> getResourceIdsByCrn(String resource) {
+        if (Crn.isCrn(resource)) {
+            return resourceIdProvider.getResourceIdsByResourceCrn(resource);
+        } else {
+            return Collections.EMPTY_LIST;
+        }
+    }
+
     public FlowLog getLastFlowLogByResourceCrnOrName(String resource) {
         Long resourceId = getResourceIdByCrnOrName(resource);
         Iterator<FlowLog> iterator = findAllForLastFlowIdByResourceIdOrderByCreatedDesc(resourceId).iterator();

@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.sequenceiq.cloudbreak.service.flowlog.FlowLogUtil.isFlowFailHandled;
 import static java.util.stream.Collectors.toSet;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowLogResponse;
@@ -112,8 +114,21 @@ public class FlowService {
     }
 
     public FlowCheckResponse getFlowChainStateByResourceCrn(String chainId, String resourceCrn) {
-        Long resourceId = flowLogDBService.getResourceIdByCrnOrName(resourceCrn);
-        return getFlowChainStateSafe(resourceId, chainId);
+        Crn crn;
+        List<Long> resourceIds;
+        try {
+            crn = Crn.safeFromString(resourceCrn);
+            if (crn.getService().equals(Crn.Service.DATALAKE)) {
+                resourceIds = flowLogDBService.getResourceIdsByCrn(resourceCrn);
+            } else {
+                Long resourceId = flowLogDBService.getResourceIdByCrnOrName(resourceCrn);
+                resourceIds = Collections.singletonList(resourceId);
+            }
+        } catch (CrnParseException crnParseException) {
+            resourceIds = Collections.EMPTY_LIST;
+        }
+
+        return getFlowChainStateSafe(resourceIds, chainId);
     }
 
     public FlowCheckResponse getFlowChainState(String chainId) {
@@ -135,7 +150,7 @@ public class FlowService {
         }
     }
 
-    public FlowCheckResponse getFlowChainStateSafe(Long resourceId, String chainId) {
+    public FlowCheckResponse getFlowChainStateSafe(List<Long> resourceIdList, String chainId) {
         FlowCheckResponse flowCheckResponse = new FlowCheckResponse();
         flowCheckResponse.setFlowChainId(chainId);
         List<FlowChainLog> flowChains = flowChainLogService.findByFlowChainIdOrderByCreatedDesc(chainId);
@@ -145,7 +160,7 @@ public class FlowService {
             Set<String> relatedChainIds = relatedChains.stream().map(FlowChainLog::getFlowChainId).collect(toSet());
             Set<String> relatedFlowIds = flowLogDBService.getFlowIdsByChainIds(relatedChainIds);
             List<FlowLog> relatedFlowLogs = flowLogDBService.getFlowLogsByFlowIdsCreatedDesc(relatedFlowIds);
-            validateResourceId(relatedFlowLogs, resourceId);
+            validateResourceId(relatedFlowLogs, resourceIdList);
             flowCheckResponse.setHasActiveFlow(!completed("Flow chain", chainId, relatedChains, relatedFlowLogs));
             flowCheckResponse.setLatestFlowFinalizedAndFailed(isFlowFailHandled(relatedFlowLogs, failHandledEvents));
             return flowCheckResponse;
@@ -155,9 +170,10 @@ public class FlowService {
         }
     }
 
-    private void validateResourceId(List<FlowLog> flowlogs, Long resourceId) {
-        if (flowlogs.stream().anyMatch(l -> !l.getResourceId().equals(resourceId))) {
-            throw new BadRequestException(String.format("The requested chain id %s does not belong to that resource", resourceId));
+    private void validateResourceId(List<FlowLog> flowLogs, List<Long> resourceIdList) {
+        if (flowLogs.stream().anyMatch(flowLog -> !resourceIdList.contains(flowLog.getResourceId()))) {
+            throw new BadRequestException(String.format("The requested chain id %s does not belong to that " +
+                    "resources %s", flowLogs.get(0).getFlowChainId(), resourceIdList));
         }
     }
 

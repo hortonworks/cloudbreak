@@ -34,6 +34,9 @@ public class FlowUtil {
     @Value("#{'${integrationtest.cloudProvider}'.equals('MOCK') ? 300 : ${integrationtest.testsuite.maxRetry:2700}}")
     private int maxRetry;
 
+    @Value("${integrationtest.testsuite.maxFailureRetry:5}")
+    private int maxFailureRetry;
+
     public long getPollingInterval() {
         return getPollingDurationOrTheDefault(RunningParameter.emptyRunningParameter()).toMillis();
     }
@@ -65,6 +68,7 @@ public class FlowUtil {
         boolean flowFailed = false;
 
         int retryCount = 0;
+        int failureCount = 0;
         long pollingInterval = getPollingInterval();
         while (flowRunning && retryCount < maxRetry) {
             sleep(pollingInterval, crn, flowChainId, flowId);
@@ -84,10 +88,13 @@ public class FlowUtil {
                     flowRunning = false;
                 }
             } catch (Exception ex) {
-                flowFailed = true;
-                LOGGER.error("Error during polling flow. Crn={}, FlowId={}, FlowChainId={}, Message={}", crn, flowId, flowChainId, ex.getMessage(), ex);
-                throw new TestFailException(String.format(" Error during polling flow. Crn=%s, FlowId=%s , FlowChainId=%s, Message=%s ",
-                        crn, flowId, flowChainId, ex.getMessage()));
+                if (failureCount >= maxFailureRetry) {
+                    LOGGER.error("Error during polling flow. Crn={}, FlowId={}, FlowChainId={}, Message={}", crn, flowId, flowChainId, ex.getMessage(), ex);
+                    throw new TestFailException(String.format(" Error during polling flow. Crn=%s, FlowId=%s , FlowChainId=%s, Message=%s ",
+                            crn, flowId, flowChainId, ex.getMessage()));
+                } else {
+                    LOGGER.info("Retrying after failure. Failure count {}", ++failureCount);
+                }
             }
             retryCount++;
         }
