@@ -143,7 +143,7 @@ public class ScalingRequest implements Runnable {
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
             if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
-                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstances(stackCrn, updateStackJson);
+                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstancesByCrn(stackCrn, updateStackJson);
             } else {
                 cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
             }

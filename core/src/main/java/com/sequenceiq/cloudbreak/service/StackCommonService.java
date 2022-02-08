@@ -176,14 +176,17 @@ public class StackCommonService {
         put(stack, updateRequest);
     }
 
-    public void putStartInstancesInDefaultWorkspace(String crn, UpdateStackV4Request updateRequest, ScalingStrategy scalingStrategy) {
-        LOGGER.info("Received putStack on crn: {}, with scalingStrategy: {}, updateRequest: {}", crn, scalingStrategy, updateRequest);
-        Stack stack = stackService.getByCrn(crn);
-        if (!stackUtil.stopStartScalingEntitlementEnabled(stack)) {
+    public void putStartInstancesInDefaultWorkspace(NameOrCrn nameOrCrn, Long workspaceId, UpdateStackV4Request updateRequest, ScalingStrategy scalingStrategy) {
+        LOGGER.info("Received putStack: {}, with scalingStrategy: {}, updateRequest: {}", nameOrCrn, scalingStrategy, updateRequest);
+        Optional<Stack> stack = stackService.findStackByNameOrCrnAndWorkspaceId(nameOrCrn, workspaceId);
+        if (stack.isEmpty()) {
+            throw new BadRequestException("The requested Data Hub does not exist.");
+        }
+        if (!stackUtil.stopStartScalingEntitlementEnabled(stack.get())) {
             throw new BadRequestException("The entitlement for scaling via stop/start is not enabled");
         }
         MDCBuilder.buildMdcContext(stack);
-        putStartInstances(stack, updateRequest, scalingStrategy);
+        putStartInstances(stack.get(), updateRequest, scalingStrategy);
     }
 
     public FlowIdentifier putStopInWorkspace(NameOrCrn nameOrCrn, Long workspaceId) {
@@ -362,10 +365,10 @@ public class StackCommonService {
     private void validateStackIsNotDataLake(Stack stack, Set<String> instanceIds) {
         if (StackType.DATALAKE.equals(stack.getType())) {
             if (instanceIds.size() == 1) {
-                throw new BadRequestException(String.format("%s is a node of a data lake cluster, therefore it's not allowed to delete it.",
+                throw new BadRequestException(String.format("%s is a node of a data lake cluster, therefore it's not allowed to delete/stop it.",
                         List.copyOf(instanceIds).get(0)));
             } else {
-                throw new BadRequestException(String.format("%s are nodes of a data lake cluster, therefore it's not allowed to delete them.",
+                throw new BadRequestException(String.format("%s are nodes of a data lake cluster, therefore it's not allowed to delete/stop them.",
                         String.join(", ", instanceIds)));
             }
         }

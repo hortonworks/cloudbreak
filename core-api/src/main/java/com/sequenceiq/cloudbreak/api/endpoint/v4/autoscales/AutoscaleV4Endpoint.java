@@ -58,8 +58,15 @@ public interface AutoscaleV4Endpoint {
     @Path("/stack/startNodes/crn/{crn}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStart")
-    void putStackStartInstances(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
+            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartByCrn")
+    void putStackStartInstancesByCrn(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
+
+    @PUT
+    @Path("/stack/startNodes/name/{name}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStartByName")
+    void putStackStartInstancesByName(@PathParam("name") String name, @Valid UpdateStackV4Request updateRequest);
 
     @PUT
     @Path("/stack/crn/{crn}/{userId}/cluster")
@@ -142,8 +149,18 @@ public interface AutoscaleV4Endpoint {
     @Path("/stack/stopNodes/crn/{crn}")
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
-            notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstances")
+            notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstancesByCrn")
     void stopInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+            @RequestBody @NotEmpty List<String> instanceIds,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("scalingStrategy") ScalingStrategy scalingStrategy);
+
+    @DELETE
+    @Path("/stack/stopNodes/name/{name}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstancesByName")
+    void stopInstancesForClusterName(@PathParam("name") String clusterName,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced,
             @QueryParam("scalingStrategy") ScalingStrategy scalingStrategy);

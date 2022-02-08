@@ -138,11 +138,11 @@ public class ScalingRequestTest {
             ScalingRequest scalingRequest = initializeTestRequest(existingClusterNodeCount, existingHostGroupNodeCount, desiredHostGroupNodeCount, List.of());
             scalingRequest.run();
 
-            verify(autoscaleV4Endpoint, times(1)).putStackStartInstances(anyString(), captor.capture());
+            verify(autoscaleV4Endpoint, times(1)).putStackStartInstancesByCrn(anyString(), captor.capture());
             UpdateStackV4Request request = captor.getValue();
             assertEquals("Upscale nodecount should match", expectedNodeCount, request.getInstanceGroupAdjustment().getScalingAdjustment().intValue());
         } else {
-            verify(autoscaleV4Endpoint, times(0)).putStackStartInstances(anyString(), captor.capture());
+            verify(autoscaleV4Endpoint, times(0)).putStackStartInstancesByCrn(anyString(), captor.capture());
         }
     }
 
