@@ -31,7 +31,7 @@ include:
 
 init-services-db-remote:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/init_db_remote.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /opt/salt/scripts/init-services-db-remote-executed
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/init_db_remote.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> /opt/salt/scripts/init-services-db-remote-executed
     - unless: test -f /opt/salt/scripts/init-services-db-remote-executed
     - require:
       - file: /opt/salt/scripts/init_db_remote.sh
@@ -65,7 +65,7 @@ init-services-db-remote:
 
 init-db-with-utf8:
   cmd.run:
-    - name: rm -rf {{ postgres_directory }}/data && runuser -l postgres sh -c 'initdb --locale=en_US.UTF-8 {{ postgres_directory }}/data > {{ postgres_directory }}/initdb.log' && rm -f {{ postgres_log_directory }}/pgsql_listen_address_configured
+    - name: rm -rf {{ postgres_directory }}/data && runuser -l postgres -s /bin/bash sh -c 'initdb --locale=en_US.UTF-8 {{ postgres_directory }}/data > {{ postgres_directory }}/initdb.log' && rm -f {{ postgres_log_directory }}/pgsql_listen_address_configured
     - unless: grep -q UTF-8 {{ postgres_directory }}/initdb.log
 
 {%- if postgres_data_on_attached_disk %}
@@ -106,7 +106,7 @@ start-postgresql:
 
 configure-listen-address:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_listen_address.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_listen_address_configured
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/conf_pgsql_listen_address.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_listen_address_configured
     - require:
       - file: /opt/salt/scripts/conf_pgsql_listen_address.sh
       - service: start-postgresql
@@ -128,7 +128,7 @@ configure-listen-address:
 
 configure-max-connections:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/conf_pgsql_max_connections.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/conf_pgsql_max_connections.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/pgsql_max_connections_configured
     - require:
       - file: /opt/salt/scripts/conf_pgsql_max_connections.sh
       - service: start-postgresql
@@ -154,7 +154,7 @@ configure-max-connections:
 
 init-services-db:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/init_db.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/init-services-db-executed
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/init_db.sh' && echo $(date +%Y-%m-%d:%H:%M:%S) >> {{ postgres_scripts_executed_directory }}/init-services-db-executed
     - unless: test -f {{ postgres_scripts_executed_directory }}/init-services-db-executed
     - require:
       - file: /opt/salt/scripts/init_db.sh
