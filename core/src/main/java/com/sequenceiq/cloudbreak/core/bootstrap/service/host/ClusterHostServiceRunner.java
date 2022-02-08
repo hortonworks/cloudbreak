@@ -60,6 +60,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.json.Json;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
@@ -89,7 +90,6 @@ import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GrainProperties;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
@@ -287,7 +287,8 @@ public class ClusterHostServiceRunner {
         SaltConfig saltConfig = createSaltConfig(stack, cluster, grainsProperties);
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
         modifyStartupMountRole(stack, reachableNodes, GrainOperation.ADD);
-        hostOrchestrator.initServiceRun(gatewayConfigs, allNodes, reachableNodes, saltConfig, exitCriteriaModel, stack.getCloudPlatform());
+        hostOrchestrator.initServiceRun(stack, gatewayConfigs, allNodes, reachableNodes, saltConfig,
+                exitCriteriaModel, stack.getCloudPlatform());
         mountDisks(stack, candidateAddresses, allNodes);
         recipeEngine.executePreClusterManagerRecipes(stack, hostGroupService.getByClusterWithRecipes(cluster.getId()));
         hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
@@ -341,7 +342,7 @@ public class ClusterHostServiceRunner {
             List<GrainProperties> grainsProperties = grainPropertiesService.createGrainProperties(gatewayConfigs, cluster, reachableNodes);
             SaltConfig saltConfig = createSaltConfig(stack, cluster, grainsProperties);
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-            hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
+            hostOrchestrator.initSaltConfig(stack, gatewayConfigs, allNodes, saltConfig, exitCriteriaModel);
             hostOrchestrator.runService(gatewayConfigs, reachableNodes, saltConfig, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException | IOException e) {
             throw new CloudbreakServiceException(e.getMessage(), e);

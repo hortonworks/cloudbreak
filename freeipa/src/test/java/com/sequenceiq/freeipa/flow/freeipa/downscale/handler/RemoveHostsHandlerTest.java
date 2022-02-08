@@ -81,7 +81,7 @@ class RemoveHostsHandlerTest {
         underTest.accept(new Event<>(request));
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
         verify(bootstrapService).bootstrap(any(), any());
-        verify(hostOrchestrator).tearDown(any(), any(), any(), any());
+        verify(hostOrchestrator).tearDown(any(), any(), any(), any(), any());
     }
 
     @Test
@@ -135,6 +135,6 @@ class RemoveHostsHandlerTest {
         underTest.accept(new Event<>(request));
         verify(eventBus, times(1)).notify(eq("REMOVEHOSTSFROMORCHESTRATIONSUCCESS"), ArgumentMatchers.<Event>any());
         verify(bootstrapService).bootstrap(any(), any());
-        verify(hostOrchestrator).tearDown(any(), eq(Map.of("example1.com", "192.168.0.1")), any(), any());
+        verify(hostOrchestrator).tearDown(any(), any(), eq(Map.of("example1.com", "192.168.0.1")), any(), any());
     }
 }

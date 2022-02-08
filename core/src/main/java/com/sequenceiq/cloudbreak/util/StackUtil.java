@@ -33,6 +33,8 @@ import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.orchestration.NodeVolumes;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -43,8 +45,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.model.NodeVolumes;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
@@ -80,20 +80,7 @@ public class StackUtil {
     private EntitlementService entitlementService;
 
     public Set<Node> collectNodes(Stack stack) {
-        Set<Node> agents = new HashSet<>();
-        for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            if (instanceGroup.getNodeCount() != 0) {
-                for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
-                    if (im.getDiscoveryFQDN() != null) {
-                        String instanceId = im.getInstanceId();
-                        String instanceType = instanceGroup.getTemplate().getInstanceType();
-                        agents.add(new Node(im.getPrivateIp(), im.getPublicIp(), instanceId, instanceType,
-                                im.getDiscoveryFQDN(), im.getInstanceGroupName()));
-                    }
-                }
-            }
-        }
-        return agents;
+        return stack.getAllNodes();
     }
 
     public Set<Node> collectReachableNodesByInstanceStates(Stack stack) {
