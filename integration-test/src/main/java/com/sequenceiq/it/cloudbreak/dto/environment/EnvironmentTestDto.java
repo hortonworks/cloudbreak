@@ -7,6 +7,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
 import static java.util.Objects.isNull;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -447,5 +448,10 @@ public class EnvironmentTestDto
         } else if (flowIdentifier.getType() == FlowType.FLOW_CHAIN) {
             setLastKnownFlowChainId(flowIdentifier.getPollableId());
         }
+    }
+
+    public EnvironmentTestDto waitingFor(Duration duration, String interruptedMessage) {
+        getTestContext().waitingFor(duration, interruptedMessage);
+        return this;
     }
 }
