@@ -1,5 +1,62 @@
 package com.sequenceiq.datalake.service.sdx;
 
+import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
+import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
+import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_JUMPGATE_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_REQUIRED_VERSION;
+import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
+import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anySet;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import com.google.common.collect.Sets;
 import com.sequenceiq.authorization.service.OwnerAssignmentService;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
@@ -38,8 +95,6 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionEx
 import com.sequenceiq.cloudbreak.util.FileReaderUtils;
 import com.sequenceiq.cloudbreak.validation.ValidationResult;
 import com.sequenceiq.common.api.cloudstorage.old.S3CloudStorageV1Parameters;
-import static com.sequenceiq.common.api.type.InstanceGroupType.CORE;
-import static com.sequenceiq.common.api.type.InstanceGroupType.GATEWAY;
 import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.common.model.FileSystemType;
 import com.sequenceiq.datalake.configuration.CDPConfigService;
@@ -49,9 +104,6 @@ import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.repository.SdxClusterRepository;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
 import com.sequenceiq.datalake.service.imagecatalog.ImageCatalogService;
-import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_JUMPGATE_REQUIRED_VERSION;
-import static com.sequenceiq.datalake.service.sdx.SdxService.CCMV2_REQUIRED_VERSION;
-import static com.sequenceiq.datalake.service.sdx.SdxService.MEDIUM_DUTY_REQUIRED_VERSION;
 import com.sequenceiq.datalake.service.sdx.status.SdxStatusService;
 import com.sequenceiq.datalake.service.validation.cloudstorage.CloudStorageLocationValidator;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXV1Endpoint;
@@ -67,58 +119,9 @@ import com.sequenceiq.sdx.api.model.SdxClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterRequestBase;
 import com.sequenceiq.sdx.api.model.SdxClusterResizeRequest;
 import com.sequenceiq.sdx.api.model.SdxClusterShape;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.LIGHT_DUTY;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.MEDIUM_DUTY_HA;
-import static com.sequenceiq.sdx.api.model.SdxClusterShape.MICRO_DUTY;
 import com.sequenceiq.sdx.api.model.SdxCustomClusterRequest;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 import com.sequenceiq.sdx.api.model.SdxRecipe;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-import java.util.UUID;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-import org.apache.commons.lang3.tuple.Pair;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
-import org.mockito.ArgumentCaptor;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayName("SDX service tests")
@@ -397,7 +400,6 @@ class SdxServiceTest {
         RangerRazEnabledV4Response response = mock(RangerRazEnabledV4Response.class);
         when(stackV4Endpoint.rangerRazEnabledInternal(anyLong(), anyString(), anyString())).thenReturn(response);
         when(response.isRangerRazEnabled()).thenReturn(true);
-        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         when(environmentClientService.getByCrn(anyString())).thenReturn(environmentResponse);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.updateRangerRazEnabled(sdxCluster));
@@ -843,7 +845,6 @@ class SdxServiceTest {
         when(clock.getCurrentTimeMillis()).thenReturn(1L);
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         Pair<SdxCluster, FlowIdentifier> result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () ->
                 underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null));
         SdxCluster createdSdxCluster = result.getLeft();
@@ -854,43 +855,15 @@ class SdxServiceTest {
         assertTrue(capturedSdx.isRangerRazEnabled());
     }
 
-    @ParameterizedTest(name = "{0}")
-    @MethodSource("razCloudPlatformAndRuntimeDataProvider")
-    void testSdxCreateRazEnabledNoEntitlement(String testCaseName, CloudPlatform cloudPlatform, String runtime) {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest(null, LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        long id = 10L;
-        mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
-        sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString())).thenReturn(false);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("Provisioning Ranger Raz is not enabled for this account.", badRequestException.getMessage());
-    }
-
     @Test
     void testSdxCreateRazEnabledNotAwsOrAzure() {
         SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.2", LIGHT_DUTY);
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.YARN, null);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
-    }
-
-    @Test
-    void testSdxCreateRazEnabledNoEntitlementAndNotAwsOrAzure() {
-        SdxClusterRequest sdxClusterRequest = createSdxClusterRequest("7.2.2", LIGHT_DUTY);
-        when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
-        mockEnvironmentCall(sdxClusterRequest, CloudPlatform.YARN, null);
-        sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString())).thenReturn(false);
-        BadRequestException badRequestException = assertThrows(BadRequestException.class,
-                () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("1. Provisioning Ranger Raz is not enabled for this account.\n" +
-                "2. Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.", badRequestException.getMessage());
     }
 
     @ParameterizedTest(name = "{0}")
@@ -900,7 +873,6 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(expectedErrorMsg, badRequestException.getMessage());
@@ -913,7 +885,6 @@ class SdxServiceTest {
         when(sdxClusterRepository.findByAccountIdAndEnvNameAndDeletedIsNullAndDetachedIsFalse(anyString(), anyString())).thenReturn(new ArrayList<>());
         mockEnvironmentCall(sdxClusterRequest, cloudPlatform, null);
         sdxClusterRequest.setEnableRangerRaz(true);
-        when(entitlementService.razEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
         assertEquals(expectedErrorMsg, badRequestException.getMessage());

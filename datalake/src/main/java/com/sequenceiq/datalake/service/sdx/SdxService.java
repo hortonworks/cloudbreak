@@ -807,10 +807,6 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     private void validateRazEnablement(String runtime, boolean razEnabled, DetailedEnvironmentResponse environment) {
         ValidationResultBuilder validationBuilder = new ValidationResultBuilder();
         if (razEnabled) {
-            boolean razEntitlementEnabled = entitlementService.razEnabled(Crn.safeFromString(environment.getCreator()).getAccountId());
-            if (!razEntitlementEnabled) {
-                validationBuilder.error("Provisioning Ranger Raz is not enabled for this account.");
-            }
             CloudPlatform cloudPlatform = EnumUtils.getEnumIgnoreCase(CloudPlatform.class, environment.getCloudPlatform());
             if (!(AWS.equals(cloudPlatform) || AZURE.equals(cloudPlatform))) {
                 validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");

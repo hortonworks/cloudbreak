@@ -26,7 +26,6 @@ auth:
       gcp: false
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
-    raz.enable: true
     raws3.enable: false
     azure.marketplace.images.enable: true
     azure.single.resourcegroup.enable: true
