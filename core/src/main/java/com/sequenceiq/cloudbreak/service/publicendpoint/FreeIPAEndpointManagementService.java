@@ -116,11 +116,9 @@ public class FreeIPAEndpointManagementService extends BasePublicEndpointManageme
     }
 
     private Optional<LoadBalancer> getLoadBalancer(Long stackId) {
-        if (manageCertificateAndDnsInPem()) {
-            Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
-            if (!loadBalancers.isEmpty()) {
-                return loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PRIVATE);
-            }
+        Set<LoadBalancer> loadBalancers = loadBalancerPersistenceService.findByStackId(stackId);
+        if (!loadBalancers.isEmpty()) {
+            return loadBalancerConfigService.selectLoadBalancer(loadBalancers, LoadBalancerType.PRIVATE);
         }
         return Optional.empty();
     }
