@@ -1,6 +1,6 @@
-package com.sequenceiq.cloudbreak.usage.processor;
+package com.sequenceiq.cloudbreak.usage.http;
 
-public class EdhCloudwatchField {
+public class EdhHttpAdditionalField {
 
     private String key;
 
