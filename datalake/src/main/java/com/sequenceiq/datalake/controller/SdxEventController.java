@@ -10,7 +10,8 @@ import javax.ws.rs.core.StreamingOutput;
 
 import org.springframework.stereotype.Controller;
 
-import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
+import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
+import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.StructuredEventType;
@@ -32,8 +33,8 @@ public class SdxEventController implements SdxEventEndpoint {
      * @return structured events gathered from datalake and cloudbreak services.
      */
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
-    public List<CDPStructuredEvent> getAuditEvents(String environmentCrn, List<StructuredEventType> types, Integer page, Integer size) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public List<CDPStructuredEvent> getAuditEvents(@ResourceCrn String environmentCrn, List<StructuredEventType> types, Integer page, Integer size) {
         return sdxEventsService.getPagedDatalakeAuditEvents(environmentCrn, types, page, size);
     }
 
@@ -45,8 +46,8 @@ public class SdxEventController implements SdxEventEndpoint {
      * @return zipped datalake events gathered from datalake and cloudbreak services.
      */
     @Override
-    @CheckPermissionByAccount(action = AuthorizationResourceAction.DESCRIBE_DATALAKE)
-    public Response getDatalakeEventsZip(String environmentCrn, List<StructuredEventType> types) {
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.DESCRIBE_ENVIRONMENT)
+    public Response getDatalakeEventsZip(@ResourceCrn String environmentCrn, List<StructuredEventType> types) {
         List<CDPStructuredEvent> events = sdxEventsService.getDatalakeAuditEvents(environmentCrn, List.of(StructuredEventType.NOTIFICATION));
         return getDatalakeEventsZipResponse(events);
     }
