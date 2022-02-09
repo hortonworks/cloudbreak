@@ -3,6 +3,8 @@ package com.sequenceiq.cloudbreak.service.stack;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Set;
@@ -43,13 +45,21 @@ public class TargetedUpscaleSupportServiceTest {
     private TargetedUpscaleSupportService underTest;
 
     @Test
-    public void testIfEntitlementDisabled() {
+    public void testIfEntitlementsDisabled() {
+        when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(Boolean.FALSE);
         assertFalse(underTest.targetedUpscaleOperationSupported(getStack()));
+
+        when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.FALSE);
+        assertFalse(underTest.targetedUpscaleOperationSupported(getStack()));
+
+        verify(entitlementService, times(2)).targetedUpscaleSupported(any());
+        verify(entitlementService, times(1)).isUnboundEliminationSupported(any());
     }
 
     @Test
     public void testIfUnboundConfigPresent() {
+        when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
@@ -59,6 +69,7 @@ public class TargetedUpscaleSupportServiceTest {
 
     @Test
     public void testIfUnboundConfigNotPresent() {
+        when(entitlementService.targetedUpscaleSupported(any())).thenReturn(Boolean.TRUE);
         when(entitlementService.isUnboundEliminationSupported(any())).thenReturn(Boolean.TRUE);
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(new GatewayConfig(null, null, null, null, null, null));
         when(stackUtil.collectReachableNodes(any())).thenReturn(Set.of());
@@ -68,7 +79,7 @@ public class TargetedUpscaleSupportServiceTest {
 
     @Test
     public void testIfThereIsAnyError() {
-        when(entitlementService.isUnboundEliminationSupported(any())).thenThrow(new InternalServerErrorException("error"));
+        when(entitlementService.targetedUpscaleSupported(any())).thenThrow(new InternalServerErrorException("error"));
         assertFalse(underTest.targetedUpscaleOperationSupported(getStack()));
     }
 
