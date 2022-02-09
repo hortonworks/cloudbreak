@@ -98,7 +98,6 @@ import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -181,9 +180,6 @@ public class ClusterHostServiceRunner {
 
     @Inject
     private RecipeEngine recipeEngine;
-
-    @Inject
-    private BlueprintService blueprintService;
 
     @Inject
     private ComponentConfigProviderService componentConfigProviderService;
@@ -423,14 +419,12 @@ public class ClusterHostServiceRunner {
         Map<String, List<String>> serviceLocations = getServiceLocations(cluster);
         Optional<LdapView> ldapView = ldapConfigService.get(stack.getEnvironmentCrn(), stack.getName());
         VirtualGroupRequest virtualGroupRequest = getVirtualGroupRequest(virtualGroupsEnvironmentCrn, ldapView);
-        saveGatewayPillar(primaryGatewayConfig, cluster, stack, servicePillar, virtualGroupRequest,
-                connector, kerberosConfig, serviceLocations, clouderaManagerRepo);
+        servicePillar.putAll(createGatewayPillar(primaryGatewayConfig, cluster, stack, virtualGroupRequest, connector, kerberosConfig, serviceLocations,
+                clouderaManagerRepo));
         saveIdBrokerPillar(cluster, servicePillar);
         postgresConfigService.decorateServicePillarWithPostgresIfNeeded(servicePillar, stack, cluster);
 
-        if (blueprintService.isClouderaManagerTemplate(cluster.getBlueprint())) {
-            addClouderaManagerConfig(stack, cluster, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
-        }
+        addClouderaManagerConfig(stack, cluster, servicePillar, clouderaManagerRepo, primaryGatewayConfig);
         ldapView.ifPresent(ldap -> saveLdapPillar(ldap, servicePillar));
 
         saveSssdAdPillar(servicePillar, kerberosConfig);
@@ -489,10 +483,8 @@ public class ClusterHostServiceRunner {
                 && !kerberosDetailService.isClusterManagerManagedKrb5Config(kerberosConfig);
     }
 
-    private void addClouderaManagerConfig(Stack stack, Cluster cluster,
-            Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo,
-            GatewayConfig primaryGatewayConfig)
-            throws CloudbreakOrchestratorFailedException {
+    private void addClouderaManagerConfig(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar,
+            ClouderaManagerRepo clouderaManagerRepo, GatewayConfig primaryGatewayConfig) throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = componentConfigProviderService.getTelemetry(stack.getId());
         DataBusCredential dataBusCredential = null;
         if (StringUtils.isNotBlank(cluster.getDatabusCredential())) {
@@ -508,10 +500,10 @@ public class ClusterHostServiceRunner {
         Optional<String> licenseOpt = decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, licenseOpt);
         decoratePillarWithClouderaManagerDatabase(cluster, servicePillar);
-        decoratePillarWithClouderaManagerCommunicationSettings(stack, cluster, servicePillar, primaryGatewayConfig, clouderaManagerRepo);
+        decoratePillarWithClouderaManagerCommunicationSettings(stack, cluster, servicePillar);
         decoratePillarWithClouderaManagerAutoTls(cluster, servicePillar);
         csdParcelDecorator.decoratePillarWithCsdParcels(stack, servicePillar);
-        decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
+        servicePillar.putAll(createPillarWithClouderaManagerSettings(clouderaManagerRepo, stack, primaryGatewayConfig));
     }
 
     private void saveSssdAdPillar(Map<String, SaltPillarProperties> servicePillar, KerberosConfig kerberosConfig) {
@@ -574,11 +566,7 @@ public class ClusterHostServiceRunner {
                 new SaltPillarProperties("/cloudera-manager/database.sls", singletonMap("cloudera-manager", singletonMap("database", rdsView))));
     }
 
-    private void decoratePillarWithClouderaManagerCommunicationSettings(Stack stack,
-            Cluster cluster,
-            Map<String, SaltPillarProperties> servicePillar,
-            GatewayConfig primaryGatewayConfig,
-            ClouderaManagerRepo clouderaManagerRepo) {
+    private void decoratePillarWithClouderaManagerCommunicationSettings(Stack stack, Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
         Boolean autoTls = cluster.getAutoTlsEnabled();
         Map<String, Object> communication = new HashMap<>();
         Optional<String> san = loadBalancerSANProvider.getLoadBalancerSAN(stack);
@@ -636,12 +624,12 @@ public class ClusterHostServiceRunner {
         return pillarValues;
     }
 
-    public void decoratePillarWithClouderaManagerSettings(Map<String, SaltPillarProperties> servicePillar, ClouderaManagerRepo clouderaManagerRepo,
-            Stack stack) {
+    public Map<String, SaltPillarProperties> createPillarWithClouderaManagerSettings(ClouderaManagerRepo clouderaManagerRepo, Stack stack,
+            GatewayConfig primaryGatewayConfig) {
         ServiceLocationMap serviceLocations = clusterApiConnectors.getConnector(stack.getCluster()).getServiceLocations();
         String cmVersion = clouderaManagerRepo.getVersion();
         boolean disableAutoBundleCollection = entitlementService.cmAutoBundleCollectionDisabled(Crn.safeFromString(stack.getResourceCrn()).getAccountId());
-        servicePillar.put("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
+        return Map.of("cloudera-manager-settings", new SaltPillarProperties("/cloudera-manager/settings.sls",
                 singletonMap("cloudera-manager", Map.of(
                         "settings", Map.of(
                                 "heartbeat_interval", cmHeartbeatInterval,
@@ -650,7 +638,8 @@ public class ClusterHostServiceRunner {
                                 "set_cdp_env", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_2),
                                 "deterministic_uid_gid", isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_2_1),
                                 "cloudera_scm_sudo_access", CMRepositoryVersionUtil.isSudoAccessNeededForHostCertRotation(clouderaManagerRepo)),
-                        "mgmt_service_directories", serviceLocations.getAllVolumePath()))));
+                        "mgmt_service_directories", serviceLocations.getAllVolumePath(),
+                        "address", primaryGatewayConfig.getPrivateAddress()))));
     }
 
     private void decoratePillarWithTags(Stack stack, Map<String, SaltPillarProperties> servicePillarConfig) {
@@ -696,32 +685,39 @@ public class ClusterHostServiceRunner {
     }
 
     @SuppressWarnings("ParameterNumber")
-    private void saveGatewayPillar(GatewayConfig gatewayConfig,
-            Cluster cluster,
-            Stack stack,
-            Map<String, SaltPillarProperties> servicePillar,
-            VirtualGroupRequest virtualGroupRequest,
-            ClusterPreCreationApi connector, KerberosConfig kerberosConfig,
-            Map<String, List<String>> serviceLocations,
+    private Map<String, SaltPillarProperties> createGatewayPillar(GatewayConfig gatewayConfig, Cluster cluster, Stack stack,
+            VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector, KerberosConfig kerberosConfig, Map<String, List<String>> serviceLocations,
             ClouderaManagerRepo clouderaManagerRepo) throws IOException {
-        final boolean enableKnoxRangerAuthorizer = isVersionNewerOrEqualThanLimited(
-                clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
-        Optional<String> version = Optional.ofNullable(cluster.getBlueprint().getStackVersion());
-
-
         Map<String, Object> gateway = new HashMap<>();
         gateway.put("address", gatewayConfig.getPublicAddress());
         gateway.put("username", cluster.getUserName());
         gateway.put("password", cluster.getPassword());
-        gateway.put("enable_knox_ranger_authorizer", enableKnoxRangerAuthorizer);
+        gateway.put("enable_knox_ranger_authorizer", isRangerAuthorizerEnabled(clouderaManagerRepo));
         gateway.put("enable_ccmv2", stack.getTunnel().useCcmV2OrJumpgate());
         gateway.put("enable_ccmv2_jumpgate", stack.getTunnel().useCcmV2Jumpgate());
 
-        // for cloudbreak upgradeability
-        gateway.put("ssotype", SSOType.NONE);
+        gateway.putAll(createKnoxRelatedGatewayCofniguration(cluster, virtualGroupRequest, connector));
+        gateway.putAll(createGatewayUserFacingCertAndFqdn(gatewayConfig, cluster));
+        gateway.put("kerberos", kerberosConfig != null);
 
+        ExposedService rangerService = exposedServiceCollector.getRangerService();
+        List<String> rangerLocations = serviceLocations.get(rangerService.getServiceName());
+        if (!CollectionUtils.isEmpty(rangerLocations)) {
+            List<String> rangerGatewayHosts = getRangerFqdn(cluster, gatewayConfig.getHostname(), rangerLocations);
+            serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
+        }
+        serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
+        gateway.put("location", serviceLocations);
+        if (stack.getNetwork() != null) {
+            gateway.put("cidrBlocks", stack.getNetwork().getNetworkCidrs());
+        }
+        return Map.of("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    }
+
+    private Map<String, Object> createKnoxRelatedGatewayCofniguration(Cluster cluster, VirtualGroupRequest virtualGroupRequest, ClusterPreCreationApi connector)
+            throws IOException {
         Gateway clusterGateway = cluster.getGateway();
-
+        Map<String, Object> gateway = new HashMap<>();
         if (clusterGateway != null) {
             gateway.put("path", clusterGateway.getPath());
             gateway.put("ssotype", clusterGateway.getSsoType());
@@ -732,7 +728,7 @@ public class ClusterHostServiceRunner {
             gateway.put("tokencert", clusterGateway.getTokenCert());
             gateway.put("mastersecret", clusterGateway.getKnoxMasterSecret());
             gateway.put("envAccessGroup", virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.ENVIRONMENT_ACCESS.getRight()));
-            List<Map<String, Object>> topologies = getTopologies(clusterGateway, version);
+            List<Map<String, Object>> topologies = getTopologies(clusterGateway, cluster.getBlueprint().getStackVersion());
             gateway.put("topologies", topologies);
             if (cluster.getBlueprint() != null) {
                 Boolean autoTlsEnabled = cluster.getAutoTlsEnabled();
@@ -750,22 +746,16 @@ public class ClusterHostServiceRunner {
                     throw new NotFoundException("Could not get SAML metadata file to set up IdP in KNOXSSO: " + e.getMessage());
                 }
             }
+        } else {
+            gateway.put("ssotype", SSOType.NONE);
+            LOGGER.debug("Cluster gateway (Knox) is not set. Configure ssotype to 'NONE' for backward compatibility.");
         }
-        addGatewayUserFacingCertAndFqdn(gatewayConfig, cluster, gateway);
-        gateway.put("kerberos", kerberosConfig != null);
+        return gateway;
+    }
 
-        ExposedService rangerService = exposedServiceCollector.getRangerService();
-        List<String> rangerLocations = serviceLocations.get(rangerService.getServiceName());
-        if (!CollectionUtils.isEmpty(rangerLocations)) {
-            List<String> rangerGatewayHosts = getRangerFqdn(cluster, gatewayConfig.getHostname(), rangerLocations);
-            serviceLocations.put(rangerService.getServiceName(), rangerGatewayHosts);
-        }
-        serviceLocations.put(exposedServiceCollector.getClouderaManagerService().getServiceName(), asList(gatewayConfig.getHostname()));
-        gateway.put("location", serviceLocations);
-        if (stack.getNetwork() != null) {
-            gateway.put("cidrBlocks", stack.getNetwork().getNetworkCidrs());
-        }
-        servicePillar.put("gateway", new SaltPillarProperties("/gateway/init.sls", singletonMap("gateway", gateway)));
+    private boolean isRangerAuthorizerEnabled(ClouderaManagerRepo clouderaManagerRepo) {
+        return isVersionNewerOrEqualThanLimited(
+                clouderaManagerRepo.getVersion(), CLOUDERAMANAGER_VERSION_7_2_0);
     }
 
     private void saveIdBrokerPillar(Cluster cluster, Map<String, SaltPillarProperties> servicePillar) {
@@ -782,9 +772,10 @@ public class ClusterHostServiceRunner {
         servicePillar.put("idbroker", new SaltPillarProperties("/idbroker/init.sls", singletonMap("idbroker", idbroker)));
     }
 
-    private void addGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, Cluster cluster, Map<String, Object> gateway) {
+    private Map<String, Object> createGatewayUserFacingCertAndFqdn(GatewayConfig gatewayConfig, Cluster cluster) {
         boolean userFacingCertHasBeenGenerated = isNotEmpty(gatewayConfig.getUserFacingCert())
                 && isNotEmpty(gatewayConfig.getUserFacingKey());
+        Map<String, Object> gateway = new HashMap<>();
         if (userFacingCertHasBeenGenerated) {
             gateway.put("userfacingcert_configured", Boolean.TRUE);
             gateway.put("userfacingkey", cluster.getStack().getSecurityConfig().getUserFacingKey());
@@ -801,6 +792,7 @@ public class ClusterHostServiceRunner {
                 gateway.put("userfacingdomain", Pattern.quote(fqdnParts[1]));
             }
         }
+        return gateway;
     }
 
     private Map<String, List<String>> getServiceLocations(Cluster cluster) {
@@ -835,11 +827,11 @@ public class ClusterHostServiceRunner {
         return List.of(value);
     }
 
-    private List<Map<String, Object>> getTopologies(Gateway clusterGateway, Optional<String> version) throws IOException {
+    private List<Map<String, Object>> getTopologies(Gateway clusterGateway, String version) throws IOException {
         if (!CollectionUtils.isEmpty(clusterGateway.getTopologies())) {
             List<Map<String, Object>> topologyMaps = new ArrayList<>();
             for (GatewayTopology topology : clusterGateway.getTopologies()) {
-                Map<String, Object> topologyAndExposed = mapTopologyToMap(topology, version);
+                Map<String, Object> topologyAndExposed = mapTopologyToMap(topology, Optional.ofNullable(version));
                 topologyMaps.add(topologyAndExposed);
             }
             return topologyMaps;
