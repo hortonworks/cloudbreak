@@ -81,14 +81,14 @@ public class ClusterManagerUpgradeService {
     private void upgradeClusterManager(Stack stack) throws CloudbreakOrchestratorException {
         Cluster cluster = stack.getCluster();
         InstanceMetaData gatewayInstance = stack.getPrimaryGatewayInstance();
-        GatewayConfig gatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway() != null);
+        GatewayConfig primaryGatewayConfig = gatewayConfigService.getGatewayConfig(stack, gatewayInstance, cluster.getGateway() != null);
         Set<String> gatewayFQDN = Collections.singleton(gatewayInstance.getDiscoveryFQDN());
         ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), cluster.getId());
-        SaltConfig pillar = createSaltConfig(stack, cluster.getId());
+        SaltConfig pillar = createSaltConfig(stack, cluster.getId(), primaryGatewayConfig);
         Set<String> allNode = stackUtil.collectNodes(stack).stream().map(Node::getHostname).collect(Collectors.toSet());
         try {
             Set<Node> reachableNodes = stackUtil.collectAndCheckReachableNodes(stack, allNode);
-            hostOrchestrator.upgradeClusterManager(gatewayConfig, gatewayFQDN, reachableNodes, pillar, exitCriteriaModel);
+            hostOrchestrator.upgradeClusterManager(primaryGatewayConfig, gatewayFQDN, reachableNodes, pillar, exitCriteriaModel);
         } catch (NodesUnreachableException e) {
             String errorMessage = "Can not upgrade cluster manager because the configuration management service is not responding on these nodes: "
                     + e.getUnreachableNodes();
@@ -105,12 +105,12 @@ public class ClusterManagerUpgradeService {
         clusterApiConnectors.getConnector(stack).startCluster();
     }
 
-    private SaltConfig createSaltConfig(Stack stack, Long clusterId) {
+    private SaltConfig createSaltConfig(Stack stack, Long clusterId, GatewayConfig primaryGatewayConfig) {
         Map<String, SaltPillarProperties> servicePillar = new HashMap<>();
         ClouderaManagerRepo clouderaManagerRepo = clusterComponentConfigProvider.getClouderaManagerRepoDetails(clusterId);
         Optional<String> license = clusterHostServiceRunner.decoratePillarWithClouderaManagerLicense(stack.getId(), servicePillar);
         clusterHostServiceRunner.decoratePillarWithClouderaManagerRepo(clouderaManagerRepo, servicePillar, license);
-        clusterHostServiceRunner.decoratePillarWithClouderaManagerSettings(servicePillar, clouderaManagerRepo, stack);
+        servicePillar.putAll(clusterHostServiceRunner.createPillarWithClouderaManagerSettings(clouderaManagerRepo, stack, primaryGatewayConfig));
         csdParcelDecorator.decoratePillarWithCsdParcels(stack, servicePillar);
         return new SaltConfig(servicePillar);
     }
