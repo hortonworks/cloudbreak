@@ -87,7 +87,7 @@ public class ClusterManagerUpgradeServiceTest {
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
-        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
+        verify(clusterHostServiceRunner, times(1)).createPillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi).startCluster();
     }
 
@@ -102,7 +102,7 @@ public class ClusterManagerUpgradeServiceTest {
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
-        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
+        verify(clusterHostServiceRunner, times(1)).createPillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi, never()).startCluster();
     }
 
@@ -118,7 +118,7 @@ public class ClusterManagerUpgradeServiceTest {
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
-        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
+        verify(clusterHostServiceRunner, times(1)).createPillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi).startCluster();
         verify(csdParcelDecorator, times(1)).decoratePillarWithCsdParcels(any(), any());
     }
@@ -135,7 +135,7 @@ public class ClusterManagerUpgradeServiceTest {
         verify(hostOrchestrator, times(1)).upgradeClusterManager(any(), any(), any(), any(), any());
         verify(clusterApi).stopCluster(true);
         verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerRepo(any(), any(), any());
-        verify(clusterHostServiceRunner, times(1)).decoratePillarWithClouderaManagerSettings(any(), any(), any());
+        verify(clusterHostServiceRunner, times(1)).createPillarWithClouderaManagerSettings(any(), any(), any());
         verify(clusterApi).startCluster();
         verify(csdParcelDecorator, times(1)).decoratePillarWithCsdParcels(any(), any());
     }

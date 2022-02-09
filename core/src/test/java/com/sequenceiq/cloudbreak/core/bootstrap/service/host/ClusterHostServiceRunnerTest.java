@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.core.bootstrap.service.host;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -20,19 +21,20 @@ import java.util.Optional;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.api.service.ExposedService;
 import com.sequenceiq.cloudbreak.api.service.ExposedServiceCollector;
 import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
@@ -40,6 +42,9 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
+import com.sequenceiq.cloudbreak.cluster.api.ClusterPreCreationApi;
+import com.sequenceiq.cloudbreak.cluster.model.ServiceLocation;
+import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
@@ -49,6 +54,7 @@ import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcel
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.HostAttributeDecorator;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.TelemetryDecorator;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.domain.RDSConfig;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
@@ -63,11 +69,11 @@ import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
+import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.DefaultClouderaManagerRepoService;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.LoadBalancerConfigService;
-import com.sequenceiq.cloudbreak.service.blueprint.BlueprintService;
 import com.sequenceiq.cloudbreak.service.blueprint.ComponentLocatorService;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.flow.recipe.RecipeEngine;
@@ -87,13 +93,10 @@ import com.sequenceiq.cloudbreak.util.NodesUnreachableException;
 import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.common.api.type.Tunnel;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class ClusterHostServiceRunnerTest {
 
     private static final String TEST_CLUSTER_CRN = "crn:cdp:datahub:us-west-1:datahub:cluster:f7563fc1-e8ff-486a-9260-4e54ccabbaa0";
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private StackService stackService;
@@ -130,9 +133,6 @@ public class ClusterHostServiceRunnerTest {
 
     @Mock
     private RecipeEngine recipeEngine;
-
-    @Mock
-    private BlueprintService blueprintService;
 
     @Mock
     private DefaultClouderaManagerRepoService clouderaManagerRepoService;
@@ -206,24 +206,25 @@ public class ClusterHostServiceRunnerTest {
     @Mock
     private CsdParcelDecorator csdParcelDecorator;
 
+    @Mock
+    private LoadBalancerSANProvider loadBalancerSANProvider;
+
     @InjectMocks
     private ClusterHostServiceRunner underTest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        initMocks(this);
-        when(stack.getEnvironmentCrn()).thenReturn("envCrn");
-        when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("envCrn");
+        lenient().when(stack.getEnvironmentCrn()).thenReturn("envCrn");
+        lenient().when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("envCrn");
     }
 
     @Test
     public void shouldUsecollectAndCheckReachableNodes() throws NodesUnreachableException {
         try {
-            expectedException.expect(NullPointerException.class);
             underTest.runClusterServices(stack, cluster, Map.of());
-        } catch (Exception e) {
+            fail();
+        } catch (NullPointerException e) {
             verify(stackUtil).collectAndCheckReachableNodes(eq(stack), any());
-            throw e;
         }
     }
 
@@ -330,20 +331,21 @@ public class ClusterHostServiceRunnerTest {
     }
 
     private void setupMocksForRunClusterServices() throws NodesUnreachableException {
+        when(umsClient.getAccountDetails(any(), any())).thenReturn(UserManagementProto.Account.getDefaultInstance());
+        when(stackService.get(any())).thenReturn(stack);
         when(stack.getCluster()).thenReturn(cluster);
         when(stack.getTunnel()).thenReturn(Tunnel.DIRECT);
         when(stack.getCloudPlatform()).thenReturn(CloudPlatform.AWS.name());
         when(stack.getResourceCrn()).thenReturn(TEST_CLUSTER_CRN);
         when(cluster.getName()).thenReturn("clustername");
         when(cluster.getStack()).thenReturn(stack);
-        when(cluster.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getStackVersion()).thenReturn("7.2.12");
         when(componentLocator.getComponentLocation(any(), any())).thenReturn(new HashMap<>());
         when(exposedServiceCollector.getImpalaService()).thenReturn(mock(ExposedService.class));
         when(environmentConfigProvider.getParentEnvironmentCrn(any())).thenReturn("crn:cdp:iam:us-west-1:accid:user:mockuser@cloudera.com");
         ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
         when(clouderaManagerRepo.getVersion()).thenReturn("7.2.2");
         GatewayConfig gatewayConfig = mock(GatewayConfig.class);
+        when(gatewayConfig.getPrivateAddress()).thenReturn("1.2.3.4");
         when(gatewayConfig.getHostname()).thenReturn("hostname");
         when(gatewayConfigService.getPrimaryGatewayConfig(any())).thenReturn(gatewayConfig);
         when(clusterComponentConfigProvider.getClouderaManagerRepoDetails(any())).thenReturn(clouderaManagerRepo);
@@ -360,11 +362,24 @@ public class ClusterHostServiceRunnerTest {
         createInstanceGroup(template, instanceGroups, "fqdn2", null, "1.1.2.1", "1.1.2.2");
         InstanceGroup gwIg = createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
 
-        when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
+        lenient().when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
         when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
                 node("gateway1"), node("gateway3")));
 
         when(stack.getInstanceGroups()).thenReturn(instanceGroups);
+        when(rdsConfigService.findByClusterIdAndType(any(), eq(DatabaseType.CLOUDERA_MANAGER))).thenReturn(new RDSConfig());
+        RDSConfig rdsConfig = new RDSConfig();
+        rdsConfig.setType("asdf");
+        rdsConfig.setConnectionURL("jdbc:postgresql:subname://some-rds.1d3nt1f13r.eu-west-1.rds.amazonaws.com:5432/ranger");
+        when(rdsConfigService.resolveVaultValues(any())).thenReturn(rdsConfig);
+        when(loadBalancerSANProvider.getLoadBalancerSAN(stack)).thenReturn(Optional.empty());
+        ClusterPreCreationApi clusterPreCreationApi = mock(ClusterPreCreationApi.class);
+        when(clusterApiConnectors.getConnector(cluster)).thenReturn(clusterPreCreationApi);
+        ServiceLocationMap serviceLocationMap = new ServiceLocationMap();
+        serviceLocationMap.add(new ServiceLocation("serv", "paath"));
+        when(clusterPreCreationApi.getServiceLocations()).thenReturn(serviceLocationMap);
+        ReflectionTestUtils.setField(underTest, "cmHeartbeatInterval", "1");
+        ReflectionTestUtils.setField(underTest, "cmMissedHeartbeatInterval", "1");
     }
 
     private InstanceGroup createInstanceGroup(Template template, Set<InstanceGroup> instanceGroups, String fqdn1, String fqdn2,
