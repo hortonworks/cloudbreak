@@ -141,7 +141,7 @@ class UserDataBuilderTest {
     void testBuildUserDataWithCCMV2JumpgateParams(CcmV2TlsType ccmV2TlsType,
             boolean oneWayTlsEntitlementEnabled, String expectedContentFileName) throws IOException {
         CcmV2JumpgateParameters ccmV2JumpgateParameters = new DefaultCcmV2JumpgateParameters("invertingProxyHost", "invertingProxyCertificate",
-                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate",
+                "agentCrn", "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate", "environmentCrn",
                 "agentMachineUserAccessKeyId", "agentMachineUserEncipheredAccessKey");
         CcmConnectivityParameters ccmConnectivityParameters = new CcmConnectivityParameters(ccmV2JumpgateParameters);
 

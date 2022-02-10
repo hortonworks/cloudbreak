@@ -61,10 +61,12 @@ class DefaultCcmV2JumpgateParameterSupplierTest {
                 Crn.fromString(TEST_CLUSTER_CRN).getResource());
         assertNotNull(resultParameters, "CCMV2 Jumpgate Parameters should not be null");
 
+        assertEquals(TEST_ENVIRONMENT_CRN, resultParameters.getEnvironmentCrn(), "EnvironmentCRN should match");
         assertEquals("invertingProxyAgentCrn", resultParameters.getAgentCrn(), "AgentCRN should match");
         assertEquals("invertingProxyHost", resultParameters.getInvertingProxyHost(), "InvertingProxyHost should match");
         assertEquals("invertingProxyCertificate", resultParameters.getInvertingProxyCertificate(), "InvertingProxyCertificate should match");
         assertEquals(TEST_RESOURCE_ID, resultParameters.getAgentKeyId(), "AgentKeyId should match");
+        assertAgentCertOrMachineUser(resultParameters, singleWayTls);
     }
 
     private void assertAgentCertOrMachineUser(CcmV2JumpgateParameters resultParameters, boolean singleWayTls) {

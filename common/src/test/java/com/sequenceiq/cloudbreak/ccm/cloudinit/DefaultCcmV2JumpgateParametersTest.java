@@ -24,7 +24,7 @@ class DefaultCcmV2JumpgateParametersTest {
     @Test
     void testAddToTemplateModelFull() {
         underTest = new DefaultCcmV2JumpgateParameters("invertingProxyHost", "invertingProxyCertificate", "agentCrn",
-                "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate",
+                "agentKeyId", "agentEncipheredPrivateKey", "agentCertificate", "environmentCrn",
                 "agentMachineUserAccessKey", "agentMachineUserEncipheredAccessKey");
 
         Map<String, Object> expectedParams = new HashMap<>();
