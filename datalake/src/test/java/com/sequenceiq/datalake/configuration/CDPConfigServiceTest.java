@@ -51,7 +51,7 @@ class CDPConfigServiceTest {
 
     private static final String RUNTIME_7212 = "7.2.12";
 
-    private static final String RUNTIME_7213 = "7.2.13";
+    private static final String RUNTIME_7214 = "7.2.14";
 
     @Spy
     private Set<String> advertisedRuntimes;
@@ -77,10 +77,10 @@ class CDPConfigServiceTest {
     private static Object[][] testResourceTemplateDataProvider() {
         return new Object[][]{
                 //testCaseName     templatePath     expectedVersion     expectedProvider    expectedEntitlement     expectedSdxClusterShape
-                {"testResourceTemplate - with Entitlement", "resources/duties/7.2.13/aws/cdp_data_lake_medium_duty_with_profiler/medium_duty_ha.json",
-                        RUNTIME_7213, "aws", "/cdp_data_lake_medium_duty_with_profiler", "medium_duty_ha"},
-                {"testResourceTemplate - without Entitlement", "resources/duties/7.2.13/aws/medium_duty_ha.json",
-                        RUNTIME_7213, "aws", null, "medium_duty_ha"}
+                {"testResourceTemplate - with Entitlement", "resources/duties/7.2.14/aws/cdp_data_lake_medium_duty_with_profiler/medium_duty_ha.json",
+                        RUNTIME_7214, "aws", "/cdp_data_lake_medium_duty_with_profiler", "medium_duty_ha"},
+                {"testResourceTemplate - without Entitlement", "resources/duties/7.2.14/aws/medium_duty_ha.json",
+                        RUNTIME_7214, "aws", null, "medium_duty_ha"}
         };
     }
 
@@ -109,14 +109,14 @@ class CDPConfigServiceTest {
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.YARN, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_7212)));
             assertNotNull(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.MOCK, SdxClusterShape.LIGHT_DUTY, RUNTIME_710)));
-            assertTrue(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7213))
+            assertTrue(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7214))
                     .getCluster().getBlueprintName().contains("Profiler"));
             assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7212))
                     .getCluster().getBlueprintName().contains("Profiler"));
-            assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_7213))
+            assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.LIGHT_DUTY, RUNTIME_7214))
                     .getCluster().getBlueprintName().contains("Profiler"));
             lenient().when(entitlementService.isEntitledFor(anyString(), eq(Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER))).thenReturn(Boolean.FALSE);
-            assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7213))
+            assertFalse(cdpConfigService.getConfigForKey(new CDPConfigKey(CloudPlatform.AWS, SdxClusterShape.MEDIUM_DUTY_HA, RUNTIME_7214))
                     .getCluster().getBlueprintName().contains("Profiler"));
         });
     }
