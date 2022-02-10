@@ -174,7 +174,7 @@ class SdxClusterStatusCheckerJobTest {
                 eq(ResourceEvent.SDX_CLUSTER_DELETED_ON_PROVIDER_SIDE),
                 eq(""),
                 eq(sdxCluster));
-        verify(jobService, times(1)).scheduleLongIntervalCheck(any(), any());
+        verify(jobService, times(1)).scheduleLongIntervalCheck(any());
     }
 
     @Test
@@ -191,7 +191,7 @@ class SdxClusterStatusCheckerJobTest {
                 eq(Collections.singleton("data-lake-cluster")),
                 eq(""),
                 eq(sdxCluster));
-        verify(jobService, times(1)).schedule(any(), any());
+        verify(jobService, times(1)).schedule(any());
     }
 
     @Test
