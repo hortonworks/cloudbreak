@@ -74,7 +74,6 @@ public class KafkaConnectDataHubConfigProviderTest {
     private static Stream<Arguments> invalidConfigurationParameters() {
         return Stream.of(
                 Arguments.of("7.2.12", KafkaRoles.KAFKA_CONNECT),
-                Arguments.of("7.2.13", KafkaRoles.KAFKA_CONNECT),
                 Arguments.of("7.2.12", KafkaRoles.KAFKA_BROKER),
                 Arguments.of("7.2.14", KafkaRoles.KAFKA_BROKER),
                 Arguments.of("7.2.15", KafkaRoles.KAFKA_BROKER)

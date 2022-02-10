@@ -744,7 +744,7 @@
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": true,
-      "minVersion": "7.2.13"
+      "minVersion": "7.2.14"
     },
     {
       "name": "KNOX_TOKEN_INTEGRATOR",
