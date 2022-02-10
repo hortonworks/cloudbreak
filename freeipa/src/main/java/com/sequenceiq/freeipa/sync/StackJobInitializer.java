@@ -10,9 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.stack.StackService;
+import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 
 @Component
 public class StackJobInitializer implements JobInitializer {
@@ -27,10 +27,10 @@ public class StackJobInitializer implements JobInitializer {
 
     @Override
     public void initJobs() {
-        List<JobResource> jobResources = checkedMeasure(() -> stackService.findAllForAutoSync(), LOGGER, ":::Auto sync::: Stacks are fetched from db in {}ms");
-        for (JobResource jobResource : jobResources) {
-            freeipaJobService.schedule(jobResource);
+        List<Stack> stacks = checkedMeasure(() -> stackService.findAllForAutoSync(), LOGGER, ":::Auto sync::: stacks are fetched from db in {}ms");
+        for (Stack stack : stacks) {
+            freeipaJobService.schedule(stack);
         }
-        LOGGER.info("Auto syncer is inited with {} stacks on start", jobResources.size());
+        LOGGER.info("Auto syncer is inited with {} stacks on start", stacks.size());
     }
 }

@@ -29,8 +29,4 @@ public abstract class StatusCheckerJob extends TracedQuartzJob {
     public void setRemoteResourceCrn(String remoteResourceCrn) {
         this.remoteResourceCrn = remoteResourceCrn;
     }
-
-    protected Long getLocalIdAsLong() {
-        return Long.valueOf(getLocalId());
-    }
 }

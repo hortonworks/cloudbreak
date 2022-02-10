@@ -2,12 +2,11 @@ package com.sequenceiq.environment.environment.sync;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.repository.CrudRepository;
 
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.repository.EnvironmentRepository;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 public class EnvironmentJobAdapter extends JobResourceAdapter<Environment> {
 
@@ -15,8 +14,18 @@ public class EnvironmentJobAdapter extends JobResourceAdapter<Environment> {
         super(id, context);
     }
 
-    public EnvironmentJobAdapter(JobResource resource) {
+    public EnvironmentJobAdapter(Environment resource) {
         super(resource);
+    }
+
+    @Override
+    public String getLocalId() {
+        return String.valueOf(getResource().getId());
+    }
+
+    @Override
+    public String getRemoteResourceId() {
+        return getResource().getResourceCrn();
     }
 
     @Override
@@ -25,7 +34,7 @@ public class EnvironmentJobAdapter extends JobResourceAdapter<Environment> {
     }
 
     @Override
-    public Class<? extends JobResourceRepository<Environment, Long>> getRepositoryClassForResource() {
+    public Class<? extends CrudRepository<Environment, Long>> getRepositoryClassForResource() {
         return EnvironmentRepository.class;
     }
 }

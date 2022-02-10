@@ -80,7 +80,7 @@ public abstract class AbstractCommonChainAction<S extends FlowState, E extends F
 
     protected void enableStatusChecker(Stack stack, String reason) {
         LOGGER.info("Enabling the status checker for stack ID {}. {}", stack.getId(), reason);
-        jobService.schedule(stack.getId());
+        jobService.schedule(stack);
     }
 
     protected boolean shouldCompleteOperation(Map<Object, Object> variables) {

@@ -6,9 +6,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.cloudbreak.quartz.model.JobInitializer;
 
 @Component
 public class EnvironmentJobInitializer implements JobInitializer {
@@ -26,10 +26,10 @@ public class EnvironmentJobInitializer implements JobInitializer {
 
     @Override
     public void initJobs() {
-        List<JobResource> jobResources = environmentService.findAllForAutoSync();
-        for (JobResource jobResource : jobResources) {
-            environmentJobService.schedule(jobResource);
+        List<Environment> environments = environmentService.findAllForAutoSync();
+        for (Environment environment : environments) {
+            environmentJobService.schedule(environment);
         }
-        LOGGER.info("Auto syncer is inited with {} environments on start", jobResources.size());
+        LOGGER.info("Auto syncer is inited with {} environments on start", environments.size());
     }
 }

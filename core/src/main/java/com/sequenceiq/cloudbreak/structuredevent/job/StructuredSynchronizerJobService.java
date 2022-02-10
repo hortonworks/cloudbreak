@@ -53,7 +53,7 @@ public class StructuredSynchronizerJobService {
             JobResourceAdapter<T> resourceAdapter = c.newInstance(id, applicationContext);
             JobDetail jobDetail = buildJobDetail(resourceAdapter);
             Trigger trigger = buildJobTrigger(jobDetail);
-            schedule(resourceAdapter.getJobResource().getLocalId(), jobDetail, trigger);
+            schedule(resourceAdapter.getLocalId(), jobDetail, trigger);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
         }
@@ -62,7 +62,7 @@ public class StructuredSynchronizerJobService {
     public <T> void scheduleWithDelay(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTriggerWithDelay(jobDetail);
-        schedule(resource.getJobResource().getLocalId(), jobDetail, trigger);
+        schedule(resource.getLocalId(), jobDetail, trigger);
     }
 
     public <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
@@ -88,7 +88,7 @@ public class StructuredSynchronizerJobService {
 
     private <T> JobDetail buildJobDetail(JobResourceAdapter<T> resourceAdapter) {
         return JobBuilder.newJob(resourceAdapter.getJobClassForResource())
-                .withIdentity(resourceAdapter.getJobResource().getLocalId(), JOB_GROUP)
+                .withIdentity(resourceAdapter.getLocalId(), JOB_GROUP)
                 .withDescription("Creating Structured Synchronization Event")
                 .usingJobData(resourceAdapter.toJobDataMap())
                 .storeDurably()

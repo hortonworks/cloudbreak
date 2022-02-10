@@ -180,7 +180,7 @@ public class FreeIpaProvisionActions {
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
-                freeipaJobService.schedule(context.getStack().getId());
+                freeipaJobService.schedule(context.getStack());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 sendEvent(context);
             }

@@ -53,12 +53,12 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
 
     @Override
     protected Object getMdcContextObject() {
-        return environmentService.findEnvironmentById(getLocalIdAsLong()).orElse(null);
+        return environmentService.findEnvironmentById(getEnvId()).orElse(null);
     }
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
-        Long envId = getLocalIdAsLong();
+        Long envId = getEnvId();
         Optional<Environment> environmentOpt = environmentService.findEnvironmentById(envId);
         if (environmentOpt.isPresent()) {
             Environment environment = environmentOpt.get();
@@ -100,5 +100,9 @@ public class EnvironmentStatusCheckerJob extends StatusCheckerJob {
         } else {
             LOGGER.info("The environment status would be had to update from {} to {}", environment.getStatus(), status);
         }
+    }
+
+    private Long getEnvId() {
+        return Long.valueOf(getLocalId());
     }
 }
