@@ -11,6 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus;
@@ -21,13 +24,15 @@ import com.sequenceiq.freeipa.entity.Stack;
 
 @Transactional(Transactional.TxType.REQUIRED)
 @EntityType(entityClass = Stack.class)
-public interface StackRepository extends AccountAwareResourceRepository<Stack, Long> {
+public interface StackRepository extends AccountAwareResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
 
     @Query("SELECT s FROM Stack s WHERE s.terminated = -1")
     List<Stack> findAllRunning();
 
-    @Query("SELECT s FROM Stack s WHERE s.terminated = -1 and s.stackStatus.status in (:statuses)")
-    List<Stack> findAllRunningAndStatusIn(@Param("statuses") Collection<Status> statuses);
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.terminated = -1 and s.stackStatus.status in (:statuses)")
+    List<JobResource> findAllRunningAndStatusIn(@Param("statuses") Collection<Status> statuses);
 
     @Query("SELECT s FROM Stack s LEFT JOIN FETCH s.instanceGroups ig LEFT JOIN FETCH ig.instanceMetaData WHERE s.id= :id ")
     Optional<Stack> findOneWithLists(@Param("id") Long id);
@@ -124,4 +129,13 @@ public interface StackRepository extends AccountAwareResourceRepository<Stack, L
 
     @Query("SELECT i FROM Stack s JOIN s.image i WHERE (s.terminated = -1 OR s.terminated >= :thresholdTimestamp)")
     List<ImageEntity> findImagesOfAliveStacks(@Param("thresholdTimestamp") long thresholdTimestamp);
+
+    @Query("SELECT new com.sequenceiq.cloudbreak.common.event.PayloadContext(s.resourceCrn, s.environmentCrn, s.cloudPlatform) " +
+            "FROM Stack s " +
+            "WHERE s.id = :id")
+    Optional<PayloadContext> getStackAsPayloadContextById(@Param("id") Long id);
+
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name FROM Stack s " +
+            "WHERE s.id = :resourceId")
+    Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
 }

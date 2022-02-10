@@ -1,14 +1,11 @@
 package com.sequenceiq.freeipa.configuration;
 
-import java.security.Security;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -42,11 +39,6 @@ public class AppConfig {
 
     @Inject
     private Tracer tracer;
-
-    @PostConstruct
-    public void init() {
-        Security.addProvider(new BouncyCastleProvider());
-    }
 
     @Bean
     @Primary

@@ -3,6 +3,7 @@ import org.ajoberstar.grgit.Grgit
 
 buildscript {
   repositories {
+    maven { url = "$repoMirrorUrl" }
     maven { url = "$repoUrl" }
     mavenCentral()
     maven {
@@ -35,6 +36,11 @@ ext['junit-jupiter.version'] = "$junitJupiterVersion"
 allprojects {
 
   repositories {
+    maven { url = "$repoMirrorUrl"
+      content {
+        includeGroupByRegex "com.cloudera.cdp.*"
+      }
+    }
     maven { url = "$cdpRepoUrl" }
     maven { url = "$repoUrl" }
   }
@@ -141,7 +147,9 @@ subprojects {
                         '**/converter/mapper/**',
                         '**/sequenceiq/it/**',
                         '**/cloudbreak/api/endpoint/**',
-                        '**/cloudbreak/domain/**'
+                        '**/cloudbreak/domain/**',
+                        '**/environment/**/domain/**',
+                        '**/environment/**/attributes/**'
                 ]
         )
       })
@@ -197,6 +205,7 @@ subprojects {
   repositories {
     maven { url = "$repoUrl" }
     mavenCentral()
+    maven { url = "$repoMirrorUrl" }
     maven { url "https://cloudbreak-maven.s3.amazonaws.com/releases" }
     maven { url "https://repo.spring.io/release" }
     maven { url "https://plugins.gradle.org/m2/" }

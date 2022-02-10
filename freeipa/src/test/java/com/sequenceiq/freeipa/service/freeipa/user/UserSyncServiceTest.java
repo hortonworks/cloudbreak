@@ -220,7 +220,8 @@ class UserSyncServiceTest {
 
         underTest.applyStateDifferenceToIpa(ENV_CRN, freeIpaClient, usersStateDifference, warnings::put, true);
 
-        verify(freeIpaClient, times(8)).callBatch(any(), any(), any(), any());
+        // 9 times instead of 8 because non-posix groups are added in a separate batch
+        verify(freeIpaClient, times(9)).callBatch(any(), any(), any(), any());
 
         verifyNoMoreInteractions(freeIpaClient);
     }

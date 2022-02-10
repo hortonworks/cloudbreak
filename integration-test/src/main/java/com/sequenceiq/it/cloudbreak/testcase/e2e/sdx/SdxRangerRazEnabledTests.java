@@ -11,7 +11,7 @@ import org.testng.annotations.Test;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
 import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
@@ -34,10 +34,10 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         testContext
-                .given(SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
+                .given(SdxTestDto.class)
+                .withExternalDatabase(sdxDatabaseRequest)
                 .withCloudStorage(getCloudStorageRequest(testContext))
-                .when(sdxTestClient.createInternal(), key(sdx))
+                .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .whenException(sdxTestClient.enableRangerRaz(), BadRequestException.class)
@@ -56,11 +56,11 @@ public class SdxRangerRazEnabledTests extends PreconditionSdxE2ETest {
         sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
 
         testContext
-                .given(SdxInternalTestDto.class)
-                .withDatabase(sdxDatabaseRequest)
+                .given(SdxTestDto.class)
+                .withExternalDatabase(sdxDatabaseRequest)
                 .withCloudStorage(getCloudStorageRequest(testContext))
                 .withRangerRazEnabled(Boolean.TRUE)
-                .when(sdxTestClient.createInternal(), key(sdx))
+                .when(sdxTestClient.create(), key(sdx))
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.enableRangerRaz())

@@ -26,7 +26,8 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
         super(clouderaManagerApiPojoFactory, clusterEventService);
     }
 
-    protected boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(T pollerObject) throws ApiException {
+        CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(pollerObject.getApiClient());
         ApiCommand apiCommand = commandsResourceApi.readCommand(pollerObject.getId());
         if (apiCommand.getActive()) {
             LOGGER.debug("Command [{}] with id [{}] is active, so it hasn't finished yet", getCommandName(), pollerObject.getId());
@@ -70,5 +71,24 @@ public abstract class AbstractClouderaManagerCommandCheckerTask<T extends Cloude
             getClusterEventService().fireClusterManagerEvent(pollerObject.getStack(),
                     ResourceEvent.CLUSTER_CM_COMMAND_TIMEOUT, getCommandName(), Optional.of(pollerObject.getId()));
         }
+    }
+
+    protected abstract String getCommandName();
+
+    @Override
+    protected String getPollingName() {
+        return getCommandName();
+    }
+
+    @Override
+    protected String getToleratedErrorMessage(T pollerObject, ApiException e) {
+        return String.format("Command [%s] with id [%s] failed with a tolerated error '%s' for the %s. time(s). ",
+                getCommandName(), getOperationIdentifier(pollerObject), e.getMessage(), toleratedErrorCounter);
+    }
+
+    @Override
+    protected String getErrorMessage(T pollerObject, ApiException e) {
+        return String.format("Command [%s] with id [%s] failed with a %s.",
+                getCommandName(), getOperationIdentifier(pollerObject), e.getClass().getSimpleName());
     }
 }

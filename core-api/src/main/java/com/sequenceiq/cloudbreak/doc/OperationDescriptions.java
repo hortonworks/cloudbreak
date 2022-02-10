@@ -19,6 +19,7 @@ public class OperationDescriptions {
         public static final String GET_BY_CRN = "retrieve stack by crn";
         public static final String GET_STATUS_BY_NAME = "retrieve stack status by stack name";
         public static final String PUT_BY_ID = "update stack by id";
+        public static final String PUT_START_INSTANCES_BY_ID = "update stack to start instances by id";
         public static final String PUT_BY_NAME = "update stack by name";
         public static final String GET_STACK_CERT = "retrieves the TLS certificate used by the gateway";
         public static final String GET_ALL = "retrieve all stacks";
@@ -64,6 +65,7 @@ public class OperationDescriptions {
         public static final String POST_STACK_FOR_BLUEPRINT_IN_WORKSPACE = "posts stack for blueprint in workspace";
         public static final String DELETE_INSTANCE_BY_ID_IN_WORKSPACE = "deletes instance from the stack's cluster in workspace";
         public static final String DELETE_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE = "deletes multiple instances from the stack's cluster in workspace";
+        public static final String STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE = "stop multiple instances from the stack's cluster in workspace";
         public static final String CHECK_IMAGE_IN_WORKSPACE = "checks image in stack by name in workspace";
         public static final String CHECK_IMAGE_IN_WORKSPACE_INTERNAL = "checks image in stack by name in workspace, internal only";
         public static final String GENERATE_HOSTS_INVENTORY = "Generate hosts inventory";

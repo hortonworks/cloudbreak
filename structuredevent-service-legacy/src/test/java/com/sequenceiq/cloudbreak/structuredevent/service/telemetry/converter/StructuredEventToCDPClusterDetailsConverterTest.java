@@ -110,7 +110,7 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
     public void testVariantConversionWithNotNullVariant() {
         StackDetails stackDetails = new StackDetails();
         stackDetails.setPlatformVariant("AWS_NATIVE");
-        doReturn(true).when(multiAzConverter).convert(any());
+        stackDetails.setMultiAz(true);
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);

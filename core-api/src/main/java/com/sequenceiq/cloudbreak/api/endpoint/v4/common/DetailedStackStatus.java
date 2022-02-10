@@ -52,6 +52,14 @@ public enum DetailedStackStatus {
     DOWNSCALE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
     DOWNSCALE_COMPLETED(Status.AVAILABLE),
     DOWNSCALE_FAILED(Status.AVAILABLE),
+    // Upscale by starting statuses
+    UPSCALE_BY_START_REQUESTED(Status.UPDATE_REQUESTED),
+    UPSCALE_BY_START_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
+    UPSCALE_BY_START_FAILED(Status.AVAILABLE),
+    // Downscale by stopping statuses
+    DOWNSCALE_BY_STOP_REQUESTED(Status.UPDATE_REQUESTED),
+    DOWNSCALE_BY_STOP_IN_PROGRESS(Status.UPDATE_IN_PROGRESS),
+    DOWNSCALE_BY_STOP_FAILED(Status.AVAILABLE),
     // Termination statuses
     PRE_DELETE_IN_PROGRESS(Status.PRE_DELETE_IN_PROGRESS),
     DELETE_IN_PROGRESS(Status.DELETE_IN_PROGRESS),
@@ -63,6 +71,7 @@ public enum DetailedStackStatus {
     ROLLING_BACK(Status.UPDATE_IN_PROGRESS),
     // The stack is available
     AVAILABLE(Status.AVAILABLE),
+    AVAILABLE_WITH_STOPPED_INSTANCES(Status.AVAILABLE),
     // Instance removing status
     REMOVE_INSTANCE(Status.UPDATE_IN_PROGRESS),
     // Cluster operation is in progress

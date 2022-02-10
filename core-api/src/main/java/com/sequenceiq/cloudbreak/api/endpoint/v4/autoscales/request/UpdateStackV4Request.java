@@ -47,4 +47,13 @@ public class UpdateStackV4Request implements JsonEntity {
     public Boolean getWithClusterEvent() {
         return withClusterEvent;
     }
+
+    @Override
+    public String toString() {
+        return "UpdateStackV4Request{" +
+                "status=" + status +
+                ", withClusterEvent=" + withClusterEvent +
+                ", instanceGroupAdjustment=" + instanceGroupAdjustment +
+                '}';
+    }
 }

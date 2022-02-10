@@ -1,18 +1,12 @@
 package com.sequenceiq.it.cloudbreak.dto.imagecatalog;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import java.util.Collection;
-
-import javax.inject.Inject;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.requests.ImageCatalogV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImageCatalogV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.imagecatalog.responses.ImagesV4Response;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.ImageCatalogTestClient;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -24,16 +18,11 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
 
     public static final String IMAGE_CATALOG = "IMAGE_CATALOG";
 
-    public static final String IMAGE_CATALOG_URL = "IMAGE_CATALOG_URL";
-
     private static final String IMAGECATALOG_RESOURCE_NAME = "imagecatalogName";
 
     private ImagesV4Response imagesV4Response;
 
     private Boolean skipCleanup = Boolean.FALSE;
-
-    @Inject
-    private ImageCatalogTestClient imageCatalogTestClient;
 
     public ImageCatalogTestDto(TestContext testContext) {
         super(new ImageCatalogV4Request(), testContext);
@@ -86,14 +75,9 @@ public class ImageCatalogTestDto extends AbstractCloudbreakTestDto<ImageCatalogV
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
+    public void deleteForCleanup() {
         if (!skipCleanup) {
-            LOGGER.info("Cleaning up image catalog with name: {}", getName());
-            if (getResponse() != null) {
-                when(imageCatalogTestClient.deleteV4(), key("delete-imagecatalog-" + getName()).withSkipOnFail(false));
-            } else {
-                LOGGER.info("Image catalog: {} response is null!", getName());
-            }
+            getClientForCleanup().getDefaultClient().imageCatalogV4Endpoint().deleteByCrn(0L, getCrn());
         }
     }
 

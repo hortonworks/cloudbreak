@@ -14,7 +14,7 @@ public class StackJobInitializer extends AbstractStackJobInitializer {
 
     @Override
     public void initJobs() {
-        getAliveAndNotDeleteInProgressStacksStream()
+        getAliveJobResources()
                 .forEach(s -> jobService.schedule(new StackJobAdapter(s)));
     }
 }

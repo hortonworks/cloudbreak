@@ -2,7 +2,6 @@ package com.sequenceiq.it.cloudbreak.client;
 
 import java.util.Set;
 
-import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
@@ -15,10 +14,12 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaCreateAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDescribeAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDetachChildEnvironmentAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaDownscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindGroupsAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaFindUsersInGroupAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaGetLastSyncOperationStatus;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRebuildAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRefreshAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaRepairAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSetPasswordAction;
@@ -27,10 +28,13 @@ import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaStopAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaSynchronizeAllUsersInternalAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpgradeAction;
+import com.sequenceiq.it.cloudbreak.action.freeipa.FreeIpaUpscaleAction;
 import com.sequenceiq.it.cloudbreak.action.freeipa.FreeipaUsedImagesAction;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDiagnosticsTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaUsedImagesTestDto;
@@ -121,4 +125,13 @@ public class FreeIpaTestClient {
     public Action<FreeipaChangeImageCatalogTestDto, FreeIpaClient> changeImageCatalog() {
         return new FreeIpaChangeImageCatalogAction();
     }
+
+    public Action<FreeIpaUpscaleTestDto, FreeIpaClient> upscale() {
+        return new FreeIpaUpscaleAction();
+    }
+
+    public Action<FreeIpaDownscaleTestDto, FreeIpaClient> downscale() {
+        return new FreeIpaDownscaleAction();
+    }
+
 }

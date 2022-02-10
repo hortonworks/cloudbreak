@@ -117,10 +117,8 @@ dependencyManagement {
             entry 'spring-boot-starter-freemarker'
         }
 
-        dependencySet(group: 'io.springfox', version: '2.9.2') {
-            entry 'springfox-swagger2'
-            entry 'springfox-core'
-            entry 'springfox-swagger-ui'
+        dependencySet(group: 'io.springfox', version: swaggerSpringFoxVersion) {
+            entry 'springfox-boot-starter'
         }
 
         dependencySet (group: 'org.powermock', version: powermockVersion) {
@@ -179,9 +177,7 @@ dependencies {
     implementation group: 'dnsjava',                       name: 'dnsjava'
     implementation group: 'net.sf.ehcache',                name: 'ehcache'
 
-    implementation group: 'io.springfox',                  name: 'springfox-swagger2'
-    implementation group: 'io.springfox',                  name: 'springfox-core'
-    implementation group: 'io.springfox',                  name: 'springfox-swagger-ui'
+    implementation group: 'io.springfox',                  name: 'springfox-boot-starter'
 
     implementation group: 'io.opentracing.contrib',    name: 'opentracing-spring-jaeger-starter',        version: opentracingSpringJaegerStarterVersion
 

@@ -1,5 +1,6 @@
 package com.sequenceiq.periscope.monitor.handler;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -200,6 +201,37 @@ public class ClusterStatusSyncHandlerTest {
         verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
     }
 
+    @Test
+    public void testOnApplicationEventWhenStopStartScalingEnabledAndClusterIsScaledDown() {
+        // At the moment, there's no good way to determine if the cluster is scaled down,
+        //  so this test essentially exercises existing flow with the stopStartMechanism enabled.
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        cluster.setStopStartScalingEnabled(Boolean.TRUE);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.AVAILABLE));
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        assertEquals(ClusterState.RUNNING, cluster.getState());
+        verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
+        verify(clusterService, never()).setState(anyLong(), any(ClusterState.class));
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
+    @Test
+    public void testOnApplicationEventWhenStopStartScalingEnabledAndClusterIsScaledUp() {
+        Cluster cluster = getACluster(ClusterState.RUNNING);
+        cluster.setStopStartScalingEnabled(Boolean.TRUE);
+        when(clusterService.findById(anyLong())).thenReturn(cluster);
+        when(cloudbreakCommunicator.getStackStatusByCrn(anyString())).thenReturn(getStackResponse(Status.AVAILABLE));
+
+        underTest.onApplicationEvent(new ClusterStatusSyncEvent(AUTOSCALE_CLUSTER_ID));
+
+        verify(clusterService).findById(AUTOSCALE_CLUSTER_ID);
+        verify(clusterService, never()).setState(anyLong(), any(ClusterState.class));
+        verify(cloudbreakCommunicator).getStackStatusByCrn(CLOUDBREAK_STACK_CRN);
+    }
+
     private StackStatusV4Response getStackResponse(Status clusterStatus) {
         StackStatusV4Response stackResponse = new StackStatusV4Response();
         stackResponse.setStatus(clusterStatus);
@@ -212,6 +244,7 @@ public class ClusterStatusSyncHandlerTest {
         cluster.setId(AUTOSCALE_CLUSTER_ID);
         cluster.setStackCrn(CLOUDBREAK_STACK_CRN);
         cluster.setState(clusterState);
+        cluster.setStopStartScalingEnabled(Boolean.FALSE);
 
         ClusterPertain clusterPertain = new ClusterPertain();
         cluster.setClusterPertain(clusterPertain);

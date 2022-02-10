@@ -151,6 +151,16 @@ public class MeasuredTestContext extends MockedTestContext {
     }
 
     @Override
+    public String getActingUserOwnerTag() {
+        return wrappedTestContext.getActingUserOwnerTag();
+    }
+
+    @Override
+    public String getCreationTimestampTag() {
+        return wrappedTestContext.getCreationTimestampTag();
+    }
+
+    @Override
     public <O extends CloudbreakTestDto> O init(Class<O> clss) {
         return wrappedTestContext.init(clss);
     }

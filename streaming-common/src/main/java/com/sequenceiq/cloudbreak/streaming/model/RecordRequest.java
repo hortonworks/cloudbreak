@@ -12,10 +12,13 @@ public class RecordRequest {
 
     private final long timestamp;
 
-    public RecordRequest(String rawBody, GeneratedMessageV3 messageBody, long timestamp) {
+    private final boolean forceRawOutput;
+
+    public RecordRequest(String rawBody, GeneratedMessageV3 messageBody, long timestamp, boolean forceRawOutput) {
         this.rawBody = rawBody;
         this.messageBody = messageBody;
         this.timestamp = timestamp;
+        this.forceRawOutput = forceRawOutput;
     }
 
     public Optional<String> getRawBody() {
@@ -30,12 +33,17 @@ public class RecordRequest {
         return timestamp;
     }
 
+    public boolean isForceRawOutput() {
+        return forceRawOutput;
+    }
+
     @Override
     public String toString() {
         return "RecordRequest{" +
                 "rawBody='" + rawBody + '\'' +
                 ", messageBody=" + messageBody +
                 ", timestamp=" + timestamp +
+                ", forceRawOutput=" + forceRawOutput +
                 '}';
     }
 }

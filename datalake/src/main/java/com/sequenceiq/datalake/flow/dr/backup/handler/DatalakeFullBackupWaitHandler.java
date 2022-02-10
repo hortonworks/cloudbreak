@@ -1,5 +1,14 @@
 package com.sequenceiq.datalake.flow.dr.backup.handler;
 
+import java.util.concurrent.TimeUnit;
+
+import javax.inject.Inject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
+
 import com.dyngr.exception.PollerException;
 import com.dyngr.exception.PollerStoppedException;
 import com.dyngr.exception.UserBreakException;
@@ -13,15 +22,6 @@ import com.sequenceiq.datalake.service.sdx.dr.SdxBackupRestoreService;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
 import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
-
-import java.util.concurrent.TimeUnit;
-
-import javax.inject.Inject;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 
 import reactor.bus.Event;
 
@@ -68,7 +68,7 @@ public class DatalakeFullBackupWaitHandler extends ExceptionCatcherEventHandler<
         } catch (PollerStoppedException pollerStoppedException) {
             LOGGER.info("Full backup poller stopped for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId,
-                new PollerStoppedException("Database backup timed out after " + durationInMinutes + " minutes"));
+                new PollerStoppedException("Datalake backup timed out after " + durationInMinutes + " minutes"));
         } catch (PollerException exception) {
             LOGGER.info("Full backup polling failed for cluster: {}", sdxId);
             response = new DatalakeBackupFailedEvent(sdxId, userId, exception);

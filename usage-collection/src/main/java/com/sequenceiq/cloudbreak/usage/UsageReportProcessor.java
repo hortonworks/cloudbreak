@@ -17,7 +17,7 @@ import com.sequenceiq.cloudbreak.usage.strategy.UsageProcessingStrategy;
 @Service
 public class UsageReportProcessor implements UsageReporter {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(LoggingUsageProcessingStrategy.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UsageReportProcessor.class);
 
     private final UsageProcessingStrategy usageProcessingStrategy;
 

@@ -28,13 +28,11 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSetti
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonCloudProperties;
 import com.sequenceiq.it.cloudbreak.cloud.v4.CommonClusterManagerProperties;
-import com.sequenceiq.it.cloudbreak.cloud.v4.mock.MockCloudProvider;
 import com.sequenceiq.it.cloudbreak.context.Clue;
 import com.sequenceiq.it.cloudbreak.context.Investigable;
 import com.sequenceiq.it.cloudbreak.context.Purgable;
@@ -49,7 +47,6 @@ import com.sequenceiq.it.cloudbreak.dto.PlacementSettingsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.StackAuthenticationTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDto;
-import com.sequenceiq.it.cloudbreak.dto.stack.StackTestDtoBase;
 import com.sequenceiq.it.cloudbreak.search.Searchable;
 import com.sequenceiq.it.cloudbreak.util.AuditUtil;
 import com.sequenceiq.it.cloudbreak.util.InstanceUtil;
@@ -209,12 +206,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         return this;
     }
 
-    public SdxInternalTestDto withClusterTemplateName(String template) {
-        ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
-        cluster.withBlueprintName(template);
-        return this;
-    }
-
     public SdxInternalTestDto withTemplate(JSONObject templateJson) {
         StackTestDto stack = getTestContext().given(StackTestDto.class);
         ClusterTestDto cluster = getTestContext().given(ClusterTestDto.class);
@@ -257,10 +248,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
             throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Sdx: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
-    }
-
-    private SdxInternalTestDto withEnvironmentDto(EnvironmentTestDto environmentTestDto) {
-        return withEnvironmentName(environmentTestDto.getResponse().getName());
     }
 
     public SdxInternalTestDto withEnvironmentClass(Class<EnvironmentTestDto> environmentClass) {
@@ -383,17 +370,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up sdx internal with name: {}", getName());
-        if (getResponse() != null) {
-            when(sdxTestClient.forceDeleteInternal(), key("delete-sdx-" + getName()));
-            await(DELETED, new RunningParameter().withSkipOnFail(true));
-        } else {
-            LOGGER.info("Sdx internal: {} response is null!", getName());
-        }
-    }
-
-    @Override
     public List<SdxClusterResponse> getAll(SdxClient client) {
         SdxEndpoint sdxEndpoint = client.getDefaultClient().sdxEndpoint();
         return sdxEndpoint.list(null, false).stream()
@@ -443,16 +419,6 @@ public class SdxInternalTestDto extends AbstractSdxTestDto<SdxInternalClusterReq
         } catch (JSONException e) {
             LOGGER.error("Cannot get Authentication from template: {}", templateJson, e);
             return getCloudProvider().stackAuthentication(getTestContext().get(StackAuthenticationTestDto.class));
-        }
-    }
-
-    private Integer getGatewayPort(StackTestDtoBase stack, JSONObject templateJson) {
-        try {
-            return Integer.parseInt(templateJson.getString("gatewayPort"));
-        } catch (JSONException e) {
-            LOGGER.error("Cannot get Gateway Port from template: {}", templateJson, e);
-            MockCloudProvider mock = new MockCloudProvider();
-            return mock.gatewayPort(stack);
         }
     }
 

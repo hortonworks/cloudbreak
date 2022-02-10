@@ -118,7 +118,7 @@ mount_one() {
         return_value=1
       fi
       log $LOG_FILE result of mounting $path: $?
-      chmod 777 $path >> $LOG_FILE 2>&1
+      chmod 1777 $path >> $LOG_FILE 2>&1
       return $((return_value))
 }
 
@@ -161,6 +161,11 @@ mount_common() {
 }
 
 create_directories() {
+    if [ ! -d "/hadoopfs/fs1" ]; then
+      log $LOG_FILE directory /hadoopfs/fs1 does not exists. Skipping log directory creation
+      return 0
+    fi
+
     cd /hadoopfs/fs1 && mkdir logs >> $LOG_FILE 2>&1
 
     fs1_logs_dir=/hadoopfs/fs1/logs

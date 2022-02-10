@@ -54,8 +54,8 @@ public class CheckResult {
     @Override
     public String toString() {
         return "CheckResult{"
-                + "status='" + status + "\',"
-                + "host='" + host + "\',"
+                + "status='" + status + "',"
+                + "host='" + host + "',"
                 + "checks={" + StringUtils.join(checks, ",") + "},"
                 + "plugin_stat={" + StringUtils.join(pluginStat, ",") +  "}"
                 + '}';

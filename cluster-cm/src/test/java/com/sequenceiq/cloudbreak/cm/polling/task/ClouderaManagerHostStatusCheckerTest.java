@@ -18,7 +18,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.HostsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -60,7 +59,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         InstanceMetaData instanceMetaData = validInstanceMetadata();
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(Collections.emptyList()));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
         assertFalse(result);
     }
@@ -71,7 +70,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = new ApiHost().ipAddress(instanceMetaData.getPrivateIp());
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
         assertFalse(result);
     }
@@ -84,7 +83,7 @@ public class ClouderaManagerHostStatusCheckerTest {
                 .lastHeartbeat(Instant.now().minus(5, ChronoUnit.MINUTES).toString());
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
         assertFalse(result);
     }
@@ -95,7 +94,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
         assertTrue(result);
     }
@@ -108,7 +107,7 @@ public class ClouderaManagerHostStatusCheckerTest {
                 .lastHeartbeat(Instant.now().plus(5, ChronoUnit.MINUTES).toString());
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData));
 
         assertFalse(result);
     }
@@ -121,7 +120,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertFalse(result);
     }
@@ -135,7 +134,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost2 = getValidApiHost(instanceMetaData2);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost, apiHost2)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertTrue(result);
     }
@@ -149,7 +148,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost2 = getValidApiHost(instanceMetaData2).ipAddress("3.3.3.3");
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost, apiHost2)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertFalse(result);
     }
@@ -163,7 +162,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertTrue(result);
     }
@@ -177,7 +176,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertTrue(result);
     }
@@ -191,7 +190,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertTrue(result);
     }
@@ -205,7 +204,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertTrue(result);
     }
@@ -219,7 +218,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertTrue(result);
     }
@@ -233,7 +232,7 @@ public class ClouderaManagerHostStatusCheckerTest {
         ApiHost apiHost = getValidApiHost(instanceMetaData);
         when(hostsResourceApi.readHosts(null, null, VIEWTYPE)).thenReturn(new ApiHostList().items(List.of(apiHost)));
 
-        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2), new CommandsResourceApi());
+        boolean result = underTest.doStatusCheck(getPollerObject(instanceMetaData, instanceMetaData2));
 
         assertTrue(result);
     }

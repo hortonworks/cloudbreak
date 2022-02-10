@@ -143,7 +143,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     @Value("${cb.max.salt.recipe.execution.retry.forced:2}")
     private int maxRetryRecipeForced;
 
-    @Value("${cb.max.salt.database.dr.retry:60}")
+    @Value("${cb.max.salt.database.dr.retry:300}")
     private int maxDatabaseDrRetry;
 
     @Value("${cb.max.salt.database.dr.retry.onerror:5}")

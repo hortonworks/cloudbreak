@@ -45,6 +45,12 @@ stop_metering_heartbeat_application_if_needed:
       - mode
 
 {% if metering.enabled %}
+
+{% if salt['pillar.get']('platform') == 'AZURE' %}
+include:
+  - metering.upgrade
+{% endif %}
+
 /etc/metering/generate_heartbeats.ini:
   file.managed:
     - source: salt://metering/template/generate_heartbeats.ini.j2

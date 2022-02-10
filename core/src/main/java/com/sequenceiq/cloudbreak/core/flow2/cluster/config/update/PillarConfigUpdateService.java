@@ -75,7 +75,7 @@ public class PillarConfigUpdateService {
                 String errorMessage = clusterCreationService
                     .getErrorMessageFromException(exception);
                 transactionService.required(() -> {
-                    stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.PILLAR_CONFIG_UPDATE_FAILED);
+                    stackUpdater.updateStackStatus(stackView.getId(), DetailedStackStatus.PILLAR_CONFIG_UPDATE_FAILED, errorMessage);
                 });
                 flowMessageService.fireEventAndLog(stackView.getId(), UPDATE_FAILED.name(),
                     CLUSTER_PILLAR_CONFIG_UPDATE_FAILED, errorMessage);

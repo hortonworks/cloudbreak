@@ -157,6 +157,7 @@ public class TelemetryDecorator {
         boolean meteringFeatureEnabled = telemetry.isMeteringFeatureEnabled();
         // for datalake - metering is not enabled yet
         boolean meteringEnabled = meteringFeatureEnabled && !datalakeCluster;
+        boolean databusEndpointValidationEnabled = !datalakeCluster && entitlementService.isDatahubDatabusEndpointValidationEnabled(accountId);
         String clusterCrn = datalakeCluster ? getDatalakeCrn(telemetry, stack.getResourceCrn()) : stack.getResourceCrn();
         final TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
                 .withOwner(stack.getCreator().getUserCrn())
@@ -165,10 +166,12 @@ public class TelemetryDecorator {
                 .withCrn(clusterCrn)
                 .withPlatform(stack.getCloudPlatform())
                 .withVersion(version)
+                .withDatabusEndpoint(databusEndpoint)
+                .withDatabusS3Endpoint(databusS3Endpoint)
+                .withDatabusEndpointValidation(databusEndpointValidationEnabled)
                 .build();
         final TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
-                telemetry, vmLogsService.getVmLogs(), clusterType, clusterCrn, stack.getName(), stack.getCreator().getUserCrn(), stack.getCloudPlatform(),
-                databusEndpoint, databusS3Endpoint);
+                telemetry, vmLogsService.getVmLogs(), clusterDetails);
         servicePillar.put("telemetry",
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
 

@@ -7,6 +7,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_FAI
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.DELETE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.EXTERNAL_DATABASE_STOP_FINISHED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.MAINTENANCE_MODE_ENABLED;
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.REQUESTED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.START_IN_PROGRESS;
@@ -631,6 +632,16 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
 
     public boolean isAvailable() {
         return AVAILABLE.equals(getStatus());
+    }
+
+    public boolean isAvailableWithStoppedInstances() {
+        // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
+        //  when there are some STOPPED instances. The entire method may be removed.
+        return isAvailable();
+    }
+
+    public boolean hasNodeFailure() {
+        return NODE_FAILURE.equals(getStatus());
     }
 
     public boolean isStopRequested() {

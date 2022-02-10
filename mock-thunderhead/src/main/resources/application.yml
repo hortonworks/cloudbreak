@@ -26,7 +26,6 @@ auth:
       gcp: false
     runtime.upgrade.enable: true
     sshpublickey.file: key.pub
-    raz.enable: true
     raws3.enable: false
     azure.marketplace.images.enable: true
     azure.single.resourcegroup.enable: true
@@ -42,6 +41,7 @@ auth:
       backup.on.upgrade.enable: false
       backup.on.resize.enable: true
       light.to.medium.migration.enable: true
+      recovery.resize.enable: true
       multiaz.enable: true
     differentdatahubversionthandatalake.enabled: true
     database.wire.encryption.enable: true
@@ -84,6 +84,7 @@ auth:
     ui:
       edp.progress.bar.enable: true
     unbound.elimination.enable: true
+    e2e.test.only.enable: true
 
 crn:
   partition: cdp

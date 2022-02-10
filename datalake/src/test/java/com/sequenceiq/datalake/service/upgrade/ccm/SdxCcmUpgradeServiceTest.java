@@ -4,12 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -22,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.StackV4Response;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.message.CloudbreakMessagesService;
@@ -29,6 +32,8 @@ import com.sequenceiq.common.api.type.Tunnel;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
 import com.sequenceiq.datalake.service.EnvironmentClientService;
+import com.sequenceiq.datalake.service.sdx.CloudbreakPoller;
+import com.sequenceiq.datalake.service.sdx.PollingConfig;
 import com.sequenceiq.datalake.service.sdx.SdxService;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
@@ -57,6 +62,12 @@ class SdxCcmUpgradeServiceTest {
     @Mock
     private CloudbreakMessagesService messagesService;
 
+    @Mock
+    private StackV4Endpoint stackV4Endpoint;
+
+    @Mock
+    private CloudbreakPoller cloudbreakPoller;
+
     @InjectMocks
     private SdxCcmUpgradeService underTest;
 
@@ -67,7 +78,7 @@ class SdxCcmUpgradeServiceTest {
         environment = new DetailedEnvironmentResponse();
         environment.setEnvironmentStatus(EnvironmentStatus.AVAILABLE);
         environment.setTunnel(Tunnel.latestUpgradeTarget());
-        when(environmentService.getByCrn(any())).thenReturn(environment);
+        lenient().when(environmentService.getByCrn(any())).thenReturn(environment);
     }
 
     @Test
@@ -149,6 +160,14 @@ class SdxCcmUpgradeServiceTest {
         SdxCcmUpgradeResponse response = underTest.upgradeCcm(ENV_CRN);
         assertThat(response.getReason()).isEqualTo("success");
         assertThat(response.getFlowIdentifier()).isEqualTo(flowId);
+    }
+
+    @Test
+    void testInitAndWaitForStackUpgrade() {
+        PollingConfig pc = new PollingConfig(1L, TimeUnit.HOURS, 1L, TimeUnit.HOURS);
+        SdxCluster sdx = new SdxCluster();
+        underTest.initAndWaitForStackUpgrade(sdx, pc);
+        verify(cloudbreakPoller).pollCcmUpgradeUntilAvailable(sdx, pc);
     }
 
     private SdxCluster getSdxCluster() {

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ParcelsResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -34,7 +33,7 @@ public class ClouderaManagerParcelStatusListenerTask extends AbstractClouderaMan
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
         ApiClient apiClient = pollerObject.getApiClient();
         Stack stack = pollerObject.getStack();
         ApiParcelList parcels = getClouderaManagerParcels(apiClient, stack.getName());

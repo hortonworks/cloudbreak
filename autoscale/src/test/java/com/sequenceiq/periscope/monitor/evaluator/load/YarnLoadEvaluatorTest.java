@@ -190,7 +190,7 @@ public class YarnLoadEvaluatorTest {
         Cluster cluster = getARunningCluster();
         String hostGroup = "compute";
         StackV4Response stackV4Response = MockStackResponseGenerator
-                .getMockStackV4Response(CLOUDBREAK_STACK_CRN, hostGroup, fqdnBase, currentHostGroupCount);
+                .getMockStackV4Response(CLOUDBREAK_STACK_CRN, hostGroup, fqdnBase, currentHostGroupCount, false);
 
         YarnScalingServiceV1Response upScale = getMockYarnScalingResponse(hostGroup, yarnUpScaleCount, yarnDownScaleCount);
 

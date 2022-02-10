@@ -54,11 +54,14 @@ import com.sequenceiq.cloudbreak.cloud.notification.PersistenceNotifier;
 import com.sequenceiq.cloudbreak.cloud.template.compute.PreserveResourceException;
 import com.sequenceiq.common.api.type.CommonStatus;
 import com.sequenceiq.common.api.type.ResourceType;
+import com.sequenceiq.cloudbreak.util.DeviceNameGenerator;
 
 @Component
 public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AzureVolumeResourceBuilder.class);
+
+    private static final String DEVICE_NAME_TEMPLATE = "/dev/sd%s";
 
     @Inject
     @Qualifier("intermediateBuilderExecutor")
@@ -161,7 +164,7 @@ public class AzureVolumeResourceBuilder extends AbstractAzureComputeBuilder {
         for (CloudResource resource : requestedResources) {
             volumeSetMap.put(resource.getName(), Collections.synchronizedList(new ArrayList<>()));
             VolumeSetAttributes volumeSet = getVolumeSetAttributes(resource);
-            DeviceNameGenerator generator = new DeviceNameGenerator();
+            DeviceNameGenerator generator = new DeviceNameGenerator(DEVICE_NAME_TEMPLATE, 1);
             futures.addAll(volumeSet.getVolumes().stream()
                     .map(volume -> intermediateBuilderExecutor.submit(() -> {
                         Disk result = client.getDiskByName(resourceGroupName, volume.getId());

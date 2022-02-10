@@ -28,8 +28,8 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     }
 
     @Override
-    public List<String> listVolumeEncryptionKeyIds(String clusterName, List<String> instanceIds) {
-        return azureClientActions.getVolumesDesId(clusterName, instanceIds);
+    public List<String> listVolumeEncryptionKeyIds(String clusterName, String resourceGroupName, List<String> instanceIds) {
+        return azureClientActions.getVolumesDesId(clusterName, resourceGroupName, instanceIds);
     }
 
     @Override
@@ -45,16 +45,6 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public void stopInstances(String clusterName, List<String> instanceIds) {
         azureClientActions.stopInstances(clusterName, instanceIds);
-    }
-
-    @Override
-    public ResourceGroup createResourceGroup(String resourceGroupName) {
-        return azureClientActions.createResourceGroup(resourceGroupName);
-    }
-
-    @Override
-    public void deleteResourceGroup(String resourceGroupName) {
-        azureClientActions.deleteResourceGroup(resourceGroupName);
     }
 
     @Override
@@ -106,5 +96,13 @@ public class AzureCloudFunctionality implements CloudFunctionality {
     @Override
     public String getDataHubLogsUrl(String clusterName, String crn, String baseLocation) {
         return azureCloudBlobUtil.getDataHubLogsUrl(clusterName, crn, baseLocation);
+    }
+
+    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
+        return azureClientActions.createResourceGroup(resourceGroupName, tags);
+    }
+
+    public void deleteResourceGroup(String resourceGroupName) {
+        azureClientActions.deleteResourceGroup(resourceGroupName);
     }
 }

@@ -10,9 +10,15 @@ public class PayloadContext implements Serializable {
 
     private final String cloudPlatform;
 
-    private PayloadContext(String resourceCrn, String environmentCrn, String cloudPlatform) {
+    public PayloadContext(String resourceCrn, String environmentCrn, String cloudPlatform) {
         this.resourceCrn = resourceCrn;
         this.environmentCrn = environmentCrn;
+        this.cloudPlatform = cloudPlatform;
+    }
+
+    public PayloadContext(String resourceCrn, String cloudPlatform) {
+        this.resourceCrn = resourceCrn;
+        this.environmentCrn = null;
         this.cloudPlatform = cloudPlatform;
     }
 

@@ -18,6 +18,8 @@ public class ApiDescription {
         public static final String CLONE_BY_CRN = "clone new custom configs from existing custom configs by crn";
         public static final String DELETE_BY_CRN = "delete custom configs by crn";
         public static final String DELETE_BY_NAME = "delete custom configs by name";
+        public static final String GET_SERVICE_TYPES = "retrieves a list of serviceTypes";
+        public static final String GET_ROLE_TYPES = "retrieves a list of all roleTypes";
     }
 
     public static class CustomConfigurationsJsonProperties {

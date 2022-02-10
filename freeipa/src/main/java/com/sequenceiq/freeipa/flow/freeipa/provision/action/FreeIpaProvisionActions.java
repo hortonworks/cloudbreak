@@ -180,7 +180,7 @@ public class FreeIpaProvisionActions {
             protected void doExecute(StackContext context, PostInstallFreeIpaSuccess payload, Map<Object, Object> variables) {
                 configRegisters.forEach(configProvider -> configProvider.register(context.getStack().getId()));
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FINISHED, context.getStack());
-                freeipaJobService.schedule(context.getStack());
+                freeipaJobService.schedule(context.getStack().getId());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISIONED, "FreeIPA installation finished");
                 sendEvent(context);
             }
@@ -198,7 +198,7 @@ public class FreeIpaProvisionActions {
 
             @Override
             protected void doExecute(StackFailureContext context, StackFailureEvent payload, Map<Object, Object> variables) {
-                String errorReason = payload.getException() == null ? "Unknown error" : payload.getException().getMessage();
+                String errorReason = getErrorReason(payload.getException());
                 stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.PROVISION_FAILED, errorReason);
                 metricService.incrementMetricCounter(MetricType.FREEIPA_CREATION_FAILED, context.getStack(), payload.getException());
                 sendEvent(context);

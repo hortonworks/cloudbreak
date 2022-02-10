@@ -148,7 +148,7 @@ class RepairInstancesServiceTest {
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
@@ -175,7 +175,7 @@ class RepairInstancesServiceTest {
         Stack stack = createStack(Status.AVAILABLE, List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
         List<String> instanceIds = List.of("i-2");
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.CREATED));
         when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
@@ -193,7 +193,7 @@ class RepairInstancesServiceTest {
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
@@ -219,7 +219,7 @@ class RepairInstancesServiceTest {
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.CREATED, InstanceStatus.UNREACHABLE));
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
@@ -243,7 +243,7 @@ class RepairInstancesServiceTest {
     void testRepairThrowsWhenOnlyBadInstancesRemain() {
         Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE, InstanceStatus.CREATED));
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(true);
@@ -258,7 +258,7 @@ class RepairInstancesServiceTest {
     void testRepairThrowsWhenOneBadInstancesRemain() {
         Stack stack = createStack(Status.UNHEALTHY, List.of(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
 
@@ -273,7 +273,7 @@ class RepairInstancesServiceTest {
     void testRepairWithForceThrowsWhenNoInstanceIdsAreProvided() {
         Stack stack = createStack(Status.AVAILABLE, List.of(InstanceStatus.CREATED, InstanceStatus.CREATED));
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
 
         RepairInstancesRequest request = new RepairInstancesRequest();
         request.setForceRepair(true);
@@ -289,7 +289,7 @@ class RepairInstancesServiceTest {
         List<String> instanceIds = List.of("i-2");
         OperationStatus operationStatus = new OperationStatus();
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
@@ -313,7 +313,7 @@ class RepairInstancesServiceTest {
     void testRepairThrowsWhenOnlyDeletedInstancesAndForceIsCalledRemain() {
         Stack stack = createStack(Status.DELETED_ON_PROVIDER_SIDE, List.of(InstanceStatus.DELETED_BY_PROVIDER, InstanceStatus.DELETED_BY_PROVIDER));
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.UNREACHABLE, InstanceStatus.UNREACHABLE));
 
@@ -327,7 +327,7 @@ class RepairInstancesServiceTest {
     @Test
     public void testBasicSuccessReboot() throws Exception {
         OperationStatus operationStatus = new OperationStatus();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack1);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack1);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails1());
         Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
@@ -342,7 +342,7 @@ class RepairInstancesServiceTest {
     @Test
     public void testInstancesSuccessReboot() throws Exception {
         OperationStatus operationStatus = new OperationStatus();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack1);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack1);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails1());
         Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
@@ -357,7 +357,7 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testInvalidInstancesReboot() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack1);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack1);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails1());
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
         rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
@@ -371,7 +371,7 @@ class RepairInstancesServiceTest {
     @Test
     public void testForceInstancesSuccessReboot() throws Exception {
         OperationStatus operationStatus = new OperationStatus();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack1);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack1);
         Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
@@ -386,7 +386,7 @@ class RepairInstancesServiceTest {
 
     @Test
     public void testNonForceAvailableInstanceReboot() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack2);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack2);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails2());
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
         rebootInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID2);
@@ -402,7 +402,7 @@ class RepairInstancesServiceTest {
     @Test
     public void testNonForceMultiInstanceReboot() throws Exception {
         OperationStatus operationStatus = new OperationStatus();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack2);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack2);
         Mockito.when(healthDetailsService.getHealthDetails(any(), any())).thenReturn(getMockDetails2());
         Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
@@ -416,7 +416,7 @@ class RepairInstancesServiceTest {
     @Test
     public void testForceMultiInstanceReboot() throws Exception {
         OperationStatus operationStatus = new OperationStatus();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(stack2);
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(stack2);
         Mockito.when(operationService.startOperation(any(), any(), any(), any())).thenReturn(createOperation());
         Mockito.when(operationToOperationStatusConverter.convert(any())).thenReturn(operationStatus);
         RebootInstancesRequest rebootInstancesRequest = new RebootInstancesRequest();
@@ -435,7 +435,7 @@ class RepairInstancesServiceTest {
         repairInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
         repairInstancesRequest.setForceRepair(false);
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
         when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);
@@ -455,7 +455,7 @@ class RepairInstancesServiceTest {
         repairInstancesRequest.setEnvironmentCrn(ENVIRONMENT_ID1);
         repairInstancesRequest.setForceRepair(false);
 
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_ID1, ACCOUNT_ID)).thenReturn(stack);
         when(healthDetailsService.getHealthDetails(ENVIRONMENT_ID1, ACCOUNT_ID))
                 .thenReturn(createHealthDetails(InstanceStatus.DELETED_ON_PROVIDER_SIDE, InstanceStatus.CREATED));
         when(entitlementService.freeIpaHaRepairEnabled(any())).thenReturn(Boolean.TRUE);

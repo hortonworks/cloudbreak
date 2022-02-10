@@ -47,7 +47,7 @@ public class ExistingStackPatcherJobService {
             if (scheduler.getJobDetail(jobKey) != null) {
                 unschedule(jobKey);
             }
-            LOGGER.debug("Scheduling stack patcher job for stack {}", resource.getRemoteResourceId());
+            LOGGER.debug("Scheduling stack patcher job for stack {}", resource.getJobResource().getRemoteResourceId());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during scheduling stack patcher job: %s", jobDetail), e);
@@ -69,8 +69,8 @@ public class ExistingStackPatcherJobService {
 
     private JobDetail buildJobDetail(ExistingStackPatcherJobAdapter resource) {
         return JobBuilder.newJob(ExistingStackPatcherJob.class)
-                .withIdentity(resource.getLocalId(), JOB_GROUP)
-                .withDescription("Patching existing stack: " + resource.getRemoteResourceId())
+                .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
+                .withDescription("Patching existing stack: " + resource.getJobResource().getRemoteResourceId())
                 .usingJobData(resource.toJobDataMap())
                 .storeDurably()
                 .build();
@@ -90,7 +90,7 @@ public class ExistingStackPatcherJobService {
     }
 
     private Date delayedFirstStart() {
-        int delayInMinutes = RANDOM.nextInt((int) TimeUnit.HOURS.toMinutes(properties.getIntervalInHours()));
+        int delayInMinutes = RANDOM.nextInt((int) TimeUnit.HOURS.toMinutes(properties.getMaxInitialStartDelayInHours()));
         return Date.from(ZonedDateTime.now().toInstant().plus(Duration.ofMinutes(delayInMinutes)));
     }
 }

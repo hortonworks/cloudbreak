@@ -365,6 +365,21 @@ public class ClouderaManagerSetupService implements ClusterSetupService {
     }
 
     @Override
+    public void waitForHostsHealthy(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
+        Cluster cluster = stack.getCluster();
+        String user = cluster.getCloudbreakAmbariUser();
+        String password = cluster.getCloudbreakAmbariPassword();
+        ApiClient client;
+        try {
+            client = clouderaManagerApiClientProvider.getV31Client(stack.getGatewayPort(), user, password, clientConfig);
+        } catch (ClouderaManagerClientInitException e) {
+            throw new ClusterClientInitException(e);
+        }
+        clouderaManagerPollingServiceProvider.startPollingCmHostStatusHealthy(
+                stack, client, hostsInCluster.stream().map(x -> x.getDiscoveryFQDN()).collect(Collectors.toUnmodifiableSet()));
+    }
+
+    @Override
     public void waitForServices(int requestId) {
 
     }

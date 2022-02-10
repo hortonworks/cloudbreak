@@ -21,9 +21,11 @@ import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.create.event.EnvWaitRequest;
@@ -75,6 +77,9 @@ public class SdxCreateActions {
     @Inject
     private FlowLogService flowLogService;
 
+    @Inject
+    private EventSenderService eventSenderService;
+
     @Bean(name = "SDX_CREATION_STORAGE_VALIDATION_STATE")
     public Action<?, ?> storageValidation() {
         return new AbstractSdxAction<>(SdxEvent.class) {
@@ -91,6 +96,7 @@ public class SdxCreateActions {
                     SdxCluster sdxCluster = sdxService.getByNameInAccount(context.getUserId(), payload.getSdxName());
                     context.setSdxId(sdxCluster.getId());
                 }
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_PROVISION_STARTED);
                 StorageValidationRequest req = new StorageValidationRequest(context);
                 sendEvent(context, req.selector(), req);
             }
@@ -209,6 +215,7 @@ public class SdxCreateActions {
                         "Datalake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_CREATION_FINISHED, sdxCluster);
                 jobService.schedule(context.getSdxId(), SdxClusterJobAdapter.class);
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_PROVISION_FINISHED);
                 sendEvent(context, SDX_CREATE_FINALIZED_EVENT.event(), payload);
             }
 
@@ -243,6 +250,7 @@ public class SdxCreateActions {
                     SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.PROVISIONING_FAILED,
                             statusReason, payload.getResourceId());
                     metricService.incrementMetricCounter(MetricType.SDX_CREATION_FAILED, sdxCluster);
+                    eventSenderService.notifyEvent(context, ResourceEvent.SDX_CLUSTER_CREATION_FAILED);
                 } catch (NotFoundException notFoundException) {
                     LOGGER.info("Can not set status to SDX_CREATION_FAILED because data lake was not found");
                 } catch (DatalakeStatusUpdateException datalakeStatusUpdateException) {
@@ -259,5 +267,4 @@ public class SdxCreateActions {
             }
         };
     }
-
 }

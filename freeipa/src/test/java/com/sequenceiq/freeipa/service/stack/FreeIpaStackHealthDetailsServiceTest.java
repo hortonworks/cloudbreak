@@ -152,7 +152,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
 
     @Test
     public void testNodeDeletedOnProvider() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getDeletedStack());
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getDeletedStack());
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
         Assert.assertFalse(response.getNodeHealthDetails().isEmpty());
@@ -161,7 +161,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
 
     @Test
     public void testHealthySingleNode() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStack());
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenReturn(getGoodDetails1());
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.AVAILABLE, response.getStatus());
@@ -174,7 +174,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
 
     @Test
     public void testUnhealthySingleNode() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStack());
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenReturn(getUnhealthyDetails1());
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
@@ -187,7 +187,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
 
     @Test
     public void testUnresponsiveSingleNode() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStack());
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNREACHABLE, response.getStatus());
@@ -202,7 +202,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
 
     @Test
     public void testUnresponsiveSingleNodeThatThrowsRuntimeException() throws Exception {
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStack());
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStack());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenThrow(new RuntimeException("Expected"));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNREACHABLE, response.getStatus());
@@ -219,7 +219,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
     public void testUnresponsiveSecondaryNode() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im1))).thenReturn(getGoodDetails1());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
@@ -231,7 +231,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
     public void testTwoGoodNodes() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im1))).thenReturn(getGoodDetails1());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getGoodDetails2());
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
@@ -243,7 +243,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
     public void testOneGoodOneUnhealthyNode() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im1))).thenReturn(getGoodDetails1());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getUnhealthyDetails2());
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
@@ -255,7 +255,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
     public void testTwoUnhealthyNodes() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im1))).thenReturn(getUnhealthyDetails1());
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getUnhealthyDetails2());
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
@@ -268,7 +268,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
         InstanceMetaData im1 = getInstance1();
         im1.setInstanceStatus(InstanceStatus.STOPPED);
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), eq(im2))).thenReturn(getUnhealthyDetails2());
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
@@ -281,7 +281,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
         im1.setInstanceStatus(InstanceStatus.STOPPED);
         InstanceMetaData im2 = getInstance2();
         im2.setInstanceStatus(InstanceStatus.STOPPED);
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.STOPPED, response.getStatus());
         Assert.assertTrue(response.getNodeHealthDetails().size() == 2);
@@ -293,7 +293,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
         im1.setInstanceStatus(InstanceStatus.FAILED);
         InstanceMetaData im2 = getInstance2();
         im2.setInstanceStatus(InstanceStatus.FAILED);
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNHEALTHY, response.getStatus());
         Assert.assertTrue(response.getNodeHealthDetails().size() == 2);
@@ -303,7 +303,7 @@ public class FreeIpaStackHealthDetailsServiceTest {
     public void testTwoUnresponsiveNodes() throws Exception {
         InstanceMetaData im1 = getInstance1();
         InstanceMetaData im2 = getInstance2();
-        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithLists(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
+        Mockito.when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(anyString(), anyString())).thenReturn(getStackTwoInstances(im1, im2));
         Mockito.when(freeIpaInstanceHealthDetailsService.getInstanceHealthDetails(any(), any())).thenThrow(ipaClientException);
         HealthDetailsFreeIpaResponse response = underTest.getHealthDetails(ENVIRONMENT_ID, ACCOUNT_ID);
         Assert.assertEquals(Status.UNREACHABLE, response.getStatus());

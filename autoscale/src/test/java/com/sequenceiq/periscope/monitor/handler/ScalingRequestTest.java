@@ -5,6 +5,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -111,6 +112,7 @@ public class ScalingRequestTest {
 
         if (expectedNodeCount > 0) {
             initScaleUpMocks();
+            when(cluster.isStopStartScalingEnabled()).thenReturn(false);
             when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(TEST_CLUSTER_MAX_NODE_COUNT);
             ScalingRequest scalingRequest = initializeTestRequest(existingClusterNodeCount, existingHostGroupNodeCount, desiredHostGroupNodeCount, List.of());
             scalingRequest.run();
@@ -123,13 +125,34 @@ public class ScalingRequestTest {
         }
     }
 
+    @ParameterizedTest(name = "{0}: With existingClusterNodeCount={1}, existingHostGroupNodeCount={2}, desiredHostGroupNodeCount ={3}, expectedNodeCount={4} ")
+    @MethodSource("scaleUpNodeCountTesting")
+    public void testScaleUpNodeCountWithStopStartScaling(String testCaseName, int existingClusterNodeCount, int existingHostGroupNodeCount,
+            int desiredHostGroupNodeCount, int expectedNodeCount) {
+        ArgumentCaptor<UpdateStackV4Request> captor = ArgumentCaptor.forClass(UpdateStackV4Request.class);
+
+        if (expectedNodeCount > 0) {
+            initScaleUpMocks();
+            when(cluster.isStopStartScalingEnabled()).thenReturn(true);
+            when(limitsConfigurationService.getMaxNodeCountLimit()).thenReturn(TEST_CLUSTER_MAX_NODE_COUNT);
+            ScalingRequest scalingRequest = initializeTestRequest(existingClusterNodeCount, existingHostGroupNodeCount, desiredHostGroupNodeCount, List.of());
+            scalingRequest.run();
+
+            verify(autoscaleV4Endpoint, times(1)).putStackStartInstances(anyString(), captor.capture());
+            UpdateStackV4Request request = captor.getValue();
+            assertEquals("Upscale nodecount should match", expectedNodeCount, request.getInstanceGroupAdjustment().getScalingAdjustment().intValue());
+        } else {
+            verify(autoscaleV4Endpoint, times(0)).putStackStartInstances(anyString(), captor.capture());
+        }
+    }
+
     private void initScaleUpMocks() {
         when(scalingHardLimitsService.isViolatingAutoscaleMaxStepInNodeCount(anyInt())).thenReturn(false);
         ClusterPertain cluterPertain = mock(ClusterPertain.class);
         when(cluster.getClusterPertain()).thenReturn(cluterPertain);
         when(cluster.getStackCrn()).thenReturn("testStackCrn");
         when(cluterPertain.getTenant()).thenReturn("testTenant");
-        when(cluterPertain.getUserId()).thenReturn("userId");
+        lenient().when(cluterPertain.getUserId()).thenReturn("userId");
 
         BaseAlert baseAlert = mock(BaseAlert.class);
         when(baseAlert.getAlertType()).thenReturn(AlertType.LOAD);

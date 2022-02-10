@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 
 import javax.inject.Inject;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -25,6 +26,7 @@ import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncrypti
 import com.sequenceiq.cloudbreak.cloud.azure.task.diskencryptionset.DiskEncryptionSetCreationPoller;
 import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
+import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.cloud.model.Variant;
@@ -96,8 +98,8 @@ public class AzureEncryptionResources implements EncryptionResources {
             String vaultResourceGroupName = diskEncryptionSetCreationRequest.getEncryptionKeyResourceGroupName();
             String desResourceGroupName = diskEncryptionSetCreationRequest.getDiskEncryptionSetResourceGroupName();
 
-            if (desResourceGroupName == null) {
-                if (vaultResourceGroupName == null) {
+            if (StringUtils.isEmpty(desResourceGroupName)) {
+                if (StringUtils.isEmpty(vaultResourceGroupName)) {
                     throw new IllegalArgumentException("Encryption key resource group name should be present if resource group is not provided during " +
                             "environment creation. At least one of --resource-group-name or --encryption-key-resource-group-name should be specified.");
                 }
@@ -271,6 +273,9 @@ public class AzureEncryptionResources implements EncryptionResources {
             try {
                 LOGGER.info("Granting {}.", description);
                 azureClient.grantKeyVaultAccessPolicyToServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId);
+                if (!azureClient.checkKeyVaultAccessPolicyForServicePrincipal(vaultResourceGroupName, vaultName, desPrincipalObjectId)) {
+                    throw new CloudConnectorException(String.format("Access policy has not been granted to object Id: %s, Retrying ...", desPrincipalObjectId));
+                }
                 LOGGER.info("Granted {}.", description);
                 return true;
             } catch (Exception e) {

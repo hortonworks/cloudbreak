@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpMethod;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.it.TestParameter;
@@ -252,6 +253,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
         return await(statuses, emptyRunningParameter());
     }
 
+    public T awaitWithClient(Map<String, Status> statuses, U client) {
+        return getTestContext().awaitWithClient((T) this, statuses, client);
+    }
+
     public T await(Map<String, Status> statuses, RunningParameter runningParameter) {
         return getTestContext().await((T) this, statuses, runningParameter);
     }
@@ -393,5 +398,10 @@ public abstract class AbstractTestDto<R, S, T extends CloudbreakTestDto, U exten
             return new FreeIPAEndpoints<>((T) this, (MockedTestContext) getTestContext());
         }
         throw new TestFailException("mockFreeIpa is supported by MockedTestContext only.");
+    }
+
+    public U getClientForCleanup() {
+        String accountId = Crn.safeFromString(getCrn()).getAccountId();
+        return getTestContext().getAdminMicroserviceClient(getClass(), accountId);
     }
 }

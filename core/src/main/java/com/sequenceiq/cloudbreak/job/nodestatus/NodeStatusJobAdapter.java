@@ -3,23 +3,14 @@ package com.sequenceiq.cloudbreak.job.nodestatus;
 import org.quartz.Job;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 
 public class NodeStatusJobAdapter extends JobResourceAdapter<Stack> {
 
-    public NodeStatusJobAdapter(Stack resource) {
-        super(resource);
-    }
-
-    @Override
-    public String getLocalId() {
-        return String.valueOf(getResource().getId());
-    }
-
-    @Override
-    public String getRemoteResourceId() {
-        return getResource().getResourceCrn();
+    public NodeStatusJobAdapter(JobResource jobResource) {
+        super(jobResource);
     }
 
     @Override

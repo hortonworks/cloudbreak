@@ -70,9 +70,9 @@ public class TelemetryConfigService {
         if (telemetry != null) {
             String databusEndpoint = getDatabusEndpoint(stack, telemetry);
             boolean databusEnabled = telemetry.isClusterLogsCollectionEnabled();
-
+            boolean databusEndpointValidation = entitlementService.isFreeIpaDatabusEndpointValidationEnabled(stack.getAccountId());
             Map<String, SaltPillarProperties> servicePillarConfig = new HashMap<>();
-            servicePillarConfig.putAll(getTelemetryCommonPillarConfig(stack, telemetry, databusEndpoint));
+            servicePillarConfig.putAll(getTelemetryCommonPillarConfig(stack, telemetry, databusEndpoint, databusEndpointValidation));
             servicePillarConfig.putAll(getFluentPillarConfig(stack, telemetry, databusEnabled));
             servicePillarConfig.putAll(getDatabusPillarConfig(stack, databusEndpoint, databusEnabled));
             servicePillarConfig.putAll(getCdpNodeStatusPillarConfig(stack));
@@ -106,10 +106,21 @@ public class TelemetryConfigService {
         return Map.of("fluent", new SaltPillarProperties("/fluent/init.sls", Collections.singletonMap("fluent", fluentConfigView.toMap())));
     }
 
-    private Map<String, SaltPillarProperties> getTelemetryCommonPillarConfig(Stack stack, Telemetry telemetry, String databusEndpoint) {
+    private Map<String, SaltPillarProperties> getTelemetryCommonPillarConfig(Stack stack, Telemetry telemetry, String databusEndpoint,
+            boolean databusEndpointValidation) {
+        TelemetryClusterDetails clusterDetails = TelemetryClusterDetails.Builder.builder()
+                .withVersion(version)
+                .withPlatform(stack.getCloudPlatform())
+                .withCrn(stack.getResourceCrn())
+                .withName(stack.getName())
+                .withType(FluentClusterType.FREEIPA.value())
+                .withOwner(stack.getOwner())
+                .withDatabusEndpoint(databusEndpoint)
+                .withDatabusS3Endpoint(dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint))
+                .withDatabusEndpointValidation(databusEndpointValidation)
+                .build();
         TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
-                telemetry, vmLogsService.getVmLogs(), FluentClusterType.FREEIPA.value(), stack.getResourceCrn(),
-                stack.getName(), stack.getOwner(), stack.getCloudPlatform(), databusEndpoint, dataBusEndpointProvider.getDatabusS3Endpoint(databusEndpoint));
+                telemetry, vmLogsService.getVmLogs(), clusterDetails);
         return Map.of("telemetry",
                 new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
     }

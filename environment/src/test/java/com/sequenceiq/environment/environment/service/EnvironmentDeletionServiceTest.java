@@ -1,22 +1,5 @@
 package com.sequenceiq.environment.environment.service;
 
-import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.util.TestConstants;
-import com.sequenceiq.environment.environment.domain.Environment;
-import com.sequenceiq.environment.environment.dto.EnvironmentDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
-import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
-import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Mockito;
-
-import javax.ws.rs.BadRequestException;
-import java.util.Optional;
-import java.util.Set;
-
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonList;
@@ -30,6 +13,25 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+import java.util.Set;
+
+import javax.ws.rs.BadRequestException;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.Mockito;
+
+import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.util.TestConstants;
+import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.dto.EnvironmentDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentDtoConverter;
+import com.sequenceiq.environment.environment.flow.EnvironmentReactorFlowManager;
+import com.sequenceiq.environment.environment.sync.EnvironmentJobService;
 
 public class EnvironmentDeletionServiceTest {
 
@@ -131,7 +133,7 @@ public class EnvironmentDeletionServiceTest {
         assertEquals(environmentDto, environmentDeletionServiceWired
                 .deleteByCrnAndAccountId(TestConstants.CRN, TestConstants.ACCOUNT_ID, TestConstants.USER, cascading, true));
         verify(environmentDeletionServiceWired).delete(eq(environment), eq(TestConstants.USER), anyBoolean(), anyBoolean());
-        verify(environmentJobService).unschedule(environment);
+        verify(environmentJobService).unschedule(any());
         if (cascading) {
             verify(reactorFlowManager).triggerCascadingDeleteFlow(eq(environment), eq(TestConstants.USER), eq(true));
             verify(reactorFlowManager, never()).triggerDeleteFlow(any(), any(), anyBoolean());

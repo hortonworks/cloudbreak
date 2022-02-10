@@ -47,5 +47,6 @@ public interface SdxUpgradeEndpoint {
     @Path("/internal/upgrade_ccm")
     @Produces(MediaType.APPLICATION_JSON)
     @ApiOperation(value = "Upgrade Cluster Connectivity Manager", nickname = "upgradeCcm")
-    SdxCcmUpgradeResponse upgradeCcm(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn);
+    SdxCcmUpgradeResponse upgradeCcm(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @QueryParam("environment") @NotEmpty String environmentCrn,
+            @ValidCrn(resource = CrnResourceDescriptor.USER) @NotEmpty String initiatorUserCrn);
 }

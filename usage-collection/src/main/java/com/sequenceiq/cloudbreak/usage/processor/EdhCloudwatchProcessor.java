@@ -27,7 +27,7 @@ public class EdhCloudwatchProcessor extends AbstractCloudwatchRecordProcessor {
 
     public EdhCloudwatchProcessor(EdhCloudwatchConfiguration configuration, Tracer tracer, LoggingUsageProcessingStrategy loggingUsageProcessorStrategy) {
         super(new CloudwatchConfiguration(configuration.isEnabled(), configuration.getWorkers(), configuration.getQueueSizeLimit(),
-                configuration.getLogGroup(), configuration.getLogStream(), configuration.getMaxRetry()), tracer);
+                configuration.getLogGroup(), configuration.getLogStream(), configuration.getRegion(), configuration.getMaxRetry()), tracer);
         this.loggingUsageProcessorStrategy = loggingUsageProcessorStrategy;
         this.forceLogging = configuration.isForceLogging();
     }
@@ -80,6 +80,8 @@ public class EdhCloudwatchProcessor extends AbstractCloudwatchRecordProcessor {
             } catch (Exception e) {
                 LOGGER.warn("Could not log binary format for the following usage event: {}! Cause: {}", eventMessage, e.getMessage());
             }
+        } else {
+            LOGGER.warn("Could not log binary format of usage event in Cloudwatch request: {}!", input);
         }
     }
 

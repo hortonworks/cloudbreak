@@ -31,7 +31,8 @@ public class StackStatusFinalizer extends FlowFinalizerCallback {
                     Status finalStatus = stackStatus.getStatus().mapToFailedIfInProgress();
                     LOGGER.error("Flow completed with stack in {} status which is an in progress status. Mapping it to {} final state.",
                             stackStatus.getStatus(), finalStatus);
-                    stackUpdater.updateStackStatusAndSetDetailedStatusToUnknown(resourceId, finalStatus);
+                    stackUpdater.updateStackStatusAndSetDetailedStatusToUnknown(resourceId, finalStatus,
+                            "Flow completed with stack is in progress status");
                 });
     }
 }

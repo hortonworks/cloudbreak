@@ -58,7 +58,10 @@ public enum Status {
     EXTERNAL_DATABASE_STOP_FAILED(StatusKind.FINAL),
     LOAD_BALANCER_UPDATE_IN_PROGRESS(StatusKind.PROGRESS),
     LOAD_BALANCER_UPDATE_FINISHED(StatusKind.FINAL),
-    LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL);
+    LOAD_BALANCER_UPDATE_FAILED(StatusKind.FINAL),
+    UPGRADE_CCM_IN_PROGRESS(StatusKind.PROGRESS),
+    UPGRADE_CCM_FAILED(StatusKind.FINAL),
+    UPGRADE_CCM_FINISHED(StatusKind.FINAL);
 
     private static final Map<Status, Status> IN_PROGRESS_TO_FINAL_STATUS_MAPPING = ImmutableMap.<Status, Status>builder()
             .put(REQUESTED, CREATE_FAILED)
@@ -84,6 +87,7 @@ public enum Status {
             .put(EXTERNAL_DATABASE_STOP_IN_PROGRESS, STOP_FAILED)
             .put(EXTERNAL_DATABASE_STOP_FINISHED, STOP_FAILED)
             .put(LOAD_BALANCER_UPDATE_IN_PROGRESS, UPDATE_FAILED)
+            .put(UPGRADE_CCM_IN_PROGRESS, UPGRADE_CCM_FAILED)
             .build();
 
     private final StatusKind statusKind;
@@ -98,7 +102,7 @@ public enum Status {
 
     public boolean isRemovableStatus() {
         return EnumSet.of(AVAILABLE, UPDATE_FAILED, RECOVERY_FAILED, CREATE_FAILED, ENABLE_SECURITY_FAILED, DELETE_FAILED,
-                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED).contains(this);
+                DELETE_COMPLETED, DELETED_ON_PROVIDER_SIDE, STOPPED, START_FAILED, STOP_FAILED, UPGRADE_CCM_FAILED).contains(this);
     }
 
     public boolean isAvailable() {

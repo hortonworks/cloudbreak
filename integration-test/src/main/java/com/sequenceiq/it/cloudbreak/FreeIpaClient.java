@@ -24,9 +24,12 @@ import com.sequenceiq.it.cloudbreak.actor.CloudbreakUser;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.CloudbreakTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.EnvironmentAware;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaChildEnvironmentTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaDownscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaOperationStatusTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaTestDto;
+import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUpscaleTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncStatusDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeipaChangeImageCatalogTestDto;
@@ -79,9 +82,9 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
                     testContext.get(EnvironmentTestDto.class).getResponse().getCrn(), (OperationState) desiredStatuses.get("status"),
                     (Set<OperationState>) ignoredFailedStatuses);
         } else {
-            FreeIpaTestDto freeIpaTestDto = (FreeIpaTestDto) entity;
-            return new FreeIpaWaitObject(this, entity.getName(), freeIpaTestDto.getResponse().getEnvironmentCrn(), (Status) desiredStatuses.get("status"),
-                    (Set<Status>) ignoredFailedStatuses);
+            EnvironmentAware environmentAware = (EnvironmentAware) entity;
+            return new FreeIpaWaitObject(this, entity.getName(), environmentAware.getEnvironmentCrn(), (Status) desiredStatuses.get("status"),
+                (Set<Status>) ignoredFailedStatuses);
         }
     }
 
@@ -123,7 +126,9 @@ public class FreeIpaClient<E extends Enum<E>> extends MicroserviceClient<com.seq
                 FreeIpaUserSyncStatusDto.class.getSimpleName(),
                 FreeipaUsedImagesTestDto.class.getSimpleName(),
                 FreeIpaOperationStatusTestDto.class.getSimpleName(),
-                FreeipaChangeImageCatalogTestDto.class.getSimpleName());
+                FreeipaChangeImageCatalogTestDto.class.getSimpleName(),
+                FreeIpaUpscaleTestDto.class.getSimpleName(),
+                FreeIpaDownscaleTestDto.class.getSimpleName());
     }
 
     @Override

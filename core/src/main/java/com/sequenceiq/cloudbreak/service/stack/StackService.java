@@ -96,6 +96,7 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.orchestrator.container.ContainerOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
@@ -413,6 +414,10 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     public Optional<Stack> findById(Long id) {
         return stackRepository.findById(id);
+    }
+
+    public Optional<PayloadContext> findStackAsPayloadContext(Long id) {
+        return stackRepository.findStackAsPayloadContext(id);
     }
 
     public Stack getByIdWithTransaction(Long id) {
@@ -767,12 +772,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     @Override
     public PayloadContext getPayloadContext(Long resourceId) {
-        Optional<Stack> stackOpt = findById(resourceId);
-        if (stackOpt.isPresent()) {
-            Stack stack = stackOpt.get();
-            return PayloadContext.create(stack.getResourceCrn(), stack.getCloudPlatform());
-        }
-        return null;
+        return findStackAsPayloadContext(resourceId).orElse(null);
     }
 
     private Optional<Stack> findByNameAndWorkspaceIdWithLists(String name, Long workspaceId, StackType stackType, ShowTerminatedClustersAfterConfig config) {
@@ -824,7 +824,7 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
 
     public List<String> getHostNamesForPrivateIds(List<InstanceMetaData> instanceMetaDataList, Collection<Long> privateIds) {
         return getInstanceMetaDataForPrivateIdsWithoutTerminatedInstances(instanceMetaDataList, privateIds).stream()
-                .map(InstanceMetaData::getInstanceId)
+                .map(InstanceMetaData::getDiscoveryFQDN)
                 .collect(Collectors.toList());
     }
 
@@ -991,5 +991,13 @@ public class StackService implements ResourceIdProvider, ResourcePropertyProvide
     public CloudPlatformVariant getPlatformVariantByStackId(Long resourceId) {
         StackPlatformVariantView variantView = stackRepository.findPlatformVariantAndCloudPlatformById(resourceId);
         return new CloudPlatformVariant(variantView.getCloudPlatform(), variantView.getPlatformVariant());
+    }
+
+    public List<JobResource> getAllAliveForAutoSync(Set<Status> statusesNotIn) {
+        return stackRepository.getJobResourcesNotIn(statusesNotIn);
+    }
+
+    public JobResource getJobResource(Long resourceId) {
+        return stackRepository.getJobResource(resourceId).orElseThrow(notFound("Stack", resourceId));
     }
 }

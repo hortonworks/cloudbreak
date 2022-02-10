@@ -36,17 +36,21 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_DISA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CM_HA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_CONCLUSION_CHECKER_SEND_USER_EVENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_CUSTOM_CONFIGS;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_METRICS_DATABUS_PROCESSING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB_NODESTATUS_CHECK;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENDPOINT_GATEWAY_SKIP_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_EXPERIENCE_DELETION_BY_ENVIRONMENT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FMS_CLUSTER_PROXY;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_HA_REPAIR;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_REBUILD;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_FREEIPA_UPGRADE;
@@ -56,10 +60,10 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_NODESTA
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
@@ -67,9 +71,13 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_DAT
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
@@ -77,7 +85,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.OJDBC_TOKEN_DH_ONE_HOUR_TOKEN;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.PERSONAL_VIEW_CB_BY_RIGHT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.UI_EDP_PROGRESS_BAR;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_MEDIUM_DUTY_WITH_PROFILER;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -220,10 +227,6 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_CLOUD_STORAGE_VALIDATION_GCP);
     }
 
-    public boolean razEnabled(String accountId) {
-        return isEntitlementRegistered(accountId, CDP_RAZ);
-    }
-
     public boolean microDutySdxEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_MICRO_DUTY_SDX);
     }
@@ -276,12 +279,24 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, DATAHUB_AWS_AUTOSCALING);
     }
 
+    public boolean awsStopStartScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AWS_STOP_START_SCALING);
+    }
+
     public boolean azureAutoScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_AZURE_AUTOSCALING);
     }
 
+    public boolean azureStopStartScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_AZURE_STOP_START_SCALING);
+    }
+
     public boolean gcpAutoScalingEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATAHUB_GCP_AUTOSCALING);
+    }
+
+    public boolean gcpStopStartScalingEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, DATAHUB_GCP_STOP_START_SCALING);
     }
 
     public boolean ccmV2Enabled(String accountId) {
@@ -328,6 +343,10 @@ public class EntitlementService {
         return isEntitlementRegistered(accountId, CDP_DATALAKE_BACKUP_ON_RESIZE);
     }
 
+    public boolean isDatalakeResizeRecoveryEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATALAKE_RESIZE_RECOVERY);
+    }
+
     public boolean isDatalakeLightToMediumMigrationEnabled(String accountId) {
         return isEntitlementRegistered(accountId, DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION);
     }
@@ -350,6 +369,14 @@ public class EntitlementService {
 
     public boolean isDiagnosticsEnabled(String accountId) {
         return isEntitlementRegistered(accountId, CDP_VM_DIAGNOSTICS);
+    }
+
+    public boolean isFreeIpaDatabusEndpointValidationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_FREEIPA_DATABUS_ENDPOINT_VALIDATION);
+    }
+
+    public boolean isDatahubDatabusEndpointValidationEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_DATAHUB_DATABUS_ENDPOINT_VALIDATION);
     }
 
     public boolean isEDPProgressBarEnabled(String accountID) {
@@ -414,6 +441,14 @@ public class EntitlementService {
 
     public boolean isOjdbcTokenDhOneHour(String accountId) {
         return isEntitlementRegistered(accountId, OJDBC_TOKEN_DH_ONE_HOUR_TOKEN);
+    }
+
+    public boolean isE2ETestOnlyEnabled(String accountId) {
+        return isEntitlementRegistered(accountId, E2E_TEST_ONLY);
+    }
+
+    public boolean targetedUpscaleSupported(String accountId) {
+        return isEntitlementRegistered(accountId, CDP_TARGETED_UPSCALE);
     }
 
     public List<String> getEntitlements(String accountId) {

@@ -1,5 +1,7 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -8,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.junit.Assert;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +19,9 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.client.RPCMessage;
+import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.health.NodeHealthDetails;
@@ -23,9 +29,9 @@ import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClient;
 import com.sequenceiq.freeipa.client.FreeIpaHealthCheckClientFactory;
+import com.sequenceiq.freeipa.client.healthcheckmodel.CheckEntry;
 import com.sequenceiq.freeipa.client.healthcheckmodel.CheckResult;
-import com.sequenceiq.cloudbreak.client.RPCMessage;
-import com.sequenceiq.cloudbreak.client.RPCResponse;
+import com.sequenceiq.freeipa.client.healthcheckmodel.PluginStatusEntry;
 import com.sequenceiq.freeipa.entity.InstanceGroup;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
 import com.sequenceiq.freeipa.entity.Stack;
@@ -130,6 +136,37 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         return badResponse;
     }
 
+    private RPCResponse<CheckResult> getErrorPayloadWithMixedResults(String host) {
+        CheckResult checkResult = new CheckResult();
+        checkResult.setHost(host);
+        CheckEntry healthy = new CheckEntry();
+        healthy.setStatus("HEALTHY");
+        healthy.setCheckId("hId");
+        healthy.setPlugin("good");
+        CheckEntry unhealthy = new CheckEntry();
+        unhealthy.setStatus("UNHEALTHY");
+        unhealthy.setCheckId("unhId");
+        unhealthy.setPlugin("bad");
+        checkResult.setChecks(List.of(healthy, unhealthy));
+        PluginStatusEntry healthyPlugin = new PluginStatusEntry();
+        healthyPlugin.setPlugin("healthyPlugin");
+        healthyPlugin.setStatus("HEALTHY");
+        healthyPlugin.setHost(host);
+        PluginStatusEntry unhealthyPlugin = new PluginStatusEntry();
+        unhealthyPlugin.setPlugin("unhealthyPlugin");
+        unhealthyPlugin.setStatus("UNHEALTHY");
+        unhealthyPlugin.setHost(host);
+        checkResult.setPluginStats(List.of(healthyPlugin, unhealthyPlugin));
+        RPCResponse<CheckResult> badResponse;
+        badResponse = new RPCResponse<>();
+        badResponse.setResult(checkResult);
+        RPCMessage message = new RPCMessage();
+        message.setCode(503);
+        message.setMessage(JsonUtil.writeValueAsStringSilentSafe(checkResult));
+        badResponse.setMessages(List.of(message));
+        return badResponse;
+    }
+
     private InstanceMetaData getInstance() {
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId(INSTANCE_ID);
@@ -165,10 +202,10 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         NodeHealthDetails response = underTest.getInstanceHealthDetails(stack, instanceMetaData);
-        Assert.assertEquals(InstanceStatus.CREATED, response.getStatus());
-        Assert.assertEquals(INSTANCE_ID, response.getInstanceId());
-        Assert.assertEquals(HOST, response.getName());
-        Assert.assertTrue(response.getIssues().isEmpty());
+        assertEquals(InstanceStatus.CREATED, response.getStatus());
+        assertEquals(INSTANCE_ID, response.getInstanceId());
+        assertEquals(HOST, response.getName());
+        Assertions.assertTrue(response.getIssues().isEmpty());
     }
 
     @Test
@@ -183,10 +220,10 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         NodeHealthDetails response = underTest.getInstanceHealthDetails(stack, instanceMetaData);
-        Assert.assertEquals(InstanceStatus.UNHEALTHY, response.getStatus());
-        Assert.assertEquals(INSTANCE_ID, response.getInstanceId());
-        Assert.assertEquals(HOST, response.getName());
-        Assert.assertFalse(response.getIssues().isEmpty());
+        assertEquals(InstanceStatus.UNHEALTHY, response.getStatus());
+        assertEquals(INSTANCE_ID, response.getInstanceId());
+        assertEquals(HOST, response.getName());
+        assertFalse(response.getIssues().isEmpty());
     }
 
     @Test
@@ -214,10 +251,10 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         NodeHealthDetails response = underTest.getInstanceHealthDetails(stack, instanceMetaData);
-        Assert.assertEquals(InstanceStatus.CREATED, response.getStatus());
-        Assert.assertEquals(INSTANCE_ID, response.getInstanceId());
-        Assert.assertEquals(HOST, response.getName());
-        Assert.assertTrue(response.getIssues().isEmpty());
+        assertEquals(InstanceStatus.CREATED, response.getStatus());
+        assertEquals(INSTANCE_ID, response.getInstanceId());
+        assertEquals(HOST, response.getName());
+        Assertions.assertTrue(response.getIssues().isEmpty());
     }
 
     @Test
@@ -231,10 +268,10 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         NodeHealthDetails response = underTest.getInstanceHealthDetails(stack, instanceMetaData);
-        Assert.assertEquals(InstanceStatus.UNHEALTHY, response.getStatus());
-        Assert.assertEquals(INSTANCE_ID, response.getInstanceId());
-        Assert.assertEquals(HOST, response.getName());
-        Assert.assertFalse(response.getIssues().isEmpty());
+        assertEquals(InstanceStatus.UNHEALTHY, response.getStatus());
+        assertEquals(INSTANCE_ID, response.getInstanceId());
+        assertEquals(HOST, response.getName());
+        assertFalse(response.getIssues().isEmpty());
     }
 
     @Test
@@ -262,7 +299,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
-        Assert.assertTrue(response.getResult());
+        Assertions.assertTrue(response.getResult());
     }
 
     @Test
@@ -277,7 +314,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
-        Assert.assertFalse(response.getResult());
+        assertFalse(response.getResult());
     }
 
     @Test
@@ -305,7 +342,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
-        Assert.assertTrue(response.getResult());
+        Assertions.assertTrue(response.getResult());
     }
 
     @Test
@@ -319,7 +356,30 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
         Stack stack = getStack(Set.of(instanceMetaData));
 
         RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
-        Assert.assertFalse(response.getResult());
+        assertFalse(response.getResult());
+    }
+
+    @Test
+    public void testCheckFreeIpaHealthUnhealthyNodeWithFiltering() throws Exception {
+        FreeIpaHealthCheckClient mockIpaHealthClient = Mockito.mock(FreeIpaHealthCheckClient.class);
+        Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
+        Mockito.when(freeIpaHealthCheckClientFactory.getClient(any(), any())).thenReturn(mockIpaHealthClient);
+        Mockito.when(mockIpaHealthClient.nodeHealth()).thenReturn(getErrorPayloadWithMixedResults(HOST));
+
+        InstanceMetaData instanceMetaData = getInstance();
+        Stack stack = getStack(Set.of(instanceMetaData));
+
+        RPCResponse<Boolean> response = underTest.checkFreeIpaHealth(stack, instanceMetaData);
+
+        assertFalse(response.getResult());
+        assertEquals("node health check", response.getFirstRpcMessage().getName());
+        CheckResult checkResult = JsonUtil.readValue(response.getFirstRpcMessage().getMessage(), CheckResult.class);
+        assertEquals(1, checkResult.getChecks().size());
+        assertEquals("UNHEALTHY", checkResult.getChecks().get(0).getStatus());
+        assertEquals(1, checkResult.getPluginStats().size());
+        assertEquals("UNHEALTHY", checkResult.getPluginStats().get(0).getStatus());
+        assertEquals(HOST, checkResult.getHost());
+        assertEquals(HOST, checkResult.getPluginStats().get(0).getHost());
     }
 
     @Test
@@ -336,7 +396,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
     }
 
     @Test
-    public void testCheckFreeIpaHealthThrowsWhenFqdnIsMissing() throws Exception {
+    public void testCheckFreeIpaHealthThrowsWhenFqdnIsMissing() {
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(true);
 
         InstanceMetaData instanceMetaData = getInstance();
@@ -347,7 +407,7 @@ public class FreeIpaInstanceHealthDetailsServiceTest {
     }
 
     @Test
-    public void testCheckLegacyFreeIpaHealthThrowsWhenFqdnIsMissing() throws Exception {
+    public void testCheckLegacyFreeIpaHealthThrowsWhenFqdnIsMissing() {
         Mockito.when(healthCheckAvailabilityChecker.isCdpFreeIpaHeathAgentAvailable(any())).thenReturn(false);
 
         InstanceMetaData instanceMetaData = getInstance();

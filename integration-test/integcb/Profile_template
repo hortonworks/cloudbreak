@@ -19,6 +19,7 @@ export CLUSTERPROXY_ENABLED=true
 export ENVIRONMENT_AUTOSYNC_ENABLED=false
 export ENVIRONMENT_FREEIPA_SYNCHRONIZEONSTART=false
 export ENVIRONMENT_EXPERIENCE_SCAN_ENABLED=true
+export CB_LOCAL_DEV_LIST=jaeger,environments2-api,audit-api,distrox-api,thunderhead-api,datalake-api
 
 export ALTUS_AUDIT_ENDPOINT=thunderhead-mock
 export CLUSTERDNS_HOST=thunderhead-mock

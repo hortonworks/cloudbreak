@@ -6,7 +6,7 @@ import com.sequenceiq.cloudbreak.streaming.model.RecordRequest;
 public class CloudwatchRecordRequest extends RecordRequest {
 
     private CloudwatchRecordRequest(Builder builder) {
-        super(builder.rawBody, builder.messageBody, builder.timestamp);
+        super(builder.rawBody, builder.messageBody, builder.timestamp, builder.forceRawOutput);
     }
 
     @Override
@@ -21,6 +21,8 @@ public class CloudwatchRecordRequest extends RecordRequest {
         private GeneratedMessageV3 messageBody;
 
         private long timestamp;
+
+        private boolean forceRawOutput;
 
         private Builder() {
         }
@@ -45,6 +47,11 @@ public class CloudwatchRecordRequest extends RecordRequest {
 
         public Builder withTimestamp(long timestamp) {
             this.timestamp = timestamp;
+            return this;
+        }
+
+        public Builder withForceRawOutput(boolean forceRawOutput) {
+            this.forceRawOutput = forceRawOutput;
             return this;
         }
     }

@@ -1,19 +1,19 @@
 package com.sequenceiq.redbeams.sync;
 
-import com.sequenceiq.redbeams.domain.stack.DBStack;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
-import org.junit.jupiter.api.BeforeEach;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
+import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
+import com.sequenceiq.redbeams.domain.stack.DBStack;
 
+@ExtendWith(MockitoExtension.class)
 public class DBStackJobServiceTest {
 
     private static final Long DB_STACK_ID = 123L;
@@ -30,38 +30,27 @@ public class DBStackJobServiceTest {
     @InjectMocks
     private DBStackJobService victim;
 
-    @BeforeEach
-    public void initTests() {
-        initMocks(this);
-    }
-
     @Test
     public void shouldScheduleJobWhenEnabled() {
         when(autoSyncConfig.isEnabled()).thenReturn(true);
 
-        victim.schedule(dbStack);
+        victim.schedule(DB_STACK_ID);
 
-        ArgumentCaptor<DBStackJobAdapter> dbStackJobAdapterArgumentCaptor = ArgumentCaptor.forClass(DBStackJobAdapter.class);
-
-        verify(jobService).schedule(dbStackJobAdapterArgumentCaptor.capture());
-
-        assertEquals(dbStack, dbStackJobAdapterArgumentCaptor.getValue().getResource());
+        verify(jobService).schedule(DB_STACK_ID, DBStackJobAdapter.class);
     }
 
     @Test
     public void shouldNotScheduleJobWhenDisabled() {
         when(autoSyncConfig.isEnabled()).thenReturn(false);
 
-        victim.schedule(dbStack);
+        victim.schedule(DB_STACK_ID);
 
-        verifyZeroInteractions(jobService);
+        verifyNoInteractions(jobService);
     }
 
     @Test
     public void shouldUnscheduleJob() {
-        when(dbStack.getId()).thenReturn(DB_STACK_ID);
-
-        victim.unschedule(dbStack);
+        victim.unschedule(DB_STACK_ID, "name");
 
         verify(jobService).unschedule(String.valueOf(DB_STACK_ID));
     }

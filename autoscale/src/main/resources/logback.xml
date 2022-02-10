@@ -35,7 +35,7 @@
         <appender-ref ref="STDOUT"/>
     </root>
 
-    <logger name="com.sequenceiq" level="${PERISCOPE_LOG_LEVEL:-INFO}" additivity="false">
+    <logger name="com.sequenceiq" level="${PERISCOPE_LOG_LEVEL:-DEBUG}" additivity="false">
         <appender-ref ref="AUTOSCALE_FILE_BASED"/>
         <appender-ref ref="STDOUT"/>
     </logger>
@@ -61,6 +61,10 @@
     </logger>
 
     <logger name="org.hibernate.type.descriptor.sql.BasicBinder">
+        <level value="${PERISCOPE_SQL_LOG_LEVEL:-INFO}"/>
+    </logger>
+
+    <logger name="org.springframework.orm.jpa">
         <level value="${PERISCOPE_SQL_LOG_LEVEL:-INFO}"/>
     </logger>
 

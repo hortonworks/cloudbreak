@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -196,7 +197,9 @@ public class ClouderaManagerDecomissioner {
                 .filter(hostMetadata -> hostNames.contains(hostMetadata.getDiscoveryFQDN()))
                 .collect(Collectors.toMap(InstanceMetaData::getDiscoveryFQDN, hostMetadata -> hostMetadata));
         if (hostsToRemove.size() != hostNames.size()) {
-            LOGGER.debug("Not all hosts found in the given host group. [{}, {}]", hostGroup.getName(), hostNames);
+            List<String> missingHosts = hostNames.stream().filter(h -> !hostsToRemove.containsKey(h)).collect(Collectors.toList());
+            LOGGER.debug("Not all requested hosts found in CB for host group: {}. MissingCount={}, missingHosts=[{}]. Requested hosts: [{}]",
+                    hostGroup.getName(), missingHosts.size(), missingHosts, hostNames);
         }
         HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
         try {
@@ -205,13 +208,100 @@ public class ClouderaManagerDecomissioner {
                     .map(ApiHost::getHostname)
                     .collect(Collectors.toList());
             // TODO: what if i remove a node from CM manually?
+
+            List<String> matchingCmHosts = hostsToRemove.keySet().stream()
+                    .filter(hostName -> runningHosts.contains(hostName))
+                    .collect(Collectors.toList());
+            Set<String> matchingCmHostSet = new HashSet<>(matchingCmHosts);
+
+            if (matchingCmHosts.size() != hostsToRemove.size()) {
+                List<String> missingHostsInCm = hostsToRemove.keySet().stream().filter(h -> !matchingCmHostSet.contains(h)).collect(Collectors.toList());
+
+                LOGGER.debug("Not all requested hosts found in CM. MissingCount={}, missingHosts=[{}]. Requested hosts: [{}]",
+                        missingHostsInCm.size(), missingHostsInCm, hostsToRemove.keySet());
+            }
+
             Sets.newHashSet(hostsToRemove.keySet()).stream()
-                    .filter(hostName -> !runningHosts.contains(hostName))
+                    .filter(hostName -> !matchingCmHostSet.contains(hostName))
                     .forEach(hostsToRemove::remove);
             LOGGER.debug("Collected hosts to remove: [{}]", hostsToRemove);
             return hostsToRemove;
         } catch (ApiException e) {
             LOGGER.error("Failed to get host list for cluster: {}", stack.getName(), e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    public void enterMaintenanceMode(Stack stack, Set<String> hostList, ApiClient client) {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
+        String currentHostId = null;
+        int successCount = 0;
+        List<String> availableHostsIdsFromCm = null;
+        LOGGER.debug("Attempting to put {} instances into CM maintenance mode", hostList == null ? 0 : hostList.size());
+        try {
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
+            availableHostsIdsFromCm = hostRefList.getItems().stream()
+                    .filter(apiHostRef -> hostList.contains(apiHostRef.getHostname()))
+                    .parallel()
+                    .map(ApiHost::getHostId)
+                    .collect(Collectors.toList());
+
+            for (String hostId : availableHostsIdsFromCm) {
+                currentHostId = hostId;
+                hostsResourceApi.enterMaintenanceMode(hostId);
+                successCount++;
+            }
+            LOGGER.debug("Finished putting {} instances into CM maintenance mode. Initial request size: {}, CM availableCount: {}",
+                    successCount, hostList == null ? 0 : hostList.size(), availableHostsIdsFromCm == null ? "null" : availableHostsIdsFromCm);
+        } catch (ApiException e) {
+            LOGGER.error("Failed while putting a node into maintenance mode. nodeId=" + currentHostId + ", successCount=" + successCount, e);
+            throw new CloudbreakServiceException(e.getMessage(), e);
+        }
+    }
+
+    public Set<String> decommissionNodesStopStart(Stack stack, Map<String, InstanceMetaData> hostsToRemove, ApiClient client, long pollingTimeout) {
+        HostsResourceApi hostsResourceApi = clouderaManagerApiFactory.getHostsResourceApi(client);
+        try {
+            ApiHostList hostRefList = hostsResourceApi.readHosts(null, null, SUMMARY_REQUEST_VIEW);
+            LOGGER.trace("Target decommissionNodes: count={}, hosts=[{}]", hostsToRemove.size(), hostsToRemove.keySet());
+            LOGGER.debug("hostsAvailableFromCM: count={}, hosts=[{}]", hostRefList.getItems().size(),
+                    hostRefList.getItems().stream().map(ApiHost::getHostname));
+            List<String> stillAvailableRemovableHosts = hostRefList.getItems().stream()
+                    .filter(apiHostRef -> hostsToRemove.containsKey(apiHostRef.getHostname()))
+                    .parallel()
+                    .map(ApiHost::getHostname)
+                    .collect(Collectors.toList());
+
+            Set<String> hostsAvailableForDecommissionSet = new HashSet<>(stillAvailableRemovableHosts);
+            List<String> cmHostsUnavailableForDecommission = hostsToRemove.keySet().stream()
+                    .filter(h -> !hostsAvailableForDecommissionSet.contains(h)).collect(Collectors.toList());
+            if (cmHostsUnavailableForDecommission.size() != 0) {
+                LOGGER.info("Some decommission targets are unavailable in CM: TotalDecommissionTargetCount={}, unavailableInCMCount={}, unavailableInCm=[{}]",
+                        hostsToRemove.size(), cmHostsUnavailableForDecommission.size(), cmHostsUnavailableForDecommission);
+            }
+
+            ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
+            ApiHostNameList body = new ApiHostNameList().items(stillAvailableRemovableHosts);
+            ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
+
+            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostsDecommission(
+                    stack, client, apiCommand.getId(), pollingTimeout);
+            if (isExited(pollingResult)) {
+                throw new CancellationException("Cluster was terminated while waiting for host decommission");
+            } else if (isTimeout(pollingResult)) {
+                String warningMessage = "Cloudera Manager decommission host command {} polling timed out, " +
+                        "thus we are aborting the decommission and we are retrying it for lost nodes once again.";
+                abortDecommissionWithWarningMessage(apiCommand, client, warningMessage);
+                throw new CloudbreakServiceException(
+                        String.format("Timeout while Cloudera Manager decommissioned host. CM command Id: %s", apiCommand.getId()));
+            }
+            return stillAvailableRemovableHosts.stream()
+                    .map(hostsToRemove::get)
+                    .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                    .map(InstanceMetaData::getDiscoveryFQDN)
+                    .collect(Collectors.toSet());
+        } catch (ApiException e) {
+            LOGGER.error("Failed to decommission hosts: {}", hostsToRemove.keySet(), e);
             throw new CloudbreakServiceException(e.getMessage(), e);
         }
     }
