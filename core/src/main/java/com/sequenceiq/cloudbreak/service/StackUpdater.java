@@ -48,8 +48,8 @@ public class StackUpdater {
         return doUpdateStackStatus(stackId, detailedStatus.getStatus(), detailedStatus, statusReason);
     }
 
-    public Stack updateStackStatusAndSetDetailedStatusToUnknown(Long stackId, Status status) {
-        return doUpdateStackStatus(stackId, status, DetailedStackStatus.UNKNOWN, "");
+    public Stack updateStackStatusAndSetDetailedStatusToUnknown(Long stackId, Status status, String statusReason) {
+        return doUpdateStackStatus(stackId, status, DetailedStackStatus.UNKNOWN, statusReason);
     }
 
     public void updateStackSecurityConfig(Stack stack, SecurityConfig securityConfig) {

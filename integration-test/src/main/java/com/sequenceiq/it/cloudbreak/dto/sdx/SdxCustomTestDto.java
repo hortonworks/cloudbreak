@@ -16,7 +16,6 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.image.ImageSettingsV4Request;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.ResourcePropertyProvider;
 import com.sequenceiq.it.cloudbreak.SdxClient;
@@ -108,11 +107,6 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         return this;
     }
 
-    public SdxCustomTestDto addTags(Map<String, String> tags) {
-        getRequest().addTags(tags);
-        return this;
-    }
-
     public SdxCustomTestDto withTags(Map<String, String> tags) {
         getRequest().addTags(tags);
         return this;
@@ -131,22 +125,10 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         return withEnvironmentName(environment.getResponse().getName());
     }
 
-    private SdxCustomTestDto withEnvironmentDto(EnvironmentTestDto environmentTestDto) {
-        return withEnvironmentName(environmentTestDto.getResponse().getName());
-    }
-
     public SdxCustomTestDto withEnvironmentClass(Class<EnvironmentTestDto> environmentClass) {
         EnvironmentTestDto environment = getTestContext().get(environmentClass.getSimpleName());
         if (environment == null) {
             throw new IllegalArgumentException(String.format("Environment has not been provided for this Sdx: '%s' response!", getName()));
-        }
-        return withEnvironmentName(environment.getResponse().getName());
-    }
-
-    public SdxCustomTestDto withEnvironmentKey(RunningParameter key) {
-        EnvironmentTestDto environment = getTestContext().get(key.getKey());
-        if (environment == null) {
-            throw new IllegalArgumentException(String.format("Environment has not been provided for this internal Sdx: '%s' response!", getName()));
         }
         return withEnvironmentName(environment.getResponse().getName());
     }
@@ -191,14 +173,6 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
         return getTestContext().awaitForFlow(this, runningParameter);
     }
 
-    public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses) {
-        return awaitForInstance(statuses, emptyRunningParameter());
-    }
-
-    public SdxCustomTestDto awaitForInstance(SdxCustomTestDto entity, Map<String, InstanceStatus> statuses, RunningParameter runningParameter) {
-        return getTestContext().await(entity, statuses, runningParameter);
-    }
-
     public SdxCustomTestDto awaitForInstance(Map<List<String>, InstanceStatus> statuses, RunningParameter runningParameter) {
         return getTestContext().awaitForInstance(this, statuses, runningParameter);
     }
@@ -207,17 +181,6 @@ public class SdxCustomTestDto extends AbstractSdxTestDto<SdxCustomClusterRequest
     public CloudbreakTestDto refresh() {
         LOGGER.info("Refresh SDX with name: {}", getName());
         return when(sdxTestClient.refreshCustom(), key("refresh-sdx-" + getName()));
-    }
-
-    @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up sdx internal with name: {}", getName());
-        if (getResponse() != null) {
-            when(sdxTestClient.forceDeleteCustom(), key("delete-sdx-" + getName()));
-            await(DELETED, new RunningParameter().withSkipOnFail(true));
-        } else {
-            LOGGER.info("Sdx internal: {} response is null!", getName());
-        }
     }
 
     @Override

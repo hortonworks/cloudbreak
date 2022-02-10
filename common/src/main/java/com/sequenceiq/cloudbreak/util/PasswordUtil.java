@@ -6,10 +6,6 @@ import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 
-/**
- * @deprecated Use {@link SHA512PasswordGenerator} instead.
- */
-@Deprecated
 public class PasswordUtil {
 
     private static final int PWD_LENGTH = 128;

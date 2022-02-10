@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.8",
     "displayName": "opdb",
+    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
     "services": [
       {
         "refName": "zookeeper",

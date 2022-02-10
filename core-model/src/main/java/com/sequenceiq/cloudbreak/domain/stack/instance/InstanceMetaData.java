@@ -230,6 +230,10 @@ public class InstanceMetaData implements ProvisionEntity {
                 || instanceStatus == InstanceStatus.DECOMMISSION_FAILED;
     }
 
+    public boolean isStopped() {
+        return instanceStatus == InstanceStatus.STOPPED;
+    }
+
     public boolean isTerminated() {
         return terminationDate != null || InstanceStatus.TERMINATED.equals(instanceStatus);
     }

@@ -14,6 +14,6 @@ public class ApiDocController {
     @RequestMapping(value = "/apidocs", method = RequestMethod.GET)
     @CheckPermissionByAccount(action = AuthorizationResourceAction.POWERUSER_ONLY)
     public ModelAndView apiDocs() {
-        return new ModelAndView("redirect:swagger-ui.html");
+        return new ModelAndView("redirect:swagger-ui/");
     }
 }

@@ -18,6 +18,7 @@ import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.cloudbreak.domain.Network;
 import com.sequenceiq.cloudbreak.domain.projection.AutoscaleStack;
 import com.sequenceiq.cloudbreak.domain.projection.StackClusterStatusView;
@@ -29,13 +30,15 @@ import com.sequenceiq.cloudbreak.domain.projection.StackPlatformVariantView;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @EntityType(entityClass = Stack.class)
 @Transactional(TxType.REQUIRED)
-public interface StackRepository extends WorkspaceResourceRepository<Stack, Long> {
+public interface StackRepository extends WorkspaceResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
 
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn from Stack s "
             + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated = null "
@@ -362,4 +365,22 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
     int setCcmV2AgentCrnByStackId(@Param("id") Long id, @Param("ccmV2AgentCrn") String ccmV2AgentCrn);
 
     StackPlatformVariantView findPlatformVariantAndCloudPlatformById(Long id);
+
+    @Query("SELECT new com.sequenceiq.cloudbreak.common.event.PayloadContext(s.resourceCrn, s.cloudPlatform) " +
+            "FROM Stack s " +
+            "WHERE s.id = :id")
+    Optional<PayloadContext> findStackAsPayloadContext(@Param("id") Long id);
+
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
+            "FROM Stack s " +
+            "WHERE s.id = :resourceId")
+    Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
+
+    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
+            "FROM Stack s " +
+            "LEFT JOIN s.stackStatus ss " +
+            "WHERE s.terminated = null " +
+            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
+            "AND ss.status not in (:notInStatuses)")
+    List<JobResource> getJobResourcesNotIn(@Param("notInStatuses") Set<Status> notInStatuses);
 }

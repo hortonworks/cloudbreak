@@ -17,35 +17,28 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.SaltJobIdTracker;
 import com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker.ConcurrentParameterizedStateRunner;
 import com.sequenceiq.cloudbreak.orchestrator.salt.runner.SaltRunner;
-import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
+import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetrySaltRetryConfig;
 
+@ExtendWith(MockitoExtension.class)
 class SaltTelemetryOrchestratorTest {
 
-    private static final int MAX_TELEMETRY_STOP_RETRY = 5;
-
-    private static final int MAX_NODESTATUS_COLLECT_RETRY = 3;
-
     private static final int MAX_DIAGNOSTICS_COLLECTION_RETRY = 360;
-
-    private final ExitCriteria exitCriteria = Mockito.mock(ExitCriteria.class);
-
-    private final SaltService saltService = Mockito.mock(SaltService.class);
-
-    private final SaltRunner saltRunner = Mockito.mock(SaltRunner.class);
-
-    private final SaltConnector saltConnector = Mockito.mock(SaltConnector.class);
 
     private final GatewayConfig gatewayConfig = new GatewayConfig("1.1.1.1", "10.0.0.1", "172.16.252.43", "10-0-0-1", 9443,
             "instanceid", "servercert", "clientcert", "clientkey", "saltpasswd", "saltbootpassword",
@@ -65,13 +58,25 @@ class SaltTelemetryOrchestratorTest {
     private final ExitCriteriaModel exitCriteriaModel = new ExitCriteriaModel() {
     };
 
-    private SaltTelemetryOrchestrator underTest = new SaltTelemetryOrchestrator(exitCriteria, saltService, saltRunner,
-            MAX_TELEMETRY_STOP_RETRY, MAX_NODESTATUS_COLLECT_RETRY, MAX_DIAGNOSTICS_COLLECTION_RETRY);
+    @Mock
+    private SaltService saltService;
+
+    @Mock
+    private SaltRunner saltRunner;
+
+    @Mock
+    private TelemetrySaltRetryConfig telemetrySaltRetryConfig;
+
+    @InjectMocks
+    private SaltTelemetryOrchestrator underTest;
 
     @BeforeEach
     void setupTest() throws CloudbreakOrchestratorFailedException {
+        underTest = new SaltTelemetryOrchestrator();
+        MockitoAnnotations.openMocks(this);
+        when(telemetrySaltRetryConfig.getDiagnosticsCollect()).thenReturn(MAX_DIAGNOSTICS_COLLECTION_RETRY);
         when(saltService.getPrimaryGatewayConfig(gatewayConfigs)).thenReturn(gatewayConfig);
-        when(saltService.createSaltConnector(gatewayConfig)).thenReturn(saltConnector);
+        when(saltService.createSaltConnector(gatewayConfig)).thenReturn(null);
         when(saltRunner.runner(orchestratorBootstrapArgumentCaptor.capture(), any(), any(), anyInt(), anyBoolean()))
                 .thenReturn(callable);
     }
@@ -102,6 +107,9 @@ class SaltTelemetryOrchestratorTest {
         Assertions.assertTrue(CollectionUtils.isEqualCollection(targets, saltJobRunner.getAllNode()));
         assertEquals(SaltTelemetryOrchestrator.FILECOLLECTOR_COLLECT, saltJobRunner.getState());
         verify(callable, Mockito.times(1)).call();
+        verify(saltService, Mockito.times(1)).getPrimaryGatewayConfig(gatewayConfigs);
+        verify(saltRunner, Mockito.times(1)).runner(any(), any(), any(), anyInt(), anyBoolean());
+        verify(telemetrySaltRetryConfig, Mockito.times(1)).getDiagnosticsCollect();
     }
 
     @Test

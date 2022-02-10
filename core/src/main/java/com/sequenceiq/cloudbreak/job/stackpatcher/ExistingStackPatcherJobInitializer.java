@@ -23,7 +23,7 @@ public class ExistingStackPatcherJobInitializer extends AbstractStackJobInitiali
     public void initJobs() {
         if (config.isExistingStackPatcherEnabled()) {
             LOGGER.info("Scheduling stack patcher jobs");
-            getAliveAndNotDeleteInProgressStacksStream()
+            getAliveJobResources()
                     .forEach(s -> jobService.schedule(new ExistingStackPatcherJobAdapter(s)));
         } else {
             LOGGER.info("Skipping scheduling stack patcher jobs, as they are disabled");

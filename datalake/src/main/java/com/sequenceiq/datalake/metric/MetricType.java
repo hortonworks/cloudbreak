@@ -19,7 +19,9 @@ public enum MetricType implements Metric {
     SDX_BACKUP_FINISHED("sdx.backup.finished"),
     SDX_RESTORE_REQUESTED("sdx.restore.requested"),
     SDX_RESTORE_FAILED("sdx.restore.failed"),
-    SDX_RESTORE_FINISHED("sdx.restore.finished");
+    SDX_RESTORE_FINISHED("sdx.restore.finished"),
+    UPGRADE_CCM_FINISHED("sdx.upgrade.ccm.finished"),
+    UPGRADE_CCM_FAILED("sdx.upgrade.ccm.failed");
 
     private final String metricName;
 

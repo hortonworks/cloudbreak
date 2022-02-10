@@ -1,10 +1,10 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
-
 
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
@@ -13,6 +13,8 @@ import com.sequenceiq.authorization.annotation.DisableCheckPermissions;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.resource.AuthorizationResourceAction;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.RoleTypeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.ServiceTypeV4Response;
 import com.sequenceiq.cloudbreak.converter.CustomConfigurationsToCustomConfigurationsV4ResponseConverter;
 import com.sequenceiq.cloudbreak.converter.CustomConfigurationsV4RequestToCustomConfigurationsConverter;
 import org.springframework.stereotype.Controller;
@@ -26,6 +28,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.dto.NameOrCrn;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.CustomConfigurations;
 import com.sequenceiq.cloudbreak.service.customconfigs.CustomConfigurationsService;
+import com.sequenceiq.cloudbreak.validation.AllRoleTypes;
+import com.sequenceiq.cloudbreak.validation.AllServiceTypes;
 
 @Controller
 public class CustomConfigurationsV4Controller implements CustomConfigurationsV4Endpoint {
@@ -92,5 +96,17 @@ public class CustomConfigurationsV4Controller implements CustomConfigurationsV4E
     public CustomConfigurationsV4Response deleteByName(@ResourceName String name) {
         return customConfigsToCustomConfigsResponseConverter.convert(customConfigurationsService.deleteByName(name,
                 ThreadBasedUserCrnProvider.getAccountId()));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CUSTOM_CONFIGS)
+    public ServiceTypeV4Response getServiceTypes() {
+        return new ServiceTypeV4Response(Arrays.stream(AllServiceTypes.values()).map(Enum::toString).collect(Collectors.toList()));
+    }
+
+    @Override
+    @CheckPermissionByAccount(action = AuthorizationResourceAction.CREATE_CUSTOM_CONFIGS)
+    public RoleTypeV4Response getRoleTypes() {
+        return new RoleTypeV4Response(Arrays.stream(AllRoleTypes.values()).map(Enum::toString).collect(Collectors.toList()));
     }
 }

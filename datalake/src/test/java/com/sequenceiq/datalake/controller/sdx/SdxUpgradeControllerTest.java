@@ -30,6 +30,7 @@ import com.sequenceiq.datalake.service.upgrade.SdxRuntimeUpgradeService;
 import com.sequenceiq.datalake.service.upgrade.ccm.SdxCcmUpgradeService;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.sdx.api.model.CcmUpgradeResponseType;
 import com.sequenceiq.sdx.api.model.SdxCcmUpgradeResponse;
 import com.sequenceiq.sdx.api.model.SdxUpgradeRequest;
 import com.sequenceiq.sdx.api.model.SdxUpgradeResponse;
@@ -255,9 +256,9 @@ class SdxUpgradeControllerTest {
 
     @Test
     void testUpgradeCcm() {
-        SdxCcmUpgradeResponse response = new SdxCcmUpgradeResponse("OK", new FlowIdentifier(FlowType.FLOW, "FlowId"));
+        SdxCcmUpgradeResponse response = new SdxCcmUpgradeResponse(CcmUpgradeResponseType.TRIGGERED, new FlowIdentifier(FlowType.FLOW, "FlowId"), "OK");
         when(sdxCcmUpgradeService.upgradeCcm(ENV_CRN)).thenReturn(response);
-        SdxCcmUpgradeResponse sdxCcmUpgradeResponse = underTest.upgradeCcm(ENV_CRN);
+        SdxCcmUpgradeResponse sdxCcmUpgradeResponse = underTest.upgradeCcm(ENV_CRN, USER_CRN);
         assertThat(sdxCcmUpgradeResponse).isEqualTo(response);
     }
 }

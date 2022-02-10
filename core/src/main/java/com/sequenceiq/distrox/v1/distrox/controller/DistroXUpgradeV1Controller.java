@@ -2,6 +2,7 @@ package com.sequenceiq.distrox.v1.distrox.controller;
 
 import javax.inject.Inject;
 import javax.validation.Valid;
+import javax.validation.constraints.NotEmpty;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +19,19 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.InternalUpgradeS
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.tags.upgrade.UpgradeV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade.UpgradeV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
+import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.auth.security.internal.InitiatorUserCrn;
+import com.sequenceiq.cloudbreak.service.upgrade.ccm.StackCcmUpgradeService;
 import com.sequenceiq.cloudbreak.structuredevent.CloudbreakRestRequestThreadLocalService;
+import com.sequenceiq.cloudbreak.validation.ValidCrn;
 import com.sequenceiq.distrox.api.v1.distrox.endpoint.DistroXUpgradeV1Endpoint;
+import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXCcmUpgradeV1Response;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Request;
 import com.sequenceiq.distrox.api.v1.distrox.model.upgrade.DistroXUpgradeV1Response;
 import com.sequenceiq.distrox.v1.distrox.converter.UpgradeConverter;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeAvailabilityService;
 import com.sequenceiq.distrox.v1.distrox.service.upgrade.DistroXUpgradeService;
+import com.sequenceiq.flow.api.model.FlowIdentifier;
 
 @Controller
 public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
@@ -43,6 +49,9 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
 
     @Inject
     private DistroXUpgradeService upgradeService;
+
+    @Inject
+    private StackCcmUpgradeService stackCcmUpgradeService;
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPGRADE_DATAHUB)
@@ -78,6 +87,14 @@ public class DistroXUpgradeV1Controller implements DistroXUpgradeV1Endpoint {
         boolean dataHubOsUpgradeEntitled = upgradeAvailabilityService.isOsUpgradeEnabledByUserCrn(initiatorUserCrn);
         return upgradeCluster(clusterCrn, distroxUpgradeRequest, nameOrCrn, new InternalUpgradeSettings(true, dataHubRuntimeUpgradeEnabled,
                 dataHubOsUpgradeEntitled));
+    }
+
+    @Override
+    @InternalOnly
+    public DistroXCcmUpgradeV1Response upgradeCcmByCrnInternal(@NotEmpty @ValidCrn(resource = CrnResourceDescriptor.DATAHUB) String crn,
+            @InitiatorUserCrn @ValidCrn(resource = CrnResourceDescriptor.USER) @NotEmpty String initiatorUserCrn) {
+        FlowIdentifier flowIdentifier = stackCcmUpgradeService.upgradeCcm(NameOrCrn.ofCrn(crn));
+        return new DistroXCcmUpgradeV1Response(flowIdentifier);
     }
 
     private DistroXUpgradeV1Response upgradeCluster(String clusterNameOrCrn, DistroXUpgradeV1Request distroxUpgradeRequest, NameOrCrn nameOrCrn) {

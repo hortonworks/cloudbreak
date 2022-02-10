@@ -77,13 +77,9 @@ dependencies {
     implementation     project(':cluster-dns-connector')
 
     implementation     group: "org.yaml",                  name: "snakeyaml",                                version: snakeYamlVersion
-    implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version
-    implementation     group: "io.springfox",              name: "springfox-core",                           version: swagger2Version
-    implementation     group: "io.springfox",              name: "springfox-swagger-ui",                     version: swagger2Version
     implementation     group: "com.google.code.gson",      name: "gson",                                     version: gsonVersion
     implementation     group: "dnsjava",                   name: "dnsjava",                                  version: dnsjavaVersion
-    implementation     group: "io.springfox",              name: "springfox-swagger2",                       version: swagger2Version
-    implementation     group: "io.springfox",              name: "springfox-swagger-ui",                     version: swagger2Version
+    implementation     group: "io.springfox",              name: "springfox-boot-starter",                   version: swaggerSpringFoxVersion
     implementation    (group: "io.swagger",                name: "swagger-jersey2-jaxrs",                    version: swaggerVersion) {
         exclude group: "org.yaml", module: "snakeyaml"
     }

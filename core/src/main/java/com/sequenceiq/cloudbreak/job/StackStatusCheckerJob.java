@@ -36,9 +36,13 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVmInstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.HostName;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.status.ExtendedHostStatuses;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
+import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.type.HealthCheck;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.converter.spi.InstanceMetaDataToCloudInstanceConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
@@ -54,6 +58,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stack.flow.InstanceSyncState;
 import com.sequenceiq.cloudbreak.service.stack.flow.StackSyncService;
 import com.sequenceiq.cloudbreak.service.stack.flow.SyncConfig;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.core.FlowLogService;
 
 import io.opentracing.Tracer;
@@ -102,6 +107,12 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
     @Inject
     private RuntimeVersionService runtimeVersionService;
 
+    @Inject
+    private StackUtil stackUtil;
+
+    @Inject
+    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
+
     public StackStatusCheckerJob(Tracer tracer) {
         super(tracer, "Stack Status Checker Job");
     }
@@ -127,7 +138,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 } else if (shouldSwitchToLongSyncJob(stackStatus, context)) {
                     LOGGER.debug("Stack sync will be scheduled to long polling, stack state is {}", stackStatus);
                     jobService.unschedule(getLocalId());
-                    jobService.scheduleLongIntervalCheck(new StackJobAdapter(stack));
+                    jobService.scheduleLongIntervalCheck(getStackId(), StackJobAdapter.class);
                 } else if (null == stackStatus || ignoredStates().contains(stackStatus)) {
                     LOGGER.debug("Stack sync is skipped, stack state is {}", stackStatus);
                 } else if (syncableStates().contains(stackStatus)) {
@@ -147,7 +158,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Stack stack = stackService.get(getStackId());
             Status stackStatus = stack.getStatus();
             if (!longSyncableStates().contains(stackStatus)) {
-                jobService.schedule(new StackJobAdapter(stack));
+                jobService.schedule(getStackId(), StackJobAdapter.class);
             }
         }
     }
@@ -209,7 +220,10 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 Status.EXTERNAL_DATABASE_STOP_FAILED,
                 Status.EXTERNAL_DATABASE_STOP_IN_PROGRESS,
                 Status.EXTERNAL_DATABASE_STOP_FINISHED,
-                Status.RECOVERY_FAILED
+                Status.RECOVERY_FAILED,
+                Status.UPGRADE_CCM_FAILED,
+                Status.UPGRADE_CCM_FINISHED,
+                Status.UPGRADE_CCM_IN_PROGRESS
         );
     }
 
@@ -253,7 +267,23 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
         clusterService.updateClusterCertExpirationState(stack.getCluster(), hostCertExpiring);
         clusterOperationService.reportHealthChange(stack.getResourceCrn(), newFailedNodeNamesWithReason, newHealthyHostNames);
         if (!failedInstances.isEmpty()) {
-            clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
+            if (stackUtil.stopStartScalingEntitlementEnabled(stack)) {
+                Set<InstanceMetaData> stoppedInstances = failedInstances.stream().filter(im -> im.getInstanceStatus().equals(STOPPED)).collect(toSet());
+                long stoppedInstancesCount = stoppedInstances.size();
+                Set<String> computeGroups = getComputeHostGroups(stack.getCluster());
+                boolean stoppedComputeOnly = stoppedInstances.stream().map(im -> im.getInstanceGroup().getGroupName()).allMatch(computeGroups::contains);
+                if (stoppedInstancesCount > 0 && stoppedComputeOnly && stoppedInstancesCount == failedInstances.size()) {
+                    // TODO CB-15146: This may need to change depending on the final form of how we check which operations are to be allowed
+                    //  when there are some STOPPED instances
+                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
+                } else {
+                    LOGGER.debug("WithStopStartEntitlement, putting cluster into NODE_FAILURE. Counts: stoppedInstanceCount={}, failedInstanceCount={}",
+                            stoppedInstancesCount, failedInstances.size());
+                    clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
+                }
+            } else {
+                clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.NODE_FAILURE);
+            }
         } else if (statesFromAvailableAllowed().contains(stack.getStatus())) {
             clusterService.updateClusterStatusByStackId(stack.getId(), DetailedStackStatus.AVAILABLE);
         }
@@ -333,6 +363,13 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             return failedHosts.get(imd.getDiscoveryFQDN());
         }
         return Optional.empty();
+    }
+
+    private Set<String> getComputeHostGroups(Cluster cluster) {
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+        Versioned blueprintVersion = () -> blueprintProcessor.getVersion().get();
+        return blueprintProcessor.getComputeHostGroups(blueprintVersion);
     }
 
     private Long getStackId() {

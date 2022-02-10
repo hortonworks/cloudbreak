@@ -19,12 +19,13 @@ import javax.ws.rs.QueryParam;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.cloudera.cdp.shaded.javax.ws.rs.core.MediaType;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.UpdateStackV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AuthorizeForAutoscaleV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.AutoscaleStackV4Responses;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.CertificateV4Response;
-import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.ClusterProxyConfiguration;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.response.LimitsConfigurationResponse;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.connector.responses.AutoscaleRecommendationV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.UpdateClusterV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.AutoscaleStackV4Response;
@@ -51,6 +52,14 @@ public interface AutoscaleV4Endpoint {
     @Produces(APPLICATION_JSON)
     @ApiOperation(value = StackOpDescription.PUT_BY_ID, produces = APPLICATION_JSON, notes = Notes.STACK_NOTES, nickname = "putStackForAutoscale")
     void putStack(@PathParam("crn") String crn, @PathParam("userId") String userId, @Valid UpdateStackV4Request updateRequest);
+
+    // Not overloading the regular scaling API since 1) that is public, and 2) stopstart may move into a separate InstancePoolManagementController at some point
+    @PUT
+    @Path("/stack/startNodes/crn/{crn}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.PUT_START_INSTANCES_BY_ID, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "putStackForAutoscaleStart")
+    void putStackStartInstances(@PathParam("crn") String crn, @Valid UpdateStackV4Request updateRequest);
 
     @PUT
     @Path("/stack/crn/{crn}/{userId}/cluster")
@@ -128,6 +137,16 @@ public interface AutoscaleV4Endpoint {
     void decommissionInternalInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
             @RequestBody @NotEmpty List<String> instanceIds,
             @QueryParam("forced") @DefaultValue("false") Boolean forced);
+
+    @DELETE
+    @Path("/stack/stopNodes/crn/{crn}")
+    @Produces(APPLICATION_JSON)
+    @ApiOperation(value = StackOpDescription.STOP_MULTIPLE_INSTANCES_BY_ID_IN_WORKSPACE, produces = APPLICATION_JSON,
+            notes = Notes.STACK_NOTES, nickname = "autoscaleStopInstances")
+    void stopInstancesForClusterCrn(@PathParam("crn") String clusterCrn,
+            @RequestBody @NotEmpty List<String> instanceIds,
+            @QueryParam("forced") @DefaultValue("false") Boolean forced,
+            @QueryParam("scalingStrategy") ScalingStrategy scalingStrategy);
 
     @GET
     @Path("clusterproxy")

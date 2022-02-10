@@ -343,7 +343,7 @@ public class StackCreationService {
             if (!stack.getOnFailureActionAction().equals(OnFailureAction.ROLLBACK)) {
                 LOGGER.debug("Nothing to do. OnFailureAction {}", stack.getOnFailureActionAction());
             } else {
-                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ROLLING_BACK);
+                stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.ROLLING_BACK, errorReason);
                 connector.rollback(stack, stack.getResources());
                 flowMessageService.fireEventAndLog(stack.getId(), Status.CREATE_FAILED.name(), STACK_INFRASTRUCTURE_CREATE_FAILED, errorReason);
             }

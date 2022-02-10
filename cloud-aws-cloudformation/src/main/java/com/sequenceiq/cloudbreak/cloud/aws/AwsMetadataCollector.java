@@ -9,6 +9,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -81,8 +82,8 @@ public class AwsMetadataCollector implements MetadataCollector {
                 ac.getCloudContext().getName(), resources.size(), vms.size(), allInstances.size());
         try {
             List<String> knownInstanceIdList = allInstances.stream()
-                    .filter(cloudInstance -> cloudInstance.getInstanceId() != null)
                     .map(CloudInstance::getInstanceId)
+                    .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
             return collectCloudVmMetaDataStatuses(ac, vms, resources, knownInstanceIdList);

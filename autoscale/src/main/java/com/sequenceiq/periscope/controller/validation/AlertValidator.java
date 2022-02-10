@@ -59,6 +59,16 @@ public class AlertValidator {
         }
     }
 
+    public void validateStopStartEntitlementAndDisableIfNotEntitled(Cluster cluster) {
+        if (!entitlementValidationService.stopStartAutoscalingEntitlementEnabled(ThreadBasedUserCrnProvider.getAccountId(), cluster.getCloudPlatform())) {
+            if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
+                asClusterCommonService.setStopStartScalingState(cluster.getId(), false);
+            }
+            throw new BadRequestException(messagesService.getMessage(MessageCode.AUTOSCALING_STOP_START_ENTITLEMENT_NOT_ENABLED,
+                    List.of(cluster.getCloudPlatform(), cluster.getStackName())));
+        }
+    }
+
     public void validateSupportedHostGroup(Cluster cluster, Set<String> requestHostGroups, AlertType alertType) {
         Set<String> supportedHostGroups = Optional.ofNullable(
                 recommendationService.getAutoscaleRecommendations(cluster.getStackCrn())).map(

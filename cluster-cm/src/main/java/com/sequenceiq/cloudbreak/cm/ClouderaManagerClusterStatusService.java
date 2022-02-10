@@ -86,7 +86,11 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
 
     static final String FULL_WITH_EXPLANATION_VIEW = "FULL_WITH_HEALTH_CHECK_EXPLANATION";
 
+    static final String SUMMARY = "summary";
+
     private static final String DEFAULT_STATUS_REASON = "Cloudera Manager reported bad health for this host.";
+
+    private static final String MAINTENANCE_MODE = "This host is in maintenance mode.";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClouderaManagerClusterStatusService.class);
 
@@ -221,7 +225,10 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         }
     }
 
-    private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary healthSummary) {
+    private static HealthCheckResult healthSummaryToHealthCheckResult(ApiHealthSummary healthSummary, Boolean maintenanceMode) {
+        if (Boolean.TRUE.equals(maintenanceMode)) {
+            return HealthCheckResult.UNHEALTHY;
+        }
         switch (healthSummary) {
             case GOOD:
             case CONCERNING:
@@ -275,6 +282,19 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         return new ExtendedHostStatuses(hostStates);
     }
 
+    @Override
+    public List<String> getDecommissionedHostsFromCM() {
+        HostsResourceApi api = clouderaManagerApiFactory.getHostsResourceApi(client);
+        try {
+            ApiHostList apiHostList = api.readHosts(null, null, SUMMARY);
+            LOGGER.trace("Response from CM for readHosts call: {}", apiHostList);
+            return apiHostList.getItems().stream().filter(ApiHost::getMaintenanceMode).map(ApiHost::getHostname).collect(toList());
+        } catch (ApiException e) {
+            LOGGER.info("Failed to get hosts from CM", e);
+            throw new RuntimeException("Failed to get hosts from CM due to: " + e.getMessage(), e);
+        }
+    }
+
     private static Set<HealthCheck> getHealthChecks(ApiHost apiHost, boolean cmServicesHealthCheckAllowed) {
         Set<HealthCheck> healthChecks = HEALTH_CHECK_FUNCTIONS.stream()
                 .map(healthCheck -> healthCheck.apply(apiHost))
@@ -318,12 +338,17 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
                 .filter(health -> HOST_SCM_HEALTH.equals(health.getName()))
                 .filter(health -> !IGNORED_HEALTH_SUMMARIES.contains(health.getSummary()))
                 .findFirst()
-                .map(apiHealthCheck -> new HealthCheck(HealthCheckType.HOST, healthSummaryToHealthCheckResult(apiHealthCheck.getSummary()),
-                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation())));
+                .map(apiHealthCheck -> new HealthCheck(
+                        HealthCheckType.HOST,
+                        healthSummaryToHealthCheckResult(apiHealthCheck.getSummary(), apiHost.getMaintenanceMode()),
+                        getHostHealthMessage(apiHealthCheck.getSummary(), apiHealthCheck.getExplanation(), apiHost.getMaintenanceMode())));
     }
 
-    private static Optional<String> getHostHealthMessage(ApiHealthSummary healthSummary, String explanation) {
-        if (healthSummaryToHealthCheckResult(healthSummary) == HealthCheckResult.UNHEALTHY) {
+    private static Optional<String> getHostHealthMessage(ApiHealthSummary healthSummary, String explanation, Boolean maintenanceMode) {
+        if (Boolean.TRUE.equals(maintenanceMode)) {
+            return Optional.of(MAINTENANCE_MODE);
+        }
+        if (healthSummaryToHealthCheckResult(healthSummary, false) == HealthCheckResult.UNHEALTHY) {
             if (StringUtils.isNotBlank(explanation)) {
                 return Optional.of(explanation.endsWith(".") ? explanation : explanation + ".");
             } else {
@@ -393,7 +418,7 @@ public class ClouderaManagerClusterStatusService implements ClusterStatusService
         return services.stream()
                 .flatMap(service -> readRoles(api, stack, service))
                 .filter(role -> !IGNORED_ROLE_STATES.contains(role.getRoleState()))
-                .collect(groupingBy(role -> toClusterStatus(role.getRoleState()),
+                .collect(groupingBy(role -> toClusterStatus(Optional.ofNullable(role.getRoleState()).orElse(ApiRoleState.UNKNOWN)),
                         mapping(ApiRole::getName, toList())));
     }
 

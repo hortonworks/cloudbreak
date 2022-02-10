@@ -27,7 +27,9 @@ public class FreeIpaPermissionService {
     private static final String ENROLLMENT_ADMINISTRATOR_ROLE = "Enrollment Administrator";
 
     public void setPermissions(FreeIpaClient freeIpaClient) throws FreeIpaClientException {
-        freeIpaClient.addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(ADD_HOSTS_PERMISSION, REMOVE_HOSTS_PERMISSION, REMOVE_SERVICES_PERMISSION));
+        freeIpaClient.addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(ADD_HOSTS_PERMISSION));
+        freeIpaClient.addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(REMOVE_HOSTS_PERMISSION));
+        freeIpaClient.addPermissionsToPrivilege(HOST_ENROLLMENT_PRIVILEGE, List.of(REMOVE_SERVICES_PERMISSION));
         freeIpaClient.addRolePrivileges(ENROLLMENT_ADMINISTRATOR_ROLE, Set.of(DNS_ADMINISTRATORS_PRIVILEGE));
     }
 }

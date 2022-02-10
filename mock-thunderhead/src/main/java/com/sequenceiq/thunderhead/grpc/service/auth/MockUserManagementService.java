@@ -39,6 +39,7 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATAHUB
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_RESIZE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_BACKUP_ON_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_METRICS_DATABUS_PROCESSING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATALAKE_RESIZE_RECOVERY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_AWS_EFS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_DATA_LAKE_LOAD_BALANCER;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_ENABLE_DISTROX_INSTANCE_TYPES;
@@ -54,7 +55,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_OS_UPGR
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_GCP;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAW_S3;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RAZ;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
@@ -65,11 +65,15 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_VM_DIAGNOSTICS;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CLOUDERA_INTERNAL_ACCOUNT;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AWS_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_AZURE_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_FLOW_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_AUTOSCALING;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_GCP_STOP_START_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATAHUB_STREAMING_SCALING;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION;
+import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.E2E_TEST_ONLY;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.EPHEMERAL_DISKS_FOR_TEMP_DATA;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.FMS_FREEIPA_BATCH_CALL;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.LOCAL_DEV;
@@ -313,9 +317,6 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datahub.os.upgrade.enable}")
     private boolean datahubOsUpgradeEnabled;
 
-    @Value("${auth.mock.raz.enable}")
-    private boolean razEnabled;
-
     @Value("${auth.mock.raws3.enable}")
     private boolean rawS3Enabled;
 
@@ -391,6 +392,9 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.datalake.backup.on.resize.enable}")
     private boolean datalakeBackupOnResize;
 
+    @Value("${auth.mock.datalake.recovery.resize.enable}")
+    private boolean datalakeResizeRecovery;
+
     @Value("${auth.mock.datalake.light.to.medium.migration.enable}")
     private boolean datalakeLightToMediumMigration;
 
@@ -426,6 +430,9 @@ public class MockUserManagementService extends UserManagementImplBase {
 
     @Value("${auth.mock.aws.native.variant.migration.enable}")
     private boolean enableAwsVariantMigration;
+
+    @Value("${auth.mock.e2e.test.only.enable}")
+    private boolean enableE2ETestOnly;
 
     private String cbLicense;
 
@@ -740,9 +747,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (datahubOsUpgradeEnabled) {
             builder.addEntitlements(createEntitlement(CDP_OS_UPGRADE_DATAHUB));
         }
-        if (razEnabled) {
-            builder.addEntitlements(createEntitlement(CDP_RAZ));
-        }
         if (ccmV2Enabled) {
             builder.addEntitlements(createEntitlement(CDP_CCM_V2));
         }
@@ -811,6 +815,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (datalakeBackupOnResize) {
             builder.addEntitlements(createEntitlement(CDP_DATALAKE_BACKUP_ON_RESIZE));
+        }
+        if (datalakeResizeRecovery) {
+            builder.addEntitlements(createEntitlement(CDP_DATALAKE_RESIZE_RECOVERY));
         }
         if (datalakeLightToMediumMigration) {
             builder.addEntitlements(createEntitlement(DATA_LAKE_LIGHT_TO_MEDIUM_MIGRATION));
@@ -882,6 +889,9 @@ public class MockUserManagementService extends UserManagementImplBase {
         if (enableUnboundElimination) {
             builder.addEntitlements(createEntitlement(CDP_UNBOUND_ELIMINATION));
         }
+        if (enableE2ETestOnly) {
+            builder.addEntitlements(createEntitlement(E2E_TEST_ONLY));
+        }
         responseObserver.onNext(
                 GetAccountResponse.newBuilder()
                         .setAccount(builder
@@ -895,6 +905,9 @@ public class MockUserManagementService extends UserManagementImplBase {
                                 .addEntitlements(createEntitlement(DATAHUB_AZURE_AUTOSCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_AWS_AUTOSCALING))
                                 .addEntitlements(createEntitlement(DATAHUB_GCP_AUTOSCALING))
+                                .addEntitlements(createEntitlement(DATAHUB_AWS_STOP_START_SCALING))
+                                .addEntitlements(createEntitlement(DATAHUB_AZURE_STOP_START_SCALING))
+                                .addEntitlements(createEntitlement(DATAHUB_GCP_STOP_START_SCALING))
                                 .addEntitlements(createEntitlement(LOCAL_DEV))
                                 .addEntitlements(createEntitlement(DATAHUB_FLOW_SCALING))
                                 .addEntitlements(createEntitlement(CDP_SHOW_CLI))

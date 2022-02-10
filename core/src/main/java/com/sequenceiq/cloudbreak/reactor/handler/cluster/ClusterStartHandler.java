@@ -1,8 +1,12 @@
 package com.sequenceiq.cloudbreak.reactor.handler.cluster;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -10,12 +14,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.database.base.DatabaseType;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
+import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.cluster.ClusterBuilderService;
 import com.sequenceiq.cloudbreak.domain.RDSConfig;
@@ -30,6 +36,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsDbCertificateProvider
 import com.sequenceiq.cloudbreak.service.sharedservice.DatalakeService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.template.views.RdsView;
+import com.sequenceiq.cloudbreak.util.StackUtil;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.EventHandler;
 
@@ -87,6 +94,9 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
     @Inject
     private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
+    @Inject
+    private StackUtil stackUtil;
+
     @Override
     public String selector() {
         return EventSelectorUtil.selector(ClusterStartRequest.class);
@@ -109,13 +119,14 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
                     datalakeStack.isPresent(),
                     dlIsRebuild,
                     resizeEntitlementEnabled);
+            CmTemplateProcessor blueprintProcessor = getCmTemplateProcessor(stack.getCluster());
             if (clusterDataHub && datalakeStack.isPresent() &&
                     dlIsRebuild &&
                     resizeEntitlementEnabled) {
                 LOGGER.info("Triggering update of remote data context");
                 apiConnectors.getConnector(stack).startClusterMgmtServices();
                 clusterBuilderService.configureManagementServices(stack.getId());
-                if (shouldReloadDatabaseConfig(stack.getCluster())) {
+                if (shouldReloadDatabaseConfig(blueprintProcessor)) {
                     //Update Hive service database configuration
                     updateDatabaseConfiguration(datalakeStack, stack, HIVE_SERVICE, DatabaseType.HIVE);
                 } else {
@@ -125,11 +136,38 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
             } else {
                 requestId = apiConnectors.getConnector(stack).startCluster();
             }
+            handleStopStartScalingFeature(stack, blueprintProcessor);
             result = new ClusterStartResult(request, requestId);
         } catch (Exception e) {
             result = new ClusterStartResult(e.getMessage(), e, request);
         }
         eventBus.notify(result.selector(), new Event<>(event.getHeaders(), result));
+    }
+
+    @VisibleForTesting
+    void handleStopStartScalingFeature(Stack stack, CmTemplateProcessor blueprintProcessor) {
+        if (stackUtil.stopStartScalingEntitlementEnabled(stack)) {
+            Set<String> computeGroups = getComputeHostGroups(blueprintProcessor);
+            if (computeGroups.isEmpty()) {
+                return;
+            }
+            List<String> decommissionedHostsFromCM = apiConnectors.getConnector(stack).clusterStatusService().getDecommissionedHostsFromCM();
+            if (decommissionedHostsFromCM.isEmpty()) {
+                return;
+            }
+            Set<String> decommissionedComputeHosts = new HashSet<>();
+            for (String group : computeGroups) {
+                String groupWithPrefix = '-' + group;
+                for (String hostName : decommissionedHostsFromCM) {
+                    if (hostName.contains(groupWithPrefix)) {
+                        decommissionedComputeHosts.add(hostName);
+                    }
+                }
+            }
+            if (!decommissionedComputeHosts.isEmpty()) {
+                apiConnectors.getConnector(stack).clusterCommissionService().recommissionHosts(new ArrayList<>(decommissionedComputeHosts));
+            }
+        }
     }
 
     private void updateDatabaseConfiguration(Optional<Stack> datalakeStack, Stack dataHubStack, String service, DatabaseType databaseType) {
@@ -165,9 +203,17 @@ public class ClusterStartHandler implements EventHandler<ClusterStartRequest> {
         return datalakeStack.getCreated() > dataHubStack.getCreated();
     }
 
-    private boolean shouldReloadDatabaseConfig(Cluster cluster) {
-        String blueprintText = cluster.getBlueprint().getBlueprintText();
-        CmTemplateProcessor blueprintProcessor = cmTemplateProcessorFactory.get(blueprintText);
+    private boolean shouldReloadDatabaseConfig(CmTemplateProcessor blueprintProcessor) {
         return blueprintProcessor.isCMComponentExistsInBlueprint("HIVEMETASTORE");
+    }
+
+    private CmTemplateProcessor getCmTemplateProcessor(Cluster cluster) {
+        String blueprintText = cluster.getBlueprint().getBlueprintText();
+        return cmTemplateProcessorFactory.get(blueprintText);
+    }
+
+    private Set<String> getComputeHostGroups(CmTemplateProcessor blueprintProcessor) {
+        Versioned blueprintVersion = () -> blueprintProcessor.getVersion().get();
+        return blueprintProcessor.getComputeHostGroups(blueprintVersion);
     }
 }

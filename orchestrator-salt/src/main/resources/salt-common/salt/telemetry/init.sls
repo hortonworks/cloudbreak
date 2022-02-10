@@ -4,9 +4,8 @@ check_databus_network_connectivity:
   cmd.run:
     - name: "cdp-telemetry utils check-connection --url {{ telemetry.databusEndpoint }}"
     - failhard: True{% if telemetry.proxyUrl %}
-    - env: {% if telemetry.proxyProtocol == "https" %}
-       - HTTPS_PROXY: {{ telemetry.proxyUrl }}{% else %}
-       - HTTP_PROXY: {{ telemetry.proxyUrl }}{% endif %}{% if telemetry.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
+    - env:
+       - HTTPS_PROXY: {{ telemetry.proxyUrl }}{% if telemetry.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
        - NO_PROXY: {{ telemetry.noProxyHosts }}{% endif %}{% endif %}{% endif %}{% if telemetry.noProxyHosts and telemetry.cdpTelemetryVersion > 8 %}
 /etc/cdp-telemetry/conf:
   file.directory:

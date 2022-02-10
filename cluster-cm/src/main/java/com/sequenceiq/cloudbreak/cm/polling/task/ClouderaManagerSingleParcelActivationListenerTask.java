@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.cm.polling.task;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
 import com.cloudera.api.swagger.ParcelResourceApi;
 import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
@@ -26,7 +25,7 @@ public class ClouderaManagerSingleParcelActivationListenerTask extends AbstractC
     }
 
     @Override
-    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException {
+    protected boolean doStatusCheck(ClouderaManagerCommandPollerObject pollerObject) throws ApiException {
         ApiClient apiClient = pollerObject.getApiClient();
         ParcelResourceApi parcelResourceApi = clouderaManagerApiPojoFactory.getParcelResourceApi(apiClient);
         String parcelStatus = getParcelStatus(pollerObject, parcelResourceApi);

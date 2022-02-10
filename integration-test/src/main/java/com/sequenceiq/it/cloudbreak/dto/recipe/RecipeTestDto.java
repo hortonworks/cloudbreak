@@ -1,13 +1,8 @@
 package com.sequenceiq.it.cloudbreak.dto.recipe;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.RecipeV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.requests.RecipeV4Request;
@@ -16,9 +11,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeV4Respo
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.recipes.responses.RecipeViewV4Responses;
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.RecipeTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.DeletableTestDto;
 import com.sequenceiq.it.cloudbreak.util.ResponseUtil;
@@ -30,9 +23,6 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
 
     private RecipeViewV4Responses simpleResponses;
 
-    @Inject
-    private RecipeTestClient recipeTestClient;
-
     private String accountId;
 
     public RecipeTestDto(TestContext testContext) {
@@ -40,13 +30,8 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient cloudbreakClient) {
-        LOGGER.info("Cleaning up recipe with name: {}", getName());
-        try {
-            when(recipeTestClient.deleteV4(), key("delete-recipe-" + getName()).withSkipOnFail(false));
-        } catch (WebApplicationException ignore) {
-            LOGGER.warn("Something went wrong during {} recipe delete, because of: {}", getName(), ignore.getMessage(), ignore);
-        }
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().recipeV4Endpoint().deleteByCrn(0L, getCrn());
     }
 
     @Override
@@ -133,6 +118,6 @@ public class RecipeTestDto extends DeletableTestDto<RecipeV4Request, RecipeV4Res
 
     @Override
     public int order() {
-        return 500;
+        return 600;
     }
 }

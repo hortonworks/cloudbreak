@@ -109,7 +109,7 @@ public class RedbeamsProvisionActions {
                 metricService.incrementMetricCounter(MetricType.DB_PROVISION_FINISHED, dbStack);
 
                 dbStack.ifPresentOrElse(
-                        db -> dbStackJobService.schedule(db),
+                        db -> dbStackJobService.schedule(db.getId()),
                         () -> LOGGER.info("DBStack was not present, could not start autosynch service")
                 );
             }

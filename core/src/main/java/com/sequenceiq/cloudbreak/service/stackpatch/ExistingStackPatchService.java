@@ -67,6 +67,12 @@ public abstract class ExistingStackPatchService {
                 .isReachable();
     }
 
+    protected boolean isPrimaryGatewayReachable(Stack stack) throws ExistingStackPatchApplyException {
+        return Optional.ofNullable(stack.getPrimaryGatewayInstance())
+                .orElseThrow(() -> new ExistingStackPatchApplyException("Could not find Primary gateway for stack: " + stack.getResourceCrn()))
+                .isReachable();
+    }
+
     /**
      * @return The StackFixType that is fixed by running the service implementation's doApply
      */

@@ -510,7 +510,7 @@ public class MetadataSetupServiceTest {
         workerInstanceGroup.setInstanceMetaData(Set.of(workerInstanceMetadata3));
 
         when(instanceGroupService.findByStackId(1L)).thenReturn(Set.of(gwInstanceGroup, workerInstanceGroup));
-        when(instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(gwInstanceGroup,
+        when(instanceMetaDataService.findAllByInstanceGroupAndInstanceStatusOrdered(gwInstanceGroup,
                 com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.CREATED)).thenReturn(List.of(gwInstanceMetadata1, gwInstanceMetadata2));
         when(instanceMetaDataService.findNotTerminatedForStack(1L)).thenReturn(Set.of(gwInstanceMetadata1, gwInstanceMetadata2, workerInstanceMetadata3));
         underTest.saveInstanceMetaData(stack, cloudVmMetaDataStatuses, CREATED);

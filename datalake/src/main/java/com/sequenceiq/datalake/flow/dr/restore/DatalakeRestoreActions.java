@@ -6,6 +6,7 @@ import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATAL
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILED_EVENT;
 import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_RESTORE_FAILURE_HANDLED_EVENT;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -346,7 +347,8 @@ public class DatalakeRestoreActions {
                         ResourceEvent.DATALAKE_RESTORE_FINISHED,
                         "Datalake is running, Datalake restore failed", payload.getResourceId());
 
-                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FAILED);
+                eventSenderService.sendEventAndNotification(sdxCluster, context.getFlowTriggerUserCrn(), ResourceEvent.DATALAKE_RESTORE_FAILED,
+                        List.of(exception.getMessage()));
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
                 metricService.incrementMetricCounter(MetricType.SDX_RESTORE_FAILED, sdxCluster);

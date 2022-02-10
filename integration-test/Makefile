@@ -29,6 +29,8 @@ swagger-check: buildswagger swagger-compare
 
 bring-up-schema: download-cbd create-image create-cloudbreak-context schema-migration
 
+clear-ums-user-assignments: fetch-secrets-docker clean-up-ums-user-assignments-docker
+
 download-jar-from-s3:
 	./scripts/download-artifacts.sh
 
@@ -40,6 +42,9 @@ buildcb:
 
 buildswagger:
 	./scripts/build-swagger.sh
+
+clean-up-ums-user-assignments-docker:
+	./scripts/clear-ums-user-assignments-docker.sh
 
 create-image:
 	./scripts/create-image.sh

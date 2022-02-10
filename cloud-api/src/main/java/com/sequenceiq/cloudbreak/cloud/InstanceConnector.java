@@ -26,6 +26,24 @@ public interface InstanceConnector {
     List<CloudVmInstanceStatus> start(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
 
     /**
+     * A version of instance start which limits the retries that the operation may normally perform.
+     *
+     * This falls back to the existing {@link #start(AuthenticatedContext, List, List)} implementation
+     * if a specific connector does not implement the API.
+     * 
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param resources            resources managed by Cloudbreak, can be used to figure out which resources are associated with the given VMs
+     *                             (e.g. floating IP) and they can be started as well
+     * @param vms                  VM instances to be started
+     * @param timeboundInMs        A timebound in ms for this call.
+     * @return status of instances
+     */
+    default List<CloudVmInstanceStatus> startWithLimitedRetry(AuthenticatedContext authenticatedContext, List<CloudResource> resources,
+            List<CloudInstance> vms, Long timeboundInMs) {
+        return start(authenticatedContext, resources, vms);
+    }
+
+    /**
      * Stop instances. You can stop instances trough this method. It does not need to wait/block until the VM instances are stopped, but it can return
      * immediately and the {@link #check(AuthenticatedContext, List)} method is invoked to check regularly whether the VM instances have already been stopped
      * or not.
@@ -37,6 +55,24 @@ public interface InstanceConnector {
      * @return status of instances
      */
     List<CloudVmInstanceStatus> stop(AuthenticatedContext authenticatedContext, List<CloudResource> resources, List<CloudInstance> vms);
+
+    /**
+     * A version of instance stop which limits the retries that operation may normally perform.
+     *
+     * This falls back to the existing {@link #stop(AuthenticatedContext, List, List)} implementation
+     * if a specific connector does not implement the API.
+     *
+     * @param authenticatedContext the authenticated context which holds the client object
+     * @param resources            resources managed by Cloudbreak, can be used to figure out which resources are associated with the given VMs
+     *                             (e.g. floating IP) and they can be started as well
+     * @param vms                  VM instances to be stopped
+     * @param timeboundInMs        A timebound in ms for this call.
+     * @return status of instances
+     */
+    default List<CloudVmInstanceStatus> stopWithLimitedRetry(AuthenticatedContext authenticatedContext, List<CloudResource> resources,
+            List<CloudInstance> vms, Long timeboundInMs) {
+        return stop(authenticatedContext, resources, vms);
+    }
 
     /**
      * Reboot instances. You can reboot instances through this method. It does not need to wait/block until the VM instances are rebooted, but it can return

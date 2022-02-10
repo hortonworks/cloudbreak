@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.service.TransactionService;
-import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.converter.DiagnosticsDataToParameterConverter;
 import com.sequenceiq.common.api.diagnostics.ListDiagnosticsCollectionResponse;
@@ -96,8 +95,7 @@ public class DiagnosticsService {
     }
 
     public FlowIdentifier startDiagnosticsCollection(DiagnosticsCollectionRequest request, String accountId, String userCrn) {
-        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithLists(request.getEnvironmentCrn(), accountId);
-        MDCBuilder.buildMdcContext(stack);
+        Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         diagnosticsCollectionValidator.validate(request, stack);
         LOGGER.debug("Starting diagnostics collection for FreeIpa. Crn: '{}'", stack.getResourceCrn());
         boolean useDbusCnameEndpoint = entitlementService.useDataBusCNameEndpointEnabled(stack.getAccountId());

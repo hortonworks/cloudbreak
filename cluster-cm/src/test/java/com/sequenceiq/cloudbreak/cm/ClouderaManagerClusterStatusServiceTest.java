@@ -5,6 +5,7 @@ import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.F
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.FULL_WITH_EXPLANATION_VIEW;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_AGENT_CERTIFICATE_EXPIRY;
 import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.HOST_SCM_HEALTH;
+import static com.sequenceiq.cloudbreak.cm.ClouderaManagerClusterStatusService.SUMMARY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -164,6 +165,25 @@ public class ClouderaManagerClusterStatusServiceTest {
     }
 
     @Test
+    public void reportsClusterUnknownWhenARoleStateIsNull() throws ApiException {
+        cmIsReachable();
+        servicesAre(
+                new ApiService().name("service1").serviceState(ApiServiceState.STARTED),
+                new ApiService().name("service2").serviceState(ApiServiceState.STARTED)
+        );
+        rolesAre("service1",
+                new ApiRole().name("role 1.1").roleState(ApiRoleState.STARTED),
+                new ApiRole().name("role 1.2").roleState(ApiRoleState.STARTED)
+        );
+        rolesAre("service2",
+                new ApiRole().name("role 2.1").roleState(null),
+                new ApiRole().name("role 2.2").roleState(ApiRoleState.STARTED)
+        );
+
+        assertEquals(ClusterStatus.UNKNOWN, subject.getStatus(true).getClusterStatus());
+    }
+
+    @Test
     public void ignoresServicesNA() throws ApiException {
         cmIsReachable();
         servicesAre(
@@ -231,6 +251,18 @@ public class ClouderaManagerClusterStatusServiceTest {
     }
 
     @Test
+    public void getDecommissionedHostsFromCM() throws ApiException {
+        hostsAre(
+                new ApiHost().hostname("host1").maintenanceMode(true),
+                new ApiHost().hostname("host2").maintenanceMode(false)
+        );
+
+        List<String> hosts = subject.getDecommissionedHostsFromCM();
+        assertEquals(1, hosts.size());
+        assertEquals("host1", hosts.get(0));
+    }
+
+    @Test
     public void collectsExtendedHostHealthIfAvailable() throws ApiException {
         hostsAre(
                 new ApiHost().hostname("host1")
@@ -245,7 +277,10 @@ public class ClouderaManagerClusterStatusServiceTest {
                         .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.BAD).explanation("in 2 days")),
                 new ApiHost().hostname("host4").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.NOT_AVAILABLE)),
                 new ApiHost().hostname("host5").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.HISTORY_NOT_AVAILABLE)),
-                new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED))
+                new ApiHost().hostname("host6").addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.DISABLED)),
+                new ApiHost().hostname("host7").maintenanceMode(true)
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_SCM_HEALTH).summary(ApiHealthSummary.GOOD))
+                        .addHealthChecksItem(new ApiHealthCheck().name(HOST_AGENT_CERTIFICATE_EXPIRY).summary(ApiHealthSummary.GOOD))
         );
 
         ExtendedHostStatuses extendedHostStatuses = subject.getExtendedHostStatuses(Optional.of("7.2.12"));
@@ -254,6 +289,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host1")));
         assertTrue(extendedHostStatuses.isHostHealthy(hostName("host2")));
         assertFalse(extendedHostStatuses.isHostHealthy(hostName("host3")));
+        assertFalse(extendedHostStatuses.isHostHealthy(hostName("host7")));
     }
 
     @Test
@@ -412,6 +448,7 @@ public class ClouderaManagerClusterStatusServiceTest {
         Arrays.stream(hosts).forEach(host -> host.addRoleRefsItem(roleRef(ApiHealthSummary.GOOD)));
         ApiHostList list = new ApiHostList().items(Arrays.asList(hosts));
         when(hostsApi.readHosts(null, null, FULL_VIEW)).thenReturn(list);
+        when(hostsApi.readHosts(null, null, SUMMARY)).thenReturn(list);
         when(hostsApi.readHosts(null, null, FULL_WITH_EXPLANATION_VIEW)).thenReturn(list);
     }
 

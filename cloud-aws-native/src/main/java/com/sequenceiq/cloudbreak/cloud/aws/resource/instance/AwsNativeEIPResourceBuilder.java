@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.aws.resource.instance;
 
+import static com.sequenceiq.cloudbreak.cloud.aws.resource.AwsNativeResourceBuilderOrderConstants.NATIVE_EIP_RESOURCE_BUILDER_ORDER;
 import static java.util.Collections.singletonList;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -46,8 +47,6 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
 
     private static final Logger LOGGER = getLogger(AwsNativeEIPResourceBuilder.class);
 
-    private static final int ORDER = 4;
-
     @Inject
     private AwsTaggingService awsTaggingService;
 
@@ -76,7 +75,7 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
                 return singletonList(CloudResource.builder()
                         .group(group.getName())
                         .type(resourceType())
-                        .status(CommonStatus.CREATED)
+                        .status(CommonStatus.REQUESTED)
                         .name(resourceName)
                         .persistent(true)
                         .reference(String.valueOf(privateId))
@@ -93,7 +92,7 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
             Group group, List<CloudResource> buildableResource, CloudStack cloudStack) throws Exception {
         List<CloudResource> ret = new ArrayList<>();
         if (!buildableResource.isEmpty()) {
-            LOGGER.info("Trying to create EIp for {}, resource name: {}", cloudInstance.getInstanceId(), buildableResource.get(0).getName());
+            LOGGER.info("Trying to create EIp for instance with privateId: {}, resource name: {}", privateId, buildableResource.get(0).getName());
             AmazonEc2Client amazonEC2Client = context.getAmazonEc2Client();
             TagSpecification tagSpecification = awsTaggingService.prepareEc2TagSpecification(
                     cloudStack.getTags(),
@@ -109,25 +108,28 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
             Optional<CloudResource> instanceResourceOpt = persistenceRetriever.notifyRetrieve(ac.getCloudContext().getId(), String.valueOf(privateId),
                     CommonStatus.CREATED, ResourceType.AWS_INSTANCE);
             CloudResource instanceResource = instanceResourceOpt.orElseThrow();
-            List<String> eips = List.of(allocateAddressResult.getAllocationId());
+            String allocationId = allocateAddressResult.getAllocationId();
+            List<String> eips = List.of(allocationId);
+            String instanceId = instanceResource.getInstanceId();
             List<AssociateAddressResult> associateAddressResults = awsElasticIpService.associateElasticIpsToInstances(
                     amazonEC2Client,
                     eips,
-                    List.of(instanceResource.getInstanceId()));
+                    List.of(instanceId));
 
+            String associationId = associateAddressResults.get(0).getAssociationId();
             CloudResource cloudResource = CloudResource.builder()
                     .cloudResource(buildableResource.get(0))
-                    .persistent(true)
-                    .instanceId(instanceResource.getInstanceId())
-                    .reference(allocateAddressResult.getAllocationId())
+                    .instanceId(instanceId)
+                    .status(CommonStatus.CREATED)
+                    .reference(allocationId)
                     .params(Map.of(CloudResource.ATTRIBUTES, EIpAttributes.EIpAttributesBuilder.builder()
-                            .withAllocateId(allocateAddressResult.getAllocationId())
-                            .withAssociationId(associateAddressResults.get(0).getAssociationId())
+                            .withAllocateId(allocationId)
+                            .withAssociationId(associationId)
                             .build()))
                     .build();
             ret.add(cloudResource);
-            LOGGER.info("EIp created for {}: association id: {}, allocationId: {}",
-                    cloudInstance.getInstanceId(), associateAddressResults.get(0).getAssociationId(), allocateAddressResult.getAllocationId());
+            LOGGER.info("EIp created for instance with private id: '{}' EC2 instance id: '{}' association id: '{}', allocationId: '{}'", privateId, instanceId,
+                    associationId, allocationId);
         } else {
             LOGGER.debug("No buildable EIp for {}", cloudInstance.getInstanceId());
         }
@@ -141,21 +143,22 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
 
     @Override
     public CloudResource delete(AwsContext context, AuthenticatedContext auth, CloudResource resource) throws Exception {
-        LOGGER.info("Terminate EIP with id: {}", resource.getInstanceId());
+        String allocationId = resource.getReference();
+        LOGGER.info("Terminate EIP with allocation id: '{}' and instance id: '{}'", allocationId, resource.getInstanceId());
         EIpAttributes eipAttributes = resource.getParameter(CloudResource.ATTRIBUTES, EIpAttributes.class);
         CloudResource ret = null;
         if (eipAttributes != null) {
             DisassociateAddressRequest disassociateAddressRequest = new DisassociateAddressRequest()
                     .withAssociationId(eipAttributes.getAssociationId());
             awsMethodExecutor.execute(() -> context.getAmazonEc2Client().disassociateAddress(disassociateAddressRequest), null);
-            ReleaseAddressRequest request = new ReleaseAddressRequest()
-                    .withAllocationId(eipAttributes.getAllocateId());
-            ReleaseAddressResult releaseAddressResult = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().releaseAddress(request), null);
-            ret = releaseAddressResult == null ? null : resource;
         } else {
-            LOGGER.debug("Cannot find attribute for {}, release and disassociate skipped", resource.getName());
+            LOGGER.info("Cannot find attribute for {}, disassociate address operation is skipped", resource.getName());
         }
-        return ret;
+        LOGGER.debug("Releasing EIP address with allocation id: '{}' and instance id: '{}'", allocationId, resource.getInstanceId());
+        ReleaseAddressRequest request = new ReleaseAddressRequest()
+                .withAllocationId(allocationId);
+        ReleaseAddressResult releaseAddressResult = awsMethodExecutor.execute(() -> context.getAmazonEc2Client().releaseAddress(request), null);
+        return releaseAddressResult == null ? null : resource;
     }
 
     @Override
@@ -165,6 +168,6 @@ public class AwsNativeEIPResourceBuilder extends AbstractAwsNativeComputeBuilder
 
     @Override
     public int order() {
-        return ORDER;
+        return NATIVE_EIP_RESOURCE_BUILDER_ORDER;
     }
 }

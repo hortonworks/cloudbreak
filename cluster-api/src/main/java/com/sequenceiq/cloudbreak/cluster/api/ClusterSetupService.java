@@ -52,6 +52,8 @@ public interface ClusterSetupService {
 
     void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
 
+    void waitForHostsHealthy(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException;
+
     void waitForServices(int requestId) throws CloudbreakException;
 
     String getSdxContext();

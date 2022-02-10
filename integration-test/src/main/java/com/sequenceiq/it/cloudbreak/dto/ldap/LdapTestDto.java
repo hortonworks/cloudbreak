@@ -1,16 +1,9 @@
 package com.sequenceiq.it.cloudbreak.dto.ldap;
 
-import static com.sequenceiq.it.cloudbreak.context.RunningParameter.key;
-
-import javax.inject.Inject;
-import javax.ws.rs.WebApplicationException;
-
 import com.sequenceiq.freeipa.api.v1.ldap.model.DirectoryType;
 import com.sequenceiq.freeipa.api.v1.ldap.model.create.CreateLdapConfigRequest;
 import com.sequenceiq.freeipa.api.v1.ldap.model.describe.DescribeLdapConfigResponse;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
-import com.sequenceiq.it.cloudbreak.client.LdapTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractFreeIpaTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
@@ -20,21 +13,13 @@ public class LdapTestDto extends AbstractFreeIpaTestDto<CreateLdapConfigRequest,
 
     private static final String LDAP_RESOURCE_NAME = "ldapName";
 
-    @Inject
-    private LdapTestClient ldapTestClient;
-
     public LdapTestDto(TestContext testContext) {
         super(new CreateLdapConfigRequest(), testContext);
     }
 
     @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.info("Cleaning up LDAP config with name: {}", getName());
-        try {
-            when(ldapTestClient.deleteV1(), key("delete-ldap-" + getName()).withSkipOnFail(false));
-        } catch (WebApplicationException ignore) {
-            LOGGER.warn("Something went wrong during {} LDAP config delete, because of: {}", getName(), ignore.getMessage(), ignore);
-        }
+    public void deleteForCleanup() {
+        getClientForCleanup().getDefaultClient().getLdapConfigV1Endpoint().delete(getResponse().getEnvironmentCrn());
     }
 
     public String getName() {

@@ -293,7 +293,10 @@ public class MetadataSetupService {
                 .findFirst();
 
         if (gwInstanceGroup.isPresent()) {
-            List<InstanceMetaData> gwInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatus(gwInstanceGroup.get(), InstanceStatus.CREATED);
+            // Ordered list of metadata to guarantee consistent primary gateway generation across multiple cluster recoveries
+            List<InstanceMetaData> gwInstances = instanceMetaDataService.findAllByInstanceGroupAndInstanceStatusOrdered(
+                    gwInstanceGroup.get(), InstanceStatus.CREATED);
+            LOGGER.debug("Found Gateway instances {}", gwInstances);
             Optional<InstanceMetaData> gwInstance = gwInstances.stream().findFirst();
             if (gwInstance.isPresent()) {
                 LOGGER.info("We were able to select primary GW from GW instances: {}", gwInstance);

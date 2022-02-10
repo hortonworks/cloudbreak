@@ -142,7 +142,12 @@ public class ScalingRequest implements Runnable {
             instanceGroupAdjustmentJson.setInstanceGroup(hostGroup);
             updateStackJson.setInstanceGroupAdjustment(instanceGroupAdjustmentJson);
 
-            cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
+            if (Boolean.TRUE.equals(cluster.isStopStartScalingEnabled())) {
+                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStackStartInstances(stackCrn, updateStackJson);
+            } else {
+                cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint().putStack(stackCrn, cluster.getClusterPertain().getUserId(), updateStackJson);
+            }
+
             scalingStatus = ScalingStatus.SUCCESS;
             statusReason = getMessageForCBSuccess();
             metricService.incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL);
@@ -174,6 +179,7 @@ public class ScalingRequest implements Runnable {
             hostGroupAdjustmentJson.setHostGroup(hostGroup);
             hostGroupAdjustmentJson.setValidateNodeCount(false);
             updateClusterJson.setHostGroupAdjustment(hostGroupAdjustmentJson);
+            // TODO CB-14929: CB-15153 List of nodes not provided. Do we really need to support this? Can Periscope always specify the list of nodes?
             cloudbreakCrnClient.withInternalCrn().autoscaleEndpoint()
                     .putCluster(stackCrn, cluster.getClusterPertain().getUserId(), updateClusterJson);
             scalingStatus = ScalingStatus.SUCCESS;

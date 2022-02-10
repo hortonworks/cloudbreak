@@ -11,6 +11,7 @@ import static java.lang.String.format;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -25,6 +26,7 @@ import org.springframework.dao.ConcurrencyFailureException;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.base.ScalingStrategy;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
@@ -140,6 +142,43 @@ public class StackOperationService {
         return flowManager.triggerStackRemoveInstances(stack.getId(), instanceIdsByHostgroupMap, forced);
     }
 
+    public FlowIdentifier stopInstances(Stack stack, Collection<String> instanceIds, boolean forced) {
+        LOGGER.info("Received stop instances request for instanceIds: [{}]", instanceIds);
+
+        if (instanceIds == null || instanceIds.isEmpty()) {
+            throw new BadRequestException("Stop request cannot process an empty instanceIds collection");
+        }
+        Map<String, Set<Long>> instanceIdsByHostgroupMap = new HashMap<>();
+        Set<String> instanceIdsWithoutMetadata = new HashSet<>();
+        for (String instanceId : instanceIds) {
+            InstanceMetaData metaData = updateNodeCountValidator.validateInstanceForStop(instanceId, stack);
+            if (metaData != null) {
+                instanceIdsByHostgroupMap.computeIfAbsent(metaData.getInstanceGroupName(), s -> new LinkedHashSet<>()).add(metaData.getPrivateId());
+            } else {
+                instanceIdsWithoutMetadata.add(instanceId);
+            }
+        }
+        if (instanceIdsByHostgroupMap.size() > 1) {
+            throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
+        }
+        LOGGER.info("InstanceIds without metadata: [{}]", instanceIdsWithoutMetadata);
+        updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
+                .stream()
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+        LOGGER.info("Stopping the following instances: {}", instanceIdsByHostgroupMap);
+        if (!forced) {
+            for (Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
+                String instanceGroupName = entry.getKey();
+                int scalingAdjustment = entry.getValue().size() * -1;
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stack, instanceGroupName, scalingAdjustment);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupName, scalingAdjustment, stack);
+            }
+        }
+        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DOWNSCALE_BY_STOP_REQUESTED,
+                "Requested node count for downscaling (stopstart): " + instanceIds.size());
+        return flowManager.triggerStopStartStackDownscale(stack.getId(), instanceIdsByHostgroupMap, forced);
+    }
+
     public FlowIdentifier updateImage(ImageChangeDto imageChangeDto) {
         return flowManager.triggerStackImageUpdate(imageChangeDto);
     }
@@ -225,6 +264,46 @@ public class StackOperationService {
             return FlowIdentifier.notTriggered();
         } else {
             return triggerStackStopIfNeeded(stack, cluster, updateCluster);
+        }
+    }
+
+    public FlowIdentifier updateNodeCountStartInstances(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson,
+            boolean withClusterEvent, ScalingStrategy scalingStrategy) {
+
+        if (instanceGroupAdjustmentJson.getScalingAdjustment() == 0) {
+            throw new BadRequestException("Attempting to upscale zero instances");
+        }
+        if (instanceGroupAdjustmentJson.getScalingAdjustment() < 0) {
+            throw new BadRequestException("Attempting to downscale via the start instances method. (File a bug)");
+        }
+
+        environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.upscalable());
+        try {
+            return transactionService.required(() -> {
+                Stack stackWithLists = stackService.getByIdWithLists(stack.getId());
+
+                updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateStackStatusForStartHostGroup(stackWithLists);
+                updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
+                updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
+                updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
+                if (withClusterEvent) {
+                    updateNodeCountValidator.validateClusterStatusForStartHostGroup(stackWithLists);
+                    updateNodeCountValidator.validateHostGroupIsPresent(instanceGroupAdjustmentJson, stackWithLists);
+                    updateNodeCountValidator.validateCMStatus(stackWithLists, instanceGroupAdjustmentJson);
+                }
+                stackUpdater.updateStackStatus(stackWithLists.getId(), DetailedStackStatus.UPSCALE_BY_START_REQUESTED,
+                        "Requested node count for upscaling (stopstart): " + instanceGroupAdjustmentJson.getScalingAdjustment());
+                return flowManager.triggerStopStartStackUpscale(
+                        stackWithLists.getId(),
+                        instanceGroupAdjustmentJson,
+                        withClusterEvent);
+            });
+        } catch (TransactionExecutionException e) {
+            if (e.getCause() instanceof BadRequestException) {
+                throw e.getCause();
+            }
+            throw new TransactionRuntimeExecutionException(e);
         }
     }
 
@@ -326,7 +405,7 @@ public class StackOperationService {
         } else if (reason != StopRestrictionReason.NONE) {
             throw new BadRequestException(
                     format("Cannot stop a stack '%s'. Reason: %s", stack.getName(), reason.getReason()));
-        } else if (!stack.isAvailable() && !stack.isStopFailed()) {
+        } else if (!stack.isAvailable() && !stack.isStopFailed() && !stack.isAvailableWithStoppedInstances()) {
             throw NotAllowedStatusUpdate
                     .stack(stack)
                     .to(STOPPED)

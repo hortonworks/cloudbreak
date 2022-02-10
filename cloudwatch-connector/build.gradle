@@ -23,7 +23,14 @@ dependencies {
   implementation ("io.grpc:grpc-all:$grpcVersion") {
     exclude group: 'org.mockito'
   }
+
+
+  testImplementation project(':usage-collection')
+
   testImplementation group: 'org.assertj',                         name: 'assertj-core',                   version: assertjVersion
   testImplementation group: 'org.mockito',                         name: 'mockito-core',                   version: mockitoVersion
   testImplementation group: 'org.mockito',                         name: 'mockito-inline',                 version: mockitoVersion
+  testImplementation group: 'org.hamcrest',                        name: 'hamcrest',                       version: hamcrestVersion
+  testImplementation group: 'org.powermock',                       name: 'powermock-module-junit4',        version: powermockVersion
+  testImplementation group: 'org.powermock',                       name: 'powermock-api-mockito2',         version: powermockVersion
 }

@@ -82,9 +82,6 @@ class EntitlementServiceTest {
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, false},
                 {"CDP_CLOUD_STORAGE_VALIDATION", (EntitlementCheckFunction) EntitlementService::cloudStorageValidationEnabled, true},
 
-                {"CDP_RAZ", (EntitlementCheckFunction) EntitlementService::razEnabled, false},
-                {"CDP_RAZ", (EntitlementCheckFunction) EntitlementService::razEnabled, true},
-
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, false},
                 {"CDP_RUNTIME_UPGRADE", (EntitlementCheckFunction) EntitlementService::runtimeUpgradeEnabled, true},
 
@@ -143,11 +140,23 @@ class EntitlementServiceTest {
                 {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, false},
                 {"DATAHUB_GCP_AUTOSCALING", (EntitlementCheckFunction) EntitlementService::gcpAutoScalingEnabled, true},
 
+                {"DATAHUB_AWS_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::awsStopStartScalingEnabled, false},
+                {"DATAHUB_AWS_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::awsStopStartScalingEnabled, true},
+
+                {"DATAHUB_AZURE_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::azureStopStartScalingEnabled, false},
+                {"DATAHUB_AZURE_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::azureStopStartScalingEnabled, true},
+
+                {"DATAHUB_GCP_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::gcpStopStartScalingEnabled, false},
+                {"DATAHUB_GCP_STOP_START_SCALING", (EntitlementCheckFunction) EntitlementService::gcpStopStartScalingEnabled, true},
+
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, false},
                 {"CDP_CB_DATABASE_WIRE_ENCRYPTION", (EntitlementCheckFunction) EntitlementService::databaseWireEncryptionEnabled, true},
 
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, false},
                 {"CDP_DATA_LAKE_LOAD_BALANCER", (EntitlementCheckFunction) EntitlementService::datalakeLoadBalancerEnabled, true},
+
+                {"CDP_DATALAKE_RESIZE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isDatalakeResizeRecoveryEnabled, false},
+                {"CDP_DATALAKE_RESIZE_RECOVERY", (EntitlementCheckFunction) EntitlementService::isDatalakeResizeRecoveryEnabled, true},
 
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", (EntitlementCheckFunction) EntitlementService::azureEndpointGatewayEnabled, false},
                 {"CDP_PUBLIC_ENDPOINT_ACCESS_GATEWAY_AZURE", (EntitlementCheckFunction) EntitlementService::azureEndpointGatewayEnabled, true},
@@ -188,7 +197,10 @@ class EntitlementServiceTest {
                 {"EPHEMERAL_DISKS_FOR_TEMP_DATA", (EntitlementCheckFunction) EntitlementService::ephemeralDisksForTempDataEnabled, true},
 
                 {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, false},
-                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true}
+                {"CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK", (EntitlementCheckFunction) EntitlementService::isGcpDiskEncryptionWithCMEKEnabled, true},
+
+                {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, false},
+                {"E2E_TEST_ONLY", (EntitlementCheckFunction) EntitlementService::isE2ETestOnlyEnabled, true}
         };
     }
 

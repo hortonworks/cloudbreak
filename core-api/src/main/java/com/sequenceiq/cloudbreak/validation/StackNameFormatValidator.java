@@ -6,12 +6,18 @@ import java.util.regex.Pattern;
 import javax.validation.ConstraintValidator;
 import javax.validation.ConstraintValidatorContext;
 
+import io.netty.util.internal.StringUtil;
+
 public class StackNameFormatValidator implements ConstraintValidator<ValidStackNameFormat, String> {
+
+    private static final Pattern NAME_PATTERN = Pattern.compile("(^[a-z][-a-z0-9]*[a-z0-9]$)");
 
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
-        Pattern pattern = Pattern.compile("(^[a-z][-a-z0-9]*[a-z0-9]$)");
-        Matcher matcher = pattern.matcher(value);
-        return matcher.matches();
+        if (!StringUtil.isNullOrEmpty(value)) {
+            Matcher matcher = NAME_PATTERN.matcher(value);
+            return matcher.matches();
+        }
+        return false;
     }
 }

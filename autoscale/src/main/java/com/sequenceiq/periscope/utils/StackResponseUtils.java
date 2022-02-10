@@ -33,6 +33,7 @@ public class StackResponseUtils {
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))
                 .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceMetaData -> InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
                 .collect(Collectors.toMap(InstanceMetaDataV4Response::getDiscoveryFQDN,
                         InstanceMetaDataV4Response::getInstanceId));
     }

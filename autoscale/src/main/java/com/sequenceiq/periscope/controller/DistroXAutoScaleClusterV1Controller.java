@@ -96,14 +96,14 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public DistroXAutoscaleClusterResponse enableAutoscaleForClusterCrn(@ResourceCrn String clusterCrn, AutoscaleClusterState autoscaleState) {
         Cluster cluster = asClusterCommonService.getClusterByStackCrn(clusterCrn);
-        return createClusterJsonResponse(asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
+        return updateClusterAutoScaleState(cluster, autoscaleState);
     }
 
     @Override
     @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public DistroXAutoscaleClusterResponse enableAutoscaleForClusterName(@ResourceName String clusterName, AutoscaleClusterState autoscaleState) {
         Cluster cluster = asClusterCommonService.getClusterByStackName(clusterName);
-        return createClusterJsonResponse(asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
+        return updateClusterAutoScaleState(cluster, autoscaleState);
     }
 
     @Override
@@ -138,11 +138,28 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
         return distroXAutoscaleClusterResponseConverter.convert(cluster);
     }
 
+    private DistroXAutoscaleClusterResponse updateClusterAutoScaleState(Cluster cluster, AutoscaleClusterState autoscaleState) {
+        if (Boolean.TRUE.equals(autoscaleState.getUseStopStartMechanism())) {
+            alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
+        }
+        try {
+            transactionService.required(() -> asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleState));
+        } catch (TransactionService.TransactionExecutionException e) {
+            throw e.getCause();
+        }
+        Cluster updatedCluster = clusterService.findById(cluster.getId());
+        return createClusterJsonResponse(updatedCluster);
+    }
+
     private DistroXAutoscaleClusterResponse updateClusterAutoScaleConfig(Cluster cluster,
             DistroXAutoscaleClusterRequest autoscaleClusterRequest) {
 
         alertValidator.validateEntitlementAndDisableIfNotEntitled(cluster);
         alertValidator.validateDistroXAutoscaleClusterRequest(cluster, autoscaleClusterRequest);
+
+        if (Boolean.TRUE.equals(autoscaleClusterRequest.getUseStopStartMechanism())) {
+            alertValidator.validateStopStartEntitlementAndDisableIfNotEntitled(cluster);
+        }
 
         try {
             transactionService.required(() -> {
@@ -152,6 +169,7 @@ public class DistroXAutoScaleClusterV1Controller implements DistroXAutoScaleClus
                 asClusterCommonService.createTimeAlerts(cluster.getId(),
                         timeAlertRequestConverter.convertAllFromJson(autoscaleClusterRequest.getTimeAlertRequests()));
                 asClusterCommonService.setAutoscaleState(cluster.getId(), autoscaleClusterRequest.getEnableAutoscaling());
+                asClusterCommonService.setStopStartScalingState(cluster.getId(), autoscaleClusterRequest.getUseStopStartMechanism());
             });
         } catch (TransactionService.TransactionExecutionException e) {
             throw e.getCause();

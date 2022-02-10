@@ -212,7 +212,7 @@ public class StackSyncService {
         }
     }
 
-    private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
+    void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig,
             Set<InstanceMetaData> instances) {
         Status status = stack.getStatus();
         if (instanceStateCounts.get(InstanceSyncState.RUNNING) > 0) {

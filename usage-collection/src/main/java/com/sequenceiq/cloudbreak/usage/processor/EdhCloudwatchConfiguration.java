@@ -19,6 +19,8 @@ public class EdhCloudwatchConfiguration {
 
     private String logStream;
 
+    private String region;
+
     private int maxRetry;
 
     private boolean forceLogging;
@@ -63,6 +65,14 @@ public class EdhCloudwatchConfiguration {
 
     public void setLogStream(String logStream) {
         this.logStream = logStream;
+    }
+
+    public String getRegion() {
+        return region;
+    }
+
+    public void setRegion(String region) {
+        this.region = region;
     }
 
     public boolean isForceLogging() {

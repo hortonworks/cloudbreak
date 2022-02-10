@@ -71,6 +71,9 @@ public class CentralCmTemplateUpdaterTest {
     @InjectMocks
     private HbaseCloudStorageServiceConfigProvider hbaseCloudStorageProvider = new HbaseCloudStorageServiceConfigProvider();
 
+    @InjectMocks
+    private CoreConfigProvider coreConfigProvider;
+
     @Spy
     private TemplateProcessor templateProcessor;
 
@@ -113,7 +116,9 @@ public class CentralCmTemplateUpdaterTest {
     public void setUp() {
         when(entitlementService.sdxHbaseCloudStorageEnabled(anyString())).thenReturn(true);
 
-        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(new HiveMetastoreConfigProvider(),
+        List<CmTemplateComponentConfigProvider> cmTemplateComponentConfigProviders = List.of(
+                new HiveMetastoreConfigProvider(),
+                coreConfigProvider,
                 hbaseCloudStorageProvider);
         when(cmTemplateProcessorFactory.get(anyString())).thenAnswer(i -> new CmTemplateProcessor(i.getArgument(0)));
         when(templatePreparationObject.getBlueprintView()).thenReturn(blueprintView);
@@ -220,6 +225,52 @@ public class CentralCmTemplateUpdaterTest {
         when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/clouderamanager-nometastore.bp"));
         ApiClusterTemplate generated = testGetCmTemplate();
         assertMatchesBlueprintAtPath("output/clouderamanager-nometastore.bp", generated);
+    }
+
+    @Test
+    public void getCmTemplateIfCoresettingspresentedShouldNotOverrideTheProperty() {
+        List<StorageLocationView> locations = new ArrayList<>();
+
+        StorageLocation hbaseRootDir = new StorageLocation();
+        hbaseRootDir.setProperty("hbase.rootdir");
+        hbaseRootDir.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(hbaseRootDir));
+
+        StorageLocation coresettings = new StorageLocation();
+        coresettings.setProperty("core_defaultfs");
+        coresettings.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(coresettings));
+
+        S3FileSystemConfigurationsView fileSystemConfigurationsView =
+                new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationsView));
+
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/core-settings.bp"));
+        ApiClusterTemplate generated = testGetCmTemplate();
+        assertMatchesBlueprintAtPath("output/core-settings.bp", generated);
+    }
+
+    @Test
+    public void getCmTemplateIfCoresettingspresentedShouldNotOverrideThePropertyWithEmptyString() {
+        List<StorageLocationView> locations = new ArrayList<>();
+
+        StorageLocation hbaseRootDir = new StorageLocation();
+        hbaseRootDir.setProperty("hbase.rootdir");
+        hbaseRootDir.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(hbaseRootDir));
+
+        StorageLocation coresettings = new StorageLocation();
+        coresettings.setProperty("core_defaultfs");
+        coresettings.setValue("s3a://bucket/cluster1/hbase");
+        locations.add(new StorageLocationView(coresettings));
+
+        S3FileSystemConfigurationsView fileSystemConfigurationsView =
+                new S3FileSystemConfigurationsView(new S3FileSystem(), locations, false);
+        when(templatePreparationObject.getFileSystemConfigurationView()).thenReturn(Optional.of(fileSystemConfigurationsView));
+
+        when(blueprintView.getBlueprintText()).thenReturn(getBlueprintText("input/core-settings-empty.bp"));
+        ApiClusterTemplate generated = testGetCmTemplate();
+        assertMatchesBlueprintAtPath("output/core-settings-empty.bp", generated);
     }
 
     @Test

@@ -17,6 +17,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CloneCustomConfigurati
 import com.sequenceiq.cloudbreak.api.endpoint.v4.requests.CustomConfigurationsV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.CustomConfigurationsV4Response;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.CustomConfigurationsV4Responses;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.RoleTypeV4Response;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.responses.ServiceTypeV4Response;
 import com.sequenceiq.cloudbreak.doc.ApiDescription;
 import com.sequenceiq.cloudbreak.jerseyclient.RetryAndMetrics;
 
@@ -83,4 +85,17 @@ public interface CustomConfigurationsV4Endpoint {
     @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.DELETE_BY_NAME, produces = MediaType.APPLICATION_JSON, nickname = "deleteByName",
             notes = CUSTOM_CONFIGURATIONS_NOTES)
     CustomConfigurationsV4Response deleteByName(@PathParam("name") @NotNull String name);
+
+    @GET
+    @Path("/service_types")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.GET_SERVICE_TYPES, produces = MediaType.APPLICATION_JSON,
+            nickname = "getServiceTypes")
+    ServiceTypeV4Response getServiceTypes();
+
+    @GET
+    @Path("/role_types")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = ApiDescription.CustomConfigurationsOpDescription.GET_ROLE_TYPES, produces = MediaType.APPLICATION_JSON, nickname = "getRoleTypes")
+    RoleTypeV4Response getRoleTypes();
 }

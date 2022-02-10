@@ -29,7 +29,16 @@ public abstract class EvaluatorExecutor implements Runnable {
     public final void run() {
         long itemId = getContext().getItemId();
         try {
+            LOGGER.debug("Running EvaluatorExecutor: {}", this);
+            // TODO CB-14972: Have the evaluatorExecutors implement toString with relevant context information.
             execute();
+        } catch (Exception e) {
+            LOGGER.warn("Exception occurred while running EvaluatorExecutor: {}", this, e);
+            throw e;
+            // TODO CB-14972: The threadpoolexecutor which handles this needs to take care of Exceptions.
+            //  At least log them.
+            // TODO AS-Improvement: Do we need to generate alerts if there are too many failures. This could be a result
+            //  of a temporary problem - so alerting may not work very welll.
         } finally {
             executorServiceWithRegistry.finished(this, itemId);
         }

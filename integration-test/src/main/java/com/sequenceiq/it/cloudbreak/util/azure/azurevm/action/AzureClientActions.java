@@ -3,6 +3,7 @@ package com.sequenceiq.it.cloudbreak.util.azure.azurevm.action;
 import static java.lang.String.format;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -136,12 +137,16 @@ public class AzureClientActions {
                 .collect(Collectors.toMap(VirtualMachine::id, VirtualMachine::tags));
     }
 
-    public List<String> getVolumesDesId(String clusterName, List<String> instanceIds) {
+    public List<String> getVolumesDesId(String clusterName, String resourceGroupName, List<String> instanceIds) {
         List<String> diskEncryptionSetIds = new ArrayList<>();
 
         instanceIds.forEach(id -> {
-            String resourceGroup = getResourceGroupName(clusterName, id);
-            VirtualMachine virtualMachine = azure.virtualMachines().getByResourceGroup(resourceGroup, id);
+            VirtualMachine virtualMachine;
+            if (StringUtils.isBlank(resourceGroupName)) {
+                virtualMachine = azure.virtualMachines().getByResourceGroup(getResourceGroupName(clusterName, id), id);
+            } else {
+                virtualMachine = azure.virtualMachines().getByResourceGroup(resourceGroupName, id);
+            }
             Map<Integer, VirtualMachineDataDisk> dataDiskMap = virtualMachine.dataDisks();
 
             if (MapUtils.isNotEmpty(dataDiskMap)) {
@@ -160,16 +165,20 @@ public class AzureClientActions {
         return diskEncryptionSetIds;
     }
 
-    public ResourceGroup createResourceGroup(String resourceGroupName) {
+    public ResourceGroup createResourceGroup(String resourceGroupName, Map<String, String> tags) {
         if (StringUtils.isNotBlank(resourceGroupName)) {
             LOGGER.info(format("Creating resource group '%s'...", resourceGroupName));
+            Map<String, String> allTags = new HashMap<>();
+            allTags.putAll(tags);
+            allTags.putAll(commonCloudProperties.getTags());
             ResourceGroup resourceGroup;
             resourceGroup = azure.resourceGroups().define(resourceGroupName)
                     .withRegion(azureProperties.getRegion())
-                    .withTags(commonCloudProperties.getTags())
+                    .withTags(allTags)
                     .create();
             if (resourceGroup.provisioningState().equalsIgnoreCase("Succeeded")) {
-                LOGGER.info(format("Resource group '%s' has been created!", resourceGroupName));
+                LOGGER.info(format("New resource group '%s' has been created.", resourceGroupName));
+                Log.then(LOGGER, format(" New resource group '%s' has been created. ", resourceGroupName));
                 return resourceGroup;
             } else {
                 LOGGER.error("Failed to provision the resource group '{}'!", resourceGroupName);

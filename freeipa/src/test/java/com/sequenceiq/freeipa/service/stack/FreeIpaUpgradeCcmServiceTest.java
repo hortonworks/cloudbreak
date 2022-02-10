@@ -64,7 +64,7 @@ class FreeIpaUpgradeCcmServiceTest {
     @Test
     void upgradeCcmTestWhenAvailableAndOperationRunning() {
         Stack stack = createStack(Status.AVAILABLE);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Operation operation = createOperation(OperationState.RUNNING);
         when(operationService.startOperation(ACCOUNT_ID, OperationType.UPGRADE_CCM, List.of(ENVIRONMENT_CRN), List.of())).thenReturn(operation);
         when(operationConverter.convert(operation)).thenReturn(operationStatus);
@@ -81,7 +81,7 @@ class FreeIpaUpgradeCcmServiceTest {
     @EnumSource(value = OperationState.class, names = {"RUNNING"}, mode = EnumSource.Mode.EXCLUDE)
     void upgradeCcmTestWhenAvailableAndOperationNotRunning(OperationState operationState) {
         Stack stack = createStack(Status.AVAILABLE);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
         Operation operation = createOperation(operationState);
         when(operationService.startOperation(ACCOUNT_ID, OperationType.UPGRADE_CCM, List.of(ENVIRONMENT_CRN), List.of())).thenReturn(operation);
         when(operationConverter.convert(operation)).thenReturn(operationStatus);
@@ -96,7 +96,7 @@ class FreeIpaUpgradeCcmServiceTest {
     @EnumSource(value = Status.class, names = {"AVAILABLE"}, mode = EnumSource.Mode.EXCLUDE)
     void upgradeCcmTestWhenNotAvailable(Status status) {
         Stack stack = createStack(status);
-        when(stackService.getByEnvironmentCrnAndAccountIdWithLists(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
+        when(stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(ENVIRONMENT_CRN, ACCOUNT_ID)).thenReturn(stack);
 
         BadRequestException badRequestException = assertThrows(BadRequestException.class, () -> underTest.upgradeCcm(ENVIRONMENT_CRN, ACCOUNT_ID));
         assertThat(badRequestException).hasMessage("FreeIPA stack 'stackName' must be AVAILABLE to start Cluster Connectivity Manager upgrade.");

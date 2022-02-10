@@ -115,7 +115,21 @@ public class ReactorFlowManager {
         return reactorNotifier.notify(stackId, selector, new StackEvent(selector, stackId));
     }
 
+    public FlowIdentifier triggerStopStartStackUpscale(Long stackId, InstanceGroupAdjustmentV4Request instanceGroupAdjustment, boolean withClusterEvent) {
+        LOGGER.debug("FlowManager trigger for stopstart-upscale");
+        String selector = FlowChainTriggers.STOPSTART_UPSCALE_CHAIN_TRIGGER_EVENT;
+        AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(instanceGroupAdjustment.getAdjustmentType(),
+                instanceGroupAdjustment.getThreshold());
+        CloudPlatformVariant cloudPlatformVariant = stackService.getPlatformVariantByStackId(stackId);
+        Acceptable stackAndClusterUpscaleTriggerEvent = new StackAndClusterUpscaleTriggerEvent(selector,
+                stackId, instanceGroupAdjustment.getInstanceGroup(), instanceGroupAdjustment.getScalingAdjustment(),
+                withClusterEvent ? ScalingType.UPSCALE_TOGETHER : ScalingType.UPSCALE_ONLY_STACK,
+                getStackNetworkScaleDetails(instanceGroupAdjustment), adjustmentTypeWithThreshold, cloudPlatformVariant.getVariant().value());
+        return reactorNotifier.notify(stackId, selector, stackAndClusterUpscaleTriggerEvent);
+    }
+
     public FlowIdentifier triggerStackUpscale(Long stackId, InstanceGroupAdjustmentV4Request instanceGroupAdjustment, boolean withClusterEvent) {
+        LOGGER.info("FlowManager trigger for upscale");
         String selector = FlowChainTriggers.FULL_UPSCALE_TRIGGER_EVENT;
         AdjustmentTypeWithThreshold adjustmentTypeWithThreshold = new AdjustmentTypeWithThreshold(instanceGroupAdjustment.getAdjustmentType(),
                 instanceGroupAdjustment.getThreshold());
@@ -151,6 +165,26 @@ public class ReactorFlowManager {
         ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
         ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, Collections.singleton(privateId),
                 ScalingType.DOWNSCALE_TOGETHER, new Promise<>(), details);
+        return reactorNotifier.notify(stackId, selector, event);
+    }
+
+    public FlowIdentifier triggerStopStartStackDownscale(Long stackId, Map<String, Set<Long>> instanceIdsByHostgroupMap, boolean forced) {
+        // TODO CB-14929: stop-start is not meant for multiple hostGroups - set up a different API for this.
+        LOGGER.debug("triggerStopStartStackDownscale with instanceIdsByHostgroupMap={}", instanceIdsByHostgroupMap);
+        if (instanceIdsByHostgroupMap.size() != 1) {
+            throw new RuntimeException("Expected instancesIdsToHostGroupMap to contain exactly 1 host group. Found" + instanceIdsByHostgroupMap.size());
+        }
+
+        Map.Entry<String, Set<Long>> entry = instanceIdsByHostgroupMap.entrySet().iterator().next();
+        String hostGroup = entry.getKey();
+        Set<Long> privateIds = entry.getValue();
+        LOGGER.debug("ids to remove(stop). size:{}, ids:{}", privateIds.size(), privateIds);
+
+        String selector = FlowChainTriggers.STOPSTART_DOWNSCALE_CHAIN_TRIGGER_EVENT;
+
+        ClusterDownscaleDetails details = new ClusterDownscaleDetails(forced, false);
+        ClusterAndStackDownscaleTriggerEvent event = new ClusterAndStackDownscaleTriggerEvent(selector, stackId, hostGroup, privateIds,
+                ScalingType.DOWNSCALE_TOGETHER,  new Promise<>(), details);
         return reactorNotifier.notify(stackId, selector, event);
     }
 

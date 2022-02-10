@@ -5,7 +5,6 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.sequenceiq.authorization.info.model.CheckRightV4Response;
 import com.sequenceiq.authorization.info.model.RightV4;
-import com.sequenceiq.it.cloudbreak.MicroserviceClient;
 import com.sequenceiq.it.cloudbreak.Prototype;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.AbstractCloudbreakTestDto;
@@ -31,11 +30,6 @@ public class CheckRightTestDto extends AbstractCloudbreakTestDto<Object, CheckRi
     public CheckRightTestDto withRightsToCheck(List<RightV4> rightsToCheck) {
         this.rightsToCheck = rightsToCheck;
         return this;
-    }
-
-    @Override
-    public void cleanUp(TestContext context, MicroserviceClient client) {
-        LOGGER.debug("this entry point does not have any clean up operation");
     }
 
     @Override

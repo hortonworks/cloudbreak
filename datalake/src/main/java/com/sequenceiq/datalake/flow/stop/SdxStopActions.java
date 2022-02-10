@@ -17,7 +17,9 @@ import org.springframework.statemachine.StateContext;
 import org.springframework.statemachine.action.Action;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.datalake.entity.DatalakeStatusEnum;
+import com.sequenceiq.datalake.events.EventSenderService;
 import com.sequenceiq.datalake.flow.SdxContext;
 import com.sequenceiq.datalake.flow.SdxEvent;
 import com.sequenceiq.datalake.flow.SdxFailedEvent;
@@ -46,6 +48,9 @@ public class SdxStopActions {
 
     @Inject
     private SdxStopService stopService;
+
+    @Inject
+    private EventSenderService eventSenderService;
 
     @Bean(name = "SDX_STOP_START_STATE")
     public Action<?, ?> sdxStop() {
@@ -194,6 +199,7 @@ public class SdxStopActions {
                 }
                 Flow flow = getFlow(context.getFlowParameters().getFlowId());
                 flow.setFlowFailed(payload.getException());
+                eventSenderService.notifyEvent(context, ResourceEvent.SDX_STOP_FAILED);
                 sdxStatusService.setStatusForDatalakeAndNotify(failedStatus, statusReason, payload.getResourceId());
                 sendEvent(context, SDX_STOP_FAILED_HANDLED_EVENT.event(), payload);
             }

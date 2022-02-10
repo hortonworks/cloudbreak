@@ -12,6 +12,7 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataType;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
@@ -71,9 +72,32 @@ public class UpdateNodeCountValidator {
         }
     }
 
+    public void validateCMStatus(Stack stack, InstanceGroupAdjustmentV4Request instanceGroupAdjustmentJson) {
+        List<InstanceMetaData> instanceMetaDataAsList = stack.getInstanceMetaDataAsList();
+        List<InstanceMetaData> unhealthyCM = instanceMetaDataAsList.stream()
+                .filter(instanceMetaData -> (instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY) ||
+                                                instanceMetaData.getInstanceMetadataType().equals(InstanceMetadataType.GATEWAY_PRIMARY))
+                                                && !InstanceStatus.SERVICES_HEALTHY.equals(instanceMetaData.getInstanceStatus()))
+                .collect(Collectors.toList());
+        if (!unhealthyCM.isEmpty()) {
+            String notHealthyInstances = unhealthyCM.stream()
+                    .map(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() + ": " + instanceMetaData.getInstanceStatus())
+                    .collect(Collectors.joining(","));
+            throw new BadRequestException(
+                    format("Upscale is not allowed because the CM host is not healthy: %s.", notHealthyInstances));
+        }
+    }
+
     public void validateStackStatus(Stack stack) {
         if (!stack.isAvailable()) {
             throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's running.",
+                    stack.getName(), stack.getStatus()));
+        }
+    }
+
+    public void validateStackStatusForStartHostGroup(Stack stack) {
+        if (!(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
+            throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
                     stack.getName(), stack.getStatus()));
         }
     }
@@ -107,6 +131,14 @@ public class UpdateNodeCountValidator {
         Cluster cluster = stack.getCluster();
         if (cluster != null && !stack.isAvailable()) {
             throw new BadRequestException(format("Data Hub '%s' is currently in '%s' state. Node count can only be updated if it's available.",
+                    cluster.getName(), stack.getStatus()));
+        }
+    }
+
+    public void validateClusterStatusForStartHostGroup(Stack stack) {
+        Cluster cluster = stack.getCluster();
+        if (cluster != null && !(stack.isAvailable() || stack.isAvailableWithStoppedInstances())) {
+            throw new BadRequestException(format("Data Hub '%s' has '%s' state. Node group start operation is not allowed for this state.",
                     cluster.getName(), stack.getStatus()));
         }
     }
@@ -248,6 +280,15 @@ public class UpdateNodeCountValidator {
                 .orElseThrow(() -> new NotFoundException(format("Metadata for instance %s has not found.", instanceId)));
         downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
         downscaleValidatorService.checkClusterInValidStatus(stack);
+        return metaData;
+    }
+
+    public InstanceMetaData validateInstanceForStop(String instanceId, Stack stack) {
+        InstanceMetaData metaData = instanceMetaDataService.findByStackIdAndInstanceId(stack.getId(), instanceId).orElse(null);
+        if (metaData != null) {
+            downscaleValidatorService.checkInstanceIsTheClusterManagerServerOrNot(metaData.getPublicIp(), metaData.getInstanceMetadataType());
+            downscaleValidatorService.checkClusterInValidStatus(stack);
+        }
         return metaData;
     }
 }

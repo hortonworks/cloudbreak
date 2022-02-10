@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.collections4.MapUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
@@ -22,20 +24,23 @@ import com.sequenceiq.cloudbreak.usage.processor.EdhCloudwatchProcessor;
 @Service
 public class CloudwatchUsageProcessingStrategy implements UsageProcessingStrategy {
 
-    private final EdhCloudwatchProcessor edhKuduProcessor;
+    private static final Logger LOGGER = LoggerFactory.getLogger(CloudwatchUsageProcessingStrategy.class);
+
+    private final EdhCloudwatchProcessor edhCloudwatchProcessor;
 
     private final EdhCloudwatchConfiguration edhCloudwatchConfiguration;
 
     private final Map<String, Object> additionalFields;
 
-    public CloudwatchUsageProcessingStrategy(EdhCloudwatchProcessor edhKuduProcessor, EdhCloudwatchConfiguration edhCloudwatchConfiguration) {
-        this.edhKuduProcessor = edhKuduProcessor;
+    public CloudwatchUsageProcessingStrategy(EdhCloudwatchProcessor edhCloudwatchProcessor, EdhCloudwatchConfiguration edhCloudwatchConfiguration) {
+        this.edhCloudwatchProcessor = edhCloudwatchProcessor;
         this.edhCloudwatchConfiguration = edhCloudwatchConfiguration;
         this.additionalFields = toMap(edhCloudwatchConfiguration.getAdditionalFields());
     }
 
     @Override
     public void processUsage(UsageProto.Event event) {
+        LOGGER.info("Logging binary format for the following usage event: {}", event);
         Map<String, Object> fields = new HashMap<>();
         long timestamp = event.getTimestamp();
         String binaryUsageEvent = BaseEncoding.base64().encode(event.toByteArray());
@@ -48,8 +53,10 @@ public class CloudwatchUsageProcessingStrategy implements UsageProcessingStrateg
         CloudwatchRecordRequest recordRequest = CloudwatchRecordRequest.Builder.newBuilder()
                 .withTimestamp(timestamp)
                 .withRawBody(jsonMessageInput)
+                .withMessageBody(event)
+                .withForceRawOutput(true)
                 .build();
-        edhKuduProcessor.processRecord(recordRequest);
+        edhCloudwatchProcessor.processRecord(recordRequest);
     }
 
     public boolean isEnabled() {

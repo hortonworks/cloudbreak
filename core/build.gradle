@@ -125,10 +125,8 @@ dependencyManagement {
       entry 'reactor-bus'
     }
 
-    dependencySet(group: 'io.springfox', version: '2.9.2') {
-      entry 'springfox-swagger2'
-      entry 'springfox-core'
-      entry 'springfox-swagger-ui'
+    dependencySet(group: 'io.springfox', version: swaggerSpringFoxVersion) {
+      entry 'springfox-boot-starter'
     }
 
     dependencySet(group: 'org.bouncycastle',  version: bouncycastleVersion) {
@@ -222,9 +220,7 @@ dependencies {
   implementation group: 'javax.xml.bind',                     name: 'jaxb-api'
   implementation group: 'dnsjava',                            name: 'dnsjava'
 
-  implementation group: 'io.springfox',                       name: 'springfox-swagger2'
-  implementation group: 'io.springfox',                       name: 'springfox-core'
-  implementation group: 'io.springfox',                       name: 'springfox-swagger-ui'
+  implementation group: 'io.springfox',                       name: 'springfox-boot-starter'
 
   implementation group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
 

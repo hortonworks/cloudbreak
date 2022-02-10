@@ -13,7 +13,7 @@ export LAZY_FORMAT_DISK_LIMIT=12
 export IS_GATEWAY=true
 export TMP_SSH_KEY="dummy"
 export SSH_USER=cloudbreak
-export SALT_BOOT_PASSWORD="pass"
+export SALT_BOOT_PASSWORD=pass
 export SALT_BOOT_SIGN_KEY=cHJpdi1rZXk=
 export CB_CERT=cert
 export IS_PROXY_ENABLED=false

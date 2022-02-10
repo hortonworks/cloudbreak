@@ -12,6 +12,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.util.AwsEncodedAuthorizationFa
 import com.sequenceiq.cloudbreak.cloud.aws.common.view.AwsCredentialView;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.service.Retry.ActionFailedException;
+import com.sequenceiq.cloudbreak.util.NullUtil;
 
 @Component
 public class SdkClientExceptionMapper {
@@ -44,9 +45,11 @@ public class SdkClientExceptionMapper {
     }
 
     private String addMethodNameIfNotContains(String message, String methodName) {
-        if (!message.toLowerCase().contains(methodName.toLowerCase())) {
+        if (NullUtil.allNotNull(message, methodName) && !message.toLowerCase().contains(methodName.toLowerCase())) {
             String pre = "Cannot execute method: " + methodName + ". ";
-            message = pre + message;
+            return pre + message;
+        } else if (message == null && methodName != null) {
+            return "Cannot execute method: " + methodName + ". ";
         }
         return message;
     }

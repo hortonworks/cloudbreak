@@ -10,8 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 
-import com.cloudera.api.swagger.CommandsResourceApi;
-import com.cloudera.api.swagger.client.ApiClient;
 import com.cloudera.api.swagger.client.ApiException;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterBasedStatusCheckerTask;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterEventService;
@@ -30,9 +28,9 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     //CHECKSTYLE:OFF
     protected final ClouderaManagerApiPojoFactory clouderaManagerApiPojoFactory;
 
-    private final ClusterEventService clusterEventService;
+    protected int toleratedErrorCounter = 0;
 
-    private int toleratedErrorCounter = 0;
+    private final ClusterEventService clusterEventService;
 
     private boolean connectExceptionOccurred = false;
     //CHECKSTYLE:ON
@@ -45,10 +43,8 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
 
     @Override
     public final boolean checkStatus(T pollerObject) {
-        ApiClient apiClient = pollerObject.getApiClient();
-        CommandsResourceApi commandsResourceApi = clouderaManagerApiPojoFactory.getCommandsResourceApi(apiClient);
         try {
-            return doStatusCheck(pollerObject, commandsResourceApi);
+            return doStatusCheck(pollerObject);
         } catch (ApiException e) {
             return handleApiException(pollerObject, e);
         }
@@ -63,13 +59,12 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         } else if (isToleratedError(e)) {
             return handleToleratedError(pollerObject, e);
         } else {
-            throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation failed. %s", getCommandName(), e.getMessage()), e);
+            throw new ClouderaManagerOperationFailedException(String.format("Cloudera Manager [%s] operation failed. %s", getPollingName(), e.getMessage()), e);
         }
     }
 
     private boolean handleConnectException(T pollerObject, ApiException e) {
-        LOGGER.warn("Command [{}] with id [{}] failed with a ConnectException '{}'. Notification is sent to the UI.",
-                getCommandName(), getOperationIdentifier(pollerObject), e.getMessage());
+        LOGGER.warn("{}. Notification is sent to the UI.", getErrorMessage(pollerObject, e), e.getMessage());
         if (!connectExceptionOccurred) {
             connectExceptionOccurred = true;
             Stack stack = pollerObject.getStack();
@@ -81,13 +76,11 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
     private boolean handleToleratedError(T pollerObject, ApiException e) {
         if (toleratedErrorCounter < TOLERATED_ERROR_LIMIT) {
             toleratedErrorCounter++;
-            LOGGER.warn("Command [{}] with id [{}] failed with a tolerated error '{}' for the {}. time(s). Tolerating till {} occasions.",
-                    getCommandName(), getOperationIdentifier(pollerObject), e.getMessage(), toleratedErrorCounter, TOLERATED_ERROR_LIMIT, e);
+            LOGGER.warn("{}. Tolerating till {} occasions.", getToleratedErrorMessage(pollerObject, e), TOLERATED_ERROR_LIMIT, e);
             return false;
         } else {
             throw new ClouderaManagerOperationFailedException(
-                    String.format("Command [%s] with id [%s] failed with a tolerated error '%s' for %s times. Operation is considered failed.",
-                            getCommandName(), getOperationIdentifier(pollerObject), e.getMessage(), TOLERATED_ERROR_LIMIT), e);
+                    String.format("{}. Operation is considered failed.", getToleratedErrorMessage(pollerObject, e)), e);
         }
     }
 
@@ -104,9 +97,28 @@ public abstract class AbstractClouderaManagerApiCheckerTask<T extends ClouderaMa
         return clusterEventService;
     }
 
-    protected abstract boolean doStatusCheck(T pollerObject, CommandsResourceApi commandsResourceApi) throws ApiException;
+    protected abstract boolean doStatusCheck(T pollerObject) throws ApiException;
 
-    protected abstract String getCommandName();
+    protected abstract String getPollingName();
 
-    protected abstract String getOperationIdentifier(T pollerObject);
+    protected String getToleratedErrorMessage(T pollerObject, ApiException e) {
+        return String.format("API checking [%s] failed with a tolerated error '%s' for the %s. time(s).",
+                getPollingName(), e.getMessage(), toleratedErrorCounter);
+    }
+
+    protected String getErrorMessage(T pollerObject, ApiException e) {
+        return String.format("API checking [%s] failed with a %s.",
+                getPollingName(), e.getClass().getSimpleName());
+    }
+
+    @Override
+    public void handleTimeout(T t) {
+        throw new ClouderaManagerOperationFailedException(String.format("Polling of [%s] timed out.",
+                getPollingName()));
+    }
+
+    @Override
+    public String successMessage(T t) {
+        return String.format("Cloudera Manager API checking [%s] was a success", getPollingName());
+    }
 }

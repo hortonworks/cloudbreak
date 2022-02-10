@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.service.stack;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -14,6 +15,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +27,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.sequenceiq.cloudbreak.auth.security.internal.InternalCrnModifier;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -73,6 +76,9 @@ public class StackImageServiceTest {
     @Mock
     private ImageCatalogService imageCatalogService;
 
+    @Mock
+    private InternalCrnModifier internalCrnModifier;
+
     @Captor
     private ArgumentCaptor<Component> componentArgumentCaptor;
 
@@ -91,6 +97,7 @@ public class StackImageServiceTest {
         stack.setRegion("region");
         stack.setCloudPlatform("AWS");
         stack.setWorkspace(workspace);
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:accountId:cluster:name");
 
         image = anImage("uuid");
         statedImage = StatedImage.statedImage(image, "url", "name");
@@ -194,6 +201,23 @@ public class StackImageServiceTest {
 
         verify(componentConfigProviderService).getComponent(stack.getId(), ComponentType.IMAGE, TARGET_IMAGE);
         verifyNoMoreInteractions(componentConfigProviderService);
+    }
+
+    @Test
+    public void testGetStatedImageForStackInternal() throws Exception {
+        ImageCatalog imageCatalog = mock(ImageCatalog.class);
+        com.sequenceiq.cloudbreak.cloud.model.Image imageComp = mock(com.sequenceiq.cloudbreak.cloud.model.Image.class);
+        when(imageCatalog.getName()).thenReturn(TARGET_IMAGE_CATALOG);
+        when(imageComp.getImageCatalogName()).thenReturn(TARGET_IMAGE_CATALOG);
+        when(imageComp.getImageId()).thenReturn(IMAGE_ID);
+        when(componentConfigProviderService.getImage(anyLong())).thenReturn(imageComp);
+        when(internalCrnModifier.getInternalCrnWithAccountId(anyString())).thenReturn("accountId");
+        when(imageCatalogService.getImageCatalogByName(anyLong(), anyString())).thenReturn(imageCatalog);
+        when(imageCatalogService.getImageByCatalogName(anyLong(), anyString(), anyString())).thenReturn(statedImage);
+
+        Optional<StatedImage> result = victim.getStatedImageInternal(stack);
+
+        assertTrue(result.isPresent());
     }
 
     private Component createImageComponent() {
