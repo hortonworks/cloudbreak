@@ -30,5 +30,7 @@ public interface CcmV2Parameters {
 
     String getAgentCrn();
 
+    String getAgentBackendIdPrefix();
+
     void addToTemplateModel(@Nonnull Map<String, Object> model);
 }

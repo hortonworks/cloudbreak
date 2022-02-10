@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.ccmimpl.cloudinit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 
+import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -17,6 +18,8 @@ import com.cloudera.thunderhead.service.clusterconnectivitymanagementv2.ClusterC
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2ParameterSupplier;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.CcmV2Parameters;
 import com.sequenceiq.cloudbreak.ccm.cloudinit.DefaultCcmV2Parameters;
+import com.sequenceiq.cloudbreak.ccm.exception.CcmV2Exception;
+import com.sequenceiq.cloudbreak.ccm.key.CcmResourceUtil;
 import com.sequenceiq.cloudbreak.ccmimpl.ccmv2.CcmV2ManagementClient;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 
@@ -48,10 +51,23 @@ public class DefaultCcmV2ParameterSupplier implements CcmV2ParameterSupplier {
         String requestId = MDCBuilder.getOrGenerateRequestId();
 
         InvertingProxy invertingProxy = ccmV2Client.awaitReadyInvertingProxyForAccount(requestId, accountId);
+        unregisterExistingAgent(requestId, accountId, environmentCrnOpt, agentKeyId);
         InvertingProxyAgent invertingProxyAgent = ccmV2Client.registerInvertingProxyAgent(requestId, accountId, environmentCrnOpt,
                 clusterGatewayDomain, agentKeyId);
         validateCcmV2ConfigResponse(invertingProxy, invertingProxyAgent);
         return new InvertingProxyAndAgent(invertingProxy, invertingProxyAgent);
+    }
+
+    private void unregisterExistingAgent(String requestId, String accountId, Optional<String> environmentCrnOpt, String agentKeyId) {
+        try {
+            List<InvertingProxyAgent> invertingProxyAgents = ccmV2Client.listInvertingProxyAgents(requestId, accountId, environmentCrnOpt);
+            Optional<InvertingProxyAgent> registeredAgentWithSameKey = invertingProxyAgents.stream()
+                    .filter(agent -> agentKeyId.equals(CcmResourceUtil.getKeyId(agent.getAgentCrn())))
+                    .findFirst();
+            registeredAgentWithSameKey.ifPresent(agent -> ccmV2Client.deregisterInvertingProxyAgent(requestId, agent.getAgentCrn()));
+        } catch (CcmV2Exception e) {
+            throw new CcmV2Exception("Error in trying to deregister possibly existing CCM Agent", e);
+        }
     }
 
     private void validateCcmV2ConfigResponse(InvertingProxy invertingProxy, InvertingProxyAgent invertingProxyAgent) {
