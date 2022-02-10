@@ -32,6 +32,8 @@ class TerminationServiceTest {
 
     private static final String STACK_NAME = "freeipa-cluster";
 
+    private static final long STACK_ID = 1L;
+
     @Mock
     private StackService stackService;
 
@@ -108,18 +110,19 @@ class TerminationServiceTest {
     }
 
     @Test
-    void testfinalizeTerminationTransaction() throws Exception {
+    void testFinalizeTerminationTransaction() throws Exception {
         Stack stack = mock(Stack.class);
+        when(stack.getId()).thenReturn(STACK_ID);
 
-        when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
+        when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(stack.getName()).thenReturn(STACK_NAME);
 
-        underTest.finalizeTerminationTransaction(1L);
+        underTest.finalizeTerminationTransaction(STACK_ID);
 
         verify(stack).setName(anyString());
         verify(stack).setTerminated(any());
         verify(keytabCleanupService).cleanupByEnvironment(any(), any());
-        verify(stackUpdater).updateStackStatus(eq(stack),
+        verify(stackUpdater).updateStackStatusWithRetry(eq(STACK_ID),
                 eq(DetailedStackStatus.DELETE_COMPLETED),
                 eq("Stack was terminated successfully."));
         verify(stackService).save(eq(stack));

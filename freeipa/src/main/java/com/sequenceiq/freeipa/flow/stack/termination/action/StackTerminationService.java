@@ -33,7 +33,7 @@ public class StackTerminationService {
         if (!forced) {
             Exception errorDetails = payload.getException();
             String stackUpdateMessage = "Termination failed: " + errorDetails.getMessage();
-            stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DELETE_FAILED, stackUpdateMessage);
+            stackUpdater.updateStackStatusWithRetry(stack.getId(), DetailedStackStatus.DELETE_FAILED, stackUpdateMessage);
             LOGGER.debug("Error during stack termination flow: ", errorDetails);
         } else {
             terminationService.finalizeTermination(stack.getId());

@@ -24,7 +24,7 @@ public class DeregisterClusterProxyAction extends AbstractStackTerminationAction
 
     @Override
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
-        stackUpdater.updateStackStatus(context.getStack().getId(), DetailedStackStatus.DEREGISTERING_WITH_CLUSTERPROXY,
+        stackUpdater.updateStackStatusWithRetry(context.getStack().getId(), DetailedStackStatus.DEREGISTERING_WITH_CLUSTERPROXY,
                 "Deregistering FreeIPA from Cluster Proxy.");
         ClusterProxyDeregistrationRequest clusterProxyDeregistrationRequest =
                 new ClusterProxyDeregistrationRequest(payload.getResourceId(), payload.getForced());

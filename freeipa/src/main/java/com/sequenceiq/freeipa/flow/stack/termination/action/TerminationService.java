@@ -75,7 +75,7 @@ public class TerminationService {
         stack.setTerminated(currentTimeMillis);
         terminateMetaDataInstances(stack, null);
         cleanupVault(stack);
-        stackUpdater.updateStackStatus(stack, DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
+        stackUpdater.updateStackStatusWithRetry(stack.getId(), DetailedStackStatus.DELETE_COMPLETED, "Stack was terminated successfully.");
         stackService.save(stack);
     }
 

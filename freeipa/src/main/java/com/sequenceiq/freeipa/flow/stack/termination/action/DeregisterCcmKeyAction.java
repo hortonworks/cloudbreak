@@ -30,7 +30,7 @@ public class DeregisterCcmKeyAction extends AbstractStackTerminationAction<Termi
     protected void doExecute(StackTerminationContext context, TerminationEvent payload, Map<Object, Object> variables) {
         Stack stack = context.getStack();
 
-        stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.DEREGISTERING_CCM_KEY,
+        stackUpdater.updateStackStatusWithRetry(stack.getId(), DetailedStackStatus.DEREGISTERING_CCM_KEY,
                 "Deregistering CCM key.");
 
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
