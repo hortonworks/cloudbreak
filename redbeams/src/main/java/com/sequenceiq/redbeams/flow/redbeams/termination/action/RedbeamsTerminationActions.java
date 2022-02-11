@@ -66,7 +66,7 @@ public class RedbeamsTerminationActions {
 
             @Override
             protected Selectable createRequest(RedbeamsContext context) {
-                dbStackJobService.unschedule(context.getDBStack().getId(), context.getDBStack().getName());
+                dbStackJobService.unschedule(context.getDBStack());
                 return new DeregisterDatabaseServerRequest(context.getCloudContext(), context.getDatabaseStack(), context.getDBStack());
             }
 
