@@ -107,7 +107,7 @@ public class DBStackStatusSyncService {
             CloudContext cloudContext = CloudContext.Builder.builder()
                     .withId(dbStack.getId())
                     .withName(dbStack.getName())
-                    .withCrn(dbStack.getResourceCrn().toString())
+                    .withCrn(dbStack.getResourceCrn())
                     .withPlatform(dbStack.getCloudPlatform())
                     .withVariant(dbStack.getPlatformVariant())
                     .withLocation(location)

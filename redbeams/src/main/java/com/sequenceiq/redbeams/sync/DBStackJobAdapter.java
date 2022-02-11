@@ -25,7 +25,7 @@ public class DBStackJobAdapter extends JobResourceAdapter<DBStack> {
 
     @Override
     public String getRemoteResourceId() {
-        return getResource().getResourceCrn().toString();
+        return getResource().getResourceCrn();
     }
 
     @Override

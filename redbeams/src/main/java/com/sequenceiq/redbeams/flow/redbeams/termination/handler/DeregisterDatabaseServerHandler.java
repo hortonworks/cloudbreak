@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.flow.event.EventSelectorUtil;
 import com.sequenceiq.flow.reactor.api.handler.ExceptionCatcherEventHandler;
@@ -50,7 +51,7 @@ public class DeregisterDatabaseServerHandler extends ExceptionCatcherEventHandle
         DBStack dbStack = request.getDbStack();
 
         try {
-            databaseServerConfigService.getByCrn(dbStack.getResourceCrn())
+            databaseServerConfigService.getByCrn(Crn.safeFromString(dbStack.getResourceCrn()))
                     .ifPresent(dsc -> databaseServerConfigService.delete(dsc));
             return response;
         } catch (Exception e) {

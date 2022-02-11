@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.exception.TemplatingNotSupportedException;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -141,7 +142,7 @@ public class RedbeamsCreationService {
         dbServerConfig.setDatabaseVendor(databaseServer.getDatabaseVendor());
         dbServerConfig.setDbStack(dbStack);
         // host and port are set after allocation is complete, so leave as null
-        dbServerConfig.setResourceCrn(dbStack.getResourceCrn());
+        dbServerConfig.setResourceCrn(Crn.safeFromString(dbStack.getResourceCrn()));
         dbServerConfig.setClusterCrn(clusterCrn);
 
         databaseServerConfigService.create(dbServerConfig, DEFAULT_WORKSPACE, false);

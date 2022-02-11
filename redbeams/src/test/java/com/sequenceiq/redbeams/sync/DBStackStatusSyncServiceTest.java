@@ -121,7 +121,7 @@ public class DBStackStatusSyncServiceTest {
         when(dbStack.getResourceCrn()).thenReturn(CrnTestUtil.getDatabaseServerCrnBuilder()
                 .setAccountId("acc")
                 .setResource("resource")
-                .build());
+                .build().toString());
         when(credentialService.getCredentialByEnvCrn(ENVIRONMENT_ID)).thenReturn(credential);
         when(credentialConverter.convert(credential)).thenReturn(cloudCredential);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);

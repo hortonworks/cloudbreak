@@ -12,7 +12,7 @@ public class DBStackToDatabaseServerStatusV4ResponseConverter {
         DatabaseServerStatusV4Response response = new DatabaseServerStatusV4Response();
         response.setName(source.getName());
         response.setEnvironmentCrn(source.getEnvironmentId());
-        response.setResourceCrn(source.getResourceCrn().toString());
+        response.setResourceCrn(source.getResourceCrn());
 
         response.setStatus(source.getStatus());
         response.setStatusReason(source.getStatusReason());

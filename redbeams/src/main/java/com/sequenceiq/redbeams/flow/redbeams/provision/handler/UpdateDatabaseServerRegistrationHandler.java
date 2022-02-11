@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.cloud.context.CloudContext;
 import com.sequenceiq.cloudbreak.cloud.model.CloudResource;
 import com.sequenceiq.cloudbreak.cloud.transform.CloudResourceHelper;
@@ -61,7 +62,7 @@ public class UpdateDatabaseServerRegistrationHandler extends ExceptionCatcherEve
 
         Selectable response;
         try {
-            DatabaseServerConfig dbServerConfig = databaseServerConfigService.getByCrn(dbStack.getResourceCrn())
+            DatabaseServerConfig dbServerConfig = databaseServerConfigService.getByCrn(Crn.safeFromString(dbStack.getResourceCrn()))
                     .orElseThrow(() -> new IllegalStateException("Cannot find database server " + dbStack.getResourceCrn()));
             CloudResource dbHostname = cloudResourceHelper.getResourceTypeFromList(ResourceType.RDS_HOSTNAME, dbResources)
                     .orElseThrow(() -> new IllegalStateException("DB hostname not found for allocated database."));
