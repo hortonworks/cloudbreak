@@ -1,5 +1,8 @@
 package com.sequenceiq.freeipa.service.stack;
 
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.DetailedStackStatus.UPGRADE_CCM_REQUESTED;
+import static com.sequenceiq.freeipa.flow.stack.upgrade.ccm.selector.UpgradeCcmStateSelector.UPGRADE_CCM_TRIGGER_EVENT;
+
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -14,6 +17,7 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.converter.operation.OperationToOperationStatusConverter;
 import com.sequenceiq.freeipa.entity.Operation;
 import com.sequenceiq.freeipa.entity.Stack;
+import com.sequenceiq.freeipa.flow.stack.upgrade.ccm.event.UpgradeCcmTriggerEvent;
 import com.sequenceiq.freeipa.service.freeipa.flow.FreeIpaFlowManager;
 import com.sequenceiq.freeipa.service.operation.OperationService;
 
@@ -50,7 +54,7 @@ public class FreeIpaUpgradeCcmService {
         LOGGER.info("Start 'UPGRADE_CCM' operation");
         Operation operation = operationService.startOperation(accountId, OperationType.UPGRADE_CCM, List.of(stack.getEnvironmentCrn()), List.of());
         if (OperationState.RUNNING == operation.getStatus()) {
-            return operationConverter.convert(triggerCcmUpgradeFlow(accountId, operation));
+            return operationConverter.convert(triggerCcmUpgradeFlow(environmentCrn, accountId, operation, stack));
         } else {
             LOGGER.info("Operation isn't in RUNNING state: {}", operation);
             return operationConverter.convert(operation);
@@ -64,11 +68,14 @@ public class FreeIpaUpgradeCcmService {
         }
     }
 
-    private Operation triggerCcmUpgradeFlow(String accountId, Operation operation) {
+    private Operation triggerCcmUpgradeFlow(String environmentCrn, String accountId, Operation operation, Stack stack) {
         try {
-            LOGGER.info("Starting CCM upgrade flow");
-            // TODO log & update stack status (if needed), then send event to FreeIpaFlowManager; see CB-14571
-            // TODO what to do with the FlowIdentifier?
+            LOGGER.info("Starting CCM upgrade flow, new status: {}", UPGRADE_CCM_REQUESTED);
+            stackUpdater.updateStackStatus(stack, UPGRADE_CCM_REQUESTED, "Starting of stack infrastructure has been requested.");
+            UpgradeCcmTriggerEvent event = new UpgradeCcmTriggerEvent(UPGRADE_CCM_TRIGGER_EVENT.event(), accountId, operation.getOperationId(), environmentCrn,
+                    stack.getId());
+            flowManager.notify(event);
+            // Ignore returned FlowIdentifier
             LOGGER.info("Started CCM upgrade flow");
             return operation;
         } catch (Exception e) {

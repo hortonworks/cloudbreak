@@ -60,19 +60,25 @@ public enum DetailedStackStatus {
     DELETE_FAILED(Status.DELETE_FAILED, AvailabilityStatus.UNAVAILABLE),
     // Rollback statuses
     ROLLING_BACK(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
-    // The stack is available
+    // The stack is available status
     AVAILABLE(Status.AVAILABLE, AvailabilityStatus.AVAILABLE),
     // Instance removing status
     REMOVE_INSTANCE(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.UNAVAILABLE),
-    // Cluster operation is in progress
+    // Cluster operation is in progress status
     CLUSTER_OPERATION(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
-    // Wait for sync
+    // Wait for sync status
     WAIT_FOR_SYNC(Status.WAIT_FOR_SYNC, AvailabilityStatus.UNAVAILABLE),
+    // Unhealthy statuses
     UNREACHABLE(Status.UNREACHABLE, AvailabilityStatus.UNAVAILABLE),
     DELETED_ON_PROVIDER_SIDE(Status.DELETED_ON_PROVIDER_SIDE, AvailabilityStatus.UNAVAILABLE),
     UNHEALTHY(Status.UNHEALTHY, AvailabilityStatus.AVAILABLE),
+    // Salt state update statuses
     SALT_STATE_UPDATE_IN_PROGRESS(Status.UPDATE_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
-    SALT_STATE_UPDATE_FAILED(Status.UPDATE_FAILED, AvailabilityStatus.AVAILABLE);
+    SALT_STATE_UPDATE_FAILED(Status.UPDATE_FAILED, AvailabilityStatus.AVAILABLE),
+    // CCM upgrade statuses
+    UPGRADE_CCM_REQUESTED(Status.UPGRADE_CCM_REQUESTED, AvailabilityStatus.AVAILABLE),
+    UPGRADE_CCM_IN_PROGRESS(Status.UPGRADE_CCM_IN_PROGRESS, AvailabilityStatus.AVAILABLE),
+    UPGRADE_CCM_FAILED(Status.UPGRADE_CCM_FAILED, AvailabilityStatus.UNAVAILABLE);
 
     public static final Collection<DetailedStackStatus> AVAILABLE_STATUSES;
 
