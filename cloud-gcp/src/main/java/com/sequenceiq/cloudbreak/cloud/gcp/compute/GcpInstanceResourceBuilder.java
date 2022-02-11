@@ -170,24 +170,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         scheduling.setPreemptible(preemptible);
         instance.setScheduling(scheduling);
 
-        Tags tags = new Tags();
-        List<String> tagList = new ArrayList<>();
-        String groupname = group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
-        addTag(tagList, groupname);
-        // GCP firewall rules' target tags need to be added to the network tags for the firewall rule to take effect
-        if (group.getSecurity() != null && group.getSecurity().getCloudSecurityId() != null) {
-            addTag(tagList, group.getSecurity().getCloudSecurityId());
-        }
-        addTag(tagList, gcpStackUtil.getClusterTag(auth.getCloudContext()));
-        addTag(tagList, gcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
-        addTag(tagList, gcpStackUtil.getGroupTypeTag(group.getType()));
-        Map<String, String> labelsFromTags = gcpLabelUtil.createLabelsFromTags(cloudStack);
-        labelsFromTags.forEach((key, value) -> addTag(tagList, mergeAndTrimKV(key, value, '-', MAX_TAG_LENGTH)));
-
-        tags.setItems(tagList);
-
-        instance.setTags(tags);
-        instance.setLabels(labelsFromTags);
+        configureTagsOnInstance(auth, group, instance);
+        configureLabelsOnInstance(cloudStack, instance);
 
         Metadata metadata = new Metadata();
         metadata.setItems(new ArrayList<>());
@@ -220,6 +204,23 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         } catch (GoogleJsonResponseException e) {
             throw new GcpResourceException(checkException(e), resourceType(), buildableResource.get(0).getName());
         }
+    }
+
+    private void configureLabelsOnInstance(CloudStack cloudStack, Instance instance) {
+        Map<String, String> labelsFromTags = gcpLabelUtil.createLabelsFromTags(cloudStack);
+        instance.setLabels(labelsFromTags);
+    }
+
+    private void configureTagsOnInstance(AuthenticatedContext auth, Group group, Instance instance) {
+        List<String> tagList = new ArrayList<>();
+        addTagIfNotEmpty(tagList, gcpStackUtil.convertGroupName(group.getName()));
+        addTagIfNotEmpty(tagList, gcpStackUtil.getNetworkSecurityIdFromGroup(group));
+        addTagIfNotEmpty(tagList, gcpStackUtil.getClusterTag(auth.getCloudContext()));
+        addTagIfNotEmpty(tagList, gcpStackUtil.getGroupClusterTag(auth.getCloudContext(), group));
+        addTagIfNotEmpty(tagList, gcpStackUtil.getGroupTypeTag(group.getType()));
+        Tags tags = new Tags();
+        tags.setItems(tagList);
+        instance.setTags(tags);
     }
 
     /**
@@ -266,8 +267,8 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
         return instanceGroupList.getItems().stream().anyMatch(item -> item.getName().equals(instanceGroupResource.getName()));
     }
 
-    private void addTag(List<String> tagList, String actualTag) {
-        if (!tagList.contains(actualTag)) {
+    private void addTagIfNotEmpty(List<String> tagList, String actualTag) {
+        if (!tagList.contains(actualTag) && StringUtils.isNotEmpty(actualTag)) {
             tagList.add(actualTag);
         }
     }
@@ -303,10 +304,6 @@ public class GcpInstanceResourceBuilder extends AbstractGcpComputeBuilder {
             LOGGER.debug("Setting FreeIPA hostname to {}", hostname);
         }
         return hostname;
-    }
-
-    private static String mergeAndTrimKV(String key, String value, char middle, int maxLen) {
-        return StringUtils.left(key + middle + value, maxLen);
     }
 
     private void verifyOperation(Operation operation, List<CloudResource> buildableResource) {
