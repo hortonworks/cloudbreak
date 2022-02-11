@@ -78,7 +78,7 @@ public class EnvironmentDeletionService {
         validateDeletion(environment, cascading);
         environment = updateEnvironmentDeletionType(environment, forced);
         LOGGER.debug("Deleting environment with name: {}", environment.getName());
-        environmentJobService.unschedule(environment.getId());
+        environmentJobService.unschedule(environment);
         if (cascading) {
             reactorFlowManager.triggerCascadingDeleteFlow(environment, userCrn, forced);
         } else {

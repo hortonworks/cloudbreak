@@ -262,7 +262,7 @@ public class EnvCreationActions {
                             environment.setStatus(EnvironmentStatus.AVAILABLE);
                             environment.setStatusReason(null);
                             Environment result = environmentService.save(environment);
-                            environmentJobService.schedule(result.getId());
+                            environmentJobService.schedule(result);
                             EnvironmentDto environmentDto = environmentService.getEnvironmentDto(result);
                             metricService.incrementMetricCounter(MetricType.ENV_CREATION_FINISHED, environmentDto);
                             eventService.sendEventAndNotification(environmentDto, context.getFlowTriggerUserCrn(), ENVIRONMENT_CREATION_FINISHED);

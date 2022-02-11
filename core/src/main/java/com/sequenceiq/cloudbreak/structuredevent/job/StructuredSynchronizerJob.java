@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.quartz.statuschecker.job.StatusCheckerJob;
+import com.sequenceiq.cloudbreak.quartz.TracedQuartzJob;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.structuredevent.LegacyDefaultStructuredEventClient;
 import com.sequenceiq.cloudbreak.structuredevent.StructuredSyncEventFactory;
@@ -25,9 +25,11 @@ import io.opentracing.Tracer;
 
 @DisallowConcurrentExecution
 @Component
-public class StructuredSynchronizerJob extends StatusCheckerJob {
+public class StructuredSynchronizerJob extends TracedQuartzJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StructuredSynchronizerJob.class);
+
+    private String localId;
 
     @Inject
     private StackService stackService;
@@ -47,38 +49,49 @@ public class StructuredSynchronizerJob extends StatusCheckerJob {
 
     @Override
     protected Object getMdcContextObject() {
-        return stackService.getById(getLocalIdAsLong());
+        return stackService.getById(getStackId());
     }
 
     @Override
     protected void executeTracedJob(JobExecutionContext context) throws JobExecutionException {
-        Long stackId = getLocalIdAsLong();
         try {
-            Stack stack = stackService.get(stackId);
+            Stack stack = stackService.get(getStackId());
             if (stack == null) {
-                LOGGER.debug("Stack not found with id {}, StructuredSynchronizerJob will be unscheduled.", stackId);
-                syncJobService.unschedule(getLocalId());
+                LOGGER.debug("Stack not found with id {}, StructuredSynchronizerJob will be unscheduled.", getStackId());
+                syncJobService.unschedule(localId);
             } else if (stack.getStatus() == null) {
-                LOGGER.debug("Stack state is null for stack {}. The event won't be stored!", stackId);
-            } else if (unschedulableStates().contains(stack.getStatus())) {
-                LOGGER.debug("StructuredSynchronizerJob will be unscheduled for stack {}, stack state is {}", stackId, stack.getStatus());
-                syncJobService.unschedule(getLocalId());
+                LOGGER.debug("Stack state is null for stack {}. The event won't be stored!", getStackId());
+            } else if (unshedulableStates().contains(stack.getStatus())) {
+                LOGGER.debug("StructuredSynchronizerJob will be unscheduled for stack {}, stack state is {}", getStackId(), stack.getStatus());
+                syncJobService.unschedule(localId);
             } else {
-                LOGGER.debug("StructuredSynchronizerJob is running for stack: '{}'", stackId);
-                StructuredSyncEvent structuredEvent = structuredSyncEventFactory.createStructuredSyncEvent(stackId);
+                LOGGER.debug("StructuredSynchronizerJob is running for stack: '{}'", getStackId());
+                StructuredSyncEvent structuredEvent = structuredSyncEventFactory.createStructuredSyncEvent(getStackId());
                 legacyDefaultStructuredEventClient.sendStructuredEvent(structuredEvent);
             }
         } catch (NotFoundException ex) {
-            LOGGER.debug("Stack not found with id {}, StructuredSynchronizerJob will be unscheduled.", stackId);
-            syncJobService.unschedule(getLocalId());
+            LOGGER.debug("Stack not found with id {}, StructuredSynchronizerJob will be unscheduled.", getStackId());
+            syncJobService.unschedule(localId);
         } catch (Exception ex) {
             LOGGER.error("Error happened during StructuredSyncEvent generation! The event won't be stored!", ex);
         }
     }
 
-    Set<Status> unschedulableStates() {
+    Set<Status> unshedulableStates() {
         return EnumSet.of(
                 Status.DELETE_COMPLETED
         );
+    }
+
+    private Long getStackId() {
+        return Long.valueOf(localId);
+    }
+
+    public String getLocalId() {
+        return localId;
+    }
+
+    public void setLocalId(String localId) {
+        this.localId = localId;
     }
 }
