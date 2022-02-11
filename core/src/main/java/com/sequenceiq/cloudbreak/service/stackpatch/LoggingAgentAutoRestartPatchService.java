@@ -129,7 +129,7 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
     }
 
     @Override
-    public StackPatchType getStackFixType() {
+    public StackPatchType getStackPatchType() {
         return StackPatchType.LOGGING_AGENT_AUTO_RESTART_V2;
     }
 

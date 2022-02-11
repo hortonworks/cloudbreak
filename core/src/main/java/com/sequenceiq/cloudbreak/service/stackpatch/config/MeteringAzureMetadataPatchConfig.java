@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stackpatch.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-@ConfigurationProperties("existingstackpatcher.active-patches.metering-azure-metadata")
-public class MeteringAzureMetadataPatchConfig {
+import com.sequenceiq.cloudbreak.job.stackpatcher.config.StackPatchTypeConfig;
+
+@Configuration
+@ConfigurationProperties("existing-stack-patcher.patch-configs.metering-azure-metadata")
+public class MeteringAzureMetadataPatchConfig extends StackPatchTypeConfig {
 
     private String dateBefore;
 
