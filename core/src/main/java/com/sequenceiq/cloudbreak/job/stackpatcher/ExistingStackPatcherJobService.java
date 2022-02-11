@@ -22,6 +22,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.job.stackpatcher.config.ExistingStackPatcherConfig;
+
 @Service
 public class ExistingStackPatcherJobService {
 
@@ -48,7 +50,8 @@ public class ExistingStackPatcherJobService {
                 LOGGER.info("Unscheduling stack patcher job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 unschedule(jobKey);
             }
-            LOGGER.info("Scheduling stack patcher job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+            LOGGER.info("Scheduling stack patcher {} job for stack with key: '{}' and group: '{}'",
+                    resource.getStackPatchType(), jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during scheduling stack patcher job: %s", jobDetail), e);

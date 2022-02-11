@@ -1,11 +1,13 @@
 package com.sequenceiq.cloudbreak.service.stackpatch.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
-@Component
-@ConfigurationProperties("existingstackpatcher.active-patches.logging-agent-auto-restart")
-public class LoggingAgentAutoRestartPatchConfig {
+import com.sequenceiq.cloudbreak.job.stackpatcher.config.StackPatchTypeConfig;
+
+@Configuration
+@ConfigurationProperties("existing-stack-patcher.patch-configs.logging-agent-auto-restart")
+public class LoggingAgentAutoRestartPatchConfig extends StackPatchTypeConfig {
 
     private String affectedVersionFrom;
 

@@ -852,18 +852,23 @@ crn:
   partition: cdp
   region: us-west-1
 
-existingstackpatcher:
-  intervalhours: 24
-  maxInitialStartDelayInHours: 2
-  enabled: true
-  active-patches:
-    metering-azure-metadata:
-      date-before: 2022-01-18
-      custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
+existing-stack-patcher:
+  intervalInHours: 24
+  maxInitialStartDelayInHours: 12
+  patch-configs:
+    unbound-restart:
+      enabled: false
     logging-agent-auto-restart:
+      enabled: false
       affected-version-from: 0.2.13
       date-after: 2019-11-24
       date-before: 2022-01-18
+    logging-agent-auto-restart-v2:
+      enabled: false
+    metering-azure-metadata:
+      enabled: false
+      date-before: 2022-01-18
+      custom-rpm-url: https://archive.cloudera.com/cp_clients/thunderhead-metering-heartbeat-application-0.1-SNAPSHOT.x86_64.rpm
 
 clusterdns:
   host: localhost

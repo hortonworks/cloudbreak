@@ -31,7 +31,7 @@ public abstract class ExistingStackPatchService {
     private FlowRetryService flowRetryService;
 
     public boolean isStackAlreadyFixed(Stack stack) {
-        return stackPatchRepository.findByStackAndType(stack, getStackFixType()).isPresent();
+        return stackPatchRepository.findByStackAndType(stack, getStackPatchType()).isPresent();
     }
 
     public void apply(Stack stack) throws ExistingStackPatchApplyException {
@@ -42,16 +42,16 @@ public abstract class ExistingStackPatchService {
             Optional<FlowLog> lastRetryableFailedFlow = flowRetryService.getLastRetryableFailedFlow(stack.getId());
             if (lastRetryableFailedFlow.isEmpty()) {
                 try {
-                    LOGGER.info("Starting stack {} patching for {}", stack.getResourceCrn(), getStackFixType());
+                    LOGGER.info("Starting stack {} patching for {}", stack.getResourceCrn(), getStackPatchType());
                     checkedMeasure(() -> doApply(stack), LOGGER, "Existing stack patching took {} ms for stack {} and patch {}.",
-                            stack.getResourceCrn(), getStackFixType());
-                    LOGGER.info("Stack {} was patched successfully for {}", stack.getResourceCrn(), getStackFixType());
-                    stackPatchRepository.save(new StackPatch(stack, getStackFixType()));
+                            stack.getResourceCrn(), getStackPatchType());
+                    LOGGER.info("Stack {} was patched successfully for {}", stack.getResourceCrn(), getStackPatchType());
+                    stackPatchRepository.save(new StackPatch(stack, getStackPatchType()));
                 } catch (ExistingStackPatchApplyException e) {
                     throw e;
                 } catch (Exception e) {
                     String message = String.format("Something unexpected went wrong with stack %s while applying patch %s",
-                            stack.getResourceCrn(), getStackFixType());
+                            stack.getResourceCrn(), getStackPatchType());
                     throw new ExistingStackPatchApplyException(message, e);
                 }
             } else {
@@ -74,9 +74,9 @@ public abstract class ExistingStackPatchService {
     }
 
     /**
-     * @return The StackFixType that is fixed by running the service implementation's doApply
+     * @return The StackPatchType that is patched by running the service implementation's doApply
      */
-    public abstract StackPatchType getStackFixType();
+    public abstract StackPatchType getStackPatchType();
 
     /**
      * @return Is the stack affected by the {@link StackPatchType}
