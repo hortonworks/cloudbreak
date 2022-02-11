@@ -97,7 +97,7 @@ class RedbeamsCreationServiceTest {
         dbStack.setPlatformVariant(PLATFORM_VARIANT);
         dbStack.setUserName("username");
         dbStack.setOwnerCrn(Crn.fromString("crn:cdp:iam:us-west-1:1234:user:234123"));
-        dbStack.setResourceCrn(Crn.fromString("crn:cdp:iam:us-west-1:1234:database:2312312"));
+        dbStack.setResourceCrn("crn:cdp:iam:us-west-1:1234:database:2312312");
         DatabaseServer databaseServer = new DatabaseServer();
         dbStack.setDatabaseServer(databaseServer);
         databaseServer.setAccountId(ACCOUNT_ID);
@@ -122,7 +122,7 @@ class RedbeamsCreationServiceTest {
         assertThat(launchedStack).isEqualTo(dbStack);
         verify(dbStackService).save(dbStack);
 
-        assertThat(dbStack.getResourceCrn()).isEqualTo(crn);
+        assertThat(dbStack.getResourceCrn()).isEqualTo(crn.toString());
         assertThat(dbStack.getTemplate()).isEqualTo(TEMPLATE);
 
         ArgumentCaptor<DatabaseServerConfig> databaseServerConfigCaptor = ArgumentCaptor.forClass(DatabaseServerConfig.class);

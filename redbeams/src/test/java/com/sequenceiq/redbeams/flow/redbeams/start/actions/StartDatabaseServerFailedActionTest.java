@@ -155,7 +155,7 @@ public class StartDatabaseServerFailedActionTest {
         when(dbStack.getResourceCrn()).thenReturn(CrnTestUtil.getDatabaseServerCrnBuilder()
                 .setAccountId("acc")
                 .setResource("resource")
-                .build());
+                .build().toString());
         when(ownerCrn.getUserId()).thenReturn(USER_NAME);
         when(ownerCrn.getAccountId()).thenReturn(ACCOUNT_ID);
         when(credentialService.getCredentialByEnvCrn(DB_STACK_ENV_ID)).thenReturn(credential);

@@ -261,7 +261,7 @@ class UpdateDatabaseServerRegistrationHandlerTest {
         DBStack dbStack = new DBStack();
         dbStack.setName(DB_STACK_NAME);
         dbStack.setEnvironmentId(ENVIRONMENT_CRN);
-        dbStack.setResourceCrn(CRN);
+        dbStack.setResourceCrn(CRN.toString());
         return dbStack;
     }
 
