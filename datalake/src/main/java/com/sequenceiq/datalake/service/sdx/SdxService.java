@@ -8,6 +8,7 @@ import static com.sequenceiq.sdx.api.model.SdxClusterShape.CUSTOM;
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -256,6 +257,25 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
             return sdxCluster.get();
         } else {
             throw notFound("SDX cluster", clusterCrn).get();
+        }
+    }
+
+    public List<SdxCluster> getSdxClustersByCrn(String userCrn, String clusterCrn) {
+        LOGGER.info("Searching for SDX cluster by crn {}", clusterCrn);
+        List<SdxCluster> sdxClusterList = new ArrayList<>();
+        String accountIdFromCrn = getAccountIdFromCrn(userCrn);
+        Optional<SdxCluster> sdxCluster = sdxClusterRepository.findByAccountIdAndCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+        if (sdxCluster.isPresent()) {
+            sdxClusterList.add(sdxCluster.get());
+            sdxCluster = sdxClusterRepository.findByAccountIdAndOriginalCrnAndDeletedIsNull(accountIdFromCrn, clusterCrn);
+            if(sdxCluster.isPresent()) {
+                sdxClusterList.add(sdxCluster.get());
+            }
+        }
+        if(sdxClusterList.isEmpty()) {
+            throw notFound("SDX cluster", clusterCrn).get();
+        } else {
+            return sdxClusterList;
         }
     }
 
@@ -738,6 +758,12 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
     public Long getResourceIdByResourceCrn(String resourceCrn) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
         return getByCrn(userCrn, resourceCrn).getId();
+    }
+
+    @Override
+    public List<Long> getResourceIdsByResourceCrn(String resourceCrn) {
+        String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
+        return getSdxClustersByCrn(userCrn, resourceCrn).stream().map(cluster -> cluster.getId()).collect(Collectors.toList());
     }
 
     @Override
