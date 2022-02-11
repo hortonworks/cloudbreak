@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateGeneratorService;
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedService;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 
 @Service
 public class ParcelFilterService {
@@ -39,7 +40,11 @@ public class ParcelFilterService {
     @Inject
     private RestClientFactory restClientFactory;
 
-    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> parcels, Blueprint blueprint) {
+    @Inject
+    private ImageReaderService imageReaderService;
+
+    public Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long stackId, Set<ClouderaManagerProduct> parcels, Blueprint blueprint) {
+        LOGGER.debug("Filtering the following parcels based on the blueprint {}", parcels);
         Set<String> serviceNamesInBlueprint = getAllServiceNameInBlueprint(blueprint);
         LOGGER.debug("The following services are found in the blueprint: {}", serviceNamesInBlueprint);
         Set<ClouderaManagerProduct> ret = new HashSet<>();
@@ -47,19 +52,18 @@ public class ParcelFilterService {
             LOGGER.debug("We can not identify one of the service from the blueprint so to stay on the safe side we will add every parcel");
             return parcels;
         }
-        filterParcels(parcels, serviceNamesInBlueprint, ret);
+        filterParcels(stackId, parcels, serviceNamesInBlueprint, ret);
         LOGGER.debug("The following parcels are used in CM based on blueprint: {}", ret);
         return ret;
     }
 
-    private void filterParcels(Set<ClouderaManagerProduct> parcels, Set<String> serviceNamesInBlueprint, Set<ClouderaManagerProduct> ret) {
+    private void filterParcels(Long stackId, Set<ClouderaManagerProduct> parcels, Set<String> serviceNamesInBlueprint, Set<ClouderaManagerProduct> ret) {
         parcels.forEach(parcel -> {
             ImmutablePair<ManifestStatus, Manifest> manifest = readRepoManifest(parcel.getParcel());
             if (manifest.right != null && ManifestStatus.SUCCESS.equals(manifest.left)) {
                 Set<String> componentNamesInParcel = getAllComponentNameInParcel(manifest.right);
                 LOGGER.debug("The following components are available in parcel: {}", componentNamesInParcel);
-                if (componentNamesInParcel.stream().anyMatch(serviceNamesInBlueprint::contains)) {
-                    LOGGER.info("Add parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel);
+                if (servicesArePresentInTheBlueprint(serviceNamesInBlueprint, componentNamesInParcel, parcel) || isCustomParcel(stackId, parcel)) {
                     ret.add(parcel);
                 } else {
                     LOGGER.info("Skip parcel '{}' as there isn't any service both in the manifest and in the blueprint.", parcel);
@@ -69,6 +73,27 @@ public class ParcelFilterService {
                 ret.add(parcel);
             }
         });
+    }
+
+    private boolean servicesArePresentInTheBlueprint(Set<String> serviceNamesInBlueprint, Set<String> componentNamesInParcel, ClouderaManagerProduct parcel) {
+        if (componentNamesInParcel.stream().anyMatch(serviceNamesInBlueprint::contains)) {
+            LOGGER.debug("Add parcel '{}' as there is at least one service both in the manifest and in the blueprint.", parcel);
+            return true;
+        } else {
+            LOGGER.debug("The following services in the parcel {} are not present in the blueprint {}", componentNamesInParcel, serviceNamesInBlueprint);
+            return false;
+        }
+    }
+
+    private boolean isCustomParcel(Long stackId, ClouderaManagerProduct parcel) {
+        Set<String> parcelNamesFromImage = imageReaderService.getParcelNames(stackId, false);
+        if (parcelNamesFromImage.stream().noneMatch(preWarmParcel -> preWarmParcel.equals(parcel.getName()))) {
+            LOGGER.debug("Add custom parcel {}", parcel);
+            return true;
+        } else {
+            LOGGER.debug("The parcel {} is present on the image. It' not a custom parcel", parcel);
+            return false;
+        }
     }
 
     private Set<String> getAllServiceNameInBlueprint(Blueprint blueprint) {
