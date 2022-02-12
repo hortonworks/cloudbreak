@@ -287,7 +287,7 @@
       "knoxService": "SOLR",
       "knoxUrl": "/solr/",
       "ssoSupported": true,
-      "port": 8983,
+      "port": 8993,
       "tlsPort": 8985,
       "apiOnly": false,
       "apiIncluded": true,
