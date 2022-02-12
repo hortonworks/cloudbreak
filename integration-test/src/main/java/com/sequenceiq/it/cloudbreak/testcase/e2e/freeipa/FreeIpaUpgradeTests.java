@@ -7,11 +7,15 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.waitForFlow;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.inject.Inject;
 
+import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.instancemetadata.InstanceMetaDataV4Response;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.ServiceKeytabRequest;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Assertions;
 import org.testng.annotations.Test;
 
@@ -57,6 +61,8 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
     private static final long TWO_HOURS_IN_SEC = 2L * 60 * 60;
 
     private static final long FIVE_MINUTES_IN_SEC = 5L * 60;
+
+    private static final String CHECK_DNS_LOOKUPS_CMD = "ping -c 2 %s | grep -q '%s'";
 
     @Inject
     private SdxTestClient sdxTestClient;
@@ -162,6 +168,7 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
                 createBindUser(testContext, ipaClient, environmentCrn);
                 generateHostKeyTab(ipaClient, environmentCrn);
                 generateServiceKeytab(ipaClient, environmentCrn);
+                dnsLookups(testContext.given(SdxTestDto.class), testContext.getSdxClient());
                 cleanUp(testContext, ipaClient, environmentCrn);
                 kinit(testContext.given(SdxTestDto.class), testContext.getSdxClient());
                 syncUsers(testContext, ipaClient, environmentCrn, accountId);
@@ -314,6 +321,23 @@ public class FreeIpaUpgradeTests extends AbstractE2ETest {
         } catch (Exception e) {
             logger.error("FreeIPA upgrade kinit test failed with unexpected error", e);
             throw new TestFailException("FreeIPA upgrade kinit test failed with unexpected error: " + e.getMessage(), e);
+        }
+    }
+
+    private void dnsLookups(SdxTestDto sdxTestDto, SdxClient sdxClient) {
+        InstanceMetaDataV4Response instanceGroupMetadata = getInstanceGroups(sdxTestDto, sdxClient).stream()
+                .flatMap(instanceGroup -> instanceGroup.getMetadata().stream())
+                .filter(metadata -> metadata.getInstanceGroup().equals("idbroker"))
+                .filter(metadata -> StringUtils.isNoneBlank(metadata.getDiscoveryFQDN(), metadata.getPrivateIp()))
+                .findFirst().orElseThrow(() -> new TestFailException("FreeIPA upgrade DNS lookups test failed, idbroker instance group was not found."));
+        try {
+            String cmd = String.format(CHECK_DNS_LOOKUPS_CMD, instanceGroupMetadata.getDiscoveryFQDN(), instanceGroupMetadata.getPrivateIp());
+            Map<String, Pair<Integer, String>> results = sshJClientActions.executeSshCommand(getInstanceGroups(sdxTestDto, sdxClient),
+                    List.of(HostGroupType.MASTER.getName()), cmd, false);
+            results.values().forEach(result -> Assertions.assertEquals(0, result.getLeft()));
+        } catch (Exception e) {
+            logger.error("FreeIPA upgrade DNS lookups test failed with unexpected error", e);
+            throw new TestFailException("FreeIPA upgrade DNS lookups test failed with unexpected error: " + e.getMessage(), e);
         }
     }
 
