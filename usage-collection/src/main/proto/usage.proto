@@ -1282,6 +1282,9 @@ message CDPClusterDetails {
   CDPCloudProviderVariantType.Value cloudProviderVariant = 5;
   // multi az for freeipa
   bool multiAz = 6;
+  // Application defined (product specific) tags for the cluster. The format of this is a map serialized
+  // into a string as json. e.g.:   "tags": "{\"key1\":\"value1\",\"key2\":\"value2\"}"
+  string applicationTags = 7;
 }
 
 message CDPStatusDetails {

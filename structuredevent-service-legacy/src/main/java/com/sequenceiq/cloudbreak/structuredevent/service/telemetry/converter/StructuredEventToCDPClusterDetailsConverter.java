@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.structuredevent.service.telemetry.converter;
 
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -35,10 +36,8 @@ public class StructuredEventToCDPClusterDetailsConverter {
         cdpClusterDetails.setImageDetails(imageDetailsConverter.convert(structuredFlowEvent));
         cdpClusterDetails.setVersionDetails(versionDetailsConverter.convert(structuredFlowEvent));
         if (structuredFlowEvent != null && structuredFlowEvent.getStack() != null) {
-            Map<String, String> userTags = structuredFlowEvent.getStack().getStackTags().getUserDefinedTags();
-            if (userTags != null && !userTags.isEmpty()) {
-                cdpClusterDetails.setUserTags(JsonUtil.writeValueAsStringSilentSafe(userTags));
-            }
+            setTags(cdpClusterDetails::setUserTags, structuredFlowEvent.getStack().getStackTags().getUserDefinedTags());
+            setTags(cdpClusterDetails::setApplicationTags, structuredFlowEvent.getStack().getStackTags().getApplicationTags());
             String platformVariant = structuredFlowEvent.getStack().getPlatformVariant();
             if (!Strings.isNullOrEmpty(platformVariant)) {
                 cdpClusterDetails.setCloudProviderVariant(UsageProto.CDPCloudProviderVariantType
@@ -58,10 +57,8 @@ public class StructuredEventToCDPClusterDetailsConverter {
         cdpClusterDetails.setImageDetails(imageDetailsConverter.convert(structuredSyncEvent));
         cdpClusterDetails.setVersionDetails(versionDetailsConverter.convert(structuredSyncEvent));
         if (structuredSyncEvent != null && structuredSyncEvent.getStack() != null) {
-            Map<String, String> userTags = structuredSyncEvent.getStack().getStackTags().getUserDefinedTags();
-            if (userTags != null && !userTags.isEmpty()) {
-                cdpClusterDetails.setUserTags(JsonUtil.writeValueAsStringSilentSafe(userTags));
-            }
+            setTags(cdpClusterDetails::setUserTags, structuredSyncEvent.getStack().getStackTags().getUserDefinedTags());
+            setTags(cdpClusterDetails::setApplicationTags, structuredSyncEvent.getStack().getStackTags().getApplicationTags());
             String platformVariant = structuredSyncEvent.getStack().getPlatformVariant();
             if (!Strings.isNullOrEmpty(platformVariant)) {
                 cdpClusterDetails.setCloudProviderVariant(UsageProto.CDPCloudProviderVariantType
@@ -71,5 +68,11 @@ public class StructuredEventToCDPClusterDetailsConverter {
         }
 
         return cdpClusterDetails.build();
+    }
+
+    private void setTags(final Consumer<String> setter, Map<String, String> tags) {
+        if (tags != null && !tags.isEmpty()) {
+            setter.accept(JsonUtil.writeValueAsStringSilentSafe(tags));
+        }
     }
 }
