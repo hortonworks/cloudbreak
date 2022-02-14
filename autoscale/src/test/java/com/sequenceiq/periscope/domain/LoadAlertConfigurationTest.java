@@ -22,8 +22,8 @@ public class LoadAlertConfigurationTest {
                 Arguments.of("POLLING_COOLDOWN_DEFINED2", 50, 10, 10, 10),
                 Arguments.of("POLLING_COOLDOWN_DEFINED2", 50, 10, 5, 5),
 
-                Arguments.of("POLLING_SCALEUP_DEFINED", -1, 10, -1, 2),
-                Arguments.of("POLLING_SCALEDOWN_DEFINED", -1, -1, 10, 2),
+                Arguments.of("POLLING_SCALEUP_DEFINED", -1, 10, -1, DEFAULT_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS),
+                Arguments.of("POLLING_SCALEDOWN_DEFINED", -1, -1, 10, DEFAULT_LOAD_BASED_AUTOSCALING_COOLDOWN_MINS),
 
                 Arguments.of("POLLING_SCALEUP_SCALEDOWN_DEFINED1", -1, 10, 10, 10),
                 Arguments.of("POLLING_SCALEUP_SCALEDOWN_DEFINED2", -1, 5, 10, 5)
