@@ -21,7 +21,7 @@ public class ClusterStatusMonitor extends ClusterMonitor {
 
     @Override
     public String getTriggerExpression() {
-        return MonitorUpdateRate.EVERY_MIN_RATE_CRON;
+        return MonitorUpdateRate.CLUSTER_MONITOR_EVERY_MIN_RATE_CRON;
     }
 
     @Override
