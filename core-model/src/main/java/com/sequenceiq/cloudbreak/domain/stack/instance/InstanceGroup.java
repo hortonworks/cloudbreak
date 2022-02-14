@@ -292,7 +292,7 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
                 "id=" + id +
                 ", groupName='" + groupName + '\'' +
                 ", instanceGroupType=" + instanceGroupType +
-                ", stack=" + stack +
+                ", stack=" + stack.getName() +
                 '}';
     }
 }
