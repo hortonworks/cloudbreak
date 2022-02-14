@@ -21,8 +21,8 @@ public interface TelemetryOrchestrator {
     void initDiagnosticCollection(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
 
-    void updateTelemetryComponent(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters, ExitCriteriaModel exitModel,
-            String component, String version, boolean skipComponentRestart) throws CloudbreakOrchestratorFailedException;
+    void updateTelemetryComponent(List<GatewayConfig> allGateways, Set<Node> nodes, ExitCriteriaModel exitModel, Map<String, Object> parameters)
+            throws CloudbreakOrchestratorFailedException;
 
     void preFlightDiagnosticsCheck(List<GatewayConfig> allGateways, Set<Node> nodes, Map<String, Object> parameters,
             ExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException;
@@ -52,5 +52,8 @@ public interface TelemetryOrchestrator {
             throws CloudbreakOrchestratorFailedException;
 
     void upgradeMetering(List<GatewayConfig> gatewayConfigs, Set<Node> nodes, ExitCriteriaModel exitModel, String upgradeFromDate, String customRpmUrl)
+            throws CloudbreakOrchestratorFailedException;
+
+    void updatePartialSaltDefinition(byte[] partialSaltDefinition, List<String> components, List<GatewayConfig> gatewayConfigs, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;
 }

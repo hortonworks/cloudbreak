@@ -31,6 +31,7 @@ import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollect
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.logger.MdcContext;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.sequenceiq.cloudbreak.telemetry.diagnostics.DiagnosticsOperationsService;
 import com.sequenceiq.common.model.diagnostics.AwsDiagnosticParameters;
 import com.sequenceiq.common.model.diagnostics.AzureDiagnosticParameters;
 import com.sequenceiq.common.model.diagnostics.CloudStorageDiagnosticsParameters;
@@ -51,7 +52,7 @@ public class DiagnosticsCollectionActions {
     private CloudbreakEventService cloudbreakEventService;
 
     @Inject
-    private DiagnosticsFlowService diagnosticsFlowService;
+    private DiagnosticsOperationsService diagnosticsOperationsService;
 
     @Bean(name = "DIAGNOSTICS_SALT_VALIDATION_STATE")
     public Action<?, ?> diagnosticsSaltValidationAction() {
@@ -75,6 +76,52 @@ public class DiagnosticsCollectionActions {
                         .withResourceId(resourceId)
                         .withResourceCrn(resourceCrn)
                         .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_VALIDATION_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .withHosts(payload.getHosts())
+                        .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
+    @Bean(name = "DIAGNOSTICS_SALT_PILLAR_UPDATE_STATE")
+    public Action<?, ?> diagnosticsSaltPillarUpdateAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into DIAGNOSTICS_SALT_PILLAR_UPDATE_STATE. resourceCrn: '{}'", resourceCrn);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_SALT_PILLAR_UPDATE_RUNNING);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(resourceId)
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_PILLAR_UPDATE_DIAGNOSTICS_EVENT.selector())
+                        .withParameters(payload.getParameters())
+                        .withHosts(payload.getHosts())
+                        .withHostGroups(payload.getHostGroups())
+                        .withExcludeHosts(payload.getExcludeHosts())
+                        .build();
+                sendEvent(context, event);
+            }
+        };
+    }
+
+    @Bean(name = "DIAGNOSTICS_SALT_STATE_UPDATE_STATE")
+    public Action<?, ?> diagnosticsSaltStateUpdateAction() {
+        return new AbstractDiagnosticsCollectionActions<>(DiagnosticsCollectionEvent.class) {
+            @Override
+            protected void doExecute(CommonContext context, DiagnosticsCollectionEvent payload, Map<Object, Object> variables) {
+                Long resourceId = payload.getResourceId();
+                String resourceCrn = payload.getResourceCrn();
+                LOGGER.debug("Flow entered into SALT_STATE_UPDATE_DIAGNOSTICS_EVENT. resourceCrn: '{}'", resourceCrn);
+                cloudbreakEventService.fireCloudbreakEvent(resourceId, UPDATE_IN_PROGRESS.name(), ResourceEvent.STACK_DIAGNOSTICS_SALT_STATE_UPDATE_RUNNING);
+                DiagnosticsCollectionEvent event = DiagnosticsCollectionEvent.builder()
+                        .withResourceId(resourceId)
+                        .withResourceCrn(resourceCrn)
+                        .withSelector(DiagnosticsCollectionHandlerSelectors.SALT_STATE_UPDATE_DIAGNOSTICS_EVENT.selector())
                         .withParameters(payload.getParameters())
                         .withHosts(payload.getHosts())
                         .withHostGroups(payload.getHostGroups())
@@ -347,7 +394,7 @@ public class DiagnosticsCollectionActions {
                         .withHostGroups(payload.getHostGroups())
                         .withExcludeHosts(payload.getExcludeHosts())
                         .build();
-                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters());
+                diagnosticsOperationsService.vmDiagnosticsReport(resourceCrn, payload.getParameters());
                 sendEvent(context, event);
             }
         };
@@ -377,7 +424,7 @@ public class DiagnosticsCollectionActions {
                         .withHostGroups(payload.getHostGroups())
                         .withExcludeHosts(payload.getExcludeHosts())
                         .build();
-                diagnosticsFlowService.vmDiagnosticsReport(resourceCrn, payload.getParameters(),
+                diagnosticsOperationsService.vmDiagnosticsReport(resourceCrn, payload.getParameters(),
                         UsageProto.CDPVMDiagnosticsFailureType.Value.valueOf(payload.getFailureType()), payload.getException());
                 sendEvent(context, event);
             }
@@ -399,7 +446,8 @@ public class DiagnosticsCollectionActions {
 
         @Override
         protected Object getFailurePayload(P payload, Optional<CommonContext> flowContext, Exception ex) {
-            return payload;
+            return new DiagnosticsCollectionFailureEvent(payload.getResourceId(), ex, payload.getResourceCrn(), new DiagnosticParameters(),
+                    UsageProto.CDPVMDiagnosticsFailureType.Value.UNSET.name());
         }
 
         @Override

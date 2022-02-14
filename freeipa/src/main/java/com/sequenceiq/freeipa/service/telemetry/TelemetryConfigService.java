@@ -1,9 +1,13 @@
 package com.sequenceiq.freeipa.service.telemetry;
 
+import static org.apache.commons.lang3.StringUtils.isNotEmpty;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -13,11 +17,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
+import com.sequenceiq.cloudbreak.auth.CMLicenseParser;
+import com.sequenceiq.cloudbreak.auth.JsonCMLicense;
 import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
+import com.sequenceiq.cloudbreak.auth.altus.GrpcUmsClient;
+import com.sequenceiq.cloudbreak.auth.crn.Crn;
+import com.sequenceiq.cloudbreak.logger.MDCUtils;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.telemetry.DataBusEndpointProvider;
 import com.sequenceiq.cloudbreak.telemetry.TelemetryClusterDetails;
+import com.sequenceiq.cloudbreak.telemetry.TelemetryComponentType;
 import com.sequenceiq.cloudbreak.telemetry.VmLogsService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigService;
 import com.sequenceiq.cloudbreak.telemetry.common.TelemetryCommonConfigView;
@@ -28,13 +39,15 @@ import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigService;
 import com.sequenceiq.cloudbreak.telemetry.fluent.FluentConfigView;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigService;
 import com.sequenceiq.cloudbreak.telemetry.nodestatus.NodeStatusConfigView;
+import com.sequenceiq.cloudbreak.telemetry.orchestrator.TelemetryConfigProvider;
 import com.sequenceiq.common.api.telemetry.model.DataBusCredential;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.freeipa.service.AltusMachineUserService;
+import com.sequenceiq.freeipa.service.stack.StackService;
 
 @Service
-public class TelemetryConfigService {
+public class TelemetryConfigService implements TelemetryConfigProvider {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelemetryConfigService.class);
 
@@ -64,6 +77,22 @@ public class TelemetryConfigService {
 
     @Inject
     private DataBusEndpointProvider dataBusEndpointProvider;
+
+    @Inject
+    private CMLicenseParser cmLicenseParser;
+
+    @Inject
+    private GrpcUmsClient umsClient;
+
+    @Inject
+    private StackService stackService;
+
+    @Override
+    public Map<String, SaltPillarProperties> createTelemetryConfigs(Long stackId, Set<TelemetryComponentType> components)
+            throws CloudbreakOrchestratorFailedException {
+        Stack stack = stackService.getStackById(stackId);
+        return createTelemetryPillarConfig(stack);
+    }
 
     public Map<String, SaltPillarProperties> createTelemetryPillarConfig(Stack stack) throws CloudbreakOrchestratorFailedException {
         Telemetry telemetry = stack.getTelemetry();
@@ -122,7 +151,8 @@ public class TelemetryConfigService {
         TelemetryCommonConfigView telemetryCommonConfigs = telemetryCommonConfigService.createTelemetryCommonConfigs(
                 telemetry, vmLogsService.getVmLogs(), clusterDetails);
         return Map.of("telemetry",
-                new SaltPillarProperties("/telemetry/init.sls", Collections.singletonMap("telemetry", telemetryCommonConfigs.toMap())));
+                new SaltPillarProperties("/telemetry/init.sls", Map.of("telemetry", telemetryCommonConfigs.toMap(),
+                        "cloudera-manager", getPaywallConfigs(stack))));
     }
 
     private String getDatabusEndpoint(Stack stack, Telemetry telemetry) {
@@ -152,5 +182,30 @@ public class TelemetryConfigService {
                 stack.getCdpNodeStatusMonitorUser(), passwordInput, saltPingEnabled);
         return Map.of("nodestatus",
                 new SaltPillarProperties("/nodestatus/init.sls", Collections.singletonMap("nodestatus", nodeStatusConfigs.toMap())));
+    }
+
+    private Map<String, Object> getPaywallConfigs(Stack stack) {
+        String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
+        UserManagementProto.Account account = umsClient.getAccountDetails(accountId, MDCUtils.getRequestId());
+        Optional<JsonCMLicense> license = Optional.of(account.getClouderaManagerLicenseKey())
+                .flatMap(cmLicenseParser::parseLicense);
+        if (license.isPresent()) {
+            return createConfigWhenCmLicenseAvailable(license.get());
+        } else {
+            LOGGER.debug("No CM license available");
+            return Map.of();
+        }
+    }
+
+    private Map<String, Object> createConfigWhenCmLicenseAvailable(JsonCMLicense license) {
+        String username = license.getPaywallUsername();
+        String password = license.getPaywallPassword();
+        if (isNotEmpty(username) && isNotEmpty(password)) {
+            LOGGER.debug("Setting paywall license in pillar");
+            return Map.of("paywall_username", username, "paywall_password", password);
+        } else {
+            LOGGER.debug("While CM license exist the username or password is empty");
+            return Map.of();
+        }
     }
 }

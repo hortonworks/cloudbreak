@@ -6,15 +6,31 @@ altus:
         endpoint: https://cloudera-dbus-prod.s3.amazonaws.com
       - pattern: dbusapi.sigma-dev
         endpoint: https://cloudera-dbus-dev.s3.amazonaws.com
+      - pattern: dbusapi.sigma-int
+        endpoint: https://cloudera-dbus-int.s3.amazonaws.com
       - pattern: dbusapi.sigma-stage
         endpoint: https://cloudera-dbus-stage.s3.amazonaws.com
+    connection-check:
+      max-time-seconds: 60
+      retry-times: 2
+      retry-delay-seconds: 5
+      retry-max-time-seconds: 120
   sigmadbus:
     endpoint:
 telemetry:
-  cdpTelemetry:
-    desiredVersion: 0.4.18
-  cdpLoggingAgent:
-    desiredVersion: 0.2.11
+  repo:
+    name: cdp-infra-tools
+    base-url: https://archive.cloudera.com/p/cdp-infra-tools/latest/redhat7/yum
+    gpg-key: https://archive.cloudera.com/p/cdp-infra-tools/latest/redhat7/yum/RPM-GPG-KEY/RPM-GPG-KEY-Jenkins
+    gpg-check: 1
+  upgrade:
+    enabled: false
+    cdp-telemetry:
+      desired-version: 0.4.23
+    cdp-logging-agent:
+      desired-version: 0.2.16
+    metering-agent:
+      desired-date: 2022-01-18
   usage:
     messagebroker:
       enabled: false
@@ -46,6 +62,8 @@ telemetry:
     retry:
       cloud-storage-validation: 3
       logging-agent-stop: 5
+      logging-agent-doctor: 3
       node-status-collect: 3
       diagnostics-collect: 360
       metering-upgrade: 5
+      telemetry-upgrade: 20

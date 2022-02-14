@@ -4,29 +4,6 @@
 {% set dbus_lock_exists = salt['file.file_exists' ]('/etc/cdp-logging-agent/databus_bundle.lock') %}
 {% set restart_sleep_time = 1200 %}
 
-{% if fluent.uninstallTdAgent %}
-td_agent_stop:
-  service.dead:
-    - enable: False
-    - name: td-agent
-
-uninstall_td_agent:
-  pkg.purged:
-    - name: td-agent
-{% endif %}
-
-{% if not fluent.cdpLoggingAgentInstalled %}
-{% if os == "RedHat" or os == "CentOS" %}
-install_cdp_logging_agent:
-  cmd.run:
-    - name: rpm -i {{ fluent.cdpLoggingAgentRpm }}
-{% else %}
-install_cdp_logging_agent_warning:
-  cmd.run:
-    - name: echo "CDP logging agent cannot be installed to {{ os }}"
-{% endif %}
-{% endif %}
-
 /etc/cdp-logging-agent/post-start.sh:
   file.managed:
     - source: salt://fluent/template/post-start.sh.j2

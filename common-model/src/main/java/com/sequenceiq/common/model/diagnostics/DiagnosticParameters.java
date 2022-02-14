@@ -37,7 +37,7 @@ public class DiagnosticParameters {
 
     private Date endTime;
 
-    private DiagnosticsDestination destination;
+    private DiagnosticsDestination destination = DiagnosticsDestination.LOCAL;
 
     private Set<String> hostGroups = new HashSet<>();
 

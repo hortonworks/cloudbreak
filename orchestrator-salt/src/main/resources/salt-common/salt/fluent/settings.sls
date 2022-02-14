@@ -4,8 +4,6 @@
 {% else %}
     {% set fluent_enabled = False %}
 {% endif %}
-{% set cdp_logging_agent_version = '0.2.11' %}
-{% set cdp_logging_agent_rpm = 'https://cloudera-service-delivery-cache.s3.amazonaws.com/telemetry/cdp-logging-agent/' + cdp_logging_agent_version + '/cdp_logging_agent-'+ cdp_logging_agent_version + '.x86_64.rpm' %}
 {% if salt['pillar.get']('fluent:cloudStorageLoggingEnabled') %}
     {% set cloud_storage_logging_enabled = True %}
 {% else %}
@@ -216,20 +214,13 @@
 {% else %}
 {% set fluent_version = 0 %}
 {% endif %}
-
 {% set td_agent_installed = salt['file.directory_exists' ]('/etc/td-agent') %}
 {% set cdp_logging_agent_installed = salt['file.directory_exists' ]('/etc/cdp-logging-agent') %}
-{% if td_agent_installed and cdp_logging_agent_installed %}
-  {% set binary = 'cdp-logging-agent' %}
-  {% set uninstall_td_agent = True %}
-{% elif td_agent_installed %}
+{% if td_agent_installed and not cdp_logging_agent_installed %}
   {% set binary = 'td-agent' %}
-  {% set uninstall_td_agent = False %}
 {% else %}
   {% set binary = 'cdp-logging-agent' %}
-  {% set uninstall_td_agent = False %}
 {% endif %}
-
 {% do fluent.update({
     "enabled": fluent_enabled,
     "is_systemd" : is_systemd,
@@ -292,8 +283,5 @@
     "proxyFullUrl": proxy_full_url,
     "noProxyHosts": no_proxy_hosts,
     "binary": binary,
-    "fluentVersion": fluent_version,
-    "cdpLoggingAgentInstalled": cdp_logging_agent_installed,
-    "cdpLoggingAgentRpm": cdp_logging_agent_rpm,
-    "uninstallTdAgent": uninstall_td_agent
+    "fluentVersion": fluent_version
 }) %}

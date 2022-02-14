@@ -4,7 +4,6 @@ import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.Diagnostics
 import static com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionStateSelectors.START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.inject.Inject;
 
@@ -13,63 +12,53 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.DiagnosticsFlowService;
+import com.sequenceiq.cloudbreak.common.event.Selectable;
 import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionEvent;
-import com.sequenceiq.cloudbreak.core.flow2.diagnostics.event.DiagnosticsCollectionFailureEvent;
+import com.sequenceiq.cloudbreak.telemetry.diagnostics.DiagnosticsOperationsService;
 import com.sequenceiq.common.api.telemetry.model.DiagnosticsDestination;
 import com.sequenceiq.common.model.diagnostics.DiagnosticParameters;
-import com.sequenceiq.flow.reactor.api.event.EventSender;
-import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
-
-import reactor.bus.Event;
-import reactor.bus.EventBus;
+import com.sequenceiq.flow.reactor.api.handler.HandlerEvent;
 
 @Component
-public class DiagnosticsVmPreFlightCheckHandler extends EventSenderAwareHandler<DiagnosticsCollectionEvent>  {
+public class DiagnosticsVmPreFlightCheckHandler extends AbstractDiagnosticsOperationHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DiagnosticsInitHandler.class);
 
     @Inject
-    private EventBus eventBus;
-
-    @Inject
-    private DiagnosticsFlowService diagnosticsFlowService;
-
-    public DiagnosticsVmPreFlightCheckHandler(EventSender eventSender) {
-        super(eventSender);
-    }
+    private DiagnosticsOperationsService diagnosticsOperationsService;
 
     @Override
-    public void accept(Event<DiagnosticsCollectionEvent> event) {
+    public Selectable executeOperation(HandlerEvent<DiagnosticsCollectionEvent> event) throws Exception {
         DiagnosticsCollectionEvent data = event.getData();
         Long resourceId = data.getResourceId();
         String resourceCrn = data.getResourceCrn();
         DiagnosticParameters parameters = data.getParameters();
         Map<String, Object> parameterMap = parameters.toMap();
-        try {
-            LOGGER.debug("Diagnostics collection VM preflight check started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
-            Set<String> hosts = parameters.getHosts();
-            Set<String> hostGroups = parameters.getHostGroups();
-            Set<String> excludedHosts = parameters.getExcludeHosts();
-            if (!DiagnosticsDestination.ENG.equals(parameters.getDestination())) {
-                diagnosticsFlowService.vmPreFlightCheck(resourceId, parameterMap, hosts, hostGroups, excludedHosts);
-            }
-            DiagnosticsCollectionEvent diagnosticsCollectionEvent = DiagnosticsCollectionEvent.builder()
-                    .withResourceCrn(resourceCrn)
-                    .withResourceId(resourceId)
-                    .withSelector(START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT.selector())
-                    .withParameters(parameters)
-                    .withHosts(hosts)
-                    .withHostGroups(hostGroups)
-                    .withExcludeHosts(excludedHosts)
-                    .build();
-            eventSender().sendEvent(diagnosticsCollectionEvent, event.getHeaders());
-        } catch (Exception e) {
-            LOGGER.debug("Diagnostics collection VM preflight check failed. resourceCrn: '{}', parameters: '{}'.", resourceCrn, parameterMap, e);
-            DiagnosticsCollectionFailureEvent failureEvent = new DiagnosticsCollectionFailureEvent(resourceId, e, resourceCrn, parameters,
-                    UsageProto.CDPVMDiagnosticsFailureType.Value.PREFLIGHT_VM_CHECK_FAILURE.name());
-            eventBus.notify(failureEvent.selector(), new Event<>(event.getHeaders(), failureEvent));
+        LOGGER.debug("Diagnostics collection VM preflight check started. resourceCrn: '{}', parameters: '{}'", resourceCrn, parameterMap);
+        if (!DiagnosticsDestination.ENG.equals(parameters.getDestination())) {
+            diagnosticsOperationsService.vmPreflightCheck(resourceId, parameters);
+        } else {
+            LOGGER.debug("Diagnostics VM preflight check skipped.");
         }
+        return DiagnosticsCollectionEvent.builder()
+                .withResourceCrn(resourceCrn)
+                .withResourceId(resourceId)
+                .withSelector(START_DIAGNOSTICS_ENSURE_MACHINE_USER_EVENT.selector())
+                .withParameters(parameters)
+                .withHosts(parameters.getHosts())
+                .withHostGroups(parameters.getHostGroups())
+                .withExcludeHosts(parameters.getExcludeHosts())
+                .build();
+    }
+
+    @Override
+    public UsageProto.CDPVMDiagnosticsFailureType.Value getFailureType() {
+        return UsageProto.CDPVMDiagnosticsFailureType.Value.PREFLIGHT_VM_CHECK_FAILURE;
+    }
+
+    @Override
+    public String getOperationName() {
+        return "VM Pre-flight check";
     }
 
     @Override
