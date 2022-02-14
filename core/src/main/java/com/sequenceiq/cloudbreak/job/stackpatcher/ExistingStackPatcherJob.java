@@ -24,6 +24,7 @@ import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.StackViewService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchApplyException;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
+import com.sequenceiq.cloudbreak.service.stackpatch.StackPatchUsageReporterService;
 
 import io.opentracing.Tracer;
 
@@ -48,6 +49,9 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
     @Inject
     private Collection<ExistingStackPatchService> existingStackPatchServices;
 
+    @Inject
+    private StackPatchUsageReporterService stackPatchUsageReporterService;
+
     public ExistingStackPatcherJob(Tracer tracer) {
         super(tracer, "Existing Stack Patcher Job");
     }
@@ -65,19 +69,28 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
             String stackPatchTypeName = context.getJobDetail().getJobDataMap().getString(STACK_PATCH_TYPE_NAME);
             StackPatchType stackPatchType = stackPatchTypeConverter.convertToEntityAttribute(stackPatchTypeName);
             if (stackPatchType == null || StackPatchType.UNKNOWN.equals(stackPatchType)) {
-                unscheduleJob(context);
-                throw new JobExecutionException(String.format("Stack patch type %s is unknown", stackPatchTypeName));
+                String message = String.format("Stack patch type %s is unknown", stackPatchTypeName);
+                unscheduleAndFail(message, context, stack, stackPatchType);
+            } else {
+                Optional<ExistingStackPatchService> optionalExistingStackPatchService = getStackPatchServiceForType(stackPatchType);
+                if (optionalExistingStackPatchService.isEmpty()) {
+                    String message = "No stack patcher implementation found for type " + stackPatchType;
+                    unscheduleAndFail(message, context, stack, stackPatchType);
+                } else {
+                    applyStackPatch(optionalExistingStackPatchService.get(), stack);
+                }
             }
-            Optional<ExistingStackPatchService> optionalExistingStackPatchService = getStackPatchServiceForType(stackPatchType);
-            if (optionalExistingStackPatchService.isEmpty()) {
-                unscheduleJob(context);
-                throw new JobExecutionException("No stack patcher implementation found for type " + stackPatchType);
-            }
-            applyStackPatch(optionalExistingStackPatchService.get(), stack);
         } else {
             LOGGER.debug("Existing stack patching will be unscheduled, because stack {} status is {}", stack.getResourceCrn(), stackStatus);
         }
         unscheduleJob(context);
+    }
+
+    private void unscheduleAndFail(String message, JobExecutionContext context, Stack stack, StackPatchType stackPatchType)
+            throws JobExecutionException {
+        unscheduleJob(context);
+        stackPatchUsageReporterService.reportFailure(stack, stackPatchType, message);
+        throw new JobExecutionException(message);
     }
 
     private void unscheduleJob(JobExecutionContext context) {
@@ -96,14 +109,17 @@ public class ExistingStackPatcherJob extends StatusCheckerJob {
             try {
                 if (existingStackPatchService.isAffected(stack)) {
                     LOGGER.debug("Stack {} needs patch for {}", stack.getResourceCrn(), stackPatchType);
+                    stackPatchUsageReporterService.reportAffected(stack, stackPatchType);
                     existingStackPatchService.apply(stack);
                     LOGGER.info("Stack {} was patched successfully for {}", stack.getResourceCrn(), stackPatchType);
+                    stackPatchUsageReporterService.reportSuccess(stack, stackPatchType);
                 } else {
                     LOGGER.debug("Stack {} is not affected by {}", stack.getResourceCrn(), stackPatchType);
                 }
             } catch (ExistingStackPatchApplyException e) {
                 String message = String.format("Failed to patch stack %s for %s", stack.getResourceCrn(), stackPatchType);
                 LOGGER.error(message, e);
+                stackPatchUsageReporterService.reportFailure(stack, stackPatchType, e.getMessage());
                 throw new JobExecutionException(message, e);
             }
         } else {
