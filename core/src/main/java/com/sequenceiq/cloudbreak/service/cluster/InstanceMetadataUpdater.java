@@ -143,7 +143,7 @@ public class InstanceMetadataUpdater {
         if (!failedVersionQueryByHost.isEmpty()) {
             cloudbreakEventService.fireCloudbreakEvent(stack.getId(), UPDATE_FAILED.name(),
                     CLUSTER_PACKAGE_VERSION_CANNOT_BE_QUERIED,
-                    Collections.singletonList(failedVersionQueryByHost.stream().collect(Collectors.joining("\r\n"))));
+                    Collections.singletonList(String.join("\r\n", failedVersionQueryByHost)));
         }
     }
 
