@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cm;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.UPDATE_IN_PROGRESS;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_4_3;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_5_1;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -66,6 +67,7 @@ import com.cloudera.api.swagger.model.ApiBatchResponseElement;
 import com.cloudera.api.swagger.model.ApiCommand;
 import com.cloudera.api.swagger.model.ApiCommandList;
 import com.cloudera.api.swagger.model.ApiConfigStalenessStatus;
+import com.cloudera.api.swagger.model.ApiEntityTag;
 import com.cloudera.api.swagger.model.ApiHost;
 import com.cloudera.api.swagger.model.ApiHostList;
 import com.cloudera.api.swagger.model.ApiHostRefList;
@@ -99,6 +101,7 @@ import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
+import com.squareup.okhttp.Call;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerModificationServiceTest {
@@ -110,6 +113,10 @@ class ClouderaManagerModificationServiceTest {
     private static final long CLUSTER_ID = 1L;
 
     private static final BigDecimal REFRESH_PARCEL_REPOS_ID = new BigDecimal(1);
+
+    private static final String HOSTNAME = "host1";
+
+    private static final String GROUP_NAME = "group1";
 
     @InjectMocks
     private ClouderaManagerModificationService underTest;
@@ -675,6 +682,9 @@ class ClouderaManagerModificationServiceTest {
         when(mgmtServiceResourceApi.restartCommand()).thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, apiClientMock)).thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
 
         Set<ClusterComponent> clusterComponents = TestUtil.clusterComponentSet(cluster);
         Set<ClusterComponent> clusterComponentsNoCDH = clusterComponents.stream().filter(clusterComponent -> !clusterComponent.getName().equals("CDH"))
@@ -724,6 +734,8 @@ class ClouderaManagerModificationServiceTest {
         when(clustersResourceApi.restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class))).thenReturn(new ApiCommand().id(apiCommandId));
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, apiClientMock)).thenReturn(success);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_4_3.getVersion());
 
         underTest.upgradeClusterRuntime(cluster.getComponents(), true, Optional.empty());
 
@@ -793,6 +805,21 @@ class ClouderaManagerModificationServiceTest {
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, apiClientMock)).thenReturn(success);
 
+        InstanceGroup instanceGroup = new InstanceGroup();
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setDiscoveryFQDN(HOSTNAME);
+        instanceGroup.setGroupName(GROUP_NAME);
+        instanceGroup.setInstanceMetaData(Set.of(instanceMetaData));
+        stack.setInstanceGroups(Set.of(instanceGroup));
+        when(clouderaManagerApiFactory.getClustersResourceApi(any())).thenReturn(clustersResourceApi);
+        ApiHostList clusterHostsRef = new ApiHostList().items(List.of(new ApiHost().hostname(HOSTNAME)));
+        when(clustersResourceApi.listHosts(eq(STACK_NAME), eq(null), eq(null), eq(null))).thenReturn(clusterHostsRef);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_6_0.getVersion());
+        when(clouderaManagerApiFactory.getHostsResourceApi(any())).thenReturn(hostResourceApi);
+        Call call = mock(Call.class);
+        when(hostResourceApi.addTagsAsync(eq(HOSTNAME), any(), any())).thenReturn(call);
+
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(apiClientMock);
 
         underTest.upgradeClusterRuntime(cluster.getComponents(), true, Optional.empty());
@@ -814,6 +841,10 @@ class ClouderaManagerModificationServiceTest {
         verify(clustersResourceApi, times(1)).restartCommand(eq(stack.getName()), any(ApiRestartClusterArgs.class));
         verify(clustersResourceApi, times(2)).listActiveCommands(stack.getName(), "SUMMARY");
         verify(clouderaManagerApiClientProvider, times(1)).getV45Client(any(), any(), any(), any());
+        ArgumentCaptor<List<ApiEntityTag>> entityTagListCaptor = ArgumentCaptor.forClass(List.class);
+        verify(hostResourceApi, times(1)).addTagsAsync(eq(HOSTNAME), entityTagListCaptor.capture(), any());
+        assertEquals("_cldr_cm_host_template_name", entityTagListCaptor.getValue().get(0).getName());
+        assertEquals(GROUP_NAME, entityTagListCaptor.getValue().get(0).getValue());
 
         InOrder inOrder = Mockito.inOrder(clouderaManagerPollingServiceProvider, clouderaManagerParcelManagementService,
                 clustersResourceApi, clouderaManagerUpgradeService, clouderaManagerApiClientProvider);
@@ -871,6 +902,8 @@ class ClouderaManagerModificationServiceTest {
                 List.of(new ApiCommand().id(apiCommandId).name("Restart"))));
         when(clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClientMock, apiCommandId)).thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, apiClientMock)).thenReturn(success);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
 
         when(clouderaManagerApiClientProvider.getV45Client(any(), any(), any(), any())).thenReturn(apiClientMock);
 
@@ -946,6 +979,9 @@ class ClouderaManagerModificationServiceTest {
                 .thenReturn(success);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, apiClientMock))
                 .thenReturn(success);
+        ClouderaManagerRepo clouderaManagerRepo = mock(ClouderaManagerRepo.class);
+        when(clusterComponentProvider.getClouderaManagerRepoDetails(CLUSTER_ID)).thenReturn(clouderaManagerRepo);
+        when(clouderaManagerRepo.getVersion()).thenReturn(CLOUDERAMANAGER_VERSION_7_5_1.getVersion());
 
         underTest.upgradeClusterRuntime(cluster.getComponents(), false, Optional.empty());
 
