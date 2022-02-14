@@ -5,7 +5,6 @@ import static org.mockito.Mockito.doReturn;
 import static org.junit.Assert.assertTrue;
 
 import com.cloudera.api.swagger.model.ApiClusterTemplateConfig;
-import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.altus.UmsRight;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupRequest;
 import com.sequenceiq.cloudbreak.auth.altus.VirtualGroupService;
