@@ -46,34 +46,29 @@ public class TemplateDecorator {
 
     public Template decorate(Credential credential, Template template, String region, String availabilityZone, String variant, CdpResourceType cdpResourceType) {
         setRootVolumeSize(template);
-        boolean needToFetchVolumeCountAndSize = template.getVolumeTemplates().stream()
-                .anyMatch(it -> it.getVolumeCount() == null || it.getVolumeSize() == null);
-        if (needToFetchVolumeCountAndSize) {
-            LOGGER.info("We need to fetch the VM types. Perhaps the client does not provide the volume count or size");
-            CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(
-                    extendedCloudCredentialConverter.convert(credential),
-                    region,
-                    variant,
-                    cdpResourceType,
-                    new HashMap<>());
-            String locationString = locationService.location(region, availabilityZone);
-            PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
-            for (VolumeTemplate volumeTemplate : template.getVolumeTemplates()) {
-                VolumeParameterConfig config;
-                try {
-                    config = resolveVolumeParameterConfig(template, volumeTemplate, platformDisks, vmTypesV2, locationString);
-                } catch (NoSuchElementException ignored) {
-                    LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like YARN");
-                    config = VolumeParameterConfig.EMPTY;
-                }
+        PlatformDisks platformDisks = cloudParameterService.getDiskTypes();
+        CloudVmTypes vmTypesV2 = cloudParameterService.getVmTypesV2(
+                extendedCloudCredentialConverter.convert(credential),
+                region,
+                variant,
+                cdpResourceType,
+                new HashMap<>());
+        String locationString = locationService.location(region, availabilityZone);
+        VolumeParameterConfig config;
+        for (VolumeTemplate volumeTemplate : template.getVolumeTemplates()) {
+            try {
+                config = resolveVolumeParameterConfig(template, volumeTemplate, platformDisks, vmTypesV2, locationString);
+            } catch (NoSuchElementException ignored) {
+                LOGGER.debug("No VolumeParameterConfig found, which might be normal for platforms like YARN");
+                config = VolumeParameterConfig.EMPTY;
+            }
 
-                if (config.volumeParameterType() != null) {
-                    if (volumeTemplate.getVolumeCount() == null) {
-                        volumeTemplate.setVolumeCount(config.maximumNumber());
-                    }
-                    if (volumeTemplate.getVolumeSize() == null) {
-                        volumeTemplate.setVolumeSize(config.maximumSize());
-                    }
+            if (config.volumeParameterType() != null) {
+                if (volumeTemplate.getVolumeCount() == null) {
+                    volumeTemplate.setVolumeCount(config.maximumNumber());
+                }
+                if (volumeTemplate.getVolumeSize() == null) {
+                    volumeTemplate.setVolumeSize(config.maximumSize());
                 }
             }
         }
@@ -84,6 +79,10 @@ public class TemplateDecorator {
     private VolumeParameterConfig resolveVolumeParameterConfig(Template template, VolumeTemplate volumeTemplate,
             PlatformDisks platformDisks, CloudVmTypes vmTypesV2, String locationString) {
         Platform platform = Platform.platform(template.cloudPlatform());
+        VmType vmType = vmTypesV2.getCloudVmResponses()
+                .getOrDefault(locationString, Collections.emptySet())
+                .stream()
+                .filter(curr -> curr.value().equals(template.getInstanceType())).findFirst().get();
         Map<String, VolumeParameterType> map = platformDisks.getDiskMappings().get(platform);
         VolumeParameterType volumeParameterType = map.get(volumeTemplate.getVolumeType());
 
@@ -91,10 +90,7 @@ public class TemplateDecorator {
             throw new CloudbreakServiceException("Cannot find the volume type: " + volumeTemplate.getVolumeType()
                     + ". Supported types: " + String.join(", ", map.keySet()));
         }
-        VmType vmType = vmTypesV2.getCloudVmResponses()
-                .getOrDefault(locationString, Collections.emptySet())
-                .stream()
-                .filter(curr -> curr.value().equals(template.getInstanceType())).findFirst().get();
+
         return vmType.getVolumeParameterbyVolumeParameterType(volumeParameterType);
     }
 
