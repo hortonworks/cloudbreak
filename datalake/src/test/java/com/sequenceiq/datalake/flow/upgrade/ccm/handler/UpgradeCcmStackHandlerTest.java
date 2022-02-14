@@ -75,7 +75,7 @@ class UpgradeCcmStackHandlerTest {
     }
 
     @Test
-    void acceptSuccess() {
+    void acceptSuccess() throws Exception {
         SdxCluster sdxCluster = getSdxCluster();
         UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user", sdxCluster);
         PollingConfig expectedPollingConfig = new PollingConfig(1, TimeUnit.SECONDS, 2, TimeUnit.MINUTES);
@@ -92,7 +92,7 @@ class UpgradeCcmStackHandlerTest {
 
     @ParameterizedTest
     @ValueSource(classes = { UserBreakException.class, PollerStoppedException.class, PollerException.class })
-    void acceptWithExceptions(Class<? extends Throwable> errorClass) {
+    void acceptWithExceptions(Class<? extends Throwable> errorClass) throws Exception {
         UpgradeCcmStackRequest request = new UpgradeCcmStackRequest(1L, "user", getSdxCluster());
         Event.Headers headers = new Event.Headers();
         Event<UpgradeCcmStackRequest> event = new Event<>(headers, request);

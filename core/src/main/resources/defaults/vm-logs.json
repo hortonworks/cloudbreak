@@ -48,6 +48,10 @@
     "label": "mount_disks"
   },
   {
+    "path": "/var/log/cdp_resources_check/cdp-resources-check.log*",
+    "label": "cdp_resources_check"
+  },
+  {
     "path": "/var/log/waagent.log",
     "label": "waagent"
   },

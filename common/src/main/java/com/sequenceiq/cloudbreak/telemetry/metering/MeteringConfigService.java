@@ -3,13 +3,18 @@ package com.sequenceiq.cloudbreak.telemetry.metering;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
+import com.sequenceiq.cloudbreak.telemetry.TelemetryUpgradeConfiguration;
+
 @Service
 public class MeteringConfigService {
 
     private final MeteringConfiguration meteringConfiguration;
 
-    public MeteringConfigService(MeteringConfiguration meteringConfiguration) {
+    private final TelemetryUpgradeConfiguration telemetryUpgradeConfiguration;
+
+    public MeteringConfigService(MeteringConfiguration meteringConfiguration, TelemetryUpgradeConfiguration telemetryUpgradeConfiguration) {
         this.meteringConfiguration = meteringConfiguration;
+        this.telemetryUpgradeConfiguration = telemetryUpgradeConfiguration;
     }
 
     public MeteringConfigView createMeteringConfigs(boolean enabled, String platform, String clusterCrn, String clusterName, String serviceType,
@@ -22,6 +27,9 @@ public class MeteringConfigService {
                     .withServiceType(StringUtils.upperCase(serviceType))
                     .withServiceVersion(serviceVersion)
                     .withStreamName(meteringConfiguration.getDbusStreamName());
+        }
+        if (telemetryUpgradeConfiguration.isEnabled() && telemetryUpgradeConfiguration.getMeteringAgent() != null) {
+            builder.withDesiredMeteringAgentDate(telemetryUpgradeConfiguration.getMeteringAgent().getDesiredDate());
         }
         return builder
                 .withEnabled(enabled)
