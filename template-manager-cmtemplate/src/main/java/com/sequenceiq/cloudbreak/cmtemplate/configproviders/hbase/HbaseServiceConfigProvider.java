@@ -23,6 +23,7 @@ import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
 @Component
 public class HbaseServiceConfigProvider implements CmTemplateComponentConfigProvider {
     private static final String SPNEGO_ADMIN_GROUP = "hbase_security_authentication_spnego_admin_groups";
+
     private static final String RANGER_HBASE_ADMIN_VIRTUAL_GROUPS = "ranger.hbase.default.admin.groups";
 
     @Inject
