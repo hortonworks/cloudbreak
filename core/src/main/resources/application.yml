@@ -687,6 +687,8 @@ cb:
         n2d-highcpu-8,
         n2d-highcpu-16,
         n2d-highcpu-32,
+        n2d-highmem-32,
+        n2d-highmem-64,
         e2-highmem-8,
         e2-highmem-16,
         e2-highcpu-8,
