@@ -33,11 +33,13 @@ public class QuartzJobInitializer {
     private void init() {
         if (properties.isAutoSyncEnabled() && initJobDefinitions.isPresent()) {
             try {
+                LOGGER.info("AutoSync is enabled and there are job initializers, clearing the Quartz scheduler.");
                 scheduler.clear();
             } catch (SchedulerException e) {
                 LOGGER.error("Error during clearing quartz jobs", e);
             }
             for (JobInitializer jobDef : initJobDefinitions.get()) {
+                LOGGER.debug("Initialize quartz jobs with initializer '{}'", jobDef.getClass());
                 jobDef.initJobs();
             }
         }
