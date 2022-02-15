@@ -48,7 +48,7 @@ public class SdxRetryService {
     private StackV4Endpoint stackV4Endpoint;
 
     public FlowIdentifier retrySdx(SdxCluster sdxCluster) {
-        FlowLog flowLog = flow2Handler.getFirstStateLogfromLatestFlow(sdxCluster.getId());
+        FlowLog flowLog = flow2Handler.getFirstRetryableStateLogfromLatestFlow(sdxCluster.getId());
         if (!flowLog.getFlowType().isOnClassPath()) {
             throw new InternalServerErrorException(String.format("Flow type %s is not on classpath", flowLog.getFlowType().getName()));
         }
