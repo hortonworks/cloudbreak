@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.quartz.cleanup.service;
 
-import java.security.SecureRandom;
-import java.util.Random;
-
 import javax.inject.Inject;
 
 import org.quartz.CronScheduleBuilder;
@@ -30,8 +27,6 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> {
 
     private static final String TRIGGER_GROUP = "ums-cleanup-triggers";
 
-    private static final Random RANDOM = new SecureRandom();
-
     @Inject
     private Scheduler scheduler;
 
@@ -42,7 +37,9 @@ public abstract class UMSCleanupJobService<T extends UMSCleanupJob> {
         JobDetail jobDetail = buildJobDetail();
         Trigger trigger = buildJobTrigger(jobDetail);
         try {
+            LOGGER.info("Unscheduling UMS cleanup job with name: '{}' and group: '{}'", JOB_NAME, JOB_GROUP);
             unschedule();
+            LOGGER.info("Scheduling UMS cleanup job with name: '{}' and group: '{}'", JOB_NAME, JOB_GROUP);
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);
