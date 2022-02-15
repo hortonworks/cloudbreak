@@ -68,9 +68,12 @@ public class StructuredSynchronizerJobService {
     public <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
         if (structuredSynchronizerConfig.isStructuredSyncEnabled()) {
             try {
-                if (scheduler.getJobDetail(JobKey.jobKey(id, JOB_GROUP)) != null) {
+                JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
+                if (scheduler.getJobDetail(jobKey) != null) {
+                    LOGGER.info("Unscheduling structured event sync job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                     unschedule(id);
                 }
+                LOGGER.info("Scheduling structured event sync job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (SchedulerException e) {
                 LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
@@ -80,7 +83,9 @@ public class StructuredSynchronizerJobService {
 
     public void unschedule(String id) {
         try {
-            scheduler.deleteJob(JobKey.jobKey(id, JOB_GROUP));
+            JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
+            LOGGER.info("Unscheduling instance metadata archiver job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+            scheduler.deleteJob(jobKey);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
         }

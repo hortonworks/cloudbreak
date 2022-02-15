@@ -36,7 +36,10 @@ public class SdxRecoveryTests extends PreconditionSdxE2ETest {
             "sudo sh -c \"echo -e '"
                     + "\\n127.0.0.1 cloudera-build-us-west-1.vpc.cloudera.com"
                     + "\\n127.0.0.1 build-cache-azure.kc.cloudera.com"
-                    + "\\n127.0.0.1 cloudera-build-2-us-west-2.vpc.cloudera.com'"
+                    + "\\n127.0.0.1 cloudera-build-2-us-west-2.vpc.cloudera.com"
+                    + "\\n127.0.0.1 cloudera-build-3-us-central-1-3.gce.cloudera.com"
+                    + "\\n127.0.0.1 build-cache.vpc.cloudera.com"
+                    + "\\n127.0.0.1 cache-test1.vpc.cloudera.com'"
                     + " >> /etc/hosts\"";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SdxRecoveryTests.class);
