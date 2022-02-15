@@ -55,8 +55,10 @@ public class ArchiveInstanceMetaDataJobService {
             try {
                 JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
                 if (scheduler.getJobDetail(jobKey) != null) {
+                    LOGGER.info("Unscheduling instance metadata archiver job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                     unschedule(jobKey);
                 }
+                LOGGER.info("Scheduling instance metadata archiver job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 scheduler.scheduleJob(jobDetail, trigger);
             } catch (SchedulerException e) {
                 LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
