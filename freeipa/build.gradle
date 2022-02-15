@@ -98,7 +98,7 @@ dependencies {
   }
 
   constraints {
-    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: '2.6.2'
+    implementation     group: 'com.google.code.gson',      name: 'gson',                           version: gsonVersion
     implementation     group: 'dnsjava',                   name: 'dnsjava',                        version: '2.1.7'
     implementation     group: 'io.springfox',              name: 'springfox-boot-starter',         version: swaggerSpringFoxVersion
     implementation     group: 'io.swagger',                name: 'swagger-jersey2-jaxrs',          version: swaggerVersion
