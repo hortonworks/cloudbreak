@@ -1,10 +1,15 @@
 package com.sequenceiq.cloudbreak.grpc.util;
 
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.tracing.TracingUtil;
 
+import io.grpc.CallOptions;
+import io.grpc.Channel;
+import io.grpc.ClientCall;
+import io.grpc.ClientInterceptor;
 import io.grpc.MethodDescriptor;
 import io.grpc.Status;
 import io.opentracing.Tracer;
@@ -54,5 +59,15 @@ public class GrpcUtil {
                     TracingUtil.setTagsFromMdc(span);
                 })
                 .build();
+    }
+
+    public static ClientInterceptor getTimeoutInterceptor(long timeoutSec) {
+        return new ClientInterceptor() {
+            @Override
+            public <R, T> ClientCall<R, T> interceptCall(MethodDescriptor<R, T> method, CallOptions callOptions, Channel next) {
+                callOptions = callOptions.withDeadlineAfter(timeoutSec, TimeUnit.SECONDS);
+                return next.newCall(method, callOptions);
+            }
+        };
     }
 }
