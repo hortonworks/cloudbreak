@@ -996,7 +996,9 @@ public class UmsClient {
     private UserManagementBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return UserManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(GrpcUtil.getTracingInterceptor(tracer),
+                .withInterceptors(
+                        GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
+                        GrpcUtil.getTracingInterceptor(tracer),
                         new AltusMetadataInterceptor(requestId, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN),
                         new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
     }

@@ -50,6 +50,7 @@ import com.sequenceiq.cloudbreak.auth.altus.exception.UmsOperationException;
 import com.sequenceiq.cloudbreak.auth.altus.model.AltusCredential;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.InternalCrnBuilder;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.cloudbreak.logger.MDCUtils;
@@ -486,9 +487,23 @@ public class GrpcUmsClient {
             client.checkRight(RequestIdUtil.getOrGenerate(requestId), userCrn, right, resource);
             LOGGER.info("User {} has right {} on resource {}!", userCrn, right, resource != null ? resource : "account");
             return true;
+        } catch (StatusRuntimeException statusRuntimeException) {
+            if (Status.Code.PERMISSION_DENIED.equals(statusRuntimeException.getStatus().getCode())) {
+                LOGGER.error("Checking right {} failed for user {}, thus access is denied! Cause: {}", right, userCrn, statusRuntimeException.getMessage());
+                return false;
+            } else if (Status.Code.DEADLINE_EXCEEDED.equals(statusRuntimeException.getStatus().getCode())) {
+                LOGGER.error("Deadline exceeded for check right {} for user {} on resource {}", right, userCrn, resource != null ? resource : "account",
+                        statusRuntimeException);
+                throw new CloudbreakServiceException("Authorization failed due to user management service call timed out.");
+            } else {
+                LOGGER.error("Status runtime exception while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource :
+                        "account", statusRuntimeException);
+                throw new CloudbreakServiceException("Authorization failed due to user management service call failed.");
+            }
         } catch (Exception e) {
-            LOGGER.error("Checking right {} failed for user {}, thus access is denied! Cause: {}", right, userCrn, e.getMessage());
-            return false;
+            LOGGER.error("Unkown error while checking right {} for user {} on resource {}", right, userCrn, resource != null ? resource :
+                    "account", e);
+            throw new CloudbreakServiceException("Authorization failed due to user management service call failed with error.");
         }
     }
 
