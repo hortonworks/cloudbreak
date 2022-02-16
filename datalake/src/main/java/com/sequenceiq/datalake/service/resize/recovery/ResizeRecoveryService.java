@@ -1,5 +1,7 @@
 package com.sequenceiq.datalake.service.resize.recovery;
 
+import java.util.Optional;
+
 import javax.inject.Inject;
 
 import org.apache.commons.lang3.NotImplementedException;
@@ -52,9 +54,13 @@ public class ResizeRecoveryService implements RecoveryService {
     private FlowChainLogService flowChainLogService;
 
     public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster) {
-        FlowLog flowLog = flow2Handler.getFirstStateLogfromLatestFlow(sdxCluster.getId());
+        Optional<FlowLog> flowLogOptional = flow2Handler.getFirstStateLogfromLatestFlow(sdxCluster.getId());
+        if (flowLogOptional.isEmpty()) {
+            return new SdxRecoverableResponse("No recent actions on this cluster", RecoveryStatus.NON_RECOVERABLE);
+        }
         if (entitlementService.isDatalakeResizeRecoveryEnabled(ThreadBasedUserCrnProvider.getAccountId())) {
-            if (!DatalakeResizeFlowEventChainFactory.class.getSimpleName().equals(flowChainLogService.getFlowChainType(flowLog.getFlowChainId()))) {
+            if (!DatalakeResizeFlowEventChainFactory.class.getSimpleName()
+                    .equals(flowChainLogService.getFlowChainType(flowLogOptional.get().getFlowChainId()))) {
                 return new SdxRecoverableResponse("No recent resize operation", RecoveryStatus.NON_RECOVERABLE);
             }
         } else {

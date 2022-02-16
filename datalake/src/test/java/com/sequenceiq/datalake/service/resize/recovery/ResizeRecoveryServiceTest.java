@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -83,7 +84,7 @@ public class ResizeRecoveryServiceTest {
                 .thenReturn(flowId);
         String flowChainId = "CHAIN";
         flowLog.setFlowChainId(flowChainId);
-        lenient().when(flow2Handler.getFirstStateLogfromLatestFlow(cluster.getId())).thenReturn(flowLog);
+        lenient().when(flow2Handler.getFirstStateLogfromLatestFlow(cluster.getId())).thenReturn(Optional.of(flowLog));
         lenient().when(flowChainLogService.getFlowChainType(flowChainId)).thenReturn(DatalakeResizeFlowEventChainFactory.class.getSimpleName());
     }
 
@@ -126,6 +127,14 @@ public class ResizeRecoveryServiceTest {
         verify(sdxReactorFlowManager).triggerSdxStartFlow(cluster);
         assertEquals(flowId, sdxRecoveryResponse.getFlowIdentifier());
 
+    }
+
+    @Test
+    public void testEmptyFlowLogValidateNonRecoverable() {
+        lenient().when(flow2Handler.getFirstStateLogfromLatestFlow(cluster.getId())).thenReturn(Optional.empty());
+        sdxStatusEntity.setStatus(DatalakeStatusEnum.REQUESTED);
+        SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.validateRecovery(cluster));
+        assertEquals(RecoveryStatus.NON_RECOVERABLE, sdxRecoverableResponse.getStatus(), "No recent flowlog should be non-recoverable");
     }
 
     @Test
