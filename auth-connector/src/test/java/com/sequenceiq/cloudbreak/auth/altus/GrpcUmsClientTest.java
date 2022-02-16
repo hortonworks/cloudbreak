@@ -17,7 +17,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -36,8 +35,9 @@ import com.cloudera.thunderhead.service.common.paging.PagingProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto;
 import com.cloudera.thunderhead.service.usermanagement.UserManagementProto.ServicePrincipalCloudIdentities;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
 import com.sequenceiq.cloudbreak.auth.altus.config.UmsClientConfig;
+import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.grpc.ManagedChannelWrapper;
 
 import io.grpc.ManagedChannel;
@@ -176,9 +176,11 @@ public class GrpcUmsClientTest {
         doNothing().when(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn1);
         doThrow(new RuntimeException("Permission denied")).when(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn2);
 
-        Map<String, Boolean> result = underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2), "right", REQUEST_ID);
+        CloudbreakServiceException exception = assertThrows(CloudbreakServiceException.class, () -> {
+            underTest.hasRights(USER_CRN, List.of(resourceCrn1, resourceCrn2), "right", REQUEST_ID);
+        });
 
-        assertEquals(Map.of(resourceCrn1, true, resourceCrn2, false), result);
+        assertEquals("Authorization failed due to user management service call failed with error.", exception.getMessage());
         InOrder inOrder = inOrder(authorizationClient);
         inOrder.verify(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn1);
         inOrder.verify(authorizationClient).checkRight(REQUEST_ID.get(), USER_CRN, "right", resourceCrn2);
