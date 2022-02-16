@@ -22,11 +22,8 @@ public class FlowLogUtil {
     private FlowLogUtil() {
     }
 
-    public static FlowLog getFirstStateLog(List<FlowLog> flowLogs) {
-        List<FlowLog> reversedOrderedFlowLog = flowLogs.stream()
-                .sorted(Comparator.comparing(FlowLog::getCreated))
-                .collect(Collectors.toList());
-        return reversedOrderedFlowLog.get(0);
+    public static Optional<FlowLog> getFirstStateLog(List<FlowLog> flowLogs) {
+        return flowLogs.stream().min(Comparator.comparing(FlowLog::getCreated));
     }
 
     public static FlowLog getLastSuccessfulStateLog(String failedState, List<FlowLog> flowLogs) {
