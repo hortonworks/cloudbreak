@@ -161,10 +161,13 @@ public class StackOperationService {
         if (instanceIdsByHostgroupMap.size() > 1) {
             throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
         }
+        updateNodeCountValidator.validateInstanceGroup(stack, instanceIdsByHostgroupMap.keySet().iterator().next());
         LOGGER.info("InstanceIds without metadata: [{}]", instanceIdsWithoutMetadata);
         updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+        updateNodeCountValidator.validateInstanceGroupForStopStart(stack, instanceIdsByHostgroupMap.keySet().iterator().next(),
+                instanceIdsByHostgroupMap.entrySet().iterator().next().getValue().size() * -1);
         LOGGER.info("Stopping the following instances: {}", instanceIdsByHostgroupMap);
         if (!forced) {
             for (Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
@@ -296,6 +299,8 @@ public class StackOperationService {
                 updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateStackStatusForStartHostGroup(stackWithLists);
                 updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
+                updateNodeCountValidator.validateInstanceGroupForStopStart(stackWithLists,
+                        instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
                 updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
                 if (withClusterEvent) {
