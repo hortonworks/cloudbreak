@@ -27,6 +27,7 @@ public enum RightV4 {
     DH_CREATE(AuthorizationResourceAction.ENVIRONMENT_CREATE_DATAHUB),
     UPDATE_AZURE_ENCRYPTION_RESOURCES(AuthorizationResourceAction.UPDATE_AZURE_ENCRYPTION_RESOURCES),
     UPDATE_AWS_DISK_ENCRYPTION_PARAMETERS(AuthorizationResourceAction.UPDATE_AWS_DISK_ENCRYPTION_PARAMETERS),
+    UPDATE_GCP_ENCRYPTION_RESOURCES(AuthorizationResourceAction.UPDATE_GCP_ENCRYPTION_RESOURCES),
     // dh level
     DH_START(AuthorizationResourceAction.START_DATAHUB),
     DH_STOP(AuthorizationResourceAction.STOP_DATAHUB),

@@ -35,6 +35,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLo
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.UpdateAwsDiskEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.UpdateGcpResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -318,5 +319,21 @@ public interface EnvironmentEndpoint {
     @ApiOperation(value = EnvironmentOpDescription.UPGRADE_CCM, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
             nickname = "upgradeCcmByEnvironmentCrnV1")
     void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @PathParam("crn") String crn);
+
+    @PUT
+    @Path("/name/{name}/update_gcp_encryption_resources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPDATE_GCP_ENCRYPTION_RESOURCES_BY_NAME, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "UpdateGcpResourceEncryptionParametersV1")
+    DetailedEnvironmentResponse updateGcpResourceEncryptionParametersByEnvironmentName(@PathParam("name") String environmentName,
+            @Valid UpdateGcpResourceEncryptionParametersRequest request);
+
+    @PUT
+    @Path("/crn/{crn}/update_gcp_encryption_resources")
+    @Produces(MediaType.APPLICATION_JSON)
+    @ApiOperation(value = EnvironmentOpDescription.UPDATE_GCP_ENCRYPTION_RESOURCES_BY_CRN, produces = MediaType.APPLICATION_JSON, notes = ENVIRONMENT_NOTES,
+            nickname = "UpdateGcpResourceEncryptionParametersV1ByCrn")
+    DetailedEnvironmentResponse updateGcpResourceEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @PathParam("crn") String crn, @Valid UpdateGcpResourceEncryptionParametersRequest request);
 
 }

@@ -45,6 +45,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.UpdateGcpResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
@@ -59,6 +60,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
+import com.sequenceiq.environment.environment.dto.UpdateGcpResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
@@ -403,6 +405,13 @@ public class EnvironmentApiConverter {
         return UpdateAwsDiskEncryptionParametersDto.builder()
                 .withAwsDiskEncryptionParametersDto(
                         awsDiskEncryptionParametersToAwsDiskEncryptionParametersDto(request.getAwsDiskEncryptionParameters()))
+                .build();
+    }
+
+    public UpdateGcpResourceEncryptionDto convertUpdateGcpResourceEncryptionDto(UpdateGcpResourceEncryptionParametersRequest request) {
+        return UpdateGcpResourceEncryptionDto.builder()
+                .withGcpResourceEncryptionParametersDto(
+                        gcpResourceEncryptionParametersToGcpEncryptionParametersDto(request.getGcpResourceEncryptionParameters()))
                 .build();
     }
 

@@ -33,6 +33,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentValidationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
+import com.sequenceiq.environment.environment.dto.UpdateGcpResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
@@ -43,10 +44,12 @@ import com.sequenceiq.environment.network.NetworkService;
 import com.sequenceiq.environment.network.dao.domain.BaseNetwork;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dao.domain.GcpParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AwsParametersRepository;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
@@ -156,6 +159,41 @@ public class EnvironmentModificationService {
                 .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
                 .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
         return updateAwsDiskEncryptionParameters(accountId, crn, dto.getAwsDiskEncryptionParametersDto(), environment);
+    }
+
+    public EnvironmentDto updateGcpResourceEncryptionParametersByEnvironmentName(String accountId, String environmentName,
+            UpdateGcpResourceEncryptionDto dto) {
+        Environment environment = environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(environmentName, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with name '%s'", environmentName)));
+        return updateGcpResourceEncryptionParameters(accountId, environmentName, dto.getGcpResourceEncryptionParametersDto(), environment);
+    }
+
+    public EnvironmentDto updateGcpResourceEncryptionParametersByEnvironmentCrn(String accountId, String crn, UpdateGcpResourceEncryptionDto dto) {
+        Environment environment = environmentService
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(crn, accountId)
+                .orElseThrow(() -> new NotFoundException(String.format("No environment found with CRN '%s'", crn)));
+        return updateGcpResourceEncryptionParameters(accountId, crn, dto.getGcpResourceEncryptionParametersDto(), environment);
+    }
+
+    private EnvironmentDto updateGcpResourceEncryptionParameters(String accountId, String environmentName, GcpResourceEncryptionParametersDto dto,
+            Environment environment) {
+        ValidationResult validateKey = environmentService.getValidatorService().validateEncryptionKey(dto.getEncryptionKey(), accountId);
+        GcpParameters gcpParameters = (GcpParameters) environment.getParameters();
+        if (gcpParameters.getEncryptionKey() == null) {
+            if (!validateKey.hasError()) {
+                gcpParameters.setEncryptionKey(dto.getEncryptionKey());
+            } else {
+                throw new BadRequestException(validateKey.getFormattedErrors());
+            }
+        } else if (gcpParameters.getEncryptionKey().equals(dto.getEncryptionKey())) {
+            LOGGER.info("Encryption Key '%s' is already set for the environment '%s'. ", gcpParameters.getEncryptionKey(), environmentName);
+        } else {
+            throw new BadRequestException(String.format("Encryption Key '%s' is already set for the environment '%s'. " +
+                    "Modifying the encryption key is not allowed.", gcpParameters.getEncryptionKey(), environmentName));
+        }
+        Environment saved = environmentService.save(environment);
+        return environmentDtoConverter.environmentToDto(saved);
     }
 
     public EnvironmentDto changeTelemetryFeaturesByEnvironmentName(String accountId, String environmentName,

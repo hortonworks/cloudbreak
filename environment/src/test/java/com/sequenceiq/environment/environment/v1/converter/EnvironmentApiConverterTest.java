@@ -57,6 +57,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.azure.Resourc
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpEnvironmentParameters;
 import com.sequenceiq.environment.api.v1.environment.model.request.gcp.GcpResourceEncryptionParameters;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.UpdateGcpResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.credential.v1.converter.TunnelConverter;
 import com.sequenceiq.environment.environment.domain.ExperimentalFeatures;
@@ -70,6 +71,7 @@ import com.sequenceiq.environment.environment.dto.LocationDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
+import com.sequenceiq.environment.environment.dto.UpdateGcpResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
@@ -412,6 +414,18 @@ public class EnvironmentApiConverterTest {
                 .build();
         UpdateAwsDiskEncryptionParametersDto actual = underTest.convertUpdateAwsDiskEncryptionParametersDto(request);
         assertEquals(ENCRYPTION_KEY_ARN, actual.getAwsDiskEncryptionParametersDto().getEncryptionKeyArn());
+    }
+
+    @Test
+    void testConvertUpdateGcpResourceEncryptionDto() {
+        UpdateGcpResourceEncryptionParametersRequest request = UpdateGcpResourceEncryptionParametersRequest.builder()
+                .withGcpResourceEncryptionParameters(GcpResourceEncryptionParameters.builder()
+                        .withEncryptionKey(KEY_URL)
+                        .build())
+                .build();
+        UpdateGcpResourceEncryptionDto actual = underTest.convertUpdateGcpResourceEncryptionDto(request);
+
+        assertEquals(KEY_URL, actual.getGcpResourceEncryptionParametersDto().getEncryptionKey());
     }
 
     private void assertLocation(LocationRequest request, LocationDto actual) {

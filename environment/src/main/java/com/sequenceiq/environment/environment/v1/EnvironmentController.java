@@ -52,6 +52,7 @@ import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentLo
 import com.sequenceiq.environment.api.v1.environment.model.request.EnvironmentRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.aws.UpdateAwsDiskEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.request.azure.UpdateAzureResourceEncryptionParametersRequest;
+import com.sequenceiq.environment.api.v1.environment.model.request.gcp.UpdateGcpResourceEncryptionParametersRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.DetailedEnvironmentResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentCrnResponse;
 import com.sequenceiq.environment.api.v1.environment.model.response.SimpleEnvironmentResponse;
@@ -472,5 +473,25 @@ public class EnvironmentController implements EnvironmentEndpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.EDIT_ENVIRONMENT /*for now*/)
     public void upgradeCcmByCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT) @ResourceCrn String crn) {
         upgradeCcmService.upgradeCcmByCrn(crn);
+    }
+
+    @Override
+    @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.UPDATE_GCP_ENCRYPTION_RESOURCES)
+    public DetailedEnvironmentResponse updateGcpResourceEncryptionParametersByEnvironmentCrn(@ValidCrn(resource = CrnResourceDescriptor.ENVIRONMENT)
+    @ResourceCrn String crn, @RequestObject @Valid UpdateGcpResourceEncryptionParametersRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto result = environmentModificationService.updateGcpResourceEncryptionParametersByEnvironmentCrn(accountId, crn,
+                environmentApiConverter.convertUpdateGcpResourceEncryptionDto(request));
+        return environmentResponseConverter.dtoToDetailedResponse(result);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.UPDATE_GCP_ENCRYPTION_RESOURCES)
+    public DetailedEnvironmentResponse updateGcpResourceEncryptionParametersByEnvironmentName(@ResourceName String environmentName,
+            @RequestObject @Valid UpdateGcpResourceEncryptionParametersRequest request) {
+        String accountId = ThreadBasedUserCrnProvider.getAccountId();
+        EnvironmentDto result = environmentModificationService.updateGcpResourceEncryptionParametersByEnvironmentName(accountId, environmentName,
+                environmentApiConverter.convertUpdateGcpResourceEncryptionDto(request));
+        return environmentResponseConverter.dtoToDetailedResponse(result);
     }
 }

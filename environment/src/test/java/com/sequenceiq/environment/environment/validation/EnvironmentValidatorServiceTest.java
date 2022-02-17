@@ -34,7 +34,6 @@ import com.sequenceiq.environment.credential.service.CredentialService;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.AuthenticationDto;
-import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsParametersDto;
 import com.sequenceiq.environment.environment.dto.FreeIpaCreationAwsSpotParametersDto;
@@ -47,9 +46,6 @@ import com.sequenceiq.environment.environment.validation.validators.EncryptionKe
 import com.sequenceiq.environment.environment.validation.validators.NetworkCreationValidator;
 import com.sequenceiq.environment.environment.validation.validators.PublicKeyValidator;
 import com.sequenceiq.environment.environment.validation.validators.TagValidator;
-import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
-import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
-import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.platformresource.PlatformParameterService;
 
 @ExtendWith(MockitoExtension.class)
@@ -418,76 +414,33 @@ class EnvironmentValidatorServiceTest {
 
     @Test
     void shouldFailIfGcpEncryptionKeySpecifiedAndEntitlementAndWrongFormat() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("GCP")
-                .withParameters(ParametersDto.builder()
-                        .withGcpParameters(GcpParametersDto.builder()
-                                .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKey("project/Wrong-dummy-key-format")
-                                        .build())
-                                .build())
-                        .build())
-                .build();
-
+        String encryptionKey = "project/Wrong-dummy-key-format";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
         validationResultBuilder.error("error");
         when(encryptionKeyValidator.validateEncryptionKey(any())).thenReturn(validationResultBuilder.build());
         when(entitlementService.isGcpDiskEncryptionWithCMEKEnabled(any())).thenReturn(true);
-        ValidationResult validationResult = underTest.validateEncryptionKey(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey, ACCOUNT_ID);
         assertTrue(validationResult.hasError());
     }
 
     @Test
     void shouldFailIfGcpEncryptionKeySpecifiedAndNotEntitlement() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("GCP")
-                .withParameters(ParametersDto.builder()
-                        .withGcpParameters(GcpParametersDto.builder()
-                                .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKey("project/Wrong-dummy-key-format")
-                                        .build())
-                                .build())
-                        .build())
-                .build();
-
+        String encryptionKey = "project/Wrong-dummy-key-format";
         when(entitlementService.isGcpDiskEncryptionWithCMEKEnabled(any())).thenReturn(false);
-        ValidationResult validationResult = underTest.validateEncryptionKey(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey, ACCOUNT_ID);
 
         assertTrue(validationResult.hasError());
     }
 
     @Test
-    void testValidateGcpEncryptionKeyNotSpecified() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("GCP")
-                .build();
-        ValidationResult validationResult = underTest.validateEncryptionKey(creationDto);
-        assertFalse(validationResult.hasError());
-    }
-
-    @Test
     void testValidateGcpEncryptionKeySpecifiedAndEntitlement() {
-        EnvironmentCreationDto creationDto = EnvironmentCreationDto.builder()
-                .withAccountId(ACCOUNT_ID)
-                .withCloudPlatform("GCP")
-                .withParameters(ParametersDto.builder()
-                        .withGcpParameters(GcpParametersDto.builder()
-                                .withEncryptionParameters(GcpResourceEncryptionParametersDto.builder()
-                                        .withEncryptionKey("projects/dummy-project/locations/us-west2/keyRings/dummy-ring/cryptoKeys/dummy-key")
-                                        .build())
-                                .build())
-                        .build())
-                .build();
-
+        String encryptionKey = "projects/dummy-project/locations/us-west2/keyRings/dummy-ring/cryptoKeys/dummy-key";
         ValidationResult.ValidationResultBuilder validationResultBuilder = new ValidationResult.ValidationResultBuilder();
 
         when(encryptionKeyValidator.validateEncryptionKey(any())).thenReturn(validationResultBuilder.build());
         when(entitlementService.isGcpDiskEncryptionWithCMEKEnabled(any())).thenReturn(true);
 
-        ValidationResult validationResult = underTest.validateEncryptionKey(creationDto);
+        ValidationResult validationResult = underTest.validateEncryptionKey(encryptionKey, ACCOUNT_ID);
         assertFalse(validationResult.hasError());
     }
 

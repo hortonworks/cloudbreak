@@ -2,9 +2,7 @@ package com.sequenceiq.environment.environment.validation;
 
 import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.AWS;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
-import static com.sequenceiq.cloudbreak.common.mappable.CloudPlatform.GCP;
 import static com.sequenceiq.common.model.CredentialType.ENVIRONMENT;
-
 import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.util.HashSet;
@@ -304,22 +302,16 @@ public class EnvironmentValidatorService {
         return resultBuilder.build();
     }
 
-    public ValidationResult validateEncryptionKey(EnvironmentCreationDto creationDto) {
+    public ValidationResult validateEncryptionKey(String encryptionKey, String accountId) {
         ValidationResultBuilder resultBuilder = ValidationResult.builder();
-        if (GCP.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKey = Optional.ofNullable(creationDto.getParameters())
-                    .map(parametersDto -> parametersDto.getGcpParametersDto())
-                    .map(gcpParametersDto -> gcpParametersDto.getGcpResourceEncryptionParametersDto())
-                    .map(gcpREParamsDto -> gcpREParamsDto.getEncryptionKey()).orElse(null);
-            if (StringUtils.isNotEmpty(encryptionKey)) {
-                if (!entitlementService.isGcpDiskEncryptionWithCMEKEnabled(creationDto.getAccountId())) {
-                    resultBuilder.error(String.format("You have specified encryption-key to enable encryption for GCP resources with CMEK "
-                            + "but that feature is currently not enabled for this account."
-                            + " Please get 'CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK' enabled for this account."));
-                } else {
-                    ValidationResult validationResult = encryptionKeyValidator.validateEncryptionKey(encryptionKey);
-                    resultBuilder.merge(validationResult);
-                }
+        if (StringUtils.isNotEmpty(encryptionKey)) {
+            if (!entitlementService.isGcpDiskEncryptionWithCMEKEnabled(accountId)) {
+                resultBuilder.error(String.format("You have specified encryption-key to enable encryption for GCP resources with CMEK "
+                        + "but that feature is currently not enabled for this account."
+                        + " Please get 'CDP_CB_GCP_DISK_ENCRYPTION_WITH_CMEK' enabled for this account."));
+            } else {
+                ValidationResult validationResult = encryptionKeyValidator.validateEncryptionKey(encryptionKey);
+                resultBuilder.merge(validationResult);
             }
         }
         return resultBuilder.build();

@@ -180,26 +180,13 @@ public class EnvironmentCreationService {
         ValidationResultBuilder validationBuilder = validatorService.validateNetworkCreation(environment, creationDto.getNetwork());
         validationBuilder.merge(validatorService.validatePublicKey(creationDto.getAuthentication().getPublicKey()));
         validationBuilder.merge(validatorService.validateTags(creationDto));
-        if (AZURE.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
-                    .map(paramsDto -> paramsDto.getAzureParametersDto())
-                    .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
-                    .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
-            if (encryptionKeyUrl != null) {
-                validationBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
-            }
-        }
-        if (GCP.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            validationBuilder.merge(validatorService.validateEncryptionKey(creationDto));
-        }
-        if (AWS.name().equalsIgnoreCase(creationDto.getCloudPlatform())) {
-            String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
-                    .map(paramsDto -> paramsDto.getAwsParametersDto())
-                    .map(awsParamsDto -> awsParamsDto.getAwsDiskEncryptionParametersDto())
-                    .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
-            if (encryptionKeyArn != null) {
-                validationBuilder.merge(validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.getAccountId()));
-            }
+        String cloudPlatform = creationDto.getCloudPlatform();
+        if (AZURE.name().equalsIgnoreCase(cloudPlatform)) {
+            validationBuilder.merge(validateAzureEncryptionKey(creationDto));
+        } else if (GCP.name().equalsIgnoreCase(cloudPlatform)) {
+            validationBuilder.merge(validateGcpEncryptionKey(creationDto));
+        } else if (AWS.name().equalsIgnoreCase(cloudPlatform)) {
+            validationBuilder.merge(validateAwsEncryptionKey(creationDto));
         }
 
         ValidationResult parentChildValidation = validatorService.validateParentChildRelation(environment, creationDto.getParentEnvironmentName());
@@ -216,6 +203,42 @@ public class EnvironmentCreationService {
         if (validationResult.hasError()) {
             throw new BadRequestException(validationResult.getFormattedErrors());
         }
+    }
+
+    private ValidationResult validateAwsEncryptionKey(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        String encryptionKeyArn = Optional.ofNullable(creationDto.getParameters())
+                .map(paramsDto -> paramsDto.getAwsParametersDto())
+                .map(awsParamsDto -> awsParamsDto.getAwsDiskEncryptionParametersDto())
+                .map(awsREparamsDto -> awsREparamsDto.getEncryptionKeyArn()).orElse(null);
+        if (encryptionKeyArn != null) {
+            validationBuilder.merge(validatorService.validateEncryptionKeyArn(encryptionKeyArn, creationDto.getAccountId()));
+        }
+        return validationBuilder.build();
+    }
+
+    private ValidationResult validateGcpEncryptionKey(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        String encryptionKey = Optional.ofNullable(creationDto.getParameters())
+                .map(paramsDto -> paramsDto.getGcpParametersDto())
+                .map(gcpParamsDto -> gcpParamsDto.getGcpResourceEncryptionParametersDto())
+                .map(gcpREparamsDto -> gcpREparamsDto.getEncryptionKey()).orElse(null);
+        if (encryptionKey != null) {
+            validationBuilder.merge(validatorService.validateEncryptionKey(encryptionKey, creationDto.getAccountId()));
+        }
+        return validationBuilder.build();
+    }
+
+    private ValidationResult validateAzureEncryptionKey(EnvironmentCreationDto creationDto) {
+        ValidationResultBuilder validationBuilder = ValidationResult.builder();
+        String encryptionKeyUrl = Optional.ofNullable(creationDto.getParameters())
+                .map(paramsDto -> paramsDto.getAzureParametersDto())
+                .map(azureParamsDto -> azureParamsDto.getAzureResourceEncryptionParametersDto())
+                .map(azureREParamsDto -> azureREParamsDto.getEncryptionKeyUrl()).orElse(null);
+        if (encryptionKeyUrl != null) {
+            validationBuilder.merge(validatorService.validateEncryptionKeyUrl(encryptionKeyUrl, creationDto.getAccountId()));
+        }
+        return validationBuilder.build();
     }
 
     private boolean isCloudPlatformInvalid(String userCrn, String cloudPlatform) {

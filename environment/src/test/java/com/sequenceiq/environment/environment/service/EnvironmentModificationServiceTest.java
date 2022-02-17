@@ -46,6 +46,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.SecurityAccessDto;
 import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
+import com.sequenceiq.environment.environment.dto.UpdateGcpResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentTelemetry;
 import com.sequenceiq.environment.environment.encryption.EnvironmentEncryptionService;
@@ -58,10 +59,12 @@ import com.sequenceiq.environment.network.dto.NetworkDto;
 import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.GcpResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.ParametersDto;
 import com.sequenceiq.environment.parameters.dao.domain.AwsParameters;
 import com.sequenceiq.environment.parameters.dao.domain.AzureParameters;
 import com.sequenceiq.environment.parameters.dao.domain.BaseParameters;
+import com.sequenceiq.environment.parameters.dao.domain.GcpParameters;
 import com.sequenceiq.environment.parameters.dao.repository.AwsParametersRepository;
 import com.sequenceiq.environment.parameters.dao.repository.AzureParametersRepository;
 import com.sequenceiq.environment.parameters.service.ParametersService;
@@ -809,6 +812,53 @@ class EnvironmentModificationServiceTest {
         environmentModificationServiceUnderTest.updateAzureResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,
                 ENVIRONMENT_NAME, updateAzureResourceEncryptionDto);
         verify(environmentDtoConverter, times(1)).environmentToDto(env);
+    }
+
+    @Test
+    void testUpdateGcpResourceEncryptionParametersByEnvironmentName() {
+        UpdateGcpResourceEncryptionDto updateGcpResourceEncryptionDto = UpdateGcpResourceEncryptionDto.builder()
+                .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder()
+                        .withEncryptionKey("dummyKey")
+                        .build())
+                .build();
+        Environment env = new Environment();
+        env.setParameters(new GcpParameters());
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(environmentService
+                .findByNameAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
+        when(validatorService.validateEncryptionKey(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
+
+        environmentModificationServiceUnderTest.updateGcpResourceEncryptionParametersByEnvironmentName(ACCOUNT_ID,
+                ENVIRONMENT_NAME, updateGcpResourceEncryptionDto);
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals("dummyKey", ((GcpParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKey());
+    }
+
+    @Test
+    void testUpdateGcpResourceEncryptionParametersByEnvironmentCrn() {
+        UpdateGcpResourceEncryptionDto updateGcpResourceEncryptionDto = UpdateGcpResourceEncryptionDto.builder()
+                .withGcpResourceEncryptionParametersDto(GcpResourceEncryptionParametersDto.builder()
+                        .withEncryptionKey("dummyKey")
+                        .build())
+                .build();
+        Environment env = new Environment();
+        env.setParameters(new GcpParameters());
+        when(environmentService.getValidatorService()).thenReturn(validatorService);
+        when(environmentService
+                .findByResourceCrnAndAccountIdAndArchivedIsFalse(eq(ENVIRONMENT_NAME), eq(ACCOUNT_ID))).thenReturn(Optional.of(env));
+        when(validatorService.validateEncryptionKey(any(String.class), any(String.class))).thenReturn(ValidationResult.builder().build());
+        when(environmentDtoConverter.environmentToDto(env)).thenReturn(new EnvironmentDto());
+
+        environmentModificationServiceUnderTest.updateGcpResourceEncryptionParametersByEnvironmentCrn(ACCOUNT_ID,
+                ENVIRONMENT_NAME, updateGcpResourceEncryptionDto);
+
+        ArgumentCaptor<Environment> environmentArgumentCaptor = ArgumentCaptor.forClass(Environment.class);
+        verify(environmentService).save(environmentArgumentCaptor.capture());
+        assertEquals("dummyKey", ((GcpParameters) environmentArgumentCaptor.getValue().getParameters()).getEncryptionKey());
+
     }
 
     @Configuration
