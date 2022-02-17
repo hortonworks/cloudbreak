@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
@@ -54,36 +54,36 @@ public class FreeIpaScalingService {
     public UpscaleResponse upscale(String accountId, UpscaleRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
-        FormFactor originalFormFactor = FormFactor.getByInstanceCount(allInstances.size());
-        logRequest(OperationType.UPSCALE, request, originalFormFactor);
-        validationService.validateStackForUpscale(allInstances, stack, new ScalingPath(originalFormFactor, request.getTargetFormFactor()));
-        return triggerUpscale(request, stack, originalFormFactor);
+        AvailabilityType originalAvailabilityType = AvailabilityType.getByInstanceCount(allInstances.size());
+        logRequest(OperationType.UPSCALE, request, originalAvailabilityType);
+        validationService.validateStackForUpscale(allInstances, stack, new ScalingPath(originalAvailabilityType, request.getTargetAvailabilityType()));
+        return triggerUpscale(request, stack, originalAvailabilityType);
     }
 
-    private void logRequest(OperationType operationType, ScaleRequestBase request, FormFactor originalFormFactor) {
-        LOGGER.debug("{} request received with original form factor {} and request {}", operationType, originalFormFactor, request);
+    private void logRequest(OperationType operationType, ScaleRequestBase request, AvailabilityType originalAvailabilityType) {
+        LOGGER.debug("{} request received with original availability type {} and request {}", operationType, originalAvailabilityType, request);
     }
 
     public DownscaleResponse downscale(String accountId, DownscaleRequest request) {
         Stack stack = stackService.getByEnvironmentCrnAndAccountIdWithListsAndMdcContext(request.getEnvironmentCrn(), accountId);
         Set<InstanceMetaData> allInstances = stack.getNotDeletedInstanceMetaDataSet();
-        FormFactor originalFormFactor = FormFactor.getByInstanceCount(allInstances.size());
-        logRequest(OperationType.DOWNSCALE, request, originalFormFactor);
-        validationService.validateStackForDownscale(allInstances, stack, new ScalingPath(originalFormFactor, request.getTargetFormFactor()));
-        return triggerDownscale(request, stack, originalFormFactor);
+        AvailabilityType originalAvailabilityType = AvailabilityType.getByInstanceCount(allInstances.size());
+        logRequest(OperationType.DOWNSCALE, request, originalAvailabilityType);
+        validationService.validateStackForDownscale(allInstances, stack, new ScalingPath(originalAvailabilityType, request.getTargetAvailabilityType()));
+        return triggerDownscale(request, stack, originalAvailabilityType);
     }
 
-    private UpscaleResponse triggerUpscale(UpscaleRequest request, Stack stack, FormFactor originalFormFactor) {
+    private UpscaleResponse triggerUpscale(UpscaleRequest request, Stack stack, AvailabilityType originalAvailabilityType) {
         Operation operation = startScalingOperation(stack.getAccountId(), request.getEnvironmentCrn(), OperationType.UPSCALE);
         UpscaleEvent upscaleEvent = new UpscaleEvent(UpscaleFlowEvent.UPSCALE_EVENT.event(),
-                stack.getId(), request.getTargetFormFactor().getInstanceCount(), false, false, false, operation.getOperationId());
+                stack.getId(), request.getTargetAvailabilityType().getInstanceCount(), false, false, false, operation.getOperationId());
         try {
             LOGGER.info("Trigger upscale flow with event: {}", upscaleEvent);
             FlowIdentifier flowIdentifier = flowManager.notify(UpscaleFlowEvent.UPSCALE_EVENT.event(), upscaleEvent);
             UpscaleResponse response = new UpscaleResponse();
             response.setOperationId(operation.getOperationId());
-            response.setOriginalFormFactor(originalFormFactor);
-            response.setTargetFormFactor(request.getTargetFormFactor());
+            response.setOriginalAvailabilityType(originalAvailabilityType);
+            response.setTargetAvailabilityType(request.getTargetAvailabilityType());
             response.setFlowIdentifier(flowIdentifier);
             return response;
         } catch (Exception e) {
@@ -99,18 +99,18 @@ public class FreeIpaScalingService {
         return message;
     }
 
-    private DownscaleResponse triggerDownscale(DownscaleRequest request, Stack stack, FormFactor originalFormFactor) {
+    private DownscaleResponse triggerDownscale(DownscaleRequest request, Stack stack, AvailabilityType originalAvailabilityType) {
         Operation operation = startScalingOperation(stack.getAccountId(), request.getEnvironmentCrn(), OperationType.DOWNSCALE);
-        ArrayList<String> instanceIdList = getDownscaleCandidates(stack, originalFormFactor, request.getTargetFormFactor());
+        ArrayList<String> instanceIdList = getDownscaleCandidates(stack, originalAvailabilityType, request.getTargetAvailabilityType());
         DownscaleEvent downscaleEvent = new DownscaleEvent(DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-                stack.getId(), instanceIdList, request.getTargetFormFactor().getInstanceCount(), false, false, false, operation.getOperationId());
+                stack.getId(), instanceIdList, request.getTargetAvailabilityType().getInstanceCount(), false, false, false, operation.getOperationId());
         try {
             LOGGER.info("Trigger downscale flow with event: {}", downscaleEvent);
             FlowIdentifier flowIdentifier = flowManager.notify(DownscaleFlowEvent.DOWNSCALE_EVENT.event(), downscaleEvent);
             DownscaleResponse response = new DownscaleResponse();
             response.setOperationId(operation.getOperationId());
-            response.setOriginalFormFactor(originalFormFactor);
-            response.setTargetFormFactor(request.getTargetFormFactor());
+            response.setOriginalAvailabilityType(originalAvailabilityType);
+            response.setTargetAvailabilityType(request.getTargetAvailabilityType());
             response.setFlowIdentifier(flowIdentifier);
             return response;
         } catch (Exception e) {
@@ -119,8 +119,8 @@ public class FreeIpaScalingService {
         }
     }
 
-    private ArrayList<String> getDownscaleCandidates(Stack stack, FormFactor originalFormFactor, FormFactor targetFormFactor) {
-        int instancesToRemove = originalFormFactor.getInstanceCount() - targetFormFactor.getInstanceCount();
+    private ArrayList<String> getDownscaleCandidates(Stack stack, AvailabilityType originalAvailabilityType, AvailabilityType targetAvailabilityType) {
+        int instancesToRemove = originalAvailabilityType.getInstanceCount() - targetAvailabilityType.getInstanceCount();
         return stack.getNotDeletedInstanceMetaDataSet().stream()
                 .filter(imd -> imd.getInstanceMetadataType() != InstanceMetadataType.GATEWAY_PRIMARY)
                 .limit(instancesToRemove)
