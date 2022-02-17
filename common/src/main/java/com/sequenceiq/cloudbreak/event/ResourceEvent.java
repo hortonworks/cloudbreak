@@ -190,7 +190,7 @@ public enum ResourceEvent {
     STACK_REMOVING_INSTANCE_FINISHED("stack.removing.instance.finished"),
     STACK_REMOVING_INSTANCE_FAILED("stack.removing.instance.failed"),
     STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
-    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.failed"),
+    STACK_GATEWAY_CERTIFICATE_CREATE_SKIPPED("stack.gateway.certificate.create.skipped"),
     STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
     STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
     STACK_DOWNSCALE_FAILED("stack.downscale.failed"),
