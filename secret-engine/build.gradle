@@ -21,7 +21,7 @@ dependencies {
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'javax.persistence', name: 'javax.persistence-api', version: '2.2'
   implementation group: 'io.swagger', name: 'swagger-annotations', version: swaggerVersion
-  implementation group: 'com.google.code.gson', name: 'gson', version: '2.6.2'
+  implementation group: 'com.google.code.gson', name: 'gson', version: gsonVersion
   implementation group: 'javax.validation', name: 'validation-api', version: '2.0.1.Final'
   implementation group: 'net.jcip', name: 'jcip-annotations', version: '1.0'
   api (group: 'org.springframework.vault', name: 'spring-vault-core', version: '2.1.0.RELEASE') {
