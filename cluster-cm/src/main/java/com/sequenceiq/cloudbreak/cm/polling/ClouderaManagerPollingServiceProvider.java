@@ -177,7 +177,7 @@ public class ClouderaManagerPollingServiceProvider {
 
     public ExtendedPollingResult startPollingCmHostsRecommission(Stack stack, ApiClient apiClient, BigDecimal commandId) {
         LOGGER.debug("Waiting for Cloudera Manager to re-commission host with commandId: {}. [Server address: {}]", commandId, stack.getClusterManagerIp());
-        long timeout = POLL_FOR_5_MINUTES;
+        long timeout = POLL_FOR_10_MINUTES;
         return pollCommandWithTimeListener(stack, apiClient, commandId, timeout,
                 new NoExceptionOnTimeoutClouderaManagerListenerTask(clouderaManagerApiPojoFactory, clusterEventService, "RecommissionHosts"));
     }
