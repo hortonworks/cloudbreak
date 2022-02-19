@@ -23,7 +23,7 @@ public class LoadMonitor extends ClusterMonitor {
 
     @Override
     public String getTriggerExpression() {
-        return MonitorUpdateRate.EVERY_TWO_MIN_RATE_CRON;
+        return MonitorUpdateRate.EVERY_MIN_RATE_CRON;
     }
 
     @Override

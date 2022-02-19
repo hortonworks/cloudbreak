@@ -1,15 +1,16 @@
 package com.sequenceiq.cloudbreak.job.stackpatcher;
 
+import static com.sequenceiq.cloudbreak.job.stackpatcher.ExistingStackPatcherJobAdapter.STACK_PATCH_TYPE_NAME;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Field;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import org.assertj.core.api.Assertions;
@@ -22,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -29,11 +31,13 @@ import org.quartz.JobKey;
 import org.springframework.util.ReflectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.domain.converter.StackPatchTypeConverter;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
+import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchApplyException;
 import com.sequenceiq.cloudbreak.service.stackpatch.ExistingStackPatchService;
-import com.sequenceiq.cloudbreak.service.stack.StackService;
 
 @ExtendWith(MockitoExtension.class)
 class ExistingStackPatcherJobTest {
@@ -47,6 +51,9 @@ class ExistingStackPatcherJobTest {
     @Mock
     private ExistingStackPatchService existingStackPatchService;
 
+    @Mock
+    private StackPatchTypeConverter stackPatchTypeConverter;
+
     @InjectMocks
     private ExistingStackPatcherJob underTest;
 
@@ -55,6 +62,9 @@ class ExistingStackPatcherJobTest {
 
     @Mock
     private JobExecutionContext context;
+
+    @Mock
+    private JobDetail jobDetail;
 
     private Stack stack;
 
@@ -68,14 +78,16 @@ class ExistingStackPatcherJobTest {
         MockitoAnnotations.openMocks(this);
 
         when(stackService.getByIdWithListsInTransaction(stack.getId())).thenReturn(stack);
+        lenient().when(existingStackPatchService.getStackPatchType()).thenReturn(StackPatchType.UNBOUND_RESTART);
+        lenient().when(stackPatchTypeConverter.convertToEntityAttribute(any())).thenReturn(StackPatchType.UNBOUND_RESTART);
 
         underTest.setLocalId(stack.getId().toString());
         underTest.setRemoteResourceCrn(stack.getResourceCrn());
 
-        setStackFixServices();
+        setStackPatchServices();
 
-        JobDetail jobDetail = mock(JobDetail.class);
         lenient().when(jobDetail.getKey()).thenReturn(JobKey.jobKey(stack.getId().toString()));
+        lenient().when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap(Map.of(STACK_PATCH_TYPE_NAME, "UNBOUND_RESTART")));
         lenient().when(context.getJobDetail()).thenReturn(jobDetail);
     }
 
@@ -132,19 +144,35 @@ class ExistingStackPatcherJobTest {
     }
 
     @Test
-    void shouldNotUnscheduleWhenOneApplyFailsAndOneSucceeds() throws ExistingStackPatchApplyException {
-        ExistingStackPatchService failingExistingStackPatchService = mock(ExistingStackPatchService.class);
-        when(failingExistingStackPatchService.isAffected(stack)).thenReturn(true);
-        doThrow(ExistingStackPatchApplyException.class).when(failingExistingStackPatchService).apply(stack);
-        setStackFixServices(failingExistingStackPatchService);
-
-        when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+    void shouldFailWhenStackPatchTypeIsNull() {
+        when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap(Map.of()));
+        when(stackPatchTypeConverter.convertToEntityAttribute(any())).thenReturn(null);
 
         Assertions.assertThatThrownBy(() -> underTest.executeTracedJob(context))
                 .isInstanceOf(JobExecutionException.class)
-                .hasMessageStartingWith("Failed to patch stack");
+                .hasMessageStartingWith("Stack patch type null is unknown");
+        verifyUnschedule();
+    }
 
-        verify(jobService, never()).unschedule(any());
+    @Test
+    void shouldFailWhenStackPatchTypeIsUnknown() {
+        when(jobDetail.getJobDataMap()).thenReturn(new JobDataMap(Map.of(STACK_PATCH_TYPE_NAME, "TEST_UNKNOWN_TYPE")));
+        when(stackPatchTypeConverter.convertToEntityAttribute(any())).thenReturn(StackPatchType.UNKNOWN);
+
+        Assertions.assertThatThrownBy(() -> underTest.executeTracedJob(context))
+                .isInstanceOf(JobExecutionException.class)
+                .hasMessageStartingWith("Stack patch type TEST_UNKNOWN_TYPE is unknown");
+        verifyUnschedule();
+    }
+
+    @Test
+    void shouldFailWhenStackPatchTypeDoesNotHaveService() {
+        when(stackPatchTypeConverter.convertToEntityAttribute(any())).thenReturn(StackPatchType.LOGGING_AGENT_AUTO_RESTART);
+
+        Assertions.assertThatThrownBy(() -> underTest.executeTracedJob(context))
+                .isInstanceOf(JobExecutionException.class)
+                .hasMessageStartingWith("No stack patcher implementation found for type LOGGING_AGENT_AUTO_RESTART");
+        verifyUnschedule();
     }
 
     private void setStackStatus(Status status) {
@@ -156,13 +184,12 @@ class ExistingStackPatcherJobTest {
     /**
      * workaround for collection injection
      */
-    private void setStackFixServices(ExistingStackPatchService... additionalServices) {
+    private void setStackPatchServices() {
         try {
             Field existingStackPatchServicesField = ExistingStackPatcherJob.class.getDeclaredField("existingStackPatchServices");
             ReflectionUtils.makeAccessible(existingStackPatchServicesField);
             Set<ExistingStackPatchService> existingStackPatchServices = new HashSet<>();
             existingStackPatchServices.add(existingStackPatchService);
-            existingStackPatchServices.addAll(Set.of(additionalServices));
             ReflectionUtils.setField(existingStackPatchServicesField, underTest, existingStackPatchServices);
         } catch (NoSuchFieldException e) {
             throw new IllegalStateException(e);

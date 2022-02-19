@@ -59,7 +59,7 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @ExtendWith(MockitoExtension.class)
@@ -305,10 +305,13 @@ public class ClouderaManagerSecurityServiceTest {
         BatchResourceApi batchResourceApi = mock(BatchResourceApi.class);
         when(clouderaManagerApiFactory.getHostsResourceApi(apiClient)).thenReturn(hostsResourceApi);
         when(clouderaManagerApiFactory.getBatchResourceApi(apiClient)).thenReturn(batchResourceApi);
+
         ApiHostList hostList = createApiHostList();
         when(hostsResourceApi.readHosts(null, null, "SUMMARY")).thenReturn(hostList);
         ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
+        when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         // WHEN
         underTest.rotateHostCertificates(null, null, subAltName);
         // THEN no exception
@@ -394,7 +397,7 @@ public class ClouderaManagerSecurityServiceTest {
         ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
         when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
-                .thenReturn(PollingResult.EXIT);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build());
         // WHEN
         CancellationException exception = assertThrows(CancellationException.class, () -> underTest.rotateHostCertificates(null, null, null));
         // THEN exception
@@ -416,7 +419,7 @@ public class ClouderaManagerSecurityServiceTest {
         ArgumentCaptor<ApiBatchRequest> batchRequestArgumentCaptor = ArgumentCaptor.forClass(ApiBatchRequest.class);
         when(batchResourceApi.execute(batchRequestArgumentCaptor.capture())).thenReturn(createApiBatchResponse(hostList, true));
         when(clouderaManagerPollingServiceProvider.startPollingCommandList(eq(stack), eq(apiClient), any(List.class), eq("Rotate host certificates")))
-                .thenReturn(PollingResult.TIMEOUT);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build());
         // WHEN
         ClouderaManagerOperationFailedException exception = assertThrows(ClouderaManagerOperationFailedException.class,
                 () -> underTest.rotateHostCertificates(null, null, null));

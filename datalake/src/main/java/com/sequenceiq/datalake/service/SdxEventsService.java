@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.EventV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.events.responses.CloudbreakEventV4Response;
+import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
@@ -127,8 +128,8 @@ public class SdxEventsService {
     private List<CDPStructuredEvent> retrievePagedCloudbreakServiceEvents(SdxCluster sdxCluster, Integer page, Integer size) {
         List<CloudbreakEventV4Response> cloudbreakEventV4Responses;
         try {
-            cloudbreakEventV4Responses = eventV4Endpoint.getPagedCloudbreakEventListByStack(sdxCluster.getName(), page, size,
-                    getAccountId(sdxCluster.getEnvCrn()));
+            cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
+                    eventV4Endpoint.getPagedCloudbreakEventListByStack(sdxCluster.getName(), page, size, getAccountId(sdxCluster.getEnvCrn())));
         } catch (Exception exception) {
             cloudbreakEventV4Responses = List.of();
         }

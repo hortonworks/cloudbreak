@@ -38,6 +38,16 @@ public class StackResponseUtils {
                         InstanceMetaDataV4Response::getInstanceId));
     }
 
+    public Integer getStoppedInstanceCountInHostGroup(StackV4Response stackV4Response, String policyHostGroup) {
+        return stackV4Response.getInstanceGroups().stream()
+                .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(policyHostGroup))
+                .flatMap(instanceGroupV4Response -> instanceGroupV4Response.getMetadata().stream())
+                .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceMetaData -> InstanceStatus.STOPPED.equals(instanceMetaData.getInstanceStatus()))
+                .collect(Collectors.counting())
+                .intValue();
+    }
+
     public Integer getNodeCountForHostGroup(StackV4Response stackResponse, String hostGroup) {
         return stackResponse.getInstanceGroups().stream()
                 .filter(instanceGroupV4Response -> instanceGroupV4Response.getName().equalsIgnoreCase(hostGroup))

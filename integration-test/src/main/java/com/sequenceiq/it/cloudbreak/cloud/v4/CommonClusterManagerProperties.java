@@ -48,8 +48,7 @@ public class CommonClusterManagerProperties {
     }
 
     public String getInternalSdxBlueprintName() {
-        return String.format(internalSdxBlueprintName, runtimeVersion);
-    }
+        return String.format(internalSdxBlueprintName, runtimeVersion); }
 
     public void setInternalSdxBlueprintName(String internalSdxBlueprintName) {
         this.internalSdxBlueprintName = internalSdxBlueprintName;
@@ -119,6 +118,12 @@ public class CommonClusterManagerProperties {
 
         private String distroXUpgradeTargetVersion;
 
+        private String imageCatalogUrl3rdParty;
+
+        private String distroXUpgrade3rdPartyCurrentVersion;
+
+        private String distroXUpgrade3rdPartyTargetVersion;
+
         public String getCurrentHARuntimeVersion() {
             return currentHARuntimeVersion;
         }
@@ -157,6 +162,30 @@ public class CommonClusterManagerProperties {
 
         public void setDistroXUpgradeTargetVersion(String distroXUpgradeTargetVersion) {
             this.distroXUpgradeTargetVersion = distroXUpgradeTargetVersion;
+        }
+
+        public String getImageCatalogUrl3rdParty() {
+            return imageCatalogUrl3rdParty;
+        }
+
+        public void setImageCatalogUrl3rdParty(String imageCatalogUrl3rdParty) {
+            this.imageCatalogUrl3rdParty = imageCatalogUrl3rdParty;
+        }
+
+        public String getDistroXUpgrade3rdPartyCurrentVersion() {
+            return distroXUpgrade3rdPartyCurrentVersion;
+        }
+
+        public void setDistroXUpgrade3rdPartyCurrentVersion(String distroXUpgrade3rdPartyCurrentVersion) {
+            this.distroXUpgrade3rdPartyCurrentVersion = distroXUpgrade3rdPartyCurrentVersion;
+        }
+
+        public String getDistroXUpgrade3rdPartyTargetVersion() {
+            return distroXUpgrade3rdPartyTargetVersion;
+        }
+
+        public void setDistroXUpgrade3rdPartyTargetVersion(String distroXUpgrade3rdPartyTargetVersion) {
+            this.distroXUpgrade3rdPartyTargetVersion = distroXUpgrade3rdPartyTargetVersion;
         }
 
     }

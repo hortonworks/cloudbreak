@@ -47,7 +47,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.dto.LdapView;
 import com.sequenceiq.cloudbreak.dto.datalake.DatalakeDto;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.util.URLUtils;
 
@@ -410,10 +410,10 @@ public class ClouderaManagerSecurityService implements ClusterSecurityService {
             List<BigDecimal> ids = apiBatchResponse.getItems().stream()
                     .map(bre -> new Json((String) bre.getResponse()).getSilent(ApiCommand.class).getId())
                     .collect(Collectors.toList());
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCommandList(stack, client, ids, "Rotate host certificates");
-            if (PollingResult.isExited(pollingResult)) {
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCommandList(stack, client, ids, "Rotate host certificates");
+            if (pollingResult.isExited()) {
                 throw new CancellationException("Cluster was terminated during rotation of host certificates");
-            } else if (PollingResult.isTimeout(pollingResult)) {
+            } else if (pollingResult.isTimeout()) {
                 throw new ClouderaManagerOperationFailedException("Timeout while Cloudera Manager rotates the host certificates.");
             }
         } else {

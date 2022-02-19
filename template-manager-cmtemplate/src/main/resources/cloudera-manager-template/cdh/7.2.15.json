@@ -98,7 +98,7 @@
     },
     {
       "name": "STREAMS_MESSAGING_MANAGER",
-      "version": "2.1.0"
+      "version": "2.3.0"
     },
     {
       "name": "DAS",
@@ -122,11 +122,11 @@
     },
     {
       "name": "FLINK",
-      "version": "1.13.2"
+      "version": "1.14.0"
     },
     {
       "name": "SQL_STREAM_BUILDER",
-      "version": "1.5.1"
+      "version": "1.6.0"
     },
     {
       "name": "SPARK3_ON_YARN",

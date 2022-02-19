@@ -945,7 +945,7 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Override
     public void verifyInteractiveUserSessionToken(VerifyInteractiveUserSessionTokenRequest request,
             StreamObserver<VerifyInteractiveUserSessionTokenResponse> responseObserver) {
-        LOGGER.info("Verify interative user session token: {}", request.getSessionToken());
+        LOGGER.trace("Verify interative user session token: {}", request.getSessionToken());
         String sessionToken = request.getSessionToken();
         Jwt token = decodeAndVerify(sessionToken, SIGNATURE_VERIFIER);
         AltusToken introspectResponse = jsonUtil.toObject(token.getClaims(), AltusToken.class);
@@ -965,7 +965,7 @@ public class MockUserManagementService extends UserManagementImplBase {
             StreamObserver<AuthenticateResponse> responseObserver) {
         String authHeader = request.getAccessKeyV1AuthRequest().getAuthHeader();
         String crn = CrnHelper.extractCrnFromAuthHeader(authHeader);
-        LOGGER.info("Crn: {}", crn);
+        LOGGER.debug("Crn: {}", crn);
 
         responseObserver.onNext(
                 AuthenticateResponse.newBuilder()

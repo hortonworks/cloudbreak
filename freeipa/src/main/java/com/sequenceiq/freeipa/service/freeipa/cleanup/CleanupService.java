@@ -23,7 +23,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.freeipa.api.v1.freeipa.cleanup.CleanupRequest;
 import com.sequenceiq.freeipa.api.v1.kerberosmgmt.model.HostRequest;
@@ -346,15 +346,14 @@ public class CleanupService {
 
     private void waitForIpaServerDeletion(Long stackId, Set<String> hosts) throws FreeIpaClientException {
         FreeIpaServerDeletionPollerObject pollerObject = new FreeIpaServerDeletionPollerObject(stackId, hosts);
-        org.apache.commons.lang3.tuple.Pair<PollingResult, Exception> resultPair = freeIpaDeletionPollerService.pollWithAbsoluteTimeout(
+        ExtendedPollingResult pollingResult = freeIpaDeletionPollerService.pollWithAbsoluteTimeout(
                 freeIpaServerDeletionPollerTask, pollerObject, serverDeletionCheckInterval, serverDeletionCheckMaxWaitSeconds, ONE_MAX_CONSECUTIVE_FAILURE);
-        PollingResult result = resultPair.getLeft();
-        if (result.equals(PollingResult.TIMEOUT)) {
+        if (pollingResult.isTimeout()) {
             LOGGER.debug(
                     "FreeIPA server deletion did not complete, but a later step in the downscale process will attempt to cleanup the remaining LDAP entires");
-        } else if (!result.equals(PollingResult.SUCCESS)) {
-            String errMsg = String.format("Failed to poll FreeIPA server deletion, polling result = %s", result);
-            Exception ex = resultPair.getRight();
+        } else if (!pollingResult.isSuccess()) {
+            String errMsg = String.format("Failed to poll FreeIPA server deletion, polling result = %s", pollingResult.getPollingResult());
+            Exception ex = pollingResult.getException();
             LOGGER.error(errMsg, ex);
             throw new FreeIpaClientException("FreeIPA server deletion poll failed", ex);
         }

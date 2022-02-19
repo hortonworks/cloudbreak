@@ -98,8 +98,16 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
 
     @Override
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
-    public void putStackStartInstances(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
-        stackCommonService.putStartInstancesInDefaultWorkspace(crn, updateRequest, ScalingStrategy.STOPSTART);
+    public void putStackStartInstancesByCrn(@TenantAwareParam @ResourceCrn String crn, @Valid UpdateStackV4Request updateRequest) {
+        stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofCrn(crn), restRequestThreadLocalService.getRequestedWorkspaceId(), updateRequest,
+                ScalingStrategy.STOPSTART);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public void putStackStartInstancesByName(@ResourceName String name, @Valid UpdateStackV4Request updateRequest) {
+        stackCommonService.putStartInstancesInDefaultWorkspace(NameOrCrn.ofName(name), restRequestThreadLocalService.getRequestedWorkspaceId(), updateRequest,
+                ScalingStrategy.STOPSTART);
     }
 
     @Override
@@ -150,10 +158,20 @@ public class AutoscaleV4Controller implements AutoscaleV4Endpoint {
     @CheckPermissionByResourceCrn(action = AuthorizationResourceAction.SCALE_DATAHUB)
     public void stopInstancesForClusterCrn(@TenantAwareParam @ResourceCrn String clusterCrn, @NotEmpty List<String> instanceIds,
             Boolean forced, ScalingStrategy scalingStrategy) {
-        LOGGER.info("stopInternalInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
+        LOGGER.info("stopInstancesForClusterCrn. ScalingStrategy={}, forced={}, clusterCrn={}, instanceIds=[{}]",
                 scalingStrategy, forced, clusterCrn, instanceIds);
         stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofCrn(clusterCrn), restRequestThreadLocalService.getRequestedWorkspaceId(),
                 new HashSet(instanceIds), forced);
+    }
+
+    @Override
+    @CheckPermissionByResourceName(action = AuthorizationResourceAction.SCALE_DATAHUB)
+    public void stopInstancesForClusterName(@ResourceName String clusterName, @NotEmpty List<String> instanceIds,
+            Boolean forced, ScalingStrategy scalingStrategy) {
+        LOGGER.info("stopInstancesForClusterName: ScalingStrategy={}, forced={}, clusterName={}, instanceIds=[{}]",
+                scalingStrategy, forced, clusterName, instanceIds);
+        stackCommonService.stopMultipleInstancesInWorkspace(NameOrCrn.ofName(clusterName), restRequestThreadLocalService.getRequestedWorkspaceId(),
+                new HashSet<>(instanceIds), forced);
     }
 
     @Override

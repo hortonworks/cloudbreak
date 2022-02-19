@@ -79,7 +79,7 @@ public class AbstractRedbeamsTerminationActionTest {
         dbStack.setResourceCrn(CrnTestUtil.getDatabaseCrnBuilder()
                 .setAccountId("acc")
                 .setResource("resource")
-                .build());
+                .build().toString());
 
         credential = new Credential("userId", null, "userCrn");
 

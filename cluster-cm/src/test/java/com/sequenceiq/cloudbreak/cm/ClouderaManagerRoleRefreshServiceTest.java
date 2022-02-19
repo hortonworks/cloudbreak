@@ -24,7 +24,7 @@ import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvide
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,7 +56,8 @@ public class ClouderaManagerRoleRefreshServiceTest {
     public void testRestartClusterRolesShouldUpdateTheRoles() throws ApiException, CloudbreakException {
         Stack stack = createStack();
         setupMocks();
-        when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, apiClient, COMMAND_ID)).thenReturn(PollingResult.SUCCESS);
+        when(clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, apiClient, COMMAND_ID))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.refreshClusterRoles(apiClient, stack);
 

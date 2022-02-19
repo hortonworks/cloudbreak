@@ -121,7 +121,7 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
     }
 
     @Override
-    public StackPatchType getStackFixType() {
+    public StackPatchType getStackPatchType() {
         return METERING_AZURE_METADATA;
     }
 }

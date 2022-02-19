@@ -8,7 +8,6 @@ import javax.transaction.Transactional;
 
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.redbeams.api.model.common.Status;
@@ -41,12 +40,8 @@ public class DBStackService implements PayloadContextProvider {
     }
 
     public DBStack getByCrn(String crn) {
-        return getByCrn(Crn.safeFromString(crn))
+        return dbStackRepository.findByResourceCrn(crn)
                 .orElseThrow(() -> new NotFoundException(String.format("Stack with crn [%s] not found", crn)));
-    }
-
-    public Optional<DBStack> getByCrn(Crn crn) {
-        return dbStackRepository.findByResourceCrn(crn);
     }
 
     public Set<Long> findAllDeleting() {
@@ -70,7 +65,7 @@ public class DBStackService implements PayloadContextProvider {
         Optional<DBStack> dbStackOpt = findById(resourceId);
         if (dbStackOpt.isPresent()) {
             DBStack dbStack = dbStackOpt.get();
-            return PayloadContext.create(dbStack.getResourceCrn().toString(), dbStack.getCloudPlatform());
+            return PayloadContext.create(dbStack.getResourceCrn(), dbStack.getCloudPlatform());
         }
         return null;
     }

@@ -15,7 +15,7 @@ import com.cloudera.api.swagger.model.ApiServiceState;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
 @Component
 class ClouderaManagerMgmtLaunchService {
@@ -45,7 +45,7 @@ class ClouderaManagerMgmtLaunchService {
         return mgmtServiceResourceApi.readService(DataView.SUMMARY.name());
     }
 
-    private PollingResult startPolling(Stack stack, ApiClient apiClient, ApiCommand sc) {
+    private ExtendedPollingResult startPolling(Stack stack, ApiClient apiClient, ApiCommand sc) {
         return clouderaManagerPollingServiceProvider.startPollingCmManagementServiceStartup(stack, apiClient, sc.getId());
     }
 }

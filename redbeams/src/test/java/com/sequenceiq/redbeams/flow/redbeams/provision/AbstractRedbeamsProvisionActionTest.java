@@ -74,7 +74,7 @@ public class AbstractRedbeamsProvisionActionTest {
         dbStack.setResourceCrn(CrnTestUtil.getDatabaseServerCrnBuilder()
                 .setAccountId("acc")
                 .setResource("resource")
-                .build());
+                .build().toString());
         dbStack.setName("mystack");
         dbStack.setRegion("us-east-1");
         dbStack.setAvailabilityZone("us-east-1b");

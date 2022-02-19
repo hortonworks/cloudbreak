@@ -38,9 +38,8 @@ public class DBStack {
     @SequenceGenerator(name = "dbstack_generator", sequenceName = "dbstack_id_seq", allocationSize = 1)
     private Long id;
 
-    @Convert(converter = CrnConverter.class)
     @Column(nullable = false)
-    private Crn resourceCrn;
+    private String resourceCrn;
 
     private String name;
 
@@ -232,11 +231,11 @@ public class DBStack {
         this.userName = userName;
     }
 
-    public Crn getResourceCrn() {
+    public String getResourceCrn() {
         return resourceCrn;
     }
 
-    public void setResourceCrn(Crn resourceCrn) {
+    public void setResourceCrn(String resourceCrn) {
         this.resourceCrn = resourceCrn;
     }
 
@@ -286,7 +285,7 @@ public class DBStack {
                 + "',platformVariant='" + platformVariant
                 + "',environmentId='" + environmentId
                 + "',ownerCrn='" + (ownerCrn != null ? ownerCrn.toString() : "null")
-                + "',resourceCrn='" + (resourceCrn != null ? resourceCrn.toString() : "null")
+                + "',resourceCrn='" + (resourceCrn != null ? resourceCrn : "null")
                 + '}';
     }
 }

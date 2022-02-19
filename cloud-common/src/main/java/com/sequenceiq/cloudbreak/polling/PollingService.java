@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.polling;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -23,17 +21,17 @@ public class PollingService<T> {
      * @param interval    sleeps this many milliseconds between status checking attempts
      * @param maxAttempts signals how many times will the status check be executed before timeout
      */
-    public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval,
+    public ExtendedPollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval,
             int maxAttempts, int maxConsecutiveFailures) {
         return pollWithTimeout(statusCheckerTask, t, interval, new AttemptBasedTimeoutChecker(maxAttempts), maxConsecutiveFailures);
     }
 
-    public Pair<PollingResult, Exception> pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval,
+    public ExtendedPollingResult pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval,
             long maximumWaitTimeInSeconds, int maxConsecutiveFailures) {
         return pollWithTimeout(statusCheckerTask, t, interval, new AbsolutTimeBasedTimeoutChecker(maximumWaitTimeInSeconds), maxConsecutiveFailures);
     }
 
-    public Pair<PollingResult, Exception> pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, TimeoutChecker timeoutChecker,
+    public ExtendedPollingResult pollWithTimeout(StatusCheckerTask<T> statusCheckerTask, T t, long interval, TimeoutChecker timeoutChecker,
             int maxConsecutiveFailures) {
         boolean success = false;
         boolean timeout = false;
@@ -59,12 +57,17 @@ public class PollingService<T> {
                 LOGGER.debug("Polling failure reached the limit which was {}, poller will drop the last exception.", maxConsecutiveFailures);
                 statusCheckerTask.sendFailureEvent(t);
                 statusCheckerTask.handleException(actual);
-                return new ImmutablePair<>(PollingResult.FAILURE, actual);
+                return new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                        .failure()
+                        .withException(actual)
+                        .build();
             } else if (success) {
                 LOGGER.debug(statusCheckerTask.successMessage(t));
                 LOGGER.debug("Set the number of consecutive failures to 0, since we received a positive answer. Original number of consecutiveFailures: {}",
                         consecutiveFailures);
-                return new ImmutablePair<>(PollingResult.SUCCESS, actual);
+                return new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                        .success()
+                        .build();
             }
             sleep(interval);
             attempts++;
@@ -75,18 +78,25 @@ public class PollingService<T> {
             LOGGER.debug("Poller timeout.");
             statusCheckerTask.sendTimeoutEvent(t);
             statusCheckerTask.handleTimeout(t);
-            return new ImmutablePair<>(PollingResult.TIMEOUT, actual);
+            return new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                    .timeout()
+                    .withException(actual)
+                    .withPayload(statusCheckerTask.getFailedInstanceIds())
+                    .build();
         }
         LOGGER.debug("Poller exiting.");
-        return new ImmutablePair<>(PollingResult.EXIT, actual);
+        return new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .exit()
+                .withException(actual)
+                .build();
     }
 
-    public PollingResult pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, long maximumWaitTimeInSeconds) {
-        return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maximumWaitTimeInSeconds, DEFAULT_MAX_CONSECUTIVE_FAILURES).getLeft();
+    public ExtendedPollingResult pollWithAbsoluteTimeout(StatusCheckerTask<T> statusCheckerTask, T t, int interval, long maximumWaitTimeInSeconds) {
+        return pollWithAbsoluteTimeout(statusCheckerTask, t, interval, maximumWaitTimeInSeconds, DEFAULT_MAX_CONSECUTIVE_FAILURES);
     }
 
-    public PollingResult pollWithAttempt(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
-        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, DEFAULT_MAX_CONSECUTIVE_FAILURES).getLeft();
+    public ExtendedPollingResult pollWithAttempt(StatusCheckerTask<T> statusCheckerTask, T t, int interval, int maxAttempts) {
+        return pollWithTimeout(statusCheckerTask, t, interval, maxAttempts, DEFAULT_MAX_CONSECUTIVE_FAILURES);
     }
 
     private void sleep(long duration) {

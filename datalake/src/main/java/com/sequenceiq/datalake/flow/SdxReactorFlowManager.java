@@ -159,10 +159,7 @@ public class SdxReactorFlowManager {
     private boolean shouldSdxBackupBePerformed(SdxCluster cluster) {
         boolean retVal = true;
         String reason = null;
-        if (cluster.isRangerRazEnabled()) {
-            retVal = false;
-            reason = "RAZ is enabled";
-        } else if (isVersionOlderThan(cluster, "7.2.1")) {
+        if (isVersionOlderThan(cluster, "7.2.1")) {
             retVal = false;
             reason = "Unsupported runtime: " + cluster.getRuntime();
         } else if (cluster.getCloudStorageFileSystemType() == null) {

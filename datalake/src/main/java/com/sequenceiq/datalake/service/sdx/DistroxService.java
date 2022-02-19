@@ -39,7 +39,7 @@ public class DistroxService {
         START
     }
 
-    @Value("${dl.dh.polling.attempt:90}")
+    @Value("${dl.dh.polling.attempt:360}")
     private Integer attempt;
 
     @Value("${dl.dh.polling.sleep.time:5}")

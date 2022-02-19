@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
-
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -24,7 +21,7 @@ import com.sequenceiq.cloudbreak.cloud.scheduler.CancellationException;
 import com.sequenceiq.cloudbreak.cm.client.retry.ClouderaManagerApiFactory;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
@@ -50,15 +47,15 @@ class ClouderaManagerRoleRefreshService {
     }
 
     private void pollingRefresh(ApiCommand command, ApiClient client, Stack stack) throws CloudbreakException {
-        PollingResult pollingResult = PollingResult.SUCCESS;
+        ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build();
         try {
             pollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(stack, client, command.getId());
         } catch (ClouderaManagerOperationFailedException e) {
             LOGGER.warn("Ignored failed refresh command. Upscale will continue.", e);
         }
-        if (isExited(pollingResult)) {
+        if (pollingResult.isExited()) {
             throw new CancellationException("Cluster was terminated while waiting for cluster refresh");
-        } else if (isTimeout(pollingResult)) {
+        } else if (pollingResult.isTimeout()) {
             throw new CloudbreakException("Timeout while Cloudera Manager tried to refresh the cluster..");
         }
     }

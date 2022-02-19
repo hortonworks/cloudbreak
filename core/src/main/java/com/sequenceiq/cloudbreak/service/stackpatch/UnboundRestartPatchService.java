@@ -54,7 +54,7 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
     private InternalCrnModifier internalCrnModifier;
 
     @Override
-    public StackPatchType getStackFixType() {
+    public StackPatchType getStackPatchType() {
         return UNBOUND_RESTART;
     }
 

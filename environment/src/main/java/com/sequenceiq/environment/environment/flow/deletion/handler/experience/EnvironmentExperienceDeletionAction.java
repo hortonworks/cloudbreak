@@ -1,18 +1,15 @@
 package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 
-import static com.sequenceiq.cloudbreak.polling.PollingResult.EXIT;
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isSuccess;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_COUNT;
 import static com.sequenceiq.environment.environment.flow.deletion.handler.experience.ExperienceDeletionRetrievalTask.EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS;
 
 import java.util.function.Function;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
@@ -80,14 +77,14 @@ public class EnvironmentExperienceDeletionAction {
     }
 
     private void waitForResult(Environment environment, boolean forceDelete) {
-        Pair<PollingResult, Exception> result = experiencePollingService.pollWithTimeout(
+        ExtendedPollingResult result = experiencePollingService.pollWithTimeout(
                 new ExperienceDeletionRetrievalTask(experienceConnectorService),
                 new ExperiencePollerObject(environment.getResourceCrn(), environment.getName(), environment.getCloudPlatform(), environment.getAccountId()),
                 EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS,
                 EXPERIENCE_RETRYING_COUNT,
                 SINGLE_FAILURE);
-        if (!isSuccess(result.getLeft())) {
-            if (result.getLeft().equals(EXIT)) {
+        if (!result.isSuccess()) {
+            if (result.isExited()) {
                 reCheckDeletionOtherwise(
                         environment,
                         env -> experienceConnectorService.getConnectedExperienceCount(EnvironmentExperienceDto.fromEnvironment(env)) == 0,
@@ -98,7 +95,7 @@ public class EnvironmentExperienceDeletionAction {
         }
     }
 
-    private void processFailureWithForceDelete(Pair<PollingResult, Exception> result, boolean forceDelete) {
+    private void processFailureWithForceDelete(ExtendedPollingResult result, boolean forceDelete) {
         if (forceDelete) {
             LOGGER.debug("Forced environment delete causes skipping of experience deletion failure.");
         } else {
@@ -113,14 +110,14 @@ public class EnvironmentExperienceDeletionAction {
         }
     }
 
-    private void processFailure(Pair<PollingResult, Exception> result) {
+    private void processFailure(ExtendedPollingResult result) {
         String rootMsg = "Failed to delete Experience!";
-        if (result.getRight() == null) {
-            LOGGER.debug("Experience deletion has failed but no exception has come from the polling result: {}", result.getLeft());
+        if (result.getException() == null) {
+            LOGGER.debug("Experience deletion has failed but no exception has come from the polling result: {}", result.getPollingResult());
             throw new ExperienceOperationFailedException(rootMsg);
         }
         throw new ExperienceOperationFailedException(String.format("%s %s", rootMsg, experiencePollingFailureResolver.getMessageForFailure(result)),
-                result.getRight());
+                result.getException());
     }
 
 }

@@ -14,6 +14,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.common.api.telemetry.model.Telemetry;
 
@@ -29,8 +30,8 @@ public interface ClusterApi {
         return clusterSetupService().getSdxContext();
     }
 
-    default void waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
-        clusterSetupService().waitForHosts(hostsInCluster);
+    default ExtendedPollingResult waitForHosts(Set<InstanceMetaData> hostsInCluster) throws ClusterClientInitException {
+        return clusterSetupService().waitForHosts(hostsInCluster);
     }
 
     default void waitForServices(int requestId) throws CloudbreakException {

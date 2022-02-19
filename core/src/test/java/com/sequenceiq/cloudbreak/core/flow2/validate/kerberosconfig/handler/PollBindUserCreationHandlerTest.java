@@ -10,7 +10,6 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -20,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.PollBindUserCreationEvent;
 import com.sequenceiq.cloudbreak.core.flow2.validate.kerberosconfig.event.ValidateKerberosConfigEvent;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.reactor.api.event.StackFailureEvent;
 import com.sequenceiq.cloudbreak.service.freeipa.FreeIpaOperationCheckerTask;
@@ -64,8 +63,11 @@ class PollBindUserCreationHandlerTest {
     public void testPollingSuccessful() {
         Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId", "acc"));
         ArgumentCaptor<FreeIpaOperationPollerObject> captor = ArgumentCaptor.forClass(FreeIpaOperationPollerObject.class);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(FreeIpaOperationCheckerTask.class), captor.capture(), anyLong(), anyLong(), anyInt()))
-        .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+        .thenReturn(extendedPollingResult);
 
         ValidateKerberosConfigEvent result = (ValidateKerberosConfigEvent) underTest.doAccept(new HandlerEvent<>(event));
 
@@ -82,8 +84,12 @@ class PollBindUserCreationHandlerTest {
     public void testPollingFailed() {
         Event<PollBindUserCreationEvent> event = new Event<>(new PollBindUserCreationEvent(1L, "opId", "acc"));
         ArgumentCaptor<FreeIpaOperationPollerObject> captor = ArgumentCaptor.forClass(FreeIpaOperationPollerObject.class);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .failure()
+                .withException(new Exception("error"))
+                .build();
         when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(FreeIpaOperationCheckerTask.class), captor.capture(), anyLong(), anyLong(), anyInt()))
-        .thenReturn(Pair.of(PollingResult.FAILURE, new Exception("error")));
+        .thenReturn(extendedPollingResult);
 
         StackFailureEvent result = (StackFailureEvent) underTest.doAccept(new HandlerEvent<>(event));
 

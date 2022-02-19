@@ -1,8 +1,5 @@
 package com.sequenceiq.cloudbreak.cm;
 
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isTimeout;
-
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
@@ -60,7 +57,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
 @Component
 public class ClouderaManagerDecomissioner {
@@ -284,11 +281,11 @@ public class ClouderaManagerDecomissioner {
             ApiHostNameList body = new ApiHostNameList().items(stillAvailableRemovableHosts);
             ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
 
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostsDecommission(
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmHostsDecommission(
                     stack, client, apiCommand.getId(), pollingTimeout);
-            if (isExited(pollingResult)) {
+            if (pollingResult.isExited()) {
                 throw new CancellationException("Cluster was terminated while waiting for host decommission");
-            } else if (isTimeout(pollingResult)) {
+            } else if (pollingResult.isTimeout()) {
                 String warningMessage = "Cloudera Manager decommission host command {} polling timed out, " +
                         "thus we are aborting the decommission and we are retrying it for lost nodes once again.";
                 abortDecommissionWithWarningMessage(apiCommand, client, warningMessage);
@@ -323,11 +320,11 @@ public class ClouderaManagerDecomissioner {
             ClouderaManagerResourceApi apiInstance = clouderaManagerApiFactory.getClouderaManagerResourceApi(client);
             ApiHostNameList body = new ApiHostNameList().items(stillAvailableRemovableHosts);
             ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
                     .startPollingCmHostDecommissioning(stack, client, apiCommand.getId(), onlyLostNodesAffected, stillAvailableRemovableHosts.size());
-            if (isExited(pollingResult)) {
+            if (pollingResult.isExited()) {
                 throw new CancellationException("Cluster was terminated while waiting for host decommission");
-            } else if (isTimeout(pollingResult)) {
+            } else if (pollingResult.isTimeout()) {
                 if (onlyLostNodesAffected) {
                     String warningMessage = "Cloudera Manager decommission host command {} polling timed out, " +
                             "thus we are aborting the decommission and we are retrying it for lost nodes once again.";
@@ -352,11 +349,11 @@ public class ClouderaManagerDecomissioner {
     private void retryDecommissionNodes(ClouderaManagerResourceApi apiInstance, ApiHostNameList body, Stack stack, ApiClient client,
             List<String> removableHosts, String hostGroupName) throws ApiException {
         ApiCommand apiCommand = apiInstance.hostsDecommissionCommand(body);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider
+        ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider
             .startPollingCmHostDecommissioning(stack, client, apiCommand.getId(), true, removableHosts.size());
-        if (isExited(pollingResult)) {
+        if (pollingResult.isExited()) {
             throw new CancellationException("Cluster was terminated while waiting for host decommission");
-        } else if (isTimeout(pollingResult)) {
+        } else if (pollingResult.isTimeout()) {
             String warningMessage = "Cloudera Manager retried decommission host command {} polling timed out again, thus we are aborting decommission " +
                     "and we are skipping it, since these lost nodes clearly cannot be decommissioned, data loss expected in this case.";
             abortDecommissionWithWarningMessage(apiCommand, client, warningMessage);
@@ -440,10 +437,10 @@ public class ClouderaManagerDecomissioner {
                 body.deleteHosts(Boolean.TRUE);
                 ApiCommand command = hostsResourceApi.removeHostsFromCluster(body);
                 LOGGER.debug("Remove hosts from cluster request sent, hosts: {}", knownDeletableHosts);
-                PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingRemoveHostsFromCluster(stack, client, command.getId());
-                if (isExited(pollingResult)) {
+                ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingRemoveHostsFromCluster(stack, client, command.getId());
+                if (pollingResult.isExited()) {
                     throw new CancellationException("Cluster was terminated while waiting for hosts removal from CM.");
-                } else if (isTimeout(pollingResult)) {
+                } else if (pollingResult.isTimeout()) {
                     throw new CloudbreakServiceException("Timeout while Cloudera Manager tried to remove hosts from cluster.");
                 }
             } else {

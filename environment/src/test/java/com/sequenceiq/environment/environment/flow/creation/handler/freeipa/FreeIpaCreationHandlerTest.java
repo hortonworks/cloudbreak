@@ -18,7 +18,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -35,6 +34,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.CloudConnector;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.configuration.SupportedPlatforms;
@@ -211,9 +211,9 @@ public class FreeIpaCreationHandlerTest {
         when(environment.getCloudPlatform()).thenReturn(environmentDto.getCloudPlatform());
         when(environment.isCreateFreeIpa()).thenReturn(environmentDto.getFreeIpaCreation().getCreate());
 
-        Pair<PollingResult, Exception> result = mock(Pair.class);
+        ExtendedPollingResult result = mock(ExtendedPollingResult.class);
 
-        when(result.getKey()).thenReturn(pollingResult);
+        when(result.getPollingResult()).thenReturn(pollingResult);
 
         when(environmentService.findEnvironmentById(environmentDto.getId())).thenReturn(Optional.of(environment));
         when(supportedPlatforms.supportedPlatformForFreeIpa(environmentDto.getCloudPlatform())).thenReturn(true);
@@ -257,6 +257,9 @@ public class FreeIpaCreationHandlerTest {
                         .build())
                 .build());
 
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
@@ -267,7 +270,7 @@ public class FreeIpaCreationHandlerTest {
                 anyLong(),
                 anyInt(),
                 anyInt()))
-                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+                .thenReturn(extendedPollingResult);
 
         victim.accept(new Event<>(environmentDto));
 
@@ -293,6 +296,9 @@ public class FreeIpaCreationHandlerTest {
         Environment environment = new Environment();
         environment.setCreateFreeIpa(true);
 
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
@@ -303,7 +309,7 @@ public class FreeIpaCreationHandlerTest {
                 anyLong(),
                 anyInt(),
                 anyInt()))
-                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+                .thenReturn(extendedPollingResult);
 
         victim.accept(new Event<>(environmentDto));
 
@@ -322,6 +328,9 @@ public class FreeIpaCreationHandlerTest {
 
         Environment environment = new Environment();
         environment.setCreateFreeIpa(true);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
 
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
@@ -333,7 +342,7 @@ public class FreeIpaCreationHandlerTest {
                 anyLong(),
                 anyInt(),
                 anyInt()))
-                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+                .thenReturn(extendedPollingResult);
 
         victim.accept(new Event<>(environmentDto));
 
@@ -352,7 +361,9 @@ public class FreeIpaCreationHandlerTest {
 
         Environment environment = new Environment();
         environment.setCreateFreeIpa(true);
-
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
         when(environmentService.findEnvironmentById(ENVIRONMENT_ID)).thenReturn(Optional.of(environment));
         when(supportedPlatforms.supportedPlatformForFreeIpa(environment.getCloudPlatform())).thenReturn(true);
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(Optional.empty());
@@ -363,7 +374,7 @@ public class FreeIpaCreationHandlerTest {
                 anyLong(),
                 anyInt(),
                 anyInt()))
-                .thenReturn(Pair.of(PollingResult.SUCCESS, null));
+                .thenReturn(extendedPollingResult);
 
         victim.accept(new Event<>(environmentDto));
 
