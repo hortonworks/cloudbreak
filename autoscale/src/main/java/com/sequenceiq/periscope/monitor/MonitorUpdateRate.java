@@ -33,6 +33,11 @@ public final class MonitorUpdateRate {
     public static final String EVERY_MIN_RATE_CRON = "0 * * * * ?";
 
     /**
+     * Every minute, at the 50s mark.
+     */
+    public static final String CLUSTER_MONITOR_EVERY_MIN_RATE_CRON = "50 0/1 * * * ?";
+
+    /**
      * Every 2 minutes.
      */
     public static final String EVERY_TWO_MIN_RATE_CRON = "0 0/2 * * * ?";

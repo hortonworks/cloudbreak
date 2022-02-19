@@ -13,7 +13,6 @@ import java.util.Set;
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -24,7 +23,7 @@ import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessage
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
@@ -124,13 +123,13 @@ public class FreeIpaCleanupService {
     private void pollCleanupOperation(OperationStatus operationStatus, String accountId) {
         FreeIpaOperationPollerObject opretaionPollerObject = new FreeIpaOperationPollerObject(operationStatus.getOperationId(),
                 operationStatus.getOperationType().name(), operationV1Endpoint, accountId);
-        Pair<PollingResult, Exception> pollingResult = freeIpaOperationChecker
+        ExtendedPollingResult pollingResult = freeIpaOperationChecker
                 .pollWithAbsoluteTimeout(new FreeIpaOperationCheckerTask<>(), opretaionPollerObject, POLL_INTERVAL, WAIT_SEC, 1);
-        if (!PollingResult.isSuccess(pollingResult.getLeft())) {
-            Exception ex = pollingResult.getRight();
-            LOGGER.error("Cleanup failed with state [{}] and message: [{}]", pollingResult.getLeft(), ex.getMessage());
+        if (!pollingResult.isSuccess()) {
+            Exception ex = pollingResult.getException();
+            LOGGER.error("Cleanup failed with state [{}] and message: [{}]", pollingResult.getPollingResult(), ex.getMessage());
             throw new FreeIpaOperationFailedException(
-                    String.format("Cleanup failed with state [%s] and message: [%s]", pollingResult.getLeft(), ex.getMessage()), ex);
+                    String.format("Cleanup failed with state [%s] and message: [%s]", pollingResult.getPollingResult(), ex.getMessage()), ex);
         }
     }
 

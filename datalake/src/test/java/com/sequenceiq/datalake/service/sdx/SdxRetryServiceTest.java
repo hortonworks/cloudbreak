@@ -4,8 +4,8 @@ import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.SDX_STACK_CREAT
 import static com.sequenceiq.datalake.flow.create.SdxCreateEvent.STORAGE_VALIDATION_WAIT_EVENT;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.INIT_STATE;
 import static com.sequenceiq.datalake.flow.create.SdxCreateState.SDX_CREATION_WAIT_RDS_STATE;
-import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static com.sequenceiq.datalake.flow.dr.backup.DatalakeBackupEvent.DATALAKE_TRIGGER_BACKUP_EVENT;
+import static com.sequenceiq.datalake.flow.dr.restore.DatalakeRestoreEvent.DATALAKE_TRIGGER_RESTORE_EVENT;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -17,6 +17,9 @@ import static org.mockito.Mockito.when;
 
 import java.util.function.Consumer;
 
+import javax.ws.rs.InternalServerErrorException;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,9 +65,21 @@ public class SdxRetryServiceTest {
             ((Consumer<FlowLog>) invocation.getArgument(1)).accept(successfulFlowLog);
             return null;
         }).when(flow2Handler).retryLastFailedFlow(anyLong(), any());
-        when(flow2Handler.getFirstStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
+        when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
 
         sdxRetryService.retrySdx(sdxCluster);
+
+        verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
+    }
+
+    @Test
+    public void noRetryForEmptyFlowLog() {
+        SdxCluster sdxCluster = new SdxCluster();
+        sdxCluster.setId(1L);
+        sdxCluster.setClusterName("sdxclustername");
+        when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenThrow(new InternalServerErrorException());
+
+        Assertions.assertThrows(InternalServerErrorException.class, () -> sdxRetryService.retrySdx(sdxCluster));
 
         verify(stackV4Endpoint, times(0)).retry(any(), any(), anyString());
     }
@@ -86,7 +101,7 @@ public class SdxRetryServiceTest {
             ((Consumer<FlowLog>) invocation.getArgument(1)).accept(successfulFlowLog);
             return null;
         }).when(flow2Handler).retryLastFailedFlow(anyLong(), any());
-        when(flow2Handler.getFirstStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
+        when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
         sdxRetryService.retrySdx(sdxCluster);
 
         verify(stackV4Endpoint, times(1)).retry(any(), eq("sdxclustername"), anyString());
@@ -104,7 +119,7 @@ public class SdxRetryServiceTest {
         successfulFlowLog.setCreated(1L);
         successfulFlowLog.setCurrentState(INIT_STATE.name());
         successfulFlowLog.setFlowType(ClassValue.of(DatalakeRestoreFlowConfig.class));
-        when(flow2Handler.getFirstStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
+        when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
 
         sdxRetryService.retrySdx(sdxCluster);
 
@@ -123,7 +138,7 @@ public class SdxRetryServiceTest {
         successfulFlowLog.setCreated(1L);
         successfulFlowLog.setCurrentState(INIT_STATE.name());
         successfulFlowLog.setFlowType(ClassValue.of(DatalakeRestoreFlowConfig.class));
-        when(flow2Handler.getFirstStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
+        when(flow2Handler.getFirstRetryableStateLogfromLatestFlow(anyLong())).thenReturn(successfulFlowLog);
 
         sdxRetryService.retrySdx(sdxCluster);
         verify(flow2Handler, times(1)).retryLastFailedFlowFromStart(any());

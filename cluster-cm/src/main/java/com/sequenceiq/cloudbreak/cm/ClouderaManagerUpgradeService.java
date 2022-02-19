@@ -19,7 +19,7 @@ import com.sequenceiq.cloudbreak.cm.commands.SyncApiCommandRetriever;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.cm.polling.PollingResultErrorHandler;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 
 @Service
@@ -48,8 +48,9 @@ class ClouderaManagerUpgradeService {
         LOGGER.info("Upgrading the CDP Runtime...");
         try {
             BigDecimal upgradeCommandId = determineUpgradeLogic(stackProductVersion, clustersResourceApi, stack, apiClient, false);
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
-            pollingResultErrorHandler.handlePollingResult(pollingResult, "Cluster was terminated while waiting for CDP Runtime to be upgraded",
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
+            pollingResultErrorHandler.handlePollingResult(pollingResult,
+                    "Cluster was terminated while waiting for CDP Runtime to be upgraded",
                     "Timeout during CDP Runtime upgrade.");
         } catch (ApiException ex) {
             String responseBody = ex.getResponseBody();
@@ -66,8 +67,8 @@ class ClouderaManagerUpgradeService {
             throws ApiException, CloudbreakException {
         LOGGER.info("Call post runtime upgrade command after maintenance upgrade");
         BigDecimal upgradeCommandId = determineUpgradeLogic("", clustersResourceApi, stack, apiClient, true);
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
-        pollingResultErrorHandler.handlePollingResult(pollingResult, "Cluster was terminated while waiting for CDP Runtime to be upgraded",
+        ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCdpRuntimeUpgrade(stack, apiClient, upgradeCommandId);
+        pollingResultErrorHandler.handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for CDP Runtime to be upgraded",
                 "Timeout during CDP Runtime upgrade.");
         LOGGER.info("Runtime is successfully upgraded!");
     }

@@ -136,12 +136,14 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
         Assertions.assertEquals("", clusterDetails.getUserTags());
+        Assertions.assertEquals("", clusterDetails.getApplicationTags());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
         Assertions.assertEquals("", clusterDetails.getUserTags());
+        Assertions.assertEquals("", clusterDetails.getApplicationTags());
     }
 
     @Test
@@ -150,18 +152,23 @@ public class StructuredEventToCDPClusterDetailsConverterTest {
         Map<String, String> userTags = new HashMap<>();
         userTags.put("key1", "value1");
         userTags.put("key2", "value2");
-        stackDetails.setTags(new Json(new StackTags(userTags, new HashMap<>(), new HashMap<>())));
+        Map<String, String> appTags = new HashMap<>();
+        appTags.put("appKey1", "appValue1");
+        appTags.put("appKey2", "appValue2");
+        stackDetails.setTags(new Json(new StackTags(userTags, appTags, new HashMap<>())));
 
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(stackDetails);
         UsageProto.CDPClusterDetails clusterDetails = underTest.convert(structuredFlowEvent);
 
         Assertions.assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", clusterDetails.getUserTags());
+        Assertions.assertEquals("{\"appKey1\":\"appValue1\",\"appKey2\":\"appValue2\"}", clusterDetails.getApplicationTags());
 
         StructuredSyncEvent structuredSyncEvent = new StructuredSyncEvent();
         structuredSyncEvent.setStack(stackDetails);
         clusterDetails = underTest.convert(structuredSyncEvent);
 
         Assertions.assertEquals("{\"key1\":\"value1\",\"key2\":\"value2\"}", clusterDetails.getUserTags());
+        Assertions.assertEquals("{\"appKey1\":\"appValue1\",\"appKey2\":\"appValue2\"}", clusterDetails.getApplicationTags());
     }
 }

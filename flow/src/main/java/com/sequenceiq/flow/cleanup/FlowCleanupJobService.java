@@ -44,9 +44,12 @@ public class FlowCleanupJobService {
         JobDetail jobDetail = buildJobDetail();
         Trigger trigger = buildJobTrigger(jobDetail);
         try {
-            if (scheduler.getJobDetail(JobKey.jobKey(JOB_NAME, JOB_GROUP)) != null) {
+            JobKey jobKey = JobKey.jobKey(JOB_NAME, JOB_GROUP);
+            if (scheduler.getJobDetail(jobKey) != null) {
+                LOGGER.info("Unscheduling flow cleanup job key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 unschedule();
             }
+            LOGGER.info("Scheduling flow cleanup job for key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", jobDetail), e);

@@ -68,7 +68,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterCommandType;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.dto.ProxyAuthentication;
 import com.sequenceiq.cloudbreak.dto.ProxyConfig;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.repository.ClusterCommandRepository;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.template.TemplatePreparationObject;
@@ -578,7 +578,7 @@ public class ClouderaManagerSetupServiceTest {
                 any(Stack.class),
                 any(ApiClient.class),
                 any(BigDecimal.class)
-        )).thenReturn(PollingResult.SUCCESS);
+        )).thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.refreshParcelRepos();
 
@@ -626,7 +626,7 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerApiClientProvider.getV31Client(anyInt(), anyString(), anyString(), any(HttpClientConfig.class)))
                 .thenReturn(apiClient);
         when(clouderaManagerPollingServiceProvider.startPollingCmHostStatus(any(Stack.class), any(ApiClient.class), anyList()))
-                .thenReturn(PollingResult.EXIT);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build());
 
         underTest.waitForHosts(Set.of());
 
@@ -660,7 +660,7 @@ public class ClouderaManagerSetupServiceTest {
     @Test
     public void testWaitForServerWhenPollingExitedThenShouldReturnWithCancellationException() {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
-                .thenReturn(PollingResult.EXIT);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build());
 
         CancellationException actual = assertThrows(CancellationException.class, () -> underTest.waitForServer(false));
 
@@ -674,7 +674,7 @@ public class ClouderaManagerSetupServiceTest {
     @Test
     public void testWaitForServerWhenPollingFailedThenShouldReturnWithCloudbreakException() {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
-                .thenReturn(PollingResult.FAILURE);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().failure().build());
 
         CloudbreakException actual = assertThrows(CloudbreakException.class, () -> underTest.waitForServer(false));
 
@@ -688,7 +688,7 @@ public class ClouderaManagerSetupServiceTest {
     @Test
     public void testWaitForServerWhenPollingSuccessThenEverythingShouldWork() throws ClusterClientInitException, CloudbreakException {
         when(clouderaManagerPollingServiceProvider.startPollingCmStartup(any(Stack.class), any(ApiClient.class)))
-                .thenReturn(PollingResult.SUCCESS);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.waitForServer(false);
 
@@ -919,7 +919,7 @@ public class ClouderaManagerSetupServiceTest {
         when(clouderaManagerResourceApi.importClusterTemplate(anyBoolean(), any(ApiClusterTemplate.class))).thenReturn(apiCommand);
         when(clusterCommandRepository.save(any(ClusterCommand.class))).thenReturn(clusterCommand);
         when(clouderaManagerPollingServiceProvider.startPollingCmTemplateInstallation(any(Stack.class), any(ApiClient.class), any(BigDecimal.class)))
-                .thenReturn(PollingResult.EXIT);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().exit().build());
 
         underTest.installCluster("{}");
 

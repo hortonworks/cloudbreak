@@ -16,7 +16,7 @@
 
 recover-services-db-remote:
   cmd.run:
-    - name: runuser -l postgres -c '/opt/salt/scripts/recover_db_remote.sh' | tee -a /var/log/recover-services-db-remote.log && [[ 0 -eq ${PIPESTATUS[0]} ]] && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/recover-services-db-remote-executed || exit ${PIPESTATUS[0]}
+    - name: runuser -l postgres -s /bin/bash -c '/opt/salt/scripts/recover_db_remote.sh' | tee -a /var/log/recover-services-db-remote.log && [[ 0 -eq ${PIPESTATUS[0]} ]] && echo $(date +%Y-%m-%d:%H:%M:%S) >> /var/log/recover-services-db-remote-executed || exit ${PIPESTATUS[0]}
     - failhard: True
     - onlyif:
       - test ! -f /var/log/recover-services-db-remote-executed

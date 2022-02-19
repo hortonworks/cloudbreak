@@ -32,6 +32,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudVolumeUsageType;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes.Volume;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
+import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
@@ -258,11 +259,11 @@ public class StackUtil {
         boolean entitled = false;
         String accountId = Crn.safeFromString(stack.getResourceCrn()).getAccountId();
         String cloudPlatform = stack.getCloudPlatform();
-        if ("AWS".equalsIgnoreCase(cloudPlatform)) {
+        if (CloudPlatform.AWS.equalsIgnoreCase(cloudPlatform)) {
             entitled = entitlementService.awsStopStartScalingEnabled(accountId);
-        } else if ("AZURE".equalsIgnoreCase(cloudPlatform)) {
+        } else if (CloudPlatform.AZURE.equalsIgnoreCase(cloudPlatform)) {
             entitled = entitlementService.azureStopStartScalingEnabled(accountId);
-        } else if ("GCP".equalsIgnoreCase(cloudPlatform)) {
+        } else if (CloudPlatform.GCP.equalsIgnoreCase(cloudPlatform)) {
             entitled = entitlementService.gcpStopStartScalingEnabled(accountId);
         }
         return entitled;

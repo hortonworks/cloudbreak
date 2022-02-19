@@ -4,17 +4,17 @@ import static com.sequenceiq.cloudbreak.util.NullUtil.getIfNotNullOtherwise;
 
 import java.util.Optional;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 
 @Component
 public class ExperiencePollingFailureResolver {
 
-    public String getMessageForFailure(Pair<PollingResult, Exception> result) {
-        String additionalMessage = attemptToProvideMessageForPollingFailure(result.getLeft()).orElse("");
-        return getIfNotNullOtherwise(result.getRight(), Throwable::getMessage, additionalMessage);
+    public String getMessageForFailure(ExtendedPollingResult result) {
+        String additionalMessage = attemptToProvideMessageForPollingFailure(result.getPollingResult()).orElse("");
+        return getIfNotNullOtherwise(result.getException(), Throwable::getMessage, additionalMessage);
     }
 
     private Optional<String> attemptToProvideMessageForPollingFailure(PollingResult pollingResult) {

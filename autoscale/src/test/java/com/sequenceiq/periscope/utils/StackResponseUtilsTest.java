@@ -48,6 +48,17 @@ public class StackResponseUtilsTest {
     }
 
     @Test
+    public void testGetStoppedInstanceCountInHostGroup() {
+        String hostGroup = "compute";
+        Integer runningHostGroupCount = 1;
+        Integer stoppedHostGroupCount = 3;
+
+        Integer stoppedInstanceCount = underTest.getStoppedInstanceCountInHostGroup(getMockStackV4ResponseForStopStart(hostGroup,
+                runningHostGroupCount, stoppedHostGroupCount), hostGroup);
+        assertEquals("Stopped instance count should match", Integer.valueOf(3), stoppedInstanceCount);
+    }
+
+    @Test
     public void testGetNodeCountForHostGroup() {
         String hostGroup = "compute";
 
@@ -102,6 +113,11 @@ public class StackResponseUtilsTest {
     private StackV4Response getMockStackV4Response(String hostGroup, boolean withUnhealthyInstances) {
         return MockStackResponseGenerator
                 .getMockStackV4Response("test-crn", hostGroup, "test_fqdn", 3, withUnhealthyInstances);
+    }
+
+    private StackV4Response getMockStackV4ResponseForStopStart(String hostGroup, int runningHostGroupCount, int stoppedHostGroupCount) {
+        return MockStackResponseGenerator
+                .getMockStackV4Response("test-crn", hostGroup, "test-fqdn", runningHostGroupCount, stoppedHostGroupCount);
     }
 
     private String getTestBP() throws IOException {

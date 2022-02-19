@@ -16,14 +16,13 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentExperienceDto;
@@ -57,13 +56,16 @@ class EnvironmentExperienceDeletionActionTest {
 
     @Test
     void testExecuteShouldInvokeDeleteConnectedExperiences() {
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
                 eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
-                .thenReturn(new ImmutablePair<>(PollingResult.SUCCESS, null));
+                .thenReturn(extendedPollingResult);
         underTest.execute(new Environment(), NO_FORCE_DELETE);
 
         verify(mockExperienceConnectorService, times(ONCE)).deleteConnectedExperiences(any());
@@ -72,14 +74,16 @@ class EnvironmentExperienceDeletionActionTest {
 
     @Test
     void testExecuteWhenPollingResultWasNotSuccessfulButNoExceptionHasGivenInThePollingResultPairThenExperienceOperationFailedExceptionShouldCome() {
-        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .failure()
+                .build();
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
                 eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
-                .thenReturn(pollingResult);
+                .thenReturn(extendedPollingResult);
 
         ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
                 () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
@@ -94,15 +98,18 @@ class EnvironmentExperienceDeletionActionTest {
     void testExecuteWhenPollingResultWasNotSuccessfulAndExceptionHasGivenInThePollingResultPairThenExperienceOperationFailedExceptionShouldCome() {
         String resolvedMessage = "Because of reasons...";
         String expectedExceptionMessage = FAILURE_BASIC_MSG + " " + resolvedMessage;
-        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, new Exception());
-        when(mockExperiencePollingFailureResolver.getMessageForFailure(pollingResult)).thenReturn(resolvedMessage);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .failure()
+                .withException(new Exception())
+                .build();
+        when(mockExperiencePollingFailureResolver.getMessageForFailure(extendedPollingResult)).thenReturn(resolvedMessage);
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
                 eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
-                .thenReturn(pollingResult);
+                .thenReturn(extendedPollingResult);
 
         ExperienceOperationFailedException expectedException = assertThrows(ExperienceOperationFailedException.class,
                 () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
@@ -110,19 +117,21 @@ class EnvironmentExperienceDeletionActionTest {
         assertNotNull(expectedException);
         assertEquals(expectedExceptionMessage, expectedException.getMessage());
 
-        verify(mockExperiencePollingFailureResolver, times(ONCE)).getMessageForFailure(pollingResult);
+        verify(mockExperiencePollingFailureResolver, times(ONCE)).getMessageForFailure(extendedPollingResult);
     }
 
     @Test
     void testExecuteWhenPollingResultWasGotBackWithExitThenReCheckShouldHappen() {
-        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.EXIT, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .exit()
+                .build();
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
                 eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
-                .thenReturn(pollingResult);
+                .thenReturn(extendedPollingResult);
 
         when(mockExperienceConnectorService.getConnectedExperienceCount(any(EnvironmentExperienceDto.class))).thenReturn(0);
 
@@ -133,14 +142,16 @@ class EnvironmentExperienceDeletionActionTest {
 
     @Test
     void testExecuteWhenPollingResultWasGotBackWithExitAndTheConnectedExperienceCountIsMoreThanZeroThenReCheckShouldHappenAndFailureShouldHappen() {
-        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.EXIT, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .exit()
+                .build();
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
                 eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
-                .thenReturn(pollingResult);
+                .thenReturn(extendedPollingResult);
 
         when(mockExperienceConnectorService.getConnectedExperienceCount(any(EnvironmentExperienceDto.class))).thenReturn(1);
 
@@ -151,14 +162,16 @@ class EnvironmentExperienceDeletionActionTest {
 
     @Test
     void testExecuteWhenPollingResultWasGotBackWithOtherThanExitThenReCheckShouldNotHappen() {
-        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .failure()
+                .build();
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
                 eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
-                .thenReturn(pollingResult);
+                .thenReturn(extendedPollingResult);
 
         assertThrows(ExperienceOperationFailedException.class, () -> underTest.execute(new Environment(), NO_FORCE_DELETE));
 
@@ -167,14 +180,16 @@ class EnvironmentExperienceDeletionActionTest {
 
     @Test
     void testForceDeleteWitPollingErrorShouldNotThrow() {
-        ImmutablePair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .failure()
+                .build();
         when(mockExperiencePollingService.pollWithTimeout(
                 any(ExperienceDeletionRetrievalTask.class),
                 any(ExperiencePollerObject.class),
                 eq(Long.valueOf(EXPERIENCE_RETRYING_INTERVAL_IN_MILLISECONDS)),
                 eq(EXPERIENCE_RETRYING_COUNT),
                 eq(1)))
-                .thenReturn(pollingResult);
+                .thenReturn(extendedPollingResult);
 
         underTest.execute(new Environment(), FORCE_DELETE);
 

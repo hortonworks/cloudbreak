@@ -13,8 +13,6 @@ import static org.mockito.Mockito.when;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -23,7 +21,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.environment.environment.domain.Environment;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
@@ -132,7 +130,9 @@ class FreeIpaDeletionHandlerTest {
                 .withForceDelete(true)
                 .withId(CHILD_ENVIRONMENT_ID)
                 .build();
-        Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.SUCCESS, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .success()
+                .build();
 
         when(environmentService.findEnvironmentById(CHILD_ENVIRONMENT_ID)).thenReturn(of(anEnvironmentWithoutParent(Boolean.TRUE)));
         when(freeIpaService.describe(ENVIRONMENT_CRN)).thenReturn(of(new DescribeFreeIpaResponse()));
@@ -140,7 +140,7 @@ class FreeIpaDeletionHandlerTest {
                 any(),
                 Mockito.eq(FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_INTERVAL),
                 Mockito.eq(FreeIpaDeletionRetrievalTask.FREEIPA_RETRYING_COUNT),
-                Mockito.eq(1))).thenReturn(pollingResult);
+                Mockito.eq(1))).thenReturn(extendedPollingResult);
 
         victim.accept(new Event<>(environmentDeletionDto));
 

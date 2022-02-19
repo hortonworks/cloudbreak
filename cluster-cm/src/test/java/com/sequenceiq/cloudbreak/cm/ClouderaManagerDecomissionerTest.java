@@ -52,7 +52,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.message.FlowMessageService;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
 @ExtendWith(MockitoExtension.class)
 class ClouderaManagerDecomissionerTest {
@@ -93,7 +93,7 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testDecommissionForLostNodesIfFirstDecommissionSucceeded() throws ApiException {
         mockListClusterHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.SUCCESS));
+        mockDecommission(Pair.of(BigDecimal.ONE, new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build()));
         mockAbortCommand(BigDecimal.ONE);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
@@ -106,8 +106,8 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testDecommissionForLostNodesIfSecondDecommissionSucceeded() throws ApiException {
         mockListClusterHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.TIMEOUT),
-                Pair.of(BigDecimal.TEN, PollingResult.SUCCESS));
+        mockDecommission(Pair.of(BigDecimal.ONE, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()),
+                Pair.of(BigDecimal.TEN, new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build()));
         mockAbortCommand(BigDecimal.ONE);
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
 
@@ -120,8 +120,8 @@ class ClouderaManagerDecomissionerTest {
     @Test
     public void testDecommissionForLostNodesIfBothDecommissionFails() throws ApiException {
         mockListClusterHosts();
-        mockDecommission(Pair.of(BigDecimal.ONE, PollingResult.TIMEOUT),
-                Pair.of(BigDecimal.TEN, PollingResult.TIMEOUT));
+        mockDecommission(Pair.of(BigDecimal.ONE, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()),
+                Pair.of(BigDecimal.TEN, new ExtendedPollingResult.ExtendedPollingResultBuilder().timeout().build()));
         mockAbortCommand(BigDecimal.ONE, BigDecimal.TEN);
         doNothing().when(flowMessageService).fireInstanceGroupEventAndLog(any(), any(), any(), any(), any());
         InstanceMetaData deletedInstanceMetadata = createDeletedInstanceMetadata();
@@ -207,13 +207,13 @@ class ClouderaManagerDecomissionerTest {
         return hostGroup;
     }
 
-    private void mockDecommission(Pair<BigDecimal, PollingResult> resultPair, Pair<BigDecimal, PollingResult>... resultPairs)
+    private void mockDecommission(Pair<BigDecimal, ExtendedPollingResult> resultPair, Pair<BigDecimal, ExtendedPollingResult>... resultPairs)
             throws ApiException {
         when(clouderaManagerApiFactory.getClouderaManagerResourceApi(eq(client))).thenReturn(clouderaManagerResourceApi);
         when(clouderaManagerResourceApi.hostsDecommissionCommand(any())).thenReturn(getApiCommand(resultPair.getLeft()),
                 Arrays.stream(resultPairs).map(resultPairItem -> getApiCommand(resultPairItem.getLeft())).toArray(ApiCommand[]::new));
         when(pollingServiceProvider.startPollingCmHostDecommissioning(any(), eq(client), any(), anyBoolean(), anyInt())).thenReturn(resultPair.getRight(),
-                Arrays.stream(resultPairs).map(resultPairItem -> resultPairItem.getRight()).toArray(PollingResult[]::new));
+                Arrays.stream(resultPairs).map(resultPairItem -> resultPairItem.getRight()).toArray(ExtendedPollingResult[]::new));
     }
 
     private void mockAbortCommand(BigDecimal commandId, BigDecimal... commandIds) throws ApiException {

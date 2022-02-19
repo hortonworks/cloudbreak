@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -35,7 +36,7 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cm.model.ParcelStatus;
 import com.sequenceiq.cloudbreak.cm.polling.ClouderaManagerPollingServiceProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 
 @ExtendWith(MockitoExtension.class)
 public class ClouderaManagerParcelDecommissionServiceTest {
@@ -110,6 +111,9 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
+        when(clouderaManagerPollingServiceProvider
+                .startPollingCmParcelStatus(eq(stack), eq(apiClient), any(), any()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         // WHEN
         ParcelOperationStatus operationStatus = underTest.undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedComponents,
                 productsFromImage);
@@ -134,6 +138,9 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         when(parcelResourceApi.startRemovalOfDistributionCommand(STACK_NAME, "product3", "version3")).thenThrow(new ApiException());
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
+        when(clouderaManagerPollingServiceProvider
+                .startPollingCmParcelStatus(eq(stack), eq(apiClient), any(), any()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         // WHEN
         ParcelOperationStatus operationStatus = underTest.undistributeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedComponents,
                 productsFromImage);
@@ -157,6 +164,9 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         when(parcelsResourceApi.readParcels(STACK_NAME, "summary")).thenReturn(parcelList);
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
+        when(clouderaManagerPollingServiceProvider
+                .startPollingCmParcelDelete(eq(stack), eq(apiClient), any()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         // WHEN
         ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedComponents,
                 productsFromImage);
@@ -181,6 +191,9 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         Stack stack = mock(Stack.class);
         when(stack.getName()).thenReturn(STACK_NAME);
         when(parcelResourceApi.removeDownloadCommand(STACK_NAME, "product3", "version3")).thenThrow(new ApiException());
+        when(clouderaManagerPollingServiceProvider
+                .startPollingCmParcelDelete(eq(stack), eq(apiClient), any()))
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
         // WHEN
         ParcelOperationStatus operationStatus = underTest.removeUnusedParcels(apiClient, parcelsResourceApi, parcelResourceApi, stack, usedComponents,
                 productsFromImage);
@@ -208,7 +221,7 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDownloaded = ArgumentCaptor.forClass(Multimap.class);
         when(clouderaManagerPollingServiceProvider
                 .startPollingCmParcelStatus(eq(stack), eq(apiClient), parcelVersionsCaptorForDownloaded.capture(), eq(ParcelStatus.DOWNLOADED)))
-                .thenReturn(PollingResult.SUCCESS);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         doReturn(List.of(
                 new ApiParcel().product("ignored").version("current"),
@@ -219,7 +232,7 @@ public class ClouderaManagerParcelDecommissionServiceTest {
         ArgumentCaptor<Multimap<String, String>> parcelVersionsCaptorForDelete = ArgumentCaptor.forClass(Multimap.class);
         when(clouderaManagerPollingServiceProvider
                 .startPollingCmParcelDelete(eq(stack), eq(apiClient), parcelVersionsCaptorForDelete.capture()))
-                .thenReturn(PollingResult.SUCCESS);
+                .thenReturn(new ExtendedPollingResult.ExtendedPollingResultBuilder().success().build());
 
         underTest.removeUnusedParcelVersions(apiClient, parcelsResourceApi, parcelResourceApi, stack, currentProductWithVersionToKeep);
 

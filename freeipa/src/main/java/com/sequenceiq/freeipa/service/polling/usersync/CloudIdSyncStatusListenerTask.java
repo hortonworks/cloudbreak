@@ -1,14 +1,15 @@
 package com.sequenceiq.freeipa.service.polling.usersync;
 
-import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
-import com.sequenceiq.cloudbreak.polling.StatusCheckerTask;
-import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
-import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
+import javax.inject.Inject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.inject.Inject;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
+import com.sequenceiq.cloudbreak.polling.StatusCheckerTask;
+import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.model.RangerCloudIdentitySyncStatus;
 
 @Component
 public class CloudIdSyncStatusListenerTask implements StatusCheckerTask<CloudIdSyncPollerObject> {

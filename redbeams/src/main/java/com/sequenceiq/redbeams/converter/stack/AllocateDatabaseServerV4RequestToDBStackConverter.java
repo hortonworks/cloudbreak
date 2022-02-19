@@ -160,7 +160,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
 
         Instant now = clock.getCurrentInstant();
         dbStack.setDBStackStatus(new DBStackStatus(dbStack, DetailedDBStackStatus.PROVISION_REQUESTED, now.toEpochMilli()));
-        dbStack.setResourceCrn(crnService.createCrn(dbStack));
+        dbStack.setResourceCrn(crnService.createCrn(dbStack).toString());
         dbStack.setTags(getTags(dbStack, source, environment));
         dbStack.setSslConfig(getSslConfig(source, dbStack));
         return dbStack;
@@ -272,7 +272,7 @@ public class AllocateDatabaseServerV4RequestToDBStackConverter {
                 .withEnvironmentCrn(dbStack.getEnvironmentId())
                 .withPlatform(dbStack.getCloudPlatform())
                 .withAccountId(dbStack.getAccountId())
-                .withResourceCrn(dbStack.getResourceCrn().toString())
+                .withResourceCrn(dbStack.getResourceCrn())
                 .withIsInternalTenant(internalTenant)
                 .withUserName(dbStack.getUserName())
                 .withAccountTags(accountTagService.list())

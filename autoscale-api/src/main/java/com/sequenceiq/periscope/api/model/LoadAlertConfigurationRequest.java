@@ -28,19 +28,19 @@ public class LoadAlertConfigurationRequest implements Json {
     private @Valid Integer maxResourceValue;
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_COOL_DOWN_MINS_VALUE)
-    @Min(value = 2)
+    @Min(value = 1)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer coolDownMinutes;
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_UP_COOL_DOWN_MINS_VALUE)
-    @Min(value = 2)
+    @Min(value = 1)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer scaleUpCoolDownMinutes;
 
     @ApiModelProperty(LoadAlertJsonProperties.LOAD_ALERT_CONFIGURATION_SCALE_DOWN_COOL_DOWN_MINS_VALUE)
-    @Min(value = 2)
+    @Min(value = 1)
     @Max(value = 180)
     @Digits(fraction = 0, integer = 3)
     private @Valid Integer scaleDownCoolDownMinutes;

@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_S
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_CLUSTER_SERVICES_STARTING;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATED_REMOTE_DATA_CONTEXT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CM_UPDATING_REMOTE_DATA_CONTEXT;
-import static com.sequenceiq.cloudbreak.polling.PollingResult.isExited;
 
 import java.math.BigDecimal;
 import java.util.Collection;
@@ -81,6 +80,7 @@ import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.event.ResourceEvent;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
@@ -459,12 +459,12 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Refreshing parcel repos");
         ClouderaManagerResourceApi clouderaManagerResourceApi = clouderaManagerApiFactory.getClouderaManagerResourceApi(apiClient);
         ApiCommand refreshParcelRepos = clouderaManagerResourceApi.refreshParcelRepos();
-        PollingResult activateParcelsPollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient,
+        ExtendedPollingResult activateParcelsPollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelRepositoryRefresh(stack, apiClient,
                 refreshParcelRepos.getId());
-        handlePollingResult(activateParcelsPollingResult, "Cluster was terminated while waiting for parcel repository refresh",
+        handlePollingResult(activateParcelsPollingResult.getPollingResult(), "Cluster was terminated while waiting for parcel repository refresh",
                 "Timeout while Cloudera Manager was refreshing parcel repositories.");
         List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId());
-        PollingResult downloadPollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient,
+        ExtendedPollingResult downloadPollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient,
                 refreshParcelRepos.getId(), products);
         handlePollingResult(downloadPollingResult, "Cluster was terminated while waiting for parcel download",
                 "Timeout while Cloudera Manager was downloading parcels.");
@@ -564,8 +564,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
             restartCommand = clustersResourceApi.restartCommand(stack.getName(), restartClusterArgs);
         }
         if (restartCommand != null) {
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
-            handlePollingResult(pollingResult, "Cluster was terminated while restarting services.", "Timeout happened while restarting services.");
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(stack, apiClient, restartCommand.getId());
+            handlePollingResult(pollingResult, "Cluster was terminated while restarting services.",
+                    "Timeout happened while restarting services.");
         }
     }
 
@@ -586,15 +587,15 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void pollRestart(ApiCommand restartCommand) throws CloudbreakException {
-        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(
+        ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmServicesRestart(
                 stack, apiClient, restartCommand.getId());
-        handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for service restart",
+        handlePollingResult(hostTemplatePollingResult.getPollingResult(), "Cluster was terminated while waiting for service restart",
                 "Timeout while Cloudera Manager was restarting services.");
     }
 
     @VisibleForTesting
     void pollDeployConfig(BigDecimal commandId) throws CloudbreakException {
-        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(
+        ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmClientConfigDeployment(
                 stack, apiClient, commandId);
         handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for config deploy",
                 "Timeout while Cloudera Manager was config deploying services.");
@@ -602,7 +603,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     @VisibleForTesting
     void pollRefresh(ApiCommand restartCommand) throws CloudbreakException {
-        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(
+        ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmConfigurationRefresh(
                 stack, apiClient, restartCommand.getId());
         handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for service refresh",
                 "Timeout while Cloudera Manager was refreshing services.");
@@ -612,7 +613,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Applying host template on upscaled hosts. Host group: [{}]", hostGroupName);
         HostTemplatesResourceApi templatesResourceApi = clouderaManagerApiFactory.getHostTemplatesResourceApi(apiClient);
         ApiCommand applyHostTemplateCommand = templatesResourceApi.applyHostTemplate(stack.getName(), hostGroupName, START_ROLES_ON_UPSCALED_NODES, body);
-        PollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
+        ExtendedPollingResult hostTemplatePollingResult = clouderaManagerPollingServiceProvider.startPollingCmApplyHostTemplate(
                 stack, apiClient, applyHostTemplateCommand.getId());
         handlePollingResult(hostTemplatePollingResult, "Cluster was terminated while waiting for host template to apply",
                 "Timeout while Cloudera Manager was applying host template.");
@@ -623,8 +624,9 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         LOGGER.debug("Deploying client configurations on upscaled hosts.");
         BigDecimal deployCommandId = deployClientConfig(clustersResourceApi, stack);
         List<ClouderaManagerProduct> products = clusterComponentConfigProvider.getClouderaManagerProductDetails(stack.getCluster().getId());
-        PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, deployCommandId, products);
-        handlePollingResult(pollingResult, "Cluster was terminated while waiting for parcels activation", "Timeout while Cloudera Manager activate parcels.");
+        ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmParcelActivation(stack, apiClient, deployCommandId, products);
+        handlePollingResult(pollingResult, "Cluster was terminated while waiting for parcels activation",
+                "Timeout while Cloudera Manager activate parcels.");
         LOGGER.debug("Parcels are activated on upscaled hosts.");
     }
 
@@ -717,8 +719,8 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
                             && !ApiServiceState.STOPPING.equals(service.getServiceState()));
             if (anyServiceNotStopped) {
                 ApiCommand apiCommand = clustersResourceApi.stopCommand(cluster.getName());
-                PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, apiClient, apiCommand.getId());
-                handlePollingResult(pollingResult, "Cluster was terminated while waiting for Hadoop services to stop",
+                ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmShutdown(stack, apiClient, apiCommand.getId());
+                handlePollingResult(pollingResult.getPollingResult(), "Cluster was terminated while waiting for Hadoop services to stop",
                         "Timeout while stopping Cloudera Manager services.");
             }
             eventService
@@ -822,7 +824,7 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
         ApiCommand apiCommand = null;
         if (anyServiceNotStarted) {
             apiCommand = apiInstance.startCommand(clusterName);
-            PollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, apiClient, apiCommand.getId());
+            ExtendedPollingResult pollingResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, apiClient, apiCommand.getId());
             handlePollingResult(pollingResult, "Cluster was terminated while waiting for Cloudera Runtime services to start",
                     "Timeout while stopping Cloudera Manager services.");
         }
@@ -833,14 +835,14 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
 
     private void startAgents() {
         LOGGER.debug("Starting Cloudera Manager agents on the hosts.");
-        PollingResult hostsJoinedResult = clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, apiClient);
-        if (isExited(hostsJoinedResult)) {
+        ExtendedPollingResult hostsJoinedResult = clouderaManagerPollingServiceProvider.startPollingCmHostStatus(stack, apiClient);
+        if (hostsJoinedResult.isExited()) {
             throw new CancellationException("Cluster was terminated while starting Cloudera Manager agents.");
         }
     }
 
     private void startClouderaManager() throws CloudbreakException {
-        PollingResult healthCheckResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, apiClient);
+        ExtendedPollingResult healthCheckResult = clouderaManagerPollingServiceProvider.startPollingCmStartup(stack, apiClient);
         handlePollingResult(healthCheckResult, "Cluster was terminated while waiting for Cloudera Manager to start.",
                 "Cloudera Manager server was not restarted properly.");
     }
@@ -860,6 +862,10 @@ public class ClouderaManagerModificationService implements ClusterModificationSe
     }
 
     private void handlePollingResult(PollingResult pollingResult, String cancellationMessage, String timeoutMessage) throws CloudbreakException {
+        pollingResultErrorHandler.handlePollingResult(pollingResult, cancellationMessage, timeoutMessage);
+    }
+
+    private void handlePollingResult(ExtendedPollingResult pollingResult, String cancellationMessage, String timeoutMessage) throws CloudbreakException {
         pollingResultErrorHandler.handlePollingResult(pollingResult, cancellationMessage, timeoutMessage);
     }
 

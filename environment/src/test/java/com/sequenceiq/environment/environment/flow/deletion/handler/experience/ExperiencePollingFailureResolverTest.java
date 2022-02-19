@@ -3,13 +3,12 @@ package com.sequenceiq.environment.environment.flow.deletion.handler.experience;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 
 class ExperiencePollingFailureResolverTest {
@@ -25,9 +24,11 @@ class ExperiencePollingFailureResolverTest {
 
     @Test
     void testGetMessageForFailureWhenNoExceptionProvidedInPairAndPollingResultIsTimeoutThenTheExpectedMessageShouldCome() {
-        Pair<PollingResult, Exception> pollingResultPair = new ImmutablePair<>(PollingResult.TIMEOUT, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .timeout()
+                .build();
 
-        String result = underTest.getMessageForFailure(pollingResultPair);
+        String result = underTest.getMessageForFailure(extendedPollingResult);
 
         assertNotNull(result);
         assertEquals("Timed out happened in the Experience deletion.", result);
@@ -40,9 +41,11 @@ class ExperiencePollingFailureResolverTest {
             mode = EnumSource.Mode.EXCLUDE
     )
     void testGetMessageForFailureWhenNoExceptionProvidedInPairAndPollingResultIsNotTimeoutThenTheEmptyMessageShouldCome(PollingResult pollingResult) {
-        Pair<PollingResult, Exception> pollingResultPair = new ImmutablePair<>(pollingResult, null);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .withPollingResult(pollingResult)
+                .build();
 
-        String result = underTest.getMessageForFailure(pollingResultPair);
+        String result = underTest.getMessageForFailure(extendedPollingResult);
 
         assertNotNull(result);
         assertEquals("Other polling result: " + pollingResult, result);
@@ -51,9 +54,12 @@ class ExperiencePollingFailureResolverTest {
     @Test
     void testGetMessageForFailureWhenExceptionProvidedInPairAndPollingResultIsTimeoutThenTheMessageShouldComeFromTheException() {
         Exception exception = new Exception(EXCEPTION_MSG);
-        Pair<PollingResult, Exception> pollingResultPair = new ImmutablePair<>(PollingResult.TIMEOUT, exception);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .timeout()
+                .withException(exception)
+                .build();
 
-        String result = underTest.getMessageForFailure(pollingResultPair);
+        String result = underTest.getMessageForFailure(extendedPollingResult);
 
         assertNotNull(result);
         assertEquals(exception.getMessage(), result);
@@ -67,9 +73,12 @@ class ExperiencePollingFailureResolverTest {
     )
     void testGetMessageForFailureWhenExceptionProvidedInPairAndPollingResultIsNotTimeoutThenTheMessageShouldComeFromTheException(PollingResult pollingResult) {
         Exception exception = new Exception(EXCEPTION_MSG);
-        Pair<PollingResult, Exception> pollingResultPair = new ImmutablePair<>(pollingResult, exception);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .withPollingResult(pollingResult)
+                .withException(exception)
+                .build();
 
-        String result = underTest.getMessageForFailure(pollingResultPair);
+        String result = underTest.getMessageForFailure(extendedPollingResult);
 
         assertNotNull(result);
         assertEquals(exception.getMessage(), result);

@@ -1,7 +1,6 @@
 package com.sequenceiq.environment.environment.flow.creation.handler.freeipa;
 
 import static com.sequenceiq.cloudbreak.cloud.model.Platform.platform;
-import static com.sequenceiq.cloudbreak.polling.PollingResult.SUCCESS;
 import static com.sequenceiq.cloudbreak.util.SecurityGroupSeparator.getSecurityGroupIds;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationHandlerSelectors.CREATE_FREEIPA_EVENT;
 import static com.sequenceiq.environment.environment.flow.creation.event.EnvCreationStateSelectors.FINISH_ENV_CREATION_EVENT;
@@ -19,7 +18,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -31,7 +29,7 @@ import com.sequenceiq.cloudbreak.cloud.aws.common.AwsConstants;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.Platform;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.util.CidrUtil;
 import com.sequenceiq.common.api.backup.request.BackupRequest;
@@ -398,20 +396,20 @@ public class FreeIpaCreationHandler extends EventSenderAwareHandler<EnvironmentD
     }
 
     private void awaitFreeIpaCreation(Event<EnvironmentDto> environmentDtoEvent, EnvironmentDto environment) {
-        Pair<PollingResult, Exception> pollWithTimeout = freeIpaPollingService.pollWithTimeout(
+        ExtendedPollingResult pollWithTimeout = freeIpaPollingService.pollWithTimeout(
                 new FreeIpaCreationRetrievalTask(freeIpaService),
                 new FreeIpaPollerObject(environment.getId(), environment.getResourceCrn()),
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_INTERVAL,
                 FreeIpaCreationRetrievalTask.FREEIPA_RETRYING_COUNT,
                 FreeIpaCreationRetrievalTask.FREEIPA_FAILURE_COUNT);
-        if (SUCCESS == pollWithTimeout.getKey()) {
+        if (pollWithTimeout.isSuccess()) {
             eventSender().sendEvent(getNextStepObject(environment), environmentDtoEvent.getHeaders());
         } else {
-            LOGGER.info("FreeIPA creation polling has stopped due to the unsuccessful state/result: {}", pollWithTimeout.getKey());
-            Optional.ofNullable(pollWithTimeout.getValue()).ifPresentOrElse(e -> {
+            LOGGER.info("FreeIPA creation polling has stopped due to the unsuccessful state/result: {}", pollWithTimeout.getPollingResult());
+            Optional.ofNullable(pollWithTimeout.getException()).ifPresentOrElse(e -> {
                 throw new FreeIpaOperationFailedException(e.getMessage());
             }, () -> {
-                throw new FreeIpaOperationFailedException("Polling result was: " + pollWithTimeout.getKey());
+                throw new FreeIpaOperationFailedException("Polling result was: " + pollWithTimeout.getPollingResult());
             });
         }
     }

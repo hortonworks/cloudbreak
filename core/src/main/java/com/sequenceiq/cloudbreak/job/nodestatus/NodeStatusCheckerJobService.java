@@ -60,9 +60,12 @@ public class NodeStatusCheckerJobService {
 
     private void schedule(JobDetail jobDetail, Trigger trigger, String localId) {
         try {
-            if (scheduler.getJobDetail(JobKey.jobKey(localId, JOB_GROUP)) != null) {
+            JobKey jobKey = JobKey.jobKey(localId, JOB_GROUP);
+            if (scheduler.getJobDetail(jobKey) != null) {
+                LOGGER.info("Unscheduling node status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
                 unschedule(localId);
             }
+            LOGGER.info("Scheduling node status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during scheduling quartz job: %s", localId), e);
@@ -81,7 +84,9 @@ public class NodeStatusCheckerJobService {
 
     public void unschedule(String id) {
         try {
-            scheduler.deleteJob(JobKey.jobKey(id, JOB_GROUP));
+            JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
+            LOGGER.info("Unscheduling node status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
+            scheduler.deleteJob(jobKey);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
         }

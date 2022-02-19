@@ -9,7 +9,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 
@@ -18,7 +17,7 @@ public interface DBStackRepository extends JpaRepository<DBStack, Long> {
 
     Optional<DBStack> findByNameAndEnvironmentId(String name, String environmentId);
 
-    Optional<DBStack> findByResourceCrn(Crn crn);
+    Optional<DBStack> findByResourceCrn(String crn);
 
     @Query("SELECT d.id FROM DBStack d LEFT JOIN d.dbStackStatus dss WHERE dss.status IN :statuses")
     Set<Long> findAllByStatusIn(@Param("statuses") Set<Status> statuses);

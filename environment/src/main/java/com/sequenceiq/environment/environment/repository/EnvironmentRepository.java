@@ -49,7 +49,17 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
 
     Optional<Environment> findByNameAndAccountIdAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);
 
+    @Query("SELECT e.resourceCrn FROM Environment e " +
+            "WHERE e.accountId = :accountId " +
+            "AND e.name IN (:names) " +
+            "AND e.archived = false")
+    List<String> findAllCrnByNameAndAccountIdAndArchivedIsFalse(@Param("names") Collection<String> names, @Param("accountId") String accountId);
+
+    Optional<Long> findIdByNameAndAccountIdAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);
+
     Optional<Environment> findByResourceCrnAndAccountIdAndArchivedIsFalse(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
+
+    Optional<Long> findIdByResourceCrnAndAccountIdAndArchivedIsFalse(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
     @Query("SELECT COUNT(e)>0 FROM Environment e WHERE e.name = :name AND e.accountId = :accountId AND e.archived = false")
     boolean existsWithNameAndAccountAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);

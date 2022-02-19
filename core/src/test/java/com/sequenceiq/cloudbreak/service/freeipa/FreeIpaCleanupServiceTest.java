@@ -22,8 +22,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.apache.commons.lang3.tuple.ImmutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -37,7 +35,7 @@ import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.KerberosConfig;
 import com.sequenceiq.cloudbreak.kerberos.KerberosConfigService;
-import com.sequenceiq.cloudbreak.polling.PollingResult;
+import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.polling.PollingService;
 import com.sequenceiq.cloudbreak.service.environment.EnvironmentConfigProvider;
 import com.sequenceiq.cloudbreak.template.kerberos.KerberosDetailService;
@@ -64,7 +62,9 @@ public class FreeIpaCleanupServiceTest {
 
     private static final String ROLE_NAME_PREFIX = "hadoopadminrole-";
 
-    private Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.SUCCESS, null);
+    private ExtendedPollingResult pollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+            .success()
+            .build();
 
     @Mock
     private FreeIpaV1Endpoint freeIpaV1Endpoint;
@@ -160,8 +160,11 @@ public class FreeIpaCleanupServiceTest {
         OperationStatus operationStatus = new OperationStatus("opId", OperationType.CLEANUP, null, null, null, null, 0L, null);
         ArgumentCaptor<CleanupRequest> captor = ArgumentCaptor.forClass(CleanupRequest.class);
         when(freeIpaV1Endpoint.internalCleanup(captor.capture(), anyString())).thenReturn(operationStatus);
-        Pair<PollingResult, Exception> pollingResult = new ImmutablePair<>(PollingResult.FAILURE, new Exception("message"));
-        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(pollingResult);
+        ExtendedPollingResult extendedPollingResult = new ExtendedPollingResult.ExtendedPollingResultBuilder()
+                .failure()
+                .withException(new Exception("message"))
+                .build();
+        when(freeIpaOperationChecker.pollWithAbsoluteTimeout(any(), any(), anyLong(), anyLong(), anyInt())).thenReturn(extendedPollingResult);
 
         assertThrows(FreeIpaOperationFailedException.class, () -> victim.cleanupButIp(stack));
 

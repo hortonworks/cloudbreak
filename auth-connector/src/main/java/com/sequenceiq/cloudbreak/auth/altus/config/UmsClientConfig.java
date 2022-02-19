@@ -31,6 +31,9 @@ public class UmsClientConfig {
     @Value("${altus.ums.caller:cloudbreak}")
     private String callingServiceName;
 
+    @Value("${altus.ums.client.grpc.timeout.sec:5}")
+    private long grpcTimeoutSec;
+
     @PostConstruct
     public void init() {
         checkNotNull(callingServiceName, "callingServiceName must not be null.");
@@ -59,6 +62,10 @@ public class UmsClientConfig {
 
     public int getListServicePrincipalCloudIdentitiesPageSize() {
         return listServicePrincipalCloudIdentitiesPageSize;
+    }
+
+    public long getGrpcTimeoutSec() {
+        return grpcTimeoutSec;
     }
 
     public String getCallingServiceName() {

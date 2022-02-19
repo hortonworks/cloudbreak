@@ -43,7 +43,7 @@ class ExistingStackPatchServiceTest {
     private ThrowExceptionExistingStackPatchService alsoUnderTest;
 
     @Captor
-    private ArgumentCaptor<StackPatch> stackFixArgumentCaptor;
+    private ArgumentCaptor<StackPatch> stackPatchArgumentCaptor;
 
     private Stack stack;
 
@@ -89,11 +89,11 @@ class ExistingStackPatchServiceTest {
     }
 
     @Test
-    void shouldSaveStackFixWhenApplyIsSuccessful() throws ExistingStackPatchApplyException {
+    void shouldSaveStackPatchWhenApplyIsSuccessful() throws ExistingStackPatchApplyException {
         underTest.apply(stack);
 
-        verify(stackPatchRepository).save(stackFixArgumentCaptor.capture());
-        StackPatch stackPatch = stackFixArgumentCaptor.getValue();
+        verify(stackPatchRepository).save(stackPatchArgumentCaptor.capture());
+        StackPatch stackPatch = stackPatchArgumentCaptor.getValue();
         assertThat(stackPatch)
                 .returns(stack, StackPatch::getStack)
                 .returns(StackPatchType.UNKNOWN, StackPatch::getType);
@@ -110,7 +110,7 @@ class ExistingStackPatchServiceTest {
     static class NoopExistingStackPatchService extends ExistingStackPatchService {
 
         @Override
-        public StackPatchType getStackFixType() {
+        public StackPatchType getStackPatchType() {
             return StackPatchType.UNKNOWN;
         }
 
@@ -128,7 +128,7 @@ class ExistingStackPatchServiceTest {
     static class ThrowExceptionExistingStackPatchService extends ExistingStackPatchService {
 
         @Override
-        public StackPatchType getStackFixType() {
+        public StackPatchType getStackPatchType() {
             return StackPatchType.UNKNOWN;
         }
 

@@ -420,6 +420,14 @@ public enum ResourceEvent {
     CLUSTER_EXTERNAL_DATABASE_STOP_FAILED("cluster.externaldatabase.stop.failed"),
     CLUSTER_EXTERNAL_DATABASE_STOP_FINISHED("cluster.externaldatabase.stop.finished"),
 
+    CLUSTER_CCM_UPGRADE_PREPARATION("cluster.ccm.upgrade.preparation"),
+    CLUSTER_CCM_UPGRADE_REREGISTER("cluster.ccm.upgrade.reregister"),
+    CLUSTER_CCM_UPGRADE_REMOVE_AUTOSSH("cluster.ccm.upgrade.remove.autossh"),
+    CLUSTER_CCM_UPGRADE_UNREGISTER_HOSTS("cluster.ccm.upgrade.unregister.hosts"),
+    CLUSTER_CCM_UPGRADE_PREPARATION_FAILED("cluster.ccm.upgrade.preparation.failed"),
+    CLUSTER_CCM_UPGRADE_FAILED("cluster.ccm.upgrade.failed"),
+    CLUSTER_CCM_UPGRADE_FINISHED("cluster.ccm.upgrade.finished"),
+
     KERBEROS_CONFIG_VALIDATION_FAILED("cluster.kerberosconfig.validation.failed"),
 
     CLOUD_CONFIG_VALIDATION_FAILED("cluster.cloudconfig.validation.failed"),

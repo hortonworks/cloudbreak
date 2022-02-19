@@ -72,7 +72,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
                 Stack stack = stackService.getByIdWithListsInTransaction(request.getResourceId());
                 PollingResult orchestratorRemovalPollingResult =
                         removeHostsFromOrchestrator(stack, new ArrayList<>(hostNames));
-                if (!PollingResult.isSuccess(orchestratorRemovalPollingResult)) {
+                if (!orchestratorRemovalPollingResult.isSuccess()) {
                     LOGGER.warn("Can not remove hosts from orchestrator: {}", hostNames);
                 }
                 // rebootstrap to update the minion's multi-master configuration
