@@ -19,6 +19,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.Response;
 
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -34,9 +35,14 @@ import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedSe
 import com.sequenceiq.cloudbreak.cmtemplate.generator.support.domain.SupportedServices;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 
 @ExtendWith(MockitoExtension.class)
 public class ParcelFilterServiceTest {
+
+    private static final long STACK_ID = 1L;
+
+    private static final String BLUEPRINT_TEXT = "bpText";
 
     @Mock
     private CmTemplateGeneratorService clusterTemplateGeneratorService;
@@ -47,15 +53,14 @@ public class ParcelFilterServiceTest {
     @Mock
     private PaywallCredentialPopulator paywallCredentialPopulator;
 
+    @Mock
+    private ImageReaderService imageReaderService;
+
     @InjectMocks
     private ParcelFilterService underTest;
 
     private static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {
-                { "Trying to download the parcel manifest in case of BASE image, when we can reach the file which is a standard " +
-                        "manifest file and it DOES NOT contains the component then DO NOT assign the parcel.",
-                        "http://parcel1.com/", OK, "NIFI", Optional.of(getManifestJson("otherService1")), 0 },
-
                 { "Trying to download the parcel manifest in case of BASE image, when we can reach the file which is a standard " +
                         "manifest file and it DOES contains the component then assign the parcel. (NIFI usecase)",
                         "http://parcel1.com/", OK, "NIFI", Optional.of(getManifestJson("NIFI")), 1 },
@@ -67,10 +72,6 @@ public class ParcelFilterServiceTest {
                 { "Trying to download the parcel manifest in case of BASE image, when we can NOT reach the manifest file " +
                         "then it should assign the parcel, because we can't check that it is required, or not. (authentication required usecase)",
                         "http://parcel1.com/", NOT_FOUND, "NIFI", Optional.empty(), 1 },
-
-                { "Trying to download the parcel manifest in case of PREWARMED image, when we can reach the file which is a standard " +
-                        "manifest file and it DOES NOT contains the component then DO NOT assign the parcel.",
-                        "http://parcel1.com/", OK, "NIFI", Optional.of(getManifestJson("otherService1")), 0 },
 
                 { "Trying to download the parcel manifest in case of PREWARMED image when we can reach the file which is a standard " +
                         "manifest file and it DOES contains the component then assign the parcel. (NIFI usecase)",
@@ -89,14 +90,52 @@ public class ParcelFilterServiceTest {
 
     @ParameterizedTest(name = "{0}")
     @MethodSource("data")
-    void test(String description, String parcelUrl, Response.Status status, String serviceNameInTheBlueprint, Optional<String> manifest,
-            int parcelCount) {
-        when(clusterTemplateGeneratorService.getServicesByBlueprint("bpText"))
-                .thenReturn(getSupportedServices(serviceNameInTheBlueprint));
+    void test(String description, String parcelUrl, Response.Status status, String serviceNameInTheBlueprint, Optional<String> manifest, int parcelCount) {
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(serviceNameInTheBlueprint)));
 
         mockManifestResponse(parcelUrl, status, manifest);
 
-        assertEquals(parcelCount, underTest.filterParcelsByBlueprint(getParcels(parcelUrl), getBlueprint()).size());
+        assertEquals(parcelCount, underTest.filterParcelsByBlueprint(STACK_ID, getParcels(parcelUrl), getBlueprint()).size());
+    }
+
+    @Test
+    void testShouldNotAddParcelWhenManifestDoesNotContainsTheComponentAndNotACustomParcel() {
+        String parcelUrl = "http://parcel1.com/";
+        String parcelName = "NIFI";
+        ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of(parcelName)));
+        when(imageReaderService.getParcelNames(STACK_ID, false)).thenReturn(Set.of(parcelName));
+
+        mockManifestResponse(parcelUrl, OK, Optional.of(getManifestJson("otherService1")));
+
+        assertEquals(0, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());
+    }
+
+    @Test
+    void testShouldAddParcelWhenManifestDoesNotContainsTheComponentAndItIsACustomParcel() {
+        String parcelUrl = "http://parcel1.com/";
+        String parcelName = "CUSTOM";
+        ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(getSupportedServices(Set.of("NIFI")));
+        when(imageReaderService.getParcelNames(STACK_ID, false)).thenReturn(Set.of("NIFI"));
+
+        mockManifestResponse(parcelUrl, OK, Optional.of(getManifestJson(parcelName)));
+
+        assertEquals(1, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());
+    }
+
+    @Test
+    void testShouldReturnAllParcelsWhenTheServiceNamesInTheBlueprintContainsANullValue() {
+        String parcelUrl = "http://parcel1.com/";
+        String parcelName = "CUSTOM";
+        ClouderaManagerProduct parcel = new ClouderaManagerProduct().withParcel(parcelUrl).withName(parcelName);
+        SupportedService supportedService = new SupportedService();
+        supportedService.setComponentNameInParcel(null);
+        SupportedServices supportedServices = new SupportedServices();
+        supportedServices.setServices(Set.of(supportedService));
+        when(clusterTemplateGeneratorService.getServicesByBlueprint(BLUEPRINT_TEXT)).thenReturn(supportedServices);
+
+        assertEquals(1, underTest.filterParcelsByBlueprint(STACK_ID, Set.of(parcel), getBlueprint()).size());
     }
 
     private Blueprint getBlueprint() {
@@ -126,9 +165,9 @@ public class ParcelFilterServiceTest {
         }).collect(Collectors.toSet());
     }
 
-    private SupportedServices getSupportedServices(String... componentNames) {
+    private SupportedServices getSupportedServices(Set<String> componentNames) {
         SupportedServices supportedServices = new SupportedServices();
-        Set<SupportedService> services = Arrays.stream(componentNames).map(s -> {
+        Set<SupportedService> services = componentNames.stream().map(s -> {
             SupportedService supportedService = new SupportedService();
             supportedService.setComponentNameInParcel(s);
             return supportedService;

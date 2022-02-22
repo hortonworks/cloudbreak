@@ -16,7 +16,10 @@ import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerProduct;
 import com.sequenceiq.cloudbreak.cloud.model.ClouderaManagerRepo;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
+import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
+import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
+import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.parcel.ClouderaManagerProductTransformer;
 
 @Service
@@ -31,7 +34,8 @@ public class ImageReaderService {
     private ImageService imageService;
 
     /**
-     * Will extract the parcel info from the supplied images. If the stack is a datalake, then only the CDH parcel is extracted.
+     * Will extract the parcel info from the supplied images. If the stack is a
+     * datalake, then only the CDH parcel is extracted.
      * @param statedImages images to get parcels from
      * @param datalake true if the stack is a datalake
      * @return a set of ClouderaManagerProducts present on the image
@@ -44,6 +48,20 @@ public class ImageReaderService {
                 .collect(Collectors.toSet());
         LOGGER.debug("Found following candidate parcels: {}", foundParcelProducts);
         return foundParcelProducts;
+    }
+
+    public Set<String> getParcelNames(Long stackId, boolean datalake) {
+        try {
+            StatedImage currentImage = imageService.getCurrentImage(stackId);
+            return getParcels(Set.of(currentImage.getImage()), datalake)
+                    .stream()
+                    .map(ClouderaManagerProduct::getName)
+                    .collect(Collectors.toSet());
+        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
+            String msg = "Failed to get the current image for the cluster.";
+            LOGGER.error(msg, e);
+            throw new CloudbreakRuntimeException(msg, e);
+        }
     }
 
     /**
