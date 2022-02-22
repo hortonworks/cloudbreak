@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -26,11 +29,13 @@ import javax.ws.rs.BadRequestException;
 import org.awaitility.core.ConditionFactory;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.util.ReflectionUtils;
@@ -47,9 +52,11 @@ import com.sequenceiq.cloudbreak.logger.MDCBuilder;
 import com.sequenceiq.flow.api.model.FlowCheckResponse;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
+import com.sequenceiq.flow.component.sleep.SleepTriggerCondition;
 import com.sequenceiq.flow.core.Flow2Handler;
 import com.sequenceiq.flow.core.FlowConstants;
 import com.sequenceiq.flow.core.FlowRegister;
+import com.sequenceiq.flow.core.FlowTriggerConditionResult;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChains;
 import com.sequenceiq.flow.core.model.FlowAcceptResult;
@@ -116,6 +123,14 @@ public class FlowComponentTest {
 
     @Inject
     private FlowLogRepository flowLogRepository;
+
+    @MockBean
+    private SleepTriggerCondition sleepTriggerCondition;
+
+    @BeforeEach
+    public void setUp() {
+        when(sleepTriggerCondition.isFlowTriggerable(anyLong())).thenReturn(FlowTriggerConditionResult.OK);
+    }
 
     @AfterAll
     public static void afterAll() throws IOException, InterruptedException {
@@ -255,6 +270,25 @@ public class FlowComponentTest {
 
         assertRunningInFlowChain(acceptResult);
         waitFlowChainToComplete(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
+    }
+
+    @Test
+    public void startFlowChainWhenSecondFlowTriggerConditionFailsItShouldFail() throws InterruptedException {
+        reset(sleepTriggerCondition);
+
+        when(sleepTriggerCondition.isFlowTriggerable(anyLong()))
+                .thenReturn(FlowTriggerConditionResult.OK)
+                .thenReturn(new FlowTriggerConditionResult("Error"));
+
+        long resourceId = RESOURCE_ID_SEC.incrementAndGet();
+        SleepChainTriggerEvent sleepChainTriggerEvent = new SleepChainTriggerEvent(resourceId, Lists.newArrayList(
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL),
+                new SleepConfig(SLEEP_TIME, SleepStartEvent.NEVER_FAIL)
+        ));
+        FlowAcceptResult acceptResult = startSleepFlowChain(sleepChainTriggerEvent);
+
+        assertRunningInFlowChain(acceptResult);
+        waitFlowChainToFail(SLEEP_TIME.multipliedBy(WAIT_FACTOR), acceptResult);
     }
 
     @Test
