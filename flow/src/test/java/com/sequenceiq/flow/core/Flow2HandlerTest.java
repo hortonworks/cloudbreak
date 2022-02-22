@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.common.service.TransactionService;
 import com.sequenceiq.cloudbreak.common.service.TransactionService.TransactionExecutionException;
 import com.sequenceiq.flow.api.model.operation.OperationType;
 import com.sequenceiq.flow.cleanup.InMemoryCleanup;
+import com.sequenceiq.flow.core.FlowState.FlowStateConstants;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
@@ -405,7 +406,7 @@ public class Flow2HandlerTest {
         given(runningFlows.remove(FLOW_ID)).willReturn(flow);
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
+        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
@@ -420,12 +421,31 @@ public class Flow2HandlerTest {
         dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
         dummyEvent.getHeaders().set(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
+        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
         verify(flowChains, never()).removeFlowChain(anyString(), anyBoolean());
         verify(flowChains, times(1)).triggerNextFlow(eq(FLOW_CHAIN_ID), eq(FLOW_TRIGGER_USERCRN), any(Map.class), any(), any());
+    }
+
+    @Test
+    public void testFlowChainFailureOnNotTriggerableFlowCreatesFailedFlow() throws TransactionExecutionException {
+        Map<String, Object> headers = new HashMap<>();
+        headers.put(FlowConstants.FLOW_CHAIN_ID, FLOW_CHAIN_ID);
+        headers.put(FlowConstants.FLOW_TRIGGER_USERCRN, FLOW_TRIGGER_USERCRN);
+        dummyEvent = new Event<>(new Headers(headers), payload);
+        dummyEvent.setKey("KEY");
+        BDDMockito.<FlowConfiguration<?>>given(flowConfigurationMap.get(any())).willReturn(flowConfig);
+        given(flowConfig.getFlowTriggerCondition()).willReturn(flowTriggerCondition);
+        given(flowTriggerCondition.isFlowTriggerable(anyLong())).willReturn(new FlowTriggerConditionResult("Not triggerable."));
+
+        FlowNotTriggerableException exception = assertThrows(FlowNotTriggerableException.class, () -> underTest.accept(dummyEvent));
+
+        assertEquals("Not triggerable.", exception.getMessage());
+        flowLogService.save(any(), eq(FLOW_CHAIN_ID), any(), eq(payload), any(), eq(flowConfig.getClass()), eq(FlowStateConstants.INIT_STATE));
+        flowLogService.close(eq(payload.getResourceId()), any(), eq(true));
+        flowChains.removeFullFlowChain(FLOW_CHAIN_ID, false);
     }
 
     @Test
@@ -435,7 +455,7 @@ public class Flow2HandlerTest {
         dummyEvent.setKey(FlowConstants.FLOW_FINAL);
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
+        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
@@ -451,7 +471,7 @@ public class Flow2HandlerTest {
         dummyEvent.getHeaders().set(FlowConstants.FLOW_CHAIN_ID, "FLOW_CHAIN_ID");
         given(runningFlows.remove(anyString())).willReturn(flow);
         underTest.accept(dummyEvent);
-        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID));
+        verify(flowLogService, times(1)).close(anyLong(), eq(FLOW_ID), eq(false));
         verify(runningFlows, times(1)).remove(eq(FLOW_ID));
         verify(runningFlows, never()).get(eq(FLOW_ID));
         verify(runningFlows, never()).put(any(Flow.class), isNull(String.class));
