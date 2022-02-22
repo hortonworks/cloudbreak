@@ -51,6 +51,10 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
 
     @Query("SELECT s FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId AND s.terminated = null "
             + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
+    Optional<Stack> findNotTerminatedByCrnAndWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
+
+    @Query("SELECT s FROM Stack s WHERE s.resourceCrn= :crn AND s.workspace.id= :workspaceId "
+            + "AND (s.type is not 'TEMPLATE' OR s.type is null)")
     Optional<Stack> findByCrnAndWorkspaceId(@Param("crn") String crn, @Param("workspaceId") Long workspaceId);
 
     @Query("SELECT s FROM Stack s WHERE s.name in :names AND s.workspace.id= :workspaceId AND s.terminated = null "

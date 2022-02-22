@@ -26,6 +26,9 @@ public interface StackViewRepository extends WorkspaceResourceRepository<StackVi
     Set<StackView> findByWorkspaceIdAndNames(@Param("workspaceId") Long workspaceId, @Param("names") List<String> names);
 
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn LIKE :crn")
+    Optional<StackView> findNotTerminatedByWorkspaceIdAndCrn(@Param("workspaceId") Long workspaceId, @Param("crn") String resourceCrn);
+
+    @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.resourceCrn LIKE :crn")
     Optional<StackView> findByWorkspaceIdAndCrn(@Param("workspaceId") Long workspaceId, @Param("crn") String resourceCrn);
 
     @Query("SELECT s FROM StackView s WHERE s.workspace.id= :workspaceId AND s.terminated = null AND s.resourceCrn IN (:crns)")

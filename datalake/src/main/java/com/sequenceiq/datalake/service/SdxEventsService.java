@@ -120,8 +120,7 @@ public class SdxEventsService {
         try {
             // Get and translate the cloudbreak events
             List<CloudbreakEventV4Response> cloudbreakEventV4Responses = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    eventV4Endpoint.getPagedCloudbreakEventListByStack(sdxCluster.getName(), page, size, getAccountId(sdxCluster.getEnvCrn()))
-            );
+                    eventV4Endpoint.getPagedCloudbreakEventListByCrn(sdxCluster.getCrn(), page, size, false));
             return cloudbreakEventV4Responses.stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {
             LOGGER.error("Failed to retrieve paged cloudbreak service events!", exception);
@@ -133,8 +132,7 @@ public class SdxEventsService {
         try {
             // Get and translate the cloudbreak events
             StructuredEventContainer structuredEventContainer = ThreadBasedUserCrnProvider.doAsInternalActor(() ->
-                    eventV4Endpoint.structured(sdxCluster.getName(), getAccountId(sdxCluster.getEnvCrn()))
-            );
+                    eventV4Endpoint.structuredByCrn(sdxCluster.getCrn(), false));
             return structuredEventContainer.getNotification().stream().map(entry -> convert(entry, sdxCluster.getCrn())).collect(toList());
         } catch (Exception exception) {
             LOGGER.error("Failed to retrieve cloudbreak service events!", exception);

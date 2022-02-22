@@ -127,9 +127,12 @@ public class OperationDescriptions {
     }
 
     public static class EventOpDescription {
+        public static final String BULK_GET = "retrieve events for multiple stack";
         public static final String GET_BY_TIMESTAMP = "retrieve events by timestamp (long)";
         public static final String GET_BY_NAME = "retrieve events by name";
+        public static final String GET_BY_CRN = "retrieve events by crn";
         public static final String GET_EVENTS_BY_NAME = "retrieve events by name";
+        public static final String GET_EVENTS_BY_CRN = "retrieve events by crn";
         public static final String GET_EVENTS_ZIP_BY_NAME = "retrieve events in zip by name";
     }
 

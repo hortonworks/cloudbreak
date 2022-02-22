@@ -431,7 +431,7 @@ public class StackOperationService {
     }
 
     public boolean rangerRazEnabled(Long workspaceId, String crn) {
-        Stack stack = stackService.getByCrnInWorkspace(crn, workspaceId);
+        Stack stack = stackService.getNotTerminatedByCrnInWorkspace(crn, workspaceId);
         return clusterService.isRangerRazEnabledOnCluster(stack);
     }
 
