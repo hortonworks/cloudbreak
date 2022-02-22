@@ -16,6 +16,7 @@ import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
+import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.service.ComponentConfigProviderService;
 import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionConfiguration.ServiceRoleGroup;
@@ -51,7 +52,7 @@ public class StackStopRestrictionService {
 
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
             if (ephemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(instanceGroup)) {
-                StopRestrictionReason ephemeralResult = checkEphemeralOnlyInstanceGroupStoppable(instanceGroup, cbVersion, saltCbVersion);
+                StopRestrictionReason ephemeralResult = checkEphemeralOnlyInstanceGroupStoppable(instanceGroup, stack.getCluster(), cbVersion, saltCbVersion);
                 if (ephemeralResult != StopRestrictionReason.NONE) {
                     return ephemeralResult;
                 }
@@ -66,9 +67,10 @@ public class StackStopRestrictionService {
         return StopRestrictionReason.NONE;
     }
 
-    private StopRestrictionReason checkEphemeralOnlyInstanceGroupStoppable(InstanceGroup instanceGroup, String cbVersion, String saltCbVersion) {
+    private StopRestrictionReason checkEphemeralOnlyInstanceGroupStoppable(InstanceGroup instanceGroup, Cluster cluster,
+            String cbVersion, String saltCbVersion) {
         if (!isCbVersionBeforeMinVersion(cbVersion, config.getEphemeralOnlyMinVersion()) || !isSaltComponentCbVersionBeforeStopSupport(saltCbVersion)) {
-            Set<ServiceComponent> serviceComponents = cmTemplateProcessorFactory.get(instanceGroup.getStack().getCluster().getBlueprint().getBlueprintText())
+            Set<ServiceComponent> serviceComponents = cmTemplateProcessorFactory.get(cluster.getBlueprint().getBlueprintText())
                     .getServiceComponentsByHostGroup().get(instanceGroup.getGroupName());
             if (!isEphemeralInstanceGroupStoppable(serviceComponents)) {
                 LOGGER.info("Infrastructure cannot be stopped. Instances in group [{}] have ephemeral storage only " +
