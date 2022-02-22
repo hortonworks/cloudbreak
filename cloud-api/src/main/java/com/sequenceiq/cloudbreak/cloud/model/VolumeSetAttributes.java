@@ -106,6 +106,20 @@ public class VolumeSetAttributes {
         return discoveryFQDN;
     }
 
+    @Override
+    public String toString() {
+        return "VolumeSetAttributes{" +
+                "availabilityZone='" + availabilityZone + '\'' +
+                ", deleteOnTermination=" + deleteOnTermination +
+                ", fstab='" + fstab + '\'' +
+                ", volumes=" + volumes +
+                ", uuids='" + uuids + '\'' +
+                ", volumeSize=" + volumeSize +
+                ", volumeType='" + volumeType + '\'' +
+                ", discoveryFQDN='" + discoveryFQDN + '\'' +
+                '}';
+    }
+
     @JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class Volume {

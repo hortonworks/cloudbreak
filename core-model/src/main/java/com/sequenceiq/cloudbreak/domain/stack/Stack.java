@@ -446,7 +446,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource, Orchestra
             case CloudConstants.GCP:
                 return getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
             case CloudConstants.AZURE:
-                return getResourcesByType(ResourceType.AZURE_VOLUMESET);
+                return ResourceUtil.getLatestResourceByInstanceId(getResourcesByType(ResourceType.AZURE_VOLUMESET));
             default:
                 return List.of();
         }
