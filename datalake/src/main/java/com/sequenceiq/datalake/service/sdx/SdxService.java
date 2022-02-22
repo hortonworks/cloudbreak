@@ -839,8 +839,9 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                 validationBuilder.error("Provisioning Ranger Raz is only valid for Amazon Web Services and Microsoft Azure.");
             }
             if (!isRazSupported(runtime, cloudPlatform)) {
-                String errorMsg = AWS.equals(cloudPlatform) ? "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not " :
-                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not ";
+                String errorMsg = AWS.equals(cloudPlatform) ?
+                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version greater than or equal to 7.2.2 and not " :
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version greater than or equal to 7.2.1 and not ";
                 validationBuilder.error(errorMsg + runtime);
             }
         }
@@ -858,13 +859,13 @@ public class SdxService implements ResourceIdProvider, ResourcePropertyProvider,
                         "Contact Cloudera support to enable CDP_MICRO_DUTY_SDX entitlement for the account.", environment.getCloudPlatform()));
             }
             if (!isShapeVersionSupportedByRuntime(runtime, MICRO_DUTY_REQUIRED_VERSION)) {
-                validationBuilder.error("Provisioning a Micro Duty SDX shape is only valid for CM version >= " + MICRO_DUTY_REQUIRED_VERSION +
-                        " and not " + runtime);
+                validationBuilder.error("Provisioning a Micro Duty SDX shape is only valid for CM version greater than or equal to "
+                        + MICRO_DUTY_REQUIRED_VERSION + " and not " + runtime);
             }
         } else if (SdxClusterShape.MEDIUM_DUTY_HA.equals(shape)) {
             if (!isShapeVersionSupportedByRuntime(runtime, MEDIUM_DUTY_REQUIRED_VERSION)) {
-                validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION +
-                        " and not " + runtime);
+                validationBuilder.error("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
+                        + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + runtime);
             }
         }
         ValidationResult validationResult = validationBuilder.build();
