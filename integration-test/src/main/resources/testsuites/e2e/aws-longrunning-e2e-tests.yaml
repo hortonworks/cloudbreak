@@ -1,6 +1,6 @@
 name: "aws-longrunning-e2e-tests"
 tests:
-  - name: "aws-longrunning-e2e-tests"
+  - name: "aws_longrunning_e2e_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRecoveryTests

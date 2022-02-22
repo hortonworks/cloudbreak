@@ -6,6 +6,7 @@ import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.DELETE_REQUESTED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.FAILED;
 import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.TERMINATED;
+import static com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus.UNHEALTHY;
 
 import java.util.List;
 import java.util.Map;
@@ -21,12 +22,11 @@ import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.Instanc
 import com.sequenceiq.it.cloudbreak.FreeIpaClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
-import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceFailedChecker;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
 public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceFailedChecker.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FreeIpaInstanceWaitObject.class);
 
     private final String environmentCrn;
 
@@ -97,7 +97,7 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailed() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED, UNHEALTHY);
         return getInstanceStatuses().values().stream().anyMatch(failedStatuses::contains);
     }
 
@@ -119,7 +119,7 @@ public class FreeIpaInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED, UNHEALTHY);
         return failedStatuses.contains(desiredStatus);
     }
 

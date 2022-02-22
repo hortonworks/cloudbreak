@@ -1,5 +1,7 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -53,17 +55,18 @@ public class DistroXScaleTest extends AbstractE2ETest {
                 .then((tc, testDto, client) -> {
                     CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     Optional<String> anInstanceToDelete = distroxUtil.getInstanceIds(testDto, client, params.getIrrelevantHostGroup()).stream().findFirst();
-                    if (!anInstanceToDelete.isPresent()) {
+                    if (anInstanceToDelete.isEmpty()) {
                         throw new TestFailException(String.format(
                                 "At least 1 instance needed from group %s to test delete it and test targeted upscale.", params.getIrrelevantHostGroup()));
                     }
                     cloudFunctionality.deleteInstances(testDto.getName(), List.of(anInstanceToDelete.get()));
-                    testDto.setRemovableInstanceId(anInstanceToDelete.get());
+                    testDto.setRemovableInstanceIds(List.of(anInstanceToDelete.get()));
                     return testDto;
                 })
                 .awaitForFlow()
                 // removing deleted instance since downscale still validates if stack is available
-                .when(distroXTestClient.removeInstance())
+                .awaitForRemovableInstancesByState(DELETED_ON_PROVIDER_SIDE)
+                .when(distroXTestClient.removeInstances())
                 .awaitForFlow()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
                 .awaitForFlow();

@@ -16,9 +16,11 @@ import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXInternalGetAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRefreshAction;
-import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstanceAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRemoveInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXRepairAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStartInstancesAction;
+import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXScaleStopInstancesAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXShowBlueprintAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStartAction;
 import com.sequenceiq.it.cloudbreak.action.v1.distrox.DistroXStopAction;
@@ -76,12 +78,20 @@ public class DistroXTestClient {
         return new DistroXScaleAction(hostGroup, count);
     }
 
+    public Action<DistroXTestDto, CloudbreakClient> scaleStopInstances() {
+        return new DistroXScaleStopInstancesAction();
+    }
+
+    public Action<DistroXTestDto, CloudbreakClient> scaleStartInstances(String hostGroup, Integer count) {
+        return new DistroXScaleStartInstancesAction(hostGroup, count);
+    }
+
     public Action<DistroXTestDto, CloudbreakClient> postStackForBlueprint() {
         return new DistroXShowBlueprintAction();
     }
 
-    public Action<DistroXTestDto, CloudbreakClient> removeInstance() {
-        return new DistroXRemoveInstanceAction();
+    public Action<DistroXTestDto, CloudbreakClient> removeInstances() {
+        return new DistroXRemoveInstancesAction();
     }
 
     public Action<RenewDistroXCertificateTestDto, CloudbreakClient> renewDistroXCertificateV4() {

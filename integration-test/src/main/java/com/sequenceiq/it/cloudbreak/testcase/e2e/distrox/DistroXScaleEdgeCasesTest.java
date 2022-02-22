@@ -1,5 +1,6 @@
 package com.sequenceiq.it.cloudbreak.testcase.e2e.distrox;
 
+import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.DELETED_ON_PROVIDER_SIDE;
 import static com.sequenceiq.it.cloudbreak.cloud.HostGroupType.WORKER;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import com.sequenceiq.it.cloudbreak.context.Description;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
+import com.sequenceiq.it.cloudbreak.util.CloudFunctionality;
 import com.sequenceiq.it.cloudbreak.util.DistroxUtil;
 
 public class DistroXScaleEdgeCasesTest extends AbstractE2ETest {
@@ -43,14 +45,15 @@ public class DistroXScaleEdgeCasesTest extends AbstractE2ETest {
                 .when(distroXTestClient.create())
                 .await(STACK_AVAILABLE)
                 .then((tc, testDto, client) -> {
+                    CloudFunctionality cloudFunctionality = tc.getCloudProvider().getCloudFunctionality();
                     List<String> instancesToDelete = distroxUtil.getInstanceIds(testDto, client, WORKER.getName()).stream()
                             .limit(1).collect(Collectors.toList());
-                    testContext.getCloudProvider().getCloudFunctionality().deleteInstances(testDto.getName(), instancesToDelete);
-                    testDto.setRemovableInstanceId(instancesToDelete.iterator().next());
+                    cloudFunctionality.deleteInstances(testDto.getName(), instancesToDelete);
+                    testDto.setRemovableInstanceIds(List.of(instancesToDelete.iterator().next()));
                     return testDto;
                 })
-                .awaitForRemovableInstance()
-                .when(distroXTestClient.removeInstance())
+                .awaitForRemovableInstancesByState(DELETED_ON_PROVIDER_SIDE)
+                .when(distroXTestClient.removeInstances())
                 .await(STACK_AVAILABLE)
                 .validate();
     }

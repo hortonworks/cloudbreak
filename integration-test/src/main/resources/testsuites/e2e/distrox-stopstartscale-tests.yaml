@@ -1,0 +1,11 @@
+name: "distrox-stopstart-scale-tests"
+tests:
+  - name: "distrox_stopstart_scale_tests"
+    parameters: {
+      host_group: compute,
+      scale_up_target: 5,
+      scale_down_target: 3,
+      times: 3
+    }
+    classes:
+      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXStopStartScaleTest
