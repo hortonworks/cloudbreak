@@ -11,6 +11,8 @@ import org.testng.ITestResult;
 import org.testng.annotations.BeforeMethod;
 
 import com.sequenceiq.common.api.type.Tunnel;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseAvailabilityType;
+import com.sequenceiq.distrox.api.v1.distrox.model.database.DistroXDatabaseRequest;
 import com.sequenceiq.environment.api.v1.environment.model.response.EnvironmentStatus;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationState;
 import com.sequenceiq.it.cloudbreak.action.v4.imagecatalog.ImageCatalogCreateRetryAction;
@@ -27,6 +29,7 @@ import com.sequenceiq.it.cloudbreak.client.SdxTestClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.blueprint.BlueprintTestDto;
 import com.sequenceiq.it.cloudbreak.dto.credential.CredentialTestDto;
+import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.environment.EnvironmentTestDto;
 import com.sequenceiq.it.cloudbreak.dto.freeipa.FreeIpaUserSyncTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
@@ -168,6 +171,40 @@ public abstract class AbstractIntegrationTest extends AbstractMinimalTest {
                 .await(SdxClusterStatusResponse.RUNNING)
                 .awaitForHealthyInstances()
                 .when(sdxTestClient.describeInternal())
+                .validate();
+    }
+
+    protected void createDefaultDatahub(TestContext testContext) {
+        initiateDefaultDatahubCreation(testContext);
+        waitForDefaultDatahubCreation(testContext);
+    }
+
+    protected void initiateDefaultDatahubCreation(TestContext testContext) {
+        testContext
+                .given(DistroXTestDto.class)
+                .when(distroXTestClient.create())
+                .validate();
+    }
+
+    protected void waitForDefaultDatahubCreation(TestContext testContext) {
+        testContext.given(DistroXTestDto.class)
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.get())
+                .validate();
+    }
+
+    protected void createDatahubWithDatabase(TestContext testContext) {
+        DistroXDatabaseRequest databaseRequest = new DistroXDatabaseRequest();
+        databaseRequest.setAvailabilityType(DistroXDatabaseAvailabilityType.NON_HA);
+
+        testContext
+                .given(DistroXTestDto.class)
+                    .withExternalDatabase(databaseRequest)
+                .when(distroXTestClient.create())
+                .await(STACK_AVAILABLE)
+                .awaitForHealthyInstances()
+                .when(distroXTestClient.get())
                 .validate();
     }
 

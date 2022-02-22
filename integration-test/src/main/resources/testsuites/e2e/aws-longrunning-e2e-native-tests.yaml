@@ -1,6 +1,5 @@
 name: "aws-longrunning-e2e-native-tests"
 tests:
-  - name: "aws-longrunning-e2e-native-tests"
-    excludedGroups: [ azure_singlerg ]
+  - name: "aws_longrunning_e2e_native_tests"
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
