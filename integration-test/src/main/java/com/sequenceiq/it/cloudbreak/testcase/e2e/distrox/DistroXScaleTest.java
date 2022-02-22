@@ -60,14 +60,14 @@ public class DistroXScaleTest extends AbstractE2ETest {
                     cloudFunctionality.deleteInstances(testDto.getName(), List.of(anInstanceToDelete.get()));
                     return testDto;
                 })
-                .await(STACK_AVAILABLE)
+                .awaitForFlow()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
-                .await(STACK_AVAILABLE);
+                .awaitForFlow();
         IntStream.range(1, params.getTimes()).forEach(i -> testContext.given(DistroXTestDto.class)
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleUpTarget()))
-                .await(STACK_AVAILABLE)
+                .awaitForFlow()
                 .when(distroXTestClient.scale(params.getHostGroup(), params.getScaleDownTarget()))
-                .await(STACK_AVAILABLE));
+                .awaitForFlow());
         testContext.given(DistroXTestDto.class).validate();
     }
 
