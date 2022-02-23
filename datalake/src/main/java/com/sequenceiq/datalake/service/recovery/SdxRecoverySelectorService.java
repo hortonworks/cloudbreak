@@ -38,7 +38,7 @@ public class SdxRecoverySelectorService {
         List<String> responseReasons = new ArrayList<>();
 
         for (RecoveryService recoveryService : services) {
-            SdxRecoverableResponse recoverableResponse = recoveryService.validateRecovery(sdxCluster);
+            SdxRecoverableResponse recoverableResponse = recoveryService.validateRecovery(sdxCluster, sdxRecoveryRequest);
             responseReasons.add(recoverableResponse.getReason());
             if (recoverableResponse.getStatus().recoverable()) {
                 return recoveryService.triggerRecovery(sdxCluster, sdxRecoveryRequest);
