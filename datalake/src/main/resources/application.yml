@@ -2,6 +2,9 @@ server:
   servlet:
     context-path: "/dl"
   shutdown: graceful
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 spring:
   application:
