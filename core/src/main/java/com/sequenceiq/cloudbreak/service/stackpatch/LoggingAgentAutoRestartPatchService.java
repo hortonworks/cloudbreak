@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -96,7 +97,7 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
     }
 
     @Override
-    void doApply(Stack stack) throws ExistingStackPatchApplyException {
+    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         if (isPrimaryGatewayReachable(stack)) {
             try {
                 byte[] currentSaltState = getCurrentSaltStateStack(stack);
@@ -108,13 +109,20 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
                     Set<InstanceMetaData> instanceMetaDataSet = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
                     List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
                     ClusterDeletionBasedExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
-                    Set<Node> availableNodes = getAvailableNodes(stack.getName(), instanceMetaDataSet, gatewayConfigs, exitModel);
-                    getTelemetryOrchestrator().executeLoggingAgentDiagnostics(fluentSaltStateConfig, gatewayConfigs, availableNodes, exitModel);
-                    byte[] newFullSaltState = compressUtil.updateCompressedOutputFolders(saltStateDefinitions, loggingAgentSaltStateDef, currentSaltState);
-                    clusterBootstrapper.updateSaltComponent(stack, newFullSaltState);
-                    LOGGER.debug("Logging agent partial salt refresh and diagnostics successfully finished for stack {}", stack.getName());
+                    Set<Node> availableNodes = getAvailableNodes(instanceMetaDataSet, gatewayConfigs, exitModel);
+                    if (CollectionUtils.isEmpty(availableNodes)) {
+                        LOGGER.info("Not found any available nodes for patch, stack: " + stack.getName());
+                        return false;
+                    } else {
+                        getTelemetryOrchestrator().executeLoggingAgentDiagnostics(fluentSaltStateConfig, gatewayConfigs, availableNodes, exitModel);
+                        byte[] newFullSaltState = compressUtil.updateCompressedOutputFolders(saltStateDefinitions, loggingAgentSaltStateDef, currentSaltState);
+                        clusterBootstrapper.updateSaltComponent(stack, newFullSaltState);
+                        LOGGER.debug("Logging agent partial salt refresh and diagnostics successfully finished for stack {}", stack.getName());
+                        return true;
+                    }
                 } else {
                     LOGGER.debug("Logging agent partial salt refresh and diagnostics is not required for stack {}", stack.getName());
+                    return true;
                 }
             } catch (ExistingStackPatchApplyException e) {
                 throw e;
@@ -122,9 +130,8 @@ public class LoggingAgentAutoRestartPatchService extends AbstractTelemetryPatchS
                 throw new ExistingStackPatchApplyException(e.getMessage(), e);
             }
         } else {
-            String message = "Salt partial update cannot run, because primary gateway is unreachable of stack: " + stack.getResourceCrn();
-            LOGGER.info(message);
-            throw new ExistingStackPatchApplyException(message);
+            LOGGER.info("Salt partial update cannot run, because primary gateway is unreachable of stack: " + stack.getResourceCrn());
+            return false;
         }
     }
 

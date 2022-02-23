@@ -176,9 +176,9 @@ public class MeteringAzureMetadataPatchServiceTest {
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
         // WHEN
-        ExistingStackPatchApplyException exception = assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(createStack()));
+        boolean result = underTest.doApply(createStack());
         // THEN
-        assertTrue(exception.getMessage().contains("Not found any available nodes"));
+        assertFalse(result);
 
     }
 

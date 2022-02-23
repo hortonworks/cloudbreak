@@ -10,6 +10,7 @@ import java.util.Set;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -82,10 +83,10 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
     }
 
     @Override
-    void doApply(Stack stack) throws ExistingStackPatchApplyException {
+    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
         if (isPrimaryGatewayReachable(stack)) {
             try {
-                upgradeMeteringOnNodes(stack);
+                return upgradeMeteringOnNodes(stack);
             } catch (ExistingStackPatchApplyException e) {
                 throw e;
             } catch (Exception e) {
@@ -94,11 +95,11 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
         } else {
             String message = "Salt partial update and metering upgrade cannot run, because primary gateway is unreachable of stack: " + stack.getResourceCrn();
             LOGGER.info(message);
-            throw new ExistingStackPatchApplyException(message);
+            return false;
         }
     }
 
-    private void upgradeMeteringOnNodes(Stack stack) throws ExistingStackPatchApplyException, IOException, CloudbreakOrchestratorFailedException {
+    private boolean upgradeMeteringOnNodes(Stack stack) throws ExistingStackPatchApplyException, IOException, CloudbreakOrchestratorFailedException {
         byte[] currentSaltState = getCurrentSaltStateStack(stack);
         List<String> saltStateDefinitions = Arrays.asList("salt-common", "salt");
         List<String> meteringSaltStateDef = List.of("/salt/metering");
@@ -109,14 +110,21 @@ public class MeteringAzureMetadataPatchService extends AbstractTelemetryPatchSer
             List<GatewayConfig> gatewayConfigs = gatewayConfigService.getAllGatewayConfigs(stack);
             ClusterDeletionBasedExitCriteriaModel exitModel = ClusterDeletionBasedExitCriteriaModel.nonCancellableModel();
             getTelemetryOrchestrator().updateMeteringSaltDefinition(meteringSaltStateConfig, gatewayConfigs, exitModel);
-            Set<Node> availableNodes = getAvailableNodes(stack.getName(), instanceMetaDataSet, gatewayConfigs, exitModel);
-            getTelemetryOrchestrator().upgradeMetering(gatewayConfigs, availableNodes, exitModel,
-                    meteringAzureMetadataPatchConfig.getDateBefore(), meteringAzureMetadataPatchConfig.getCustomRpmUrl());
-            byte[] newFullSaltState = compressUtil.updateCompressedOutputFolders(saltStateDefinitions, meteringSaltStateDef, currentSaltState);
-            clusterBootstrapper.updateSaltComponent(stack, newFullSaltState);
-            LOGGER.debug("Metering partial salt refresh successfully finished for stack {}", stack.getName());
+            Set<Node> availableNodes = getAvailableNodes(instanceMetaDataSet, gatewayConfigs, exitModel);
+            if (CollectionUtils.isEmpty(availableNodes)) {
+                LOGGER.info("Not found any available nodes for patch, stack: " + stack.getName());
+                return false;
+            } else {
+                getTelemetryOrchestrator().upgradeMetering(gatewayConfigs, availableNodes, exitModel,
+                        meteringAzureMetadataPatchConfig.getDateBefore(), meteringAzureMetadataPatchConfig.getCustomRpmUrl());
+                byte[] newFullSaltState = compressUtil.updateCompressedOutputFolders(saltStateDefinitions, meteringSaltStateDef, currentSaltState);
+                clusterBootstrapper.updateSaltComponent(stack, newFullSaltState);
+                LOGGER.debug("Metering partial salt refresh successfully finished for stack {}", stack.getName());
+                return true;
+            }
         } else {
             LOGGER.debug("Metering partial salt refresh is not required for stack {}", stack.getName());
+            return true;
         }
     }
 

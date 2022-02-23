@@ -44,6 +44,8 @@ public class StackPatchUsageReporterService {
         String message = Objects.requireNonNullElse(optionalMessage, "");
         try {
             Objects.requireNonNull(eventType);
+            LOGGER.info("Reporting stack patch event with resource crn {}, stack patch type {}, event type {} and message {}",
+                            resourceCrn, stackPatchType, eventType, message);
             UsageProto.CDPStackPatchEvent cdpStackPatchEvent = UsageProto.CDPStackPatchEvent.newBuilder()
                     .setResourceCrn(resourceCrn)
                     .setStackPatchType(stackPatchTypeName)

@@ -133,6 +133,17 @@ class ExistingStackPatcherJobTest {
 
         underTest.executeTracedJob(context);
 
+        verify(existingStackPatchService).apply(stack);
+        verify(stackPatchUsageReporterService).reportAffected(stack, STACK_PATCH_TYPE);
+    }
+
+    @Test
+    void shouldUnscheduleWhenSuccessfullyApplied() throws JobExecutionException, ExistingStackPatchApplyException {
+        when(existingStackPatchService.isAffected(stack)).thenReturn(true);
+        when(existingStackPatchService.apply(stack)).thenReturn(true);
+
+        underTest.executeTracedJob(context);
+
         verifyUnschedule();
         verify(existingStackPatchService).apply(stack);
         verify(stackPatchUsageReporterService).reportAffected(stack, STACK_PATCH_TYPE);
