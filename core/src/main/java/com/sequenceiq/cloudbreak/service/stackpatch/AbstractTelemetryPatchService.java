@@ -9,7 +9,6 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
-import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,20 +33,14 @@ public abstract class AbstractTelemetryPatchService extends ExistingStackPatchSe
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    protected Set<Node> getAvailableNodes(String stackName, Set<InstanceMetaData> instanceMetaDataSet, List<GatewayConfig> gatewayConfigs,
+    protected Set<Node> getAvailableNodes(Set<InstanceMetaData> instanceMetaDataSet, List<GatewayConfig> gatewayConfigs,
             ClusterDeletionBasedExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException, ExistingStackPatchApplyException {
         Set<Node> allNodes = getNodes(instanceMetaDataSet);
         Set<Node> unresponsiveNodes = telemetryOrchestrator.collectUnresponsiveNodes(gatewayConfigs, allNodes, exitModel);
         Set<String> unresponsiveHostnames = unresponsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        Set<Node> availableNodes = allNodes.stream()
+        return allNodes.stream()
                 .filter(n -> !unresponsiveHostnames.contains(n.getHostname()))
                 .collect(Collectors.toSet());
-        if (CollectionUtils.isEmpty(availableNodes)) {
-            String message = "Not found any available nodes for patch, stack: " + stackName;
-            LOGGER.info(message);
-            throw new ExistingStackPatchApplyException(message);
-        }
-        return availableNodes;
     }
 
     protected Set<Node> getNodes(Set<InstanceMetaData> instanceMetaDataSet) {
