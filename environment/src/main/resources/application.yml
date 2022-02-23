@@ -2,6 +2,9 @@ server:
   servlet:
     context-path: "/environmentservice"
   shutdown: graceful
+  tomcat:
+    mbeanregistry:
+      enabled: true
 
 server.port: 8088
 
