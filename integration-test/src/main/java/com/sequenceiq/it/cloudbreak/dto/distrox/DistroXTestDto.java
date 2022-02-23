@@ -64,7 +64,7 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
 
     private StackViewV4Response internalStackResponse;
 
-    private List<String> removableInstanceIds;
+    private List<String> actionableInstanceIds;
 
     private Optional<List<String>> repairableInstanceIds = Optional.empty();
 
@@ -189,9 +189,9 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return awaitForInstance(instanceStatusMap);
     }
 
-    public DistroXTestDto awaitForRemovableInstancesByState(InstanceStatus instanceStatus) {
-        if (!getRemovableInstanceIds().isEmpty()) {
-            return awaitForInstance(Map.of(getRemovableInstanceIds(), instanceStatus));
+    public DistroXTestDto awaitForActionedInstances(InstanceStatus instanceStatus) {
+        if (!getInstanceIdsForAction().isEmpty()) {
+            return awaitForInstance(Map.of(getInstanceIdsForAction(), instanceStatus));
         } else {
             throw new IllegalStateException(String.format("There is no '%s' instance to wait!", instanceStatus));
         }
@@ -343,12 +343,12 @@ public class DistroXTestDto extends DistroXTestDtoBase<DistroXTestDto> implement
         return getResponse().getCrn();
     }
 
-    public void setRemovableInstanceIds(List<String> removableInstanceIds) {
-        this.removableInstanceIds = removableInstanceIds;
+    public void setInstanceIdsForActions(List<String> actionableInstanceIds) {
+        this.actionableInstanceIds = actionableInstanceIds;
     }
 
-    public List<String> getRemovableInstanceIds() {
-        return ListUtils.emptyIfNull(removableInstanceIds);
+    public List<String> getInstanceIdsForAction() {
+        return ListUtils.emptyIfNull(actionableInstanceIds);
     }
 
     public void setRepairableInstanceIds(List<String> repairableInstanceIds) {

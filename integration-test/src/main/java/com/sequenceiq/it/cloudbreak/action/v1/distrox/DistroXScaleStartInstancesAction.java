@@ -36,9 +36,8 @@ public class DistroXScaleStartInstancesAction implements Action<DistroXTestDto, 
         UpdateStackV4Request updateStackRequest = new UpdateStackV4Request();
         updateStackRequest.setInstanceGroupAdjustment(instanceGroupAdjustmentRequest);
         updateStackRequest.setWithClusterEvent(true);
-        Log.when(LOGGER, String.format(" Starting instances [%s] for distrox '%s' Compute scaling... ", testDto.getName(),
-                testDto.getRemovableInstanceIds()));
-        Log.whenJson(LOGGER, " Distrox Compute scale request: ", testDto.getRequest());
+        Log.when(LOGGER, String.format(" Starting instances [%s] for distrox '%s' Compute scaling... ", testDto.getInstanceIdsForAction(), testDto.getName()));
+        Log.whenJson(LOGGER, " Distrox Compute scale start instances request: ", testDto.getRequest());
         client.getDefaultClient()
                 .autoscaleEndpoint()
                 .putStackStartInstancesByName(testDto.getName(), updateStackRequest);
@@ -46,8 +45,9 @@ public class DistroXScaleStartInstancesAction implements Action<DistroXTestDto, 
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
         testDto.setResponse(stackV4Response);
-        Log.whenJson(LOGGER, " Distrox Compute scale response: ", stackV4Response);
-        LOGGER.info("Hardware info for stack after start instances for Compute scale: {}", stackV4Response.getHardwareInfoGroups());
+        Log.whenJson(LOGGER, " Distrox Compute scale start instances response: ", stackV4Response);
+        LOGGER.info(String.format("Hardware info for distrox '%s' after start instances for Compute scale: %s", testDto.getName(),
+                stackV4Response.getHardwareInfoGroups()));
         return testDto;
     }
 }
