@@ -66,6 +66,7 @@ import com.sequenceiq.environment.environment.dto.EnvironmentCreationDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentEditDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentLoadBalancerDto;
+import com.sequenceiq.environment.environment.dto.EnvironmentViewDto;
 import com.sequenceiq.environment.environment.dto.UpdateAwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.environment.dto.UpdateAzureResourceEncryptionDto;
 import com.sequenceiq.environment.environment.dto.telemetry.EnvironmentFeatures;
@@ -201,7 +202,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public SimpleEnvironmentResponse deleteByName(@ResourceName String environmentName, boolean cascading, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        EnvironmentDto environmentDto = environmentDeletionService.deleteByNameAndAccountId(
+        EnvironmentViewDto environmentDto = environmentDeletionService.deleteByNameAndAccountId(
                 environmentName, accountId, actualUserCrn, cascading, forced);
         return environmentResponseConverter.dtoToSimpleResponse(environmentDto);
     }
@@ -212,7 +213,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             boolean cascading, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        EnvironmentDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(
+        EnvironmentViewDto environmentDto = environmentDeletionService.deleteByCrnAndAccountId(
                 crn, accountId, actualUserCrn, cascading, forced);
         return environmentResponseConverter.dtoToSimpleResponse(environmentDto);
     }
@@ -222,7 +223,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
     public SimpleEnvironmentResponses deleteMultipleByNames(@ResourceNameList Set<String> environmentNames, boolean cascading, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByNames(
+        List<EnvironmentViewDto> environmentDtos = environmentDeletionService.deleteMultipleByNames(
                 environmentNames, accountId, actualUserCrn, cascading, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentResponseConverter::dtoToSimpleResponse).collect(Collectors.toSet());
@@ -235,7 +236,7 @@ public class EnvironmentController implements EnvironmentEndpoint {
             boolean cascading, boolean forced) {
         String accountId = ThreadBasedUserCrnProvider.getAccountId();
         String actualUserCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        List<EnvironmentDto> environmentDtos = environmentDeletionService.deleteMultipleByCrns(
+        List<EnvironmentViewDto> environmentDtos = environmentDeletionService.deleteMultipleByCrns(
                 crns, accountId, actualUserCrn, cascading, forced);
         Set<SimpleEnvironmentResponse> responses = environmentDtos.stream()
                 .map(environmentResponseConverter::dtoToSimpleResponse).collect(Collectors.toSet());
