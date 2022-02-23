@@ -451,7 +451,7 @@ class EnvironmentCreationServiceTest {
         when(authenticationDtoConverter.dtoToAuthentication(any())).thenReturn(new EnvironmentAuthentication());
         when(validatorService.validateNetworkCreation(any(), any())).thenReturn(validationResultBuilder);
         when(environmentService.getRegionsByEnvironment(eq(environment))).thenReturn(getCloudRegions());
-        when(environmentDtoConverter.environmentToLocationDto(any())).thenReturn(LocationDto.builder().withName("loc").build());
+        when(environmentDtoConverter.environmentToLocationDto(any(Environment.class))).thenReturn(LocationDto.builder().withName("loc").build());
         when(validatorService.validateParentChildRelation(any(), any())).thenReturn(ValidationResult.builder().build());
         when(validatorService.validateFreeIpaCreation(any())).thenReturn(ValidationResult.builder().build());
         when(validationResult.merge(any())).thenReturn(ValidationResult.builder().error("nogood"));

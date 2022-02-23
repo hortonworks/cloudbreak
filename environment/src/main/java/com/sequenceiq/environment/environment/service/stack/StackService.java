@@ -1,6 +1,5 @@
 package com.sequenceiq.environment.environment.service.stack;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -15,7 +14,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.cloud.scheduler.PollGroup;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.flow.config.update.config.EnvStackConfigUpdatesFlowConfig;
 import com.sequenceiq.environment.store.EnvironmentInMemoryStateStore;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
@@ -58,7 +57,7 @@ public class StackService {
         }
     }
 
-    public void cancelRunningStackConfigUpdates(Environment environment) {
+    public void cancelRunningStackConfigUpdates(EnvironmentView environment) {
         List<FlowLog> flowLogs = flowLogDBService.findAllByResourceIdAndFinalizedIsFalseOrderByCreatedDesc(environment.getId());
         if (!flowLogs.isEmpty() && flowLogs.get(0).isFlowType(EnvStackConfigUpdatesFlowConfig.class)) {
             LOGGER.info("Canceling running Stack config update flow for environment {}", environment.getResourceCrn());

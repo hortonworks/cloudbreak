@@ -25,7 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.dyngr.exception.UserBreakException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.crn.CrnTestUtil;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
@@ -59,7 +59,7 @@ class SdxDeleteServiceTest {
                 .withTimeout(0)
                 .withTimeoutTimeUnit(TimeUnit.SECONDS)
                 .build();
-        Environment environment = new Environment();
+        EnvironmentView environment = new EnvironmentView();
         environment.setName("envName");
         when(environmentResourceDeletionService.getAttachedSdxClusterCrns(environment)).thenReturn(Set.of());
         underTest.deleteSdxClustersForEnvironment(pollingConfig, environment, true);
@@ -74,7 +74,7 @@ class SdxDeleteServiceTest {
                 .withTimeout(10)
                 .withTimeoutTimeUnit(TimeUnit.SECONDS)
                 .build();
-        Environment environment = new Environment();
+        EnvironmentView environment = new EnvironmentView();
         environment.setName("envName");
         SdxClusterResponse sdx1 = new SdxClusterResponse();
         sdx1.setCrn("crn1");
@@ -94,7 +94,7 @@ class SdxDeleteServiceTest {
                 .withTimeout(10)
                 .withTimeoutTimeUnit(TimeUnit.SECONDS)
                 .build();
-        Environment environment = new Environment();
+        EnvironmentView environment = new EnvironmentView();
         environment.setName("envName");
         SdxClusterResponse sdx2 = new SdxClusterResponse();
         sdx2.setCrn("crn2");
@@ -117,7 +117,7 @@ class SdxDeleteServiceTest {
                 .withTimeout(10)
                 .withTimeoutTimeUnit(TimeUnit.SECONDS)
                 .build();
-        Environment environment = new Environment();
+        EnvironmentView environment = new EnvironmentView();
         environment.setName("envName");
         environment.setResourceCrn(CrnTestUtil.getEnvironmentCrnBuilder()
                 .setAccountId("asd")
