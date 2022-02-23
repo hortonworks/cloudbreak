@@ -13,7 +13,7 @@ import com.dyngr.core.AttemptResults;
 import com.dyngr.exception.PollerStoppedException;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
-import com.sequenceiq.environment.environment.domain.Environment;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.service.EnvironmentResourceDeletionService;
 import com.sequenceiq.environment.exception.SdxOperationFailedException;
 import com.sequenceiq.environment.util.PollingConfig;
@@ -38,7 +38,7 @@ public class SdxDeleteService {
         this.environmentResourceDeletionService = environmentResourceDeletionService;
     }
 
-    public void deleteSdxClustersForEnvironment(PollingConfig pollingConfig, Environment environment, boolean force) {
+    public void deleteSdxClustersForEnvironment(PollingConfig pollingConfig, EnvironmentView environment, boolean force) {
         Set<String> sdxCrnsOrDatalakeName = environmentResourceDeletionService.getAttachedSdxClusterCrns(environment);
         boolean legacySdxEndpoint = false;
         // if someone use create the clusters via internal cluster API, in this case the SDX service does not know about these clusters,
@@ -57,7 +57,7 @@ public class SdxDeleteService {
         }
     }
 
-    private void waitSdxClustersDeletion(PollingConfig pollingConfig, Environment environment, Set<String> sdxCrnsOrDatalakeName,
+    private void waitSdxClustersDeletion(PollingConfig pollingConfig, EnvironmentView environment, Set<String> sdxCrnsOrDatalakeName,
         boolean legacySdxEndpoint, boolean force) {
         LOGGER.debug("Calling sdxEndpoint.deleteByCrn for all data lakes [{}]", String.join(", ", sdxCrnsOrDatalakeName));
 
@@ -81,7 +81,7 @@ public class SdxDeleteService {
         }
     }
 
-    private AttemptResult<Object> periodicCheckForDeletion(Environment environment) {
+    private AttemptResult<Object> periodicCheckForDeletion(EnvironmentView environment) {
         List<SdxClusterResponse> actualClusterList = sdxEndpoint.list(environment.getName(), true);
         if (!actualClusterList.isEmpty()) {
             if (actualClusterList.stream().anyMatch(c -> c.getStatus() == SdxClusterStatusResponse.DELETE_FAILED)) {

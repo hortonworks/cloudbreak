@@ -13,11 +13,12 @@ import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.ExceptionResponse;
+import com.sequenceiq.environment.environment.domain.EnvironmentView;
 import com.sequenceiq.environment.environment.dto.EnvironmentDeletionDto;
 import com.sequenceiq.environment.environment.dto.EnvironmentDto;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvClusterDeleteFailedEvent;
 import com.sequenceiq.environment.environment.flow.deletion.event.EnvDeleteEvent;
-import com.sequenceiq.environment.environment.service.EnvironmentService;
+import com.sequenceiq.environment.environment.service.EnvironmentViewService;
 import com.sequenceiq.environment.util.PollingConfig;
 import com.sequenceiq.flow.reactor.api.event.EventSender;
 import com.sequenceiq.flow.reactor.api.handler.EventSenderAwareHandler;
@@ -33,14 +34,14 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
 
     private static final int TIMEOUT = 90;
 
-    private final EnvironmentService environmentService;
+    private final EnvironmentViewService environmentViewService;
 
     private final SdxDeleteService sdxDeleteService;
 
-    protected DataLakeClustersDeleteHandler(EventSender eventSender, EnvironmentService environmentService, SdxDeleteService sdxDeleteService) {
+    protected DataLakeClustersDeleteHandler(EventSender eventSender, EnvironmentViewService environmentViewService, SdxDeleteService sdxDeleteService) {
         super(eventSender);
         this.sdxDeleteService = sdxDeleteService;
-        this.environmentService = environmentService;
+        this.environmentViewService = environmentViewService;
     }
 
     @Override
@@ -52,11 +53,11 @@ public class DataLakeClustersDeleteHandler extends EventSenderAwareHandler<Envir
 
         try {
             PollingConfig pollingConfig = getPollingConfig();
-            environmentService.findEnvironmentById(environmentDto.getId())
-                    .ifPresent(environment -> sdxDeleteService.deleteSdxClustersForEnvironment(
+            EnvironmentView environment = environmentViewService.getById(environmentDto.getId());
+            sdxDeleteService.deleteSdxClustersForEnvironment(
                             pollingConfig,
                             environment,
-                            environmentDeletionDto.isForceDelete()));
+                            environmentDeletionDto.isForceDelete());
             eventSender().sendEvent(envDeleteEvent, environmentDtoEvent.getHeaders());
         } catch (ClientErrorException e) {
             String message;
