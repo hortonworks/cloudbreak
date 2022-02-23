@@ -20,18 +20,18 @@ public class DistroXScaleStopInstancesAction implements Action<DistroXTestDto, C
 
     @Override
     public DistroXTestDto action(TestContext testContext, DistroXTestDto testDto, CloudbreakClient client) throws Exception {
-        Log.when(LOGGER, String.format(" Stopping instances [%s] for distrox '%s' Compute scaling... ", testDto.getName(),
-                testDto.getRemovableInstanceIds()));
-        Log.whenJson(LOGGER, " Distrox Compute scale request: ", testDto.getRequest());
+        Log.when(LOGGER, String.format(" Stopping instances [%s] for distrox '%s' Compute scaling... ", testDto.getInstanceIdsForAction(), testDto.getName()));
+        Log.whenJson(LOGGER, " Distrox Compute scale stop instances request: ", testDto.getRequest());
         client.getDefaultClient()
                 .autoscaleEndpoint()
-                .stopInstancesForClusterName(testDto.getName(), testDto.getRemovableInstanceIds(), false, ScalingStrategy.STOPSTART);
+                .stopInstancesForClusterName(testDto.getName(), testDto.getInstanceIdsForAction(), false, ScalingStrategy.STOPSTART);
         StackV4Response stackV4Response = client.getDefaultClient()
                 .distroXV1Endpoint()
                 .getByName(testDto.getName(), new HashSet<>(Arrays.asList("hardware_info", "events")));
         testDto.setResponse(stackV4Response);
-        Log.whenJson(LOGGER, " Distrox Compute scale response: ", stackV4Response);
-        LOGGER.info("Hardware info for stack after stop instances for Compute scale: {}", stackV4Response.getHardwareInfoGroups());
+        Log.whenJson(LOGGER, " Distrox Compute scale stop instances response: ", stackV4Response);
+        LOGGER.info(String.format("Hardware info for distrox '%s' after stop instances for Compute scale: %s", testDto.getName(),
+                stackV4Response.getHardwareInfoGroups()));
         return testDto;
     }
 }
