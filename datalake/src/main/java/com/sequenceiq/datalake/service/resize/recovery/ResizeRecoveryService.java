@@ -53,7 +53,8 @@ public class ResizeRecoveryService implements RecoveryService {
     @Inject
     private FlowChainLogService flowChainLogService;
 
-    public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster) {
+    @Override
+    public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster, SdxRecoveryRequest request) {
         Optional<FlowLog> flowLogOptional = flow2Handler.getFirstStateLogfromLatestFlow(sdxCluster.getId());
         if (flowLogOptional.isEmpty()) {
             return new SdxRecoverableResponse("No recent actions on this cluster", RecoveryStatus.NON_RECOVERABLE);
@@ -90,6 +91,12 @@ public class ResizeRecoveryService implements RecoveryService {
         }
     }
 
+    @Override
+    public SdxRecoverableResponse validateRecovery(SdxCluster sdxCluster) {
+        return validateRecovery(sdxCluster, null);
+    }
+
+    @Override
     public SdxRecoveryResponse triggerRecovery(SdxCluster sdxCluster, SdxRecoveryRequest sdxRecoveryRequest) {
         SdxStatusEntity actualStatusForSdx = sdxStatusService.getActualStatusForSdx(sdxCluster);
         if (entitlementService.isDatalakeResizeRecoveryEnabled(ThreadBasedUserCrnProvider.getAccountId())) {

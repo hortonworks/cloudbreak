@@ -9,6 +9,7 @@ import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.FINISHED;
 import static com.sequenceiq.datalake.service.sdx.flowcheck.FlowState.RUNNING;
 
 import java.util.Collections;
+import java.util.Optional;
 
 import javax.inject.Inject;
 import javax.ws.rs.WebApplicationException;
@@ -124,7 +125,7 @@ public class SdxBackupRestoreService {
 
     public SdxRestoreResponse triggerDatalakeRestore(SdxCluster sdxCluster, String datalakeName, String backupId, String backupLocationOverride) {
         String userCrn = ThreadBasedUserCrnProvider.getUserCrn();
-        String backupLocation = null;
+        String backupLocation;
         MDCBuilder.buildMdcContext(sdxCluster);
         if (!Strings.isNullOrEmpty(backupId)) {
             datalakeDRProto.DatalakeBackupInfo backupInfo = datalakeDrClient.getBackupById(datalakeName, backupId, userCrn);
@@ -134,15 +135,20 @@ public class SdxBackupRestoreService {
             }
             backupLocation  = backupInfo.getBackupLocation();
         } else {
-            datalakeDRProto.DatalakeBackupInfo lastSuccessBackupInfo = datalakeDrClient.getLastSuccessBackup(datalakeName, userCrn);
-            if (lastSuccessBackupInfo == null) {
-                LOGGER.error("No successful backup found for data lake: {}", datalakeName);
-                throw new NotFoundException(String.format("No successful backup found for data lake: %s", datalakeName));
-            }
+            datalakeDRProto.DatalakeBackupInfo lastSuccessBackupInfo = getLastSuccessfulBackupInfo(datalakeName, userCrn);
             backupId = lastSuccessBackupInfo.getBackupId();
             backupLocation = lastSuccessBackupInfo.getBackupLocation();
         }
         return triggerDatalakeRestoreFlow(sdxCluster, backupId, backupLocation, backupLocationOverride);
+    }
+
+    public datalakeDRProto.DatalakeBackupInfo getLastSuccessfulBackupInfo(String datalakeName, String userCrn) {
+        datalakeDRProto.DatalakeBackupInfo lastSuccessfulBackupInfo = datalakeDrClient.getLastSuccessfulBackup(datalakeName, userCrn, Optional.empty());
+        if (lastSuccessfulBackupInfo == null) {
+            LOGGER.error("No successful backup found for data lake: {}", datalakeName);
+            throw new NotFoundException(String.format("No successful backup found for data lake: %s", datalakeName));
+        }
+        return lastSuccessfulBackupInfo;
     }
 
     private SdxDatabaseBackupResponse triggerDatalakeDatabaseBackupFlow(SdxCluster cluster, SdxDatabaseBackupRequest backupRequest) {

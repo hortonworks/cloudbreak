@@ -241,8 +241,7 @@ public class DatalakeDrClient {
         }
     }
 
-    public DatalakeBackupInfo getLastSuccessBackup(String datalakeName, String actorCrn) {
-        DatalakeBackupInfo datalakeBackupInfo = null;
+    public DatalakeBackupInfo getLastSuccessfulBackup(String datalakeName, String actorCrn, Optional<String> runtime) {
         if (!datalakeDrConfig.isConfigured()) {
             return null;
         }
@@ -256,12 +255,17 @@ public class DatalakeDrClient {
             ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                     .listDatalakeBackups(builder.build());
 
-            if (response != null && response.getDatalakeInfoList() != null) {
-                datalakeBackupInfo = response.getDatalakeInfoList().stream()
+            if (response != null) {
+                return response.getDatalakeInfoList().stream()
                         .filter(backup -> "SUCCESSFUL".equals(backup.getOverallState()))
-                        .findFirst().orElse(null);
+                        .filter(backup -> runtime.isEmpty() || backup.getRuntimeVersion().equalsIgnoreCase(runtime.get()))
+                        .peek(backupInfo -> LOGGER.debug(
+                                "The following successful backup was found for data lake {} and runtime {}: {}", datalakeName, runtime, backupInfo))
+                        .findFirst()
+                        .orElse(null);
             }
-            return datalakeBackupInfo;
+            LOGGER.debug("No successful backup was found for data lake {} and runtime {}", datalakeName, runtime);
+            return null;
         }
     }
 
@@ -281,7 +285,7 @@ public class DatalakeDrClient {
             ListDatalakeBackupResponse response = newStub(channelWrapper.getChannel(), UUID.randomUUID().toString(), actorCrn)
                     .listDatalakeBackups(builder.build());
 
-            if (response != null && response.getDatalakeInfoList() != null) {
+            if (response != null) {
                 datalakeBackupInfo = response.getDatalakeInfoList().stream()
                         .filter(backup -> backupId.equals(backup.getBackupId()))
                         .findFirst().orElse(null);

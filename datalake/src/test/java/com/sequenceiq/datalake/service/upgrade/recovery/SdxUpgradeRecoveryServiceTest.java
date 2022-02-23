@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
+
 import javax.ws.rs.WebApplicationException;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,11 +16,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import com.cloudera.thunderhead.service.datalakedr.datalakeDRProto;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.StackV4Endpoint;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.recovery.RecoveryValidationV4Response;
 import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.common.exception.WebApplicationExceptionMessageExtractor;
+import com.sequenceiq.cloudbreak.datalakedr.DatalakeDrClient;
 import com.sequenceiq.cloudbreak.exception.CloudbreakApiException;
 import com.sequenceiq.datalake.entity.SdxCluster;
 import com.sequenceiq.datalake.flow.SdxReactorFlowManager;
@@ -38,6 +42,8 @@ public class SdxUpgradeRecoveryServiceTest {
 
     private static final long WORKSPACE_ID = 0L;
 
+    private static final String RUNTIME = "7.2.2";
+
     @Mock
     private SdxCluster cluster;
 
@@ -46,6 +52,9 @@ public class SdxUpgradeRecoveryServiceTest {
 
     @Mock
     private SdxReactorFlowManager sdxReactorFlowManager;
+
+    @Mock
+    private DatalakeDrClient datalakeDrClient;
 
     @Mock
     private WebApplicationExceptionMessageExtractor exceptionMessageExtractor;
@@ -103,4 +112,46 @@ public class SdxUpgradeRecoveryServiceTest {
                 () -> underTest.triggerRecovery(cluster, request));
         assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"), response.getFlowIdentifier());
     }
+
+    @Test
+    public void testValidateWithDataAndSuccessfulBackupShouldStartRecoveryFlow() {
+        String reason = "There is no successful backup taken yet for data lake cluster with runtime 7.2.2.";
+        RecoveryValidationV4Response recoveryV4Response = new RecoveryValidationV4Response(reason, RecoveryStatus.RECOVERABLE);
+
+        request.setType(SdxRecoveryType.RECOVER_WITH_DATA);
+        datalakeDRProto.DatalakeBackupInfo datalakeBackupInfo = datalakeDRProto.DatalakeBackupInfo
+                .newBuilder()
+                .setRuntimeVersion(RUNTIME)
+                .setOverallState("SUCCESSFUL")
+                .build();
+
+        when(cluster.getRuntime()).thenReturn(RUNTIME);
+        when(stackV4Endpoint.getClusterRecoverableByNameInternal(WORKSPACE_ID, CLUSTER_NAME, USER_CRN)).thenReturn(recoveryV4Response);
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.of(RUNTIME))).thenReturn(datalakeBackupInfo);
+        when(sdxReactorFlowManager.triggerDatalakeRuntimeRecoveryFlow(cluster, SdxRecoveryType.RECOVER_WITH_DATA))
+                .thenReturn(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"));
+
+        SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.validateRecovery(cluster, request));
+        assertEquals(reason, sdxRecoverableResponse.getReason());
+
+        SdxRecoveryResponse response = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.triggerRecovery(cluster, request));
+        assertEquals(new FlowIdentifier(FlowType.FLOW, "FLOW_ID"), response.getFlowIdentifier());
+    }
+
+    @Test
+    public void testValidateWithDataAndNonExistentBackupShouldThrowValidationError() {
+        String errorMessage = "There is no successful backup taken yet for data lake cluster with runtime 7.2.2.";
+
+        request.setType(SdxRecoveryType.RECOVER_WITH_DATA);
+
+        when(cluster.getRuntime()).thenReturn(RUNTIME);
+        when(datalakeDrClient.getLastSuccessfulBackup(CLUSTER_NAME, USER_CRN, Optional.of(RUNTIME))).thenReturn(null);
+
+        SdxRecoverableResponse sdxRecoverableResponse = ThreadBasedUserCrnProvider.doAs(USER_CRN,
+                () -> underTest.validateRecovery(cluster, request));
+        assertEquals(errorMessage, sdxRecoverableResponse.getReason());
+    }
+
 }
