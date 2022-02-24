@@ -20,7 +20,7 @@ public class CredentialTest {
 
     @Before
     public void setUp() {
-        underTest = new Credential(CRN, NAME, ATTRIBUTES);
+        underTest = new Credential(CRN, NAME, ATTRIBUTES, "acc");
     }
 
     @Test
@@ -35,7 +35,7 @@ public class CredentialTest {
     @Test
     public void testAzureParameters() {
         Credential.AzureParameters azure = new Credential.AzureParameters(SUBSCRIPTION_ID);
-        underTest = new Credential(CRN, NAME, ATTRIBUTES, azure);
+        underTest = new Credential(CRN, NAME, ATTRIBUTES, azure, "acc");
 
         assertEquals(SUBSCRIPTION_ID, underTest.getAzure().get().getSubscriptionId());
     }

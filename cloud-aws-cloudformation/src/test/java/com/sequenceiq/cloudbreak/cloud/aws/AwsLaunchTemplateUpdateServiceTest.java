@@ -104,7 +104,7 @@ public class AwsLaunchTemplateUpdateServiceTest {
                 .withLocation(location)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential cc = new CloudCredential("crn", "cc");
+        CloudCredential cc = new CloudCredential("crn", "cc", "account");
         ac = new AuthenticatedContext(context, cc);
         Group group = mock(Group.class);
         when(group.getName()).thenReturn("GroupName");

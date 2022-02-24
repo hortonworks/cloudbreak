@@ -83,9 +83,9 @@ public class AbstractRedbeamsProvisionActionTest {
         dbStack.setEnvironmentId(ENVIRONMENT_CRN);
         dbStack.setOwnerCrn(Crn.safeFromString("crn:cdp:iam:us-west-1:cloudera:user:bob@cloudera.com"));
 
-        credential = new Credential("userId", null, "userCrn");
+        credential = new Credential("userId", null, "userCrn", "account");
 
-        cloudCredential = new CloudCredential("userId", "userName");
+        cloudCredential = new CloudCredential("userId", "userName", "account");
     }
 
     @Test

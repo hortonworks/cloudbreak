@@ -130,7 +130,7 @@ public class AwsInstanceConnectorTest {
                 .withAccountId("account")
                 .build();
         CloudCredential credential = new CloudCredential("id", "alma",
-                Map.of("accessKey", "ac", "secretKey", "secret"), false);
+                Map.of("accessKey", "ac", "secretKey", "secret"), "acc", false);
         authenticatedContext = awsAuthenticator.authenticate(context, credential);
 
         StopInstancesResult stopInstancesResult = new StopInstancesResult();

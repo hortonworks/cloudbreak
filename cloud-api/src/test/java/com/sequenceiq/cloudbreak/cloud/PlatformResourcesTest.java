@@ -2,6 +2,7 @@ package com.sequenceiq.cloudbreak.cloud;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -59,12 +60,13 @@ class PlatformResourcesTest {
         }
 
         @Override
-        public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
+        public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters,
+            boolean availabilityZonesNeeded, List<String> entitlements) {
             return null;
         }
 
         @Override
-        public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+        public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
             return null;
         }
 

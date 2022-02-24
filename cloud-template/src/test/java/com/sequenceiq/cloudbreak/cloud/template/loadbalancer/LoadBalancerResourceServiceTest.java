@@ -87,7 +87,7 @@ public class LoadBalancerResourceServiceTest {
                 .withPlatform("GCP")
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
+        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname", "account");
         cloudCredential.putParameter("projectId", "projectId");
         String projectId = "projectId";
         String serviceAccountId = "serviceAccountId";

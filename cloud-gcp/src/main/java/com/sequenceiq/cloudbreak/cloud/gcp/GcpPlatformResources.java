@@ -152,7 +152,8 @@ public class GcpPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.getName(),
-                                regionCoordinateSpecification.isK8sSupported()));
+                                regionCoordinateSpecification.isK8sSupported(),
+                                regionCoordinateSpecification.getEntitlements()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -330,7 +331,8 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded, List<String> entitlements) throws Exception {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
@@ -388,15 +390,15 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        CloudVmTypes cloudVmTypes = getCloudVmTypes(cloudCredential, region, filters);
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
+        CloudVmTypes cloudVmTypes = getCloudVmTypes(cloudCredential, region, filters, entitlements);
         return new CloudVmTypes(cloudVmTypes.getCloudVmResponses(), cloudVmTypes.getDefaultCloudVmResponses());
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
-    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
+    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
+        CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters, entitlements);
         Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
         if (restrictInstanceTypes) {
@@ -418,7 +420,7 @@ public class GcpPlatformResources implements PlatformResources {
         return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
     }
 
-    private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
@@ -429,7 +431,7 @@ public class GcpPlatformResources implements PlatformResources {
             Set<VmType> types = new HashSet<>();
             VmType defaultVmType = null;
 
-            CloudRegions regions = regions(cloudCredential, region, filters, true);
+            CloudRegions regions = regions(cloudCredential, region, filters, true, entitlements);
 
             for (AvailabilityZone availabilityZone : regions.getCloudRegions().get(region)) {
                 MachineTypeList machineTypeList = compute.machineTypes().list(projectId, availabilityZone.value()).execute();
