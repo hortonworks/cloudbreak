@@ -88,6 +88,11 @@
             "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
             "roleType" : "STREAMS_REPLICATION_MANAGER_DRIVER",
             "base" : true
+          },
+          {
+            "refName" : "streams_replication_manager-GATEWAY-BASE",
+            "roleType" : "GATEWAY",
+            "base" : true
           }
         ]
       },
@@ -122,6 +127,7 @@
         "roleConfigGroupsRefNames": [
           "zookeeper-SERVER-BASE",
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+          "streams_replication_manager-GATEWAY-BASE",
           "kafka-GATEWAY-BASE",
           "kafka-KAFKA_BROKER-BASE",
           "kafka-KAFKA_CONNECT-BASE"
