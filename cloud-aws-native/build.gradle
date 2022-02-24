@@ -16,6 +16,7 @@ dependencies {
   implementation project(':common')
   implementation project(':cloud-api')
   implementation project(':cloud-aws-common')
+  implementation project(':auth-connector')
   implementation project(':cloud-reactor')
   implementation project(':cloud-template')
 

@@ -4,6 +4,7 @@ import static com.sequenceiq.cloudbreak.cloud.model.Region.region;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.junit.Assert;
@@ -17,6 +18,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -37,7 +39,8 @@ public class MockPlatformResourcesTest {
     public void getDefaultRegionWhenNoDefaultFoundForMockProviderThenShouldReturnWithTheFirstElement() {
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1");
         underTest.init();
-        CloudRegions regions = underTest.regions(new CloudCredential("crn", "mock"), region("mock"), new HashMap<>(), true);
+        CloudRegions regions = underTest.regions(extendedCloudCredential(new CloudCredential("crn", "mock", "account")),
+        region("mock"), new HashMap<>(), true);
         Assert.assertEquals("USA", regions.getDefaultRegion());
     }
 
@@ -45,7 +48,19 @@ public class MockPlatformResourcesTest {
     public void getDefaultRegionWhenDefaultFoundForMockProviderThenShouldReturnWithDefaultElement() {
         ReflectionTestUtils.setField(underTest, "defaultRegions", "AWS:eu-west-1,MOCK:Europe");
         underTest.init();
-        CloudRegions regions = underTest.regions(new CloudCredential("crn", "mock"), region("mock"), new HashMap<>(), true);
+        CloudRegions regions = underTest.regions(extendedCloudCredential(new CloudCredential("crn", "mock", "account")),
+                region("mock"), new HashMap<>(), true);
         Assert.assertEquals("Europe", regions.getDefaultRegion());
+    }
+
+    private ExtendedCloudCredential extendedCloudCredential(CloudCredential cloudCredential) {
+        return new ExtendedCloudCredential(
+                cloudCredential,
+                "MOCK",
+                "",
+                "crn",
+                "account",
+                new ArrayList<>()
+        );
     }
 }

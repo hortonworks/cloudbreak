@@ -4,6 +4,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -48,7 +49,7 @@ public class AzureRegionProviderTest {
     public void testRegionsShouldReturnTheEnabledRegions() throws IOException {
         Collection<Region> azureRegions = getAzureRegions();
 
-        CloudRegions actual = underTest.regions(null, azureRegions);
+        CloudRegions actual = underTest.regions(null, azureRegions, List.of());
 
         assertRegionNames(actual, azureRegions);
         assertCoordinates(actual);
@@ -60,7 +61,7 @@ public class AzureRegionProviderTest {
         Collection<Region> azureRegions = getAzureRegionsWithUnsupportedRegion();
         Collection<Region> supportedAzureRegions = getAzureRegions();
 
-        CloudRegions actual = underTest.regions(null, azureRegions);
+        CloudRegions actual = underTest.regions(null, azureRegions, List.of());
 
         assertRegionNames(actual, supportedAzureRegions);
         Assert.assertEquals("North Europe", actual.getDefaultRegion());

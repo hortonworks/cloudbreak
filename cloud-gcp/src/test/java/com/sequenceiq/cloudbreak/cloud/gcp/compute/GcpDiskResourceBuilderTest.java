@@ -129,7 +129,7 @@ class GcpDiskResourceBuilderTest {
                 .withPlatform("GCP")
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname");
+        CloudCredential cloudCredential = new CloudCredential(privateCrn, "credentialname", "account");
         cloudCredential.putParameter("projectId", "projectId");
 
         Location location = Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az"));

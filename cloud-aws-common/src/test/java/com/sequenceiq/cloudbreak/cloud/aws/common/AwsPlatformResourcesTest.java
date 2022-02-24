@@ -92,6 +92,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudNetworks;
 import com.sequenceiq.cloudbreak.cloud.model.CloudRegions;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Location;
 import com.sequenceiq.cloudbreak.cloud.model.database.CloudDatabaseServerSslCertificate;
@@ -153,7 +154,7 @@ public class AwsPlatformResourcesTest {
     @Mock
     private AmazonDynamoDBClient amazonDynamoDB;
 
-    private CloudCredential cloudCredential;
+    private ExtendedCloudCredential cloudCredential;
 
     private com.sequenceiq.cloudbreak.cloud.model.Region region;
 
@@ -190,7 +191,14 @@ public class AwsPlatformResourcesTest {
         ReflectionTestUtils.setField(underTest, "enabledRegions", Set.of(region));
         ReflectionTestUtils.setField(underTest, "enabledAvailabilityZones", Set.of(availabilityZone(AZ_NAME)));
 
-        cloudCredential = new CloudCredential("crn", "aws-credential");
+        cloudCredential = new ExtendedCloudCredential(
+                new CloudCredential("crn", "aws-credential", "account"),
+                "AWS",
+                null,
+                "crn",
+                "id",
+                new ArrayList<>());
+
     }
 
     private InstanceTypeInfo getInstanceTypeInfo(String name) {
@@ -529,7 +537,7 @@ public class AwsPlatformResourcesTest {
         CloudContext cloudContext = new Builder().withLocation(Location.location(region, availabilityZone(AZ_NAME))).build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("m5.2xlarge"));
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("m5.2xlarge"), List.of());
 
         assertEquals(2, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
@@ -541,14 +549,14 @@ public class AwsPlatformResourcesTest {
         CloudContext cloudContext = new Builder().withLocation(Location.location(region, availabilityZone(AZ_NAME))).build();
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, cloudCredential);
 
-        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"));
+        InstanceStoreMetadata instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, Collections.singletonList("unsupported"), List.of());
 
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("unsupported"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("unsupported"));
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("m5.2xlarge"));
 
-        instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>());
+        instanceStoreMetadata = underTest.collectInstanceStorageCount(ac, new ArrayList<>(), List.of());
 
         assertNull(instanceStoreMetadata.mapInstanceTypeToInstanceStoreCount("m5.2xlarge"));
         assertEquals(0, instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled("m5.2xlarge"));

@@ -33,6 +33,7 @@ import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsAuthenticator;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsDefaultZoneProvider;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsEnvironmentVariableChecker;
@@ -109,6 +110,9 @@ public class AwsStorageValidatorsTest {
     @MockBean
     private AwsPlatformResources awsPlatformResources;
 
+    @MockBean
+    private EntitlementService entitlementService;
+
     private AuthenticatedContext authenticatedContext;
 
     @BeforeEach
@@ -122,7 +126,7 @@ public class AwsStorageValidatorsTest {
                 .withLocation(Location.location(Region.region("region"), AvailabilityZone.availabilityZone("az")))
                 .withAccountId("account")
                 .build();
-        CloudCredential cloudCredential = null;
+        CloudCredential cloudCredential = new CloudCredential();
         when(awsEncodedAuthorizationFailureMessageDecoder.decodeAuthorizationFailureMessageIfNeeded(any(), anyString(), anyString()))
                 .thenAnswer(invocation -> invocation.getArgument(2));
         authenticatedContext = new AuthenticatedContext(context, cloudCredential);
@@ -151,6 +155,7 @@ public class AwsStorageValidatorsTest {
         Map<String, Set<VmType>> responses = Map.of("az", Set.of(storageType, noStorageType));
         cloudVmTypes.setCloudVmResponses(responses);
         when(awsPlatformResources.virtualMachines(any(), eq(Region.region("region")), any())).thenReturn(cloudVmTypes);
+        when(entitlementService.getEntitlements(any())).thenReturn(new ArrayList<>());
         Assertions.assertThrows(CloudConnectorException.class,
                 () -> awsStorageValidatorUnderTest.validate(authenticatedContext, cloudStack),
                 "The following instance types does not support instance storage: [noStorage]");

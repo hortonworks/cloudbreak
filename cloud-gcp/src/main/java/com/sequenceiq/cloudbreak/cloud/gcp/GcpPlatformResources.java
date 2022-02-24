@@ -52,7 +52,6 @@ import com.google.api.services.iam.v1.Iam;
 import com.google.api.services.iam.v1.model.ListServiceAccountsResponse;
 import com.google.common.base.Strings;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
-import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpCloudKMSFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpComputeFactory;
 import com.sequenceiq.cloudbreak.cloud.gcp.client.GcpIamFactory;
@@ -60,7 +59,6 @@ import com.sequenceiq.cloudbreak.cloud.gcp.util.GcpStackUtil;
 import com.sequenceiq.cloudbreak.cloud.model.AvailabilityZone;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
@@ -74,6 +72,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
 import com.sequenceiq.cloudbreak.cloud.model.Coordinate;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecification;
 import com.sequenceiq.cloudbreak.cloud.model.RegionCoordinateSpecifications;
@@ -83,6 +82,7 @@ import com.sequenceiq.cloudbreak.cloud.model.VmTypeMeta.VmTypeMetaBuilder;
 import com.sequenceiq.cloudbreak.cloud.model.nosql.CloudNoSqlTables;
 import com.sequenceiq.cloudbreak.cloud.model.resourcegroup.CloudResourceGroups;
 import com.sequenceiq.cloudbreak.common.json.JsonUtil;
+import com.sequenceiq.cloudbreak.filter.MinimalHardwareFilter;
 import com.sequenceiq.cloudbreak.service.CloudbreakResourceReaderService;
 
 @Service
@@ -152,7 +152,8 @@ public class GcpPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.getName(),
-                                regionCoordinateSpecification.isK8sSupported()));
+                                regionCoordinateSpecification.isK8sSupported(),
+                                regionCoordinateSpecification.getEntitlements()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -161,7 +162,7 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
+    public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) throws Exception {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
@@ -281,12 +282,12 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudSshKeys sshKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudSshKeys();
     }
 
     @Override
-    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) throws IOException {
+    public CloudSecurityGroups securityGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) throws IOException {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
@@ -330,7 +331,8 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception {
+    public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded) throws Exception {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
@@ -388,14 +390,14 @@ public class GcpPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudVmTypes cloudVmTypes = getCloudVmTypes(cloudCredential, region, filters);
         return new CloudVmTypes(cloudVmTypes.getCloudVmResponses(), cloudVmTypes.getDefaultCloudVmResponses());
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
-    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
         Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
@@ -418,7 +420,7 @@ public class GcpPlatformResources implements PlatformResources {
         return new CloudVmTypes(returnVmResponses, cloudVmTypes.getDefaultCloudVmResponses());
     }
 
-    private CloudVmTypes getCloudVmTypes(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    private CloudVmTypes getCloudVmTypes(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Compute compute = gcpComputeFactory.buildCompute(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
 
@@ -463,17 +465,17 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudGateWays gateways(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudGateWays();
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudIpPools publicIpPool(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudAccessConfigs accessConfigs(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         Iam iam = gcpIamFactory.buildIam(cloudCredential);
         String projectId = gcpStackUtil.getProjectId(cloudCredential);
         Set<CloudAccessConfig> collect = new HashSet<>();
@@ -501,7 +503,7 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudEncryptionKeys encryptionKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudKMS cloudKMS;
         try {
             cloudKMS = gcpCloudKMSFactory.buildCloudKMS(cloudCredential);
@@ -521,13 +523,13 @@ public class GcpPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudNoSqlTables noSqlTables(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         LOGGER.warn("NoSQL table list is not supported on 'GCP'");
         return new CloudNoSqlTables(new ArrayList<>());
     }
 
     @Override
-    public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudResourceGroups resourceGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudResourceGroups();
     }
 

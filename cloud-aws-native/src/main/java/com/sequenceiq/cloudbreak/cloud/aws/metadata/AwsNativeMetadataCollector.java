@@ -27,6 +27,7 @@ import com.amazonaws.services.ec2.model.DescribeInstancesResult;
 import com.amazonaws.services.ec2.model.Instance;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersRequest;
 import com.amazonaws.services.elasticloadbalancingv2.model.DescribeLoadBalancersResult;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.MetadataCollector;
 import com.sequenceiq.cloudbreak.cloud.aws.common.AwsPlatformResources;
 import com.sequenceiq.cloudbreak.cloud.aws.common.CommonAwsClient;
@@ -71,6 +72,9 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
     @Inject
     private AwsNativeLbMetadataCollector awsNativeLbMetadataCollector;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Value("${cb.aws.native.instance.fetch.max.item:100}")
     private int instanceFetchMaxBatchSize;
 
@@ -114,7 +118,8 @@ public class AwsNativeMetadataCollector implements MetadataCollector {
 
     @Override
     public InstanceStoreMetadata collectInstanceStorageCount(AuthenticatedContext ac, List<String> instanceTypes) {
-        return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes);
+        return awsPlatformResources.collectInstanceStorageCount(ac, instanceTypes,
+                entitlementService.getEntitlements(ac.getCloudCredential().getAccountId()));
     }
 
     private List<CloudVmMetaDataStatus> collectInstances(List<CloudInstance> vms, List<CloudResource> resources, AmazonEc2Client ec2Client) {

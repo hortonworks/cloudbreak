@@ -42,7 +42,6 @@ import com.sequenceiq.cloudbreak.cloud.context.AuthenticatedContext;
 import com.sequenceiq.cloudbreak.cloud.exception.CloudConnectorException;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfig;
 import com.sequenceiq.cloudbreak.cloud.model.CloudAccessConfigs;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudGateWays;
 import com.sequenceiq.cloudbreak.cloud.model.CloudIpPools;
@@ -54,6 +53,7 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudSecurityGroups;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSshKeys;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
 import com.sequenceiq.cloudbreak.cloud.model.CloudVmTypes;
+import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.InstanceStoreMetadata;
 import com.sequenceiq.cloudbreak.cloud.model.Region;
 import com.sequenceiq.cloudbreak.cloud.model.VmType;
@@ -105,7 +105,7 @@ public class AzurePlatformResources implements PlatformResources {
     private AzureCloudSubnetParametersService azureCloudSubnetParametersService;
 
     @Override
-    public CloudNetworks networks(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudNetworks networks(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudNetwork>> result = new HashMap<>();
         String networkId = filters.get("networkId");
@@ -168,12 +168,12 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudSshKeys sshKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudSshKeys sshKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudSshKeys();
     }
 
     @Override
-    public CloudSecurityGroups securityGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudSecurityGroups securityGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Map<String, Set<CloudSecurityGroup>> result = new HashMap<>();
         PlatformResourceSecurityGroupFilterView filter = new PlatformResourceSecurityGroupFilterView(filters);
@@ -219,15 +219,16 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
+    public CloudRegions regions(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Collection<com.microsoft.azure.management.resources.fluentcore.arm.Region> azureRegions = client.getRegion(region);
-        return azureRegionProvider.regions(region, azureRegions);
+        return azureRegionProvider.regions(region, azureRegions, cloudCredential.getEntitlements());
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachines(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         AzureClient client = azureClientService.getClient(cloudCredential);
         Set<VirtualMachineSize> vmTypes = client.getVmTypes(region.value());
 
@@ -266,7 +267,7 @@ public class AzurePlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName() + 'distrox'")
-    public CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachinesForDistroX(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudVmTypes cloudVmTypes = virtualMachines(cloudCredential, region, filters);
         Map<String, Set<VmType>> returnVmResponses = new HashMap<>();
         Map<String, Set<VmType>> cloudVmResponses = cloudVmTypes.getCloudVmResponses();
@@ -290,17 +291,17 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudGateWays gateways(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudGateWays gateways(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudGateWays();
     }
 
     @Override
-    public CloudIpPools publicIpPool(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudIpPools publicIpPool(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudIpPools();
     }
 
     @Override
-    public CloudAccessConfigs accessConfigs(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudAccessConfigs accessConfigs(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         CloudAccessConfigs cloudAccessConfigs = new CloudAccessConfigs(new HashSet<>());
         AzureClient client = azureClientService.getClient(cloudCredential);
         List<Identity> identities;
@@ -324,18 +325,18 @@ public class AzurePlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudEncryptionKeys encryptionKeys(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudEncryptionKeys encryptionKeys(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         return new CloudEncryptionKeys(new HashSet<>());
     }
 
     @Override
-    public CloudNoSqlTables noSqlTables(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudNoSqlTables noSqlTables(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         LOGGER.warn("NoSQL table list is not supported on 'AZURE'");
         return new CloudNoSqlTables(new ArrayList<>());
     }
 
     @Override
-    public CloudResourceGroups resourceGroups(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudResourceGroups resourceGroups(ExtendedCloudCredential cloudCredential, Region region, Map<String, String> filters) {
         PagedList<ResourceGroup> resourceGroupPagedList = azureClientService.getClient(cloudCredential).getResourceGroups().list();
         resourceGroupPagedList.loadAll();
         List<CloudResourceGroup> resourceGroups = resourceGroupPagedList.stream().map(rg -> new CloudResourceGroup(rg.name())).collect(Collectors.toList());

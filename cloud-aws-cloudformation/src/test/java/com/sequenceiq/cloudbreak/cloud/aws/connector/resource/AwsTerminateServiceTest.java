@@ -222,7 +222,7 @@ public class AwsTerminateServiceTest {
                 .withLocation(location)
                 .withWorkspaceId(WORKSPACE_ID)
                 .build();
-        CloudCredential credential = new CloudCredential("crn", null);
+        CloudCredential credential = new CloudCredential("crn", null, "account");
         AuthenticatedContext ac = new AuthenticatedContext(cloudContext, credential);
         ac.putParameter(AmazonEc2Client.class, ec2Client);
         return ac;

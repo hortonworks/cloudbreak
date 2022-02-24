@@ -100,7 +100,8 @@ public class AzureCredentialConnector implements CredentialConnector {
     }
 
     @Override
-    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId, String deploymentAddress, CredentialType type) {
+    public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
+        String deploymentAddress, CredentialType type) {
         String credentialCreationCommand = appCreationCommand.generateEnvironmentCredentialCommand(deploymentAddress);
         String auditCredentialCreationCommand = appCreationCommand.generateAuditCredentialCommand(deploymentAddress);
         String encodedCommand;

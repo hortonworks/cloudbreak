@@ -72,6 +72,8 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     private Long created;
 
+    private String accountId;
+
     @ApiModelProperty(EnvironmentModelDescription.TUNNEL)
     private Tunnel tunnel;
 
@@ -397,6 +399,14 @@ public abstract class EnvironmentBaseResponse implements TaggedResponse {
 
     public void setEnvironmentDomain(String environmentDomain) {
         this.environmentDomain = environmentDomain;
+    }
+
+    public String getAccountId() {
+        return accountId;
+    }
+
+    public void setAccountId(String accountId) {
+        this.accountId = accountId;
     }
 
     @Override

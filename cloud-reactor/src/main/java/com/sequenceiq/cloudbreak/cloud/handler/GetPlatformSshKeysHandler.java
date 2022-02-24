@@ -39,7 +39,7 @@ public class GetPlatformSshKeysHandler implements CloudPlatformEventHandler<GetP
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
             CloudSshKeys cloudSshKeys = cloudPlatformConnectors.get(cloudPlatformVariant)
-                    .platformResources().sshKeys(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                    .platformResources().sshKeys(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformSshKeysResult getPlatformSshKeysResult = new GetPlatformSshKeysResult(request.getResourceId(), cloudSshKeys);
             request.getResult().onNext(getPlatformSshKeysResult);
             LOGGER.debug("Query platform networks types finished.");

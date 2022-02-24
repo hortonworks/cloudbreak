@@ -39,7 +39,7 @@ public class GetPlatformNoSqlTablesHandler implements CloudPlatformEventHandler<
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
             CloudNoSqlTables cloudNoSqlTables = cloudPlatformConnectors.get(cloudPlatformVariant)
-                    .platformResources().noSqlTables(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                    .platformResources().noSqlTables(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformNoSqlTablesResult result = new GetPlatformNoSqlTablesResult(request.getResourceId(), cloudNoSqlTables);
             request.getResult().onNext(result);
             LOGGER.debug("Query platform NoSQL tables finished.");

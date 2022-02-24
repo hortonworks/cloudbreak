@@ -104,7 +104,7 @@ public class StackUtilTest {
     public void testGetCloudCredential() {
         Stack stack = new Stack();
         stack.setEnvironmentCrn("envCrn");
-        CloudCredential cloudCredential = new CloudCredential("123", "CloudCred");
+        CloudCredential cloudCredential = new CloudCredential("123", "CloudCred", "account");
 
         when(credentialClientService.getByEnvironmentCrn(anyString())).thenReturn(Credential.builder().build());
         when(credentialToCloudCredentialConverter.convert(any(Credential.class))).thenReturn(cloudCredential);
