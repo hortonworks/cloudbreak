@@ -205,7 +205,7 @@ public class ClouderaManagerClusterCreationSetupService {
                     .withParcel(stack.get(osType));
             Set<ClouderaManagerProduct> products = Sets.newHashSet(cmProduct);
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(products, cluster.getBlueprint());
+            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(getStackId(cluster), products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
             return filteredProducts;
         } else {
@@ -214,10 +214,14 @@ public class ClouderaManagerClusterCreationSetupService {
                     .map(json -> json.getSilent(ClouderaManagerProduct.class))
                     .collect(Collectors.toSet());
             LOGGER.info("Product list before filter out products by blueprint: {}", products);
-            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(products, cluster.getBlueprint());
+            Set<ClouderaManagerProduct> filteredProducts = parcelFilterService.filterParcelsByBlueprint(getStackId(cluster), products, cluster.getBlueprint());
             LOGGER.info("Product list after filter out products by blueprint: {}", filteredProducts);
             return filteredProducts;
         }
+    }
+
+    private Long getStackId(Cluster cluster) {
+        return cluster.getStack().getId();
     }
 
     private DefaultCDHInfo getDefaultCDHInfo(Long workspaceId, String blueprintCdhVersion, String osType, String cloudPlatform,
