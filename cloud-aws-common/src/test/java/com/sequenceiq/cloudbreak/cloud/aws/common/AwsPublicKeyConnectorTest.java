@@ -116,7 +116,7 @@ class AwsPublicKeyConnectorTest {
     }
 
     private PublicKeyRegisterRequest generateRegisterRequest() {
-        CloudCredential credential = new CloudCredential("credId", "credName");
+        CloudCredential credential = new CloudCredential("credId", "credName", "account");
         return PublicKeyRegisterRequest.builder()
                 .withCloudPlatform("cloudPlatform")
                 .withPublicKey(PUBLIC_KEY)
@@ -127,7 +127,7 @@ class AwsPublicKeyConnectorTest {
     }
 
     private PublicKeyUnregisterRequest generateUnregisterRequest() {
-        CloudCredential credential = new CloudCredential("credId", "credName");
+        CloudCredential credential = new CloudCredential("credId", "credName", "account");
         return PublicKeyUnregisterRequest.builder()
                 .withCloudPlatform("cloudPlatform")
                 .withPublicKeyId(PUBLIC_KEY_ID)

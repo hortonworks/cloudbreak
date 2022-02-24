@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
@@ -66,7 +67,8 @@ public class YarnPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.getName(),
-                                regionCoordinateSpecification.isK8sSupported()));
+                                regionCoordinateSpecification.isK8sSupported(),
+                                regionCoordinateSpecification.getEntitlements()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -90,12 +92,13 @@ public class YarnPlatformResources implements PlatformResources {
     }
 
     @Override
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded, List<String> entitlements) {
         return new CloudRegions(Collections.emptyMap(), Collections.emptyMap(), regionCoordinates, "", Boolean.FALSE);
     }
 
     @Override
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
         return new CloudVmTypes();
     }
 

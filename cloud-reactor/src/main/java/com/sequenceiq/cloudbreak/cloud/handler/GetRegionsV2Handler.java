@@ -1,11 +1,14 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
+import java.util.List;
+
 import javax.inject.Inject;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsRequestV2;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformRegionsResultV2;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
@@ -24,6 +27,9 @@ public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatfor
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public Class<GetPlatformRegionsRequestV2> type() {
         return GetPlatformRegionsRequestV2.class;
@@ -38,9 +44,10 @@ public class GetRegionsV2Handler implements CloudPlatformEventHandler<GetPlatfor
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
             Region region = Region.region(request.getRegion());
+            List<String> entitlements = entitlementService.getEntitlements(request.getExtendedCloudCredential().getAccountId());
             CloudRegions cloudRegions = cloudPlatformConnectors.get(cloudPlatformVariant)
                     .platformResources()
-                    .regions(request.getCloudCredential(), region, request.getFilters(), request.isAvailabilityZonesNeeded());
+                    .regions(request.getCloudCredential(), region, request.getFilters(), request.isAvailabilityZonesNeeded(), entitlements);
             GetPlatformRegionsResultV2 getPlatformRegionsResultV2 = new GetPlatformRegionsResultV2(request.getResourceId(), cloudRegions);
             request.getResult().onNext(getPlatformRegionsResultV2);
             LOGGER.debug("Query platform regions types finished.");

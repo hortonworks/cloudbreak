@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud;
 
+import java.util.List;
 import java.util.Map;
 
 import com.google.common.base.Strings;
@@ -59,7 +60,8 @@ public interface PlatformResources {
      *                                Skipping this fetching can speed up processing the request and results in fewer API calls (in case of AWS).
      * @return the {@link CloudRegions} contains every region per region
      */
-    CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) throws Exception;
+    CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded, List<String> entitlements) throws Exception;
 
     /**
      * Return the virtual machines in the defined region
@@ -68,7 +70,7 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
      */
-    CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters);
+    CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements);
 
     /**
      * Return the virtual machines in the defined region
@@ -77,8 +79,8 @@ public interface PlatformResources {
      * @param filters the filter statement
      * @return the {@link CloudVmTypes} contains every vmtype per region
      */
-    default CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
-        return virtualMachines(cloudCredential, region, filters);
+    default CloudVmTypes virtualMachinesForDistroX(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
+        return virtualMachines(cloudCredential, region, filters, entitlements);
     }
 
     /**

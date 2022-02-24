@@ -33,9 +33,9 @@ public class CredentialService {
 
         if (credentialResponse.getAzure() != null) {
             return new Credential(credentialResponse.getCrn(), credentialResponse.getName(), attributes,
-                    new Credential.AzureParameters(credentialResponse.getAzure().getSubscriptionId()));
+                    new Credential.AzureParameters(credentialResponse.getAzure().getSubscriptionId()), credentialResponse.getAccountId());
         } else {
-            return new Credential(credentialResponse.getCrn(), credentialResponse.getName(), attributes);
+            return new Credential(credentialResponse.getCrn(), credentialResponse.getName(), attributes, credentialResponse.getAccountId());
         }
     }
 }

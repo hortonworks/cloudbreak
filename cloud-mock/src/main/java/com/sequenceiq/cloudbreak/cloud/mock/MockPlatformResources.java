@@ -131,7 +131,8 @@ public class MockPlatformResources implements PlatformResources {
                                 regionCoordinateSpecification.getLatitude(),
                                 regionCoordinateSpecification.getDisplayName(),
                                 regionCoordinateSpecification.getName(),
-                                regionCoordinateSpecification.isK8sSupported()));
+                                regionCoordinateSpecification.isK8sSupported(),
+                                regionCoordinateSpecification.getEntitlements()));
             }
         } catch (IOException ignored) {
             return regionCoordinates;
@@ -194,13 +195,14 @@ public class MockPlatformResources implements PlatformResources {
 
     @Override
     @Cacheable(cacheNames = "cloudResourceRegionCache", key = "#cloudCredential?.id")
-    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters, boolean availabilityZonesNeeded) {
+    public CloudRegions regions(CloudCredential cloudCredential, Region region, Map<String, String> filters,
+        boolean availabilityZonesNeeded, List<String> entitlements) {
         return new CloudRegions(regions, regionDisplayNames, regionCoordinates, defaultRegion, true);
     }
 
     @Override
     @Cacheable(cacheNames = "cloudResourceVmTypeCache", key = "#cloudCredential?.id + #region.getRegionName()")
-    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters) {
+    public CloudVmTypes virtualMachines(CloudCredential cloudCredential, Region region, Map<String, String> filters, List<String> entitlements) {
         return new CloudVmTypes(vmTypes, defaultVmTypes);
     }
 

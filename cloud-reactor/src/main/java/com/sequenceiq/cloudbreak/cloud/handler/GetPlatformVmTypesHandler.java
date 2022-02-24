@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.PlatformResources;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesRequest;
 import com.sequenceiq.cloudbreak.cloud.event.platform.GetPlatformVmTypesResult;
@@ -26,6 +27,9 @@ public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetP
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;
 
+    @Inject
+    private EntitlementService entitlementService;
+
     @Override
     public Class<GetPlatformVmTypesRequest> type() {
         return GetPlatformVmTypesRequest.class;
@@ -45,14 +49,20 @@ public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetP
             if (CdpResourceType.DATAHUB.equals(request.getCdpResourceType())) {
                 if (request.hasEnableDistroxInstanceTypesEntitlement()) {
                     platformVirtualMachinesJson = platformResources
-                            .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                            .virtualMachines(
+                                    request.getCloudCredential(),
+                                    Region.region(request.getRegion()),
+                                    request.getFilters(),
+                                    entitlementService.getEntitlements(request.getCloudCredential().getAccountId()));
                 } else {
                     platformVirtualMachinesJson = platformResources
-                            .virtualMachinesForDistroX(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                            .virtualMachinesForDistroX(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters(),
+                                    entitlementService.getEntitlements(request.getCloudCredential().getAccountId()));
                 }
             } else {
                 platformVirtualMachinesJson = platformResources
-                        .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                        .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters(),
+                                entitlementService.getEntitlements(request.getCloudCredential().getAccountId()));
             }
             GetPlatformVmTypesResult getPlatformSecurityGroupsResult = new GetPlatformVmTypesResult(request.getResourceId(), platformVirtualMachinesJson);
             request.getResult().onNext(getPlatformSecurityGroupsResult);
