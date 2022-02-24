@@ -88,6 +88,11 @@
             "refName" : "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
             "roleType" : "STREAMS_REPLICATION_MANAGER_DRIVER",
             "base" : true
+          },
+          {
+            "refName" : "streams_replication_manager-GATEWAY-BASE",
+            "roleType" : "GATEWAY",
+            "base" : true
           }
         ]
       },
@@ -118,7 +123,8 @@
         "roleConfigGroupsRefNames": [
           "zookeeper-SERVER-BASE",
           "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
-          "cruise_control-CRUISE_CONTROL_SERVER-BASE"
+          "cruise_control-CRUISE_CONTROL_SERVER-BASE",
+          "streams_replication_manager-GATEWAY-BASE"
         ]
       },
       {
@@ -128,7 +134,8 @@
           "zookeeper-SERVER-BASE",
           "schemaregistry-SCHEMA_REGISTRY_SERVER-BASE",
           "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_SERVER-BASE",
-          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE"
+          "streams_messaging_manager-STREAMS_MESSAGING_MANAGER_UI-BASE",
+          "streams_replication_manager-GATEWAY-BASE"
         ]
       },
       {
@@ -152,7 +159,8 @@
         "cardinality": 0,
         "roleConfigGroupsRefNames": [
           "streams_replication_manager-STREAMS_REPLICATION_MANAGER_SERVICE-BASE",
-          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE"
+          "streams_replication_manager-STREAMS_REPLICATION_MANAGER_DRIVER-BASE",
+          "streams_replication_manager-GATEWAY-BASE"
         ]
       },
       {
