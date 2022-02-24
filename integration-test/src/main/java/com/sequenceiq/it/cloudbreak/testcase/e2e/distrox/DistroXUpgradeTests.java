@@ -15,11 +15,11 @@ import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.dto.distrox.DistroXTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
-import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
+import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
+import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
 
 public class DistroXUpgradeTests extends AbstractE2ETest {
 
@@ -42,18 +42,24 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @UseSpotInstances
-    @Description(given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
-            when = "upgrade called on the DistroX cluster", then = "DistroX upgrade should be successful, the cluster should be up and running")
+    @Description(
+            given = "there is a running Cloudbreak, and an environment with SDX and DistroX cluster in available state",
+            when = "upgrade called on the DistroX cluster",
+            then = "DistroX upgrade should be successful, the cluster should be up and running")
     public void testDistroXUpgrade(TestContext testContext) {
 
         String sdxName = resourcePropertyProvider().getName();
         String distroXName = resourcePropertyProvider().getName();
         String currentRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeCurrentVersion();
         String targetRuntimeVersion = commonClusterManagerProperties.getUpgrade().getDistroXUpgradeTargetVersion();
+        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
+        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
+
         testContext
                 .given(sdxName, SdxTestDto.class)
                 .withCloudStorage()
                 .withRuntimeVersion(currentRuntimeVersion)
+                .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdxName))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
                 .awaitForHealthyInstances()
@@ -66,26 +72,6 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE)
                 .awaitForHealthyInstances()
                 .then(new AwsAvailabilityZoneAssertion())
-                .validate();
-        testContext
-                .given(distroXName, DistroXTestDto.class)
-                .when(distroXTestClient.stop(), key(distroXName))
-                .await(STACK_STOPPED)
-                .validate();
-        testContext
-                .given(SdxUpgradeTestDto.class)
-                .withReplaceVms(SdxUpgradeReplaceVms.DISABLED)
-                .withRuntime(targetRuntimeVersion)
-                .given(sdxName, SdxTestDto.class)
-                .when(sdxTestClient.upgrade(), key(sdxName))
-                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
-                .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
-                .awaitForHealthyInstances()
-                .validate();
-        testContext
-                .given(distroXName, DistroXTestDto.class)
-                .when(distroXTestClient.start(), key(distroXName))
-                .await(STACK_AVAILABLE)
                 .validate();
         testContext
                 .given(DistroXUpgradeTestDto.class)
