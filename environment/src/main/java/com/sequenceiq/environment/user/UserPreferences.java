@@ -22,15 +22,19 @@ public class UserPreferences implements Serializable {
     @Column(name = "externalid")
     private String externalId;
 
+    @Column(name = "auditexternalid")
+    private String auditExternalId;
+
     @Column(name = "user_crn")
     private String userCrn;
 
     public UserPreferences() {
     }
 
-    public UserPreferences(String externalId, String userCrn) {
+    public UserPreferences(String externalId, String auditExternalId, String userCrn) {
         this.externalId = externalId;
         this.userCrn = userCrn;
+        this.auditExternalId = auditExternalId;
     }
 
     public Long getId() {
@@ -55,5 +59,13 @@ public class UserPreferences implements Serializable {
 
     public void setUserCrn(String userCrn) {
         this.userCrn = userCrn;
+    }
+
+    public String getAuditExternalId() {
+        return auditExternalId;
+    }
+
+    public void setAuditExternalId(String auditExternalId) {
+        this.auditExternalId = auditExternalId;
     }
 }

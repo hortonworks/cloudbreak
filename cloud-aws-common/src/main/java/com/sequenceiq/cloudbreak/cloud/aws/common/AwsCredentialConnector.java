@@ -126,19 +126,23 @@ public class AwsCredentialConnector implements CredentialConnector {
 
     @Override
     public CredentialPrerequisitesResponse getPrerequisites(CloudContext cloudContext, String externalId,
-        String deploymentAddress, CredentialType type) {
+        String auditExternalId, String deploymentAddress, CredentialType type) {
         String policyJson;
+        String actualExternalId;
         switch (type) {
             case ENVIRONMENT:
                 policyJson = awsPlatformParameters.getCredentialPoliciesJson();
+                actualExternalId = externalId;
                 break;
             case AUDIT:
                 policyJson = awsPlatformParameters.getAuditPoliciesJson();
+                actualExternalId = auditExternalId;
                 break;
             default:
                 policyJson = null;
+                actualExternalId = null;
         }
-        AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(externalId, policyJson);
+        AwsCredentialPrerequisites awsPrerequisites = new AwsCredentialPrerequisites(actualExternalId, policyJson);
         awsPrerequisites.setPolicies(collectNecessaryPolicies());
         return new CredentialPrerequisitesResponse(cloudContext.getPlatform().value(), accountId, awsPrerequisites);
     }
