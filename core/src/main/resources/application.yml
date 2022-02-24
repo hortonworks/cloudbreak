@@ -377,7 +377,6 @@ cb:
           7.1.0 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
           7.1.0 - Flow Management Heavy Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management;
           7.1.0 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.1.0 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.1.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
           7.1.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
           7.1.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small
@@ -387,7 +386,6 @@ cb:
           7.2.0 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.0 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.0 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.0 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.2.0 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas=cdp-sdx;
           7.2.0 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
           7.2.0 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small;
@@ -401,7 +399,6 @@ cb:
           7.2.1 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.1 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.1 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.1 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.2.1 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
           7.2.1 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small;
           7.2.1 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
@@ -415,7 +412,6 @@ cb:
           7.2.2 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.2 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.2 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.2 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.2.2 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming;
           7.2.2 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager=cdp-streaming-small;
           7.2.2 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
@@ -430,7 +426,6 @@ cb:
           7.2.6 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.6 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.6 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.6 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.2.6 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming;
           7.2.6 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming-small;
           7.2.6 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
@@ -445,7 +440,6 @@ cb:
           7.2.7 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.7 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.7 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.7 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.2.7 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming;
           7.2.7 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming-small;
           7.2.7 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
@@ -460,7 +454,6 @@ cb:
           7.2.8 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.8 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.8 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.8 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.2.8 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming;
           7.2.8 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming-small;
           7.2.8 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
@@ -475,7 +468,6 @@ cb:
           7.2.9 - Data Engineering: Apache Spark3=cdp-data-engineering-spark3;
           7.2.9 - Data Mart: Apache Impala, Hue=cdp-data-mart;
           7.2.9 - Real-time Data Mart: Apache Impala, Hue, Apache Kudu, Apache Spark=cdp-rt-data-mart;
-          7.2.9 - Operational Database: Apache HBase, Phoenix=cdp-opdb;
           7.2.9 - Streams Messaging Heavy Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming;
           7.2.9 - Streams Messaging Light Duty: Apache Kafka, Schema Registry, Streams Messaging Manager, Streams Replication Manager=cdp-streaming-small;
           7.2.9 - Flow Management Light Duty with Apache NiFi, Apache NiFi Registry=cdp-flow-management-small;
