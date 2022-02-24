@@ -53,6 +53,7 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Resource;
+import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
@@ -77,6 +78,7 @@ import com.sequenceiq.cloudbreak.service.rdsconfig.RdsConfigService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
+import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -151,6 +153,9 @@ public class ClusterRepairServiceTest {
     @Mock
     private FreeipaService freeipaService;
 
+    @Mock
+    private StackStopRestrictionService stackStopRestrictionService;
+
     private Stack stack;
 
     private Cluster cluster;
@@ -190,6 +195,7 @@ public class ClusterRepairServiceTest {
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairHostGroups(1L, Set.of("hostGroup1"), false));
 
@@ -239,6 +245,7 @@ public class ClusterRepairServiceTest {
         DatabaseServerV4Response databaseServerV4Response = new DatabaseServerV4Response();
         databaseServerV4Response.setStatus(AVAILABLE);
         when(redbeamsClientService.getByCrn(eq("dbCrn"))).thenReturn(databaseServerV4Response);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
@@ -264,6 +271,7 @@ public class ClusterRepairServiceTest {
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
 
         Result result = ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairWithDryRun(stack.getId()));
 
@@ -354,6 +362,7 @@ public class ClusterRepairServiceTest {
         when(stackService.getByIdWithListsInTransaction(1L)).thenReturn(stack);
         when(stack.getInstanceMetaDataAsList()).thenReturn(List.of(instance1md));
         when(resourceService.findByStackIdAndType(stack.getId(), volumeSet.getResourceType())).thenReturn(List.of(volumeSet));
+        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.repairNodes(1L, Set.of("instanceId1"), false, false));
         verify(resourceService).findByStackIdAndType(stack.getId(), volumeSet.getResourceType());
@@ -543,6 +552,7 @@ public class ClusterRepairServiceTest {
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
         HostGroup hostGroup1 = new HostGroup();
         hostGroup1.setName("idbroker");
         hostGroup1.setRecoveryMode(RecoveryMode.MANUAL);
@@ -579,6 +589,7 @@ public class ClusterRepairServiceTest {
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.NONE);
 
         String idbrokerGroupName = "idbroker";
         HostGroup idbrokerHg = new HostGroup();
@@ -587,6 +598,7 @@ public class ClusterRepairServiceTest {
         Set<VolumeTemplate> volumeTemplateSet = Set.of(createVolumeTemplate(AwsDiskType.Standard), createVolumeTemplate(AwsDiskType.Ephemeral));
         InstanceGroup idbrokerIg = createUnhealthyInstanceGroup(idbrokerGroupName, volumeTemplateSet);
         idbrokerHg.setInstanceGroup(idbrokerIg);
+        stack.setInstanceGroups(Set.of(idbrokerIg));
         when(hostGroupService.getByCluster(CLUSTER_ID)).thenReturn(Set.of(idbrokerHg));
 
         ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> {
@@ -603,6 +615,7 @@ public class ClusterRepairServiceTest {
         when(freeipaService.checkFreeipaRunning(stack.getEnvironmentCrn()))
                 .thenReturn(true);
         when(environmentService.environmentStatusInDesiredState(stack, Set.of(EnvironmentStatus.AVAILABLE))).thenReturn(true);
+        when(stackStopRestrictionService.isInfrastructureStoppable(stack)).thenReturn(StopRestrictionReason.EPHEMERAL_VOLUMES);
 
         String idbrokerGroupName = "idbroker";
         HostGroup idbrokerHg = new HostGroup();
