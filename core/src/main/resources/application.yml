@@ -54,7 +54,7 @@ spring:
         order_inserts: true
         order_updates: true
   lifecycle:
-    timeout-per-shutdown-phase: 60
+    timeout-per-shutdown-phase: 60s
 
 rest:
   debug: false

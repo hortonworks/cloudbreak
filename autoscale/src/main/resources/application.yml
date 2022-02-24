@@ -92,7 +92,7 @@ spring:
   datasource:
       maxActive: 30
   lifecycle:
-    timeout-per-shutdown-phase: 60
+    timeout-per-shutdown-phase: 60s
 
 secret:
   application: as/shared

@@ -226,7 +226,7 @@ spring:
     template-loader-path: file:/etc/redbeams,classpath:/
     prefer-file-system-access: false
   lifecycle:
-    timeout-per-shutdown-phase: 60
+    timeout-per-shutdown-phase: 60s
 
 rest:
   debug: false
