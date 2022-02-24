@@ -228,6 +228,7 @@ public class GcpCredentialConnectorTest {
         CredentialPrerequisitesResponse prerequisites = underTest.getPrerequisites(
                 authContext.getCloudContext(),
                 "externalId",
+                "auditExternalId",
                 "deploymentAddress",
                 CredentialType.ENVIRONMENT);
 

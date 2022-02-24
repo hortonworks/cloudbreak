@@ -29,8 +29,8 @@ import com.sequenceiq.cloudbreak.cloud.event.credential.InitCodeGrantFlowRespons
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginRequest;
 import com.sequenceiq.cloudbreak.cloud.event.credential.InteractiveLoginResult;
 import com.sequenceiq.cloudbreak.cloud.event.model.EventStatus;
-import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CDPServicePolicyVerificationResponses;
+import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CredentialStatus;
 import com.sequenceiq.cloudbreak.cloud.model.ExtendedCloudCredential;
