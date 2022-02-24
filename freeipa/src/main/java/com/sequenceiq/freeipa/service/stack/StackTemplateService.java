@@ -47,11 +47,11 @@ public class StackTemplateService {
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         GetPlatformTemplateRequest getPlatformTemplateRequest = new GetPlatformTemplateRequest(cloudContext, cloudCredential);
-        freeIpaFlowManager.notify(getPlatformTemplateRequest);
+        freeIpaFlowManager.notifyNonFlowEvent(getPlatformTemplateRequest);
         return getPlatformTemplateRequest;
     }
 
-    public String waitGetTemplate(Stack stack, GetPlatformTemplateRequest getPlatformTemplateRequest) {
+    public String waitGetTemplate(GetPlatformTemplateRequest getPlatformTemplateRequest) {
         try {
             GetPlatformTemplateResult res = getPlatformTemplateRequest.await();
             LOGGER.debug("Get template result: {}", res);

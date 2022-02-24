@@ -278,9 +278,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private AcceptResult handleFlowConflict(String key, Payload payload, String flowChainId, Set<FlowLogIdWithTypeAndTimestamp> flowLogItems) {
         AcceptResult acceptResult = null;
         Optional<FlowLog> initFlowLog = flowLogService.findAllByFlowIdOrderByCreatedDesc(flowLogItems.iterator().next().getFlowId())
-                .stream()
-                .sorted(Comparator.comparing(FlowLog::getCreated))
-                .findFirst();
+                .stream().min(Comparator.comparing(FlowLog::getCreated));
         if (initFlowLog.isPresent()) {
             LOGGER.info("Found previous init flow log: {}", initFlowLog.get());
             if (NullUtil.allNotNull(initFlowLog.get().getFlowChainId(), flowChainId)) {
