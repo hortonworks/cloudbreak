@@ -19,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import com.amazonaws.AmazonServiceException;
+import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.cloud.init.CloudPlatformConnectors;
 import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.CloudEncryptionKey;
@@ -61,9 +62,12 @@ class EncryptionKeyArnValidatorTest {
     @Mock
     private CloudCredential cloudCredential;
 
+    @Mock
+    private EntitlementService entitlementService;
+
     @BeforeEach
     void setUp() {
-        underTest = new EncryptionKeyArnValidator(credentialToCloudCredentialConverter, retryService, cloudPlatformConnectors);
+        underTest = new EncryptionKeyArnValidator(credentialToCloudCredentialConverter, retryService, cloudPlatformConnectors, entitlementService);
     }
 
     @Test

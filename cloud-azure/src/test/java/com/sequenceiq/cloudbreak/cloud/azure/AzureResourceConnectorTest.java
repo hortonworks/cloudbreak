@@ -135,7 +135,7 @@ public class AzureResourceConnectorTest {
         when(stack.getImage()).thenReturn(imageModel);
         when(ac.getCloudContext()).thenReturn(cloudContext);
         when(ac.getParameter(AzureClient.class)).thenReturn(client);
-        when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName"));
+        when(ac.getCloudCredential()).thenReturn(new CloudCredential("aCredentialId", "aCredentialName", "account"));
         when(azureUtils.getStackName(cloudContext)).thenReturn(STACK_NAME);
         when(azureStorage.getCustomImage(any(), any(), any())).thenReturn(image);
         when(deployment.exportTemplate()).thenReturn(deploymentExportResult);

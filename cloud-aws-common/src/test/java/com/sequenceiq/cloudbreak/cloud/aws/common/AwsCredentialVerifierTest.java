@@ -59,7 +59,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, false);
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", false);
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
@@ -118,7 +118,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, false);
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", false);
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
@@ -158,7 +158,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, false);
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", false);
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);
@@ -217,7 +217,7 @@ public class AwsCredentialVerifierTest {
         Map<String, Object> awsParameters = new HashMap<>();
         awsParameters.put("accessKey", "a");
         awsParameters.put("secretKey", "b");
-        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, false);
+        CloudCredential cloudCredential = new CloudCredential("id", "name", awsParameters, "acc", false);
 
         AmazonIdentityManagementClient amazonIdentityManagement = mock(AmazonIdentityManagementClient.class);
         when(awsClient.createAmazonIdentityManagement(any(AwsCredentialView.class))).thenReturn(amazonIdentityManagement);

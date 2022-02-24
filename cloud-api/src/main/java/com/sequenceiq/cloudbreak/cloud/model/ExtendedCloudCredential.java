@@ -1,5 +1,6 @@
 package com.sequenceiq.cloudbreak.cloud.model;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -13,8 +14,11 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     private final String accountId;
 
-    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description, String userCrn, String accountId) {
-        super(cloudCredential.getId(), cloudCredential.getName(), cloudCredential.isVerifyPermissions());
+    private final List<String> entitlements;
+
+    public ExtendedCloudCredential(CloudCredential cloudCredential, String cloudPlatform, String description,
+        String userCrn, String accountId, List<String> entitlements) {
+        super(cloudCredential.getId(), cloudCredential.getName(), accountId, cloudCredential.isVerifyPermissions());
         Map<String, Object> parameters = cloudCredential.getParameters();
         for (Entry<String, Object> parameter : parameters.entrySet()) {
             putParameter(parameter.getKey(), parameter.getValue());
@@ -23,6 +27,7 @@ public class ExtendedCloudCredential extends CloudCredential {
         this.description = description;
         this.userCrn = userCrn;
         this.accountId = accountId;
+        this.entitlements = entitlements;
     }
 
     public String getDescription() {
@@ -39,6 +44,10 @@ public class ExtendedCloudCredential extends CloudCredential {
 
     public String getAccountId() {
         return accountId;
+    }
+
+    public List<String> getEntitlements() {
+        return entitlements;
     }
 
     // Must not reveal any secrets, hence not including DynamicModel.toString()!

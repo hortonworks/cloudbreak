@@ -39,7 +39,7 @@ public class GetPlatformGatewaysHandler implements CloudPlatformEventHandler<Get
                     Platform.platform(request.getExtendedCloudCredential().getCloudPlatform()),
                     Variant.variant(request.getVariant()));
             CloudGateWays cloudGateWays = cloudPlatformConnectors.get(cloudPlatformVariant)
-                    .platformResources().gateways(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                    .platformResources().gateways(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             GetPlatformCloudGatewaysResult getPlatformCloudGatewaysResult = new GetPlatformCloudGatewaysResult(request.getResourceId(), cloudGateWays);
             request.getResult().onNext(getPlatformCloudGatewaysResult);
             LOGGER.debug("Query platform gateway types finished.");

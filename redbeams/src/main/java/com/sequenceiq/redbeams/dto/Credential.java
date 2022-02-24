@@ -13,6 +13,8 @@ public class Credential {
 
     private final String attributes;
 
+    private final String accountId;
+
     private final Optional<AzureParameters> azure;
 
     /**
@@ -22,8 +24,8 @@ public class Credential {
      * @param  name       credential name
      * @param  attributes credential attributes
      */
-    public Credential(String crn, String name, String attributes) {
-        this(crn, name, attributes, null);
+    public Credential(String crn, String name, String attributes, String accountId) {
+        this(crn, name, attributes, null, accountId);
     }
 
     /**
@@ -34,11 +36,12 @@ public class Credential {
      * @param  attributes credential attributes
      * @param  Azure      Azure-specific credential information (null if a non-Azure credential)
      */
-    public Credential(String crn, String name, String attributes, AzureParameters azure) {
+    public Credential(String crn, String name, String attributes, AzureParameters azure, String accountId) {
         this.crn = crn;
         this.name = name;
         this.attributes = attributes;
         this.azure = Optional.ofNullable(azure);
+        this.accountId = accountId;
     }
 
     /**
@@ -75,6 +78,10 @@ public class Credential {
      */
     public Optional<AzureParameters> getAzure() {
         return azure;
+    }
+
+    public String getAccountId() {
+        return accountId;
     }
 
     /**

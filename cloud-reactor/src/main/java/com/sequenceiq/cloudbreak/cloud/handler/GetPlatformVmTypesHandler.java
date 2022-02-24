@@ -45,14 +45,17 @@ public class GetPlatformVmTypesHandler implements CloudPlatformEventHandler<GetP
             if (CdpResourceType.DATAHUB.equals(request.getCdpResourceType())) {
                 if (request.hasEnableDistroxInstanceTypesEntitlement()) {
                     platformVirtualMachinesJson = platformResources
-                            .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                            .virtualMachines(
+                                    request.getExtendedCloudCredential(),
+                                    Region.region(request.getRegion()),
+                                    request.getFilters());
                 } else {
                     platformVirtualMachinesJson = platformResources
-                            .virtualMachinesForDistroX(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                            .virtualMachinesForDistroX(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
                 }
             } else {
                 platformVirtualMachinesJson = platformResources
-                        .virtualMachines(request.getCloudCredential(), Region.region(request.getRegion()), request.getFilters());
+                        .virtualMachines(request.getExtendedCloudCredential(), Region.region(request.getRegion()), request.getFilters());
             }
             GetPlatformVmTypesResult getPlatformSecurityGroupsResult = new GetPlatformVmTypesResult(request.getResourceId(), platformVirtualMachinesJson);
             request.getResult().onNext(getPlatformSecurityGroupsResult);
