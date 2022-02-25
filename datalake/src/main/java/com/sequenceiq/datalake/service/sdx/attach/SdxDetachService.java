@@ -67,7 +67,7 @@ public class SdxDetachService {
      *      - TransactionExecutionException : If updating the stack fails due to the stack not being
      *              able to be saved due to the stack object being null.
      */
-    public void detachStack(SdxCluster cluster, String originalName) throws Exception {
+    public void detachStack(SdxCluster cluster, String originalName) {
         LOGGER.info("Started detaching stack of SDX cluster with ID: {}.", cluster.getId());
         sdxAttachDetachUtils.updateStack(cluster, originalName);
         LOGGER.info("Finished detaching stack of SDX cluster with ID: {}.", cluster.getId());
@@ -78,7 +78,7 @@ public class SdxDetachService {
      *      - NotFoundException : If the database is not found for the cluster CRN and environment CRN.
      *      - IllegalArgumentException : If the database could not be saved due to the object for it being null.
      */
-    public void detachExternalDatabase(SdxCluster cluster) throws Exception {
+    public void detachExternalDatabase(SdxCluster cluster) {
         LOGGER.info("Started detaching external database of SDX cluster with ID {} so it has crn {} " +
                 "instead of {}.", cluster.getId(), cluster.getCrn(), cluster.getOriginalCrn());
         sdxAttachDetachUtils.updateExternalDatabase(cluster, cluster.getOriginalCrn());
