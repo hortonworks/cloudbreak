@@ -1,7 +1,5 @@
 package com.sequenceiq.cloudbreak.controller.v4;
 
-import static com.sequenceiq.authorization.resource.AuthorizationVariableType.NAME;
-
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -13,15 +11,12 @@ import javax.validation.constraints.NotNull;
 
 import org.springframework.stereotype.Controller;
 
-import com.cloudera.cdp.datahub.model.CreateRecipeRequest;
 import com.sequenceiq.authorization.annotation.CheckPermissionByAccount;
-import com.sequenceiq.authorization.annotation.CheckPermissionByRequestProperty;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceCrn;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceName;
 import com.sequenceiq.authorization.annotation.CheckPermissionByResourceNameList;
 import com.sequenceiq.authorization.annotation.FilterListBasedOnPermissions;
 import com.sequenceiq.authorization.annotation.InternalOnly;
-import com.sequenceiq.authorization.annotation.RequestObject;
 import com.sequenceiq.authorization.annotation.ResourceCrn;
 import com.sequenceiq.authorization.annotation.ResourceName;
 import com.sequenceiq.authorization.annotation.ResourceNameList;
@@ -169,11 +164,5 @@ public class RecipesV4Controller extends NotificationController implements Recip
     public RecipeV4Request getRequest(Long workspaceId, @ResourceName String name) {
         Recipe recipe = recipeService.getByNameForWorkspaceId(name, restRequestThreadLocalService.getRequestedWorkspaceId());
         return recipeToRecipeV4RequestConverter.convert(recipe);
-    }
-
-    @Override
-    @CheckPermissionByRequestProperty(path = "name", type = NAME, action = AuthorizationResourceAction.DESCRIBE_RECIPE)
-    public CreateRecipeRequest getCreateRecipeRequestForCli(Long workspaceId, @RequestObject RecipeV4Request recipeV4Request) {
-        throw new UnsupportedOperationException("not supported request");
     }
 }

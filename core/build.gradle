@@ -172,7 +172,6 @@ dependencyManagement {
     dependency group: 'org.mockito',                        name: 'mockito-core',                version: mockitoVersion
     dependency group: 'org.apache.commons',                 name: 'commons-collections4',        version: commonsCollections4Version
     dependency group: 'org.apache.commons',                 name: 'commons-lang3',               version: apacheCommonsLangVersion
-    dependency group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java',                version: cdpSdkVersion
   }
 }
 
@@ -221,8 +220,6 @@ dependencies {
   implementation group: 'dnsjava',                            name: 'dnsjava'
 
   implementation group: 'io.springfox',                       name: 'springfox-boot-starter'
-
-  implementation group: 'com.cloudera.cdp',                   name: 'cdp-sdk-java'
 
   implementation     ('io.swagger:swagger-jersey2-jaxrs') {
     exclude group: 'org.yaml'
