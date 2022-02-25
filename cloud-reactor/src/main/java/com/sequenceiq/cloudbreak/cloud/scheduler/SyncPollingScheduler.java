@@ -15,11 +15,11 @@ import com.sequenceiq.cloudbreak.cloud.task.PollTask;
 @Component
 public class SyncPollingScheduler<T> {
 
-    public static final int POLLING_INTERVAL = 1000;
+    public static final int POLLING_INTERVAL = 5000;
 
-    public static final int MAX_POLLING_ATTEMPT = 5000;
+    public static final int MAX_POLLING_ATTEMPT = 1000;
 
-    public static final int FAILURE_TOLERANT_ATTEMPT = 3;
+    public static final int FAILURE_TOLERANT_ATTEMPT = 5;
 
     public T schedule(PollTask<T> task) throws Exception {
         return schedule(task, POLLING_INTERVAL, MAX_POLLING_ATTEMPT, FAILURE_TOLERANT_ATTEMPT);
