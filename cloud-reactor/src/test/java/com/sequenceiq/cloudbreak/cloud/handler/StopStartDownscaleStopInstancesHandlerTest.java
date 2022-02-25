@@ -45,7 +45,7 @@ public class StopStartDownscaleStopInstancesHandlerTest {
 
     private static final String MOCK_INSTANCEID_PREFIX = "i-";
 
-    private static final Long EXPECTED_STOP_POLL_TIMEBOUND_MS = 300_000L;
+    private static final Long EXPECTED_STOP_POLL_TIMEBOUND_MS = 600_000L;
 
     @Mock
     private CloudPlatformConnectors cloudPlatformConnectors;

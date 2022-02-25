@@ -150,6 +150,7 @@ dependencies {
   testImplementation project(path: ':authorization-common', configuration: 'tests')
   testImplementation project(path: ':common', configuration: 'tests')
   testImplementation project(path: ':secret-engine', configuration: 'tests')
+  testImplementation project(path: ':flow', configuration: 'tests')
 
   testImplementation group: 'com.hubspot.jinjava',         name: 'jinjava',                        version: jinjavaVersion
   testImplementation group: 'net.sf.json-lib',             name: 'json-lib',                       version: '2.4',              classifier: 'jdk15'

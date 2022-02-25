@@ -206,7 +206,7 @@ public class PasswordService {
     private SetPasswordRequest triggerSetPassword(Stack stack, String environment, String username, String userCrn,
             String password, Optional<Instant> expirationInstant) {
         SetPasswordRequest request = new SetPasswordRequest(stack.getId(), environment, username, userCrn, password, expirationInstant);
-        freeIpaFlowManager.notify(request);
+        freeIpaFlowManager.notifyNonFlowEvent(request);
         return request;
     }
 
