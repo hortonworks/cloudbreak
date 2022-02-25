@@ -28,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.CloudSubnet;
+import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
 import com.sequenceiq.cloudbreak.common.network.NetworkConstants;
@@ -678,6 +679,20 @@ public class MultiAzCalculatorServiceTest {
 
         verifyCloudInstance(expectedPermissibleSubnetIdIndexes, instanceMetaData);
         verifySubnetIdAndAvailabilityZoneForInstancesAreUnchanged(existingCounts, instanceGroup, Set.of());
+    }
+
+    @Test
+    public void testWhenNoAvailableSubnetInTheEnvironmentByInstanceGroup() {
+        when(multiAzValidator.supportedForInstanceMetadataGeneration(any(InstanceGroup.class))).thenReturn(true);
+        InstanceGroup instanceGroup = instanceGroup(CloudPlatform.AWS, SINGLE_INSTANCE, SINGLE_SUBNET);
+
+        InstanceMetaData instanceMetaData = new InstanceMetaData();
+        instanceMetaData.setSubnetId(SUBNET_ID);
+        instanceMetaData.setAvailabilityZone(AVAILABILITY_ZONE);
+        CloudbreakServiceException actual = Assertions.assertThrows(CloudbreakServiceException.class, () ->
+                underTest.calculateByRoundRobin(Map.of("anysubnet", "anyaz"), instanceGroup, instanceMetaData, NetworkScaleDetails.getEmpty()));
+        assertThat(actual.getMessage()).isEqualTo("The following subnets are missing from the Environment, you may have removed them during an environment " +
+                "update previously? Missing subnets: [name-0]");
     }
 
     private InstanceGroup instanceGroup(CloudPlatform cloudPlatform, int instanceNumber, int subnetCount) {
