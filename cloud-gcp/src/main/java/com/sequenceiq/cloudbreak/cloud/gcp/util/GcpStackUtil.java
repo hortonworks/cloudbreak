@@ -6,6 +6,7 @@ import static org.apache.commons.lang3.StringUtils.isNotEmpty;
 
 import java.io.IOException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,6 +20,7 @@ import com.google.api.services.compute.Compute;
 import com.google.api.services.compute.Compute.GlobalOperations;
 import com.google.api.services.compute.Compute.RegionOperations.Get;
 import com.google.api.services.compute.Compute.ZoneOperations;
+import com.google.api.services.compute.model.Instance;
 import com.google.api.services.compute.model.Operation;
 import com.google.api.services.compute.model.Operation.Error.Errors;
 import com.google.api.services.sqladmin.SQLAdmin;
@@ -120,8 +122,8 @@ public class GcpStackUtil {
         if (errorMessage != null) {
             throw new Exception(errorMessage);
         } else {
-            String progress = operation.getStatus();
-            return FINISHED_STATUS.contains(progress);
+            String operationStatus = operation.getStatus();
+            return FINISHED_STATUS.contains(operationStatus);
         }
     }
 
@@ -176,9 +178,17 @@ public class GcpStackUtil {
         return sqlAdmin.operations().get(projectId, operationName);
     }
 
-    public ZoneOperations.Get zoneOperations(Compute compute, String projectId, String operationName, String availabilityZone)
+    public ZoneOperations.Get zoneOperation(Compute compute, String projectId, String operationName, String availabilityZone)
             throws IOException {
         return compute.zoneOperations().get(projectId, availabilityZone, operationName);
+    }
+
+    public ZoneOperations.List zoneOperationsByNames(Compute compute, String projectId, Set<String> operationNames, String availabilityZone)
+            throws IOException {
+        String filterWithOperationNames = operationNames.stream().map(opName -> String.format("name=%s", opName)).collect(Collectors.joining(" OR "));
+        return compute.zoneOperations().list(projectId, availabilityZone)
+                .setFilter(filterWithOperationNames)
+                .setReturnPartialSuccess(Boolean.TRUE);
     }
 
     public Get regionOperations(Compute compute, String projectId, String operationName, Region region) throws IOException {
@@ -356,6 +366,10 @@ public class GcpStackUtil {
             throw new CloudbreakServiceException("Type of the group must not be null");
         }
         return type.name().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
+    }
+
+    public Instance getComputeInstanceWithId(Compute compute, String projectId, String availabilityZone, String instanceId) throws IOException {
+        return compute.instances().get(projectId, availabilityZone, instanceId).execute();
     }
 
     private String[] createParts(String splittable) {
