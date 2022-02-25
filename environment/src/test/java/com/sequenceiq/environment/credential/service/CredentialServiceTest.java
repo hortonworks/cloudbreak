@@ -54,7 +54,6 @@ import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttri
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
-import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.environment.environment.verification.PolicyValidationErrorResponseConverter;
@@ -117,9 +116,6 @@ class CredentialServiceTest {
 
     @MockBean
     private CloudbreakMessagesService cloudbreakMessagesService;
-
-    @MockBean
-    private CredentialRequestToCreateAWSCredentialRequestConverter credentialRequestToCreateAWSCredentialRequestConverter;
 
     @MockBean
     private GrpcUmsClient grpcUmsClient;
