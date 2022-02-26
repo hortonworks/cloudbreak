@@ -6,8 +6,8 @@ import com.sequenceiq.it.cloudbreak.SdxClient;
 import com.sequenceiq.it.cloudbreak.action.Action;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxAutotlsCertRotationAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxBackupInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxChangeImageCatalogAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCheckForUpgradeAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectCMDiagnosticsAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxCollectDiagnosticsAction;
@@ -24,6 +24,8 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxEnableRangerRazAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteCustomAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxForceDeleteInternalAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetAuditsAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxGetDatalakeEventsZipAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxListAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRecoveryAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshAction;
@@ -32,10 +34,10 @@ import com.sequenceiq.it.cloudbreak.action.sdx.SdxRefreshInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRepairInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxResizeAction;
-import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxRestoreInternalAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStartAction;
+import com.sequenceiq.it.cloudbreak.action.sdx.SdxStatusAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxStopAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncAction;
 import com.sequenceiq.it.cloudbreak.action.sdx.SdxSyncInternalAction;
@@ -49,6 +51,7 @@ import com.sequenceiq.it.cloudbreak.dto.sdx.SdxDiagnosticsTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxInternalTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
 import com.sequenceiq.it.cloudbreak.dto.util.RenewDatalakeCertificateTestDto;
+import com.sequenceiq.it.cloudbreak.dto.util.SdxEventTestDto;
 
 @Service
 public class SdxTestClient {
@@ -203,5 +206,13 @@ public class SdxTestClient {
 
     public Action<SdxInternalTestDto, SdxClient> restoreInternal(String backupId, String backupLocation) {
         return new SdxRestoreInternalAction(backupId, backupLocation);
+    }
+
+    public Action<SdxEventTestDto, SdxClient> getAuditEvents() {
+        return new SdxGetAuditsAction();
+    }
+
+    public Action<SdxEventTestDto, SdxClient> getDatalakeEventsZip() {
+        return new SdxGetDatalakeEventsZipAction();
     }
 }
