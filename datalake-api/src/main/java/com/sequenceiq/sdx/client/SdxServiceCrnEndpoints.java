@@ -13,6 +13,7 @@ import com.sequenceiq.sdx.api.endpoint.OperationEndpoint;
 import com.sequenceiq.sdx.api.endpoint.ProgressEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxBackupEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxEndpoint;
+import com.sequenceiq.sdx.api.endpoint.SdxEventEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxInternalEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRecoveryEndpoint;
 import com.sequenceiq.sdx.api.endpoint.SdxRestoreEndpoint;
@@ -92,5 +93,10 @@ public class SdxServiceCrnEndpoints extends AbstractUserCrnServiceEndpoint imple
     @Override
     public CDPStructuredEventV1Endpoint structuredEventsV1Endpoint() {
         return getEndpoint(CDPStructuredEventV1Endpoint.class);
+    }
+
+    @Override
+    public SdxEventEndpoint sdxEventEndpoint() {
+        return getEndpoint(SdxEventEndpoint.class);
     }
 }
