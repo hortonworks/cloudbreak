@@ -12,6 +12,7 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.CustomConfigurationsTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.DataHubCreateInternalApiTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.ChangeImageCatalogTest
+      - name: com.sequenceiq.it.cloudbreak.testcase.authorization.SdxEventControllerAuthTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.CredentialListFilteringTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.DataHubListFilteringTest
       - name: com.sequenceiq.it.cloudbreak.testcase.authorization.listfiltering.DataLakeListFilteringTest
