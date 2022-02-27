@@ -1,5 +1,8 @@
 package com.sequenceiq.distrox.v1.distrox.service.upgrade;
 
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_12;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_7;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.common.model.UpgradeShowAvailableImages.LATEST_ONLY;
 
 import java.util.List;
@@ -84,29 +87,47 @@ public class DistroXUpgradeAvailabilityService {
         Stack stack = stackService.getByNameOrCrnInWorkspace(nameOrCrn, workspaceId);
         String accountId = Crn.safeFromString(userCrn).getAccountId();
         UpgradeV4Response response = stackUpgradeOperations.checkForClusterUpgrade(accountId, stack, workspaceId, request);
-        validateRangerRaz(accountId, stack);
         List<ImageInfoV4Response> filteredCandidates = filterCandidates(accountId, stack, request, response);
-        response.setUpgradeCandidates(filteredCandidates);
+        List<ImageInfoV4Response> razValidatedCandidates = validateRangerRazCandidates(accountId, stack, filteredCandidates);
+        response.setUpgradeCandidates(razValidatedCandidates);
         return response;
     }
 
-    private void validateRangerRaz(String accountId, Stack stack) {
-        if (!isRuntimeUpgradeEnabledByAccountId(accountId)) {
-            Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
-            Cluster datalakeCluster = clusterService.getCluster(datalakeStack);
-            boolean rangerRazEnabled = datalakeCluster.isRangerRazEnabled();
-            String message = String.format(
-                    "Data Hub Upgrade is %s as Ranger RAZ is %s for [%s] cluster.",
-                    rangerRazEnabled ? "not allowed" : "allowed",
-                    rangerRazEnabled ? "enabled" : "disabled",
-                    datalakeCluster.getName());
-            LOGGER.debug(message);
-            if (rangerRazEnabled) {
-                throw new BadRequestException(message);
-            }
-        } else {
+    private List<ImageInfoV4Response> validateRangerRazCandidates(String accountId, Stack stack, List<ImageInfoV4Response> filteredCandidates) {
+        if (isRuntimeUpgradeEnabledByAccountId(accountId)) {
             LOGGER.debug("Bypassing Data Hub upgrade Ranger RAZ constraint as CDP_RUNTIME_UPGRADE is enabled in [{}] account.", accountId);
+            return filteredCandidates;
         }
+
+        Stack datalakeStack = stackService.getByCrn(stack.getDatalakeCrn());
+        Cluster datalakeCluster = clusterService.getCluster(datalakeStack);
+        boolean rangerRazEnabled = datalakeCluster.isRangerRazEnabled();
+        if (!rangerRazEnabled) {
+            LOGGER.debug("Not a RAZ enabled cluster. Nothing to validate.");
+            return filteredCandidates;
+        }
+
+        String runtimeVersion = runtimeVersionService.getRuntimeVersion(stack.getCluster().getId()).orElse("");
+        boolean razRuntimeSupport = isVersionNewerOrEqualThanLimited(runtimeVersion, CLOUDERA_STACK_VERSION_7_2_12);
+        if (razRuntimeSupport) {
+            LOGGER.debug("Runtime version [{}] is supported for RAZ cluster upgrades", runtimeVersion);
+            return filteredCandidates;
+        }
+
+        boolean razPatchSupport = isVersionNewerOrEqualThanLimited(runtimeVersion, CLOUDERA_STACK_VERSION_7_2_7);
+        if (razPatchSupport) {
+            LOGGER.debug("DataHub patch upgrade is enabled for Ranger RAZ clusters with stack version 7.2.7 or newer.");
+            return filteredCandidates.stream()
+                    .filter(imgInfo -> runtimeVersion.equals(imgInfo.getComponentVersions().getCdp()))
+                    .collect(Collectors.toList());
+        }
+
+        String message = String.format(
+                "Data Hub Upgrade is not allowed as Ranger RAZ is enabled for [%s] cluster, because runtime version is [%s].",
+                datalakeCluster.getName(),
+                runtimeVersion);
+        LOGGER.debug(message);
+        throw new BadRequestException(message);
     }
 
     private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {

@@ -138,10 +138,12 @@ public class DistroXUpgradeAvailabilityServiceTest {
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
         when(clusterService.getCluster(datalake)).thenReturn(datalakeCluster);
+        when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("7.2.0"));
 
         BadRequestException exception = assertThrows(BadRequestException.class, () -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
 
-        assertEquals("Data Hub Upgrade is not allowed as Ranger RAZ is enabled for [dummyCluster] cluster.", exception.getMessage());
+        assertEquals("Data Hub Upgrade is not allowed as Ranger RAZ is enabled for [dummyCluster] cluster, because runtime version is [7.2.0].",
+                exception.getMessage());
     }
 
     @Test
@@ -150,6 +152,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         datalakeCluster.setRangerRazEnabled(false);
         Stack datalake = TestUtil.stack();
         STACK.setDatalakeCrn(DATALAKE_CRN);
+        STACK.setCluster(TestUtil.cluster());
         UpgradeV4Request request = new UpgradeV4Request();
         UpgradeV4Response response = new UpgradeV4Response();
         ImageInfoV4Response currentImage = createImageResponse(2L, "7.2.0");
@@ -159,10 +162,10 @@ public class DistroXUpgradeAvailabilityServiceTest {
         response.setUpgradeCandidates(List.of(candidateImage1, candidateImage2));
         response.setCurrent(currentImage);
         when(entitlementService.datahubRuntimeUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
-        when(stackService.getByCrn(DATALAKE_CRN)).thenReturn(datalake);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(STACK);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, STACK, WORKSPACE_ID, request)).thenReturn(response);
-        when(clusterService.getCluster(datalake)).thenReturn(datalakeCluster);
+        when(stackService.getByCrn(DATALAKE_CRN)).thenReturn(datalake);
+        when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
 
         assertDoesNotThrow(() -> underTest.checkForUpgrade(CLUSTER, WORKSPACE_ID, request, USER_CRN));
 
@@ -361,6 +364,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         Stack stackWithEnv = new Stack();
         stackWithEnv.setName("stack");
         stackWithEnv.setEnvironmentCrn("envcrn");
+        stackWithEnv.setCluster(TestUtil.cluster());
         when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
@@ -390,6 +394,7 @@ public class DistroXUpgradeAvailabilityServiceTest {
         Stack stackWithEnv = new Stack();
         stackWithEnv.setName("stack");
         stackWithEnv.setEnvironmentCrn("envcrn");
+        stackWithEnv.setCluster(TestUtil.cluster());
         when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
@@ -423,6 +428,8 @@ public class DistroXUpgradeAvailabilityServiceTest {
         ClusterView clusterView = new ClusterView();
         clusterView.setId(1L);
         ReflectionTestUtils.setField(stackView, "cluster", clusterView);
+        stackWithEnv.setCluster(TestUtil.cluster());
+        when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of("C"));
         when(clusterService.getCluster(any())).thenReturn(datalakeCluster);
         when(stackService.getByNameOrCrnInWorkspace(CLUSTER, WORKSPACE_ID)).thenReturn(stackWithEnv);
         when(stackUpgradeOperations.checkForClusterUpgrade(ACCOUNT_ID, stackWithEnv, WORKSPACE_ID, request)).thenReturn(response);
