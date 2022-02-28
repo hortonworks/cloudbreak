@@ -3,7 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.12",
     "displayName": "opdb",
-    "blueprintUpgradeOption": "MAINTENANCE_UPGRADE_GA",
+    "blueprintUpgradeOption": "GA",
     "services": [
       {
         "refName": "omid",

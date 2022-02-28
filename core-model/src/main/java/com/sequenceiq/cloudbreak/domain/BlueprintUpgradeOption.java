@@ -10,6 +10,12 @@ public enum BlueprintUpgradeOption {
     ENABLED,
 
     /**
+     * 'GA' means that a template can be upgraded without any entitlement to the version of the corresponding
+     * data lake and nothing else
+     */
+    GA,
+
+    /**
      * Disabled means that an upgrade can't be performed on a template. Neither Runtime nor OS upgrade. By default, with
      * the CDP_RUNTIME_UPGRADE_DATAHUB all templates can be upgraded so explicitly need to mark a template with
      * DISABLED to disable the upgrade. Without the entitlement only the MAINTENANCE_UPGRADE_GA marked templates

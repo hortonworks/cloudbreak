@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.1.0",
     "displayName": "dataengineering",
+    "blueprintUpgradeOption": "GA",
     "services": [
       {
         "refName": "zookeeper",

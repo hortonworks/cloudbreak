@@ -756,6 +756,25 @@ cb:
     supportedPlatforms: AWS,YARN,AZURE,GCP
 
   upgrade:
+    blueprints:
+      dataengineering:
+        services:
+          - DAS
+          - HDFS
+          - HIVE
+          - HIVE_ON_TEZ
+          - HUE
+          - KNOX
+          - LIVY
+          - OOZIE
+          - QUEUEMANAGER
+          - SPARK_ON_YARN
+          - SQOOP_CLIENT
+          - TEZ
+          - YARN
+          - ZEPPELIN
+          - ZOOKEEPER
+        gaVersion: 7.1.0
     failure.sync:
       sdx.enabled: false
     validation:

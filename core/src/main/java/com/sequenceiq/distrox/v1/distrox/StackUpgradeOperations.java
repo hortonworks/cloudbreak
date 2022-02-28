@@ -123,7 +123,7 @@ public class StackUpgradeOperations {
 
     private void validateDatalakeHasNoRunningDatahub(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
         if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()) {
-            LOGGER.info("Checking that the attached DataHubs of the Datalake are in stopped state only in case if Datalake runtime upgarda is enabled" +
+            LOGGER.info("Checking that the attached DataHubs of the Data lake are in stopped state only in case if Data lake runtime upgrade is enabled" +
                     " in [{}] account on [{}] cluster.", accountId, stack.getName());
             StackViewV4Responses stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(),
                     List.of(StackType.WORKLOAD));

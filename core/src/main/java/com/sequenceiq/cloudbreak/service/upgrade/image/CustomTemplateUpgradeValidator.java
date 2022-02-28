@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.cloud.VersionComparator;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.template.model.ServiceComponent;
@@ -24,16 +25,32 @@ public class CustomTemplateUpgradeValidator {
     @Inject
     private PermittedServicesForUpgradeService permittedServicesForUpgradeService;
 
+    @Inject
+    private BlueprintForUpgradeProvider blueprints;
+
+    private final VersionComparator versionComparator = new VersionComparator();
+
     BlueprintValidationResult isValid(Blueprint blueprint) {
         Set<String> services = getServicesFromBlueprint(blueprint);
         String blueprintVersion = blueprint.getStackVersion();
         LOGGER.debug("Validating custom template. Permitted services for upgrade with minimum required blueprint version: {}, available services: {}",
                 permittedServicesForUpgradeService.toString(), services);
-        Set<String> notUpgradePermittedServices = getNotUpgradePermittedServices(services, blueprintVersion);
-        return new BlueprintValidationResult(notUpgradePermittedServices.isEmpty(), createReason(notUpgradePermittedServices));
+        Set<String> notUpgradableServices = getNotUpgradableServices(services, blueprintVersion);
+        return new BlueprintValidationResult(notUpgradableServices.isEmpty(), createReason(notUpgradableServices));
     }
 
-    private Set<String> getNotUpgradePermittedServices(Set<String> services, String blueprintVersion) {
+    private Set<String> getNotUpgradableServices(Set<String> services, String blueprintVersion) {
+        return services.stream()
+                .filter(service -> !permittedServicesForUpgradeService.isAllowedForUpgrade(service, blueprintVersion))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<String> getBlueprint(Set<String> services, String blueprintVersion) {
+//        blueprints.getBlueprints().values()
+//                .stream()
+//                .filter(blueprintForUpgrade -> services.containsAll(blueprintForUpgrade.getServices()))
+//                .map(BlueprintForUpgrade::getGaVersion)
+//                .max(version -> versionComparator.compare(() -> version, () -> blueprintVersion));
         return services.stream()
                 .filter(service -> !permittedServicesForUpgradeService.isAllowedForUpgrade(service, blueprintVersion))
                 .collect(Collectors.toSet());
