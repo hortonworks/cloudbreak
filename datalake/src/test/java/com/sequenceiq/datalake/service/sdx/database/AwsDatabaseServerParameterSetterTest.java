@@ -36,7 +36,7 @@ public class AwsDatabaseServerParameterSetterTest {
 
     @Test
     public void testHAServer() {
-        underTest.setParameters(request, SdxDatabaseAvailabilityType.HA, null);
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.HA);
 
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
@@ -46,29 +46,18 @@ public class AwsDatabaseServerParameterSetterTest {
 
     @Test
     public void testNonHAServer() {
-        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA, null);
+        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA);
 
         verify(request).setAws(captor.capture());
         AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
         assertEquals("false", awsDatabaseServerV4Parameters.getMultiAZ());
         assertEquals(0, awsDatabaseServerV4Parameters.getBackupRetentionPeriod());
-    }
-
-    @Test
-    public void testEngineVersion() {
-        underTest.setParameters(request, SdxDatabaseAvailabilityType.NON_HA, "13");
-
-        verify(request).setAws(captor.capture());
-        AwsDatabaseServerV4Parameters awsDatabaseServerV4Parameters = captor.getValue();
-        assertEquals("false", awsDatabaseServerV4Parameters.getMultiAZ());
-        assertEquals(0, awsDatabaseServerV4Parameters.getBackupRetentionPeriod());
-        assertEquals("13", awsDatabaseServerV4Parameters.getEngineVersion());
     }
 
     @Test
     public void shouldThrowExceptionWhenAvailabilityTypeIsNotSupported() {
         IllegalArgumentException result =
-                Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.setParameters(request, SdxDatabaseAvailabilityType.NONE, null));
+                Assertions.assertThrows(IllegalArgumentException.class, () -> underTest.setParameters(request, SdxDatabaseAvailabilityType.NONE));
 
         assertEquals("NONE database availability type is not supported on AWS.", result.getMessage());
     }

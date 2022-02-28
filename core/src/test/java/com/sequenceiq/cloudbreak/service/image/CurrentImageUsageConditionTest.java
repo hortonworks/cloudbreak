@@ -39,21 +39,21 @@ public class CurrentImageUsageConditionTest {
     @Test
     public void testFilterCurrentImageShouldReturnTrueWhenThereAreInstanceWithOtherImage() {
         Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), createInstanceMetaData(OLD_IMAGE));
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
         assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
     }
 
     @Test
     public void testFilterCurrentImageShouldReturnTrueWhenThereAreNoInstanceWithOtherImage() {
         Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), createInstanceMetaData(NEW_IMAGE));
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
         assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
     }
 
     @Test
@@ -61,11 +61,11 @@ public class CurrentImageUsageConditionTest {
         InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
         nullImageInstanceMetadata.setImage(new Json(null));
         Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(NEW_IMAGE), nullImageInstanceMetadata);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
         assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
     }
 
     @Test
@@ -73,11 +73,11 @@ public class CurrentImageUsageConditionTest {
         InstanceMetaData nullImageInstanceMetadata = new InstanceMetaData();
         nullImageInstanceMetadata.setImage(new Json(null));
         Set<InstanceMetaData> instanceMetaData = Set.of(createInstanceMetaData(OLD_IMAGE), nullImageInstanceMetadata);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
         assertTrue(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
     }
 
     @Test
@@ -87,11 +87,11 @@ public class CurrentImageUsageConditionTest {
         InstanceMetaData nullImageInstanceMetadata2 = new InstanceMetaData();
         nullImageInstanceMetadata2.setImage(new Json(null));
         Set<InstanceMetaData> instanceMetaData = Set.of(nullImageInstanceMetadata, nullImageInstanceMetadata2);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(instanceMetaData);
 
         assertFalse(underTest.currentImageUsedOnInstances(STACK_ID, NEW_IMAGE));
 
-        verify(instanceMetaDataService).getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID);
+        verify(instanceMetaDataService).getNotDeletedInstanceMetadataByStackId(STACK_ID);
     }
 
     private com.sequenceiq.cloudbreak.cloud.model.Image createImage(String imageId) {

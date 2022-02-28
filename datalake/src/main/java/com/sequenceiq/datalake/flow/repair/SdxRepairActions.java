@@ -121,7 +121,7 @@ public class SdxRepairActions {
                 SdxCluster sdxCluster = sdxStatusService.setStatusForDatalakeAndNotify(DatalakeStatusEnum.RUNNING,
                         ResourceEvent.SDX_REPAIR_FINISHED, "Repair finished, Datalake is running", payload.getResourceId());
                 metricService.incrementMetricCounter(MetricType.SDX_REPAIR_FINISHED, sdxCluster);
-                jobService.schedule(sdxCluster.getId(), SdxClusterJobAdapter.class);
+                jobService.schedule(new SdxClusterJobAdapter(sdxCluster));
                 sendEvent(context, SDX_REPAIR_FINALIZED_EVENT.event(), payload);
             }
 

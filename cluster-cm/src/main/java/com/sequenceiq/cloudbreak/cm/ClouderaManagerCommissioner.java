@@ -134,7 +134,7 @@ public class ClouderaManagerCommissioner {
     }
 
     public Map<String, InstanceMetaData> collectHostsToCommission(Stack stack, HostGroup hostGroup, Set<String> hostNames, ApiClient client) {
-        Set<InstanceMetaData> hostsInHostGroup = hostGroup.getInstanceGroup().getNotTerminatedAndNotZombieInstanceMetaDataSet();
+        Set<InstanceMetaData> hostsInHostGroup = hostGroup.getInstanceGroup().getNotTerminatedInstanceMetaDataSet();
         Map<String, InstanceMetaData> hostsToCommission = hostsInHostGroup.stream()
                 .filter(hostMetadata -> hostNames.contains(hostMetadata.getDiscoveryFQDN()))
                 // TODO CB-15132: Add additional checks to make sure the hosts are in the expected state. Even better,

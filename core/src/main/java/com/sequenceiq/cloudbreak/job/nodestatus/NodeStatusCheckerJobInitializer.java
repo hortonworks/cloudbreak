@@ -14,7 +14,7 @@ public class NodeStatusCheckerJobInitializer extends AbstractStackJobInitializer
 
     @Override
     public void initJobs() {
-        getAliveJobResources()
+        getAliveAndNotDeleteInProgressStacksStream()
                 .forEach(s -> nodeStatusCheckerJobService.schedule(new NodeStatusJobAdapter(s)));
     }
 }

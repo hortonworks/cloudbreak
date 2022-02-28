@@ -2,12 +2,11 @@ package com.sequenceiq.redbeams.sync;
 
 import org.quartz.Job;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.repository.CrudRepository;
 
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
 import com.sequenceiq.redbeams.repository.DBStackRepository;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 
 public class DBStackJobAdapter extends JobResourceAdapter<DBStack> {
 
@@ -15,8 +14,18 @@ public class DBStackJobAdapter extends JobResourceAdapter<DBStack> {
         super(id, context);
     }
 
-    public DBStackJobAdapter(JobResource jobResource) {
-        super(jobResource);
+    public DBStackJobAdapter(DBStack resource) {
+        super(resource);
+    }
+
+    @Override
+    public String getLocalId() {
+        return String.valueOf(getResource().getId());
+    }
+
+    @Override
+    public String getRemoteResourceId() {
+        return getResource().getResourceCrn();
     }
 
     @Override
@@ -25,7 +34,7 @@ public class DBStackJobAdapter extends JobResourceAdapter<DBStack> {
     }
 
     @Override
-    public Class<? extends JobResourceRepository<DBStack, Long>> getRepositoryClassForResource() {
+    public Class<? extends CrudRepository<DBStack, Long>> getRepositoryClassForResource() {
         return DBStackRepository.class;
     }
 }

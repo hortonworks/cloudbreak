@@ -5,7 +5,6 @@ import org.quartz.JobDataMap;
 import org.springframework.context.ApplicationContext;
 
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.domain.stack.StackPatchType;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.repository.StackRepository;
@@ -20,9 +19,19 @@ public class ExistingStackPatcherJobAdapter extends JobResourceAdapter<Stack> {
         super(id, context);
     }
 
-    public ExistingStackPatcherJobAdapter(JobResource jobResource, StackPatchType stackPatchType) {
-        super(jobResource);
+    public ExistingStackPatcherJobAdapter(Stack resource, StackPatchType stackPatchType) {
+        super(resource);
         this.stackPatchType = stackPatchType;
+    }
+
+    @Override
+    public String getLocalId() {
+        return String.valueOf(getResource().getId());
+    }
+
+    @Override
+    public String getRemoteResourceId() {
+        return getResource().getResourceCrn();
     }
 
     @Override

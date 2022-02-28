@@ -95,7 +95,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
     @Test
     public void testConversionWithBlueprintDetails() {
-        String blueprintJson = "{ \"cdhVersion\": \"7.2.14\", \"displayName\": \"dataengineering ha\", \"services\": [{ \"refName\": \"zookeeper\", " +
+        String blueprintJson = "{ \"cdhVersion\": \"7.2.13\", \"displayName\": \"dataengineering ha\", \"services\": [{ \"refName\": \"zookeeper\", " +
                 "\"serviceType\": \"ZOOKEEPER\", \"roleConfigGroups\": [{ \"refName\": \"zookeeper-SERVER-BASE\", \"roleType\": \"SERVER\", \"base\": true " +
                 "}]},{ \"refName\": \"hdfs\", \"serviceType\": \"HDFS\", \"serviceConfigs\": [{ \"name\": \"zookeeper_service\", \"ref\": \"zookeeper\" }]}," +
                 "{ \"refName\": \"hms\", \"serviceType\": \"HIVE\", \"displayName\": \"Hive Metastore\", \"roleConfigGroups\": [{ \"refName\": " +
@@ -149,7 +149,7 @@ class StructuredEventToCDPClusterShapeConverterTest {
 
     @Test
     public void testConversionWithIncorrectBlueprintDetails() {
-        String blueprintJson = "{ \"cdhVersion\": \"7.2.14\", \"displayName\": \"dataengineering ha\", \"wrongServices\": " +
+        String blueprintJson = "{ \"cdhVersion\": \"7.2.13\", \"displayName\": \"dataengineering ha\", \"wrongServices\": " +
                 "[{ \"refName\": \"das\", \"serviceType\": \"DAS\" }] }";
         StructuredFlowEvent structuredFlowEvent = new StructuredFlowEvent();
         structuredFlowEvent.setStack(createStackDetails());

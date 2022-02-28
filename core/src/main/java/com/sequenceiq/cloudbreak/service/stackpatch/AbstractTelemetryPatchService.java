@@ -9,17 +9,18 @@ import java.util.stream.Collectors;
 
 import javax.inject.Inject;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 
 public abstract class AbstractTelemetryPatchService extends ExistingStackPatchService {
 
@@ -33,14 +34,20 @@ public abstract class AbstractTelemetryPatchService extends ExistingStackPatchSe
     @Inject
     private ClusterComponentConfigProvider clusterComponentConfigProvider;
 
-    protected Set<Node> getAvailableNodes(Set<InstanceMetaData> instanceMetaDataSet, List<GatewayConfig> gatewayConfigs,
+    protected Set<Node> getAvailableNodes(String stackName, Set<InstanceMetaData> instanceMetaDataSet, List<GatewayConfig> gatewayConfigs,
             ClusterDeletionBasedExitCriteriaModel exitModel) throws CloudbreakOrchestratorFailedException, ExistingStackPatchApplyException {
         Set<Node> allNodes = getNodes(instanceMetaDataSet);
         Set<Node> unresponsiveNodes = telemetryOrchestrator.collectUnresponsiveNodes(gatewayConfigs, allNodes, exitModel);
         Set<String> unresponsiveHostnames = unresponsiveNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
-        return allNodes.stream()
+        Set<Node> availableNodes = allNodes.stream()
                 .filter(n -> !unresponsiveHostnames.contains(n.getHostname()))
                 .collect(Collectors.toSet());
+        if (CollectionUtils.isEmpty(availableNodes)) {
+            String message = "Not found any available nodes for patch, stack: " + stackName;
+            LOGGER.info(message);
+            throw new ExistingStackPatchApplyException(message);
+        }
+        return availableNodes;
     }
 
     protected Set<Node> getNodes(Set<InstanceMetaData> instanceMetaDataSet) {

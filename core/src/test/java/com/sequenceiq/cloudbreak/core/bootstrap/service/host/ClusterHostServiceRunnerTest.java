@@ -48,7 +48,6 @@ import com.sequenceiq.cloudbreak.cluster.model.ServiceLocationMap;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.container.postgres.PostgresConfigService;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.decorator.CsdParcelDecorator;
@@ -67,7 +66,7 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorEx
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.san.LoadBalancerSANProvider;
@@ -304,41 +303,30 @@ public class ClusterHostServiceRunnerTest {
     @Test
     public void testDecoratePillarWithMountInfoAndTargetedSaltCall() throws CloudbreakOrchestratorException, NodesUnreachableException {
         setupMocksForRunClusterServices();
-        Set<Node> nodes = Sets.newHashSet(node("fqdn3"), node("gateway1"), node("gateway3"));
-        when(stackUtil.collectReachableAndUnreachableCandidateNodes(any(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
         underTest.runTargetedClusterServices(stack, cluster, Map.of("fqdn3", "1.1.1.1"));
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
-        Set<Node> reachableNodes = reachableCandidates.getValue();
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway3", node.getHostname())));
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
-        assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
-        assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
+        assertFalse(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
+        assertFalse(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
     }
 
     @Test
     public void testDecoratePillarWithMountInfo() throws CloudbreakOrchestratorException, NodesUnreachableException {
         setupMocksForRunClusterServices();
-        Set<Node> nodes = Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
-                node("gateway1"), node("gateway3"));
-        when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(nodes);
         underTest.runClusterServices(stack, cluster, Map.of());
 
         ArgumentCaptor<Set<Node>> reachableCandidates = ArgumentCaptor.forClass(Set.class);
         ArgumentCaptor<SaltConfig> saltConfig = ArgumentCaptor.forClass(SaltConfig.class);
         verify(hostOrchestrator).runService(any(), reachableCandidates.capture(), saltConfig.capture(), any());
-        Set<Node> reachableNodes = reachableCandidates.getValue();
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway3", node.getHostname())));
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
-        assertTrue(reachableNodes.stream().anyMatch(node -> StringUtils.equals("fqdn3", node.getHostname())));
-        assertFalse(reachableNodes.stream().anyMatch(node -> StringUtils.equals("gateway2", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("gateway1", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn1", node.getHostname())));
+        assertTrue(reachableCandidates.getValue().stream().anyMatch(node -> StringUtils.equals("fqdn2", node.getHostname())));
         assertTrue(saltConfig.getValue().getServicePillarConfig().keySet().stream().allMatch(Objects::nonNull));
     }
 
@@ -374,7 +362,9 @@ public class ClusterHostServiceRunnerTest {
         createInstanceGroup(template, instanceGroups, "fqdn2", null, "1.1.2.1", "1.1.2.2");
         InstanceGroup gwIg = createInstanceGroup(template, instanceGroups, "gateway1", "gateway2", "1.1.3.1", "1.1.3.2");
 
-        lenient().when(stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
+        lenient().when(stack.getNotTerminatedGatewayInstanceMetadata()).thenReturn(Lists.newArrayList(gwIg.getAllInstanceMetaData()));
+        when(stackUtil.collectAndCheckReachableNodes(any(), any())).thenReturn(Sets.newHashSet(node("fqdn1"), node("fqdn2"), node("fqdn3"),
+                node("gateway1"), node("gateway3")));
 
         when(stack.getInstanceGroups()).thenReturn(instanceGroups);
         when(rdsConfigService.findByClusterIdAndType(any(), eq(DatabaseType.CLOUDERA_MANAGER))).thenReturn(new RDSConfig());

@@ -47,7 +47,7 @@ class BlueprintBasedUpgradeValidatorTest {
 
     @Test
     public void testIsValidBlueprintShouldReturnInvalidResultWhenTheStackTypeIsDataLakeMediumDutyAndEntitlementIsDisabled() {
-        ImageFilterParams params = createImageFilterParams("7.2.14 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
+        ImageFilterParams params = createImageFilterParams("7.2.13 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
         when(entitlementService.haUpgradeEnabled(ACCOUNT_ID)).thenReturn(false);
 
         BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
@@ -60,7 +60,7 @@ class BlueprintBasedUpgradeValidatorTest {
 
     @Test
     public void testIsValidBlueprintShouldReturnValidResultWhenTheStackTypeIsDataLakeMediumDutyAndEntitlementIsEnabled() {
-        ImageFilterParams params = createImageFilterParams("7.2.14 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
+        ImageFilterParams params = createImageFilterParams("7.2.13 - SDX Medium Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
         when(entitlementService.haUpgradeEnabled(ACCOUNT_ID)).thenReturn(true);
 
         BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
@@ -72,7 +72,7 @@ class BlueprintBasedUpgradeValidatorTest {
 
     @Test
     public void testIsValidBlueprintShouldReturnValidResultWhenTheStackTypeIsDataLakeLightDuty() {
-        ImageFilterParams params = createImageFilterParams("7.2.14 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
+        ImageFilterParams params = createImageFilterParams("7.2.13 - SDX Light Duty: Apache Hive Metastore, Apache Ranger, Apache Atlas", StackType.DATALAKE);
 
         BlueprintValidationResult actual = underTest.isValidBlueprint(params, ACCOUNT_ID);
 

@@ -163,7 +163,7 @@ public class ClusterProxyService {
     }
 
     private List<ClusterServiceConfig> getClusterServiceConfigsForGWs(Stack stack, boolean preferPrivateIp) {
-        List<InstanceMetaData> gatewayInstanceMetadatas = stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata();
+        List<InstanceMetaData> gatewayInstanceMetadatas = stack.getNotTerminatedGatewayInstanceMetadata();
         return gatewayInstanceMetadatas.stream()
                 .map(gatewayInstanceMetadata -> createClusterServiceConfigFromGWMetadata(stack, gatewayInstanceMetadata, preferPrivateIp))
                 .collect(Collectors.toList());
@@ -182,7 +182,7 @@ public class ClusterProxyService {
 
     private List<TunnelEntry> tunnelEntries(Stack stack) {
         List<TunnelEntry> entries = new ArrayList<>();
-        stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().forEach(md -> {
+        stack.getNotTerminatedGatewayInstanceMetadata().forEach(md -> {
             String gatewayIp = md.getPrivateIp();
             TunnelEntry gatewayTunnel = new TunnelEntry(md.getInstanceId(), KnownServiceIdentifier.GATEWAY.name(),
                     gatewayIp, ServiceFamilies.GATEWAY.getDefaultPort(), stack.getMinaSshdServiceId());
@@ -196,7 +196,7 @@ public class ClusterProxyService {
     }
 
     private List<CcmV2Config> ccmV2Configs(Stack stack) {
-        return stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
+        return stack.getNotTerminatedGatewayInstanceMetadata().stream()
                 .map(instanceMetaData -> new CcmV2Config(
                         stack.getCcmV2AgentCrn(),
                         instanceMetaData.getPrivateIp(),

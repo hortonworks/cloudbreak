@@ -1,7 +1,6 @@
 package com.sequenceiq.datalake.service.sdx;
 
 import java.util.Comparator;
-import java.util.Optional;
 
 import javax.inject.Inject;
 
@@ -42,7 +41,6 @@ public class SdxExternalDatabaseConfigurer {
     public void configure(CloudPlatform cloudPlatform, SdxDatabaseRequest databaseRequest, SdxCluster sdxCluster) {
         SdxDatabaseAvailabilityType databaseAvailabilityType = getDatabaseAvailabilityType(databaseRequest, cloudPlatform, sdxCluster);
         sdxCluster.setDatabaseAvailabilityType(databaseAvailabilityType);
-        Optional.ofNullable(databaseRequest).map(SdxDatabaseRequest::getDatabaseEngineVersion).ifPresent(sdxCluster::setDatabaseEngineVersion);
         validate(cloudPlatform, sdxCluster);
     }
 

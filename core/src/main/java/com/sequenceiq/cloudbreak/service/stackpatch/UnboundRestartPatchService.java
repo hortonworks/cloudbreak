@@ -78,10 +78,10 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
     }
 
     @Override
-    boolean doApply(Stack stack) throws ExistingStackPatchApplyException {
+    void doApply(Stack stack) throws ExistingStackPatchApplyException {
         if (isCmServerReachable(stack)) {
             FlowIdentifier flowIdentifier = ThreadBasedUserCrnProvider.doAs(
-                    internalCrnModifier.getInternalCrnWithAccountId(Crn.safeFromString(stack.getResourceCrn()).getAccountId()),
+                    internalCrnModifier.getInternalCrnWithAccountId(Crn.fromString(stack.getResourceCrn()).getAccountId()),
                     () -> clusterOperationService.updateSalt(stack));
             LOGGER.debug("Starting update salt for stack {} with flow {}", stack.getResourceCrn(), flowIdentifier.getPollableId());
             Boolean success = Polling.waitPeriodly(1, TimeUnit.MINUTES)
@@ -91,10 +91,10 @@ public class UnboundRestartPatchService extends ExistingStackPatchService {
                 LOGGER.warn(message);
                 throw new ExistingStackPatchApplyException(message);
             }
-            return true;
         } else {
-            LOGGER.info("Salt update cannot run, because CM server is unreachable of stack: " + stack.getResourceCrn());
-            return false;
+            String message = "Salt update cannot run, because CM server is unreachable of stack: " + stack.getResourceCrn();
+            LOGGER.info(message);
+            throw new ExistingStackPatchApplyException(message);
         }
     }
 

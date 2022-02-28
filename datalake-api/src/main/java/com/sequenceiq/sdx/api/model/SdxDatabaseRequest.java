@@ -6,8 +6,6 @@ public class SdxDatabaseRequest {
 
     private SdxDatabaseAvailabilityType availabilityType;
 
-    private String databaseEngineVersion;
-
     public Boolean getCreate() {
         return create;
     }
@@ -22,13 +20,5 @@ public class SdxDatabaseRequest {
 
     public void setAvailabilityType(SdxDatabaseAvailabilityType availabilityType) {
         this.availabilityType = availabilityType;
-    }
-
-    public String getDatabaseEngineVersion() {
-        return databaseEngineVersion;
-    }
-
-    public void setDatabaseEngineVersion(String databaseEngineVersion) {
-        this.databaseEngineVersion = databaseEngineVersion;
     }
 }

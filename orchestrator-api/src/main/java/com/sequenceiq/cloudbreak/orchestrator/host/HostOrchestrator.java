@@ -7,15 +7,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
-import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 
@@ -31,10 +28,10 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     boolean isBootstrapApiAvailable(GatewayConfig gatewayConfig);
 
-    void initServiceRun(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, Set<Node> reachableNodes,
+    void initServiceRun(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes, Set<Node> reachableNodes,
             SaltConfig pillarConfig, ExitCriteriaModel exitCriteriaModel, String cloudPlatform) throws CloudbreakOrchestratorException;
 
-    void initSaltConfig(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;
 
     void runService(List<GatewayConfig> allGatewayConfigs, Set<Node> allNodes,
@@ -61,9 +58,9 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     List<String> getAvailableNodes(GatewayConfig gatewayConfig, Set<Node> nodes);
 
-    NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig);
+    Set<Node> getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig);
 
-    void tearDown(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
+    void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
             Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException;
 
     Map<String, Map<String, String>> getPackageVersionsFromAllHosts(GatewayConfig gateway, Map<String, Optional<String>> packages)
@@ -94,11 +91,12 @@ public interface HostOrchestrator extends HostRecipeExecutor {
 
     byte[] getStateConfigZip() throws IOException;
 
-    Map<String, Map<String, String>> formatAndMountDisksOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
+    Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> targets, Set<Node> allNodes,
             ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException;
 
-    void stopClusterManagerAgent(OrchestratorAware stack, GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> stoppedNodes,
-            ExitCriteriaModel exitCriteriaModel, CmAgentStopFlags flags) throws CloudbreakOrchestratorFailedException;
+    void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> stoppedNodes, ExitCriteriaModel exitCriteriaModel,
+            boolean adJoinable, boolean ipaJoinable, boolean forced)
+            throws CloudbreakOrchestratorFailedException;
 
     void uploadKeytabs(List<GatewayConfig> allGatewayConfigs, Set<KeytabModel> keytabModels, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException;

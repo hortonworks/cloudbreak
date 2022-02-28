@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 
 import java.util.Map;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
@@ -32,8 +32,8 @@ public class FreeIpaDownscaleTestDto extends AbstractFreeIpaTestDto<DownscaleReq
         return this;
     }
 
-    public FreeIpaDownscaleTestDto withAvailabilityType(AvailabilityType availabilityType) {
-        getRequest().setTargetAvailabilityType(availabilityType);
+    public FreeIpaDownscaleTestDto withFormFactor(FormFactor formFactor) {
+        getRequest().setTargetFormFactor(formFactor);
         return this;
     }
 

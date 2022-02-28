@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -107,8 +107,8 @@ class FreeIpaScalingValidationServiceTest {
         Stack stack = mock(Stack.class);
         Set<InstanceMetaData> validImSet = createValidImSet(2);
         when(stack.isAvailable()).thenReturn(true);
-        Map<AvailabilityType, List<AvailabilityType>> allowedScalingPaths = createAllowedScalingPaths();
-        allowedScalingPaths.put(AvailabilityType.HA, List.of(AvailabilityType.TWO_NODE_BASED));
+        Map<FormFactor, List<FormFactor>> allowedScalingPaths = createAllowedScalingPaths();
+        allowedScalingPaths.put(FormFactor.HA, List.of(FormFactor.TWO_NODE_BASED));
 
         when(this.allowedScalingPaths.getPaths()).thenReturn(allowedScalingPaths);
 
@@ -167,17 +167,17 @@ class FreeIpaScalingValidationServiceTest {
         return stackStatus;
     }
 
-    private Map<AvailabilityType, List<AvailabilityType>> createAllowedScalingPaths() {
-        Map<AvailabilityType, List<AvailabilityType>> allowedPaths = new HashMap<>();
-        allowedPaths.put(AvailabilityType.NON_HA, List.of(AvailabilityType.HA, AvailabilityType.TWO_NODE_BASED));
+    private Map<FormFactor, List<FormFactor>> createAllowedScalingPaths() {
+        Map<FormFactor, List<FormFactor>> allowedPaths = new HashMap<>();
+        allowedPaths.put(FormFactor.NON_HA, List.of(FormFactor.HA, FormFactor.TWO_NODE_BASED));
         return allowedPaths;
     }
 
     private ScalingPath createScalingPath(boolean allowed) {
-        AvailabilityType originalAvailabilityType = AvailabilityType.NON_HA;
-        AvailabilityType targetAvailabilityType = AvailabilityType.HA;
+        FormFactor originalFormFactor = FormFactor.NON_HA;
+        FormFactor targetFormFactor = FormFactor.HA;
         return allowed
-                ? new ScalingPath(originalAvailabilityType, targetAvailabilityType)
-                : new ScalingPath(targetAvailabilityType, originalAvailabilityType);
+                ? new ScalingPath(originalFormFactor, targetFormFactor)
+                : new ScalingPath(targetFormFactor, originalFormFactor);
     }
 }

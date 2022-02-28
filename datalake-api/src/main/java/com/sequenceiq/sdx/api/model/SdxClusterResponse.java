@@ -52,7 +52,33 @@ public class SdxClusterResponse {
 
     private boolean detached;
 
-    private String databaseEngineVersion;
+    public SdxClusterResponse() {
+    }
+
+    public SdxClusterResponse(String crn, String name, SdxClusterStatusResponse status,
+            String statusReason, String environmentName, String environmentCrn, String stackCrn,
+            SdxClusterShape clusterShape, String cloudStorageBaseLocation,
+            FileSystemType cloudStorageFileSystemType, String runtime,
+            boolean rangerRazEnabled, Map<String, String> tags, CertExpirationState certExpirationState,
+            String sdxClusterServiceVersion, boolean detached, boolean enableMultiAz) {
+        this.crn = crn;
+        this.name = name;
+        this.status = status;
+        this.statusReason = statusReason;
+        this.environmentName = environmentName;
+        this.environmentCrn = environmentCrn;
+        this.stackCrn = stackCrn;
+        this.clusterShape = clusterShape;
+        this.cloudStorageBaseLocation = cloudStorageBaseLocation;
+        this.cloudStorageFileSystemType = cloudStorageFileSystemType;
+        this.runtime = runtime;
+        this.rangerRazEnabled = rangerRazEnabled;
+        this.tags = tags;
+        this.certExpirationState = certExpirationState;
+        this.sdxClusterServiceVersion = sdxClusterServiceVersion;
+        this.detached = detached;
+        this.enableMultiAz = enableMultiAz;
+    }
 
     public String getCrn() {
         return crn;
@@ -214,14 +240,6 @@ public class SdxClusterResponse {
         this.enableMultiAz = enableMultiAz;
     }
 
-    public void setDatabaseEngineVersion(String databaseEngineVersion) {
-        this.databaseEngineVersion = databaseEngineVersion;
-    }
-
-    public String getDatabaseEngineVersion() {
-        return databaseEngineVersion;
-    }
-
     @Override
     public String toString() {
         return "SdxClusterResponse{" +
@@ -245,7 +263,6 @@ public class SdxClusterResponse {
                 ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
                 ", Detached=" + detached +
                 ", enableMultiAz=" + enableMultiAz +
-                ", databaseEngineVersion=" + databaseEngineVersion +
                 '}';
     }
 }

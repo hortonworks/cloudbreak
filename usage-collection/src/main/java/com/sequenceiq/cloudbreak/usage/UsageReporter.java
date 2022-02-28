@@ -135,11 +135,4 @@ public interface UsageReporter {
      */
     void cdpVmDiagnosticsEvent(
             UsageProto.CDPVMDiagnosticsEvent details);
-
-    /**
-     * Reports a CDP stack patcher event.
-     * @param details the event details
-     */
-    void cdpStackPatcherEvent(
-            UsageProto.CDPStackPatchEvent details);
 }

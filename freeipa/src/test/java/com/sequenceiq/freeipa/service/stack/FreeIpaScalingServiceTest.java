@@ -20,7 +20,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.DownscaleResponse;
@@ -72,7 +72,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         UpscaleRequest request = createUpscaleRequest();
         doThrow(new BadRequestException("validation failed")).when(validationService).validateStackForUpscale(allInstances, stack,
-                new ScalingPath(AvailabilityType.TWO_NODE_BASED, AvailabilityType.HA));
+                new ScalingPath(FormFactor.TWO_NODE_BASED, FormFactor.HA));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.upscale(ACCOUNT_ID, request));
 
@@ -96,8 +96,8 @@ class FreeIpaScalingServiceTest {
         UpscaleResponse response = underTest.upscale(ACCOUNT_ID, request);
 
         assertEquals(response.getOperationId(), OPERATION_ID);
-        assertEquals(response.getOriginalAvailabilityType(), AvailabilityType.TWO_NODE_BASED);
-        assertEquals(response.getTargetAvailabilityType(), AvailabilityType.HA);
+        assertEquals(response.getOriginalFormFactor(), FormFactor.TWO_NODE_BASED);
+        assertEquals(response.getTargetFormFactor(), FormFactor.HA);
         assertEquals(response.getFlowIdentifier(), flowIdentifier);
     }
 
@@ -127,7 +127,7 @@ class FreeIpaScalingServiceTest {
         when(stack.getNotDeletedInstanceMetaDataSet()).thenReturn(allInstances);
         DownscaleRequest request = createDownscaleRequest();
         doThrow(new BadRequestException("validation failed")).when(validationService).validateStackForDownscale(allInstances, stack,
-                new ScalingPath(AvailabilityType.TWO_NODE_BASED, AvailabilityType.NON_HA));
+                new ScalingPath(FormFactor.TWO_NODE_BASED, FormFactor.NON_HA));
 
         BadRequestException exception = Assertions.assertThrows(BadRequestException.class, () -> underTest.downscale(ACCOUNT_ID, request));
 
@@ -151,8 +151,8 @@ class FreeIpaScalingServiceTest {
         DownscaleResponse response = underTest.downscale(ACCOUNT_ID, request);
 
         assertEquals(response.getOperationId(), OPERATION_ID);
-        assertEquals(response.getOriginalAvailabilityType(), AvailabilityType.TWO_NODE_BASED);
-        assertEquals(response.getTargetAvailabilityType(), AvailabilityType.NON_HA);
+        assertEquals(response.getOriginalFormFactor(), FormFactor.TWO_NODE_BASED);
+        assertEquals(response.getTargetFormFactor(), FormFactor.NON_HA);
         assertEquals(response.getFlowIdentifier(), flowIdentifier);
     }
 
@@ -176,14 +176,14 @@ class FreeIpaScalingServiceTest {
     private DownscaleRequest createDownscaleRequest() {
         DownscaleRequest request = new DownscaleRequest();
         request.setEnvironmentCrn(ENV_CRN);
-        request.setTargetAvailabilityType(AvailabilityType.NON_HA);
+        request.setTargetFormFactor(FormFactor.NON_HA);
         return request;
     }
 
     private UpscaleRequest createUpscaleRequest() {
         UpscaleRequest request = new UpscaleRequest();
         request.setEnvironmentCrn(ENV_CRN);
-        request.setTargetAvailabilityType(AvailabilityType.HA);
+        request.setTargetFormFactor(FormFactor.HA);
         return request;
     }
 

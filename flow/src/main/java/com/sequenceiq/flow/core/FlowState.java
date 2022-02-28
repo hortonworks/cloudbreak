@@ -8,13 +8,4 @@ public interface FlowState {
     Class<? extends RestartAction> restartAction();
 
     String name();
-
-    enum FlowStateConstants implements FlowState {
-        INIT_STATE;
-
-        @Override
-        public Class<? extends RestartAction> restartAction() {
-            return null;
-        }
-    }
 }

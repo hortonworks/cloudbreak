@@ -5,7 +5,7 @@ import javax.validation.constraints.NotNull;
 
 import com.sequenceiq.cloudbreak.auth.crn.CrnResourceDescriptor;
 import com.sequenceiq.cloudbreak.validation.ValidCrn;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
 import com.sequenceiq.service.api.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModelProperty;
@@ -18,8 +18,8 @@ public abstract class ScaleRequestBase {
     private String environmentCrn;
 
     @NotNull
-    @ApiModelProperty(value = ModelDescriptions.AVAILABILITY_TYPE, required = true)
-    private AvailabilityType targetAvailabilityType;
+    @ApiModelProperty(value = ModelDescriptions.FORM_FACTOR, required = true)
+    private FormFactor targetFormFactor;
 
     public String getEnvironmentCrn() {
         return environmentCrn;
@@ -29,19 +29,19 @@ public abstract class ScaleRequestBase {
         this.environmentCrn = environmentCrn;
     }
 
-    public AvailabilityType getTargetAvailabilityType() {
-        return targetAvailabilityType;
+    public FormFactor getTargetFormFactor() {
+        return targetFormFactor;
     }
 
-    public void setTargetAvailabilityType(AvailabilityType targetAvailabilityType) {
-        this.targetAvailabilityType = targetAvailabilityType;
+    public void setTargetFormFactor(FormFactor targetFormFactor) {
+        this.targetFormFactor = targetFormFactor;
     }
 
     @Override
     public String toString() {
         return "ScaleRequest{" +
                 "environmentCrn='" + environmentCrn + '\'' +
-                ", targetAvailabilityType=" + targetAvailabilityType +
+                ", targetFormFactor=" + targetFormFactor +
                 '}';
     }
 }

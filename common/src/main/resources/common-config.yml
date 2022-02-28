@@ -8,28 +8,17 @@ altus:
         endpoint: https://cloudera-dbus-dev.s3.amazonaws.com
       - pattern: dbusapi.sigma-stage
         endpoint: https://cloudera-dbus-stage.s3.amazonaws.com
-  sigmadbus:
-    endpoint:
 telemetry:
   cdpTelemetry:
     desiredVersion: 0.4.18
   cdpLoggingAgent:
     desiredVersion: 0.2.11
   usage:
-    messagebroker:
+    cloudwatch:
       enabled: false
       workers: 1
       queueSizeLimit: 2000
-      dbus-app-name: manowar_dev-mow-UsageEvents
-      dbus-stream-name: manowar_dev-mow-UsageEvents
-      headers:
-        origin: CONTROL_PLANE
-        processor: NO_EDH
-    http:
-      enabled: false
-      endpoint: http://localhost:61890
-      workers: 1
-      queueSizeLimit: 2000
+      maxRetry: 5
       additionalFields:
         - key: component
           value: cloudbreak-server-usage

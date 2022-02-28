@@ -214,7 +214,7 @@ class DecommissionHandlerTest {
     @Test
     public void testBulkHostDecommission() throws ClusterClientInitException {
         when(entitlementService.bulkHostsRemovalFromCMSupported(any())).thenReturn(Boolean.TRUE);
-        when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of(CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_14.getVersion()));
+        when(runtimeVersionService.getRuntimeVersion(any())).thenReturn(Optional.of(CMRepositoryVersionUtil.CLOUDERA_STACK_VERSION_7_2_13.getVersion()));
         when(stackService.getInstanceMetadata(any(), eq(PRIVATE_ID))).thenReturn(Optional.of(instance));
         when(clusterApiConnectors.getConnector(any(Stack.class))).thenReturn(clusterApi);
         when(clusterApi.clusterDecomissionService()).thenReturn(clusterDecomissionService);

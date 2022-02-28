@@ -55,7 +55,7 @@ public class PlatformParameterService {
                 .build();
         CloudCredential cloudCredential = credentialConverter.convert(credential);
         PlatformParameterRequest parameterRequest = new PlatformParameterRequest(cloudContext, cloudCredential);
-        freeIpaFlowManager.notifyNonFlowEvent(parameterRequest);
+        freeIpaFlowManager.notify(parameterRequest);
         try {
             PlatformParameterResult res = parameterRequest.await();
             LOGGER.debug("Platform parameter result: {}", res);

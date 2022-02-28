@@ -150,7 +150,7 @@ public class FreeIpaCreationService {
 
         fillInstanceMetadata(stack, environment);
 
-        String template = templateService.waitGetTemplate(getPlatformTemplateRequest);
+        String template = templateService.waitGetTemplate(stack, getPlatformTemplateRequest);
         stack.setTemplate(template);
         SecurityConfig securityConfig = tlsSecurityService.generateSecurityKeys(accountId);
         multiAzValidator.validateMultiAzForStack(stack.getPlatformvariant(), stack.getInstanceGroups());

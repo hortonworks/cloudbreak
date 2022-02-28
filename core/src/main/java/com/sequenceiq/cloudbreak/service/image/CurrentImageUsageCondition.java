@@ -33,7 +33,7 @@ public class CurrentImageUsageCondition {
     }
 
     private Set<Image> getImagesFromInstanceMetadata(Long stackId) {
-        return instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stackId)
+        return instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stackId)
                 .stream()
                 .map(InstanceMetaData::getImage)
                 .filter(json -> !json.getMap().isEmpty())

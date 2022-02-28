@@ -13,18 +13,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterClientInitException;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterServiceRunner;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.host.ClusterHostServiceRunner;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
-import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.polling.ExtendedPollingResult;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterService;
-import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.TargetedUpscaleSupportService;
 
@@ -51,20 +49,17 @@ public class ClusterManagerUpscaleService {
     @Inject
     private TargetedUpscaleSupportService targetedUpscaleSupportService;
 
-    @Inject
-    private InstanceMetaDataService instanceMetaDataService;
-
-    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged, boolean repair)
+    public void upscaleClusterManager(Long stackId, String hostGroupName, Integer scalingAdjustment, boolean primaryGatewayChanged)
             throws ClusterClientInitException {
         Stack stack = stackService.getByIdWithListsInTransaction(stackId);
         LOGGER.debug("Adding {} new nodes for host group {}", scalingAdjustment, hostGroupName);
         Map<String, List<String>> hostsPerHostGroup = new HashMap<>();
 
-        NodeReachabilityResult nodeReachabilityResult = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment, repair);
+        Map<String, String> hosts = hostRunner.addClusterServices(stackId, hostGroupName, scalingAdjustment);
         if (primaryGatewayChanged) {
             clusterServiceRunner.updateAmbariClientConfig(stack, stack.getCluster());
         }
-        for (String hostName : nodeReachabilityResult.getReachableHosts()) {
+        for (String hostName : hosts.keySet()) {
             if (!hostsPerHostGroup.containsKey(hostGroupName)) {
                 hostsPerHostGroup.put(hostGroupName, new ArrayList<>());
             }
@@ -72,14 +67,13 @@ public class ClusterManagerUpscaleService {
         }
         clusterService.updateInstancesToRunning(stack.getCluster().getId(), hostsPerHostGroup);
 
-        clusterService.updateInstancesToZombie(stackId, nodeReachabilityResult.getUnreachableNodes());
-
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
         ExtendedPollingResult result;
-        if (!repair && !primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
-            Set<String> reachableHosts = nodeReachabilityResult.getReachableHosts();
-            Set<InstanceMetaData> reachableInstances = stack.getNotDeletedAndNotZombieInstanceMetaDataSet().stream()
-                    .filter(md -> reachableHosts.contains(md.getDiscoveryFQDN()))
+        if (!primaryGatewayChanged && targetedUpscaleSupportService.targetedUpscaleOperationSupported(stack)) {
+            Set<Node> reachableCandidates = hostRunner.getReachableCandidates(stack, hosts);
+            List<String> reachableCandidatesHostname = reachableCandidates.stream().map(Node::getHostname).collect(Collectors.toList());
+            Set<InstanceMetaData> reachableInstances = stack.getNotDeletedInstanceMetaDataSet().stream()
+                    .filter(md -> reachableCandidatesHostname.contains(md.getDiscoveryFQDN()))
                     .collect(Collectors.toSet());
             result = connector.waitForHosts(reachableInstances);
         } else {
@@ -87,8 +81,8 @@ public class ClusterManagerUpscaleService {
         }
         if (result != null && result.isTimeout()) {
             LOGGER.info("Upscaling cluster manager were not successful for nodes: {}", result.getFailedInstanceIds());
-            instanceMetaDataService.updateInstanceStatus(result.getFailedInstanceIds(), InstanceStatus.ZOMBIE,
-                    "Upscaling cluster manager were not successful.");
+            //instanceMetaDataService.updateInstanceStatus(result.getFailedInstanceIds(), InstanceStatus.ZOMBIE,
+            //        "Upscaling cluster manager were not successful.";
         }
     }
 }

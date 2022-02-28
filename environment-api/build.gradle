@@ -28,6 +28,7 @@ dependencies {
     implementation     group: "com.sun.xml.ws",                name: "rt",                             version: "2.3.0"
     implementation     group: "com.sun.xml.ws",                name: "jaxws-rt",                       version: "2.3.0"
     implementation     group: "io.opentracing.contrib",        name: "opentracing-jaxrs2",             version: opentracingJaxrs2Version
+    implementation     group: "com.cloudera.cdp",              name: "cdp-sdk-java",                   version: cdpSdkVersion
     testImplementation group: "org.assertj",                   name: "assertj-core",                   version: assertjVersion
     testImplementation group: "com.openpojo",                  name: "openpojo",                       version: openPojoVersion
     testImplementation group: "org.hibernate",                 name: "hibernate-validator",            version: hibernateValidatorVersion

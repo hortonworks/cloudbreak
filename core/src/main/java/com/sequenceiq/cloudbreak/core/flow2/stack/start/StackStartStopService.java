@@ -113,7 +113,7 @@ public class StackStartStopService {
     }
 
     private void updateInstancesToStopped(Stack stack, Collection<CloudVmInstanceStatus> instanceStatuses) {
-        Set<InstanceMetaData> allInstanceMetadataSet = instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stack.getId());
+        Set<InstanceMetaData> allInstanceMetadataSet = instanceMetaDataService.getAllInstanceMetadataByStackId(stack.getId());
         for (InstanceMetaData metaData : allInstanceMetadataSet) {
             Optional<CloudVmInstanceStatus> status = instanceStatuses.stream()
                     .filter(is -> is != null && is.getCloudInstance().getInstanceId() != null

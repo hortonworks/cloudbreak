@@ -50,6 +50,7 @@ dependencies {
   implementation group: 'org.springframework',           name: 'spring-aspects',                 version: springFrameworkVersion
   implementation group: 'org.apache.commons',            name: 'commons-lang3',                  version: apacheCommonsLangVersion
   implementation group: 'commons-validator',             name: 'commons-validator',              version: apacheCommonsValidatorVersion
+  implementation group: 'com.cloudera.cdp',                name: 'cdp-sdk-java',                   version: cdpSdkVersion
 
   testImplementation group: 'org.assertj',                 name: 'assertj-core',                   version: assertjVersion
 

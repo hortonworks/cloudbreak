@@ -31,7 +31,6 @@ import com.sequenceiq.cloudbreak.cloud.model.CloudCredential;
 import com.sequenceiq.cloudbreak.cloud.model.VolumeSetAttributes;
 import com.sequenceiq.cloudbreak.cluster.util.ResourceAttributeUtil;
 import com.sequenceiq.cloudbreak.common.json.Json;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.converter.spi.CredentialToCloudCredentialConverter;
 import com.sequenceiq.cloudbreak.domain.Resource;
 import com.sequenceiq.cloudbreak.domain.Template;
@@ -41,7 +40,7 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.dto.credential.Credential;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.environment.credential.CredentialClientService;
 import com.sequenceiq.common.api.type.ResourceType;
@@ -173,7 +172,7 @@ public class StackUtilTest {
         Set<Node> nodes = new HashSet<>();
         nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
         nodes.add(new Node("1.1.1.3", "1.1.1.3", "3", "m5.xlarge", "node3.example.com", "worker"));
-        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(nodes);
 
         stackUtil.collectAndCheckReachableNodes(stack, necessaryNodes);
 
@@ -215,7 +214,7 @@ public class StackUtilTest {
 
         Set<Node> nodes = new HashSet<>();
         nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
-        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
+        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(nodes);
 
         NodesUnreachableException nodesUnreachableException = Assertions.assertThrows(NodesUnreachableException.class,
                 () -> stackUtil.collectAndCheckReachableNodes(stack, necessaryNodes));
@@ -249,11 +248,6 @@ public class StackUtilTest {
         instanceGroup.setTemplate(template);
         instanceGroupSet.add(instanceGroup);
         stack.setInstanceGroups(instanceGroupSet);
-
-        Set<Node> nodes = new HashSet<>();
-        nodes.add(new Node("1.1.1.1", "1.1.1.1", "1", "m5.xlarge", "node1.example.com", "worker"));
-        when(hostOrchestrator.getResponsiveNodes(nodesCaptor.capture(), any())).thenReturn(new NodeReachabilityResult(nodes, Set.of()));
-
         stackUtil.collectReachableNodes(stack);
 
         verify(hostOrchestrator).getResponsiveNodes(nodesCaptor.capture(), any());

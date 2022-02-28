@@ -49,13 +49,13 @@ public class NodeStatusCheckerJobService {
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(properties.getIntervalInSeconds()));
-        schedule(jobDetail, trigger, resource.getJobResource().getLocalId());
+        schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     public <T> void schedule(JobResourceAdapter<T> resource, int delayInSeconds) {
         JobDetail jobDetail = buildJobDetail(resource);
         Trigger trigger = buildJobTrigger(jobDetail, delayInSeconds);
-        schedule(jobDetail, trigger, resource.getJobResource().getLocalId());
+        schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     private void schedule(JobDetail jobDetail, Trigger trigger, String localId) {
@@ -104,7 +104,7 @@ public class NodeStatusCheckerJobService {
         JobDataMap jobDataMap = resource.toJobDataMap();
 
         return JobBuilder.newJob(resource.getJobClassForResource())
-                .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
+                .withIdentity(resource.getLocalId(), JOB_GROUP)
                 .withDescription("Checking stack nodestatus Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()

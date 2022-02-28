@@ -9,7 +9,6 @@ import com.sequenceiq.cloudbreak.auth.ThreadBasedUserCrnProvider;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.StackStatus;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
-import com.sequenceiq.cloudbreak.usage.strategy.CompositeUsageProcessingStrategy;
 import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
 import com.sequenceiq.cloudbreak.usage.UsageReportProcessor;
 
@@ -39,9 +38,8 @@ public class UsageLoggingUtilTest {
 
     @BeforeEach
     public void setUp() {
-        CompositeUsageProcessingStrategy usageProcessingStrategy = new CompositeUsageProcessingStrategy(new LoggingUsageProcessingStrategy(),
-                null, null, null, null);
-        UsageReportProcessor usageReportProcessor = new UsageReportProcessor(usageProcessingStrategy);
+        LoggingUsageProcessingStrategy loggingUsageProcessingStrategy = new LoggingUsageProcessingStrategy();
+        UsageReportProcessor usageReportProcessor = new UsageReportProcessor(loggingUsageProcessingStrategy, null);
         util = new UsageLoggingUtil(usageReportProcessor);
         cluster = new Cluster();
 

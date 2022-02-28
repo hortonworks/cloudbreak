@@ -285,7 +285,7 @@ public class ServiceEndpointCollectorTest {
         cluster.getGateway().setGatewayPort(443);
         cluster.setExtendedBlueprintText("extended-blueprint");
         Blueprint blueprint = new Blueprint();
-        blueprint.setStackVersion("7.2.14");
+        blueprint.setStackVersion("7.2.13");
         cluster.setBlueprint(blueprint);
         mockBlueprintTextProcessor();
         mockComponentLocator(Lists.newArrayList("10.0.0.1"));

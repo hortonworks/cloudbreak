@@ -21,7 +21,7 @@ public class FreeIpaUpscaleAction implements Action<FreeIpaUpscaleTestDto, FreeI
         Log.whenJson(LOGGER, format(" FreeIPA upscale request:%n"), testDto.getRequest());
         UpscaleRequest upscaleRequest = new UpscaleRequest();
         upscaleRequest.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
-        upscaleRequest.setTargetAvailabilityType(testDto.getRequest().getTargetAvailabilityType());
+        upscaleRequest.setTargetFormFactor(testDto.getRequest().getTargetFormFactor());
         testDto.setResponse(client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .upscale(upscaleRequest));

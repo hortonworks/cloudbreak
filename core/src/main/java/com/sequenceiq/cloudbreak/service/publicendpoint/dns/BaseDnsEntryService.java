@@ -71,7 +71,7 @@ public abstract class BaseDnsEntryService extends BasePublicEndpointManagementSe
 
     private Map<String, String> getCandidateIpsByFqdn(Stack stack) {
         Map<String, List<String>> componentLocation = getComponentLocation(stack);
-        final Set<InstanceMetaData> runningInstanceMetaData = stack.getNotDeletedAndNotZombieInstanceMetaDataSet();
+        final Set<InstanceMetaData> runningInstanceMetaData = stack.getNotDeletedInstanceMetaDataSet();
         final InstanceMetaData primaryGatewayInstanceMetadata = stack.getPrimaryGatewayInstance();
         return componentLocation
                 .values()

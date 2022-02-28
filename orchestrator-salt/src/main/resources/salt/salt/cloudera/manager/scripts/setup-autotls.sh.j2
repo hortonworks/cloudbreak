@@ -1,5 +1,5 @@
-{%- set manager_server_hostname = salt['grains.get']('host') %}
-{%- set manager_server_fqdn = salt['grains.get']('fqdn') %}
+{%- set manager_server_hostname = salt['pillar.get']('hosts')[server_address]['hostname'] %}
+{%- set manager_server_fqdn = salt['pillar.get']('hosts')[server_address]['fqdn'] %}
 {%- set internal_loadbalancer_san = salt['pillar.get']('cloudera-manager:communication:internal_loadbalancer_san') %}
 #!/bin/bash
 

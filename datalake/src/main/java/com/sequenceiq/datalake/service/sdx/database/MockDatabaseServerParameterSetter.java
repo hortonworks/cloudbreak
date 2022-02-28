@@ -9,7 +9,7 @@ import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
 @Component
 public class MockDatabaseServerParameterSetter implements DatabaseServerParameterSetter {
     @Override
-    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType, String databaseEngineVersion) {
+    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
     }
 
     @Override

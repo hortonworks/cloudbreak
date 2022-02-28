@@ -31,11 +31,8 @@ public class UmsClientConfig {
     @Value("${altus.ums.caller:cloudbreak}")
     private String callingServiceName;
 
-    @Value("${altus.ums.client.grpc.timeout.sec:60}")
+    @Value("${altus.ums.client.grpc.timeout.sec:5}")
     private long grpcTimeoutSec;
-
-    @Value("${altus.ums.client.grpc.short.timeout.sec:5}")
-    private long grpcShortTimeoutSec;
 
     @PostConstruct
     public void init() {
@@ -74,9 +71,4 @@ public class UmsClientConfig {
     public String getCallingServiceName() {
         return callingServiceName;
     }
-
-    public long getGrpcShortTimeoutSec() {
-        return grpcShortTimeoutSec;
-    }
-
 }

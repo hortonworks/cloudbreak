@@ -11,8 +11,6 @@ import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.SequenceGenerator;
 
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceLifeCycle;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetadataType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceStatus;
@@ -21,7 +19,7 @@ import com.sequenceiq.freeipa.entity.util.InstanceMetadataTypeConverter;
 import com.sequenceiq.freeipa.entity.util.InstanceStatusConverter;
 
 @Entity
-public class InstanceMetaData implements OrchestrationNode {
+public class InstanceMetaData {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancemetadata_generator")
     @SequenceGenerator(name = "instancemetadata_generator", sequenceName = "instancemetadata_id_seq", allocationSize = 1)
@@ -268,11 +266,5 @@ public class InstanceMetaData implements OrchestrationNode {
                 .add("subnetId='" + subnetId + "'")
                 .add("variant='" + variant + "'")
                 .toString();
-    }
-
-    @Override
-    public Node getNode() {
-        return new Node(getPrivateIp(), getPublicIpWrapper(), getInstanceId(), getInstanceGroup().getTemplate().getInstanceType(),
-                getDiscoveryFQDN(), getInstanceGroup().getGroupName());
     }
 }

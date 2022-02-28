@@ -25,8 +25,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 
-import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.cloudbreak.quartz.model.JobResourceAdapter;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.StatusCheckerConfig;
 
@@ -56,42 +54,30 @@ public class StatusCheckerJobService {
 
     public <T> void schedule(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource);
-        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(), RANDOM.nextInt(statusCheckerConfig.getIntervalInSeconds()),
-                statusCheckerConfig.getIntervalInSeconds());
-        schedule(jobDetail, trigger, resource.getJobResource());
+        Trigger trigger = buildJobTrigger(jobDetail, RANDOM.nextInt(statusCheckerConfig.getIntervalInSeconds()), statusCheckerConfig.getIntervalInSeconds());
+        schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     public <T> void schedule(JobResourceAdapter<T> resource, int delayInSeconds) {
         JobDetail jobDetail = buildJobDetail(resource);
-        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(), delayInSeconds, statusCheckerConfig.getIntervalInSeconds());
-        schedule(jobDetail, trigger, resource.getJobResource());
+        Trigger trigger = buildJobTrigger(jobDetail, delayInSeconds, statusCheckerConfig.getIntervalInSeconds());
+        schedule(jobDetail, trigger, resource.getLocalId());
     }
 
-    public void schedule(Long id, Class<? extends JobResourceAdapter<?>> resourceAdapterClass) {
+    public void schedule(Long id, Class<? extends JobResourceAdapter<?>> resource) {
         try {
-            Constructor<? extends JobResourceAdapter> c = resourceAdapterClass.getConstructor(Long.class, ApplicationContext.class);
-            JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
+            Constructor<? extends JobResourceAdapter<?>> c = resource.getConstructor(Long.class, ApplicationContext.class);
+            JobResourceAdapter<?> resourceAdapter = c.newInstance(id, applicationContext);
             schedule(resourceAdapter);
         } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            LOGGER.error("Error during scheduling quartz job: {}", id, e);
+            LOGGER.error(String.format("Error during scheduling quartz job: %s", id), e);
         }
     }
 
     public <T> void scheduleLongIntervalCheck(JobResourceAdapter<T> resource) {
         JobDetail jobDetail = buildJobDetail(resource, Map.of(SYNC_JOB_TYPE, LONG_SYNC_JOB_TYPE));
-        Trigger trigger = buildJobTrigger(jobDetail, resource.getJobResource(), statusCheckerConfig.getIntervalInSeconds(),
-                statusCheckerConfig.getLongIntervalInSeconds());
-        schedule(jobDetail, trigger, resource.getJobResource());
-    }
-
-    public <T> void scheduleLongIntervalCheck(Long id, Class<? extends JobResourceAdapter<?>> resourceAdapterClass) {
-        try {
-            Constructor<? extends JobResourceAdapter> c = resourceAdapterClass.getConstructor(Long.class, ApplicationContext.class);
-            JobResourceAdapter resourceAdapter = c.newInstance(id, applicationContext);
-            scheduleLongIntervalCheck(resourceAdapter);
-        } catch (NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e) {
-            LOGGER.error("Error during scheduling long quartz job: {}", id, e);
-        }
+        Trigger trigger = buildJobTrigger(jobDetail, statusCheckerConfig.getIntervalInSeconds(), statusCheckerConfig.getLongIntervalInSeconds());
+        schedule(jobDetail, trigger, resource.getLocalId());
     }
 
     public void unschedule(String id) {
@@ -99,7 +85,6 @@ public class StatusCheckerJobService {
             JobKey jobKey = JobKey.jobKey(id, JOB_GROUP);
             LOGGER.info("Unscheduling status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.deleteJob(jobKey);
-            LOGGER.info("Status checker job unscheduled with id: {}", id);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during unscheduling quartz job: %s", id), e);
         }
@@ -108,26 +93,22 @@ public class StatusCheckerJobService {
     public void deleteAll() {
         try {
             scheduler.clear();
-            LOGGER.info("All scheduled tasks are cleared");
         } catch (SchedulerException e) {
             LOGGER.error("Error during clearing quartz jobs", e);
         }
     }
 
-    private void schedule(JobDetail jobDetail, Trigger trigger, JobResource jobResource) {
+    private void schedule(JobDetail jobDetail, Trigger trigger, String localId) {
         try {
-            JobKey jobKey = JobKey.jobKey(jobResource.getLocalId(), JOB_GROUP);
+            JobKey jobKey = JobKey.jobKey(localId, JOB_GROUP);
             if (scheduler.getJobDetail(jobKey) != null) {
                 LOGGER.info("Unscheduling status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
-                unschedule(jobResource.getLocalId());
+                unschedule(localId);
             }
             LOGGER.info("Scheduling status checker job for stack with key: '{}' and group: '{}'", jobKey.getName(), jobKey.getGroup());
             scheduler.scheduleJob(jobDetail, trigger);
-            LOGGER.info("Status checker job scheduled with id: {}, name: {}, crn: {}, type: {}", jobResource.getLocalId(), jobResource.getName(),
-                    jobResource.getRemoteResourceId(), jobDetail.getJobDataMap().get(SYNC_JOB_TYPE));
         } catch (SchedulerException e) {
-            LOGGER.error("Error during scheduling quartz job. id: {}, name: {}, crn: {}", jobResource.getLocalId(), jobResource.getName(),
-                    jobResource.getRemoteResourceId(), e);
+            LOGGER.error(String.format("Error during scheduling quartz job: %s", localId), e);
         }
     }
 
@@ -138,29 +119,20 @@ public class StatusCheckerJobService {
     private <T> JobDetail buildJobDetail(JobResourceAdapter<T> resource, Map<String, String> dataMap) {
         JobDataMap jobDataMap = resource.toJobDataMap();
         jobDataMap.putAll(dataMap);
-        String resourceType = getResourceTypeFromCrnIfAvailable(resource.getJobResource());
+
         return JobBuilder.newJob(resource.getJobClassForResource())
-                .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
-                .withDescription(String.format("Checking %s status job", resourceType))
+                .withIdentity(resource.getLocalId(), JOB_GROUP)
+                .withDescription("Checking datalake status Job")
                 .usingJobData(jobDataMap)
                 .storeDurably()
                 .build();
     }
 
-    private <T> String getResourceTypeFromCrnIfAvailable(JobResource jobResource) {
-        String remoteResourceId = jobResource.getRemoteResourceId();
-        String resourceType = "unknown";
-        if (Crn.isCrn(remoteResourceId)) {
-            resourceType = Crn.safeFromString(remoteResourceId).getResource();
-        }
-        return resourceType;
-    }
-
-    private Trigger buildJobTrigger(JobDetail jobDetail, JobResource jobResource, int delayInSeconds, int intervalInSeconds) {
+    private Trigger buildJobTrigger(JobDetail jobDetail, int delayInSeconds, int intervalInSeconds) {
         return TriggerBuilder.newTrigger()
                 .forJob(jobDetail)
                 .withIdentity(jobDetail.getKey().getName(), TRIGGER_GROUP)
-                .withDescription(String.format("Checking %s status trigger", getResourceTypeFromCrnIfAvailable(jobResource)))
+                .withDescription("Checking datalake status Trigger")
                 .startAt(delayedStart(delayInSeconds))
                 .withSchedule(SimpleScheduleBuilder.simpleSchedule()
                         .withIntervalInSeconds(intervalInSeconds)

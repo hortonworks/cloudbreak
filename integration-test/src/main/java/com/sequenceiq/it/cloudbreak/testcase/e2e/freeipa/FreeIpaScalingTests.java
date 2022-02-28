@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.Test;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceGroupResponse;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.instance.InstanceMetaDataResponse;
@@ -66,34 +66,34 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
                 })
 
                 .given(FreeIpaUpscaleTestDto.class)
-                .withAvailabilityType(AvailabilityType.HA)
+                .withFormFactor(FormFactor.HA)
                 .when(freeIpaTestClient.upscale(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
-                    assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
+                    assertInstanceCount(testDto.getRequest().getTargetFormFactor(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     return testDto;
                 })
 
                 .given(FreeIpaDownscaleTestDto.class)
-                .withAvailabilityType(AvailabilityType.TWO_NODE_BASED)
+                .withFormFactor(FormFactor.TWO_NODE_BASED)
                 .when(freeIpaTestClient.downscale())
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
-                    assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
+                    assertInstanceCount(testDto.getRequest().getTargetFormFactor(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     return testDto;
                 })
 
                 .given(FreeIpaUpscaleTestDto.class)
-                .withAvailabilityType(AvailabilityType.HA)
+                .withFormFactor(FormFactor.HA)
                 .when(freeIpaTestClient.upscale(), key(freeIpa))
                 .await(FREEIPA_AVAILABLE)
                 .then((tc, testDto, client) -> {
                     Set<InstanceMetaDataResponse> instanceMetaDataResponses = getInstanceMetaDataResponses(testDto.getRequest().getEnvironmentCrn(), client);
-                    assertInstanceCount(testDto.getRequest().getTargetAvailabilityType(), instanceMetaDataResponses);
+                    assertInstanceCount(testDto.getRequest().getTargetFormFactor(), instanceMetaDataResponses);
                     assertPrimaryGatewayHasNotChanged(primaryGatewayInstanceId, instanceMetaDataResponses);
                     return testDto;
                 })
@@ -130,10 +130,10 @@ public class FreeIpaScalingTests extends AbstractE2ETest {
         }
     }
 
-    private void assertInstanceCount(AvailabilityType availabilityType, Set<InstanceMetaDataResponse> imd) {
-        if (availabilityType.getInstanceCount() != imd.size()) {
+    private void assertInstanceCount(FormFactor targetFormFactor, Set<InstanceMetaDataResponse> imd) {
+        if (targetFormFactor.getInstanceCount() != imd.size()) {
             String message = String.format("Expected number of freeipa instances %s do not match the actual instance count %s ",
-                    availabilityType.getInstanceCount(), imd.size());
+                    targetFormFactor.getInstanceCount(), imd.size());
             LOGGER.error(message);
             throw new TestFailException(message);
         }

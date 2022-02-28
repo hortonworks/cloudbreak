@@ -185,7 +185,7 @@ public class ClusterOperationServiceTest {
 
         HostGroup hostGroup = getHostGroup(host1, RecoveryMode.AUTO);
         when(instanceMetaDataService.getAllInstanceMetadataByStackId(eq(stack.getId()))).thenReturn(Set.of(host1, host2));
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(eq(stack.getId()))).thenReturn(Set.of(host1, host2));
+        when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(Set.of(host1, host2));
         when(hostGroupService.findHostGroupsInCluster(stack.getCluster().getId())).thenReturn(Set.of(hostGroup, getHostGroup(host2, RecoveryMode.MANUAL)));
 
         underTest.reportHealthChange(STACK_CRN, Map.of("host1", Optional.empty(), "host2", Optional.empty()), Set.of());
@@ -252,7 +252,7 @@ public class ClusterOperationServiceTest {
 
         InstanceMetaData host1 = getHost("host1", "master", InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
 
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1)));
+        when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(host1)));
 
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("recovery detected");
 
@@ -293,7 +293,7 @@ public class ClusterOperationServiceTest {
 
         InstanceMetaData instanceWithoutFqdn = getHost(null, "master", InstanceStatus.SERVICES_UNHEALTHY, InstanceGroupType.GATEWAY);
 
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(instanceWithoutFqdn)));
+        when(instanceMetaDataService.findNotTerminatedForStack(eq(stack.getId()))).thenReturn(new HashSet<>(Arrays.asList(instanceWithoutFqdn)));
 
         when(cloudbreakMessagesService.getMessage(any(), anyCollection())).thenReturn("recovery detected");
 

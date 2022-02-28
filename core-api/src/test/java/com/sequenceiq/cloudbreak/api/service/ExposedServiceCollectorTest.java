@@ -29,7 +29,9 @@ class ExposedServiceCollectorTest {
 
     private static final Optional<String> CDH_7_2_10 = Optional.of("7.2.10");
 
-    private static final Optional<String> CDH_7_2_12 = Optional.of("7.2.12");
+    private static final Optional<String> CDH_7_2_11 = Optional.of("7.2.11");
+
+    private static final Optional<String> CDH_7_2_13 = Optional.of("7.2.13");
 
     private static final Optional<String> CDH_7_2_14 = Optional.of("7.2.14");
 
@@ -250,6 +252,63 @@ class ExposedServiceCollectorTest {
     }
 
     @Test
+    void getKnoxExposedServicesNamesWiht7213() {
+        underTest.init();
+        assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.13"))).containsExactlyInAnyOrder(
+                "ATLAS",
+                "ATLAS_API",
+                "AVATICA",
+                "CM-API",
+                "CM-UI",
+                "CRUISE-CONTROL",
+                "DAS",
+                "FLINK",
+                "HBASEJARS",
+                "HBASEUI",
+                "HDFSUI",
+                "HIVE",
+                "HUE",
+                "IMPALA",
+                "IMPALA_DEBUG_UI",
+                "JOBHISTORYUI",
+                "JOBTRACKER",
+                "RESOURCEMANAGERAPI",
+                "KUDUUI",
+                "LIVYSERVER1",
+                "LIVYSERVER_API",
+                "LIVY_FOR_SPARK3",
+                "LIVY_FOR_SPARK3_API",
+                "NAMENODE",
+                "NIFI",
+                "NIFI-REGISTRY",
+                "NIFI_REST",
+                "NIFI-REGISTRY-REST",
+                "OOZIE",
+                "DATA-DISCOVERY-SERVICE-API",
+                "PROFILER-ADMIN-API",
+                "PROFILER-METRICS-API",
+                "PROFILER-SCHEDULER-API",
+                "RANGER",
+                "SCHEMA-REGISTRY",
+                "SCHEMA-REGISTRY-API",
+                "SMM-API",
+                "SMM-UI",
+                "SOLR",
+                "SPARKHISTORYUI",
+                "SPARK3HISTORYUI",
+                "SSB-MVE-API",
+                "SSB-SSC-UI",
+                "SSB-SSC-WS",
+                "WEBHBASE",
+                "WEBHDFS",
+                "YARNUIV2",
+                "ZEPPELIN",
+                "QUEUEMANAGER_WEBAPP",
+                "KNOX_TOKEN_INTEGRATOR",
+                "SSB-SSE-API");
+    }
+
+    @Test
     void getKnoxExposedServicesNamesWiht7214() {
         underTest.init();
         assertThat(underTest.getAllKnoxExposed(Optional.of("7.2.14"))).containsExactlyInAnyOrder(
@@ -348,7 +407,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("SCHEMA-REGISTRY-API", 7788),
                 Map.entry("SMM-API", 8585),
                 Map.entry("SMM-UI", 9991),
-                Map.entry("SOLR", 8993),
+                Map.entry("SOLR", 8983),
                 Map.entry("SPARKHISTORYUI", 18088),
                 Map.entry("SPARK3HISTORYUI", 18089),
                 Map.entry("WEBHBASE", 20550),
@@ -361,7 +420,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getNonTLSServicePortsPre7214() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_12, false)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_13, false)).containsOnly(
                 Map.entry("ATLAS", 21000),
                 Map.entry("ATLAS_API", 21000),
                 Map.entry("AVATICA", 8765),
@@ -400,12 +459,13 @@ class ExposedServiceCollectorTest {
                 Map.entry("SCHEMA-REGISTRY-API", 7788),
                 Map.entry("SMM-API", 8585),
                 Map.entry("SMM-UI", 9991),
-                Map.entry("SOLR", 8993),
+                Map.entry("SOLR", 8983),
                 Map.entry("SPARKHISTORYUI", 18088),
                 Map.entry("SPARK3HISTORYUI", 18089),
                 Map.entry("SSB-SSC-UI", 18112),
                 Map.entry("SSB-SSC-WS", 18112),
                 Map.entry("SSB-MVE-API", 18131),
+                Map.entry("SSB-SSE-API", 18121),
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9870),
                 Map.entry("YARNUIV2", 8088),
@@ -456,7 +516,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("SCHEMA-REGISTRY-API", 7788),
                 Map.entry("SMM-API", 8585),
                 Map.entry("SMM-UI", 9991),
-                Map.entry("SOLR", 8993),
+                Map.entry("SOLR", 8983),
                 Map.entry("SPARKHISTORYUI", 18088),
                 Map.entry("SPARK3HISTORYUI", 18089),
                 Map.entry("SSB-SSC-UI", 18112),
@@ -524,7 +584,7 @@ class ExposedServiceCollectorTest {
     @Test
     void getTLSServicePortsPre7214() {
         underTest.init();
-        assertThat(underTest.getAllServicePorts(CDH_7_2_12, true)).containsOnly(
+        assertThat(underTest.getAllServicePorts(CDH_7_2_13, true)).containsOnly(
                 Map.entry("ATLAS", 31443),
                 Map.entry("ATLAS_API", 31443),
                 Map.entry("AVATICA", 8765),
@@ -569,6 +629,7 @@ class ExposedServiceCollectorTest {
                 Map.entry("SSB-SSC-UI", 18112),
                 Map.entry("SSB-SSC-WS", 18112),
                 Map.entry("SSB-MVE-API", 18131),
+                Map.entry("SSB-SSE-API", 18121),
                 Map.entry("WEBHBASE", 20550),
                 Map.entry("WEBHDFS", 9871),
                 Map.entry("YARNUIV2", 8090),

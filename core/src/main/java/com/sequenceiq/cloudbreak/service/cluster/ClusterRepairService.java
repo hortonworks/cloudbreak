@@ -41,7 +41,8 @@ import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.core.flow2.service.ReactorFlowManager;
 import com.sequenceiq.cloudbreak.domain.Resource;
-import com.sequenceiq.cloudbreak.domain.StopRestrictionReason;
+import com.sequenceiq.cloudbreak.domain.Template;
+import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.ManualClusterRepairMode;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -59,7 +60,6 @@ import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.rdsconfig.RedbeamsClientService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
-import com.sequenceiq.cloudbreak.service.stack.StackStopRestrictionService;
 import com.sequenceiq.cloudbreak.structuredevent.event.CloudbreakEventService;
 import com.sequenceiq.common.api.type.InstanceGroupType;
 import com.sequenceiq.common.model.AwsDiskType;
@@ -119,9 +119,6 @@ public class ClusterRepairService {
 
     @Inject
     private EntitlementService entitlementService;
-
-    @Inject
-    private StackStopRestrictionService stackStopRestrictionService;
 
     public FlowIdentifier repairAll(Long stackId) {
         Result<Map<HostGroupName, Set<InstanceMetaData>>, RepairValidation> repairStart =
@@ -321,7 +318,7 @@ public class ClusterRepairService {
                 .filter(instanceSelectors.getLeft())
                 .map(hostGroup -> Map.entry(hostGroupName(hostGroup.getName()), hostGroup
                         .getInstanceGroup()
-                        .getNotTerminatedAndNotZombieInstanceMetaDataSet()
+                        .getNotTerminatedInstanceMetaDataSet()
                         .stream()
                         .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                         .filter(instanceSelectors.getRight())
@@ -345,9 +342,9 @@ public class ClusterRepairService {
         if (reattach) {
             for (InstanceMetaData instanceMetaData : instances) {
                 validationResult.addAll(validateOnGateway(stack, instanceMetaData));
-            }
-            if (stackStopRestrictionService.isInfrastructureStoppable(stack) != StopRestrictionReason.NONE) {
-                validationResult.add("Reattach not supported for this disk type.");
+                if (hasEphemeralStorage(stack, hostGroupName.value())) {
+                    validationResult.add("Reattach not supported for this disk type.");
+                }
             }
         }
         return validationResult;
@@ -374,6 +371,15 @@ public class ClusterRepairService {
         } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
             throw new BadRequestException(e.getMessage(), e);
         }
+    }
+
+    private boolean hasEphemeralStorage(Stack stack, String hostGroupName) {
+        return stack.getInstanceGroupsAsList().stream()
+                .filter(instanceGroup -> hostGroupName.equalsIgnoreCase(instanceGroup.getGroupName()))
+                .map(InstanceGroup::getTemplate)
+                .map(Template::getVolumeTemplates)
+                .anyMatch(volumes -> volumes.stream()
+                        .map(VolumeTemplate::getVolumeType).anyMatch(REATTACH_NOT_SUPPORTED_VOLUME_TYPES::contains));
     }
 
     private void updateVolumesDeleteFlag(Stack stack, Predicate<Resource> resourceFilter, boolean deleteVolumes) {

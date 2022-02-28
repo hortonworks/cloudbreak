@@ -136,7 +136,7 @@ public class SshJClientActions extends SshJClient {
         Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
         Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
 
-        for (Entry<String, Pair<Integer, String>> node : deviceDiskTypeMappingsByIp.entrySet()) {
+        for (Entry<String, Pair<Integer, String>> node: deviceDiskTypeMappingsByIp.entrySet()) {
             Map<String, String> ephemeralDisks = new Json(node.getValue().getValue()).getMap().entrySet().stream()
                     .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
                     .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
@@ -153,7 +153,7 @@ public class SshJClientActions extends SshJClient {
             Map<String, String> mounPoints = new Json(deviceMountPointMappingsByIp.get(node.getKey()).getValue()).getMap().entrySet().stream()
                     .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
 
-            for (String device : ephemeralDisks.keySet()) {
+            for (String device: ephemeralDisks.keySet()) {
                 String mountPoint = mounPoints.get(device);
                 if (mountPoint == null) {
                     LOGGER.error("No mount point found for ephemeral device {} on node with IP {}!", device, node.getKey());
@@ -180,8 +180,8 @@ public class SshJClientActions extends SshJClient {
         return deviceDiskTypeMappingsByIp.entrySet().stream().findFirst()
                 .stream()
                 .map(node -> new Json(node.getValue().getValue()).getMap().entrySet().stream()
-                        .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
-                        .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue()))))
+                .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
+                .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue()))))
                 .map(Map::keySet)
                 .flatMap(Set::stream)
                 .map(mounPoints::get)
@@ -192,7 +192,7 @@ public class SshJClientActions extends SshJClient {
         Map<String, Pair<Integer, String>> deviceMountPointMappingsByIp = getDeviceMountPointMappingsByIp(instanceGroups, hostGroupNames);
         Map<String, Pair<Integer, String>> deviceDiskTypeMappingsByIp = getDeviceDiskTypeMappingsByIp(instanceGroups, hostGroupNames);
 
-        for (Entry<String, Pair<Integer, String>> node : deviceDiskTypeMappingsByIp.entrySet()) {
+        for (Entry<String, Pair<Integer, String>> node: deviceDiskTypeMappingsByIp.entrySet()) {
             Map<String, String> ephemeralDisks = new Json(node.getValue().getValue()).getMap().entrySet().stream()
                     .filter(e -> String.valueOf(e.getValue()).contains("Amazon EC2 NVMe Instance Storage"))
                     .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
@@ -203,7 +203,7 @@ public class SshJClientActions extends SshJClient {
             }
         }
 
-        for (Entry<String, Pair<Integer, String>> node : deviceMountPointMappingsByIp.entrySet()) {
+        for (Entry<String, Pair<Integer, String>> node: deviceMountPointMappingsByIp.entrySet()) {
             Map<String, String> ephemeralMounts = new Json(node.getValue().getValue()).getMap().entrySet().stream()
                     .filter(e -> String.valueOf(e.getValue()).contains("ephfs"))
                     .collect(Collectors.toMap(Entry::getKey, x -> String.valueOf(x.getValue())));
@@ -254,27 +254,6 @@ public class SshJClientActions extends SshJClient {
         Pair<Integer, String> cmdOut = executeSshCommand(instanceIp, "curl --max-time 30 cloudera.com");
         if (cmdOut.getKey() == 0) {
             throw new TestFailException("Instance [" + instanceIp + "] has internet coonection but shouldn't have!");
-        }
-    }
-
-    public SdxTestDto checkKinitDuringFreeipaUpgrade(SdxTestDto testDto, List<InstanceGroupV4Response> instanceGroups, List<String> hostGroupNames) {
-        getSdxInstanceGroupIps(instanceGroups, hostGroupNames, false).stream().findFirst()
-                .ifPresentOrElse(this::checkKinitDuringFreeipaUpgrade, () -> {
-                    throw new TestFailException("No instance found for kinit test");
-                });
-        return testDto;
-    }
-
-    private void checkKinitDuringFreeipaUpgrade(String instanceIp) {
-        // TODO remove sleep 31 after unbound removal has been done, this is because unbound cached for 30 sec the dns records
-        Pair<Integer, String> cmdOut = executeSshCommand(instanceIp,
-                "set -x kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 " +
-                        "|| sleep 31 && kdestroy && echo Password123! | KRB5_TRACE=/dev/stdout kinit -V fakemockuser0 && klist | grep fakemockuser0");
-        if (cmdOut.getKey() != 0) {
-            String errorMsg = "Kinit wasn't successfull on instance [" +
-                    instanceIp + "] during freeipa upgrade! Cmd exit code: " + cmdOut.getKey() + ", Cmd output: " + cmdOut.getValue();
-            LOGGER.error(errorMsg);
-            throw new TestFailException(errorMsg);
         }
     }
 

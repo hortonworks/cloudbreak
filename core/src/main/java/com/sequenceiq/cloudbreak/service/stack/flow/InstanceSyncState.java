@@ -9,8 +9,7 @@ public enum InstanceSyncState {
     RUNNING,
     STOPPED,
     IN_PROGRESS,
-    UNKNOWN,
-    ZOMBIE;
+    UNKNOWN;
 
     public static InstanceSyncState getInstanceSyncState(InstanceStatus instanceStatus) {
         switch (instanceStatus) {
@@ -28,8 +27,6 @@ public enum InstanceSyncState {
                 return DELETED_ON_PROVIDER_SIDE;
             case TERMINATED_BY_PROVIDER:
                 return DELETED_BY_PROVIDER;
-            case ZOMBIE:
-                return ZOMBIE;
             default:
                 return UNKNOWN;
         }

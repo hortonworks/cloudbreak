@@ -11,8 +11,7 @@ public enum InstanceStatus {
     UNKNOWN(StatusGroup.PERMANENT),
     CREATE_REQUESTED(StatusGroup.PERMANENT),
     DELETE_REQUESTED(StatusGroup.PERMANENT),
-    IN_PROGRESS(StatusGroup.TRANSIENT),
-    ZOMBIE(StatusGroup.PERMANENT);
+    IN_PROGRESS(StatusGroup.TRANSIENT);
 
     private final StatusGroup statusGroup;
 

@@ -17,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.reflect.Whitebox;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.StackType;
 import com.sequenceiq.cloudbreak.cloud.Authenticator;
@@ -36,7 +35,6 @@ import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.VolumeTemplate;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
-import com.sequenceiq.cloudbreak.service.stack.InstanceGroupEphemeralVolumeChecker;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
 import com.sequenceiq.common.model.AwsDiskType;
 
@@ -54,7 +52,6 @@ class StackCreationServiceTest {
 
     @BeforeEach
     void setUp() {
-        Whitebox.setInternalState(underTest, "ephemeralVolumeChecker", new InstanceGroupEphemeralVolumeChecker());
         CloudConnector<Object> cloudConnector = Mockito.mock(CloudConnector.class);
         when(cloudPlatformConnectors.get(any())).thenReturn(cloudConnector);
         MetadataCollector metadataCollector = Mockito.mock(MetadataCollector.class);

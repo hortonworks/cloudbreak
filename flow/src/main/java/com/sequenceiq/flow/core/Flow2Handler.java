@@ -41,7 +41,6 @@ import com.sequenceiq.cloudbreak.util.NullUtil;
 import com.sequenceiq.flow.api.model.FlowIdentifier;
 import com.sequenceiq.flow.api.model.FlowType;
 import com.sequenceiq.flow.cleanup.InMemoryCleanup;
-import com.sequenceiq.flow.core.FlowState.FlowStateConstants;
 import com.sequenceiq.flow.core.cache.FlowStatCache;
 import com.sequenceiq.flow.core.chain.FlowChainHandler;
 import com.sequenceiq.flow.core.chain.FlowChains;
@@ -193,7 +192,7 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
             throws TransactionExecutionException {
         String flowId = flowParameters.getFlowId();
         LOGGER.debug("flow finalizing arrived: id: {}", flowId);
-        flowLogService.close(resourceId, flowId, false);
+        flowLogService.close(resourceId, flowId);
         Flow flow = runningFlows.remove(flowId);
         Optional<FlowFinalizerCallback> finalizerCallback = createFinalizerCallback(flow);
         flowStatCache.remove(flowId, flowChainId == null && !flow.isFlowFailed());
@@ -223,11 +222,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
         FlowConfiguration<?> flowConfig = getFlowConfiguration(key);
         FlowTriggerConditionResult flowTriggerConditionResult = flowConfig.getFlowTriggerCondition().isFlowTriggerable(payload.getResourceId());
         if (!flowTriggerConditionResult.isTriggerable()) {
-            if (flowChainId != null) {
-                LOGGER.info("Creating failed init flow log for '{}' flow chain because trigger condition failed. Reason: {}",
-                        flowChainId, flowTriggerConditionResult.getErrorMessage());
-                createNewFailedFlow(key, payload, flowParameters, flowChainId, flowConfig);
-            }
             throw new FlowNotTriggerableException(flowTriggerConditionResult.getErrorMessage());
         } else {
             Set<FlowLogIdWithTypeAndTimestamp> flowLogItems = flowLogService.findAllRunningNonTerminationFlowsByResourceId(payload.getResourceId());
@@ -237,21 +231,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
                 return createNewFlow(key, payload, flowParameters, flowChainId, flowChainType, contextParams, flowConfig);
             }
         }
-    }
-
-    private void createNewFailedFlow(String key, Payload payload, FlowParameters flowParameters, String flowChainId, FlowConfiguration<?> flowConfig)
-            throws TransactionExecutionException {
-        transactionService.required(() -> {
-            try {
-                String flowId = UUID.randomUUID().toString();
-                addFlowParameters(flowParameters, flowId, flowChainId, flowConfig);
-                flowLogService.save(flowParameters, flowChainId, key, payload, null, flowConfig.getClass(), FlowStateConstants.INIT_STATE);
-                flowLogService.close(payload.getResourceId(), flowId, true);
-                flowChains.removeFullFlowChain(flowChainId, false);
-            } catch (TransactionExecutionException e) {
-                throw new TransactionRuntimeExecutionException(e);
-            }
-        });
     }
 
     private FlowConfiguration<?> getFlowConfiguration(String key) {
@@ -278,7 +257,9 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
     private AcceptResult handleFlowConflict(String key, Payload payload, String flowChainId, Set<FlowLogIdWithTypeAndTimestamp> flowLogItems) {
         AcceptResult acceptResult = null;
         Optional<FlowLog> initFlowLog = flowLogService.findAllByFlowIdOrderByCreatedDesc(flowLogItems.iterator().next().getFlowId())
-                .stream().min(Comparator.comparing(FlowLog::getCreated));
+                .stream()
+                .sorted(Comparator.comparing(FlowLog::getCreated))
+                .findFirst();
         if (initFlowLog.isPresent()) {
             LOGGER.info("Found previous init flow log: {}", initFlowLog.get());
             if (NullUtil.allNotNull(initFlowLog.get().getFlowChainId(), flowChainId)) {
@@ -453,7 +434,6 @@ public class Flow2Handler implements Consumer<Event<? extends Payload>> {
 
     /**
      * Retry the failed flow completely
-     *
      * @param resourceId Datalake ID
      * @return Identifier of flow or a flow chain
      */

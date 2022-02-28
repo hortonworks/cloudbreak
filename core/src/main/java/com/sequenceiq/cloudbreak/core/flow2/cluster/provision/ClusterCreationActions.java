@@ -222,7 +222,7 @@ public class ClusterCreationActions {
 
             @Override
             protected Selectable createRequest(StackCreationContext context) {
-                Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(context.getStack().getId());
+                Set<InstanceMetaData> instanceMetaData = instanceMetaDataService.findNotTerminatedForStack(context.getStack().getId());
                 Set<String> hostNames = instanceMetadataProcessor.extractFqdn(instanceMetaData);
                 Set<String> ips = instanceMetadataProcessor.extractIps(instanceMetaData);
                 return new CleanupFreeIpaEvent(context.getStack().getId(), hostNames, ips, false);

@@ -42,7 +42,7 @@ class AllHostPublicDnsEntryServiceTest {
         otherGatewayInstanceMetadata.setDiscoveryFQDN("something.new");
         otherGatewayInstanceMetadata.setInstanceGroup(gatewayInstanceGroup);
         otherGatewayInstanceMetadata.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
-        Set<InstanceMetaData> updatedIM = gatewayInstanceGroup.getNotTerminatedAndNotZombieInstanceMetaDataSet();
+        Set<InstanceMetaData> updatedIM = gatewayInstanceGroup.getNotTerminatedInstanceMetaDataSet();
         updatedIM.add(otherGatewayInstanceMetadata);
         gatewayInstanceGroup.replaceInstanceMetadata(updatedIM);
 
@@ -66,7 +66,7 @@ class AllHostPublicDnsEntryServiceTest {
     @Test
     void getComponentLocationWhenNodesDoesNotHaveDiscoveryFQDN() {
         Stack stack = TestUtil.stack();
-        stack.getNotTerminatedAndNotZombieInstanceMetaDataList()
+        stack.getNotTerminatedInstanceMetaDataList()
                 .forEach(im -> im.setDiscoveryFQDN(null));
 
         Map<String, List<String>> result = underTest.getComponentLocation(stack);
@@ -78,7 +78,7 @@ class AllHostPublicDnsEntryServiceTest {
     void getComponentLocationWhenTheGatewayNodeHaveOnlyDiscoveryFQDN() {
         Stack stack = TestUtil.stack();
         InstanceMetaData primaryGatewayInstance = stack.getPrimaryGatewayInstance();
-        stack.getNotTerminatedAndNotZombieInstanceMetaDataList().stream()
+        stack.getNotTerminatedInstanceMetaDataList().stream()
                 .filter(im -> !primaryGatewayInstance.getId().equals(im.getId()))
                 .forEach(im -> im.setDiscoveryFQDN(null));
 

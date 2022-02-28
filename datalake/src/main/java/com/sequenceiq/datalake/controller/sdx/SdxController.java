@@ -224,7 +224,7 @@ public class SdxController implements SdxEndpoint {
         SdxCluster sdxCluster = getSdxClusterByName(name);
         StackV4Response stackV4Response = sdxService.getDetail(name, entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
-        return SdxClusterDetailResponse.create(sdxClusterResponse, stackV4Response);
+        return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
     }
 
     @Override
@@ -233,7 +233,7 @@ public class SdxController implements SdxEndpoint {
         SdxCluster sdxCluster = getSdxClusterByCrn(clusterCrn);
         StackV4Response stackV4Response = sdxService.getDetail(sdxCluster.getClusterName(), entries, sdxCluster.getAccountId());
         SdxClusterResponse sdxClusterResponse = sdxClusterConverter.sdxClusterToResponse(sdxCluster);
-        return SdxClusterDetailResponse.create(sdxClusterResponse, stackV4Response);
+        return new SdxClusterDetailResponse(sdxClusterResponse, stackV4Response);
     }
 
     @Override

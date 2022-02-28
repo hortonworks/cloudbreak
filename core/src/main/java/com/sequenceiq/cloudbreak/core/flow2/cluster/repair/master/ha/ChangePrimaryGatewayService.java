@@ -73,7 +73,7 @@ public class ChangePrimaryGatewayService {
 
     public void primaryGatewayChanged(long stackId, String newPrimaryGatewayFQDN) throws CloudbreakException, TransactionExecutionException {
         LOGGER.info("Update primary gateway ip");
-        Set<InstanceMetaData> imds = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId);
+        Set<InstanceMetaData> imds = instanceMetaDataService.findNotTerminatedForStack(stackId);
         Optional<InstanceMetaData> formerPrimaryGateway = imds.stream()
                 .filter(imd -> imd.getInstanceMetadataType() == InstanceMetadataType.GATEWAY_PRIMARY)
                 .findFirst();

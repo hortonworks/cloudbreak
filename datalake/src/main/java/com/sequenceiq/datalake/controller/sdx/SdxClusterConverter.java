@@ -48,7 +48,6 @@ public class SdxClusterConverter {
         sdxClusterResponse.setSdxClusterServiceVersion(sdxCluster.getSdxClusterServiceVersion());
         sdxClusterResponse.setDetached(sdxCluster.isDetached());
         sdxClusterResponse.setEnableMultiAz(sdxCluster.isEnableMultiAz());
-        sdxClusterResponse.setDatabaseEngineVersion(sdxCluster.getDatabaseEngineVersion());
         return sdxClusterResponse;
     }
 }

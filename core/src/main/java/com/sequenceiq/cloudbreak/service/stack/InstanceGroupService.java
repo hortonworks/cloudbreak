@@ -55,20 +55,6 @@ public class InstanceGroupService {
         return viewRepository.findInstanceGroupsInStack(stackId);
     }
 
-    public Set<InstanceGroup> findNotTerminatedAndNotZombieByStackId(Long stackId) {
-        try {
-            return transactionService.required(() -> {
-                Set<InstanceGroup> instanceGroups = repository.findByStackId(stackId);
-                instanceGroups.forEach(
-                        ig -> ig.replaceInstanceMetadata(ig.getNotTerminatedAndNotZombieInstanceMetaDataSet())
-                );
-                return instanceGroups;
-            });
-        } catch (TransactionService.TransactionExecutionException e) {
-            throw new CloudbreakServiceException("Can't load instance groups for stack ID.", e);
-        }
-    }
-
     public Set<InstanceGroup> findNotTerminatedByStackId(Long stackId) {
         try {
             return transactionService.required(() -> {

@@ -9,7 +9,6 @@ import javax.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.flow.core.PayloadContextProvider;
 import com.sequenceiq.redbeams.api.model.common.Status;
 import com.sequenceiq.redbeams.domain.stack.DBStack;
@@ -53,7 +52,7 @@ public class DBStackService implements PayloadContextProvider {
         return dbStackRepository.findAllByIdInAndStatusIn(dbStackIds, Status.getDeletingStatuses());
     }
 
-    public Set<JobResource> findAllForAutoSync() {
+    public Set<DBStack> findAllForAutoSync() {
         return dbStackRepository.findAllDbStackByStatusIn(Status.getAutoSyncStatuses());
     }
 

@@ -6,7 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
 import com.sequenceiq.freeipa.entity.Stack;
 import com.sequenceiq.cloudbreak.quartz.statuschecker.service.StatusCheckerJobService;
 
@@ -21,19 +20,15 @@ public class FreeipaJobService {
     @Inject
     private StatusCheckerJobService jobService;
 
-    public void schedule(JobResource jobResource) {
+    public void schedule(Stack stack) {
         if (autoSyncConfig.isEnabled()) {
-            jobService.schedule(new StackJobAdapter(jobResource));
-        }
-    }
-
-    public void schedule(Long id) {
-        if (autoSyncConfig.isEnabled()) {
-            jobService.schedule(id, StackJobAdapter.class);
+            jobService.schedule(new StackJobAdapter(stack));
+            LOGGER.info("{} is scheduled for auto sync", stack.getName());
         }
     }
 
     public void unschedule(Stack stack) {
-        jobService.unschedule(String.valueOf(stack.getId()));
+        jobService.unschedule(new StackJobAdapter(stack).getLocalId());
+        LOGGER.info("{} is unscheduled, it will not auto sync anymore", stack.getName());
     }
 }

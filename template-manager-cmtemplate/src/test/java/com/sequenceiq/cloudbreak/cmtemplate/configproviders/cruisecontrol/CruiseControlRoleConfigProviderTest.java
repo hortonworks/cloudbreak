@@ -50,6 +50,14 @@ public class CruiseControlRoleConfigProviderTest {
     }
 
     @Test
+    void testRoleConfigWithCdpVersionIs7213() {
+        cdpMainVersionIs("7.2.13");
+        HostgroupView hostGroup = new HostgroupView("test group");
+        assertEquals(createExpectedConfigWithStackVersionAtLeast7211(),
+                provider.getRoleConfigs(CruiseControlRoles.CRUISE_CONTROL_SERVER, hostGroup, getTemplatePreparationObject(hostGroup)));
+    }
+
+    @Test
     void testRoleConfigWithCdpVersionIs7214() {
         cdpMainVersionIs("7.2.14");
         HostgroupView hostGroup = new HostgroupView("test group");

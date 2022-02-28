@@ -7,7 +7,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anySet;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -69,8 +68,6 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
 
     private static final String IMAGE_CATALOG_NAME = "imgcatname";
 
-    private static final long STACK_ID = 1L;
-
     @Mock
     private ImageBasedDefaultCDHEntries imageBasedDefaultCDHEntries;
 
@@ -103,7 +100,7 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         Workspace workspace = new Workspace();
         clusterRequest = new ClusterV4Request();
         stack = new Stack();
-        stack.setId(STACK_ID);
+        stack.setId(1L);
         stack.setName("test-stack");
         stack.setWorkspace(workspace);
         Blueprint blueprint = new Blueprint();
@@ -140,13 +137,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.0.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(OLDER_CDH_VERSION);
-        when(parcelFilterService.filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
+        when(parcelFilterService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
                 Optional.empty(), List.of(), Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, OLDER_CDH_VERSION);
-        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class));
+        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     @Test
@@ -155,13 +152,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.9.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(null);
-        when(parcelFilterService.filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
+        when(parcelFilterService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster,
                 Optional.empty(), List.of(), Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, DEFAULT_CM_VERSION, NEWER_CDH_VERSION);
-        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class));
+        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     @Test(expected = BadRequestException.class)
@@ -183,13 +180,13 @@ public class ClouderaManagerClusterCreationSetupServiceTest {
         clouderaManagerProductSet.add(clouderaManagerProduct("CDH", "1.5.0"));
 
         when(blueprintUtils.getCDHStackVersion(any())).thenReturn(SOME_CDH_VERSION);
-        when(parcelFilterService.filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
+        when(parcelFilterService.filterParcelsByBlueprint(anySet(), any(Blueprint.class))).thenReturn(clouderaManagerProductSet);
 
         List<ClusterComponent> clusterComponents = underTest.prepareClouderaManagerCluster(clusterRequest, cluster, Optional.of(cmRepoComponent),
                 productComponentList, Optional.of(imageComponent));
 
         assertVersionsMatch(clusterComponents, CM_VERSION, SOME_CDH_VERSION);
-        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(eq(STACK_ID), anySet(), any(Blueprint.class));
+        verify(parcelFilterService, times(1)).filterParcelsByBlueprint(anySet(), any(Blueprint.class));
     }
 
     private void assertVersionsMatch(Collection<ClusterComponent> clusterComponents, String cmVersion, String cdhVersion) {

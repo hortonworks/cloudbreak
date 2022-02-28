@@ -99,7 +99,7 @@ public class AuthorizationClient {
     private AuthorizationGrpc.AuthorizationBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return AuthorizationGrpc.newBlockingStub(channel).withInterceptors(
-                GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
+                GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
                 GrpcUtil.getTracingInterceptor(tracer),
                 new AltusMetadataInterceptor(requestId, INTERNAL_ACTOR_CRN),
                 new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())

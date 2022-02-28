@@ -335,18 +335,6 @@ public class GcpStackUtil {
         return cloudContext.getName() + cloudContext.getId();
     }
 
-    public String convertGroupName(String group) {
-        return group.toLowerCase().replaceAll("[^A-Za-z0-9 ]", "");
-    }
-
-    public String getNetworkSecurityIdFromGroup(Group group) {
-        // GCP firewall rules' target tags need to be added to the network tags for the firewall rule to take effect
-        if (group.getSecurity() != null && group.getSecurity().getCloudSecurityId() != null) {
-            return group.getSecurity().getCloudSecurityId();
-        }
-        return "";
-    }
-
     public String getGroupClusterTag(CloudContext cloudContext, Group group) {
         return group.getName().toLowerCase().replaceAll("[^A-Za-z0-9 ]", "") + cloudContext.getId();
     }

@@ -66,7 +66,7 @@ public class PersonalResourceViewClient {
     private PersonalResourceViewGrpc.PersonalResourceViewBlockingStub newStub(String requestId) {
         checkNotNull(requestId, "requestId should not be null.");
         return PersonalResourceViewGrpc.newBlockingStub(channel).withInterceptors(
-                GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
+                GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcTimeoutSec()),
                 GrpcUtil.getTracingInterceptor(tracer),
                 new AltusMetadataInterceptor(requestId, actorCrn),
                 new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName())

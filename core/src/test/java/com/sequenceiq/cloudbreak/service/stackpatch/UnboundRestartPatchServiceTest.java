@@ -111,9 +111,9 @@ class UnboundRestartPatchServiceTest {
     void unreachableCmServerFailsToApply() {
         setCmServerReachability(false);
 
-        boolean result = underTest.isAffected(stack);
-
-        assertThat(result).isFalse();
+        assertThatThrownBy(() -> underTest.doApply(stack))
+                .isInstanceOf(ExistingStackPatchApplyException.class)
+                .hasMessageStartingWith("Salt update cannot run, because CM server is unreachable of stack");
     }
 
     @Test

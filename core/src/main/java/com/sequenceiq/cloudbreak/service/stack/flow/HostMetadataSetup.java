@@ -50,7 +50,7 @@ public class HostMetadataSetup {
             transactionService.required(() -> {
                 LOGGER.debug("Setting up host metadata for the cluster.");
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stackId);
+                Set<InstanceMetaData> allInstanceMetadataByStackId = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stackId);
                 updateWithHostData(stack, allInstanceMetadataByStackId);
                 instanceMetaDataService.saveAll(allInstanceMetadataByStackId);
             });
@@ -64,7 +64,7 @@ public class HostMetadataSetup {
             transactionService.required(() -> {
                 LOGGER.info("Extending host metadata: {}", newAddresses);
                 Stack stack = stackService.getByIdWithListsInTransaction(stackId);
-                Set<InstanceMetaData> newInstanceMetadata = instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(stackId).stream()
+                Set<InstanceMetaData> newInstanceMetadata = instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(stackId).stream()
                         .filter(instanceMetaData -> newAddresses.contains(instanceMetaData.getPrivateIp()))
                         .collect(Collectors.toSet());
                 updateWithHostData(stack, newInstanceMetadata);

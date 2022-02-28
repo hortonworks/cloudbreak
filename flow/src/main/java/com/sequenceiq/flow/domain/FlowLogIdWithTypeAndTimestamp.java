@@ -7,5 +7,4 @@ public interface FlowLogIdWithTypeAndTimestamp {
     ClassValue getFlowType();
 
     Long getCreated();
-
 }

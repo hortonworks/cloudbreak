@@ -7,7 +7,3 @@ tests:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.EnvironmentStopStartTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.distrox.DistroXUpgradeTests
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.sdx.SdxRepairTests
-      - name: com.sequenceiq.it.cloudbreak.testcase.e2e.freeipa.FreeIpaUpgradeTests
-        excludedMethods:
-          # CB-15466 Azure FreeIPA Upgrade operation has been timed out with no error message
-          - testHAFreeIpaInstanceUpgrade

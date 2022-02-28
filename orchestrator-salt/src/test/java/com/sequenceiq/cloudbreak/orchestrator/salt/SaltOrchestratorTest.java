@@ -58,16 +58,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.google.common.collect.Lists;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
-import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.common.service.HostDiscoveryService;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
-import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -232,8 +230,7 @@ public class SaltOrchestratorTest {
         PowerMockito.when(SaltStates.getGrains(any(), any(), any())).thenReturn(new HashMap<>());
 
         SaltConfig saltConfig = new SaltConfig();
-        saltOrchestrator.initServiceRun(() -> Set.of(), Collections.singletonList(gatewayConfig), targets, targets,
-                saltConfig, exitCriteriaModel, "testPlatform");
+        saltOrchestrator.initServiceRun(Collections.singletonList(gatewayConfig), targets, targets, saltConfig, exitCriteriaModel, "testPlatform");
         saltOrchestrator.runService(Collections.singletonList(gatewayConfig), targets, saltConfig, exitCriteriaModel);
 
         Set<String> allNodes = targets.stream().map(Node::getHostname).collect(Collectors.toSet());
@@ -275,7 +272,7 @@ public class SaltOrchestratorTest {
 
         when(SaltStates.collectNodeStatus(eq(saltConnector))).thenReturn(minionStatusSaltResponse);
 
-        saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
+        saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
 
         verify(saltConnector, never()).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verifyStatic(SaltStates.class);
@@ -309,10 +306,9 @@ public class SaltOrchestratorTest {
 
         Node remainingNode = mock(Node.class);
         when(remainingNode.getPrivateIp()).thenReturn("10.0.0.1");
-        when(remainingNode.getHostname()).thenReturn("hostname");
         ExitCriteriaModel exitCriteriaModel = mock(ExitCriteriaModel.class);
 
-        saltOrchestrator.tearDown(() -> Set.of(), Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(remainingNode), exitCriteriaModel);
+        saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(remainingNode), exitCriteriaModel);
 
         verify(saltConnector, times(1)).wheel(eq("key.delete"), eq(downNodes), eq(Object.class));
         verifyStatic(SaltStates.class);
@@ -333,7 +329,7 @@ public class SaltOrchestratorTest {
         SaltStates.stopMinions(eq(saltConnector), eq(privateIps));
 
         try {
-            saltOrchestrator.tearDown(null, Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
+            saltOrchestrator.tearDown(Collections.singletonList(gatewayConfig), privateIpsByFQDN, Set.of(), null);
             fail();
         } catch (CloudbreakOrchestratorFailedException e) {
             assertThat(e.getCause(), IsInstanceOf.instanceOf(NullPointerException.class));
@@ -406,8 +402,8 @@ public class SaltOrchestratorTest {
     @Test
     public void testStopClusterManagerAgent() throws Exception {
         Set<Node> downscaleTargets = new HashSet<>();
-        downscaleTargets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg", "fqdn2", null));
-        downscaleTargets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg", "fqdn3", null));
+        downscaleTargets.add(new Node("10.0.0.2", "1.1.1.2", "10-0-0-2.example.com", "hg"));
+        downscaleTargets.add(new Node("10.0.0.3", "1.1.1.3", "10-0-0-3.example.com", "hg"));
 
         PowerMockito.mockStatic(SaltStates.class);
         Set<String> responsiveAddresses = new HashSet<>();
@@ -416,16 +412,11 @@ public class SaltOrchestratorTest {
         responsiveAddresses.add("10.0.0.3");
         PowerMockito.when(SaltStates.collectMinionIpAddresses(any(), any())).thenReturn(responsiveAddresses);
 
-        Set<OrchestrationNode> allNodes = new HashSet<>();
-        allNodes.add(() -> new Node("10.0.0.1", "1.1.1.1", "10-0-0-1.example.com", "hg", "fqdn3", null));
-        allNodes.addAll(downscaleTargets.stream().map(node -> (OrchestrationNode) () -> node).collect(Collectors.toSet()));
-
         Callable pillarSaveCallable = mock(Callable.class);
-        when(saltRunner.runner(any(), any(), any())).thenReturn(pillarSaveCallable);
+        when(saltRunner.runner(any(), any(), any(), anyInt(), anyInt())).thenReturn(pillarSaveCallable);
         when(saltRunner.runner(any(), any(), any(), anyInt(), anyBoolean())).thenReturn(mock(Callable.class));
 
-        saltOrchestrator.stopClusterManagerAgent(() -> allNodes, gatewayConfig, targets, downscaleTargets,
-                exitCriteriaModel, new CmAgentStopFlags(false, false, false));
+        saltOrchestrator.stopClusterManagerAgent(gatewayConfig, targets, downscaleTargets, exitCriteriaModel, false, false, false);
 
         ArgumentCaptor<ModifyGrainBase> modifyGrainBaseArgumentCaptor = ArgumentCaptor.forClass(ModifyGrainBase.class);
         ArgumentCaptor<PillarSave> pillarSaveArgumentCaptor = ArgumentCaptor.forClass(PillarSave.class);
@@ -439,7 +430,7 @@ public class SaltOrchestratorTest {
         assertEquals("roles", modifyGrainBase.getKey());
         assertEquals("cloudera_manager_agent_stop", modifyGrainBase.getValue());
 
-        inOrder.verify(saltRunner).runner(pillarSaveArgumentCaptor.capture(), any(), any());
+        inOrder.verify(saltRunner).runner(pillarSaveArgumentCaptor.capture(), any(), any(), anyInt(), anyInt());
         PillarSave capturedPillarSave = pillarSaveArgumentCaptor.getValue();
 
         ArgumentCaptor<SaltJobIdTracker> saltJobIdCaptor = ArgumentCaptor.forClass(SaltJobIdTracker.class);

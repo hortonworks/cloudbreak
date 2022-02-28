@@ -8,7 +8,7 @@ import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_BUILT;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.CLUSTER_RUN_SERVICES;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.RECOVERY_FINISHED;
-import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_GATEWAY_CERTIFICATE_CREATE_SKIPPED;
+import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_GATEWAY_CERTIFICATE_CREATE_FAILED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_INFRASTRUCTURE_BOOTSTRAP;
 
 import javax.inject.Inject;
@@ -69,7 +69,7 @@ public class ClusterCreationService {
     public void bootstrapPublicEndpoints(Stack stack) {
         boolean success = clusterPublicEndpointManagementService.provision(stack);
         if (!success) {
-            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_GATEWAY_CERTIFICATE_CREATE_SKIPPED);
+            flowMessageService.fireEventAndLog(stack.getId(), UPDATE_IN_PROGRESS.name(), STACK_GATEWAY_CERTIFICATE_CREATE_FAILED);
         }
     }
 

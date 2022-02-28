@@ -190,7 +190,7 @@ public enum ResourceEvent {
     STACK_REMOVING_INSTANCE_FINISHED("stack.removing.instance.finished"),
     STACK_REMOVING_INSTANCE_FAILED("stack.removing.instance.failed"),
     STACK_INFRASTRUCTURE_BOOTSTRAP("stack.infrastructure.bootstrap"),
-    STACK_GATEWAY_CERTIFICATE_CREATE_SKIPPED("stack.gateway.certificate.create.skipped"),
+    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.failed"),
     STACK_DOWNSCALE_INSTANCES("stack.downscale.instances"),
     STACK_DOWNSCALE_SUCCESS("stack.downscale.success"),
     STACK_DOWNSCALE_FAILED("stack.downscale.failed"),
@@ -367,7 +367,6 @@ public enum ResourceEvent {
     CLUSTER_SCALED_DOWN("cluster.scaled.down"),
     CLUSTER_SCALED_DOWN_NONE("cluster.scaled.down.none"),
     CLUSTER_SCALING_FAILED("cluster.scaling.failed"),
-    CLUSTER_SCALING_PARTIALLY_FAILED("cluster.scaling.partially.failed"),
     CLUSTER_DECOMMISSION_FAILED_FORCE_DELETE_CONTINUE("cluster.decommission.failed.force.delete.continue"),
     CLUSTER_STOP_MANAGEMENT_SERVER_STARTED("cluster.stop.management.server.started"),
     CLUSTER_STOP_COMPONENTS_STARTED("cluster.stop.components.started"),
@@ -470,10 +469,7 @@ public enum ResourceEvent {
     DATALAKE_RECOVERY_BRINGUP_FAILED("datalake.recovery.bringup.failed"),
     DATALAKE_RECOVERY_TEARDOWN_FINISHED("datalake.recovery.teardown.finished"),
     DATALAKE_RECOVERY_FAILED("datalake.recovery.failed"),
-    DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished"),
-
-    // deprecated
-    STACK_GATEWAY_CERTIFICATE_CREATE_FAILED("stack.gateway.certificate.create.skipped");
+    DATALAKE_RECOVERY_FINISHED("datalake.recovery.finished");
 
     private final String message;
 

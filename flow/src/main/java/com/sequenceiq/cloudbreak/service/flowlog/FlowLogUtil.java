@@ -64,18 +64,6 @@ public class FlowLogUtil {
         return false;
     }
 
-    public static boolean isFlowInFailedState(List<FlowLog> flowLogs, Set<String> failHandledEvents) {
-        if (flowLogs.size() > 2) {
-            FlowLog lastFlowLog = flowLogs.get(0);
-            FlowLog secondLastFlowLog = flowLogs.get(1);
-            LOGGER.debug("Last two log items: {}, {}", lastFlowLog, secondLastFlowLog);
-            return lastFlowLog.getFinalized()
-                    && (failHandledEvents.contains(secondLastFlowLog.getNextEvent())
-                    || StateStatus.FAILED.equals(secondLastFlowLog.getStateStatus()));
-        }
-        return false;
-    }
-
     public static Payload tryDeserializeTriggerEvent(FlowChainLog flowChainLog) {
         if (null == flowChainLog.getTriggerEvent()) {
             return null;

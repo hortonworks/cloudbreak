@@ -59,7 +59,6 @@ import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_RUNTIME_UPGRADE_DATAHUB;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SDX_HBASE_CLOUD_STORAGE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_SHOW_CLI;
-import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_TARGETED_UPSCALE;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_UNBOUND_ELIMINATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USER_SYNC_CREDENTIALS_UPDATE_OPTIMIZATION;
 import static com.sequenceiq.cloudbreak.auth.altus.model.Entitlement.CDP_USE_CM_SYNC_COMMAND_POLLER;
@@ -426,11 +425,8 @@ public class MockUserManagementService extends UserManagementImplBase {
     @Value("${auth.mock.freeipa.multiaz.enable}")
     private boolean enableMultiAzFreeIpa;
 
-    @Value("${auth.mock.unbound.elimination.enable}")
+    @Value("${auth.mock.unbound.elimination.enable:true}")
     private boolean enableUnboundElimination;
-
-    @Value("${auth.mock.targeted.upscale.enable}")
-    private boolean enableTargetedUpscale;
 
     @Value("${auth.mock.aws.native.variant.migration.enable}")
     private boolean enableAwsVariantMigration;
@@ -892,9 +888,6 @@ public class MockUserManagementService extends UserManagementImplBase {
         }
         if (enableUnboundElimination) {
             builder.addEntitlements(createEntitlement(CDP_UNBOUND_ELIMINATION));
-        }
-        if (enableTargetedUpscale) {
-            builder.addEntitlements(createEntitlement(CDP_TARGETED_UPSCALE));
         }
         if (enableE2ETestOnly) {
             builder.addEntitlements(createEntitlement(E2E_TEST_ONLY));

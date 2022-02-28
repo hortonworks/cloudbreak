@@ -21,7 +21,7 @@ public class FreeIpaDownscaleAction implements Action<FreeIpaDownscaleTestDto, F
         Log.whenJson(LOGGER, format(" FreeIPA downscale request:%n"), testDto.getRequest());
         DownscaleRequest downscaleRequest = new DownscaleRequest();
         downscaleRequest.setEnvironmentCrn(testDto.getRequest().getEnvironmentCrn());
-        downscaleRequest.setTargetAvailabilityType(testDto.getRequest().getTargetAvailabilityType());
+        downscaleRequest.setTargetFormFactor(testDto.getRequest().getTargetFormFactor());
         testDto.setResponse(client.getDefaultClient()
                 .getFreeIpaV1Endpoint()
                 .downscale(downscaleRequest));

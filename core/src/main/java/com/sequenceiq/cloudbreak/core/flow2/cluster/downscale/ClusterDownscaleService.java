@@ -65,7 +65,7 @@ public class ClusterDownscaleService {
             flowMessageService.fireInstanceGroupEventAndLog(stackId, Status.UPDATE_IN_PROGRESS.name(), hostGroupName, CLUSTER_REMOVING_NODE_FROM_HOSTGROUP,
                     String.valueOf(Math.abs(scalingAdjustment)), hostGroupName);
         } else if (!CollectionUtils.isEmpty(privateIds)) {
-            LOGGER.info("Decommissioning hosts with ids {} from host group '{}'", privateIds, hostGroupName);
+            LOGGER.info("Decommissioning {} hosts from host group '{}'", privateIds, hostGroupName);
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             List<String> decomissionedHostNames = stackService.getHostNamesForPrivateIds(stack.getInstanceMetaDataAsList(), privateIds);
             ResourceEvent resourceEvent = details.isForced() ? CLUSTER_FORCE_REMOVING_NODE_FROM_HOSTGROUP : CLUSTER_REMOVING_NODE_FROM_HOSTGROUP;

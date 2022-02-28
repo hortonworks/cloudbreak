@@ -203,8 +203,8 @@ class StackStatusIntegrationTest {
         stack.setWorkspace(workspace);
 
         when(stackService.get(STACK_ID)).thenReturn(stack);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(STACK_ID)).thenReturn(runningInstances);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(runningInstances);
+        when(instanceMetaDataService.findNotTerminatedForStack(STACK_ID)).thenReturn(runningInstances);
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(runningInstances);
     }
 
     private void setUpClusterApi() {
@@ -291,7 +291,7 @@ class StackStatusIntegrationTest {
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
 
         underTest.executeTracedJob(jobExecutionContext);
 
@@ -323,7 +323,7 @@ class StackStatusIntegrationTest {
         setUpCloudVmInstanceStatuses(Map.of(
                 INSTANCE_1, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER,
                 INSTANCE_2, com.sequenceiq.cloudbreak.cloud.model.InstanceStatus.TERMINATED_BY_PROVIDER));
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
+        when(instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(STACK_ID)).thenReturn(Set.of());
 
         underTest.executeTracedJob(jobExecutionContext);
 

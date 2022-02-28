@@ -78,7 +78,7 @@ public class StackStartActions {
             protected Selectable createRequest(StackStartStopContext context) {
                 Stack stack = context.getStack();
                 LOGGER.debug("Assembling start request for stack: {}", stack);
-                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(stack.getNotDeletedAndNotZombieInstanceMetaDataList(),
+                List<CloudInstance> cloudInstances = instanceMetaDataToCloudInstanceConverter.convert(stack.getNotDeletedInstanceMetaDataList(),
                         stack.getEnvironmentCrn(), stack.getStackAuthentication());
                 List<CloudResource> resources = stack.getResources().stream()
                         .map(s -> resourceToCloudResourceConverter.convert(s))
@@ -170,7 +170,7 @@ public class StackStartActions {
             Stack stack = stackService.getByIdWithListsInTransaction(stackId);
             stack.setResources(new HashSet<>(resourceService.getAllByStackId(payload.getResourceId())));
             MDCBuilder.buildMdcContext(stack);
-            List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stackId));
+            List<InstanceMetaData> instances = new ArrayList<>(instanceMetaDataService.findNotTerminatedForStack(stackId));
             Location location = location(region(stack.getRegion()), availabilityZone(stack.getAvailabilityZone()));
             CloudContext cloudContext = CloudContext.Builder.builder()
                     .withId(stack.getId())

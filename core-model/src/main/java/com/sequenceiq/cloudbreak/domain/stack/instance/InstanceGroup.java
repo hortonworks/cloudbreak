@@ -142,33 +142,15 @@ public class InstanceGroup implements ProvisionEntity, Comparable<InstanceGroup>
         return this;
     }
 
-    public Set<InstanceMetaData> getNotTerminatedAndNotZombieInstanceMetaDataSet() {
-        return instanceMetaData.stream()
-                .filter(metaData -> !metaData.isTerminated() && !metaData.isZombie())
-                .collect(Collectors.toSet());
-    }
-
     public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
         return instanceMetaData.stream()
                 .filter(metaData -> !metaData.isTerminated())
                 .collect(Collectors.toSet());
     }
 
-    public Set<InstanceMetaData> getNotDeletedAndNotZombieInstanceMetaDataSet() {
-        return instanceMetaData.stream()
-                .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider() && !metaData.isZombie())
-                .collect(Collectors.toSet());
-    }
-
     public Set<InstanceMetaData> getNotDeletedInstanceMetaDataSet() {
         return instanceMetaData.stream()
                 .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider())
-                .collect(Collectors.toSet());
-    }
-
-    public Set<InstanceMetaData> getZombieInstanceMetaDataSet() {
-        return instanceMetaData.stream()
-                .filter(metaData -> metaData.isZombie())
                 .collect(Collectors.toSet());
     }
 

@@ -110,7 +110,7 @@ public class ClusterUpscaleService {
     }
 
     private boolean shouldRestartServices(Boolean repair, Boolean restartServices, Stack stack) {
-        return repair && restartServices && stack.getNotTerminatedAndNotZombieInstanceMetaDataList().size() == stack.getRunningInstanceMetaDataSet().size();
+        return repair && restartServices && stack.getNotTerminatedInstanceMetaDataList().size() == stack.getRunningInstanceMetaDataSet().size();
     }
 
     public void executePostRecipesOnNewHosts(Long stackId) throws CloudbreakException {

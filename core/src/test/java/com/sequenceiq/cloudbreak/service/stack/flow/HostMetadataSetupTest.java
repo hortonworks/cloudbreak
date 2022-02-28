@@ -78,7 +78,7 @@ public class HostMetadataSetupTest {
         Stack stack = mock(Stack.class);
         InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.CORE, 1L, "10.0.0.1", "host1", false);
         InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.CORE, 2L, "10.0.0.2", "host2", false);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of(im1, im2));
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of(im1, im2));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of("10.0.0.1", "host1", "10.0.0.2", "host2"));
 
@@ -98,7 +98,7 @@ public class HostMetadataSetupTest {
     public void testSetupNewHostMetadataWithSingplePrimaryChange() throws CloudbreakException, CloudbreakOrchestratorException {
         Stack stack = mock(Stack.class);
         InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY_PRIMARY, 1L, "10.0.0.1", "host1", true);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of(im1));
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(Set.of(im1));
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of("10.0.0.1", "host1"));
 
@@ -117,7 +117,7 @@ public class HostMetadataSetupTest {
         InstanceMetaData im1 = createInstanceMetadata("id1", InstanceMetadataType.GATEWAY, 1L, "10.0.0.1", "host1", false);
         InstanceMetaData im2 = createInstanceMetadata("id2", InstanceMetadataType.GATEWAY, 2L, "10.0.0.2", "host2", false);
         Set<InstanceMetaData> allNewInstances = Set.of(im1, im2);
-        when(instanceMetaDataService.getNotDeletedAndNotZombieInstanceMetadataByStackId(STACK_ID)).thenReturn(allNewInstances);
+        when(instanceMetaDataService.getNotDeletedInstanceMetadataByStackId(STACK_ID)).thenReturn(allNewInstances);
         when(stackService.getByIdWithListsInTransaction(STACK_ID)).thenReturn(stack);
         when(hostOrchestrator.getMembers(any(), any())).thenReturn(Map.of("10.0.0.1", "host1", "10.0.0.2", "host2"));
 

@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.ScalingPath;
 import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.configuration.AllowedScalingPaths;
@@ -30,7 +30,7 @@ public class FreeIpaScalingValidationService {
     private AllowedScalingPaths allowedScalingPaths;
 
     public void validateStackForUpscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
-        if (allInstances.size() >= AvailabilityType.HA.getInstanceCount()) {
+        if (allInstances.size() >= FormFactor.HA.getInstanceCount()) {
             LOGGER.warn("FreeIPA instance count is bigger then allowed. Size: [{}]", allInstances.size());
             throw new BadRequestException("Upscaling currently only available for FreeIPA installation with 1 or 2 instances");
         }
@@ -38,7 +38,7 @@ public class FreeIpaScalingValidationService {
     }
 
     public void validateStackForDownscale(Set<InstanceMetaData> allInstances, Stack stack, ScalingPath scalingPath) {
-        if (allInstances.size() < AvailabilityType.HA.getInstanceCount()) {
+        if (allInstances.size() < FormFactor.HA.getInstanceCount()) {
             LOGGER.warn("FreeIPA instance count is not allowed. Size: [{}]", allInstances.size());
             throw new BadRequestException("Downscaling currently only available for FreeIPA installation with 3 instances");
         }
@@ -61,8 +61,8 @@ public class FreeIpaScalingValidationService {
     }
 
     private boolean scalingPathDisabled(ScalingPath scalingPath) {
-        List<AvailabilityType> targetAvailabilityTypes = allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType());
-        return Objects.isNull(targetAvailabilityTypes) || !targetAvailabilityTypes.contains(scalingPath.getTargetAvailabilityType());
+        List<FormFactor> targetFormFactors = allowedScalingPaths.getPaths().get(scalingPath.getOriginalFormFactor());
+        return Objects.isNull(targetFormFactors) || !targetFormFactors.contains(scalingPath.getTargetFormFactor());
     }
 
     private void throwErrorForNoInstance() {
@@ -94,14 +94,14 @@ public class FreeIpaScalingValidationService {
     private void throwErrorForUnsupportedScalingPath(ScalingPath scalingPath, OperationType scaleType) {
         String message = String.format("Refusing %s as scaling from %s node to %s is not supported.%s",
                 scaleType.name().toLowerCase(),
-                scalingPath.getOriginalAvailabilityType().getInstanceCount(),
-                scalingPath.getTargetAvailabilityType().getInstanceCount(),
-                generateAlternativeTargetString(scaleType.name().toLowerCase(), allowedScalingPaths.getPaths().get(scalingPath.getOriginalAvailabilityType())));
+                scalingPath.getOriginalFormFactor().getInstanceCount(),
+                scalingPath.getTargetFormFactor().getInstanceCount(),
+                generateAlternativeTargetString(scaleType.name().toLowerCase(), allowedScalingPaths.getPaths().get(scalingPath.getOriginalFormFactor())));
         LOGGER.warn(message);
         throw new BadRequestException(message);
     }
 
-    private String generateAlternativeTargetString(String scaleType, List<AvailabilityType> targets) {
+    private String generateAlternativeTargetString(String scaleType, List<FormFactor> targets) {
         return Objects.isNull(targets) ? "" : String.format(" Supported %s targets: %s", scaleType, targets);
     }
 }

@@ -12,17 +12,12 @@ import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupEvent;
 import com.sequenceiq.freeipa.flow.freeipa.cleanup.FreeIpaCleanupFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.diagnostics.config.DiagnosticsCollectionFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowConfig;
-import com.sequenceiq.freeipa.flow.freeipa.downscale.DownscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.freeipa.provision.FreeIpaProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowConfig;
-import com.sequenceiq.freeipa.flow.freeipa.repair.changeprimarygw.ChangePrimaryGatewayFlowEvent;
-import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateEvent;
 import com.sequenceiq.freeipa.flow.freeipa.salt.update.SaltUpdateFlowConfig;
 import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowConfig;
-import com.sequenceiq.freeipa.flow.freeipa.upscale.UpscaleFlowEvent;
 import com.sequenceiq.freeipa.flow.instance.reboot.RebootFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.image.change.ImageChangeFlowConfig;
-import com.sequenceiq.freeipa.flow.stack.image.change.event.ImageChangeEvents;
 import com.sequenceiq.freeipa.flow.stack.provision.StackProvisionFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.start.StackStartFlowConfig;
 import com.sequenceiq.freeipa.flow.stack.stop.StackStopFlowConfig;
@@ -53,12 +48,7 @@ public class FreeIpaFlowInformation implements ApplicationFlowInformation {
     private static final List<String> PARALLEL_FLOWS = List.of(
             FreeIpaCleanupEvent.CLEANUP_EVENT.event(),
             StackTerminationEvent.TERMINATION_EVENT.event(),
-            CreateBindUserFlowEvent.CREATE_BIND_USER_EVENT.event(),
-            SaltUpdateEvent.SALT_UPDATE_EVENT.event(),
-            ImageChangeEvents.IMAGE_CHANGE_EVENT.event(),
-            UpscaleFlowEvent.UPSCALE_EVENT.event(),
-            DownscaleFlowEvent.DOWNSCALE_EVENT.event(),
-            ChangePrimaryGatewayFlowEvent.CHANGE_PRIMARY_GATEWAY_EVENT.event());
+            CreateBindUserFlowEvent.CREATE_BIND_USER_EVENT.event());
 
     private static final List<Class<? extends FlowConfiguration<?>>> TERMINATION_FLOWS = List.of(StackTerminationFlowConfig.class);
 

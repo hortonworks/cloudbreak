@@ -16,7 +16,7 @@ dependencies {
     implementation project(':cloud-api')
     implementation project(':cloud-reactor')
 
-    implementation group: 'com.google.code.gson',  name: 'gson',           version: gsonVersion
+    implementation group: 'com.google.code.gson',  name: 'gson',           version: '2.6.2'
     testImplementation (group: 'org.mockito',      name: 'mockito-core',   version: mockitoVersion) {
       exclude group: 'org.hamcrest'
     }

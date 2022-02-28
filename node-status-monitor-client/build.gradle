@@ -21,7 +21,6 @@ dependencies {
     exclude group: 'io.grpc', module: 'grpc-testing'
   }
   implementation     group: 'com.google.protobuf',              name: 'protobuf-java-util',          version: protobufVersion
-  implementation     group: 'com.google.code.gson',             name: 'gson',                        version: gsonVersion
   implementation     group: 'com.github.briandilley.jsonrpc4j', name: 'jsonrpc4j',                   version: '1.6'
   implementation     group: 'com.fasterxml.jackson.core',       name: 'jackson-databind',            version: jacksonVersion
   implementation     group: 'org.slf4j',                        name: 'slf4j-api',                   version: slf4jApiVersion

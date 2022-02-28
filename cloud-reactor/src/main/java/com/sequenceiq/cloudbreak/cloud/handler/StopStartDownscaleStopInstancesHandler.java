@@ -27,7 +27,7 @@ public class StopStartDownscaleStopInstancesHandler implements CloudPlatformEven
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StopStartDownscaleStopInstancesHandler.class);
 
-    private static final Long STOP_POLL_TIMEBOUND_MS = 600_000L;
+    private static final Long STOP_POLL_TIMEBOUND_MS = 300_000L;
 
     @Inject
     private CloudPlatformConnectors cloudPlatformConnectors;

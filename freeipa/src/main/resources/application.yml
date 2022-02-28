@@ -2,9 +2,6 @@ server:
   servlet:
     context-path: "/freeipa"
   shutdown: graceful
-  tomcat:
-    mbeanregistry:
-      enabled: true
 
 opentracing:
   allowed-header-tags: "uber-trace-id,cdp-destination-api,cdp-caller-id,x-b3-parentspanid,x-b3-traceid,x-b3-spanid,x-b3-sampled,user-agent"
@@ -161,7 +158,7 @@ spring:
   datasource:
     maxActive: 30
   lifecycle:
-    timeout-per-shutdown-phase: 60s
+    timeout-per-shutdown-phase: 60
 
 rest:
   debug: false

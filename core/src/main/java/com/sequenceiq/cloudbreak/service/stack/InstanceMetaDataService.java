@@ -249,13 +249,6 @@ public class InstanceMetaDataService {
         return repository.findAllInStack(stackId);
     }
 
-    public Set<InstanceMetaData> getNotDeletedAndNotZombieInstanceMetadataByStackId(Long stackId) {
-        return repository.findAllInStack(stackId)
-                .stream()
-                .filter(metaData -> !metaData.isTerminated() && !metaData.isDeletedOnProvider() && !metaData.isZombie())
-                .collect(Collectors.toSet());
-    }
-
     public Set<InstanceMetaData> getNotDeletedInstanceMetadataByStackId(Long stackId) {
         return repository.findAllInStack(stackId)
                 .stream()
@@ -316,10 +309,6 @@ public class InstanceMetaDataService {
         return repository.findNotTerminatedForStack(stackId);
     }
 
-    public Set<InstanceMetaData> findNotTerminatedAndNotZombieForStack(Long stackId) {
-        return repository.findNotTerminatedAndNotZombieForStack(stackId);
-    }
-
     public List<InstanceMetaData> findNotTerminatedAsOrderedListForStack(Long stackId) {
         return repository.findNotTerminatedAsOrderedListForStack(stackId);
     }
@@ -328,8 +317,8 @@ public class InstanceMetaDataService {
         return repository.save(instanceMetaData);
     }
 
-    public Set<InstanceMetaData> findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(Long stackId) {
-        return repository.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(stackId);
+    public Set<InstanceMetaData> findNotTerminatedForStackWithoutInstanceGroups(Long stackId) {
+        return repository.findNotTerminatedForStackWithoutInstanceGroups(stackId);
     }
 
     public Optional<InstanceMetaData> findByStackIdAndInstanceId(Long stackId, String instanceId) {

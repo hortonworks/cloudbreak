@@ -148,7 +148,7 @@ public class ClusterUpscaleActions {
             @Override
             protected Selectable createRequest(ClusterUpscaleContext context) {
                 return new UpscaleClusterManagerRequest(context.getStackId(), context.getHostGroupName(), context.getAdjustment(),
-                        context.isSinglePrimaryGateway(), context.isRepair());
+                        context.isSinglePrimaryGateway());
             }
 
         };
@@ -385,7 +385,7 @@ public class ClusterUpscaleActions {
 
             @Override
             protected void doExecute(ClusterUpscaleContext context, UpscalePostRecipesResult payload, Map<Object, Object> variables) {
-                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName(), context.isRepair());
+                clusterUpscaleFlowService.clusterUpscaleFinished(context.getStack(), payload.getHostGroupName());
                 getMetricService().incrementMetricCounter(MetricType.CLUSTER_UPSCALE_SUCCESSFUL, context.getStack());
                 sendEvent(context, FINALIZED_EVENT.event(), payload);
             }
@@ -479,8 +479,8 @@ public class ClusterUpscaleActions {
             return (Boolean) variables.get(KERBEROS_SECURED);
         }
 
-        private boolean isRepair(Map<Object, Object> variables) {
-            return variables.get(REPAIR) != null && (Boolean) variables.get(REPAIR);
+        Boolean isRepair(Map<Object, Object> variables) {
+            return (Boolean) variables.get(REPAIR);
         }
 
         Boolean isRestartServices(Map<Object, Object> variables) {

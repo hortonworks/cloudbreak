@@ -70,8 +70,6 @@ class StackCommonServiceTest {
 
     private static final String SUBNET_ID = "aSubnetId";
 
-    private static final String HOST_GROUP = "compute";
-
     @Mock
     private ImageCatalogService imageCatalogService;
 

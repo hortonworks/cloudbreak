@@ -92,7 +92,7 @@ public class StopStartUpscaleActions {
             @Override
             protected Selectable createRequest(StopStartUpscaleContext context) {
                 Stack stack = context.getStack();
-                List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedAndNotZombieInstanceMetaDataList();
+                List<InstanceMetaData> instanceMetaDataList = stack.getNotDeletedInstanceMetaDataList();
 
                 List<InstanceMetaData> instanceMetaDataForHg = instanceMetaDataList.stream().filter(
                         x -> x.getInstanceGroupName().equals(context.getHostGroupName())).collect(Collectors.toList());
@@ -129,7 +129,7 @@ public class StopStartUpscaleActions {
                         .filter(x -> x.getStatus() == InstanceStatus.STARTED)
                         .map(x -> x.getCloudInstance().getInstanceId())
                         .collect(Collectors.toUnmodifiableSet());
-                List<InstanceMetaData> startedInstancesMetaData = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
+                List<InstanceMetaData> startedInstancesMetaData = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedInstances(
                         context.getStack(), context.getHostGroupName(), cloudInstanceIdsStarted);
                 clusterUpscaleFlowService.instancesStarted(context.getStack().getId(), startedInstancesMetaData);
 
@@ -138,7 +138,7 @@ public class StopStartUpscaleActions {
                 // This list is currently empty. It could be populated later in another flow-step by querying CM to get service health.
                 // Meant to be a mechanism which detects cloud instances which are RUNNING, but not being utilized (likely due to previous failures)
                 List<CloudInstance> instancesWithServicesNotRunning = payload.getStartInstanceRequest().getStartedInstancesWithServicesNotRunning();
-                List<InstanceMetaData> metaDataWithServicesNotRunning = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(
+                List<InstanceMetaData> metaDataWithServicesNotRunning = cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedInstances(
                         context.getStack(),
                         context.getHostGroupName(),
                         instancesWithServicesNotRunning.stream().map(i -> i.getInstanceId()).collect(Collectors.toUnmodifiableSet()));
@@ -195,7 +195,7 @@ public class StopStartUpscaleActions {
 
                 logInstancesNotCommissioned(context, payload.getNotRecommissionedFqdns());
 
-                List<InstanceMetaData> notDeletedInstanceMetaDataList = context.getStack().getNotDeletedAndNotZombieInstanceMetaDataList();
+                List<InstanceMetaData> notDeletedInstanceMetaDataList = context.getStack().getNotDeletedInstanceMetaDataList();
                 List<InstanceMetaData> instancesCommissioned = notDeletedInstanceMetaDataList.stream()
                         .filter(i -> payload.getSuccessfullyCommissionedFqdns().contains(i.getDiscoveryFQDN()))
                         .collect(Collectors.toList());

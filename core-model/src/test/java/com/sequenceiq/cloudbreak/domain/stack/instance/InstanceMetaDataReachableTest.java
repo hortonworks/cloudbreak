@@ -32,8 +32,7 @@ public class InstanceMetaDataReachableTest {
                 InstanceStatus.DELETED_BY_PROVIDER,
                 InstanceStatus.FAILED,
                 InstanceStatus.ORCHESTRATION_FAILED,
-                InstanceStatus.STOPPED,
-                InstanceStatus.ZOMBIE);
+                InstanceStatus.STOPPED);
 
         return Arrays.stream(InstanceStatus.values())
                 .map(status -> {

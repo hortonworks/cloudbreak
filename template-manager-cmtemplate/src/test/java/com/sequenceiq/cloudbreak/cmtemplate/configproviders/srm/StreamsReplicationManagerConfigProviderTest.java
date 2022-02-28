@@ -77,6 +77,17 @@ class StreamsReplicationManagerConfigProviderTest {
     }
 
     @Test
+    void getServiceConfigsWithCoreBroker7213() {
+        var source = sourceForCoreBroker(true);
+        cdhMainVersionIs("7.2.13");
+        var expected = List.of(
+                config("streams.replication.manager.config", "bootstrap.servers=corebroker-1:9093,corebroker-2:9093" + "|" + "security.protocol=SASL_SSL"),
+                config("clusters", "primary,secondary")
+        );
+        assertThat(underTest.getServiceConfigs(null, source)).hasSameElementsAs(expected);
+    }
+
+    @Test
     void getServiceConfigsWithCoreBroker7211() {
         var source = sourceForCoreBroker(true);
         cdhMainVersionIs("7.2.11");

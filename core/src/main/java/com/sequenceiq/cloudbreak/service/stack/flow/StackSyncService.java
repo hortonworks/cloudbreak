@@ -207,7 +207,7 @@ public class StackSyncService {
 
     private void handleSyncResult(Stack stack, Map<InstanceSyncState, Integer> instanceStateCounts, SyncConfig syncConfig) {
         if (syncConfig.isStackStatusUpdateEnabled()) {
-            Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(stack.getId());
+            Set<InstanceMetaData> instances = instanceMetaDataService.findNotTerminatedForStackWithoutInstanceGroups(stack.getId());
             handleSyncResult(stack, instanceStateCounts, syncConfig, instances);
         }
     }

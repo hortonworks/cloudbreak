@@ -2,9 +2,6 @@ server:
   servlet:
     context-path: "/environmentservice"
   shutdown: graceful
-  tomcat:
-    mbeanregistry:
-      enabled: true
 
 server.port: 8088
 
@@ -209,7 +206,7 @@ spring:
   datasource:
     maxActive: 30
   lifecycle:
-    timeout-per-shutdown-phase: 60s
+    timeout-per-shutdown-phase: 60
 
 notification:
   urls: http://localhost:3000/notifications

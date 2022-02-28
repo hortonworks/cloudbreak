@@ -3,7 +3,6 @@ package com.sequenceiq.cloudbreak.service.stackpatch;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -74,32 +73,19 @@ class ExistingStackPatchServiceTest {
     }
 
     @Test
-    void applyShouldNotSucceedWhenFlowIsRunning() throws ExistingStackPatchApplyException {
+    void applyShouldFailWhenFlowIsRunning() {
         when(flowLogService.isOtherFlowRunning(stack.getId())).thenReturn(true);
 
-        boolean result = underTest.apply(stack);
-
-        assertThat(result).isFalse();
+        assertThatThrownBy(() -> underTest.apply(stack))
+                .hasMessage("Another flow is running for stack %s, skipping patch apply to let the flow finish", stack.getResourceCrn());
     }
 
     @Test
-    void applyShouldNotSucceedWhenLastFlowRetryable() throws ExistingStackPatchApplyException {
+    void applyShouldFailWhenLastFlowRetryable() {
         when(flowRetryService.getLastRetryableFailedFlow(stack.getId())).thenReturn(Optional.of(new FlowLog()));
 
-        boolean result = underTest.apply(stack);
-
-        assertThat(result).isFalse();
-    }
-
-    @Test
-    void shouldNotSaveStackPatchWhenApplyDoesNotSucceed() throws ExistingStackPatchApplyException {
-        underTest.setResult(false);
-
-        underTest.apply(stack);
-
-        verifyNoInteractions(stackPatchRepository);
-        // reset result
-        underTest.setResult(true);
+        assertThatThrownBy(() -> underTest.apply(stack))
+                .hasMessage("Stack %s has a retryable failed flow, skipping patch apply to preserve possible retry", stack.getResourceCrn());
     }
 
     @Test
@@ -123,8 +109,6 @@ class ExistingStackPatchServiceTest {
 
     static class NoopExistingStackPatchService extends ExistingStackPatchService {
 
-        private boolean result = true;
-
         @Override
         public StackPatchType getStackPatchType() {
             return StackPatchType.UNKNOWN;
@@ -136,12 +120,8 @@ class ExistingStackPatchServiceTest {
         }
 
         @Override
-        boolean doApply(Stack stack) {
-            return result;
-        }
-
-        public void setResult(boolean result) {
-            this.result = result;
+        void doApply(Stack stack) {
+            // do nothing
         }
     }
 
@@ -158,7 +138,7 @@ class ExistingStackPatchServiceTest {
         }
 
         @Override
-        boolean doApply(Stack stack) {
+        void doApply(Stack stack) {
             throw new RuntimeException("Unexpected exception");
         }
     }

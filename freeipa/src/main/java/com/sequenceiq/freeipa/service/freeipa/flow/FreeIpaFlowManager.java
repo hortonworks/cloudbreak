@@ -49,16 +49,14 @@ public class FreeIpaFlowManager {
     @Inject
     private EventBusStatisticReporter reactorReporter;
 
-    @Inject
-    private FreeIpaParallelFlowValidator parallelFlowValidator;
-
     public FlowIdentifier notify(String selector, Acceptable acceptable) {
         Map<String, Object> headerWithUserCrn = getHeaderWithUserCrn(null);
         Event<Acceptable> event = eventFactory.createEventWithErrHandler(headerWithUserCrn, acceptable);
-        return notify(selector, event);
+        notify(selector, event);
+        return checkFlowOperationForResource(event);
     }
 
-    public void notifyNonFlowEvent(Selectable selectable) {
+    public void notify(Selectable selectable) {
         Event<Selectable> event = eventFactory.createEvent(selectable);
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
         reactorReporter.logInfoReport();
@@ -66,16 +64,18 @@ public class FreeIpaFlowManager {
     }
 
     public FlowIdentifier notify(BaseFlowEvent selectable, Event.Headers headers) {
-        Event<Acceptable> event = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), selectable);
-        return notify(selectable.selector(), event);
+        Event<BaseFlowEvent> event = eventFactory.createEventWithErrHandler(new HashMap<>(headers.asMap()), selectable);
+        LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selectable.selector(), event);
+        reactorReporter.logInfoReport();
+        reactor.notify(selectable.selector(), event);
+        return checkFlowOperationForResource(event);
     }
 
-    private FlowIdentifier notify(String selector, Event<Acceptable> event) {
+    private void notify(String selector, Event<Acceptable> event) {
         LOGGER.debug("Notify reactor for selector [{}] with event [{}]", selector, event);
-        parallelFlowValidator.checkFlowAllowedToStart(selector, event.getData().getResourceId());
         reactorReporter.logInfoReport();
         reactor.notify(selector, event);
-        return checkFlowOperationForResource(event);
+        checkFlowOperationForResource(event);
     }
 
     private FlowIdentifier checkFlowOperationForResource(Event<? extends Acceptable> event) {

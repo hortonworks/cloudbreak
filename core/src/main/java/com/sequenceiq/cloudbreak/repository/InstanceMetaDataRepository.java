@@ -40,15 +40,6 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @Query("SELECT i FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId " +
             "AND i.instanceStatus <> 'TERMINATED' " +
-            "AND i.instanceStatus <> 'ZOMBIE' " +
-            "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
-            "AND i.instanceStatus <> 'DELETED_BY_PROVIDER'")
-    Set<InstanceMetaData> findNotTerminatedAndNotZombieForStack(@Param("stackId") Long stackId);
-
-    @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
-    @Query("SELECT i FROM InstanceMetaData i " +
-            "WHERE i.instanceGroup.stack.id= :stackId " +
-            "AND i.instanceStatus <> 'TERMINATED' " +
             "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
             "AND i.instanceStatus <> 'DELETED_BY_PROVIDER' " +
             "ORDER BY i.privateId")
@@ -57,10 +48,9 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
     @Query("SELECT i FROM InstanceMetaData i " +
             "WHERE i.instanceGroup.stack.id= :stackId " +
             "AND i.instanceStatus <> 'TERMINATED' " +
-            "AND i.instanceStatus <> 'ZOMBIE' " +
             "AND i.instanceStatus <> 'DELETED_ON_PROVIDER_SIDE' " +
             "AND i.instanceStatus <> 'DELETED_BY_PROVIDER'")
-    Set<InstanceMetaData> findNotTerminatedAndNotZombieForStackWithoutInstanceGroups(@Param("stackId") Long stackId);
+    Set<InstanceMetaData> findNotTerminatedForStackWithoutInstanceGroups(@Param("stackId") Long stackId);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId")
@@ -100,7 +90,7 @@ public interface InstanceMetaDataRepository extends CrudRepository<InstanceMetaD
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)
     @Query("SELECT i FROM InstanceMetaData i WHERE i.instanceGroup.stack.id= :stackId AND i.instanceGroup.groupName= :groupName "
-            + "AND i.instanceStatus in ('CREATED', 'SERVICES_RUNNING', 'DECOMMISSIONED', 'FAILED', 'STOPPED', 'ZOMBIE')")
+            + "AND i.instanceStatus in ('CREATED', 'SERVICES_RUNNING', 'DECOMMISSIONED', 'FAILED', 'STOPPED')")
     Set<InstanceMetaData> findRemovableInstances(@Param("stackId") Long stackId, @Param("groupName") String groupName);
 
     @EntityGraph(value = "InstanceMetaData.instanceGroup", type = EntityGraphType.LOAD)

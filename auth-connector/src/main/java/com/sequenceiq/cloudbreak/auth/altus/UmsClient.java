@@ -812,7 +812,7 @@ public class UmsClient {
         if (resourceCrn == null) {
             resourceCrn = "*";
         }
-        return newShortTimeoutStub(requestId).getRights(
+        return newStub(requestId).getRights(
                 GetRightsRequest.newBuilder()
                         .setActorCrn(actorCrn)
                         .setResourceCrn(resourceCrn)
@@ -985,22 +985,6 @@ public class UmsClient {
         return newStub(requestId).getEventGenerationIds(UserManagementProto.GetEventGenerationIdsRequest.newBuilder()
                 .setAccountId(accountId)
                 .build());
-    }
-
-    /**
-     * Creates a new stub with the appropriate metadata injecting interceptors (short timeout).
-     *
-     * @param requestId the request ID
-     * @return the stub
-     */
-    private UserManagementBlockingStub newShortTimeoutStub(String requestId) {
-        checkNotNull(requestId, "requestId should not be null.");
-        return UserManagementGrpc.newBlockingStub(channel)
-                .withInterceptors(
-                        GrpcUtil.getTimeoutInterceptor(umsClientConfig.getGrpcShortTimeoutSec()),
-                        GrpcUtil.getTracingInterceptor(tracer),
-                        new AltusMetadataInterceptor(requestId, ThreadBasedUserCrnProvider.INTERNAL_ACTOR_CRN),
-                        new CallingServiceNameInterceptor(umsClientConfig.getCallingServiceName()));
     }
 
     /**

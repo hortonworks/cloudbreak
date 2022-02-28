@@ -15,26 +15,25 @@ import org.springframework.stereotype.Repository;
 
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.common.api.type.CertExpirationState;
 import com.sequenceiq.datalake.entity.SdxCluster;
+import com.sequenceiq.datalake.projection.SdxClusterIdView;
 
 @Repository
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = SdxCluster.class)
-public interface SdxClusterRepository extends AccountAwareResourceRepository<SdxCluster, Long>, JobResourceRepository<SdxCluster, Long> {
+public interface SdxClusterRepository extends AccountAwareResourceRepository<SdxCluster, Long> {
 
     @Override
     List<SdxCluster> findAll();
 
-    @Query("SELECT s.id as localId, s.stackCrn as remoteResourceId, s.name as name " +
+    @Query("SELECT s.id as id, s.stackCrn as stackCrn " +
             "FROM SdxCluster s " +
             "WHERE s.deleted is null " +
             "AND s.stackCrn is not null")
-    List<JobResource> findAllAliveView();
+    List<SdxClusterIdView> findAllAliveView();
 
     Optional<SdxCluster> findByAccountIdAndClusterNameAndDeletedIsNullAndDetachedIsFalse(String accountId, String clusterName);
 
@@ -92,9 +91,4 @@ public interface SdxClusterRepository extends AccountAwareResourceRepository<Sdx
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(s.id, s.crn, s.envCrn) FROM SdxCluster s " +
             "WHERE s.accountId = :accountId AND s.envCrn = :envCrn AND s.deleted IS NULL")
     List<ResourceWithId> findAuthorizationResourcesByAccountIdAndEnvCrn(@Param("accountId") String accountId, @Param("envCrn") String envCrn);
-
-    @Query("SELECT s.id as localId, s.stackCrn as remoteResourceId, s.name as name " +
-            "FROM SdxCluster s " +
-            "WHERE s.id = :resourceId")
-    Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
 }

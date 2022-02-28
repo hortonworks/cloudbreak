@@ -214,7 +214,7 @@ class ClusterServiceTest {
         instanceMetadata.setDiscoveryFQDN(FQDN1);
         instanceMetadata.setInstanceStatus(InstanceStatus.SERVICES_RUNNING);
         instanceMetadata.setStatusReason(STATUS_REASON_ORIGINAL);
-        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId())).thenReturn(Set.of(instanceMetadata));
+        when(instanceMetaDataService.findNotTerminatedForStack(stack.getId())).thenReturn(Set.of(instanceMetadata));
     }
 
     private void setupClusterApi(Stack stack, HealthCheckResult healthCheckResult, String statusReason) {

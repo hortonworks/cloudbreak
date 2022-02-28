@@ -108,9 +108,6 @@ public class GcpInstanceResourceBuilderTest {
 
     private static final Long WORKSPACE_ID = 1L;
 
-    @InjectMocks
-    private final GcpInstanceResourceBuilder builder = new GcpInstanceResourceBuilder();
-
     private long privateId;
 
     private String privateCrn;
@@ -164,6 +161,9 @@ public class GcpInstanceResourceBuilderTest {
 
     @Captor
     private ArgumentCaptor<Instance> instanceArg;
+
+    @InjectMocks
+    private final GcpInstanceResourceBuilder builder = new GcpInstanceResourceBuilder();
 
     @Before
     public void setUp() {
@@ -320,34 +320,6 @@ public class GcpInstanceResourceBuilderTest {
         verify(instances).insert(anyString(), anyString(), instanceArg.capture());
         assertNull(instanceArg.getValue().getServiceAccounts());
         assertEquals(ipaserver, instanceArg.getValue().getHostname());
-    }
-
-    @Test
-    public void labelsAndTagsSetCorrectly() throws Exception {
-        // GIVEN
-        Group group = newGroupWithParams(ImmutableMap.of(DISCOVERY_NAME, "idbroker"));
-        List<CloudResource> buildableResources = builder.create(context, group.getInstances().get(0), privateId, authenticatedContext, group, image);
-        context.addComputeResources(0L, buildableResources);
-        Map<String, String> cdpTags = new HashMap<>();
-        cdpTags.put("owner", "cdpUser");
-
-        // WHEN
-        when(gcpStackUtil.convertGroupName(anyString())).thenReturn("idbroker");
-        when(gcpLabelUtil.createLabelsFromTags(any())).thenReturn(cdpTags);
-
-        when(compute.instances()).thenReturn(instances);
-        when(instances.insert(anyString(), anyString(), any(Instance.class))).thenReturn(insert);
-        when(insert.setPrettyPrint(anyBoolean())).thenReturn(insert);
-        when(insert.execute()).thenReturn(operation);
-
-        builder.build(context, group.getInstances().get(0), privateId, authenticatedContext, group, buildableResources, cloudStack);
-
-        // THEN
-        verify(compute).instances();
-        verify(instances).insert(anyString(), anyString(), instanceArg.capture());
-        assertTrue(instanceArg.getValue().getTags().getItems().contains("idbroker"));
-        assertFalse(instanceArg.getValue().getTags().getItems().contains("owner"));
-        assertEquals("cdpUser", instanceArg.getValue().getLabels().get("owner"));
     }
 
     @Test

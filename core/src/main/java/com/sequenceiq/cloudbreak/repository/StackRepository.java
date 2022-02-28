@@ -30,15 +30,13 @@ import com.sequenceiq.cloudbreak.domain.projection.StackPlatformVariantView;
 import com.sequenceiq.cloudbreak.domain.projection.StackStatusView;
 import com.sequenceiq.cloudbreak.domain.projection.StackTtlView;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
-import com.sequenceiq.cloudbreak.quartz.model.JobResource;
-import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.model.Workspace;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.cloudbreak.workspace.repository.workspace.WorkspaceResourceRepository;
 
 @EntityType(entityClass = Stack.class)
 @Transactional(TxType.REQUIRED)
-public interface StackRepository extends WorkspaceResourceRepository<Stack, Long>, JobResourceRepository<Stack, Long> {
+public interface StackRepository extends WorkspaceResourceRepository<Stack, Long> {
 
     @Query("SELECT s.id as id, s.name as name, s.resourceCrn as crn from Stack s "
             + "WHERE s.cluster.clusterManagerIp= :clusterManagerIp AND s.terminated = null "
@@ -370,17 +368,4 @@ public interface StackRepository extends WorkspaceResourceRepository<Stack, Long
             "FROM Stack s " +
             "WHERE s.id = :id")
     Optional<PayloadContext> findStackAsPayloadContext(@Param("id") Long id);
-
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
-            "FROM Stack s " +
-            "WHERE s.id = :resourceId")
-    Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
-
-    @Query("SELECT s.id as localId, s.resourceCrn as remoteResourceId, s.name as name " +
-            "FROM Stack s " +
-            "LEFT JOIN s.stackStatus ss " +
-            "WHERE s.terminated = null " +
-            "AND (s.type is not 'TEMPLATE' OR s.type is null) " +
-            "AND ss.status not in (:notInStatuses)")
-    List<JobResource> getJobResourcesNotIn(@Param("notInStatuses") Set<Status> notInStatuses);
 }

@@ -11,6 +11,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import com.sequenceiq.flow.domain.ClassValue;
 import com.sequenceiq.flow.domain.FlowLogIdWithTypeAndTimestamp;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -80,4 +81,27 @@ public class FlowNameFormatServiceTest {
 
     }
 
+    private static class TestFlowView implements FlowLogIdWithTypeAndTimestamp {
+
+        private Class flowType;
+
+        TestFlowView(Class flowType) {
+            this.flowType = flowType;
+        }
+
+        @Override
+        public String getFlowId() {
+            return "1";
+        }
+
+        @Override
+        public ClassValue getFlowType() {
+            return ClassValue.of(flowType);
+        }
+
+        @Override
+        public Long getCreated() {
+            return 1L;
+        }
+    }
 }

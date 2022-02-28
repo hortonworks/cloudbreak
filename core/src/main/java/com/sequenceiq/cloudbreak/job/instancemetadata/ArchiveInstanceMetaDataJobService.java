@@ -47,7 +47,7 @@ public class ArchiveInstanceMetaDataJobService {
         ArchiveInstanceMetaDataJobAdapter resourceAdapter = new ArchiveInstanceMetaDataJobAdapter(id, applicationContext);
         JobDetail jobDetail = buildJobDetail(resourceAdapter);
         Trigger trigger = buildJobTrigger(jobDetail);
-        schedule(resourceAdapter.getJobResource().getLocalId(), jobDetail, trigger);
+        schedule(resourceAdapter.getLocalId(), jobDetail, trigger);
     }
 
     public <T> void schedule(String id, JobDetail jobDetail, Trigger trigger) {
@@ -74,7 +74,7 @@ public class ArchiveInstanceMetaDataJobService {
             if (scheduler.getJobDetail(jobKey) != null) {
                 unschedule(jobKey);
             }
-            LOGGER.debug("Scheduling archive InstanceMetaData job for stack {}", resource.getJobResource().getRemoteResourceId());
+            LOGGER.debug("Scheduling archive InstanceMetaData job for stack {}", resource.getRemoteResourceId());
             scheduler.scheduleJob(jobDetail, trigger);
         } catch (SchedulerException e) {
             LOGGER.error(String.format("Error during scheduling archive InstanceMetaData job: %s", jobDetail), e);
@@ -96,8 +96,8 @@ public class ArchiveInstanceMetaDataJobService {
 
     private JobDetail buildJobDetail(ArchiveInstanceMetaDataJobAdapter resource) {
         return JobBuilder.newJob(ArchiveInstanceMetaDataJob.class)
-                .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
-                .withDescription("Archiving InstanceMetadata for stack: " + resource.getJobResource().getRemoteResourceId())
+                .withIdentity(resource.getLocalId(), JOB_GROUP)
+                .withDescription("Archiving InstanceMetadata for stack: " + resource.getRemoteResourceId())
                 .usingJobData(resource.toJobDataMap())
                 .storeDurably()
                 .build();

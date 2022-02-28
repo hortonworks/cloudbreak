@@ -683,7 +683,7 @@ public class StackToTemplatePreparationObjectConverterTest {
 
     private BlueprintView getBlueprintView() {
         BlueprintView blueprint = new BlueprintView();
-        blueprint.setVersion("7.2.14");
+        blueprint.setVersion("7.2.13");
         return blueprint;
     }
 

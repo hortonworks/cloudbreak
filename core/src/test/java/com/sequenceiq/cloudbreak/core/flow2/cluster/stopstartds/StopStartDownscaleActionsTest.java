@@ -418,7 +418,7 @@ public class StopStartDownscaleActionsTest {
                 Stream.of(instancesActionableStarted, instancesActionableNotStarted, instancesRandomStarted, instancesRandomNotStarted)
                         .flatMap(Collection::stream).collect(Collectors.toList());
 
-        lenient().when(stack.getNotDeletedAndNotZombieInstanceMetaDataList()).thenReturn(combined);
+        lenient().when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(combined);
 
         InstanceGroup instanceGroup = new InstanceGroup();
         instanceGroup.setGroupName(INSTANCE_GROUP_NAME_ACTIONABLE);
@@ -426,7 +426,7 @@ public class StopStartDownscaleActionsTest {
         lenient().when(stack.getInstanceGroupByInstanceGroupName(eq(INSTANCE_GROUP_NAME_ACTIONABLE))).thenReturn(instanceGroup);
 
         lenient().when(stackService.getPrivateIdsForHostNames(any(), any())).thenCallRealMethod();
-        lenient().when(cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(any(), anyString(), any())).thenCallRealMethod();
+        lenient().when(cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedInstances(any(), anyString(), any())).thenCallRealMethod();
     }
 
     private List<CloudInstance> mockInstanceMetadataToCloudInstanceConverter(List<InstanceMetaData> src) {

@@ -55,6 +55,7 @@ import com.sequenceiq.environment.credential.attributes.azure.CodeGrantFlowAttri
 import com.sequenceiq.environment.credential.domain.Credential;
 import com.sequenceiq.environment.credential.exception.CredentialOperationException;
 import com.sequenceiq.environment.credential.repository.CredentialRepository;
+import com.sequenceiq.environment.credential.v1.converter.CredentialRequestToCreateAWSCredentialRequestConverter;
 import com.sequenceiq.environment.credential.validation.CredentialValidator;
 import com.sequenceiq.environment.credential.verification.CredentialVerification;
 import com.sequenceiq.environment.environment.verification.CDPServicePolicyVerification;
@@ -83,6 +84,9 @@ public class CredentialService extends AbstractCredentialService implements Reso
 
     @Inject
     private SecretService secretService;
+
+    @Inject
+    private CredentialRequestToCreateAWSCredentialRequestConverter credentialRequestToCreateAWSCredentialRequestConverter;
 
     @Inject
     private OwnerAssignmentService ownerAssignmentService;

@@ -19,11 +19,11 @@ import com.sequenceiq.it.cloudbreak.dto.distrox.cluster.DistroXUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.dto.distrox.image.DistroXImageTestDto;
 import com.sequenceiq.it.cloudbreak.dto.imagecatalog.ImageCatalogTestDto;
 import com.sequenceiq.it.cloudbreak.dto.sdx.SdxTestDto;
+import com.sequenceiq.it.cloudbreak.dto.sdx.SdxUpgradeTestDto;
 import com.sequenceiq.it.cloudbreak.testcase.e2e.AbstractE2ETest;
 import com.sequenceiq.it.cloudbreak.util.spot.UseSpotInstances;
 import com.sequenceiq.sdx.api.model.SdxClusterStatusResponse;
-import com.sequenceiq.sdx.api.model.SdxDatabaseAvailabilityType;
-import com.sequenceiq.sdx.api.model.SdxDatabaseRequest;
+import com.sequenceiq.sdx.api.model.SdxUpgradeReplaceVms;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -77,14 +77,10 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
         String distroX3rdPartyName = resourcePropertyProvider().getName();
         String thirdPartyCatalogName = resourcePropertyProvider().getName();
         AtomicReference<String> uuid = new AtomicReference<>();
-        SdxDatabaseRequest sdxDatabaseRequest = new SdxDatabaseRequest();
-        sdxDatabaseRequest.setAvailabilityType(SdxDatabaseAvailabilityType.NONE);
-
         testContext
                 .given(sdxName, SdxTestDto.class)
                 .withRuntimeVersion(currentRuntimeVersion)
                 .withCloudStorage(getCloudStorageRequest(testContext))
-                .withExternalDatabase(sdxDatabaseRequest)
                 .when(sdxTestClient.create(), key(sdxName))
                 .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
                 .awaitForHealthyInstances()
@@ -113,6 +109,36 @@ public class DistroXUpgradeTests extends AbstractE2ETest {
                 .await(STACK_AVAILABLE, key(distroXName))
                 .awaitForHealthyInstances()
                 .then(new AwsAvailabilityZoneAssertion())
+                .validate();
+        testContext
+                .given(distroXName, DistroXTestDto.class)
+                .when(distroXTestClient.stop(), key(distroXName))
+                .given(distroX3rdPartyName, DistroXTestDto.class)
+                .when(distroXTestClient.stop(), key(distroX3rdPartyName))
+                .await(STACK_STOPPED, key(distroX3rdPartyName))
+                .given(distroXName, DistroXTestDto.class)
+                .await(STACK_STOPPED, key(distroXName))
+                .validate();
+        testContext
+                .given(SdxUpgradeTestDto.class)
+                .withReplaceVms(SdxUpgradeReplaceVms.DISABLED)
+                .withRuntime(targetRuntimeVersion)
+                .given(sdxName, SdxTestDto.class)
+                .when(sdxTestClient.upgrade(), key(sdxName))
+                .await(SdxClusterStatusResponse.DATALAKE_UPGRADE_IN_PROGRESS, key(sdxName).withWaitForFlow(Boolean.FALSE))
+                .await(SdxClusterStatusResponse.RUNNING, key(sdxName))
+                .awaitForHealthyInstances()
+                .validate();
+        testContext
+                .given(distroXName, DistroXTestDto.class)
+                .when(distroXTestClient.start(), key(distroXName))
+                .given(distroX3rdPartyName, DistroXTestDto.class)
+                .when(distroXTestClient.start(), key(distroX3rdPartyName))
+                .await(STACK_AVAILABLE, key(distroX3rdPartyName))
+                .awaitForHealthyInstances()
+                .given(distroXName, DistroXTestDto.class)
+                .await(STACK_AVAILABLE, key(distroXName))
+                .awaitForHealthyInstances()
                 .validate();
         testContext
                 .given(DistroXUpgradeTestDto.class)

@@ -261,7 +261,7 @@ public class DatabaseServiceTest {
     private DatabaseServerParameterSetter getDatabaseParameterSetter() {
         return new DatabaseServerParameterSetter() {
             @Override
-            public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType, String databaseEngineVersion) {
+            public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
                 request.setAws(new AwsDatabaseServerV4Parameters());
             }
 

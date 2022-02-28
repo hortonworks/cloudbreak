@@ -73,8 +73,8 @@ public class ExistingStackPatcherJobService {
 
     private JobDetail buildJobDetail(ExistingStackPatcherJobAdapter resource) {
         return JobBuilder.newJob(ExistingStackPatcherJob.class)
-                .withIdentity(resource.getJobResource().getLocalId(), JOB_GROUP)
-                .withDescription("Patching existing stack: " + resource.getJobResource().getRemoteResourceId())
+                .withIdentity(resource.getLocalId(), JOB_GROUP)
+                .withDescription("Patching existing stack: " + resource.getRemoteResourceId())
                 .usingJobData(resource.toJobDataMap())
                 .storeDurably()
                 .build();

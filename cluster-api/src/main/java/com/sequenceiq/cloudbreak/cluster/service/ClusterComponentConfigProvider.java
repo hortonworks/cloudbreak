@@ -97,21 +97,6 @@ public class ClusterComponentConfigProvider {
         return result;
     }
 
-    public String getSaltStateComponentCbVersion(Long clusterId) {
-        String result = null;
-        ClusterComponent component = getComponent(clusterId, ComponentType.SALT_STATE);
-        if (component != null && ComponentType.SALT_STATE.equals(component.getComponentType())) {
-            Json jsonAttr = component.getAttributes();
-            if (jsonAttr != null) {
-                Map<String, Object> jsonMap = jsonAttr.getMap();
-                if (jsonMap.containsKey(ClusterComponent.CB_VERSION_KEY) && jsonMap.get(ClusterComponent.CB_VERSION_KEY) != null) {
-                    result = jsonMap.get(ClusterComponent.CB_VERSION_KEY).toString();
-                }
-            }
-        }
-        return result;
-    }
-
     public <T> T getComponent(Collection<ClusterComponent> components, Class<T> clazz, ComponentType componentType) {
         try {
             Optional<ClusterComponent> comp = components.stream().filter(

@@ -8,7 +8,6 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ORCHESTRATION_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.TERMINATED;
-import static com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus.ZOMBIE;
 
 import java.util.List;
 import java.util.Map;
@@ -26,11 +25,12 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.instancegroup.i
 import com.sequenceiq.it.cloudbreak.CloudbreakClient;
 import com.sequenceiq.it.cloudbreak.context.TestContext;
 import com.sequenceiq.it.cloudbreak.exception.TestFailException;
+import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceFailedChecker;
 import com.sequenceiq.it.cloudbreak.util.wait.service.instance.InstanceWaitObject;
 
 public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CloudbreakInstanceWaitObject.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(InstanceFailedChecker.class);
 
     private final String name;
 
@@ -103,7 +103,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailed() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED, ZOMBIE);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED);
         return getInstanceStatuses().values().stream().anyMatch(failedStatuses::contains);
     }
 
@@ -114,8 +114,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isCreateFailed() {
-        Set<InstanceStatus> failedStatuses = Set.of(ORCHESTRATION_FAILED, ZOMBIE);
-        return getInstanceStatuses().values().stream().anyMatch(failedStatuses::contains);
+        return getInstanceStatuses().values().stream().anyMatch(ORCHESTRATION_FAILED::equals);
     }
 
     @Override
@@ -126,7 +125,7 @@ public class CloudbreakInstanceWaitObject implements InstanceWaitObject {
 
     @Override
     public boolean isFailedCheck() {
-        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED, ZOMBIE);
+        Set<InstanceStatus> failedStatuses = Set.of(FAILED, ORCHESTRATION_FAILED, DECOMMISSION_FAILED);
         return failedStatuses.contains(desiredStatus);
     }
 

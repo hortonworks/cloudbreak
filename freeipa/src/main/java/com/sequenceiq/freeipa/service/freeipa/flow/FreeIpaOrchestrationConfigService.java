@@ -12,11 +12,11 @@ import javax.inject.Inject;
 import org.springframework.stereotype.Service;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.freeipa.entity.InstanceMetaData;
@@ -82,6 +82,6 @@ public class FreeIpaOrchestrationConfigService {
     private void createAndPushPillarsToNodes(Long stackId, Stack stack, List<GatewayConfig> gatewayConfigs, Set<Node> allNodes)
             throws CloudbreakOrchestratorFailedException {
         SaltConfig saltConfig = getSaltConfig(stack, allNodes);
-        hostOrchestrator.initSaltConfig(stack, gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
+        hostOrchestrator.initSaltConfig(gatewayConfigs, allNodes, saltConfig, new StackBasedExitCriteriaModel(stackId));
     }
 }

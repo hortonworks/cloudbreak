@@ -2,37 +2,28 @@ package com.sequenceiq.cloudbreak.service.stack.flow;
 
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.AVAILABLE;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status.NODE_FAILURE;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Stream;
 
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.function.Executable;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
 import com.sequenceiq.cloudbreak.api.endpoint.v4.autoscales.request.InstanceGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
-import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
@@ -41,10 +32,6 @@ import com.sequenceiq.common.api.type.ScalabilityOption;
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 public class UpdateNodeCountValidatorTest {
-
-    private static final String TEST_COMPUTE_GROUP = "compute";
-
-    private static final String TEST_BLUEPRINT_TEXT = "blueprintText";
 
     private static final Optional<String> FORBIDDEN_DOWN = Optional.of("Requested scaling down is forbidden");
 
@@ -56,9 +43,6 @@ public class UpdateNodeCountValidatorTest {
 
     @InjectMocks
     public UpdateNodeCountValidator underTest;
-
-    @Mock
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @ParameterizedTest(name = "The master node count is {0} this will be scaled with {2} " +
             "node and the minimum is {1} the ScalabilityOption is {3}.")
@@ -158,51 +142,5 @@ public class UpdateNodeCountValidatorTest {
                         Optional.of("Data Hub 'master-stack' has 'NODE_FAILURE' state." +
                                 " Node group start operation is not allowed for this state."))
         );
-    }
-
-    @Test
-    public void testValidateInstanceGroupForStopStartIsSuccessful() {
-        Stack stack = mock(Stack.class);
-        setupMocksForStopStartInstanceGroupValidation(stack);
-        assertDoesNotThrow(() -> underTest.validateInstanceGroupForStopStart(stack, "compute", 5));
-    }
-
-    @Test
-    public void testValidateInstanceGroupForStopStartThrowsExceptionForUpscale() {
-        Stack stack = mock(Stack.class);
-        setupMocksForStopStartInstanceGroupValidation(stack);
-        assertThatThrownBy(() -> underTest.validateInstanceGroupForStopStart(stack, "worker", 2))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Start instances operation is not allowed for worker host group.");
-    }
-
-    @Test
-    public void testValidateInstanceGroupForStopStartThrowsExceptionForDownscale() {
-        Stack stack = mock(Stack.class);
-        setupMocksForStopStartInstanceGroupValidation(stack);
-        assertThatThrownBy(() -> underTest.validateInstanceGroupForStopStart(stack, "worker", -1))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Stop instances operation is not allowed for worker host group.");
-    }
-
-    @Test
-    public void testValidateInstanceGroupForStopStartThrowsExceptionForZeroScalingAdjustment() {
-        Stack stack = mock(Stack.class);
-        setupMocksForStopStartInstanceGroupValidation(stack);
-        assertThatThrownBy(() -> underTest.validateInstanceGroupForStopStart(stack, "worker", 0))
-                .isInstanceOf(BadRequestException.class)
-                .hasMessage("Zero Scaling adjustment detected for worker host group.");
-    }
-
-    private void setupMocksForStopStartInstanceGroupValidation(Stack stack) {
-        CmTemplateProcessor cmTemplateProcessor = mock(CmTemplateProcessor.class);
-        Cluster cluster = mock(Cluster.class);
-        Blueprint blueprint = mock(Blueprint.class);
-
-        when(stack.getCluster()).thenReturn(cluster);
-        when(cluster.getBlueprint()).thenReturn(blueprint);
-        when(blueprint.getBlueprintText()).thenReturn(TEST_BLUEPRINT_TEXT);
-        when(cmTemplateProcessorFactory.get(anyString())).thenReturn(cmTemplateProcessor);
-        when(cmTemplateProcessor.getComputeHostGroups(any())).thenReturn(Set.of(TEST_COMPUTE_GROUP));
     }
 }

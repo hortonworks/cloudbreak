@@ -392,7 +392,7 @@ public class ClusterOperationService {
 
     private Collection<InstanceMetaData> collectChangedHosts(Cluster cluster, Map<String, Optional<String>> hostNamesWithReason,
             Set<InstanceStatus> expectedState, InstanceStatus newState, ResourceEvent hostEvent) {
-        return instanceMetaDataService.findNotTerminatedAndNotZombieForStack(cluster.getStack().getId()).stream()
+        return instanceMetaDataService.findNotTerminatedForStack(cluster.getStack().getId()).stream()
                 .filter(host -> expectedState.contains(host.getInstanceStatus()) && hostNamesWithReason.containsKey(host.getDiscoveryFQDN()))
                 .map(host -> updateHostStatus(hostNamesWithReason, newState, hostEvent, host))
                 .collect(Collectors.toSet());

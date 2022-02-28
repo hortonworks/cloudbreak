@@ -5,7 +5,6 @@ import static java.lang.String.format;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.inject.Inject;
@@ -17,12 +16,9 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.HostGroupAdjustmentV4Request;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessor;
-import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateProcessorFactory;
 import com.sequenceiq.cloudbreak.cmtemplate.CmTemplateValidator;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
-import com.sequenceiq.cloudbreak.common.type.Versioned;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -47,9 +43,6 @@ public class UpdateNodeCountValidator {
 
     @Inject
     private CmTemplateValidator cmTemplateValidator;
-
-    @Inject
-    private CmTemplateProcessorFactory cmTemplateProcessorFactory;
 
     @Inject
     private InstanceGroupService instanceGroupService;
@@ -177,19 +170,6 @@ public class UpdateNodeCountValidator {
                 instanceGroup);
     }
 
-    public void validateInstanceGroupForStopStart(Stack stack, String instanceGroupName, int scalingAdjustment) {
-        Set<String> computeGroups = getComputeHostGroup(stack);
-        if (!computeGroups.contains(instanceGroupName)) {
-            if (upscaleEvent(scalingAdjustment)) {
-                throw new BadRequestException(format("Start instances operation is not allowed for %s host group.", instanceGroupName));
-            } else if (downScaleEvent(scalingAdjustment)) {
-                throw new BadRequestException(format("Stop instances operation is not allowed for %s host group.", instanceGroupName));
-            } else {
-                throw new BadRequestException(format("Zero Scaling adjustment detected for %s host group.", instanceGroupName));
-            }
-        }
-    }
-
     private void validateGroupAdjustment(Stack stack, Integer scalingAdjustment, InstanceGroup instanceGroup) {
         if (upscaleEvent(scalingAdjustment)) {
             if (nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(instanceGroup, scalingAdjustment)) {
@@ -230,13 +210,6 @@ public class UpdateNodeCountValidator {
 
     private int getNodeCountAfterScaling(InstanceGroup instanceGroup, Integer scalingAdjustment) {
         return instanceGroup.getNodeCount() + scalingAdjustment.intValue();
-    }
-
-    private Set<String> getComputeHostGroup(Stack stack) {
-        String blueprintText = stack.getCluster().getBlueprint().getBlueprintText();
-        CmTemplateProcessor templateProcessor = cmTemplateProcessorFactory.get(blueprintText);
-        Versioned version = () -> templateProcessor.getVersion().get();
-        return templateProcessor.getComputeHostGroups(version);
     }
 
     private boolean nodeCountIsLowerThanMinimalNodeCountAfterTheScalingEvent(InstanceGroup instanceGroup,

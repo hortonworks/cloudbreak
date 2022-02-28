@@ -2,10 +2,10 @@ package com.sequenceiq.cloudbreak.core.bootstrap.service.host.context;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.StackContext;
 
 public class HostOrchestratorClusterContext extends StackContext {

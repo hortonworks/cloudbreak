@@ -17,11 +17,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
-import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
+import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.reactor.api.event.orchestration.RemoveHostsFailed;
@@ -90,7 +90,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
         LOGGER.debug("Remove hosts from orchestrator: {}", hostNames);
         try {
             Map<String, String> removeNodePrivateIPsByFQDN = new HashMap<>();
-            stack.getNotTerminatedInstanceMetaDataSet().stream()
+            stack.getNotTerminatedInstanceMetaDataList().stream()
                     .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
                     .filter(instanceMetaData ->
                             hostNames.stream()
@@ -99,7 +99,7 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsRequest> {
             Set<Node> remainingNodes = stackUtil.collectNodes(stack)
                     .stream().filter(node -> !removeNodePrivateIPsByFQDN.containsValue(node.getPrivateIp())).collect(Collectors.toSet());
             ExitCriteriaModel exitCriteriaModel = clusterDeletionBasedModel(stack.getId(), stack.getCluster().getId());
-            hostOrchestrator.tearDown(stack, allGatewayConfigs, removeNodePrivateIPsByFQDN, remainingNodes, exitCriteriaModel);
+            hostOrchestrator.tearDown(allGatewayConfigs, removeNodePrivateIPsByFQDN, remainingNodes, exitCriteriaModel);
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.error("Failed to delete orchestrator components while decommissioning: ", e);
             throw new CloudbreakException("Removing selected nodes from master node failed, " +

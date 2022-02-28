@@ -10,8 +10,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.usage.model.UsageContext;
-import com.sequenceiq.cloudbreak.usage.strategy.CompositeUsageProcessingStrategy;
+import com.sequenceiq.cloudbreak.usage.strategy.CloudwatchUsageProcessingStrategy;
+import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
 import com.sequenceiq.cloudbreak.usage.strategy.UsageProcessingStrategy;
 
 @Service
@@ -21,8 +21,15 @@ public class UsageReportProcessor implements UsageReporter {
 
     private final UsageProcessingStrategy usageProcessingStrategy;
 
-    public UsageReportProcessor(CompositeUsageProcessingStrategy compositeUsageProcessingStrategy) {
-        this.usageProcessingStrategy = compositeUsageProcessingStrategy;
+    public UsageReportProcessor(LoggingUsageProcessingStrategy loggingUsageProcessingStrategy,
+            CloudwatchUsageProcessingStrategy cloudwatchUsageProcessingStrategy) {
+        this.usageProcessingStrategy = initUsageProcessingStrategy(loggingUsageProcessingStrategy, cloudwatchUsageProcessingStrategy);
+    }
+
+    private UsageProcessingStrategy initUsageProcessingStrategy(LoggingUsageProcessingStrategy loggingUsageProcessingStrategy,
+            CloudwatchUsageProcessingStrategy cloudwatchUsageProcessingStrategy) {
+        return cloudwatchUsageProcessingStrategy != null
+                && cloudwatchUsageProcessingStrategy.isEnabled() ? cloudwatchUsageProcessingStrategy : loggingUsageProcessingStrategy;
     }
 
     @Override
@@ -32,8 +39,6 @@ public class UsageReportProcessor implements UsageReporter {
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setTimestamp(timestamp)
                     .setCdpDatahubClusterRequested(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(details.getAccountId())
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -47,7 +52,7 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubClusterStatusChanged(details)
-                    .build(), null);
+                    .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
             LOGGER.warn("Could not log binary format for the following usage event: {}! Cause: {}", details, e.getMessage());
@@ -61,8 +66,6 @@ public class UsageReportProcessor implements UsageReporter {
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setTimestamp(timestamp)
                     .setCdpDatalakeClusterRequested(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(details.getAccountId())
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -77,7 +80,7 @@ public class UsageReportProcessor implements UsageReporter {
             UsageProto.Event event = eventBuilder()
                     .setCdpDatalakeClusterStatusChanged(details)
                     .build();
-            usageProcessingStrategy.processUsage(event, null);
+            usageProcessingStrategy.processUsage(event);
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
             LOGGER.warn("Could not log binary format for the following usage event: {}! Cause: {}", details, e.getMessage());
@@ -90,8 +93,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpEnvironmentRequested(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -105,8 +106,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpEnvironmentStatusChanged(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -120,8 +119,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatalakeRequested(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -135,8 +132,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatalakeStatusChanged(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -150,8 +145,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubRequested(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -165,8 +158,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubStatusChanged(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -180,8 +171,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatalakeSync(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -195,8 +184,6 @@ public class UsageReportProcessor implements UsageReporter {
             checkNotNull(details);
             usageProcessingStrategy.processUsage(eventBuilder()
                     .setCdpDatahubSync(details)
-                    .build(), UsageContext.Builder.newBuilder()
-                    .accountId(getAccountId(details.getOperationDetails()))
                     .build());
             LOGGER.info("Logged binary format for the following usage event: {}", details);
         } catch (Exception e) {
@@ -209,7 +196,7 @@ public class UsageReportProcessor implements UsageReporter {
         checkNotNull(details);
         usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpDatahubAutoscaleTriggered(details)
-                .build(), null);
+                .build());
     }
 
     @Override
@@ -217,7 +204,7 @@ public class UsageReportProcessor implements UsageReporter {
         checkNotNull(details);
         usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpDatahubAutoscaleConfigChanged(details)
-                .build(), null);
+                .build());
     }
 
     @Override
@@ -225,8 +212,6 @@ public class UsageReportProcessor implements UsageReporter {
         checkNotNull(details);
         usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpNetworkCheck(details)
-                .build(), UsageContext.Builder.newBuilder()
-                .accountId(details.getAccountId())
                 .build());
     }
 
@@ -235,17 +220,7 @@ public class UsageReportProcessor implements UsageReporter {
         checkNotNull(details);
         usageProcessingStrategy.processUsage(eventBuilder()
                 .setCdpVmDiagnosticsEvent(details)
-                .build(), UsageContext.Builder.newBuilder()
-                .accountId(details.getAccountId())
                 .build());
-    }
-
-    @Override
-    public void cdpStackPatcherEvent(UsageProto.CDPStackPatchEvent details) {
-        checkNotNull(details);
-        usageProcessingStrategy.processUsage(eventBuilder()
-                .setCdpStackPatchEvent(details)
-                .build(), null);
     }
 
     private UsageProto.Event.Builder eventBuilder() {
@@ -253,9 +228,5 @@ public class UsageReportProcessor implements UsageReporter {
                 .setId(UUID.randomUUID().toString())
                 .setTimestamp(Instant.now().toEpochMilli())
                 .setVersion(UsageReporter.USAGE_VERSION);
-    }
-
-    private String getAccountId(final UsageProto.CDPOperationDetails operationDetails) {
-        return operationDetails != null ? operationDetails.getAccountId() : null;
     }
 }

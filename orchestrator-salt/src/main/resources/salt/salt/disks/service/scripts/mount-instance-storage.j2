@@ -259,7 +259,7 @@ main () {
         return_code=$?
         log $LOG_FILE result of remounting Azure temporary storage device: $return_code
         [[ ! $return_code -eq 0 ]] && exit_with_code $LOG_FILE $return_code "Error remounting Azure temporary storage device"
-    elif [[ "$CLOUD_PLATFORM" == "AWS" ]]; then
+    elif [[ "$CLOUD_PLATFORM" == "AWS" && "$TEMPORARY_STORAGE" != "EPHEMERAL_VOLUMES_ONLY" ]]; then
         log $LOG_FILE "Starting to remount AWS ephemeral devices"
         is_there_a_volume_to_mount
         find_format_and_mount_ephemeral_storage_aws

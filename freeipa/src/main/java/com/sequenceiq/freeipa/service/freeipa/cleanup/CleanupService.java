@@ -20,8 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.util.Pair;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
@@ -34,7 +32,6 @@ import com.sequenceiq.freeipa.api.v1.operation.model.OperationType;
 import com.sequenceiq.freeipa.client.FreeIpaClient;
 import com.sequenceiq.freeipa.client.FreeIpaClientException;
 import com.sequenceiq.freeipa.client.FreeIpaClientExceptionUtil;
-import com.sequenceiq.freeipa.client.RetryableFreeIpaClientException;
 import com.sequenceiq.freeipa.client.model.Cert;
 import com.sequenceiq.freeipa.client.model.DnsRecord;
 import com.sequenceiq.freeipa.client.model.DnsZone;
@@ -121,10 +118,6 @@ public class CleanupService {
         return operationToOperationStatusConverter.convert(operation);
     }
 
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Pair<Set<String>, Map<String, String>> revokeCerts(Long stackId, Set<String> hosts) throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Set<String> certCleanupSuccess = new HashSet<>();
@@ -145,10 +138,6 @@ public class CleanupService {
         return Pair.of(certCleanupSuccess, certCleanupFailed);
     }
 
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Pair<Set<String>, Map<String, String>> removeDnsEntries(Long stackId, Set<String> hosts, Set<String> ips, String domain)
             throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
@@ -228,10 +217,6 @@ public class CleanupService {
         }
     }
 
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Pair<Set<String>, Map<String, String>> removeHosts(Long stackId, Set<String> hosts) throws FreeIpaClientException {
         Stack stack = stackService.getStackById(stackId);
         FreeIpaClient client = freeIpaClientFactory.getFreeIpaClientForStack(stack);
@@ -241,10 +226,6 @@ public class CleanupService {
         return hostDeleteResult;
     }
 
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Pair<Set<String>, Map<String, String>> removeServers(Long stackId, Set<String> hosts) throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Pair<Set<String>, Map<String, String>> hostDeleteResult = hostDeletionService.removeServers(client, hosts);
@@ -282,10 +263,6 @@ public class CleanupService {
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
     }
 
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Pair<Set<String>, Map<String, String>> removeUsers(Long stackId, Set<String> users, String clusterName, String environmentCrn)
             throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
@@ -325,10 +302,6 @@ public class CleanupService {
         return Pair.of(userCleanupSuccess, userCleanupFailed);
     }
 
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Pair<Set<String>, Map<String, String>> removeRoles(Long stackId, Set<String> roles) throws FreeIpaClientException {
         FreeIpaClient client = getFreeIpaClient(stackId);
         Set<String> roleCleanupSuccess = new HashSet<>();
@@ -351,10 +324,6 @@ public class CleanupService {
         return Pair.of(roleCleanupSuccess, roleCleanupFailed);
     }
 
-    @Retryable(value = RetryableFreeIpaClientException.class,
-            maxAttemptsExpression = RetryableFreeIpaClientException.MAX_RETRIES_EXPRESSION,
-            backoff = @Backoff(delayExpression = RetryableFreeIpaClientException.DELAY_EXPRESSION,
-                    multiplierExpression = RetryableFreeIpaClientException.MULTIPLIER_EXPRESSION))
     public Pair<Set<String>, Map<String, String>> removeVaultEntries(Long stackId, Set<String> hosts) throws FreeIpaClientException {
         Set<String> vaultCleanupSuccess = new HashSet<>();
         Map<String, String> vaultCleanupFailed = new HashMap<>();
