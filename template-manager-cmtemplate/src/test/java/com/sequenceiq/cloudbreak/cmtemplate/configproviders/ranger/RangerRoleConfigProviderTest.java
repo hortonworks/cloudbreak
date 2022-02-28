@@ -10,6 +10,7 @@ import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.Ranger
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DATABASE_TYPE;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DATABASE_USER;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_DEFAULT_POLICY_GROUPS;
+import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_HBASE_ADMIN_VIRTUAL_GROUPS;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger.RangerRoleConfigProvider.RANGER_ADMIN_SITE_XML_ROLE_SAFETY_VALVE;
 import static java.util.Map.entry;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,6 +55,8 @@ public class RangerRoleConfigProviderTest {
 
     private static final String ADMIN_GROUP = "cdh_test";
 
+    private static final String HBASE_ADMIN_GROUP = "hbase_test";
+
     @Mock
     private VirtualGroupService virtualGroupService;
 
@@ -93,7 +96,8 @@ public class RangerRoleConfigProviderTest {
                 {"cdhVersion=7.2.0", "7.2.0", 6, 0},
                 {"cdhVersion=7.2.1", "7.2.1", 1, 6},
                 {"cdhVersion=7.3.1", "7.3.1", 1, 6},
-                {"cdhVersion=8.1.0", "8.1.0", 1, 6},
+                {"cdhVersion=7.6.0", "7.6.0", 2, 6},
+                {"cdhVersion=8.1.0", "8.1.0", 2, 6},
         };
     }
 
@@ -117,6 +121,10 @@ public class RangerRoleConfigProviderTest {
         if (expectedRoleConfigCount == 6) {
             when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
         }
+        if (cdhVersion == "7.6.0") {
+            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
+            when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.HBASE_ADMIN.getRight())).thenReturn(HBASE_ADMIN_GROUP);
+        }
 
         Map<String, List<ApiClusterTemplateConfig>> roleConfigs = underTest.getRoleConfigs(cmTemplateProcessor, preparationObject);
 
@@ -130,6 +138,11 @@ public class RangerRoleConfigProviderTest {
         if (expectedRoleConfigCount == 6) {
             assertThat(masterRangerAdmin.get(5).getName()).isEqualTo(RANGER_DEFAULT_POLICY_GROUPS);
             assertThat(masterRangerAdmin.get(5).getValue()).isEqualTo(ADMIN_GROUP);
+        }
+
+        if (cdhVersion == "7.6.0") {
+            assertThat(masterRangerAdmin.get(1).getName()).isEqualTo(RANGER_HBASE_ADMIN_VIRTUAL_GROUPS);
+            assertThat(masterRangerAdmin.get(1).getValue()).isEqualTo(HBASE_ADMIN_GROUP);
         }
     }
 
