@@ -1,6 +1,7 @@
 package com.sequenceiq.sdx.api.model;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.validation.Valid;
@@ -30,6 +31,8 @@ public class SdxClusterRequestBase implements TaggableRequest {
     private boolean enableRangerRaz;
 
     private boolean enableMultiAz;
+
+    private List<SdxInstanceGroupRequest> customInstanceGroups;
 
     public String getEnvironment() {
         return environment;
@@ -119,6 +122,14 @@ public class SdxClusterRequestBase implements TaggableRequest {
         this.azure = azure;
     }
 
+    public List<SdxInstanceGroupRequest> getCustomInstanceGroups() {
+        return customInstanceGroups;
+    }
+
+    public void setCustomInstanceGroups(List<SdxInstanceGroupRequest> customInstanceGroups) {
+        this.customInstanceGroups = customInstanceGroups;
+    }
+
     public void copyTo(SdxClusterRequestBase toInstance) {
         toInstance.setEnvironment(environment);
         toInstance.setClusterShape(clusterShape);
@@ -128,6 +139,7 @@ public class SdxClusterRequestBase implements TaggableRequest {
         toInstance.setAws(aws);
         toInstance.setEnableRangerRaz(enableRangerRaz);
         toInstance.setEnableMultiAz(enableMultiAz);
+        toInstance.setCustomInstanceGroups(customInstanceGroups);
     }
 
     @Override
