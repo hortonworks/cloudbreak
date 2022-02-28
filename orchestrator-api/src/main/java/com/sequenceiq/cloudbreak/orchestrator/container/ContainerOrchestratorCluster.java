@@ -2,8 +2,8 @@ package com.sequenceiq.cloudbreak.orchestrator.container;
 
 import java.util.Set;
 
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 
 public class ContainerOrchestratorCluster {
 

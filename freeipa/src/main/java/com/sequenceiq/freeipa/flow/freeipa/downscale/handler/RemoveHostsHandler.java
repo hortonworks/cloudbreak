@@ -17,10 +17,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.common.event.Selectable;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.polling.PollingResult;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.flow.event.EventSelectorUtil;
@@ -117,7 +117,8 @@ public class RemoveHostsHandler implements EventHandler<RemoveHostsFromOrchestra
             List<GatewayConfig> remainingGatewayConfigs = gatewayConfigService.getGatewayConfigs(stack, validRemainingNodes);
             LOGGER.debug("Tearing down [{}]. The following were dropped because they did not contain a FQDN [{}]. The remaining nodes are [{}].",
                     removeNodePrivateIPsByFQDN, invalidInstanceMetadata, remainingNodes);
-            hostOrchestrator.tearDown(remainingGatewayConfigs, removeNodePrivateIPsByFQDN, remainingNodes, new StackBasedExitCriteriaModel(stack.getId()));
+            hostOrchestrator.tearDown(stack, remainingGatewayConfigs, removeNodePrivateIPsByFQDN, remainingNodes,
+                    new StackBasedExitCriteriaModel(stack.getId()));
         } catch (CloudbreakOrchestratorException e) {
             LOGGER.info("Failed to delete orchestrator components while decommissioning: ", e);
             throw new CloudbreakException("Failed to delete orchestrator components while decommissioning: ", e);

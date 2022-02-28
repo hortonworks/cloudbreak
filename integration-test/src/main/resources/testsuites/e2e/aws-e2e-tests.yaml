@@ -1,12 +1,6 @@
 name: "aws-e2e-tests"
 tests:
   - name: "aws_e2e_tests"
-    parameters: {
-      host_group: worker,
-      scale_up_target: 6,
-      scale_down_target: 3,
-      times: 2,
-    }
     excludedGroups: [ azure_singlerg ]
     classes:
       - name: com.sequenceiq.it.cloudbreak.testcase.e2e.environment.NewNetworkWithNoInternetEnvironmentTests

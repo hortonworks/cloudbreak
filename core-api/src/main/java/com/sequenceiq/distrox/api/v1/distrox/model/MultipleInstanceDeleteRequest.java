@@ -3,7 +3,7 @@ package com.sequenceiq.distrox.api.v1.distrox.model;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.cloudera.cdp.shaded.com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sequenceiq.cloudbreak.doc.ModelDescriptions;
 
 import io.swagger.annotations.ApiModel;

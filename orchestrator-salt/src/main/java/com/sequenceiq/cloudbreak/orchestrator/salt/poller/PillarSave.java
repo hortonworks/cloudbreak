@@ -17,12 +17,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.util.StringUtils;
 
 import com.sequenceiq.cloudbreak.common.model.recipe.RecipeType;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponse;
 import com.sequenceiq.cloudbreak.orchestrator.model.GenericResponses;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
 import com.sequenceiq.cloudbreak.orchestrator.salt.client.SaltConnector;
@@ -40,9 +40,9 @@ public class PillarSave implements OrchestratorBootstrap {
 
     private final Set<String> originalTargets;
 
-    public PillarSave(SaltConnector sc, Set<String> targets, Collection<Node> hosts) {
+    private PillarSave(SaltConnector sc, Set<String> targets, Collection<Node> allNodes) {
         this.sc = sc;
-        Map<String, Map<String, Object>> fqdn = hosts
+        Map<String, Map<String, Object>> fqdn = allNodes
                 .stream()
                 .filter(node -> node.getHostname() != null && node.getPrivateIp() != null)
                 .collect(Collectors.toMap(Node::getPrivateIp, node -> discovery(node.getHostname(), node.getPublicIp(),
@@ -52,7 +52,7 @@ public class PillarSave implements OrchestratorBootstrap {
         originalTargets = targets;
     }
 
-    public PillarSave(SaltConnector sc, Set<String> targets, Map<String, List<RecipeModel>> recipes, Long recipeExecutionTimeout) {
+    private PillarSave(SaltConnector sc, Set<String> targets, Map<String, List<RecipeModel>> recipes, Long recipeExecutionTimeout) {
         this.sc = sc;
         Map<String, Map<String, List<String>>> scripts = new HashMap<>(recipes.size());
         for (Entry<String, List<RecipeModel>> entry : recipes.entrySet()) {
@@ -78,11 +78,23 @@ public class PillarSave implements OrchestratorBootstrap {
         originalTargets = targets;
     }
 
-    public PillarSave(SaltConnector sc, Set<String> targets, SaltPillarProperties pillarProperties) {
+    private PillarSave(SaltConnector sc, Set<String> targets, SaltPillarProperties pillarProperties) {
         this.sc = sc;
         pillar = new Pillar(pillarProperties.getPath(), pillarProperties.getProperties(), targets);
         this.targets = targets;
         originalTargets = targets;
+    }
+
+    public static PillarSave createHostsPillar(SaltConnector sc, Set<String> targets, Collection<Node> allNodes) {
+        return new PillarSave(sc, targets, allNodes);
+    }
+
+    public static PillarSave createRecipesPillar(SaltConnector sc, Set<String> targets, Map<String, List<RecipeModel>> recipes, Long recipeExecutionTimeout) {
+        return new PillarSave(sc, targets, recipes, recipeExecutionTimeout);
+    }
+
+    public static PillarSave createCustomPillar(SaltConnector sc, Set<String> targets, SaltPillarProperties pillarProperties) {
+        return new PillarSave(sc, targets, pillarProperties);
     }
 
     private Map<String, Object> discovery(String hostname, String publicAddress,

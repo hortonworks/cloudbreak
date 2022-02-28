@@ -12,8 +12,8 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 @Component
 public class CloudInstanceIdToInstanceMetaDataConverter {
 
-    public List<InstanceMetaData> getNotDeletedInstances(Stack stack, String hostGroupname, Set<String> cloudInstanceIds) {
-        return stack.getInstanceGroupByInstanceGroupName(hostGroupname).getNotDeletedInstanceMetaDataSet().stream()
+    public List<InstanceMetaData> getNotDeletedAndNotZombieInstances(Stack stack, String hostGroupname, Set<String> cloudInstanceIds) {
+        return stack.getInstanceGroupByInstanceGroupName(hostGroupname).getNotDeletedAndNotZombieInstanceMetaDataSet().stream()
                 .filter(im -> im.getInstanceId() == null ? false : cloudInstanceIds.contains(im.getInstanceId()))
                 .collect(Collectors.toList());
     }

@@ -155,6 +155,12 @@ message Event {
     CDPCDEVirtualClusterStatusChanged cdpCDEVirtualClusterStatusChanged = 73;
     // A CDP DataEngineering service upgrade was requested.
     CDPCDEServiceUpgradeRequested cdpCDEServiceUpgradeRequested = 78;
+    // A CDP DataEngineering job is created or its status changed.
+    CDPCDEJobRunStatusChanged cdpCDEJobRunStatusChanged = 79;
+    // A CDP DataEngineering job is created or modified.
+    CDPCDEJobCreated cdpCDEJobCreated = 80;
+    // A CDP CDE resource is created or modified.
+    CDPCDEResourceCreated cdpCDEResourceCreated = 81;
     // Cloudera Data Visualization Usage Event detected.
     CDPCDVEvent cdpCDVEvent = 74;
     // A CDP CML workspace's node state.
@@ -164,6 +170,10 @@ message Event {
     CDPVMDiagnosticsEvent cdpVmDiagnosticsEvent = 76;
     // A CDP DataWarehouse Virtual Warehouse's nodes changed.
     CDPCDWVirtualWarehouseNodesChanged cdpCDWVirtualWarehouseNodesChanged = 77;
+    // A CDP diagnostic event.
+    CDPDiagnosticEvent cdpDiagnosticEvent = 82;
+    // A CDP stack patcher event fired.
+    CDPStackPatchEvent cdpStackPatchEvent = 83;
   }
 }
 
@@ -617,6 +627,20 @@ message CDPCMLWorkspaceStatus {
     RESTORE_FINISHED = 49;
     // The status when the operation to restore the storage has failed.
     RESTORE_FAILED = 50;
+
+    // The status when the operation to scale down for upgrading the storage has started.
+    SCALE_DOWN_FOR_UPGRADE_STARTED = 51;
+    // The status when the operation to scale down for upgrading the storage has finished.
+    SCALE_DOWN_FOR_UPGRADE_FINISHED = 52;
+    // The status when the operation to scale down for upgrading the storage has failed.
+    SCALE_DOWN_FOR_UPGRADE_FAILED = 53;
+
+    // The status when the operation to scale up after upgrading the storage has started.
+    SCALE_UP_AFTER_UPGRADE_STARTED = 54;
+    // The status when the operation to scale up after upgrading the storage has finished.
+    SCALE_UP_AFTER_UPGRADE_FINISHED = 55;
+    // The status when the operation to scale up after upgrading the storage has failed.
+    SCALE_UP_AFTER_UPGRADE_FAILED = 56;
   }
 }
 
@@ -721,6 +745,20 @@ message CDPCMLWorkspaceStatusChanged {
 message CDPCMLWorkspaceNodeStatesHeartbeat {
   // List of states of each node in a  CDP CML workspace.
   repeated CDPCMLWorkspaceNodeState nodeStates = 1;
+  // The CDP workspace CRN of the CML workspace.
+  string workspaceCrn = 2;
+  // The CDP account ID (tenantID) of the CML workspace.
+  string accountId = 3;
+  // The user-supplied workspace name.
+  string workspaceName = 4;
+  // The environment type.
+  CDPEnvironmentsEnvironmentType.Value environmentType = 5;
+  // The CRN of the CML workspace's environment.
+  string environmentCrn = 6;
+  // The CML crud app version.
+  string cdpdVersion = 7;
+  // The CML workspace version deployed.
+  string workspaceVersion = 8;
 }
 
 message CDPCMLWorkspaceNodeState {
@@ -2340,6 +2378,7 @@ message CDPCDEVirtualClusterStatusChanged {
   string reason = 7;
 }
 
+//Generated when a CDP CDE service upgrade is requested.
 message CDPCDEServiceUpgradeRequested {
   // The ID of the CDP CDE service.
   string id = 1;
@@ -2351,6 +2390,59 @@ message CDPCDEServiceUpgradeRequested {
   string fromVersion = 4;
   // Version CDE service was upgraded to.
   string toVersion = 5;
+}
+
+
+// Generated when a CDP CDE job run is initiated or its status changes.
+message CDPCDEJobRunStatusChanged {
+  // CRN of the cluster where the job was running.
+  string clusterCrn = 1;
+  // ID of the virtual cluster where the job was running.
+  string vcId = 2;
+  // ID if the job run.
+  string runId = 3;
+  // New status of the job run.
+  string status = 4;
+  // Details of the job run.
+  CDPCDEJobDetails jobDetails = 5;
+}
+
+// Generated when a CDP CDE job is created or is modified.
+message CDPCDEJobCreated {
+  // CRN of the cluster where the job was created or modified.
+  string clusterCrn = 1;
+  // ID of the virtual cluster where the job was created or modified.
+  string vcId = 2;
+  // Job Details.
+  CDPCDEJobDetails job = 3;
+  // Status: Created, modified or deleted.
+  CDPCDEEventType.Value eventType = 4;
+}
+
+// Type for CDPCDE event generated.
+message CDPCDEEventType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // A new job/resource is created.
+    CREATED = 1;
+    // An existing job/resource is modified.
+    MODIFIED = 2;
+    // An existing job/resource is deleted.
+    DELETED = 3;
+  }
+}
+
+// Generated when a CDP CDE resource is created or modified.
+message CDPCDEResourceCreated {
+  // CRN of the cluster where the resource was created or modified.
+  string clusterCrn = 1;
+  // ID of the virtual cluster where the resource was created or modified.
+  string vcId = 2;
+  // Resource Details.
+  CDPCDEResourceDetails resource = 3;
+  // Status: Created, modified or deleted.
+  CDPCDEEventType.Value eventType = 4;
 }
 
 // Metadata about AWS CDE service when it was created or updated.
@@ -2378,6 +2470,43 @@ message CDPCDEAzureServiceMetadata {
   // Minimum number of spot instances requested for compute autoscaling.
   // Instance type requested for compute nodes.
   string instanceType = 3;
+}
+
+// Details of a CDE Job.
+message CDPCDEJobDetails {
+  // Name of the Job.
+  string jobName = 1;
+  // Type of CDE job, eg spark, airflow, etc.
+  string jobType = 2;
+  // Cron schedule for for Job run.
+  string schedule = 3;
+  // Resource information of the job run requested.
+  repeated CDPCDEResourceDetails resources = 4;
+  // User defined configurations of the job. The format is a map serialized into
+  // a json string.
+  string jobConfigurations = 5;
+  // Python version for the requested job run
+  string pythonVersion = 6;
+  // Driver memory for the job run.
+  string driverMemory = 7;
+  // Executor memory for the job run.
+  string executorMemory = 8;
+  // Number of cores for the executor requested for job run.
+  int32 executorCores = 9;
+  // Number of cores for the driver requested for job run.
+  int32 driverCores = 10;
+  // Log level requested for the job
+  string logLevel = 11;
+  // Indicates if the job was created using Pipelines Editor.
+  bool pipelinesUsed = 12;
+}
+
+// Details of a CDP CDE resource type.
+message CDPCDEResourceDetails {
+  // Name of the resource
+  string name = 1;
+  // Resource type, eg file, pythonEnv, etc
+  string type = 2;
 }
 
 // Cloudera Data Visualization Usage Event detected.
@@ -2479,5 +2608,82 @@ message CDPVMDiagnosticsFailureType {
     UPLOAD_FAILURE = 6;
     // Failure during cleaning up resources.
     CLEANUP_FAILURE = 7;
+  }
+}
+
+// Generated when a service in CDP has diagnostic event to report.
+message CDPDiagnosticEvent {
+  // The resource CRN.
+  string resourceCrn = 1;
+  // The CDP account ID.
+  string accountId = 2;
+  // The CDP service type the event is generated from.
+  ServiceType.Value serviceType = 3;
+  // The result of the diagnostic.
+  CDPDiagnosticResult.Value result = 4;
+  // The result in more details.
+  string details = 5;
+  // The failure message, if available.
+  string failureMessage = 6;
+}
+
+// The service types. Any new services added to CDP which will have their own
+// billable events must be added here. These values should match the customer
+// visible values used in the CLI.
+//
+// This list below is a subset of the values in the Crn.Service enumeration.
+// The exact value need not match, but it should correspond to some Crn.Service.
+//
+// This should match meteringevents.ServiceType.
+message ServiceType {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // DataHub
+    DATAHUB = 1;
+    // Machine Learning
+    MACHINE_LEARNING = 2;
+    // Data Warehouse
+    DATA_WAREHOUSE = 3;
+    // Data Engineering
+    DATA_ENGINEERING = 4;
+    // Operational Database
+    OPERATIONAL_DB = 5;
+    // Data Flow
+    DATA_FLOW = 6;
+  }
+}
+
+// The CDP diagnostic result.
+message CDPDiagnosticResult {
+  enum Value {
+    // A value indicating the enum is unset.
+    UNSET = 0;
+    // DBus is not available.
+    DBUS_UNAVAILABLE = 1;
+    // Metering heartbeat generation is failing.
+    METERING_HB_FAILURE = 2;
+  }
+}
+
+// Triggered when a CDP stack patcher either finds an affected stack, successfully patches it, or fails.
+message CDPStackPatchEvent {
+  // Resource CRN of the affected stack.
+  string resourceCrn = 1;
+  // Type of stack patch that affects the referenced stack.
+  string stackPatchType = 2;
+  // Type of the stack patch event.
+  CDPStackPatchEventType.Value eventType = 3;
+  // Optional message with more details about the event.
+  string message = 4;
+}
+
+// Type of stack patch event.
+message CDPStackPatchEventType {
+  enum Value {
+      UNSET = 0;
+      AFFECTED = 1;
+      SUCCESS = 2;
+      FAILURE = 3;
   }
 }

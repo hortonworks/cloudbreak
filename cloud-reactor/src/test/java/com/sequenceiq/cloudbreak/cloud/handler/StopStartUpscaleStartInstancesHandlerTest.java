@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.cloud.handler;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
@@ -130,7 +131,6 @@ public class StopStartUpscaleStartInstancesHandlerTest {
     void testAdequateStoppedInstancesInCbTest1() {
         // CB has just enough instances to START
         // [Note: but more than what the cloud provider thinks as STOPPED.
-        // The cloud-provider aspect is irrelevant at the moment, given this scenario does not trigger a cloud-provider listing.]
         testCbHasAdequateInstancesToStartInternal(5, 5);
     }
 
@@ -225,16 +225,24 @@ public class StopStartUpscaleStartInstancesHandlerTest {
     }
 
     @Test
-    void testUnableToCollectInstancesFromCloudPovider() {
+    void testFailureFromCloudProviderWhenStartingInstances() {
         List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(5);
         List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
         List<CloudInstance> startedInstancesWithServicesNotRunning = null;
         int numInstancesToStart = 5;
 
+        List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesInHg);
+        List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(stoppedInstancesInHg);
+
+        when(instanceConnector.checkWithoutRetry(
+                any(AuthenticatedContext.class),
+                eq(stoppedInstancesInHg)))
+                .thenReturn(stoppedInstanceStatusList).thenReturn(startedInstanceStatusList);
         when(instanceConnector.
                 startWithLimitedRetry(
                         any(AuthenticatedContext.class), eq(null), any(List.class), any(Long.class)))
                 .thenThrow(new RuntimeException("CloudProviderStartError"));
+
 
         StopStartUpscaleStartInstancesRequest request =
                 new StopStartUpscaleStartInstancesRequest(cloudContext, cloudCredential, cloudStack,
@@ -251,14 +259,15 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         assertEquals(StopStartUpscaleStartInstancesResult.class, resultEvent.getData().getClass());
         StopStartUpscaleStartInstancesResult result = (StopStartUpscaleStartInstancesResult) resultEvent.getData();
 
-        assertEquals("CloudProviderStartError", result.getErrorDetails().getMessage());
-        assertEquals(0, result.getAffectedInstanceStatuses().size());
-        assertEquals(EventStatus.FAILED, result.getStatus());
-        assertEquals("STOPSTARTUPSCALESTARTINSTANCESRESULT_ERROR", result.selector());
+        assertNull(result.getErrorDetails());
+        assertEquals(numInstancesToStart, result.getAffectedInstanceStatuses().size());
+        assertEquals(startedInstanceStatusList, result.getAffectedInstanceStatuses());
+        assertEquals(EventStatus.OK, result.getStatus());
+        assertEquals("STOPSTARTUPSCALESTARTINSTANCESRESULT", result.selector());
     }
 
     @Test
-    void testFailureFromCloudProviderWhenStartingInstances() {
+    void testUnableToCollectInstancesFromCloudPovider() {
         List<CloudInstance> stoppedInstancesInHg = generateCloudInstances(3);
         List<CloudInstance> allInstancesInHg = generateCloudInstances(10);
         List<CloudInstance> startedInstancesWithServicesNotRunning = null;
@@ -340,12 +349,18 @@ public class StopStartUpscaleStartInstancesHandlerTest {
                 new StopStartUpscaleStartInstancesRequest(cloudContext, cloudCredential, cloudStack,
                         "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
 
-        List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(stoppedInstancesInHg.subList(0, expectedInstances));
+        List<CloudInstance> stoppedInstancesArg = stoppedInstancesInHg.subList(0, expectedInstances);
+        List<CloudVmInstanceStatus> startedInstanceStatusList = generateStartedCloudVmInstanceStatuses(stoppedInstancesArg);
+        List<CloudVmInstanceStatus> stoppedInstanceStatusList = generateStoppedCloudVmInstanceStatuses(stoppedInstancesArg);
+        when(instanceConnector.checkWithoutRetry(
+                any(AuthenticatedContext.class),
+                eq(stoppedInstancesArg)))
+                .thenReturn(stoppedInstanceStatusList);
         when(instanceConnector.
                 startWithLimitedRetry(
                         any(AuthenticatedContext.class),
                         eq(null),
-                        eq(stoppedInstancesInHg.subList(0, expectedInstances)),
+                        eq(stoppedInstancesArg),
                         any(Long.class))).thenReturn(startedInstanceStatusList);
 
         Event event = new Event(request);
@@ -355,7 +370,7 @@ public class StopStartUpscaleStartInstancesHandlerTest {
         verify(eventBus).notify(any(Object.class), resultCaptor.capture());
         verify(instanceConnector, never()).checkWithoutRetry(any(AuthenticatedContext.class), eq(allInstancesInHg));
         verify(instanceConnector).startWithLimitedRetry(
-                any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesInHg.subList(0, expectedInstances)), any(Long.class));
+                any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesArg), any(Long.class));
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
@@ -419,13 +434,20 @@ public class StopStartUpscaleStartInstancesHandlerTest {
                 new StopStartUpscaleStartInstancesRequest(cloudContext, cloudCredential, cloudStack,
                         "compute", stoppedInstancesInHg, allInstancesInHg, startedInstancesWithServicesNotRunning, numInstancesToStart);
 
+        List<CloudInstance> stoppedInstancesArg = stoppedInstancesInHg.subList(0, expectedInstances);
+        List<CloudVmInstanceStatus> stoppedInstanceStatusList =
+                generateStoppedCloudVmInstanceStatuses(stoppedInstancesInHg);
         List<CloudVmInstanceStatus> startedInstanceStatusList =
-                generateStartedCloudVmInstanceStatusesIncludingOtherStates(stoppedInstancesInHg.subList(0, expectedInstances));
+                generateStartedCloudVmInstanceStatusesIncludingOtherStates(stoppedInstancesArg);
+        when(instanceConnector.checkWithoutRetry(
+                any(AuthenticatedContext.class),
+                eq(stoppedInstancesArg)))
+                .thenReturn(stoppedInstanceStatusList);
         when(instanceConnector.
                 startWithLimitedRetry(
                         any(AuthenticatedContext.class),
                         eq(null),
-                        eq(stoppedInstancesInHg.subList(0, expectedInstances)),
+                        eq(stoppedInstancesArg),
                         any(Long.class))).thenReturn(startedInstanceStatusList);
 
         Event event = new Event(request);
@@ -433,9 +455,10 @@ public class StopStartUpscaleStartInstancesHandlerTest {
 
         ArgumentCaptor<Event> resultCaptor = ArgumentCaptor.forClass(Event.class);
         verify(eventBus).notify(any(Object.class), resultCaptor.capture());
-        verify(instanceConnector, never()).checkWithoutRetry(any(AuthenticatedContext.class), eq(allInstancesInHg));
+        verify(instanceConnector).checkWithoutRetry(any(AuthenticatedContext.class), eq(stoppedInstancesArg));
         verify(instanceConnector).startWithLimitedRetry(
                 any(AuthenticatedContext.class), eq(null), eq(stoppedInstancesInHg.subList(0, expectedInstances)), any(Long.class));
+        verifyNoMoreInteractions(instanceConnector);
 
         assertEquals(1, resultCaptor.getAllValues().size());
         Event resultEvent = resultCaptor.getValue();
@@ -522,9 +545,17 @@ public class StopStartUpscaleStartInstancesHandlerTest {
     }
 
     private List<CloudVmInstanceStatus> generateStartedCloudVmInstanceStatuses(List<CloudInstance> cloudInstances) {
+        return generateCloudVmInstances(cloudInstances, InstanceStatus.STARTED);
+    }
+
+    private List<CloudVmInstanceStatus> generateStoppedCloudVmInstanceStatuses(List<CloudInstance> cloudInstances) {
+        return generateCloudVmInstances(cloudInstances, InstanceStatus.STOPPED);
+    }
+
+    private List<CloudVmInstanceStatus> generateCloudVmInstances(List<CloudInstance> cloudInstances, InstanceStatus status) {
         List<CloudVmInstanceStatus> cloudVmInstanceStatusList = new LinkedList<>();
         for (CloudInstance cloudInstance : cloudInstances) {
-            cloudVmInstanceStatusList.add(new CloudVmInstanceStatus(cloudInstance, InstanceStatus.STARTED));
+            cloudVmInstanceStatusList.add(new CloudVmInstanceStatus(cloudInstance, status));
         }
         return cloudVmInstanceStatusList;
     }

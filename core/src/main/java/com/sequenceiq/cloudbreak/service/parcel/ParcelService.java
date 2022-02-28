@@ -20,17 +20,13 @@ import com.sequenceiq.cloudbreak.cluster.model.ParcelOperationStatus;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.common.type.ComponentType;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
-import com.sequenceiq.cloudbreak.core.CloudbreakImageNotFoundException;
 import com.sequenceiq.cloudbreak.domain.Blueprint;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.ClusterComponent;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
-import com.sequenceiq.cloudbreak.service.CloudbreakRuntimeException;
 import com.sequenceiq.cloudbreak.service.cluster.ClusterApiConnectors;
-import com.sequenceiq.cloudbreak.service.image.ImageService;
-import com.sequenceiq.cloudbreak.service.image.StatedImage;
 import com.sequenceiq.cloudbreak.service.upgrade.ClusterComponentUpdater;
+import com.sequenceiq.cloudbreak.service.upgrade.sync.component.ImageReaderService;
 
 @Service
 public class ParcelService {
@@ -53,7 +49,7 @@ public class ParcelService {
     private ClusterComponentUpdater clusterComponentUpdater;
 
     @Inject
-    private ImageService imageService;
+    private ImageReaderService imageReaderService;
 
     public Set<ClusterComponent> getParcelComponentsByBlueprint(Stack stack) {
         Set<ClusterComponent> components = getComponents(stack);
@@ -68,7 +64,7 @@ public class ParcelService {
                 cmProductMap.put(product.getName(), clusterComponent);
                 cmProducts.add(product);
             }
-            cmProducts = filterParcelsByBlueprint(cmProducts, stack.getCluster().getBlueprint());
+            cmProducts = filterParcelsByBlueprint(stack.getId(), cmProducts, stack.getCluster().getBlueprint());
             Set<ClusterComponent> componentsByRequiredProducts = getComponentsByRequiredProducts(cmProductMap, cmProducts);
             LOGGER.debug("The following components are required for cluster {}", componentsByRequiredProducts);
             return componentsByRequiredProducts;
@@ -82,7 +78,7 @@ public class ParcelService {
         } else {
             Map<String, ClusterComponent> cmProductMap = collectClusterComponentsByName(components);
             Set<ClouderaManagerProduct> cmProducts = clouderaManagerProductTransformer.transform(image, true, true);
-            cmProducts = filterParcelsByBlueprint(cmProducts, stack.getCluster().getBlueprint());
+            cmProducts = filterParcelsByBlueprint(stack.getId(), cmProducts, stack.getCluster().getBlueprint());
             LOGGER.debug("The following parcels are used in CM based on blueprint: {}", cmProducts);
             return getComponentsByRequiredProducts(cmProductMap, cmProducts);
         }
@@ -95,24 +91,10 @@ public class ParcelService {
 
     public ParcelOperationStatus removeUnusedParcelComponents(Stack stack, Set<ClusterComponent> clusterComponentsByBlueprint) throws CloudbreakException {
         LOGGER.debug("Starting to remove unused parcels from the cluster.");
-        Set<String> parcelsFromImage = getParcelsFromImage(stack);
+        Set<String> parcelsFromImage = imageReaderService.getParcelNames(stack.getId(), stack.isDatalake());
         ParcelOperationStatus removalStatus = clusterApiConnectors.getConnector(stack).removeUnusedParcels(clusterComponentsByBlueprint, parcelsFromImage);
         clusterComponentUpdater.removeUnusedCdhProductsFromClusterComponents(stack.getCluster().getId(), clusterComponentsByBlueprint, removalStatus);
         return removalStatus;
-    }
-
-    private Set<String> getParcelsFromImage(Stack stack) {
-        try {
-            StatedImage currentImage = imageService.getCurrentImage(stack.getId());
-            return clouderaManagerProductTransformer.transform(currentImage.getImage(), false, true)
-                    .stream()
-                    .map(ClouderaManagerProduct::getName)
-                    .collect(Collectors.toSet());
-        } catch (CloudbreakImageNotFoundException | CloudbreakImageCatalogException e) {
-            String msg = "Failed to get the current image for the cluster.";
-            LOGGER.error(msg, e);
-            throw new CloudbreakRuntimeException(msg, e);
-        }
     }
 
     private Map<String, ClusterComponent> collectClusterComponentsByName(Set<ClusterComponent> components) {
@@ -125,8 +107,8 @@ public class ParcelService {
                 .collect(Collectors.toSet());
     }
 
-    private Set<ClouderaManagerProduct> filterParcelsByBlueprint(Set<ClouderaManagerProduct> cmProducts, Blueprint blueprint) {
-        return parcelFilterService.filterParcelsByBlueprint(cmProducts, blueprint);
+    private Set<ClouderaManagerProduct> filterParcelsByBlueprint(Long stackId, Set<ClouderaManagerProduct> cmProducts, Blueprint blueprint) {
+        return parcelFilterService.filterParcelsByBlueprint(stackId, cmProducts, blueprint);
     }
 
     private Set<ClusterComponent> getDataLakeClusterComponents(Set<ClusterComponent> components) {

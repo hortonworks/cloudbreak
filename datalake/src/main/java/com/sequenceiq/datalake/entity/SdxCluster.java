@@ -141,6 +141,8 @@ public class SdxCluster implements AccountAwareResource {
     @Column(nullable = false)
     private boolean detached;
 
+    private String databaseEngineVersion;
+
     public Long getId() {
         return id;
     }
@@ -409,6 +411,14 @@ public class SdxCluster implements AccountAwareResource {
         this.detached = detached;
     }
 
+    public String getDatabaseEngineVersion() {
+        return databaseEngineVersion;
+    }
+
+    public void setDatabaseEngineVersion(String databaseEngineVersion) {
+        this.databaseEngineVersion = databaseEngineVersion;
+    }
+
     //CHECKSTYLE:OFF
     @Override
     public boolean equals(Object o) {
@@ -439,14 +449,15 @@ public class SdxCluster implements AccountAwareResource {
                 databaseAvailabilityType == that.databaseAvailabilityType &&
                 rangerRazEnabled == that.rangerRazEnabled &&
                 certExpirationState == that.certExpirationState &&
-                Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion);
+                Objects.equals(sdxClusterServiceVersion, that.sdxClusterServiceVersion) &&
+                Objects.equals(databaseEngineVersion, that.databaseEngineVersion);
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(id, accountId, crn, clusterName, initiatorUserCrn, envName, envCrn, stackCrn, clusterShape, tags, stackId, stackRequest,
                 stackRequestToCloudbreak, deleted, created, createDatabase, databaseCrn, cloudStorageBaseLocation, cloudStorageFileSystemType,
-                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz);
+                databaseAvailabilityType, rangerRazEnabled, certExpirationState, sdxClusterServiceVersion, enableMultiAz, databaseEngineVersion);
     }
 
     @Override
@@ -465,6 +476,7 @@ public class SdxCluster implements AccountAwareResource {
                 ", certExpirationState=" + certExpirationState +
                 ", sdxClusterServiceVersion=" + sdxClusterServiceVersion +
                 ", enableMultiAz=" + enableMultiAz +
+                ", databaseEngineVersion=" + databaseEngineVersion +
                 '}';
     }
 

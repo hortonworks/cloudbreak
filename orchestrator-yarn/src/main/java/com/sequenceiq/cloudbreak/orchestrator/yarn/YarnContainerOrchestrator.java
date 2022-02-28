@@ -16,6 +16,7 @@ import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrapRunner;
 import com.sequenceiq.cloudbreak.orchestrator.container.SimpleContainerOrchestrator;
@@ -25,7 +26,6 @@ import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerConstraint;
 import com.sequenceiq.cloudbreak.orchestrator.model.ContainerInfo;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.OrchestrationCredential;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteria;
 import com.sequenceiq.cloudbreak.orchestrator.state.ExitCriteriaModel;

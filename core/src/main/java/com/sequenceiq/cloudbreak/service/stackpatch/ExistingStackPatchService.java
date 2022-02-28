@@ -34,19 +34,29 @@ public abstract class ExistingStackPatchService {
         return stackPatchRepository.findByStackAndType(stack, getStackPatchType()).isPresent();
     }
 
-    public void apply(Stack stack) throws ExistingStackPatchApplyException {
+    /**
+     * @param stack the stack to apply the patch for
+     * @return whether the patch was applied successfully
+     * @throws ExistingStackPatchApplyException when something unexpected goes wrong while applying the patch
+     */
+    public boolean apply(Stack stack) throws ExistingStackPatchApplyException {
         if (flowLogService.isOtherFlowRunning(stack.getId())) {
-            String message = String.format("Another flow is running for stack %s, skipping patch apply to let the flow finish", stack.getResourceCrn());
-            throw new ExistingStackPatchApplyException(message);
+            LOGGER.info("Another flow is running for stack {}, skipping patch apply to let the flow finish", stack.getResourceCrn());
+            return false;
         } else {
             Optional<FlowLog> lastRetryableFailedFlow = flowRetryService.getLastRetryableFailedFlow(stack.getId());
             if (lastRetryableFailedFlow.isEmpty()) {
                 try {
                     LOGGER.info("Starting stack {} patching for {}", stack.getResourceCrn(), getStackPatchType());
-                    checkedMeasure(() -> doApply(stack), LOGGER, "Existing stack patching took {} ms for stack {} and patch {}.",
+                    boolean success = checkedMeasure(() -> doApply(stack), LOGGER, "Existing stack patching took {} ms for stack {} and patch {}.",
                             stack.getResourceCrn(), getStackPatchType());
-                    LOGGER.info("Stack {} was patched successfully for {}", stack.getResourceCrn(), getStackPatchType());
-                    stackPatchRepository.save(new StackPatch(stack, getStackPatchType()));
+                    if (success) {
+                        LOGGER.info("Stack {} was patched successfully for {}", stack.getResourceCrn(), getStackPatchType());
+                        stackPatchRepository.save(new StackPatch(stack, getStackPatchType()));
+                    } else {
+                        LOGGER.info("Stack {} was not patched for {}", stack.getResourceCrn(), getStackPatchType());
+                    }
+                    return success;
                 } catch (ExistingStackPatchApplyException e) {
                     throw e;
                 } catch (Exception e) {
@@ -55,8 +65,8 @@ public abstract class ExistingStackPatchService {
                     throw new ExistingStackPatchApplyException(message, e);
                 }
             } else {
-                String message = String.format("Stack %s has a retryable failed flow, skipping patch apply to preserve possible retry", stack.getResourceCrn());
-                throw new ExistingStackPatchApplyException(message);
+                LOGGER.info("Stack {} has a retryable failed flow, skipping patch apply to preserve possible retry", stack.getResourceCrn());
+                return false;
             }
         }
     }
@@ -85,6 +95,9 @@ public abstract class ExistingStackPatchService {
 
     /**
      * Apply the fix of {@link StackPatchType} for the affected stack
+     * @param stack the stack to apply the patch for
+     * @return whether the patch was applied successful
+     * @throws ExistingStackPatchApplyException when something unexpected goes wrong while applying the patch
      */
-    abstract void doApply(Stack stack) throws ExistingStackPatchApplyException;
+    abstract boolean doApply(Stack stack) throws ExistingStackPatchApplyException;
 }

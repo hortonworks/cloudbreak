@@ -55,6 +55,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.request.database.Databas
 import com.sequenceiq.cloudbreak.api.endpoint.v4.util.OnFailureActionConverter;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.CloudConstants;
 import com.sequenceiq.cloudbreak.converter.TunnelConverter;
 import com.sequenceiq.cloudbreak.domain.FailurePolicy;
@@ -80,7 +81,7 @@ import com.sequenceiq.common.api.type.Tunnel;
 
 @Entity
 @Table(uniqueConstraints = @UniqueConstraint(columnNames = {"workspace_id", "name", "resourceCrn"}))
-public class Stack implements ProvisionEntity, WorkspaceAwareResource {
+public class Stack implements ProvisionEntity, WorkspaceAwareResource, OrchestratorAware {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "stack_generator")
@@ -445,7 +446,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
             case CloudConstants.GCP:
                 return getResourcesByType(ResourceType.GCP_ATTACHED_DISKSET);
             case CloudConstants.AZURE:
-                return getResourcesByType(ResourceType.AZURE_VOLUMESET);
+                return ResourceUtil.getLatestResourceByInstanceId(getResourcesByType(ResourceType.AZURE_VOLUMESET));
             default:
                 return List.of();
         }
@@ -512,14 +513,32 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         return nodeCount;
     }
 
+    public Set<InstanceMetaData> getNotTerminatedAndNotZombieInstanceMetaDataSet() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getNotTerminatedAndNotZombieInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
+    }
+
     public Set<InstanceMetaData> getNotTerminatedInstanceMetaDataSet() {
         return instanceGroups.stream()
                 .flatMap(instanceGroup -> instanceGroup.getNotTerminatedInstanceMetaDataSet().stream())
                 .collect(Collectors.toSet());
     }
 
-    public List<InstanceMetaData> getNotTerminatedInstanceMetaDataList() {
-        return new ArrayList<>(getNotTerminatedInstanceMetaDataSet());
+    public List<InstanceMetaData> getNotTerminatedAndNotZombieInstanceMetaDataList() {
+        return new ArrayList<>(getNotTerminatedAndNotZombieInstanceMetaDataSet());
+    }
+
+    public Set<InstanceMetaData> getNotDeletedAndNotZombieInstanceMetaDataSet() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
+    }
+
+    public Set<InstanceMetaData> getZombieInstanceMetaDataSet() {
+        return instanceGroups.stream()
+                .flatMap(instanceGroup -> instanceGroup.getZombieInstanceMetaDataSet().stream())
+                .collect(Collectors.toSet());
     }
 
     public Set<InstanceMetaData> getNotDeletedInstanceMetaDataSet() {
@@ -540,8 +559,8 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 .collect(Collectors.toSet());
     }
 
-    public List<InstanceMetaData> getNotDeletedInstanceMetaDataList() {
-        return new ArrayList<>(getNotDeletedInstanceMetaDataSet());
+    public List<InstanceMetaData> getNotDeletedAndNotZombieInstanceMetaDataList() {
+        return new ArrayList<>(getNotDeletedAndNotZombieInstanceMetaDataSet());
     }
 
     public List<InstanceMetaData> getInstanceMetaDataAsList() {
@@ -582,6 +601,13 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
         this.parameters = parameters;
     }
 
+    public List<InstanceMetaData> getNotTerminatedAndNotZombieGatewayInstanceMetadata() {
+        return instanceGroups.stream()
+                .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
+                .flatMap(ig -> ig.getNotTerminatedAndNotZombieInstanceMetaDataSet().stream())
+                .collect(Collectors.toList());
+    }
+
     public List<InstanceMetaData> getNotTerminatedGatewayInstanceMetadata() {
         return instanceGroups.stream()
                 .filter(ig -> InstanceGroupType.GATEWAY.equals(ig.getInstanceGroupType()))
@@ -597,7 +623,7 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
     }
 
     public InstanceMetaData getPrimaryGatewayInstance() {
-        Optional<InstanceMetaData> metaData = getNotTerminatedGatewayInstanceMetadata().stream()
+        Optional<InstanceMetaData> metaData = getNotTerminatedAndNotZombieGatewayInstanceMetadata().stream()
                 .filter(im -> InstanceMetadataType.GATEWAY_PRIMARY.equals(im.getInstanceMetadataType())).findFirst();
         return metaData.orElse(null);
     }
@@ -935,4 +961,11 @@ public class Stack implements ProvisionEntity, WorkspaceAwareResource {
                 '}';
     }
 
+    @Override
+    public Set<InstanceMetaData> getAllNodesForOrchestration() {
+        return instanceGroups.stream()
+                .flatMap(ig -> ig.getNotDeletedAndNotZombieInstanceMetaDataSet().stream())
+                .filter(im -> StringUtils.isNotBlank(im.getDiscoveryFQDN()))
+                .collect(Collectors.toSet());
+    }
 }

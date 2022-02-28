@@ -155,7 +155,7 @@ restore_systemctl:
 dns_resolution_fix:
   file.append:
     - name: /etc/resolv.conf
-    - text: "domain {{ salt['pillar.get']('hosts')[metadata.server_address]['domain'] }}"
+    - text: "domain {{ salt['grains.get']('domain') }}"
 {% endif %}
 
 include:

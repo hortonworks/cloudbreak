@@ -271,9 +271,9 @@ class SdxServiceTest {
         return new Object[][]{
                 // testCaseName cloudPlatform expectedErrorMsg
                 {"CloudPlatform.AWS", CloudPlatform.AWS,
-                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.1.0"},
+                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version greater than or equal to 7.2.2 and not 7.1.0"},
                 {"CloudPlatform.AZURE", CloudPlatform.AZURE,
-                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.1.0"}
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version greater than or equal to 7.2.1 and not 7.1.0"}
         };
     }
 
@@ -281,9 +281,9 @@ class SdxServiceTest {
         return new Object[][]{
                 // testCaseName cloudPlatform expectedErrorMsg
                 {"CloudPlatform.AWS", CloudPlatform.AWS,
-                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version >= 7.2.2 and not 7.2.0"},
+                        "Provisioning Ranger Raz on Amazon Web Services is only valid for CM version greater than or equal to 7.2.2 and not 7.2.0"},
                 {"CloudPlatform.AZURE", CloudPlatform.AZURE,
-                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version >= 7.2.1 and not 7.2.0"}
+                        "Provisioning Ranger Raz on Microsoft Azure is only valid for CM version greater than or equal to 7.2.1 and not 7.2.0"}
         };
     }
 
@@ -926,8 +926,8 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
-                + invalidRuntime, badRequestException.getMessage());
+        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
+                + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + invalidRuntime, badRequestException.getMessage());
     }
 
     @Test
@@ -938,8 +938,8 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterRequest, CloudPlatform.AWS, null);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
-                + invalidRuntime, badRequestException.getMessage());
+        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
+                + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + invalidRuntime, badRequestException.getMessage());
     }
 
     @Test
@@ -1287,8 +1287,8 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
-        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
-                + invalidRuntime, badRequestException.getMessage());
+        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
+                + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + invalidRuntime, badRequestException.getMessage());
     }
 
     @Test
@@ -1310,8 +1310,8 @@ class SdxServiceTest {
         mockEnvironmentCall(sdxClusterResizeRequest, CloudPlatform.AWS);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.resizeSdx(USER_CRN, "sdxcluster", sdxClusterResizeRequest)));
-        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version >= " + MEDIUM_DUTY_REQUIRED_VERSION + " and not "
-                + invalidRuntime, badRequestException.getMessage());
+        assertEquals("Provisioning a Medium Duty SDX shape is only valid for CM version greater than or equal to "
+                + MEDIUM_DUTY_REQUIRED_VERSION + " and not " + invalidRuntime, badRequestException.getMessage());
     }
 
     @Test
@@ -1474,7 +1474,8 @@ class SdxServiceTest {
         when(entitlementService.microDutySdxEnabled(anyString())).thenReturn(true);
         BadRequestException badRequestException = assertThrows(BadRequestException.class,
                 () -> ThreadBasedUserCrnProvider.doAs(USER_CRN, () -> underTest.createSdx(USER_CRN, CLUSTER_NAME, sdxClusterRequest, null)));
-        assertEquals("Provisioning a Micro Duty SDX shape is only valid for CM version >= 7.2.12 and not 7.2.11", badRequestException.getMessage());
+        assertEquals("Provisioning a Micro Duty SDX shape is only valid for CM version greater than or equal to 7.2.12 and not 7.2.11",
+                badRequestException.getMessage());
     }
 
     @Test

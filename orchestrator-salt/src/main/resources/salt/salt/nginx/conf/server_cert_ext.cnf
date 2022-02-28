@@ -1,0 +1,12 @@
+basicConstraints = critical,CA:FALSE
+keyUsage = critical,digitalSignature,keyEncipherment
+extendedKeyUsage = serverAuth,clientAuth
+subjectAltName = @alt_names
+
+[ alt_names ]
+DNS.1 = hostname
+{% if salt['pillar.get']('gateway:address_is_ip', True) == True %}
+IP.1 = {{ salt['pillar.get']('gateway:address') }}
+{% else %}
+DNS.2 = {{ salt['pillar.get']('gateway:address') }}
+{% endif %}

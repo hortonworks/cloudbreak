@@ -138,7 +138,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 } else if (shouldSwitchToLongSyncJob(stackStatus, context)) {
                     LOGGER.debug("Stack sync will be scheduled to long polling, stack state is {}", stackStatus);
                     jobService.unschedule(getLocalId());
-                    jobService.scheduleLongIntervalCheck(new StackJobAdapter(stack));
+                    jobService.scheduleLongIntervalCheck(getStackId(), StackJobAdapter.class);
                 } else if (null == stackStatus || ignoredStates().contains(stackStatus)) {
                     LOGGER.debug("Stack sync is skipped, stack state is {}", stackStatus);
                 } else if (syncableStates().contains(stackStatus)) {
@@ -158,7 +158,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
             Stack stack = stackService.get(getStackId());
             Status stackStatus = stack.getStatus();
             if (!longSyncableStates().contains(stackStatus)) {
-                jobService.schedule(new StackJobAdapter(stack));
+                jobService.schedule(getStackId(), StackJobAdapter.class);
             }
         }
     }
@@ -229,7 +229,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
 
     private void doSync(Stack stack) {
         ClusterApi connector = clusterApiConnectors.getConnector(stack);
-        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedForStack(stack.getId());
+        Set<InstanceMetaData> runningInstances = instanceMetaDataService.findNotTerminatedAndNotZombieForStack(stack.getId());
         try {
             if (isClusterManagerRunning(stack, connector)) {
                 ExtendedHostStatuses extendedHostStatuses = connector.clusterStatusService().getExtendedHostStatuses(
@@ -350,6 +350,7 @@ public class StackStatusCheckerJob extends StatusCheckerJob {
                 .collect(Collectors.toMap(e -> e.getKey().value(), e -> Optional.ofNullable(hostStatuses.statusReasonForHost(e.getKey()))));
         Set<String> noReportHosts = runningInstances.stream()
                 .filter(instanceMetaData -> instanceMetaData.getDiscoveryFQDN() != null)
+                .filter(instanceMetaData -> !instanceMetaData.isZombie())
                 .map(InstanceMetaData::getDiscoveryFQDN)
                 .filter(discoveryFQDN -> hostStatuses.getHostsHealth().get(hostName(discoveryFQDN)) == null)
                 .collect(toSet());

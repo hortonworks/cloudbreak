@@ -22,6 +22,7 @@ import org.springframework.stereotype.Component;
 import com.google.api.client.util.Joiner;
 import com.google.common.annotations.VisibleForTesting;
 import com.sequenceiq.cloudbreak.api.endpoint.v4.common.Status;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterDeletionBasedExitCriteriaModel;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.host.HostGroup;
@@ -32,7 +33,6 @@ import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFa
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorTimeoutException;
 import com.sequenceiq.cloudbreak.orchestrator.host.HostOrchestrator;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.service.CloudbreakException;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
@@ -191,7 +191,7 @@ class OrchestratorRecipeExecutor {
     private Set<Node> collectNodes(Stack stack, Set<String> hostNames) {
         Set<Node> agents = new HashSet<>();
         for (InstanceGroup instanceGroup : stack.getInstanceGroups()) {
-            for (InstanceMetaData im : instanceGroup.getNotDeletedInstanceMetaDataSet()) {
+            for (InstanceMetaData im : instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet()) {
                 if (hostNames.contains(im.getDiscoveryFQDN())) {
                     String instanceId = im.getInstanceId();
                     String instanceType = instanceGroup.getTemplate().getInstanceType();

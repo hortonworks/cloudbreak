@@ -2,32 +2,32 @@ package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale;
 
 import java.util.Objects;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 
 public class ScalingPath {
 
-    private final FormFactor originalFormFactor;
+    private final AvailabilityType originalAvailabilityType;
 
-    private final FormFactor targetFormFactor;
+    private final AvailabilityType targetAvailabilityType;
 
-    public ScalingPath(FormFactor originalFormFactor, FormFactor targetFormFactor) {
-        this.originalFormFactor = originalFormFactor;
-        this.targetFormFactor = targetFormFactor;
+    public ScalingPath(AvailabilityType originalAvailabilityType, AvailabilityType targetAvailabilityType) {
+        this.originalAvailabilityType = originalAvailabilityType;
+        this.targetAvailabilityType = targetAvailabilityType;
     }
 
-    public FormFactor getOriginalFormFactor() {
-        return originalFormFactor;
+    public AvailabilityType getOriginalAvailabilityType() {
+        return originalAvailabilityType;
     }
 
-    public FormFactor getTargetFormFactor() {
-        return targetFormFactor;
+    public AvailabilityType getTargetAvailabilityType() {
+        return targetAvailabilityType;
     }
 
     @Override
     public String toString() {
         return "ScalingPath{" +
-                "originalFormFactor=" + originalFormFactor +
-                ", targetFormFactor=" + targetFormFactor +
+                "originalAvailabilityType=" + originalAvailabilityType +
+                ", targetAvailabilityType=" + targetAvailabilityType +
                 '}';
     }
 
@@ -40,11 +40,11 @@ public class ScalingPath {
             return false;
         }
         ScalingPath that = (ScalingPath) o;
-        return originalFormFactor == that.originalFormFactor && targetFormFactor == that.targetFormFactor;
+        return originalAvailabilityType == that.originalAvailabilityType && targetAvailabilityType == that.targetAvailabilityType;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(originalFormFactor, targetFormFactor);
+        return Objects.hash(originalAvailabilityType, targetAvailabilityType);
     }
 }

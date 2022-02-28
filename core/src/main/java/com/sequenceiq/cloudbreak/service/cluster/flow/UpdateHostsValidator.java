@@ -78,7 +78,7 @@ public class UpdateHostsValidator {
                 throw new BadRequestException(String.format("Can't find instancegroup for hostgroup: %s", hostGroupName));
             } else {
                 InstanceGroup instanceGroup = hostGroup.getInstanceGroup();
-                int hostsCount = instanceGroup.getNotDeletedInstanceMetaDataSet().size();
+                int hostsCount = instanceGroup.getNotDeletedAndNotZombieInstanceMetaDataSet().size();
                 int adjustment = Math.abs(hostGroupAdjustment.getScalingAdjustment());
                 Boolean validateNodeCount = hostGroupAdjustment.getValidateNodeCount();
                 if (validateNodeCount == null || validateNodeCount) {

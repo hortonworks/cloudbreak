@@ -1,0 +1,211 @@
+{
+  "cdpTelemetryVersion": "0.4.19",
+  "nodes": [{
+    "statusDetails": {
+      "host": "example-local-dl-idbroker0.example-l.xcu2-8y8x.wl.cloudera.site",
+      "status": "OK"
+    },
+    "systemMetrics": {
+      "cdpTelemetryVersion": "0.4.19",
+      "cpu": {
+        "count": 1,
+        "loadAvg": [0.0, 0.01, 0.05],
+        "logicalCount": 2,
+        "times": {
+          "idle": 98.5,
+          "system": 0.5,
+          "user": 1.0
+        }
+      },
+      "disk": {
+        "partitions": [{
+          "device": "/dev/nvme0n1p1",
+          "fstype": "xfs",
+          "maxfile": 255,
+          "maxpath": 4096,
+          "mountpoint": "/",
+          "opts": "rw,relatime,attr2,inode64,noquota",
+          "usage": {
+            "free": "86856577024",
+            "percent": 19.1,
+            "total": "107362627584",
+            "used": "20506050560"
+          }
+        }],
+        "topVarlog": [{
+          "path": "/var/log/salt",
+          "size": "2.0 MB"
+        }, {
+          "path": "/var/log/anaconda",
+          "size": "1.8 MB"
+        }, {
+          "path": "/var/log/audit",
+          "size": "820.0 KB"
+        }, {
+          "path": "/var/log/knox",
+          "size": "410.2 KB"
+        }, {
+          "path": "/var/log/cdp_resources_check",
+          "size": "406.4 KB"
+        }, {
+          "path": "/var/log/cloudera-scm-agent",
+          "size": "360.6 KB"
+        }, {
+          "path": "/var/log/cdp-logging-agent",
+          "size": "337.3 KB"
+        }, {
+          "path": "/var/log/cdp-telemetry",
+          "size": "163.6 KB"
+        }, {
+          "path": "/var/log/sa",
+          "size": "151.5 KB"
+        }, {
+          "path": "/var/log/tuned",
+          "size": "8.9 KB"
+        }]
+      },
+      "memory": {
+        "swapMemory": {},
+        "virtualMemory": {
+          "active": "1622794240",
+          "available": "2347225088",
+          "buffers": "2138112",
+          "cached": "815263744",
+          "free": "1797541888",
+          "inactive": "288772096",
+          "percent": 40.0,
+          "shared": "29655040",
+          "slab": "81104896",
+          "total": "3910430720",
+          "used": "1295486976"
+        }
+      },
+      "network": {
+        "connections": {
+          "CLOSEWAIT": 1,
+          "ESTABLISHED": 7,
+          "LISTEN": 17,
+          "TIMEWAIT": 4
+        }
+      },
+      "timestamp": "1644934998"
+    }
+  }, {
+    "statusDetails": {
+      "host": "example-local-dl-master0.example-l.xcu2-8y8x.wl.cloudera.site",
+      "status": "OK"
+    },
+    "systemMetrics": {
+      "cdpTelemetryVersion": "0.4.19",
+      "cpu": {
+        "count": 4,
+        "loadAvg": [0.27, 0.36, 0.32],
+        "logicalCount": 8,
+        "times": {
+          "idle": 97.4,
+          "system": 0.5,
+          "user": 2.0
+        }
+      },
+      "disk": {
+        "partitions": [{
+          "device": "/dev/nvme0n1p1",
+          "fstype": "xfs",
+          "maxfile": 255,
+          "maxpath": 4096,
+          "mountpoint": "/",
+          "opts": "rw,relatime,attr2,inode64,noquota",
+          "usage": {
+            "free": "86400499712",
+            "percent": 19.5,
+            "total": "107362627584",
+            "used": "20962127872"
+          }
+        }, {
+          "device": "/dev/nvme1n1",
+          "fstype": "ext4",
+          "maxfile": 255,
+          "maxpath": 4096,
+          "mountpoint": "/dbfs",
+          "opts": "rw,noatime,data=ordered",
+          "usage": {
+            "free": "105237536768",
+            "percent": 0.3,
+            "total": "105554829312",
+            "used": "300515328"
+          }
+        }, {
+          "device": "/dev/nvme2n1",
+          "fstype": "ext4",
+          "maxfile": 255,
+          "maxpath": 4096,
+          "mountpoint": "/hadoopfs/fs1",
+          "opts": "rw,noatime,data=ordered",
+          "usage": {
+            "free": "262990061568",
+            "percent": 0.4,
+            "total": "264088522752",
+            "used": "1081683968"
+          }
+        }],
+        "topVarlog": [{
+          "path": "/var/log/solr-infra",
+          "size": "115.1 MB"
+        }, {
+          "path": "/var/log/cloudera-scm-server",
+          "size": "105.5 MB"
+        }, {
+          "path": "/var/log/ranger",
+          "size": "17.0 MB"
+        }, {
+          "path": "/var/log/atlas",
+          "size": "14.5 MB"
+        }, {
+          "path": "/var/log/kafka",
+          "size": "12.2 MB"
+        }, {
+          "path": "/var/log/salt",
+          "size": "9.7 MB"
+        }, {
+          "path": "/var/log/hive",
+          "size": "7.3 MB"
+        }, {
+          "path": "/var/log/hbase",
+          "size": "5.8 MB"
+        }, {
+          "path": "/var/log/hadoop-hdfs",
+          "size": "5.8 MB"
+        }, {
+          "path": "/var/log/cdp_resources_check",
+          "size": "3.1 MB"
+        }]
+      },
+      "memory": {
+        "swapMemory": {},
+        "virtualMemory": {
+          "active": "22533296128",
+          "available": "43865714688",
+          "buffers": "160923648",
+          "cached": "2713882624",
+          "free": "41616306176",
+          "inactive": "1223434240",
+          "percent": 34.1,
+          "shared": "84922368",
+          "slab": "256049152",
+          "total": "66548244480",
+          "used": "22057132032"
+        }
+      },
+      "network": {
+        "connections": {
+          "CLOSEWAIT": 4,
+          "ESTABLISHED": 280,
+          "LISTEN": 68,
+          "TIMEWAIT": 214
+        }
+      },
+      "timestamp": "1644934998"
+    }
+  }],
+  "timestamp": "1644934998"
+}

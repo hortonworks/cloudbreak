@@ -72,13 +72,13 @@ import com.sequenceiq.cloudbreak.service.StackUpdater;
 import com.sequenceiq.cloudbreak.service.image.ImageService;
 import com.sequenceiq.cloudbreak.service.metrics.CloudbreakMetricService;
 import com.sequenceiq.cloudbreak.service.resource.ResourceService;
+import com.sequenceiq.cloudbreak.service.stack.InstanceGroupEphemeralVolumeChecker;
 import com.sequenceiq.cloudbreak.service.stack.InstanceMetaDataService;
 import com.sequenceiq.cloudbreak.service.stack.StackService;
 import com.sequenceiq.cloudbreak.service.stack.connector.adapter.ServiceProviderConnectorAdapter;
 import com.sequenceiq.cloudbreak.service.stack.flow.MetadataSetupService;
 import com.sequenceiq.cloudbreak.service.stack.flow.TlsSetupService;
 import com.sequenceiq.cloudbreak.service.template.TemplateService;
-import com.sequenceiq.common.model.AwsDiskType;
 import com.sequenceiq.flow.reactor.ErrorHandlerAwareReactorEventFactory;
 
 import reactor.bus.EventBus;
@@ -137,6 +137,9 @@ public class StackCreationService {
 
     @Inject
     private TemplateService templateService;
+
+    @Inject
+    private InstanceGroupEphemeralVolumeChecker ephemeralVolumeChecker;
 
     public void setupProvision(Stack stack) {
         stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.PROVISION_SETUP, "Provisioning setup");
@@ -245,7 +248,7 @@ public class StackCreationService {
 
     public void setupTls(StackContext context) throws CloudbreakException {
         Stack stack = context.getStack();
-        for (InstanceMetaData gwInstance : stack.getNotTerminatedGatewayInstanceMetadata()) {
+        for (InstanceMetaData gwInstance : stack.getNotTerminatedAndNotZombieGatewayInstanceMetadata()) {
             tlsSetupService.setupTls(stack, gwInstance);
         }
     }
@@ -289,10 +292,8 @@ public class StackCreationService {
         for (InstanceGroup ig : stack.getInstanceGroups()) {
             Template template = ig.getTemplate();
             if (template != null) {
-                boolean ephemeralVolumesOnly = template.getVolumeTemplates().stream()
-                        .allMatch(volumeTemplate -> AwsDiskType.Ephemeral.value().equalsIgnoreCase(volumeTemplate.getVolumeType()));
                 Integer instanceStorageCount = instanceStoreMetadata.mapInstanceTypeToInstanceStoreCountNullHandled(template.getInstanceType());
-                if (ephemeralVolumesOnly) {
+                if (ephemeralVolumeChecker.instanceGroupContainsOnlyDatabaseAndEphemeralVolumes(ig)) {
                     LOGGER.debug("Instance storage was already requested. Setting temporary storage in template to: {}. " +
                             "Group name: {}, Template id: {}, instance type: {}",
                             TemporaryStorage.EPHEMERAL_VOLUMES_ONLY.name(), ig.getGroupName(), template.getId(), template.getInstanceType());

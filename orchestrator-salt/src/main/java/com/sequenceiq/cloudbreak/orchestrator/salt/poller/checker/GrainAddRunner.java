@@ -2,7 +2,7 @@ package com.sequenceiq.cloudbreak.orchestrator.salt.poller.checker;
 
 import java.util.Set;
 
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 
 public class GrainAddRunner extends ModifyGrainBase {
 

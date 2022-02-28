@@ -104,32 +104,32 @@ public class FlowLogDBService implements FlowLogService {
     }
 
     @Override
-    public FlowLog close(Long resourceId, String flowId) throws TransactionExecutionException {
-        return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE);
+    public FlowLog close(Long resourceId, String flowId, boolean failed) throws TransactionExecutionException {
+        return finalize(resourceId, flowId, FlowConstants.FINISHED_STATE, failed);
     }
 
     @Override
     public FlowLog cancel(Long resourceId, String flowId) throws TransactionExecutionException {
-        return finalize(resourceId, flowId, FlowConstants.CANCELLED_STATE);
+        return finalize(resourceId, flowId, FlowConstants.CANCELLED_STATE, false);
     }
 
     @Override
     public FlowLog terminate(Long resourceId, String flowId) throws TransactionExecutionException {
-        return finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE);
+        return finalize(resourceId, flowId, FlowConstants.TERMINATED_STATE, false);
     }
 
     public void finalize(String flowId) {
         flowLogRepository.finalizeByFlowId(flowId);
     }
 
-    private FlowLog finalize(Long resourceId, String flowId, String state) throws TransactionExecutionException {
+    private FlowLog finalize(Long resourceId, String flowId, String state, boolean failed) throws TransactionExecutionException {
         return transactionService.required(() -> {
             flowLogRepository.finalizeByFlowId(flowId);
             Optional<FlowLog> lastFlowLogOpt = getLastFlowLog(flowId);
             OperationType operationType = OperationType.UNKNOWN;
             if (lastFlowLogOpt.isPresent()) {
                 FlowLog lastFlowLog = lastFlowLogOpt.get();
-                updateLastFlowLogStatus(lastFlowLog, false);
+                updateLastFlowLogStatus(lastFlowLog, failed);
                 operationType = lastFlowLog.getOperationType();
             }
             FlowLog flowLog = new FlowLog(resourceId, flowId, state, Boolean.TRUE, StateStatus.SUCCESSFUL, operationType);

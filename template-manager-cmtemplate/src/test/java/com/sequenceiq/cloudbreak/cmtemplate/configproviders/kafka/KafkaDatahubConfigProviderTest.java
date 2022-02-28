@@ -84,8 +84,7 @@ class KafkaDatahubConfigProviderTest {
                 Arguments.of("7.0.3", cdhParcelVersion("7.0.2", 3), CONFIG_WITHOUT_RANGER),
                 Arguments.of("7.1.0", cdhParcelVersion("7.1.0", 0), CONFIG_WITH_RANGER),
                 Arguments.of("7.2.11", cdhParcelVersion("7.2.11", 0), CONFIG_WITHOUT_KAFKA),
-                Arguments.of("7.2.12", cdhParcelVersion("7.2.12", 0), CONFIG_WITH_KAFKA),
-                Arguments.of("7.2.13", cdhParcelVersion("7.2.13", 0), CONFIG_WITH_KAFKA));
+                Arguments.of("7.2.12", cdhParcelVersion("7.2.12", 0), CONFIG_WITH_KAFKA));
     }
 
     @ParameterizedTest
