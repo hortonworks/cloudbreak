@@ -18,6 +18,8 @@ import com.sequenceiq.cloudbreak.common.json.JsonUtil;
 import com.sequenceiq.cloudbreak.structuredevent.event.cdp.environment.EnvironmentDetails;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
+import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.GcpParametersDto;
@@ -91,6 +93,15 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverter {
 
     private UsageProto.CDPEnvironmentAwsDetails convertAwsDetails(ParametersDto parametersDto) {
         UsageProto.CDPEnvironmentAwsDetails.Builder builder = UsageProto.CDPEnvironmentAwsDetails.newBuilder();
+        if (parametersDto != null) {
+            AwsParametersDto awsParametersDto = parametersDto.getAwsParametersDto();
+            if (awsParametersDto != null) {
+                Optional<String> encryptionKeyArn = Optional.of(awsParametersDto)
+                        .map(AwsParametersDto::getAwsDiskEncryptionParametersDto)
+                        .map(AwsDiskEncryptionParametersDto::getEncryptionKeyArn);
+                builder.setResourceEncryptionEnabled(encryptionKeyArn.isPresent());
+            }
+        }
         return builder.build();
     }
 

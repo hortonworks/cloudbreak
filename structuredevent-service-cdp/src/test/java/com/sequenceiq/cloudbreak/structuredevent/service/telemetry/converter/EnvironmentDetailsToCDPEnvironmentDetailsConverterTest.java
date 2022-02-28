@@ -22,6 +22,7 @@ import com.sequenceiq.common.api.type.ServiceEndpointCreation;
 import com.sequenceiq.environment.environment.domain.Region;
 import com.sequenceiq.environment.network.dao.domain.RegistrationType;
 import com.sequenceiq.environment.network.dto.NetworkDto;
+import com.sequenceiq.environment.parameter.dto.AwsDiskEncryptionParametersDto;
 import com.sequenceiq.environment.parameter.dto.AwsParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureParametersDto;
 import com.sequenceiq.environment.parameter.dto.AzureResourceEncryptionParametersDto;
@@ -142,6 +143,34 @@ public class EnvironmentDetailsToCDPEnvironmentDetailsConverterTest {
         UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
 
         Assertions.assertFalse(cdpEnvironmentDetails.getAzureDetails().getResourceEncryptionEnabled());
+    }
+
+    @Test
+    public void testConversionResourceEncryptionEnabledWhenAWSUsingResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledTrue() {
+        ParametersDto parametersDto = ParametersDto.builder()
+                .withAwsParameters(AwsParametersDto.builder()
+                        .withAwsDiskEncryptionParameters(AwsDiskEncryptionParametersDto.builder()
+                                .withEncryptionKeyArn("dummyEncryptionKeyArn")
+                                .build())
+                        .build())
+                .build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertTrue(cdpEnvironmentDetails.getAwsDetails().getResourceEncryptionEnabled());
+    }
+
+    @Test
+    public void testConversionResourceEncryptionEnabledWhenAWSNOTResourceEncryptionEnabledShouldReturnResourceEncryptionEnabledFalse() {
+        ParametersDto parametersDto = ParametersDto.builder().build();
+
+        when(environmentDetails.getParameters()).thenReturn(parametersDto);
+
+        UsageProto.CDPEnvironmentDetails cdpEnvironmentDetails = underTest.convert(environmentDetails);
+
+        Assertions.assertFalse(cdpEnvironmentDetails.getAwsDetails().getResourceEncryptionEnabled());
     }
 
     @Test
