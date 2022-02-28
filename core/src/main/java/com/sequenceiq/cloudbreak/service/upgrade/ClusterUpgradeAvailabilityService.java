@@ -101,7 +101,7 @@ public class ClusterUpgradeAvailabilityService {
     public void filterUpgradeOptions(String accountId, UpgradeV4Response upgradeOptions, UpgradeV4Request upgradeRequest, boolean datalake) {
         List<ImageInfoV4Response> upgradeCandidates = upgradeOptions.getUpgradeCandidates();
         List<ImageInfoV4Response> filteredUpgradeCandidates;
-        // We would like to upgrade to latest available if no request params exist
+        // We would like to upgrade to the latest available if no request params exist
         if ((Objects.isNull(upgradeRequest) || upgradeRequest.isEmpty()) && datalake) {
             filteredUpgradeCandidates = filterDatalakeUpgradeCandidates(accountId, upgradeOptions.getCurrent(), upgradeCandidates);
             LOGGER.info("No request param, defaulting to latest image {}", filteredUpgradeCandidates);
@@ -113,7 +113,7 @@ public class ClusterUpgradeAvailabilityService {
             if (StringUtils.isNotEmpty(requestImageId)) {
                 filteredUpgradeCandidates = validateImageId(upgradeCandidates, requestImageId);
                 LOGGER.info("Image successfully validated by imageId {}", requestImageId);
-                // We would like to upgrade to latest available image with given runtime
+                // We would like to upgrade to the latest available image with given runtime
             } else if (StringUtils.isNotEmpty(runtime)) {
                 filteredUpgradeCandidates = validateRuntime(upgradeCandidates, runtime);
                 LOGGER.info("Image successfully filtered by runtime ({}): {}", runtime, filteredUpgradeCandidates);

@@ -36,6 +36,7 @@ public class ModelDescriptions {
         public static final String INPUTS = "input parameters of the blueprint";
         public static final String BLUEPRINT_PROPERTIES = "properties to extend the blueprint with";
         public static final String TAGS = "user defined tags for blueprint";
+        public static final String UPGRADEABLE = "marks if combination of the blueprint version and services enables upgrade";
         public static final String STACK_TYPE = "The type of the stack: for example HDP or HDF";
         public static final String STACK_VERSION = "The version of the stack";
     }

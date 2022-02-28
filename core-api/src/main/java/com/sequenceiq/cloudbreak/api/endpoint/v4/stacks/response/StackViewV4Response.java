@@ -60,6 +60,8 @@ public class StackViewV4Response implements JsonEntity {
     @ApiModelProperty(StackModelDescription.STACK_VERSION)
     private String stackVersion;
 
+    private boolean upgradeable;
+
     public String getCrn() {
         return crn;
     }
@@ -188,6 +190,14 @@ public class StackViewV4Response implements JsonEntity {
         this.variant = variant;
     }
 
+    public boolean isUpgradeable() {
+        return upgradeable;
+    }
+
+    public void setUpgradeable(boolean upgradeable) {
+        this.upgradeable = upgradeable;
+    }
+
     @Override
     public String toString() {
         return "StackViewV4Response{" +
@@ -207,6 +217,7 @@ public class StackViewV4Response implements JsonEntity {
                 ", variant='" + variant + '\'' +
                 ", tunnel=" + tunnel +
                 ", stackVersion='" + stackVersion + '\'' +
+                ", upgradeable=" + upgradeable +
                 '}';
     }
 }

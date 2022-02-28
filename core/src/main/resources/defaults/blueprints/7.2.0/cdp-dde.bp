@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.0",
     "displayName": "dde",
+    "blueprintUpgradeOption": "GA",
     "services": [
       {
         "refName": "zookeeper",

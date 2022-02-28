@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.1",
     "displayName": "dataengineering_spark3",
+    "blueprintUpgradeOption": "GA",
     "services": [
       {
         "refName": "zookeeper",

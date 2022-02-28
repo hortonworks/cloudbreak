@@ -36,8 +36,6 @@ import com.sequenceiq.cloudbreak.cloud.model.catalog.CloudbreakImageCatalogV3;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Images;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Versions;
-import com.sequenceiq.cloudbreak.cluster.api.ClusterApi;
-import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
 import com.sequenceiq.cloudbreak.core.CloudbreakImageCatalogException;
@@ -126,12 +124,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
     private ClusterRepairService clusterRepairService;
 
     @Mock
-    private ClusterApi clusterApi;
-
-    @Mock
-    private ClusterComponentConfigProvider clusterComponentConfigProvider;
-
-    @Mock
     private ImageFilterParamsFactory imageFilterParamsFactory;
 
     @Mock
@@ -140,8 +132,6 @@ public class ClusterUpgradeAvailabilityServiceTest {
     private boolean lockComponents;
 
     private final Map<String, String> activatedParcels = new HashMap<>();
-
-    private String accountId = "account1";
 
     @Test
     public void testCheckForUpgradesByNameShouldReturnImagesWhenThereAreAvailableImagesUsingImageCatalogByName()
@@ -164,7 +154,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(ACCOUNT_ID, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -174,7 +164,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         assertEquals(response, actual);
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV3(CATALOG_URL);
-        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
+        verify(clusterUpgradeImageFilter).filter(ACCOUNT_ID, imageCatalog, imageFilterParams);
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());
     }
@@ -199,7 +189,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenThrow(new NotFoundException("not found"));
         when(imageCatalogProvider.getImageCatalogV3(FALLBACK_CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(ACCOUNT_ID, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -209,7 +199,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         assertEquals(response, actual);
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV3(FALLBACK_CATALOG_URL);
-        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
+        verify(clusterUpgradeImageFilter).filter(ACCOUNT_ID, imageCatalog, imageFilterParams);
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());
     }
@@ -232,7 +222,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         ImageFilterParams imageFilterParams = createImageFilterParams(stack, currentImageFromCatalog);
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(ACCOUNT_ID, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -242,7 +232,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         assertEquals(response, actual);
         verify(imageService).getImage(stack.getId());
         verify(imageCatalogProvider).getImageCatalogV3(CATALOG_URL);
-        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
+        verify(clusterUpgradeImageFilter).filter(ACCOUNT_ID, imageCatalog, imageFilterParams);
         verify(upgradeOptionsResponseFactory).createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName());
         verifyNoInteractions(clusterRepairService);
@@ -282,7 +272,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(ACCOUNT_ID, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -324,7 +314,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogProvider.getImageCatalogV3(CATALOG_URL)).thenReturn(imageCatalog);
         ImageFilterResult filteredImages = createFilteredImages(properImage);
         when(imageFilterParamsFactory.create(currentImageFromCatalog, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(ACCOUNT_ID, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(currentImageFromCatalog, filteredImages, stack.getCloudPlatform(), stack.getRegion(),
                 currentImage.getImageCatalogName())).thenReturn(response);
         when(imageProvider.getCurrentImageFromCatalog(CURRENT_IMAGE_ID, imageCatalog)).thenReturn(currentImageFromCatalog);
@@ -500,7 +490,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         when(imageCatalogService.getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME)).thenReturn(imageCatalogDomain);
         when(imageCatalogProvider.getImageCatalogV3(imageCatalogDomain.getImageCatalogUrl())).thenReturn(imageCatalog);
         when(imageFilterParamsFactory.create(image, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS)).thenReturn(imageFilterParams);
-        when(clusterUpgradeImageFilter.filter(accountId, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
+        when(clusterUpgradeImageFilter.filter(ACCOUNT_ID, imageCatalog, imageFilterParams)).thenReturn(filteredImages);
         when(upgradeOptionsResponseFactory.createV4Response(image, filteredImages, CLOUD_PLATFORM, REGION, CATALOG_NAME)).thenReturn(upgradeResponse);
         when(upgradeResponse.getReason()).thenReturn("done");
 
@@ -513,7 +503,7 @@ public class ClusterUpgradeAvailabilityServiceTest {
         verify(imageCatalogService).getImageCatalogByName(stack.getWorkspace().getId(), CATALOG_NAME);
         verify(imageCatalogProvider).getImageCatalogV3(imageCatalogDomain.getImageCatalogUrl());
         verify(imageFilterParamsFactory).create(image, lockComponents, stack, INTERNAL_UPGRADE_SETTINGS);
-        verify(clusterUpgradeImageFilter).filter(accountId, imageCatalog, imageFilterParams);
+        verify(clusterUpgradeImageFilter).filter(ACCOUNT_ID, imageCatalog, imageFilterParams);
         verify(upgradeOptionsResponseFactory).createV4Response(image, filteredImages, CLOUD_PLATFORM, REGION, CATALOG_NAME);
     }
 
@@ -533,9 +523,9 @@ public class ClusterUpgradeAvailabilityServiceTest {
         stack.setCluster(cluster);
         stack.setType(stackType);
         stack.setRegion(REGION);
-        stack.setResourceCrn("crn:cdp:datahub:us-west-1:account1:cluster:cluster");
+        stack.setResourceCrn("crn:cdp:datahub:us-west-1:" + ACCOUNT_ID + ":cluster:cluster");
         Tenant t = new Tenant();
-        t.setName(accountId);
+        t.setName(ACCOUNT_ID);
         User creator = new User();
         creator.setTenant(t);
         stack.setCreator(creator);

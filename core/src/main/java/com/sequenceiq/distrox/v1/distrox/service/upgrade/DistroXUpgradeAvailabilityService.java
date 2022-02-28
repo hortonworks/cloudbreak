@@ -26,6 +26,7 @@ import com.sequenceiq.cloudbreak.auth.altus.EntitlementService;
 import com.sequenceiq.cloudbreak.auth.crn.Crn;
 import com.sequenceiq.cloudbreak.auth.crn.CrnParseException;
 import com.sequenceiq.cloudbreak.common.exception.BadRequestException;
+import com.sequenceiq.cloudbreak.domain.BlueprintUpgradeOption;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
 import com.sequenceiq.cloudbreak.domain.stack.cluster.Cluster;
 import com.sequenceiq.cloudbreak.domain.view.StackView;
@@ -131,7 +132,11 @@ public class DistroXUpgradeAvailabilityService {
     }
 
     private List<ImageInfoV4Response> filterCandidates(String accountId, Stack stack, UpgradeV4Request request, UpgradeV4Response upgradeV4Response) {
-        filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
+        BlueprintUpgradeOption upgradeOption = stack.getCluster().getBlueprint().getBlueprintUpgradeOption();
+        if (upgradeOption != BlueprintUpgradeOption.GA) {
+            LOGGER.debug("Running filtering logic as upgrade option is {}, not GA", upgradeOption);
+            filterOnlyPatchUpgradesIfRuntimeUpgradeDisabled(accountId, stack.getName(), upgradeV4Response);
+        }
         List<ImageInfoV4Response> filteredCandidates;
         String stackName = stack.getName();
         boolean differentDataHubAndDataLakeVersionAllowed = entitlementService.isDifferentDataHubAndDataLakeVersionAllowed(accountId);
@@ -164,7 +169,7 @@ public class DistroXUpgradeAvailabilityService {
                         .collect(Collectors.toList());
                 upgradeV4Response.setUpgradeCandidates(upgradeCandidates);
                 if (upgradeCandidates.isEmpty()) {
-                    upgradeV4Response.appendReason(" No image is available for maintenance upgrade, CDP version: " + currentCdpVersion);
+                    upgradeV4Response.appendReason("No image is available for maintenance upgrade, CDP version: " + currentCdpVersion);
                 }
                 LOGGER.debug("Patch upgrade candidates for [{}] cluster: [{}]", clusterName, upgradeCandidates);
             } else {

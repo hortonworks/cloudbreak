@@ -117,17 +117,19 @@ public class StackUpgradeOperations {
         if (CollectionUtils.isNotEmpty(upgradeResponse.getUpgradeCandidates())) {
             clusterUpgradeAvailabilityService.filterUpgradeOptions(accountId, upgradeResponse, request, stack.isDatalake());
         }
-        validateDatalakeHasNoRunningDatahub(accountId, workspaceId, stack, upgradeResponse);
+        validateAttachedDataHubsForDataLake(accountId, workspaceId, stack, upgradeResponse);
+        LOGGER.debug("Upgrade response after validations: {}", upgradeResponse);
         return upgradeResponse;
     }
 
-    private void validateDatalakeHasNoRunningDatahub(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
+    private void validateAttachedDataHubsForDataLake(String accountId, Long workspaceId, Stack stack, UpgradeV4Response upgradeResponse) {
         if (entitlementService.runtimeUpgradeEnabled(accountId) && StackType.DATALAKE == stack.getType()) {
-            LOGGER.info("Checking that the attached DataHubs of the Datalake are in stopped state only in case if Datalake runtime upgarda is enabled" +
-                    " in [{}] account on [{}] cluster.", accountId, stack.getName());
+            LOGGER.info("Checking that the attached DataHubs of the Data lake are both in stopped state and upgradeable only in case if "
+                    + "Data lake runtime upgrade is enabled in [{}] account on [{}] cluster.", accountId, stack.getName());
             StackViewV4Responses stackViewV4Responses = stackOperations.listByEnvironmentCrn(workspaceId, stack.getEnvironmentCrn(),
                     List.of(StackType.WORKLOAD));
-            upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, upgradeResponse, stack);
+            upgradeResponse.appendReason(upgradePreconditionService.checkForNonUpgradeableAttachedClusters(stackViewV4Responses));
+            upgradeResponse.appendReason(upgradePreconditionService.checkForRunningAttachedClusters(stackViewV4Responses, stack));
         }
     }
 
