@@ -37,7 +37,7 @@ public class DistroXScaleTest extends AbstractE2ETest {
 
     @Test(dataProvider = TEST_CONTEXT)
     @Description(
-            given = "there is a running cloudbreak",
+            given = "there is a running environment",
             when = "a valid DistroX create request is sent",
             then = "DistroX cluster can be resiliently scaled up and down with higher node count")
     public void testCreateAndScaleDistroX(TestContext testContext, ITestContext iTestContext) {
