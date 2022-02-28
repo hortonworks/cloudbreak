@@ -795,7 +795,7 @@ cb:
         YARN: 7.2.7,
         ZEPPELIN: 7.2.7,
         ZOOKEEPER: 7.2.7,
-        QUERY_PROCESSOR: 7.2.13
+        QUERY_PROCESSOR: 7.2.14
         
 
   stopRestriction:

@@ -409,6 +409,17 @@
         ]
       },
       {
+        "refName": "query_processor",
+        "serviceType": "QUERY_PROCESSOR",
+        "roleConfigGroups": [
+          {
+            "refName": "query_processor-QUERY_PROCESSOR",
+            "roleType": "QUERY_PROCESSOR",
+            "base": true
+          }
+        ]
+      },
+      {
         "refName": "oozie",
         "serviceType": "OOZIE",
         "roleConfigGroups": [
@@ -487,6 +498,7 @@
           "zookeeper-SERVER-BASE",
           "das-DAS_WEBAPP",
           "das-DAS_EVENT_PROCESSOR",
+          "query_processor-QUERY_PROCESSOR",
           "yarn-QUEUEMANAGER_WEBAPP-BASE",
           "yarn-QUEUEMANAGER_STORE-BASE",
           "yarn-GATEWAY-BASE"

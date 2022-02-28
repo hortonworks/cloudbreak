@@ -20,11 +20,11 @@ public class QueryProcessorConfigProvider extends AbstractRdsRoleConfigProvider 
     public List<ApiClusterTemplateConfig> getServiceConfigs(CmTemplateProcessor templateProcessor, TemplatePreparationObject source) {
         RdsView queryProcessorView = getRdsView(source);
         return List.of(
-                config("data_analytics_studio_database_host", queryProcessorView.getHost()),
-                config("data_analytics_studio_database_port", queryProcessorView.getPort()),
-                config("data_analytics_studio_database_name", queryProcessorView.getDatabaseName()),
-                config("data_analytics_studio_database_username", queryProcessorView.getConnectionUserName()),
-                config("data_analytics_studio_database_password", queryProcessorView.getConnectionPassword())
+                config("query_processor_database_host", queryProcessorView.getHost()),
+                config("query_processor_database_port", queryProcessorView.getPort()),
+                config("query_processor_database_name", queryProcessorView.getDatabaseName()),
+                config("query_processor_database_username", queryProcessorView.getConnectionUserName()),
+                config("query_processor_database_password", queryProcessorView.getConnectionPassword())
         );
     }
 
