@@ -161,10 +161,13 @@ public class StackOperationService {
         if (instanceIdsByHostgroupMap.size() > 1) {
             throw new BadRequestException("Downscale via Instance Stop cannot process more than one host group");
         }
+        updateNodeCountValidator.validateInstanceGroup(stack, instanceIdsByHostgroupMap.keySet().iterator().next());
         LOGGER.info("InstanceIds without metadata: [{}]", instanceIdsWithoutMetadata);
         updateNodeCountValidator.validateServiceRoles(stack, instanceIdsByHostgroupMap.entrySet()
                 .stream()
                 .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().size() * -1)));
+        updateNodeCountValidator.validateInstanceGroupForStopStart(stack, instanceIdsByHostgroupMap.keySet().iterator().next(),
+                instanceIdsByHostgroupMap.entrySet().iterator().next().getValue().size() * -1);
         LOGGER.info("Stopping the following instances: {}", instanceIdsByHostgroupMap);
         if (!forced) {
             for (Entry<String, Set<Long>> entry : instanceIdsByHostgroupMap.entrySet()) {
@@ -214,6 +217,7 @@ public class StackOperationService {
             throw new BadRequestException(format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         }
         environmentService.checkEnvironmentStatus(stack, EnvironmentStatus.stoppable());
+        checkForZombieInstances(stack);
         if (cluster != null && !stack.isStopped() && !stack.isStopFailed()) {
             if (!updateCluster) {
                 throw NotAllowedStatusUpdate
@@ -232,6 +236,16 @@ public class StackOperationService {
         } else {
             stackUpdater.updateStackStatus(stack.getId(), DetailedStackStatus.STOP_REQUESTED);
             return flowManager.triggerStackStop(stack.getId());
+        }
+    }
+
+    private void checkForZombieInstances(Stack stack) {
+        Set<InstanceMetaData> zombieInstanceMetaDataSet = stack.getZombieInstanceMetaDataSet();
+        if (!zombieInstanceMetaDataSet.isEmpty()) {
+            Set<String> zombieInstanceIds = zombieInstanceMetaDataSet.stream().map(im -> im.getInstanceId()).collect(Collectors.toSet());
+            LOGGER.warn("Cannot stop cluster, because there are nodes in ZOMBIE status: {}", zombieInstanceIds);
+            throw new BadRequestException(format("Cannot stop cluster, because there are nodes in ZOMBIE status: %s. Please delete these nodes and try again.",
+                    zombieInstanceIds));
         }
     }
 
@@ -285,6 +299,8 @@ public class StackOperationService {
                 updateNodeCountValidator.validateServiceRoles(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateStackStatusForStartHostGroup(stackWithLists);
                 updateNodeCountValidator.validateInstanceGroup(stackWithLists, instanceGroupAdjustmentJson.getInstanceGroup());
+                updateNodeCountValidator.validateInstanceGroupForStopStart(stackWithLists,
+                        instanceGroupAdjustmentJson.getInstanceGroup(), instanceGroupAdjustmentJson.getScalingAdjustment());
                 updateNodeCountValidator.validateScalabilityOfInstanceGroup(stackWithLists, instanceGroupAdjustmentJson);
                 updateNodeCountValidator.validateScalingAdjustment(instanceGroupAdjustmentJson, stackWithLists);
                 if (withClusterEvent) {

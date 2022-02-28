@@ -21,6 +21,8 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceMetadataTyp
 import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.common.json.Json;
 import com.sequenceiq.cloudbreak.common.json.JsonToString;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.orchestration.OrchestrationNode;
 import com.sequenceiq.cloudbreak.domain.InstanceStatusConverter;
 import com.sequenceiq.cloudbreak.domain.ProvisionEntity;
 import com.sequenceiq.cloudbreak.domain.converter.InstanceLifeCycleConverter;
@@ -38,7 +40,7 @@ import com.sequenceiq.common.api.type.InstanceGroupType;
         ),
 })
 @Entity
-public class InstanceMetaData implements ProvisionEntity {
+public class InstanceMetaData implements ProvisionEntity, OrchestrationNode {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "instancemetadata_generator")
     @SequenceGenerator(name = "instancemetadata_generator", sequenceName = "instancemetadata_id_seq", allocationSize = 50)
@@ -227,7 +229,7 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public boolean isFailed() {
         return instanceStatus == InstanceStatus.FAILED || instanceStatus == InstanceStatus.ORCHESTRATION_FAILED
-                || instanceStatus == InstanceStatus.DECOMMISSION_FAILED;
+                || instanceStatus == InstanceStatus.DECOMMISSION_FAILED || instanceStatus == InstanceStatus.ZOMBIE;
     }
 
     public boolean isStopped() {
@@ -241,6 +243,7 @@ public class InstanceMetaData implements ProvisionEntity {
     public boolean isReachable() {
         return !isTerminated()
                 && !isDeletedOnProvider()
+                && !InstanceStatus.ZOMBIE.equals(instanceStatus)
                 && !InstanceStatus.ORCHESTRATION_FAILED.equals(instanceStatus)
                 && !InstanceStatus.FAILED.equals(instanceStatus)
                 && !InstanceStatus.STOPPED.equals(instanceStatus);
@@ -248,6 +251,10 @@ public class InstanceMetaData implements ProvisionEntity {
 
     public boolean isDeletedOnProvider() {
         return InstanceStatus.DELETED_ON_PROVIDER_SIDE.equals(instanceStatus) || InstanceStatus.DELETED_BY_PROVIDER.equals(instanceStatus);
+    }
+
+    public boolean isZombie() {
+        return InstanceStatus.ZOMBIE.equals(instanceStatus);
     }
 
     public boolean isHealthy() {
@@ -407,5 +414,11 @@ public class InstanceMetaData implements ProvisionEntity {
                 .add("variant='" + variant + "'")
                 .add("subnetId='" + subnetId + "'")
                 .toString();
+    }
+
+    @Override
+    public Node getNode() {
+        return new Node(getPrivateIp(), getPublicIp(), getInstanceId(), getInstanceGroup().getTemplate().getInstanceType(),
+                getDiscoveryFQDN(), getInstanceGroupName());
     }
 }

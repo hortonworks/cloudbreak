@@ -89,7 +89,7 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldBeSuccessfulIfCMIsRunningAndAllInstanceIsHealthy() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
-        when(instanceMetaDataService.findNotTerminatedForStack(anyLong()))
+        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(true));
 
@@ -103,7 +103,7 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldFailIfCMIsRunningAndUnhealthyOrUnknownInstanceExists() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.TRUE);
-        when(instanceMetaDataService.findNotTerminatedForStack(anyLong()))
+        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2"), createInstanceMetadata("host3")));
         when(clusterStatusService.getExtendedHostStatuses(any())).thenReturn(createExtendedHostStatuses(false));
 
@@ -119,7 +119,7 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldBeSuccessfulIfCMIsNotRunningAndAllInstanceIsHealthy() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
-        when(instanceMetaDataService.findNotTerminatedForStack(anyLong()))
+        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
                 .thenReturn(List.of(createCloudVmInstanceStatus("host1", true), createCloudVmInstanceStatus("host2", true)));
@@ -134,7 +134,7 @@ class VmStatusCheckerConclusionStepTest {
     @Test
     public void checkShouldFailIfCMIsNotRunningAndUnhealthyInstanceExists() {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
-        when(instanceMetaDataService.findNotTerminatedForStack(anyLong()))
+        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong()))
                 .thenReturn(Set.of(createInstanceMetadata("host1"), createInstanceMetadata("host2")));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
                 .thenReturn(List.of(createCloudVmInstanceStatus("host1", false), createCloudVmInstanceStatus("host2", false)));
@@ -153,7 +153,7 @@ class VmStatusCheckerConclusionStepTest {
         when(clusterStatusService.isClusterManagerRunningQuickCheck()).thenReturn(Boolean.FALSE);
         InstanceMetaData instanceMetaData = new InstanceMetaData();
         instanceMetaData.setInstanceId("1");
-        when(instanceMetaDataService.findNotTerminatedForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
+        when(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).thenReturn(Set.of(instanceMetaData));
         when(stackInstanceStatusChecker.queryInstanceStatuses(any(), anyList()))
                 .thenReturn(List.of(createCloudVmInstanceStatus("1", false)));
 

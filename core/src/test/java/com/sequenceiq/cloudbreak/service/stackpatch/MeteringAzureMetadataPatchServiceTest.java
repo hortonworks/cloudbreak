@@ -30,6 +30,7 @@ import com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.base.InstanceStatus;
 import com.sequenceiq.cloudbreak.cloud.model.catalog.Image;
 import com.sequenceiq.cloudbreak.cluster.service.ClusterComponentConfigProvider;
 import com.sequenceiq.cloudbreak.common.mappable.CloudPlatform;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
 import com.sequenceiq.cloudbreak.core.bootstrap.service.ClusterBootstrapper;
 import com.sequenceiq.cloudbreak.domain.Template;
 import com.sequenceiq.cloudbreak.domain.stack.Stack;
@@ -38,7 +39,6 @@ import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceGroup;
 import com.sequenceiq.cloudbreak.domain.stack.instance.InstanceMetaData;
 import com.sequenceiq.cloudbreak.orchestrator.exception.CloudbreakOrchestratorFailedException;
 import com.sequenceiq.cloudbreak.orchestrator.host.TelemetryOrchestrator;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
 import com.sequenceiq.cloudbreak.service.GatewayConfigService;
 import com.sequenceiq.cloudbreak.service.image.ImageCatalogService;
 import com.sequenceiq.cloudbreak.service.image.StatedImage;
@@ -148,7 +148,7 @@ public class MeteringAzureMetadataPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
@@ -169,16 +169,16 @@ public class MeteringAzureMetadataPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(telemetryOrchestrator.collectUnresponsiveNodes(any(), any(), any())).willReturn(
                 Set.of(new Node(null, null, null, null)));
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);
         // WHEN
-        ExistingStackPatchApplyException exception = assertThrows(ExistingStackPatchApplyException.class, () -> underTest.doApply(createStack()));
+        boolean result = underTest.doApply(createStack());
         // THEN
-        assertTrue(exception.getMessage().contains("Not found any available nodes"));
+        assertFalse(result);
 
     }
 
@@ -216,7 +216,7 @@ public class MeteringAzureMetadataPatchServiceTest {
         InstanceGroup instanceGroup = createInstanceGroup();
         instanceMetaData.setInstanceGroup(instanceGroup);
         Set<InstanceMetaData> instanceMetaDataSet = Set.of(instanceMetaData);
-        given(instanceMetaDataService.findNotTerminatedForStack(anyLong())).willReturn(instanceMetaDataSet);
+        given(instanceMetaDataService.findNotTerminatedAndNotZombieForStack(anyLong())).willReturn(instanceMetaDataSet);
         given(clusterComponentConfigProvider.getSaltStateComponent(anyLong())).willReturn(currentSaltState);
         given(compressUtil.generateCompressedOutputFromFolders(any(), any())).willReturn(meteringConfig);
         given(compressUtil.compareCompressedContent(any(), any(), any())).willReturn(false);

@@ -287,7 +287,7 @@
       "knoxService": "SOLR",
       "knoxUrl": "/solr/",
       "ssoSupported": true,
-      "port": 8983,
+      "port": 8993,
       "tlsPort": 8985,
       "apiOnly": false,
       "apiIncluded": true,
@@ -758,7 +758,7 @@
       "apiIncluded": true,
       "visibleForDatalake": false,
       "visibleForDatahub": true,
-      "minVersion": "7.2.13"
+      "minVersion": "7.2.14"
     },
     {
       "name": "KNOX_TOKEN_INTEGRATOR",

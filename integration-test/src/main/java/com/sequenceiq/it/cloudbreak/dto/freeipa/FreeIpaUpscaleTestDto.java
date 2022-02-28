@@ -4,7 +4,7 @@ import static com.sequenceiq.it.cloudbreak.context.RunningParameter.emptyRunning
 
 import java.util.Map;
 
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.Status;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleRequest;
 import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale.UpscaleResponse;
@@ -32,8 +32,8 @@ public class FreeIpaUpscaleTestDto extends AbstractFreeIpaTestDto<UpscaleRequest
         return this;
     }
 
-    public FreeIpaUpscaleTestDto withFormFactor(FormFactor formFactor) {
-        getRequest().setTargetFormFactor(formFactor);
+    public FreeIpaUpscaleTestDto withAvailabilityType(AvailabilityType availabilityType) {
+        getRequest().setTargetAvailabilityType(availabilityType);
         return this;
     }
 

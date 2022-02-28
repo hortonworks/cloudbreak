@@ -14,7 +14,7 @@ apply plugin: 'com.google.protobuf'
 dependencies {
   implementation project(':common')
   implementation project(':streaming-common')
-  implementation project(':cloudwatch-connector')
+  implementation project(':databus-connector')
 
   implementation group: 'com.google.protobuf',          name: 'protobuf-java',        version: protobufVersion
 

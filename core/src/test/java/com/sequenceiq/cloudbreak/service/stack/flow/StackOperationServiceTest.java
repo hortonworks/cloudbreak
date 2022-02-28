@@ -6,6 +6,7 @@ import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStat
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_FAILED;
 import static com.sequenceiq.cloudbreak.api.endpoint.v4.common.DetailedStackStatus.STOP_REQUESTED;
 import static com.sequenceiq.cloudbreak.event.ResourceEvent.STACK_START_IGNORED;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -31,7 +32,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -215,7 +215,7 @@ public class StackOperationServiceTest {
         when(spotInstanceUsageCondition.isStackRunsOnSpotInstances(stack)).thenReturn(true);
         when(stackService.getByIdWithLists(stack.getId())).thenReturn(stack);
 
-        Assertions.assertThatThrownBy(() -> underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true))
+        assertThatThrownBy(() -> underTest.updateStatus(stack.getId(), StatusRequest.STOPPED, true))
                 .isInstanceOf(BadRequestException.class)
                 .hasMessage(String.format("Cannot update the status of stack '%s' to STOPPED, because it runs on spot instances", stack.getName()));
         verify(stackUpdater, never()).updateStackStatus(any(), any(DetailedStackStatus.class));
@@ -319,6 +319,7 @@ public class StackOperationServiceTest {
             doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), any(InstanceGroupAdjustmentV4Request.class));
             doNothing().when(updateNodeCountValidator).validateScalingAdjustment(any(InstanceGroupAdjustmentV4Request.class), any());
             doNothing().when(updateNodeCountValidator).validateHostGroupIsPresent(any(InstanceGroupAdjustmentV4Request.class), any());
+            doNothing().when(updateNodeCountValidator).validateInstanceGroupForStopStart(any(), any(), anyInt());
         }
 
         // Regular
@@ -380,6 +381,8 @@ public class StackOperationServiceTest {
 
         doNothing().when(updateNodeCountValidator).validateServiceRoles(any(), anyMap());
         doNothing().when(updateNodeCountValidator).validateScalabilityOfInstanceGroup(any(), anyString(), anyInt());
+        doNothing().when(updateNodeCountValidator).validateInstanceGroupForStopStart(any(), anyString(), anyInt());
+        doNothing().when(updateNodeCountValidator).validateInstanceGroup(any(), anyString());
         doNothing().when(updateNodeCountValidator).validateScalingAdjustment(anyString(), anyInt(), any());
 
         ArgumentCaptor<Map<String, Set<Long>>> capturedInstances;
@@ -409,18 +412,19 @@ public class StackOperationServiceTest {
         assertEquals("group1", captured.keySet().iterator().next());
         assertEquals(3, captured.entrySet().iterator().next().getValue().size());
 
-
         // No requestIds sent - BadRequest stopstart
-        assertThrows(BadRequestException.class,
-                () -> underTest.stopInstances(stack, null, false));
+        assertThatThrownBy(() -> underTest.stopInstances(stack, null, false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Stop request cannot process an empty instanceIds collection");
 
         // stopstart supports a single hostGroup only
         reset(flowManager);
         InstanceMetaData im4 = createInstanceMetadataForTest(4L, "group2");
         doReturn(im4).when(updateNodeCountValidator).validateInstanceForStop(im4.getInstanceId(), stack);
         instanceIds.add("i4");
-        assertThrows(BadRequestException.class,
-                () -> underTest.stopInstances(stack, instanceIds, false));
+        assertThatThrownBy(() -> underTest.stopInstances(stack, instanceIds, false))
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage("Downscale via Instance Stop cannot process more than one host group");
 
         // regular scaling supports multiple hostgroups
         reset(flowManager);

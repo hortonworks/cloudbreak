@@ -214,7 +214,7 @@ public class MetadataSetupService {
                 }
                 instanceMetaDataEntry.setLifeCycle(InstanceLifeCycle.fromCloudInstanceLifeCycle(md.getLifeCycle()));
                 primaryIgSelected = setupInstanceMetaDataType(primaryIgSelected, terminatedPrimaryGwWhichShouldBeRestored, instanceMetaDataEntry, ig);
-                if (status != null) {
+                if (status != null && instanceMetaDataEntry.getInstanceStatus() != InstanceStatus.ZOMBIE) {
                     if (cloudVmMetaDataStatus.getCloudVmInstanceStatus().getStatus() == TERMINATED) {
                         instanceMetaDataEntry.setInstanceStatus(InstanceStatus.TERMINATED);
                     } else {

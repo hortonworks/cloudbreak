@@ -1,15 +1,15 @@
 package com.sequenceiq.freeipa.api.v1.freeipa.stack.model.scale;
 
 import com.sequenceiq.flow.api.model.FlowIdentifier;
-import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.FormFactor;
+import com.sequenceiq.freeipa.api.v1.freeipa.stack.model.common.AvailabilityType;
 
 public abstract class ScaleResponseBase {
 
     private FlowIdentifier flowIdentifier;
 
-    private FormFactor originalFormFactor;
+    private AvailabilityType originalAvailabilityType;
 
-    private FormFactor targetFormFactor;
+    private AvailabilityType targetAvailabilityType;
 
     private String operationId;
 
@@ -29,28 +29,28 @@ public abstract class ScaleResponseBase {
         this.operationId = operationId;
     }
 
-    public FormFactor getOriginalFormFactor() {
-        return originalFormFactor;
+    public AvailabilityType getOriginalAvailabilityType() {
+        return originalAvailabilityType;
     }
 
-    public void setOriginalFormFactor(FormFactor originalFormFactor) {
-        this.originalFormFactor = originalFormFactor;
+    public void setOriginalAvailabilityType(AvailabilityType originalAvailabilityType) {
+        this.originalAvailabilityType = originalAvailabilityType;
     }
 
-    public FormFactor getTargetFormFactor() {
-        return targetFormFactor;
+    public AvailabilityType getTargetAvailabilityType() {
+        return targetAvailabilityType;
     }
 
-    public void setTargetFormFactor(FormFactor targetFormFactor) {
-        this.targetFormFactor = targetFormFactor;
+    public void setTargetAvailabilityType(AvailabilityType targetAvailabilityType) {
+        this.targetAvailabilityType = targetAvailabilityType;
     }
 
     @Override
     public String toString() {
         return "ScaleResponse{" +
                 "flowIdentifier=" + flowIdentifier +
-                ", originalFormFactor=" + originalFormFactor +
-                ", targetFormFactor=" + targetFormFactor +
+                ", originalAvailabilityType=" + originalAvailabilityType +
+                ", targetAvailabilityType=" + targetAvailabilityType +
                 ", operationId='" + operationId + '\'' +
                 '}';
     }

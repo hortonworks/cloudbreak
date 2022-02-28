@@ -1,8 +1,7 @@
 package com.sequenceiq.cloudbreak.usage;
 
 import com.cloudera.thunderhead.service.common.usage.UsageProto;
-import com.sequenceiq.cloudbreak.usage.strategy.CloudwatchUsageProcessingStrategy;
-import com.sequenceiq.cloudbreak.usage.strategy.LoggingUsageProcessingStrategy;
+import com.sequenceiq.cloudbreak.usage.strategy.CompositeUsageProcessingStrategy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -13,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,15 +23,12 @@ public class UsageReportProcessorTest {
     private UsageReportProcessor usageReporter;
 
     @Mock
-    private LoggingUsageProcessingStrategy loggingUsageProcessingStrategy;
-
-    @Mock
-    private CloudwatchUsageProcessingStrategy cloudwatchUsageProcessingStrategy;
+    private CompositeUsageProcessingStrategy compositeUsageProcessingStrategy;
 
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        usageReporter = new UsageReportProcessor(loggingUsageProcessingStrategy, cloudwatchUsageProcessingStrategy);
+        usageReporter = new UsageReportProcessor(compositeUsageProcessingStrategy);
     }
 
     @Test
@@ -48,7 +45,7 @@ public class UsageReportProcessorTest {
         usageReporter.cdpDatahubClusterRequested(timestamp, proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
+        verify(compositeUsageProcessingStrategy).processUsage(captor.capture(), any());
 
         assertEquals(timestamp, captor.getValue().getTimestamp());
         assertEquals(DUMMY, captor.getValue().getCdpDatahubClusterRequested().getCreatorCrn());
@@ -64,7 +61,7 @@ public class UsageReportProcessorTest {
         usageReporter.cdpDatahubClusterStatusChanged(proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
+        verify(compositeUsageProcessingStrategy).processUsage(captor.capture(), any());
 
         assertEquals(DUMMY, captor.getValue().getCdpDatahubClusterStatusChanged().getClusterId());
     }
@@ -82,7 +79,7 @@ public class UsageReportProcessorTest {
         usageReporter.cdpDatalakeClusterRequested(timestamp, proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
+        verify(compositeUsageProcessingStrategy).processUsage(captor.capture(), any());
 
         assertEquals(timestamp, captor.getValue().getTimestamp());
         assertEquals(DUMMY, captor.getValue().getCdpDatalakeClusterRequested().getCreatorCrn());
@@ -98,7 +95,7 @@ public class UsageReportProcessorTest {
         usageReporter.cdpDatalakeClusterStatusChanged(proto);
 
         ArgumentCaptor<UsageProto.Event> captor = ArgumentCaptor.forClass(UsageProto.Event.class);
-        verify(loggingUsageProcessingStrategy).processUsage(captor.capture());
+        verify(compositeUsageProcessingStrategy).processUsage(captor.capture(), any());
 
         assertEquals(DUMMY, captor.getValue().getCdpDatalakeClusterStatusChanged().getDatalakeId());
     }

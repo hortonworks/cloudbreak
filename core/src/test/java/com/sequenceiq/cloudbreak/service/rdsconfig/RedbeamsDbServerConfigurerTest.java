@@ -157,9 +157,9 @@ public class RedbeamsDbServerConfigurerTest {
 
     private Stack createStack(Cluster testCluster) {
         Stack testStack = TestUtil.stack();
-        InstanceMetaData metaData = testStack.getNotTerminatedGatewayInstanceMetadata().iterator().next();
+        InstanceMetaData metaData = testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().iterator().next();
         metaData.setInstanceMetadataType(InstanceMetadataType.GATEWAY_PRIMARY);
-        testStack.getNotTerminatedGatewayInstanceMetadata().add(metaData);
+        testStack.getNotTerminatedAndNotZombieGatewayInstanceMetadata().add(metaData);
         testStack.setCluster(testCluster);
         return testStack;
     }

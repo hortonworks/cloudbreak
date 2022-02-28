@@ -14,6 +14,8 @@ import org.springframework.data.repository.query.Param;
 import com.sequenceiq.authorization.service.list.ResourceWithId;
 import com.sequenceiq.authorization.service.model.projection.ResourceCrnAndNameView;
 import com.sequenceiq.cloudbreak.common.event.PayloadContext;
+import com.sequenceiq.cloudbreak.quartz.model.JobResource;
+import com.sequenceiq.cloudbreak.quartz.model.JobResourceRepository;
 import com.sequenceiq.cloudbreak.structuredevent.repository.AccountAwareResourceRepository;
 import com.sequenceiq.cloudbreak.workspace.repository.EntityType;
 import com.sequenceiq.environment.environment.EnvironmentStatus;
@@ -21,7 +23,7 @@ import com.sequenceiq.environment.environment.domain.Environment;
 
 @Transactional(TxType.REQUIRED)
 @EntityType(entityClass = Environment.class)
-public interface EnvironmentRepository extends AccountAwareResourceRepository<Environment, Long> {
+public interface EnvironmentRepository extends AccountAwareResourceRepository<Environment, Long>, JobResourceRepository<Environment, Long> {
 
     @Query("SELECT e FROM Environment e "
             + "LEFT JOIN FETCH e.network n "
@@ -55,10 +57,18 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             "AND e.archived = false")
     List<String> findAllCrnByNameAndAccountIdAndArchivedIsFalse(@Param("names") Collection<String> names, @Param("accountId") String accountId);
 
-    Optional<Long> findIdByNameAndAccountIdAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);
-
     Optional<Environment> findByResourceCrnAndAccountIdAndArchivedIsFalse(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
+    @Query("SELECT e.id FROM Environment e " +
+            "WHERE e.accountId = :accountId " +
+            "AND e.name = :name " +
+            "AND e.archived = false")
+    Optional<Long> findIdByNameAndAccountIdAndArchivedIsFalse(@Param("name") String name, @Param("accountId") String accountId);
+
+    @Query("SELECT e.id FROM Environment e " +
+            "WHERE e.accountId = :accountId " +
+            "AND e.resourceCrn = :resourceCrn " +
+            "AND e.archived = false")
     Optional<Long> findIdByResourceCrnAndAccountIdAndArchivedIsFalse(@Param("resourceCrn") String resourceCrn, @Param("accountId") String accountId);
 
     @Query("SELECT COUNT(e)>0 FROM Environment e WHERE e.name = :name AND e.accountId = :accountId AND e.archived = false")
@@ -90,8 +100,8 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
     List<Environment> findAllByAccountIdAndParentEnvIdAndArchivedIsFalse(@Param("accountId") String accountId,
             @Param("parentEnvironmentId") Long parentEnvironmentId);
 
-    @Query("SELECT e FROM Environment e WHERE e.archived = false and e.status in (:statuses)")
-    List<Environment> findAllRunningAndStatusIn(@Param("statuses") Collection<EnvironmentStatus> statuses);
+    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name FROM Environment e WHERE e.archived = false and e.status in (:statuses)")
+    List<JobResource> findAllRunningAndStatusIn(@Param("statuses") Collection<EnvironmentStatus> statuses);
 
     @Query("SELECT new com.sequenceiq.authorization.service.list.ResourceWithId(e.id, e.resourceCrn) FROM Environment e " +
             "WHERE e.accountId = :accountId AND e.archived = false")
@@ -101,4 +111,8 @@ public interface EnvironmentRepository extends AccountAwareResourceRepository<En
             "FROM Environment e " +
             "WHERE e.id = :id")
     Optional<PayloadContext> findStackAsPayloadContext(@Param("id") Long id);
+
+    @Query("SELECT e.resourceCrn as remoteResourceId, e.id as localId, e.name as name " +
+            "FROM Environment e WHERE e.id = :resourceId")
+    Optional<JobResource> getJobResource(@Param("resourceId") Long resourceId);
 }

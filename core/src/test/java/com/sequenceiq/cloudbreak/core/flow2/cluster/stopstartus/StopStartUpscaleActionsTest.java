@@ -417,7 +417,7 @@ public class StopStartUpscaleActionsTest {
         List<InstanceMetaData> combined =
                 Stream.of(instancesActionableNotStopped, instancesActionableStopped, instancesRandomNotStopped, instancesRandomStopped)
                 .flatMap(Collection::stream).collect(Collectors.toList());
-        lenient().when(stack.getNotDeletedInstanceMetaDataList()).thenReturn(combined);
+        lenient().when(stack.getNotDeletedAndNotZombieInstanceMetaDataList()).thenReturn(combined);
         lenient().when(stack.getEnvironmentCrn()).thenReturn(ENV_CRN);
         lenient().when(stack.getStackAuthentication()).thenReturn(stackAuthentication);
         lenient().when(stack.getId()).thenReturn(STACK_ID);
@@ -437,7 +437,7 @@ public class StopStartUpscaleActionsTest {
         lenient().when(instanceMetaDataToCloudInstanceConverter.convert(any(), anyString(), any(StackAuthentication.class)))
                 .thenReturn(cloudInstancesActionableStopped, cloudInstancesActionableAll);
 
-        lenient().when(cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedInstances(any(), any(), any())).thenCallRealMethod();
+        lenient().when(cloudInstanceIdToInstanceMetaDataConverter.getNotDeletedAndNotZombieInstances(any(), any(), any())).thenCallRealMethod();
     }
 
     private List<InstanceMetaData> generateInstances(int count, int startIndex,

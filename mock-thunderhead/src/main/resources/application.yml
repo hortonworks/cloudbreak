@@ -84,6 +84,7 @@ auth:
     ui:
       edp.progress.bar.enable: true
     unbound.elimination.enable: true
+    targeted.upscale.enable: true
     e2e.test.only.enable: true
 
 crn:

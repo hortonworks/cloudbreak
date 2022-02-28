@@ -40,6 +40,9 @@ import com.google.common.base.Joiner;
 import com.google.common.collect.Sets;
 import com.sequenceiq.cloudbreak.common.exception.CloudbreakServiceException;
 import com.sequenceiq.cloudbreak.common.exception.NotFoundException;
+import com.sequenceiq.cloudbreak.common.orchestration.Node;
+import com.sequenceiq.cloudbreak.common.orchestration.NodeVolumes;
+import com.sequenceiq.cloudbreak.common.orchestration.OrchestratorAware;
 import com.sequenceiq.cloudbreak.common.type.RecipeExecutionPhase;
 import com.sequenceiq.cloudbreak.common.type.TemporaryStorage;
 import com.sequenceiq.cloudbreak.orchestrator.OrchestratorBootstrap;
@@ -52,10 +55,10 @@ import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorGrainRunnerParams
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateParams;
 import com.sequenceiq.cloudbreak.orchestrator.host.OrchestratorStateRetryParams;
 import com.sequenceiq.cloudbreak.orchestrator.model.BootstrapParams;
+import com.sequenceiq.cloudbreak.orchestrator.model.CmAgentStopFlags;
 import com.sequenceiq.cloudbreak.orchestrator.model.GatewayConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.KeytabModel;
-import com.sequenceiq.cloudbreak.orchestrator.model.Node;
-import com.sequenceiq.cloudbreak.orchestrator.model.NodeVolumes;
+import com.sequenceiq.cloudbreak.orchestrator.model.NodeReachabilityResult;
 import com.sequenceiq.cloudbreak.orchestrator.model.RecipeModel;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltConfig;
 import com.sequenceiq.cloudbreak.orchestrator.model.SaltPillarProperties;
@@ -198,13 +201,13 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Override
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
-    public Map<String, Map<String, String>> formatAndMountDisksOnNodes(List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData, Set<Node> allNodes,
-            ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
+    public Map<String, Map<String, String>> formatAndMountDisksOnNodes(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> nodesWithDiskData,
+            Set<Node> allNodes, ExitCriteriaModel exitModel, String platformVariant) throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
         Target<String> allHosts = new HostList(nodesWithDiskData.stream().map(Node::getHostname).collect(Collectors.toSet()));
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            initializePillar(allNodes, exitModel, gatewayTargetIpAddresses, sc);
+            saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, sc);
             Callable<Boolean> saltPillarRunner;
 
             Map<String, String> dataVolumeMap = nodesWithDiskData.stream()
@@ -229,7 +232,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
             SaltPillarProperties mounDiskProperties = new SaltPillarProperties("/mount/disk.sls", Collections.singletonMap("mount_data", hostnameDiskMountMap));
 
-            OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, mounDiskProperties);
+            OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargetIpAddresses, mounDiskProperties);
             saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
@@ -258,8 +261,9 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private void initializePillar(Set<Node> allNodes, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
-        OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargetIpAddresses, allNodes);
+    private void saveHostsPillar(OrchestratorAware stack, ExitCriteriaModel exitModel,
+            Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
+        OrchestratorBootstrap hostSave = PillarSave.createHostsPillar(sc, gatewayTargetIpAddresses, stack.getAllNodes());
         Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
         saltPillarRunner.call();
     }
@@ -346,7 +350,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @SuppressFBWarnings("REC_CATCH_EXCEPTION")
     @Override
-    public void initServiceRun(List<GatewayConfig> allGateway, Set<Node> allNodes, Set<Node> reachableNodes, SaltConfig saltConfig,
+    public void initServiceRun(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> allNodes, Set<Node> reachableNodes, SaltConfig saltConfig,
             ExitCriteriaModel exitModel, String cloudPlatform) throws CloudbreakOrchestratorException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargetIpAddresses = getGatewayPrivateIps(allGateway);
@@ -354,11 +358,8 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> serverHostname = Sets.newHashSet(primaryGateway.getHostname());
         Set<String> reachableHostnames = reachableNodes.stream().map(Node::getHostname).collect(Collectors.toSet());
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargetIpAddresses, allNodes);
-            Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
-            saltPillarRunner.call();
-
-            savePillars(saltConfig, exitModel, gatewayTargetIpAddresses, sc);
+            saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, sc);
+            saveCustomPillars(saltConfig, exitModel, gatewayTargetIpAddresses, sc);
 
             setAdMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
             setIpaMemberRoleIfNeeded(allNodes, saltConfig, exitModel, sc, reachableHostnames);
@@ -393,25 +394,22 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private void savePillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
+    private void saveCustomPillars(SaltConfig saltConfig, ExitCriteriaModel exitModel, Set<String> gatewayTargetIpAddresses, SaltConnector sc) throws Exception {
         for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-            OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
+            OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargetIpAddresses, propertiesEntry.getValue());
             Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
         }
     }
 
     @Override
-    public void initSaltConfig(List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
+    public void initSaltConfig(OrchestratorAware stack, List<GatewayConfig> allGateway, Set<Node> allNodes, SaltConfig saltConfig, ExitCriteriaModel exitModel)
             throws CloudbreakOrchestratorFailedException {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGateway);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGateway);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            OrchestratorBootstrap hostSave = new PillarSave(sc, gatewayTargets, allNodes);
-            Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
-            saltPillarRunner.call();
-
-            savePillars(saltConfig, exitModel, gatewayTargets, sc);
+            saveHostsPillar(stack, exitModel, gatewayTargets, sc);
+            saveCustomPillars(saltConfig, exitModel, gatewayTargets, sc);
         } catch (ExecutionException e) {
             LOGGER.warn("Error occurred during bootstrap", e);
             if (e.getCause() instanceof CloudbreakOrchestratorFailedException) {
@@ -710,7 +708,8 @@ public class SaltOrchestrator implements HostOrchestrator {
             ExitCriteriaModel exitCriteriaModel) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : pillarConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(gatewayConfig.getPrivateAddress()), propertiesEntry.getValue());
+                OrchestratorBootstrap pillarSave =
+                        PillarSave.createCustomPillar(sc, Sets.newHashSet(gatewayConfig.getPrivateAddress()), propertiesEntry.getValue());
                 Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitCriteriaModel);
                 saltPillarRunner.call();
             }
@@ -735,7 +734,7 @@ public class SaltOrchestrator implements HostOrchestrator {
 
     @Retryable(backoff = @Backoff(delay = 1000, multiplier = 2, maxDelay = 10000), maxAttempts = 5)
     @Override
-    public void tearDown(List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
+    public void tearDown(OrchestratorAware stack, List<GatewayConfig> allGatewayConfigs, Map<String, String> removeNodePrivateIPsByFQDN,
             Set<Node> remainingNodes, ExitCriteriaModel exitModel) throws CloudbreakOrchestratorException {
         LOGGER.debug("Tear down hosts: {},", removeNodePrivateIPsByFQDN);
         LOGGER.debug("Gateway config for tear down: {}", allGatewayConfigs);
@@ -752,9 +751,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         try (SaltConnector saltConnector = saltService.createSaltConnector(primaryGateway)) {
             SaltStates.stopMinions(saltConnector, minionsToStop);
             if (!CollectionUtils.isEmpty(remainingNodes)) {
-                OrchestratorBootstrap hostSave = new PillarSave(saltConnector, gatewayTargetIpAddresses, remainingNodes);
-                Callable<Boolean> saltPillarRunner = saltRunner.runner(hostSave, exitCriteria, exitModel);
-                saltPillarRunner.call();
+                saveHostsPillar(stack, exitModel, gatewayTargetIpAddresses, saltConnector);
             }
         } catch (Exception e) {
             LOGGER.info("Error occurred during salt minion tear down", e);
@@ -836,7 +833,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         GatewayConfig primaryGateway = saltService.getPrimaryGatewayConfig(allGatewayConfigs);
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
-            OrchestratorBootstrap scriptPillarSave = new PillarSave(sc, gatewayTargets, recipes, calculateRecipeExecutionTimeout());
+            OrchestratorBootstrap scriptPillarSave = PillarSave.createRecipesPillar(sc, gatewayTargets, recipes, calculateRecipeExecutionTimeout());
             Callable<Boolean> saltPillarRunner = saltRunner.runner(scriptPillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
 
@@ -867,7 +864,7 @@ public class SaltOrchestrator implements HostOrchestrator {
                 properties.put(keytabModel.getService(), keytabProps);
             }
             SaltPillarProperties saltPillarProperties = new SaltPillarProperties("/kerberos/keytab.sls", Collections.singletonMap("keytab", properties));
-            OrchestratorBootstrap pillarSave = new PillarSave(sc, gatewayTargets, saltPillarProperties);
+            OrchestratorBootstrap pillarSave = PillarSave.createCustomPillar(sc, gatewayTargets, saltPillarProperties);
             Callable<Boolean> runner = saltRunner.runner(pillarSave, exitCriteria, exitModel);
             runner.call();
         } catch (Exception e) {
@@ -969,10 +966,11 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public void stopClusterManagerAgent(GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> nodesUnderStopping, ExitCriteriaModel exitCriteriaModel,
-            boolean adJoinable, boolean ipaJoinable, boolean forced) throws CloudbreakOrchestratorFailedException {
+    public void stopClusterManagerAgent(OrchestratorAware stack, GatewayConfig gatewayConfig, Set<Node> allNodes, Set<Node> nodesUnderStopping,
+            ExitCriteriaModel exitCriteriaModel, CmAgentStopFlags flags) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(gatewayConfig)) {
-            Set<Node> responsiveNodes = getResponsiveNodes(allNodes, sc);
+            NodeReachabilityResult nodeReachabilityResult = getResponsiveNodes(allNodes, sc);
+            Set<Node> responsiveNodes = nodeReachabilityResult.getReachableNodes();
             Set<String> nodesUnderStoppingIPs = nodesUnderStopping.stream().map(Node::getPrivateIp).collect(Collectors.toSet());
             Set<Node> responsiveNodesUnderStopping =
                     responsiveNodes.stream().filter(responsiveNode -> nodesUnderStoppingIPs.contains(responsiveNode.getPrivateIp())).collect(Collectors.toSet());
@@ -981,12 +979,12 @@ public class SaltOrchestrator implements HostOrchestrator {
                 Set<String> targetHostnames = responsiveNodesUnderStopping.stream().map(Node::getHostname).collect(Collectors.toSet());
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
                         "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
-                if (adJoinable || ipaJoinable) {
-                    String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
+                if (flags.isAdJoinable() || flags.isIpaJoinable()) {
+                    String identityRole = flags.isAdJoinable() ? "ad_leave" : "ipa_leave";
                     LOGGER.debug("Applying role '{}' on nodes: [{}]", identityRole, responsiveNodesUnderStopping);
                     saltCommandRunner.runModifyGrainCommand(sc, new GrainAddRunner(targetHostnames, responsiveNodesUnderStopping, "roles", identityRole),
                             exitCriteriaModel, exitCriteria);
-                    String removeIdentityRole = adJoinable ? "ad_member" : "ipa_member";
+                    String removeIdentityRole = flags.isAdJoinable() ? "ad_member" : "ipa_member";
                     LOGGER.debug("Removing role '{}' on nodes: [{}]", removeIdentityRole, responsiveNodesUnderStopping);
                     saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
                             removeIdentityRole), exitCriteriaModel, exitCriteria);
@@ -995,28 +993,21 @@ public class SaltOrchestrator implements HostOrchestrator {
                 Set<String> allHostnames = responsiveNodesUnderStopping.stream().map(Node::getHostname).collect(Collectors.toSet());
                 runSyncAll(sc, allHostnames, responsiveNodesUnderStopping, exitCriteriaModel);
 
-                refreshPillars(gatewayConfig, allNodes, exitCriteriaModel, sc);
+                saveHostsPillar(stack, exitCriteriaModel, getGatewayPrivateIps(Collections.singleton(gatewayConfig)), sc);
                 runNewService(sc, new HighStateAllRunner(allHostnames, responsiveNodesUnderStopping), exitCriteriaModel, maxRetry, true);
 
                 saltCommandRunner.runModifyGrainCommand(sc, new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles",
                         "cloudera_manager_agent_stop"), exitCriteriaModel, exitCriteria);
-                if (adJoinable || ipaJoinable) {
-                    String identityRole = adJoinable ? "ad_leave" : "ipa_leave";
+                if (flags.isAdJoinable() || flags.isIpaJoinable()) {
+                    String identityRole = flags.isAdJoinable() ? "ad_leave" : "ipa_leave";
                     saltCommandRunner.runModifyGrainCommand(sc,
                             new GrainRemoveRunner(targetHostnames, responsiveNodesUnderStopping, "roles", identityRole), exitCriteriaModel, exitCriteria);
                 }
             }
         } catch (Exception e) {
             LOGGER.info("Error occurred during executing highstate (for cluster manager agent stop).", e);
-            throwExceptionIfNotForced(forced, e);
+            throwExceptionIfNotForced(flags.isForced(), e);
         }
-    }
-
-    private void refreshPillars(GatewayConfig gatewayConfig, Set<Node> allNodes, ExitCriteriaModel exitCriteriaModel, SaltConnector sc) throws Exception {
-        PillarSave pillarSave = new PillarSave(sc, getGatewayPrivateIps(Collections.singleton(gatewayConfig)), allNodes);
-        Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitCriteriaModel, maxDatabaseDrRetry,
-                maxDatabaseDrRetryOnError);
-        saltPillarRunner.call();
     }
 
     private void runSyncAll(SaltConnector sc, Set<String> targetHostnames, Set<Node> allNode, ExitCriteriaModel exitCriteriaModel) throws Exception {
@@ -1031,7 +1022,7 @@ public class SaltOrchestrator implements HostOrchestrator {
         Set<String> gatewayTargets = getGatewayPrivateIps(allGatewayConfigs);
         try (SaltConnector sc = saltService.createSaltConnector(primaryGatewayConfig)) {
             SaltPillarProperties gatewayPillarProperties = saltConfig.getServicePillarConfig().get("gateway");
-            OrchestratorBootstrap gatewayPillarSave = new PillarSave(sc, gatewayTargets, gatewayPillarProperties);
+            OrchestratorBootstrap gatewayPillarSave = PillarSave.createCustomPillar(sc, gatewayTargets, gatewayPillarProperties);
             Callable<Boolean> saltPillarRunner = saltRunner.runnerWithUsingErrorCount(gatewayPillarSave, exitCriteria, exitModel);
             saltPillarRunner.call();
         } catch (Exception e) {
@@ -1088,7 +1079,7 @@ public class SaltOrchestrator implements HostOrchestrator {
     }
 
     @Override
-    public Set<Node> getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
+    public NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, GatewayConfig gatewayConfig) {
         try (SaltConnector saltConnector = saltService.createSaltConnector(gatewayConfig)) {
             return getResponsiveNodes(nodes, saltConnector);
         }
@@ -1198,7 +1189,8 @@ public class SaltOrchestrator implements HostOrchestrator {
             ExitCriteriaModel exitModel, String state) throws CloudbreakOrchestratorFailedException {
         try (SaltConnector sc = saltService.createSaltConnector(primaryGateway)) {
             for (Entry<String, SaltPillarProperties> propertiesEntry : saltConfig.getServicePillarConfig().entrySet()) {
-                OrchestratorBootstrap pillarSave = new PillarSave(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
+                OrchestratorBootstrap pillarSave =
+                        PillarSave.createCustomPillar(sc, Sets.newHashSet(primaryGateway.getPrivateAddress()), propertiesEntry.getValue());
                 Callable<Boolean> saltPillarRunner = saltRunner.runner(pillarSave, exitCriteria, exitModel, maxDatabaseDrRetry, maxDatabaseDrRetryOnError);
                 saltPillarRunner.call();
             }
@@ -1342,8 +1334,9 @@ public class SaltOrchestrator implements HostOrchestrator {
         }
     }
 
-    private Set<Node> getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
+    private NodeReachabilityResult getResponsiveNodes(Set<Node> nodes, SaltConnector sc) {
         Set<Node> responsiveNodes = new HashSet<>();
+        Set<Node> unresponsiveNodes = new HashSet<>();
         Set<String> minionIpAddresses = SaltStates.collectMinionIpAddresses(retry, sc);
         nodes.forEach(node -> {
             if (minionIpAddresses.contains(node.getPrivateIp())) {
@@ -1351,8 +1344,9 @@ public class SaltOrchestrator implements HostOrchestrator {
                 responsiveNodes.add(node);
             } else {
                 LOGGER.warn("Salt-minion is not responding on host: {}", node);
+                unresponsiveNodes.add(node);
             }
         });
-        return responsiveNodes;
+        return new NodeReachabilityResult(responsiveNodes, unresponsiveNodes);
     }
 }

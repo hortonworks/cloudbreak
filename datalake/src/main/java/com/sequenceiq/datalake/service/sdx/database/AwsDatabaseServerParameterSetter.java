@@ -1,5 +1,6 @@
 package com.sequenceiq.datalake.service.sdx.database;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +22,7 @@ public class AwsDatabaseServerParameterSetter implements DatabaseServerParameter
     int backupRetentionPeriodNonHa;
 
     @Override
-    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType) {
+    public void setParameters(DatabaseServerV4StackRequest request, SdxDatabaseAvailabilityType availabilityType, String databaseEngineVersion) {
         AwsDatabaseServerV4Parameters parameters = new AwsDatabaseServerV4Parameters();
         if (SdxDatabaseAvailabilityType.HA.equals(availabilityType)) {
             parameters.setBackupRetentionPeriod(backupRetentionPeriodHa);
@@ -31,6 +32,9 @@ public class AwsDatabaseServerParameterSetter implements DatabaseServerParameter
             parameters.setMultiAZ("false");
         } else {
             throw new IllegalArgumentException(availabilityType + " database availability type is not supported on AWS.");
+        }
+        if (StringUtils.isNotEmpty(databaseEngineVersion)) {
+            parameters.setEngineVersion(databaseEngineVersion);
         }
         request.setAws(parameters);
     }

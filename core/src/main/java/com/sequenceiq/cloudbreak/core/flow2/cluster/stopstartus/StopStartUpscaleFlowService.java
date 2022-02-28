@@ -68,8 +68,8 @@ class StopStartUpscaleFlowService {
         flowMessageService.fireEventAndLog(stackId, UPDATE_FAILED.name(), CLUSTER_SCALING_STOPSTART_UPSCALE_NODES_NOT_STARTED,
                 String.valueOf(notStartedIntances.size()),
                         notStartedIntances.stream()
-                                .map(x -> x.getCloudInstance().getInstanceId())
-                                .collect(Collectors.joining(", ")));
+                                .map(x -> String.format("{%s : %s}", x.getCloudInstance().getInstanceId(), x.getStatus()))
+                                .collect(Collectors.joining(", ", "{", "}")));
     }
 
     void warnNotEnoughInstances(long stackId, String hostGroupName, int desiredCount, int addedCount) {
