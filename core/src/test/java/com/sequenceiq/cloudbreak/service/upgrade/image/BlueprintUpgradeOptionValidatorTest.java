@@ -37,6 +37,24 @@ public class BlueprintUpgradeOptionValidatorTest {
     }
 
     @Test
+    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsGaOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
+        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.GA);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);
+        assertTrue(actual.isValid());
+        assertNull(actual.getReason());
+        verifyNoInteractions(customTemplateUpgradeValidator);
+    }
+
+    @Test
+    public void testIsValidBlueprintShouldReturnTrueWhenTheUpgradeOptionIsGaOnDefaultBlueprintAndTheUpgradeIsOsUpgrade() {
+        Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.GA);
+        BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, true, false, true);
+        assertTrue(actual.isValid());
+        assertNull(actual.getReason());
+        verifyNoInteractions(customTemplateUpgradeValidator);
+    }
+
+    @Test
     public void testIsValidBlueprintShouldReturnFalseWhenTheUpgradeOptionIsDisabledOnDefaultBlueprintAndTheUpgradeIsRuntimeUpgrade() {
         Blueprint blueprint = createBlueprint(ResourceStatus.DEFAULT, BlueprintUpgradeOption.DISABLED);
         BlueprintValidationResult actual = underTest.isValidBlueprint(blueprint, false, false, true);

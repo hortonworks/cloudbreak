@@ -39,6 +39,9 @@ class BlueprintUpgradeOptionValidator {
         if (skipValidations) {
             LOGGER.debug("Blueprint options are not validated if the request is internal");
             result = createResult(true);
+        } else if (upgradeOption == BlueprintUpgradeOption.GA) {
+            LOGGER.debug("Blueprint marks this GA so upgrade is enabled.");
+            result = createResult(true);
         } else {
             result = createResult(lockComponents ? upgradeOption.isOsUpgradeEnabled() : isRuntimeUpgradeEnabled(upgradeOption, dataHubUpgradeEntitled));
         }

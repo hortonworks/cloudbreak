@@ -1,6 +1,7 @@
 package com.sequenceiq.cloudbreak.api.endpoint.v4.stacks.response.upgrade;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -60,7 +61,7 @@ public class UpgradeV4Response {
 
     public void appendReason(String reason) {
         if (StringUtils.isNotEmpty(this.reason)) {
-            this.reason += reason;
+            this.reason += " " + reason;
         } else {
             setReason(reason);
         }
@@ -90,5 +91,23 @@ public class UpgradeV4Response {
                 ", reason='" + reason + '\'' +
                 ", replaceVms='" + replaceVms + '\'' +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        UpgradeV4Response that = (UpgradeV4Response) o;
+        return replaceVms == that.replaceVms && Objects.equals(current, that.current) && Objects.equals(upgradeCandidates, that.upgradeCandidates)
+                && Objects.equals(reason, that.reason) && Objects.equals(flowIdentifier, that.flowIdentifier);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(current, upgradeCandidates, reason, flowIdentifier, replaceVms);
     }
 }

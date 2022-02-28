@@ -3,6 +3,7 @@
   "blueprint": {
     "cdhVersion": "7.2.2",
     "displayName": "rt-datamart",
+    "blueprintUpgradeOption": "GA",
     "services": [
       {
         "refName": "hdfs",

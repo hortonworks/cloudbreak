@@ -10,6 +10,12 @@ public enum BlueprintUpgradeOption {
     ENABLED,
 
     /**
+     * 'GA' means that a template can be upgraded without any entitlement to the version of the corresponding
+     * data lake
+     */
+    GA,
+
+    /**
      * Disabled means that an upgrade can't be performed on a template. Neither Runtime nor OS upgrade. By default, with
      * the CDP_RUNTIME_UPGRADE_DATAHUB all templates can be upgraded so explicitly need to mark a template with
      * DISABLED to disable the upgrade. Without the entitlement only the MAINTENANCE_UPGRADE_GA marked templates
@@ -36,10 +42,10 @@ public enum BlueprintUpgradeOption {
     MAINTENANCE_UPGRADE_GA;
 
     public boolean isOsUpgradeEnabled() {
-        return OS_UPGRADE_ENABLED.equals(this) || ENABLED.equals(this) || MAINTENANCE_UPGRADE_GA.equals(this);
+        return OS_UPGRADE_ENABLED.equals(this) || ENABLED.equals(this) || MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this);
     }
 
     public boolean isRuntimeUpgradeEnabled(boolean dataHubUpgradeEntitled) {
-        return dataHubUpgradeEntitled ? !DISABLED.equals(this) : MAINTENANCE_UPGRADE_GA.equals(this);
+        return dataHubUpgradeEntitled ? !DISABLED.equals(this) : (MAINTENANCE_UPGRADE_GA.equals(this) || GA.equals(this));
     }
 }

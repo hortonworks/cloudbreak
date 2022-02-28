@@ -4,8 +4,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import com.sequenceiq.cloudbreak.domain.projection.StackListItem;
@@ -18,8 +16,6 @@ import com.sequenceiq.cloudbreak.domain.view.UserView;
 
 @Component
 public class StackListItemToStackApiViewConverter {
-
-    private static final Logger LOGGER = LoggerFactory.getLogger(StackListItemToStackApiViewConverter.class);
 
     public StackApiView convert(StackListItem item, Map<Long, Integer> stackInstanceCounts,
             List<HostGroupView> hostGroupViews) {
@@ -79,6 +75,7 @@ public class StackListItemToStackApiViewConverter {
         blueprintResponse.setHostGroupCount(item.getHostGroupCount());
         blueprintResponse.setStatus(item.getBlueprintStatus());
         blueprintResponse.setTags(item.getBlueprintTags());
+        blueprintResponse.setBlueprintUpgradeOption(item.getBlueprintUpgradeOption());
         return blueprintResponse;
     }
 }

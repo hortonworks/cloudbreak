@@ -42,7 +42,7 @@ public class EntitlementDrivenPackageLocationFilter implements UpgradeImageFilte
 
     @Override
     public String getMessage(ImageFilterParams imageFilterParams) {
-        return "There are no eligible images to upgrade because the location of the packages are not appropriate.";
+        return "There are no eligible images to upgrade because the location of the packages is not appropriate.";
     }
 
     @Override

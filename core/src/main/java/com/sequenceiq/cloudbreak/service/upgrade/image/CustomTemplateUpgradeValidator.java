@@ -29,11 +29,11 @@ public class CustomTemplateUpgradeValidator {
         String blueprintVersion = blueprint.getStackVersion();
         LOGGER.debug("Validating custom template. Permitted services for upgrade with minimum required blueprint version: {}, available services: {}",
                 permittedServicesForUpgradeService.toString(), services);
-        Set<String> notUpgradePermittedServices = getNotUpgradePermittedServices(services, blueprintVersion);
-        return new BlueprintValidationResult(notUpgradePermittedServices.isEmpty(), createReason(notUpgradePermittedServices));
+        Set<String> notUpgradableServices = getNotUpgradableServices(services, blueprintVersion);
+        return new BlueprintValidationResult(notUpgradableServices.isEmpty(), createReason(notUpgradableServices));
     }
 
-    private Set<String> getNotUpgradePermittedServices(Set<String> services, String blueprintVersion) {
+    private Set<String> getNotUpgradableServices(Set<String> services, String blueprintVersion) {
         return services.stream()
                 .filter(service -> !permittedServicesForUpgradeService.isAllowedForUpgrade(service, blueprintVersion))
                 .collect(Collectors.toSet());
