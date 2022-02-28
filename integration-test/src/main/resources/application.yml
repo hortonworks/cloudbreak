@@ -98,6 +98,9 @@ integrationtest:
     # disabled
     retryEnabled: false
 
+  stackPatch:
+    sleepMinutes: 2
+
   # aws parameters
   aws:
     region: eu-central-1
