@@ -3,6 +3,7 @@ package com.sequenceiq.cloudbreak.cmtemplate.configproviders.ranger;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_0_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_1;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_2_2;
+import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.CLOUDERAMANAGER_VERSION_7_6_0;
 import static com.sequenceiq.cloudbreak.cmtemplate.CMRepositoryVersionUtil.isVersionNewerOrEqualThanLimited;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.config;
 import static com.sequenceiq.cloudbreak.cmtemplate.configproviders.ConfigUtils.getCmVersion;
@@ -55,6 +56,9 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
     @VisibleForTesting
     static final String RANGER_DEFAULT_POLICY_GROUPS = "ranger.default.policy.groups";
 
+    @VisibleForTesting
+    static final String RANGER_HBASE_ADMIN_VIRTUAL_GROUPS = "ranger.hbase.default.admin.groups";
+
     private static final String RANGER_JPA_JDBC_URL = "ranger.jpa.jdbc.url";
 
     @Inject
@@ -89,10 +93,16 @@ public class RangerRoleConfigProvider extends AbstractRdsRoleConfigProvider {
                 }
                 addDbSslConfigsIfNeeded(rangerRdsView, configList, cmVersion);
 
+                VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
+
                 if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_0_1)) {
-                    VirtualGroupRequest virtualGroupRequest = source.getVirtualGroupRequest();
                     String adminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.RANGER_ADMIN.getRight());
                     configList.add(config(RANGER_DEFAULT_POLICY_GROUPS, adminGroup));
+                }
+
+                if (isVersionNewerOrEqualThanLimited(cmVersion, CLOUDERAMANAGER_VERSION_7_6_0)) {
+                    String hbaseAdminGroup = virtualGroupService.getVirtualGroup(virtualGroupRequest, UmsRight.HBASE_ADMIN.getRight());
+                    configList.add(config(RANGER_HBASE_ADMIN_VIRTUAL_GROUPS, hbaseAdminGroup));
                 }
                 return configList;
             default:
