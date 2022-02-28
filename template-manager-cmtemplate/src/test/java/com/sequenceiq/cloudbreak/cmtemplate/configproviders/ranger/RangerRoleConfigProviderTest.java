@@ -121,7 +121,7 @@ public class RangerRoleConfigProviderTest {
         if (expectedRoleConfigCount == 6) {
             when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
         }
-        if (cdhVersion == "7.6.0") {
+        if ("7.6.0".equals(cdhVersion)) {
             when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.RANGER_ADMIN.getRight())).thenReturn(ADMIN_GROUP);
             when(virtualGroupService.getVirtualGroup(preparationObject.getVirtualGroupRequest(), UmsRight.HBASE_ADMIN.getRight())).thenReturn(HBASE_ADMIN_GROUP);
         }
@@ -140,7 +140,7 @@ public class RangerRoleConfigProviderTest {
             assertThat(masterRangerAdmin.get(5).getValue()).isEqualTo(ADMIN_GROUP);
         }
 
-        if (cdhVersion == "7.6.0") {
+        if ("7.6.0".equals(cdhVersion)) {
             assertThat(masterRangerAdmin.get(1).getName()).isEqualTo(RANGER_HBASE_ADMIN_VIRTUAL_GROUPS);
             assertThat(masterRangerAdmin.get(1).getValue()).isEqualTo(HBASE_ADMIN_GROUP);
         }
