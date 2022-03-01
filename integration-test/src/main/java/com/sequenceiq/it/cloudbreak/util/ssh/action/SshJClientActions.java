@@ -124,7 +124,7 @@ public class SshJClientActions extends SshJClient {
         });
 
         if (requiredNumberOfFiles == quantity.get()) {
-            Log.log(LOGGER, format(" File '%s' is available at [%s] host group(s). ", filePath, hostGroupNames.toString()));
+            Log.log(LOGGER, " File '%s' is available at [%s] host group(s). ", filePath, hostGroupNames.toString());
         } else {
             LOGGER.error("File '{}' is NOT available at [{}] host group(s)!", filePath, hostGroupNames.toString());
             throw new TestFailException(String.format("File '%s' is NOT available at [%s] host group(s)!", filePath, hostGroupNames.toString()));
@@ -281,7 +281,7 @@ public class SshJClientActions extends SshJClient {
     private Pair<Integer, String> executeSshCommand(String instanceIp, String command) {
         try (SSHClient sshClient = createSshClient(instanceIp, null, null, null)) {
             Pair<Integer, String> cmdOut = execute(sshClient, command);
-            Log.log(LOGGER, format("Command exit status [%s] and result [%s].", cmdOut.getKey(), cmdOut.getValue()));
+            Log.log(LOGGER, " Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue());
             return cmdOut;
         } catch (Exception e) {
             LOGGER.error("SSH fail on [{}] while executing command [{}]", instanceIp, command);
@@ -294,7 +294,7 @@ public class SshJClientActions extends SshJClient {
 
         try {
             Pair<Integer, String> cmdOut = execute(sshClient, fileListCommand);
-            Log.log(LOGGER, format(" Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue()));
+            Log.log(LOGGER, " Command exit status '%s' and result '%s'. ", cmdOut.getKey(), cmdOut.getValue());
 
             List<String> cmdOutputValues = Stream.of(cmdOut.getValue().split("[\\r\\n\\t]")).filter(Objects::nonNull).collect(Collectors.toList());
             boolean fileFound = cmdOutputValues.stream()
